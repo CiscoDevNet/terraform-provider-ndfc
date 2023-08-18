@@ -433,7 +433,7 @@ func (r *{{camelCase .Name}}Resource) Read(ctx context.Context, req resource.Rea
 
 	res, err := r.client.Get(fmt.Sprintf("%v%v", state.getPath(), {{range .Attributes}}{{if .Id}}state.{{toGoName .TfName}}.Value{{.Type}}(){{end}}{{end}}))
 	if err != nil {
-		if strings.Contains(err.Error(), "StatusCode 400") {
+		if strings.Contains(err.Error(), "StatusCode 400") || strings.Contains(err.Error(), "StatusCode 500") {
 			resp.State.RemoveResource(ctx)
 			return
 		} else {

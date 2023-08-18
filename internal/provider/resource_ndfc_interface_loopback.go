@@ -185,7 +185,7 @@ func (r *InterfaceLoopbackResource) Read(ctx context.Context, req resource.ReadR
 
 	res, err := r.client.Get(fmt.Sprintf("%v?serialNumber=%v&ifName=%v", state.getPath(), state.SerialNumber.ValueString(), state.InterfaceName.ValueString()))
 	if err != nil {
-		if strings.Contains(err.Error(), "StatusCode 400") {
+		if strings.Contains(err.Error(), "StatusCode 400") || strings.Contains(err.Error(), "StatusCode 500") {
 			resp.State.RemoveResource(ctx)
 			return
 		} else {

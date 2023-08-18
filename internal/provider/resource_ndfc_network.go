@@ -375,7 +375,7 @@ func (r *NetworkResource) Read(ctx context.Context, req resource.ReadRequest, re
 
 	res, err := r.client.Get(fmt.Sprintf("%v%v", state.getPath(), state.NetworkName.ValueString()))
 	if err != nil {
-		if strings.Contains(err.Error(), "StatusCode 400") {
+		if strings.Contains(err.Error(), "StatusCode 400") || strings.Contains(err.Error(), "StatusCode 500") {
 			resp.State.RemoveResource(ctx)
 			return
 		} else {
