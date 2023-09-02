@@ -157,6 +157,8 @@ func (r *InterfaceLoopbackResource) Create(ctx context.Context, req resource.Cre
 	}
 
 	// Deploy interface
+	r.updateMutex.Lock()
+	defer r.updateMutex.Unlock()
 	diags = helpers.DeployInterface(ctx, r.client, plan.SerialNumber.ValueString(), plan.InterfaceName.ValueString())
 	resp.Diagnostics.Append(diags...)
 	if resp.Diagnostics.HasError() {
@@ -222,6 +224,8 @@ func (r *InterfaceLoopbackResource) Update(ctx context.Context, req resource.Upd
 	}
 
 	// Deploy interface
+	r.updateMutex.Lock()
+	defer r.updateMutex.Unlock()
 	diags = helpers.DeployInterface(ctx, r.client, plan.SerialNumber.ValueString(), plan.InterfaceName.ValueString())
 	resp.Diagnostics.Append(diags...)
 	if resp.Diagnostics.HasError() {
@@ -255,6 +259,8 @@ func (r *InterfaceLoopbackResource) Delete(ctx context.Context, req resource.Del
 	}
 
 	// Deploy interface
+	r.updateMutex.Lock()
+	defer r.updateMutex.Unlock()
 	diags = helpers.DeployInterface(ctx, r.client, state.SerialNumber.ValueString(), state.InterfaceName.ValueString())
 	resp.Diagnostics.Append(diags...)
 	if resp.Diagnostics.HasError() {

@@ -319,7 +319,9 @@ func (r *NetworkResource) Create(ctx context.Context, req resource.CreateRequest
 
 	// Create object
 	body := plan.toBody(ctx)
+	r.updateMutex.Lock()
 	res, err := r.client.Post(plan.getPath(), body)
+	r.updateMutex.Unlock()
 	if err != nil {
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Failed to configure object (POST), got error: %s, %s", err, res.String()))
 		return
@@ -334,7 +336,9 @@ func (r *NetworkResource) Create(ctx context.Context, req resource.CreateRequest
 			return
 		}
 		bodyAttachments := plan.toBodyAttachments(ctx, res)
+		r.updateMutex.Lock()
 		res, err = r.client.Post(plan.getPath()+"attachments", bodyAttachments)
+		r.updateMutex.Unlock()
 		if err != nil {
 			resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Failed to configure network attachments, got error: %s, %s", err, res.String()))
 			return
@@ -418,7 +422,9 @@ func (r *NetworkResource) Update(ctx context.Context, req resource.UpdateRequest
 
 	plan.NetworkId = state.NetworkId
 	body := plan.toBody(ctx)
+	r.updateMutex.Lock()
 	res, err := r.client.Put(fmt.Sprintf("%v%v", plan.getPath(), plan.NetworkName.ValueString()), body)
+	r.updateMutex.Unlock()
 	if err != nil {
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Failed to configure object (PUT), got error: %s, %s", err, res.String()))
 		return
@@ -432,7 +438,9 @@ func (r *NetworkResource) Update(ctx context.Context, req resource.UpdateRequest
 			return
 		}
 		bodyAttachments := plan.toBodyAttachments(ctx, res)
+		r.updateMutex.Lock()
 		res, err = r.client.Post(plan.getPath()+"attachments", bodyAttachments)
+		r.updateMutex.Unlock()
 		if err != nil {
 			resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Failed to configure network attachments, got error: %s, %s", err, res.String()))
 			return
@@ -480,7 +488,9 @@ func (r *NetworkResource) Delete(ctx context.Context, req resource.DeleteRequest
 		}
 		state.Attachments = make([]NetworkAttachments, 0)
 		bodyAttachments := state.toBodyAttachments(ctx, res)
+		r.updateMutex.Lock()
 		res, err = r.client.Post(state.getPath()+"attachments", bodyAttachments)
+		r.updateMutex.Unlock()
 		if err != nil {
 			resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Failed to configure network attachments, got error: %s, %s", err, res.String()))
 			return
@@ -519,6 +529,8 @@ func (r *NetworkResource) Deploy(ctx context.Context, state Network, expectedSta
 
 	body := ""
 	body, _ = sjson.Set(body, "networkNames", state.NetworkName.ValueString())
+	r.updateMutex.Lock()
+	defer r.updateMutex.Unlock()
 	res, err := r.client.Post(state.getPath()+"deployments", body)
 	if err != nil {
 		diags.AddError("Client Error", fmt.Sprintf("Failed to deploy network, got error: %s, %s", err, res.String()))

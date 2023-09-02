@@ -256,6 +256,8 @@ func (r *InterfaceVlanResource) Create(ctx context.Context, req resource.CreateR
 	}
 
 	// Deploy interface
+	r.updateMutex.Lock()
+	defer r.updateMutex.Unlock()
 	diags = helpers.DeployInterface(ctx, r.client, plan.SerialNumber.ValueString(), plan.InterfaceName.ValueString())
 	resp.Diagnostics.Append(diags...)
 	if resp.Diagnostics.HasError() {
@@ -321,6 +323,8 @@ func (r *InterfaceVlanResource) Update(ctx context.Context, req resource.UpdateR
 	}
 
 	// Deploy interface
+	r.updateMutex.Lock()
+	defer r.updateMutex.Unlock()
 	diags = helpers.DeployInterface(ctx, r.client, plan.SerialNumber.ValueString(), plan.InterfaceName.ValueString())
 	resp.Diagnostics.Append(diags...)
 	if resp.Diagnostics.HasError() {
@@ -354,6 +358,8 @@ func (r *InterfaceVlanResource) Delete(ctx context.Context, req resource.DeleteR
 	}
 
 	// Deploy interface
+	r.updateMutex.Lock()
+	defer r.updateMutex.Unlock()
 	diags = helpers.DeployInterface(ctx, r.client, state.SerialNumber.ValueString(), state.InterfaceName.ValueString())
 	resp.Diagnostics.Append(diags...)
 	if resp.Diagnostics.HasError() {

@@ -220,6 +220,8 @@ func (r *InterfaceEthernetResource) Create(ctx context.Context, req resource.Cre
 	}
 
 	// Deploy interface
+	r.updateMutex.Lock()
+	defer r.updateMutex.Unlock()
 	diags = helpers.DeployInterface(ctx, r.client, plan.SerialNumber.ValueString(), plan.InterfaceName.ValueString())
 	resp.Diagnostics.Append(diags...)
 	if resp.Diagnostics.HasError() {
@@ -285,6 +287,8 @@ func (r *InterfaceEthernetResource) Update(ctx context.Context, req resource.Upd
 	}
 
 	// Deploy interface
+	r.updateMutex.Lock()
+	defer r.updateMutex.Unlock()
 	diags = helpers.DeployInterface(ctx, r.client, plan.SerialNumber.ValueString(), plan.InterfaceName.ValueString())
 	resp.Diagnostics.Append(diags...)
 	if resp.Diagnostics.HasError() {
