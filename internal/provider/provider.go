@@ -6,6 +6,7 @@ package provider
 import (
 	"context"
 	"os"
+	"terraform-provider-ndfc/internal/provider/vrf"
 
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	"github.com/hashicorp/terraform-plugin-framework/path"
@@ -177,7 +178,7 @@ func (p *ndfcProvider) Configure(ctx context.Context, req provider.ConfigureRequ
 		return
 	}
 
-	client, err := nd.NewClient(host, "/appcenter/cisco/ndfc/api/v1", username, password, "", false, nd.MaxRetries(100))
+	client, err := nd.NewClient(host, "/appcenter/cisco/ndfc/api/v1", username, password, "", true, nd.MaxRetries(500))
 	if err != nil {
 		resp.Diagnostics.AddError(
 			"Unable to create client",
@@ -197,7 +198,7 @@ func (p *ndfcProvider) Configure(ctx context.Context, req provider.ConfigureRequ
 // DataSources defines the data sources implemented in the provider.
 func (p *ndfcProvider) DataSources(_ context.Context) []func() datasource.DataSource {
 	return []func() datasource.DataSource{
-		NewNDFCVRFDataSource,
+		vrf.NewNDFCVRFDataSource,
 	}
 }
 

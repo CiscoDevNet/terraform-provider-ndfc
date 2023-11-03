@@ -1,7 +1,8 @@
-package provider
+package vrf
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
@@ -26,18 +27,7 @@ type NDFCVRFDataSource struct {
 // ExampleDataSourceModel describes the data source data model.
 type NDFCVRFDataSourceModel struct {
 	FabricName types.String `tfsdk:"fabric_name"`
-	Vrfs       []NDVRFType  `tfsdk:"vrfs"`
-}
-
-type NDVRFType struct {
-	VrfName              types.String `tfsdk:"vrf_name"`
-	VrfTemplate          types.String `tfsdk:"vrf_template"`
-	VrfExtensionTemplate types.String `tfsdk:"vrf_extension_template"`
-	VrfTemplateConfig    types.String `tfsdk:"vrf_template_config"`
-	Id                   types.Int64  `tfsdk:"id"`
-	VrfId                types.Int64  `tfsdk:"vrf_id"`
-	VrfStatus            types.String `tfsdk:"vrf_status"`
-	Fabric               types.String `tfsdk:"fabric"`
+	Vrfs       []VRF        `tfsdk:"vrfs"`
 }
 
 func (d *NDFCVRFDataSource) Metadata(ctx context.Context, req datasource.MetadataRequest, resp *datasource.MetadataResponse) {
@@ -113,7 +103,7 @@ func (d *NDFCVRFDataSource) Configure(ctx context.Context, req datasource.Config
 func (d *NDFCVRFDataSource) Read(ctx context.Context, req datasource.ReadRequest, resp *datasource.ReadResponse) {
 	var data NDFCVRFDataSourceModel
 
-	var vrf NDVRFType
+	var vrf VRF
 
 	// Read Terraform configuration data into the model
 
@@ -133,95 +123,113 @@ func (d *NDFCVRFDataSource) Read(ctx context.Context, req datasource.ReadRequest
 	url_path := fmt.Sprintf("/lan-fabric/rest/top-down/fabrics/%v/vrfs", data.FabricName.ValueString())
 
 	tflog.Info(ctx, fmt.Sprintf("Read URL %s", url_path))
-/*
+
 	res, err := d.client.Get(url_path)
 	if err != nil {
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Failed to retrieve object, got error: %s", err))
 		tflog.Error(ctx, fmt.Sprintf("Client Error: %v", err))
 		return
 	}
-*/
-    test_out := `[
-		{
-		"fabric": "test_evpn_vxlan",
-		"vrfName": "MyVRF_50003",
-		"vrfTemplate": "Default_VRF_Universal",
-		"vrfExtensionTemplate": "Default_VRF_Extension_Universal",
-		"tenantName": null,
-		"id": 14,
-		"vrfId": 10001,
-		"serviceVrfTemplate": null,
-		"source": null,
-		"vrfStatus": "NA",
-		"hierarchicalKey": "test_evpn_vxlan",
-		"vrfTemplateConfig": {
-		"advertiseDefaultRouteFlag": "false",
-		"routeTargetImport": "1:1",
-		"vrfVlanId": "1500",
-		"isRPExternal": "true",
-		"vrfDescription": "My vrf description",
-		"disableRtAuto": "true",
-		"cloudRouteTargetImportEvpn": "1:1",
-		"L3VniMcastGroup": "233.1.1.1",
-		"maxBgpPaths": "2",
-		"maxIbgpPaths": "3",
-		"routeTargetExport": "1:1",
-		"ipv6LinkLocalFlag": "false",
-		"vrfRouteMap": "FABRIC-RMAP-REDIST",
-		"ENABLE_NETFLOW": "false",
-		"configureStaticDefaultRouteFlag": "false",
-		"tag": "11111",
-		"rpAddress": "1.2.3.4",
-		"trmBGWMSiteEnabled": "true",
-		"mvpnInterAs": "false",
-		"nveId": "1",
-		"routeTargetExportEvpn": "1:1",
-		"NETFLOW_MONITOR": "MON1",
-		"bgpPasswordKeyType": "7",
-		"bgpPassword": "1234567890ABCDEF",
-		"mtu": "9200",
-		"multicastGroup": "234.0.0.0/8",
-		"isRPAbsent": "false",
-		"cloudRouteTargetExportEvpn": "1:1",
-		"advertiseHostRouteFlag": "true",
-		"vrfVlanName": "VLAN1500",
-		"trmEnabled": "true",
-		"loopbackNumber": "100",
-		"asn": "64000",
-		"vrfIntfDescription": "My int description",
-		"routeTargetImportEvpn": "1:1"
-		}
-		}
-		]`
-	res = gjson.Get(test_out)
-	
-	if value := res.Get("0.fabric"); value.Exists() && value.String() != "" {
-		data.FabricName = types.StringValue(value.String())
-	} else {
-		data.FabricName = types.StringNull()
-	}
-	if value := res.Get("0.vrfName"); value.Exists() && value.String() != "" {
-		vrf.VrfName = types.StringValue(value.String())
-	} else {
-		vrf.VrfName = types.StringNull()
-	}
-	if value := res.Get("0.vrfTemplate"); value.Exists() && value.String() != "" {
-		vrf.VrfTemplate = types.StringValue(value.String())
-	} else {
-		vrf.VrfTemplate = types.StringNull()
-	}
-	if value := res.Get("0.vrfExtensionTemplate"); value.Exists() && value.String() != "" {
-		vrf.VrfExtensionTemplate = types.StringValue(value.String())
-	} else {
-		vrf.VrfExtensionTemplate = types.StringNull()
-	}
-	if value := res.Get("0.vrfId"); value.Exists() && value.String() != "" {
-		vrf.VrfId = types.Int64Value(value.Int())
-	} else {
-		vrf.VrfId = types.Int64Null()
+
+	/*
+	       test_out := `[
+	   		{
+	   		"fabric": "test_evpn_vxlan",
+	   		"vrfName": "MyVRF_50003",
+	   		"vrfTemplate": "Default_VRF_Universal",
+	   		"vrfExtensionTemplate": "Default_VRF_Extension_Universal",
+	   		"tenantName": null,
+	   		"id": 14,
+	   		"vrfId": 10001,
+	   		"serviceVrfTemplate": null,
+	   		"source": null,
+	   		"vrfStatus": "NA",
+	   		"hierarchicalKey": "test_evpn_vxlan",
+	   		"vrfTemplateConfig": {
+	   		"advertiseDefaultRouteFlag": "false",
+	   		"routeTargetImport": "1:1",
+	   		"vrfVlanId": "1500",
+	   		"isRPExternal": "true",
+	   		"vrfDescription": "My vrf description",
+	   		"disableRtAuto": "true",
+	   		"cloudRouteTargetImportEvpn": "1:1",
+	   		"L3VniMcastGroup": "233.1.1.1",
+	   		"maxBgpPaths": "2",
+	   		"maxIbgpPaths": "3",
+	   		"routeTargetExport": "1:1",
+	   		"ipv6LinkLocalFlag": "false",
+	   		"vrfRouteMap": "FABRIC-RMAP-REDIST",
+	   		"ENABLE_NETFLOW": "false",
+	   		"configureStaticDefaultRouteFlag": "false",
+	   		"tag": "11111",
+	   		"rpAddress": "1.2.3.4",
+	   		"trmBGWMSiteEnabled": "true",
+	   		"mvpnInterAs": "false",
+	   		"nveId": "1",
+	   		"routeTargetExportEvpn": "1:1",
+	   		"NETFLOW_MONITOR": "MON1",
+	   		"bgpPasswordKeyType": "7",
+	   		"bgpPassword": "1234567890ABCDEF",
+	   		"mtu": "9200",
+	   		"multicastGroup": "234.0.0.0/8",
+	   		"isRPAbsent": "false",
+	   		"cloudRouteTargetExportEvpn": "1:1",
+	   		"advertiseHostRouteFlag": "true",
+	   		"vrfVlanName": "VLAN1500",
+	   		"trmEnabled": "true",
+	   		"loopbackNumber": "100",
+	   		"asn": "64000",
+	   		"vrfIntfDescription": "My int description",
+	   		"routeTargetImportEvpn": "1:1"
+	   		}
+	   		}
+	   		]`
+	   	res = gjson.Get(test_out)
+	*/
+	tflog.Info(ctx, fmt.Sprintf("Retrieved data from NDFC %v", res.Raw))
+
+	err = json.Unmarshal([]byte(res.Get("0").Raw), &vrf)
+	if err != nil {
+		tflog.Error(ctx, fmt.Sprintf("Json unmarshal error %v", err))
 	}
 
-	data.Vrfs[0] = vrf
+	/*
+		if value := res.Get("0.fabric"); value.Exists() && value.String() != "" {
+			vrf.Fabric = types.StringValue(value.String())
+		} else {
+			vrf.Fabric = types.StringNull()
+		}
+		if value := res.Get("0.vrfName"); value.Exists() && value.String() != "" {
+			vrf.VrfName = types.StringValue(value.String())
+		} else {
+			vrf.VrfName = types.StringNull()
+		}
+		if value := res.Get("0.vrfTemplate"); value.Exists() && value.String() != "" {
+			vrf.VrfTemplate = types.StringValue(value.String())
+		} else {
+			vrf.VrfTemplate = types.StringNull()
+		}
+		if value := res.Get("0.vrfExtensionTemplate"); value.Exists() && value.String() != "" {
+			vrf.VrfExtensionTemplate = types.StringValue(value.String())
+		} else {
+			vrf.VrfExtensionTemplate = types.StringNull()
+		}
+		if value := res.Get("0.vrfId"); value.Exists() && value.String() != "" {
+			vrf.VrfId = types.Int64Value(value.Int())
+		} else {
+			vrf.VrfId = types.Int64Null()
+		}
+		if value := res.Get("0.vrfTemplateConfig"); value.Exists() && value.String() != "" {
+			vrf.VrfTemplateConfig = types.StringValue(value.String())
+		}
+
+		if value := res.Get("0.vrfStatus"); value.Exists() && value.String() != "" {
+			vrf.VrfStatus = types.StringValue(value.String())
+		}
+
+	*/
+
+	data.Vrfs = append(data.Vrfs, vrf)
 	// If applicable, this is a great opportunity to initialize any necessary
 	// provider client data and make a call using it.
 	// httpResp, err := d.client.Do(httpReq)

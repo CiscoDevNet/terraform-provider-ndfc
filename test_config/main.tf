@@ -16,3 +16,7 @@ data "ndfc_vrfs" "vrf_example" {
   fabric_name = "test_evpn_vxlan"
 }
 
+output "vrf_example" {
+  value = data.ndfc_vrfs.vrf_example
+}
+
