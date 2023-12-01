@@ -1,0 +1,50 @@
+{
+	"provider": {
+		"name": "ndfc",
+		"schema": {
+			"attributes": [
+				{
+					"name": "username",
+					"string": {
+						"description": "NDFC Login credentials - user",
+						"optional_required": "required",
+						"sensitive": false
+					}
+				},
+				{
+					"name": "password",
+					"string": {
+						"description": "NDFC Login credentials - password",
+						"optional_required": "required",
+						"sensitive": true
+					}
+				},
+				{
+					"name": "domain",
+					"string": {
+						"description": "NDFC Login credentials - domain",
+						"optional_required": "optional",
+						"sensitive": false
+					}
+				},
+				{
+					"name": "host",
+					"string": {
+						"description": "NDFC Login credentials - host",
+						"optional_required": "required",
+						"sensitive": false
+					}
+				},
+				{
+					"bool": {
+						"description": "NDFC Login  - ignore certificate issues",
+						"optional_required": "required",
+						"sensitive": false
+					},
+					"name": "insecure"
+				}
+			]
+		}
+	},
+	"version": "0.1"
+}

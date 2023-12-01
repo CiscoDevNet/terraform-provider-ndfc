@@ -1,0 +1,527 @@
+{
+	"provider": {
+		"name": "ndfc",
+		"schema": {
+			"attributes": [
+				{
+					"name": "username",
+					"string": {
+						"description": "NDFC Login credentials - user",
+						"optional_required": "required",
+						"sensitive": false
+					}
+				},
+				{
+					"name": "password",
+					"string": {
+						"description": "NDFC Login credentials - password",
+						"optional_required": "required",
+						"sensitive": true
+					}
+				},
+				{
+					"name": "domain",
+					"string": {
+						"description": "NDFC Login credentials - domain",
+						"optional_required": "optional",
+						"sensitive": false
+					}
+				},
+				{
+					"name": "host",
+					"string": {
+						"description": "NDFC Login credentials - host",
+						"optional_required": "required",
+						"sensitive": false
+					}
+				},
+				{
+					"bool": {
+						"description": "NDFC Login  - ignore certificate issues",
+						"optional_required": "required",
+						"sensitive": false
+					},
+					"name": "insecure"
+				}
+			]
+		}
+	},
+	"resources": [
+		{
+			"name": "vrf",
+			"schema": {
+				"attributes": [
+					{
+						"name": "fabric_name",
+						"string": {
+							"computed_optional_required": "optional",
+							"default": {
+								"static": ""
+							},
+							"description": "The name of the fabric"
+						}
+					},
+					{
+						"name": "vrf_name",
+						"string": {
+							"computed_optional_required": "required",
+							"default": {
+								"static": ""
+							},
+							"description": "The name of the VRF"
+						}
+					},
+					{
+						"name": "vrf_template",
+						"string": {
+							"computed_optional_required": "optional",
+							"default": {
+								"static": "Default_VRF_Universal"
+							},
+							"description": "The name of the VRF template"
+						}
+					},
+					{
+						"name": "vrf_extension_template",
+						"string": {
+							"computed_optional_required": "optional",
+							"default": {
+								"static": "Default_VRF_Extension_Universal"
+							},
+							"description": "The name of the VRF extension template"
+						}
+					},
+					{
+						"int64": {
+							"computed_optional_required": "computed",
+							"description": "VNI ID of VRF"
+						},
+						"name": "vrf_id"
+					},
+					{
+						"name": "vrf_config",
+						"single_nested": {
+							"attributes": [
+								{
+									"int64": {
+										"computed_optional_required": "computed",
+										"description": "VLAN ID"
+									},
+									"name": "vlan_id"
+								},
+								{
+									"name": "vlan_name",
+									"string": {
+										"computed_optional_required": "optional",
+										"default": {
+											"static": ""
+										},
+										"description": "VLAN name"
+									}
+								},
+								{
+									"name": "interface_description",
+									"string": {
+										"computed_optional_required": "optional",
+										"default": {
+											"static": ""
+										},
+										"description": "Interface description"
+									}
+								},
+								{
+									"name": "vrf_description",
+									"string": {
+										"computed_optional_required": "optional",
+										"default": {
+											"static": ""
+										},
+										"description": "VRF description"
+									}
+								},
+								{
+									"int64": {
+										"computed_optional_required": "optional",
+										"default": {
+											"static": 9216
+										},
+										"description": "Interface MTU"
+									},
+									"name": "mtu"
+								},
+								{
+									"int64": {
+										"computed_optional_required": "optional",
+										"default": {
+											"static": 12345
+										},
+										"description": "Loopback routing tag"
+									},
+									"name": "loopback_routing_tag"
+								},
+								{
+									"name": "redistribute_direct_route_map",
+									"string": {
+										"computed_optional_required": "optional",
+										"default": {
+											"static": "FABRIC-RMAP-REDIST-SUBNET"
+										},
+										"description": "Redistribute direct route map"
+									}
+								},
+								{
+									"int64": {
+										"computed_optional_required": "optional",
+										"default": {
+											"static": 1
+										},
+										"description": "Maximum BGP paths"
+									},
+									"name": "max_bgp_paths"
+								},
+								{
+									"int64": {
+										"computed_optional_required": "optional",
+										"default": {
+											"static": 2
+										},
+										"description": "Maximum iBGP paths"
+									},
+									"name": "max_ibgp_paths"
+								},
+								{
+									"bool": {
+										"computed_optional_required": "optional",
+										"default": {
+											"static": true
+										},
+										"description": "Enables IPv6 link-local Option under VRF SVI"
+									},
+									"name": "ipv6_link_local"
+								},
+								{
+									"bool": {
+										"computed_optional_required": "optional",
+										"default": {
+											"static": false
+										},
+										"description": "Enable Tenant Routed Multicast"
+									},
+									"name": "trm"
+								},
+								{
+									"bool": {
+										"computed_optional_required": "optional",
+										"default": {
+											"static": false
+										},
+										"description": "There is no RP as only SSM is used"
+									},
+									"name": "no_rp"
+								},
+								{
+									"bool": {
+										"computed_optional_required": "optional",
+										"default": {
+											"static": false
+										},
+										"description": "Is RP external to the fabric"
+									},
+									"name": "rp_external"
+								},
+								{
+									"name": "rp_address",
+									"string": {
+										"computed_optional_required": "optional",
+										"default": {
+											"static": ""
+										},
+										"description": "IPv4 address"
+									}
+								},
+								{
+									"int64": {
+										"computed_optional_required": "optional",
+										"description": "RP loopback ID"
+									},
+									"name": "rp_loopback_id"
+								},
+								{
+									"name": "underlay_multicast_address",
+									"string": {
+										"computed_optional_required": "optional",
+										"default": {
+											"static": ""
+										},
+										"description": "IPv4 Multicast Address. Applicable only when TRM is enabled."
+									}
+								},
+								{
+									"name": "overlay_multicast_groups",
+									"string": {
+										"computed_optional_required": "optional",
+										"default": {
+											"static": ""
+										},
+										"description": "Overlay multicast groups"
+									}
+								},
+								{
+									"bool": {
+										"computed_optional_required": "optional",
+										"default": {
+											"static": false
+										},
+										"description": "Use the inter-as keyword for the MVPN address family routes to cross the BGP autonomous system (AS) boundaries, applicable when TRM is enabled. IOS XE Specific"
+									},
+									"name": "mvpn_inter_as"
+								},
+								{
+									"bool": {
+										"computed_optional_required": "optional",
+										"default": {
+											"static": false
+										},
+										"description": "Enable TRM on Border Gateway Multisite"
+									},
+									"name": "trm_bgw_msite"
+								},
+								{
+									"bool": {
+										"computed_optional_required": "optional",
+										"default": {
+											"static": false
+										},
+										"description": "Flag to Control Advertisement of /32 and /128 Routes to Edge Routers"
+									},
+									"name": "advertise_host_routes"
+								},
+								{
+									"bool": {
+										"computed_optional_required": "optional",
+										"default": {
+											"static": true
+										},
+										"description": "Flag to Control Advertisement of Default Route Internally"
+									},
+									"name": "advertise_default_route"
+								},
+								{
+									"bool": {
+										"computed_optional_required": "optional",
+										"default": {
+											"static": true
+										},
+										"description": "Flag to Control Static Default Route Configuration"
+									},
+									"name": "configure_static_default_route"
+								},
+								{
+									"name": "bgp_password",
+									"string": {
+										"computed_optional_required": "optional",
+										"default": {
+											"static": ""
+										},
+										"description": "VRF Lite BGP neighbor password (Hex String)"
+									}
+								},
+								{
+									"name": "bgp_password_type",
+									"string": {
+										"computed_optional_required": "optional",
+										"default": {
+											"static": ""
+										},
+										"description": "VRF Lite BGP Key Encryption Type: 3 - 3DES, 7 - Cisco"
+									}
+								},
+								{
+									"bool": {
+										"computed_optional_required": "optional",
+										"default": {
+											"static": false
+										},
+										"description": "For netflow on VRF-LITE Sub-interface. Supported only if netflow is enabled on fabric. For NX-OS only"
+									},
+									"name": "netflow"
+								},
+								{
+									"name": "netflow_monitor",
+									"string": {
+										"computed_optional_required": "optional",
+										"default": {
+											"static": ""
+										},
+										"description": "Netflow monitor. For NX-OS only"
+									}
+								},
+								{
+									"bool": {
+										"computed_optional_required": "optional",
+										"default": {
+											"static": false
+										},
+										"description": "Applicable to IPv4, IPv6 VPN/EVPN/MVPN"
+									},
+									"name": "disable_rt_auto"
+								},
+								{
+									"name": "route_target_import",
+									"string": {
+										"computed_optional_required": "optional",
+										"default": {
+											"static": ""
+										},
+										"description": "For VPN Routes Import, One or a Comma Separated List"
+									}
+								},
+								{
+									"name": "route_target_export",
+									"string": {
+										"computed_optional_required": "optional",
+										"default": {
+											"static": ""
+										},
+										"description": "For VPN Routes Export, One or a Comma Separated List"
+									}
+								},
+								{
+									"name": "route_target_import_evpn",
+									"string": {
+										"computed_optional_required": "optional",
+										"default": {
+											"static": ""
+										},
+										"description": "For EVPN Routes Import, One or a Comma Separated List"
+									}
+								},
+								{
+									"name": "route_target_export_evpn",
+									"string": {
+										"computed_optional_required": "optional",
+										"default": {
+											"static": ""
+										},
+										"description": "For EVPN Routes Export, One or a Comma Separated List"
+									}
+								},
+								{
+									"name": "route_target_import_mvpn",
+									"string": {
+										"computed_optional_required": "optional",
+										"default": {
+											"static": ""
+										},
+										"description": "For MVPN Routes Import, One or a Comma Separated List"
+									}
+								},
+								{
+									"name": "route_target_export_mvpn",
+									"string": {
+										"computed_optional_required": "optional",
+										"default": {
+											"static": ""
+										},
+										"description": "For MVPN Routes Export, One or a Comma Separated List"
+									}
+								},
+								{
+									"name": "route_target_import_cloud_evpn",
+									"string": {
+										"computed_optional_required": "optional",
+										"default": {
+											"static": ""
+										},
+										"description": "For Cloud EVPN Routes Import, One or a Comma Separated List"
+									}
+								},
+								{
+									"name": "route_target_export_cloud_evpn",
+									"string": {
+										"computed_optional_required": "optional",
+										"default": {
+											"static": ""
+										},
+										"description": "For Cloud EVPN Routes Export, One or a Comma Separated List"
+									}
+								}
+							],
+							"computed_optional_required": "required",
+							"description": "VRF config parameters from the template"
+						}
+					},
+					{
+						"list_nested": {
+							"computed_optional_required": "required",
+							"description": "A list of attachments",
+							"nested_object": {
+								"attributes": [
+									{
+										"name": "serial_number",
+										"string": {
+											"computed_optional_required": "required",
+											"default": {
+												"static": ""
+											},
+											"description": "Serial number of switch to attach"
+										}
+									},
+									{
+										"int64": {
+											"computed_optional_required": "computed",
+											"default": {
+												"static": -1
+											},
+											"description": "Override VLAN ID. `-1` to use VLAN ID defined at VRF level"
+										},
+										"name": "vlan_id"
+									},
+									{
+										"name": "freeform_config",
+										"string": {
+											"computed_optional_required": "optional",
+											"default": {
+												"static": ""
+											},
+											"description": "This field covers any configuration not included in overlay templates which is needed as part of this VRF attachment"
+										}
+									},
+									{
+										"int64": {
+											"computed_optional_required": "optional",
+											"description": "Override loopback ID"
+										},
+										"name": "loopback_id"
+									},
+									{
+										"name": "loopback_ipv4",
+										"string": {
+											"computed_optional_required": "optional",
+											"default": {
+												"static": ""
+											},
+											"description": "Override loopback IPv4 address"
+										}
+									},
+									{
+										"name": "loopback_ipv6",
+										"string": {
+											"computed_optional_required": "optional",
+											"default": {
+												"static": ""
+											},
+											"description": "Override loopback IPv6 address"
+										}
+									}
+								]
+							}
+						},
+						"name": "attachments"
+					}
+				]
+			}
+		}
+	],
+	"version": "0.1"
+}
