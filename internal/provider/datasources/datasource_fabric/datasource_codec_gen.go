@@ -113,53 +113,53 @@ func (v FabricModel) GetModelData() *NDFCFabricModel {
 		if diag != nil {
 			panic(diag)
 		}
-		for i, ele := range elements {
-			if !ele.FabricId.IsNull() && !ele.FabricId.IsUnknown() {
-				data.Fabrics[i].FabricId = ele.FabricId.ValueString()
+		for i1, ele1 := range elements {
+			if !ele1.FabricId.IsNull() && !ele1.FabricId.IsUnknown() {
+				data.Fabrics[i1].FabricId = ele1.FabricId.ValueString()
 			} else {
-				data.Fabrics[i].FabricId = ""
+				data.Fabrics[i1].FabricId = ""
 			}
 
-			if !ele.FabricName.IsNull() && !ele.FabricName.IsUnknown() {
-				data.Fabrics[i].FabricName = ele.FabricName.ValueString()
+			if !ele1.FabricName.IsNull() && !ele1.FabricName.IsUnknown() {
+				data.Fabrics[i1].FabricName = ele1.FabricName.ValueString()
 			} else {
-				data.Fabrics[i].FabricName = ""
+				data.Fabrics[i1].FabricName = ""
 			}
 
-			if !ele.FabricType.IsNull() && !ele.FabricType.IsUnknown() {
-				data.Fabrics[i].FabricType = ele.FabricType.ValueString()
+			if !ele1.FabricType.IsNull() && !ele1.FabricType.IsUnknown() {
+				data.Fabrics[i1].FabricType = ele1.FabricType.ValueString()
 			} else {
-				data.Fabrics[i].FabricType = ""
+				data.Fabrics[i1].FabricType = ""
 			}
 
-			if !ele.FabricTechnology.IsNull() && !ele.FabricTechnology.IsUnknown() {
-				data.Fabrics[i].FabricTechnology = ele.FabricTechnology.ValueString()
+			if !ele1.FabricTechnology.IsNull() && !ele1.FabricTechnology.IsUnknown() {
+				data.Fabrics[i1].FabricTechnology = ele1.FabricTechnology.ValueString()
 			} else {
-				data.Fabrics[i].FabricTechnology = ""
+				data.Fabrics[i1].FabricTechnology = ""
 			}
 
-			if !ele.ProvisionMode.IsNull() && !ele.ProvisionMode.IsUnknown() {
-				data.Fabrics[i].ProvisionMode = ele.ProvisionMode.ValueString()
+			if !ele1.ProvisionMode.IsNull() && !ele1.ProvisionMode.IsUnknown() {
+				data.Fabrics[i1].ProvisionMode = ele1.ProvisionMode.ValueString()
 			} else {
-				data.Fabrics[i].ProvisionMode = ""
+				data.Fabrics[i1].ProvisionMode = ""
 			}
 
-			if !ele.DeviceType.IsNull() && !ele.DeviceType.IsUnknown() {
-				data.Fabrics[i].DeviceType = ele.DeviceType.ValueString()
+			if !ele1.DeviceType.IsNull() && !ele1.DeviceType.IsUnknown() {
+				data.Fabrics[i1].DeviceType = ele1.DeviceType.ValueString()
 			} else {
-				data.Fabrics[i].DeviceType = ""
+				data.Fabrics[i1].DeviceType = ""
 			}
 
-			if !ele.AsNumber.IsNull() && !ele.AsNumber.IsUnknown() {
-				data.Fabrics[i].AsNumber = ele.AsNumber.ValueString()
+			if !ele1.AsNumber.IsNull() && !ele1.AsNumber.IsUnknown() {
+				data.Fabrics[i1].AsNumber = ele1.AsNumber.ValueString()
 			} else {
-				data.Fabrics[i].AsNumber = ""
+				data.Fabrics[i1].AsNumber = ""
 			}
 
-			if !ele.SiteId.IsNull() && !ele.SiteId.IsUnknown() {
-				data.Fabrics[i].SiteId = ele.SiteId.ValueString()
+			if !ele1.SiteId.IsNull() && !ele1.SiteId.IsUnknown() {
+				data.Fabrics[i1].SiteId = ele1.SiteId.ValueString()
 			} else {
-				data.Fabrics[i].SiteId = ""
+				data.Fabrics[i1].SiteId = ""
 			}
 
 		}

@@ -655,45 +655,45 @@ func (v VrfModel) GetModelData() *NDFCVrfModel {
 		if diag != nil {
 			panic(diag)
 		}
-		for i, ele := range elements {
-			if !ele.SerialNumber.IsNull() && !ele.SerialNumber.IsUnknown() {
-				data.Attachments[i].SerialNumber = ele.SerialNumber.ValueString()
+		for i1, ele1 := range elements {
+			if !ele1.SerialNumber.IsNull() && !ele1.SerialNumber.IsUnknown() {
+				data.Attachments[i1].SerialNumber = ele1.SerialNumber.ValueString()
 			} else {
-				data.Attachments[i].SerialNumber = ""
+				data.Attachments[i1].SerialNumber = ""
 			}
 
-			if !ele.VlanId.IsNull() && !ele.VlanId.IsUnknown() {
-				data.Attachments[i].VlanId = new(int64)
-				*data.Attachments[i].VlanId = ele.VlanId.ValueInt64()
+			if !ele1.VlanId.IsNull() && !ele1.VlanId.IsUnknown() {
+				data.Attachments[i1].VlanId = new(int64)
+				*data.Attachments[i1].VlanId = ele1.VlanId.ValueInt64()
 
 			} else {
-				data.Attachments[i].VlanId = nil
+				data.Attachments[i1].VlanId = nil
 			}
 
-			if !ele.FreeformConfig.IsNull() && !ele.FreeformConfig.IsUnknown() {
-				data.Attachments[i].FreeformConfig = ele.FreeformConfig.ValueString()
+			if !ele1.FreeformConfig.IsNull() && !ele1.FreeformConfig.IsUnknown() {
+				data.Attachments[i1].FreeformConfig = ele1.FreeformConfig.ValueString()
 			} else {
-				data.Attachments[i].FreeformConfig = ""
+				data.Attachments[i1].FreeformConfig = ""
 			}
 
-			if !ele.LoopbackId.IsNull() && !ele.LoopbackId.IsUnknown() {
-				data.Attachments[i].LoopbackId = new(int64)
-				*data.Attachments[i].LoopbackId = ele.LoopbackId.ValueInt64()
+			if !ele1.LoopbackId.IsNull() && !ele1.LoopbackId.IsUnknown() {
+				data.Attachments[i1].LoopbackId = new(int64)
+				*data.Attachments[i1].LoopbackId = ele1.LoopbackId.ValueInt64()
 
 			} else {
-				data.Attachments[i].LoopbackId = nil
+				data.Attachments[i1].LoopbackId = nil
 			}
 
-			if !ele.LoopbackIpv4.IsNull() && !ele.LoopbackIpv4.IsUnknown() {
-				data.Attachments[i].LoopbackIpv4 = ele.LoopbackIpv4.ValueString()
+			if !ele1.LoopbackIpv4.IsNull() && !ele1.LoopbackIpv4.IsUnknown() {
+				data.Attachments[i1].LoopbackIpv4 = ele1.LoopbackIpv4.ValueString()
 			} else {
-				data.Attachments[i].LoopbackIpv4 = ""
+				data.Attachments[i1].LoopbackIpv4 = ""
 			}
 
-			if !ele.LoopbackIpv6.IsNull() && !ele.LoopbackIpv6.IsUnknown() {
-				data.Attachments[i].LoopbackIpv6 = ele.LoopbackIpv6.ValueString()
+			if !ele1.LoopbackIpv6.IsNull() && !ele1.LoopbackIpv6.IsUnknown() {
+				data.Attachments[i1].LoopbackIpv6 = ele1.LoopbackIpv6.ValueString()
 			} else {
-				data.Attachments[i].LoopbackIpv6 = ""
+				data.Attachments[i1].LoopbackIpv6 = ""
 			}
 
 		}
