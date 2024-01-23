@@ -426,340 +426,340 @@ func (v VrfBulkModel) GetModelData() *NDFCVrfBulkModel {
 		if diag != nil {
 			panic(diag)
 		}
-		for i, ele := range elements {
+		for i1, ele1 := range elements {
 
-			if !ele.VrfName.IsNull() && !ele.VrfName.IsUnknown() {
-				data.Vrfs[i].VrfName = ele.VrfName.ValueString()
+			if !ele1.VrfName.IsNull() && !ele1.VrfName.IsUnknown() {
+				data.Vrfs[i1].VrfName = ele1.VrfName.ValueString()
 			} else {
-				data.Vrfs[i].VrfName = ""
+				data.Vrfs[i1].VrfName = ""
 			}
 
-			data.VrfsMap[data.Vrfs[i].VrfName] = &data.Vrfs[i]
+			data.VrfsMap[data.Vrfs[i1].VrfName] = &data.Vrfs[i1]
 
-			if !ele.VrfTemplate.IsNull() && !ele.VrfTemplate.IsUnknown() {
-				data.Vrfs[i].VrfTemplate = ele.VrfTemplate.ValueString()
+			if !ele1.VrfTemplate.IsNull() && !ele1.VrfTemplate.IsUnknown() {
+				data.Vrfs[i1].VrfTemplate = ele1.VrfTemplate.ValueString()
 			} else {
-				data.Vrfs[i].VrfTemplate = ""
+				data.Vrfs[i1].VrfTemplate = ""
 			}
 
-			if !ele.VrfExtensionTemplate.IsNull() && !ele.VrfExtensionTemplate.IsUnknown() {
-				data.Vrfs[i].VrfExtensionTemplate = ele.VrfExtensionTemplate.ValueString()
+			if !ele1.VrfExtensionTemplate.IsNull() && !ele1.VrfExtensionTemplate.IsUnknown() {
+				data.Vrfs[i1].VrfExtensionTemplate = ele1.VrfExtensionTemplate.ValueString()
 			} else {
-				data.Vrfs[i].VrfExtensionTemplate = ""
+				data.Vrfs[i1].VrfExtensionTemplate = ""
 			}
 
-			if !ele.VrfId.IsNull() && !ele.VrfId.IsUnknown() {
-				data.Vrfs[i].VrfId = new(int64)
-				*data.Vrfs[i].VrfId = ele.VrfId.ValueInt64()
+			if !ele1.VrfId.IsNull() && !ele1.VrfId.IsUnknown() {
+				data.Vrfs[i1].VrfId = new(int64)
+				*data.Vrfs[i1].VrfId = ele1.VrfId.ValueInt64()
 
 			} else {
-				data.Vrfs[i].VrfId = nil
+				data.Vrfs[i1].VrfId = nil
 			}
 
 			//-----inline nesting Start----
-			if !ele.VlanId.IsNull() && !ele.VlanId.IsUnknown() {
-				data.Vrfs[i].VrfTemplateConfig.VlanId = new(Int64Custom)
-				*data.Vrfs[i].VrfTemplateConfig.VlanId = Int64Custom(ele.VlanId.ValueInt64())
+			if !ele1.VlanId.IsNull() && !ele1.VlanId.IsUnknown() {
+				data.Vrfs[i1].VrfTemplateConfig.VlanId = new(Int64Custom)
+				*data.Vrfs[i1].VrfTemplateConfig.VlanId = Int64Custom(ele1.VlanId.ValueInt64())
 			} else {
-				data.Vrfs[i].VrfTemplateConfig.VlanId = nil
+				data.Vrfs[i1].VrfTemplateConfig.VlanId = nil
 			}
 			//-----inline nesting end----
 
 			//-----inline nesting Start----
-			if !ele.VlanName.IsNull() && !ele.VlanName.IsUnknown() {
-				data.Vrfs[i].VrfTemplateConfig.VlanName = ele.VlanName.ValueString()
+			if !ele1.VlanName.IsNull() && !ele1.VlanName.IsUnknown() {
+				data.Vrfs[i1].VrfTemplateConfig.VlanName = ele1.VlanName.ValueString()
 			} else {
-				data.Vrfs[i].VrfTemplateConfig.VlanName = ""
+				data.Vrfs[i1].VrfTemplateConfig.VlanName = ""
 			}
 			//-----inline nesting end----
 
 			//-----inline nesting Start----
-			if !ele.InterfaceDescription.IsNull() && !ele.InterfaceDescription.IsUnknown() {
-				data.Vrfs[i].VrfTemplateConfig.InterfaceDescription = ele.InterfaceDescription.ValueString()
+			if !ele1.InterfaceDescription.IsNull() && !ele1.InterfaceDescription.IsUnknown() {
+				data.Vrfs[i1].VrfTemplateConfig.InterfaceDescription = ele1.InterfaceDescription.ValueString()
 			} else {
-				data.Vrfs[i].VrfTemplateConfig.InterfaceDescription = ""
+				data.Vrfs[i1].VrfTemplateConfig.InterfaceDescription = ""
 			}
 			//-----inline nesting end----
 
 			//-----inline nesting Start----
-			if !ele.VrfDescription.IsNull() && !ele.VrfDescription.IsUnknown() {
-				data.Vrfs[i].VrfTemplateConfig.VrfDescription = ele.VrfDescription.ValueString()
+			if !ele1.VrfDescription.IsNull() && !ele1.VrfDescription.IsUnknown() {
+				data.Vrfs[i1].VrfTemplateConfig.VrfDescription = ele1.VrfDescription.ValueString()
 			} else {
-				data.Vrfs[i].VrfTemplateConfig.VrfDescription = ""
+				data.Vrfs[i1].VrfTemplateConfig.VrfDescription = ""
 			}
 			//-----inline nesting end----
 
 			//-----inline nesting Start----
-			if !ele.Mtu.IsNull() && !ele.Mtu.IsUnknown() {
-				data.Vrfs[i].VrfTemplateConfig.Mtu = new(int64)
-				*data.Vrfs[i].VrfTemplateConfig.Mtu = ele.Mtu.ValueInt64()
+			if !ele1.Mtu.IsNull() && !ele1.Mtu.IsUnknown() {
+				data.Vrfs[i1].VrfTemplateConfig.Mtu = new(int64)
+				*data.Vrfs[i1].VrfTemplateConfig.Mtu = ele1.Mtu.ValueInt64()
 
 			} else {
-				data.Vrfs[i].VrfTemplateConfig.Mtu = nil
+				data.Vrfs[i1].VrfTemplateConfig.Mtu = nil
 			}
 			//-----inline nesting end----
 
-			if !ele.VrfStatus.IsNull() && !ele.VrfStatus.IsUnknown() {
-				data.Vrfs[i].VrfStatus = ele.VrfStatus.ValueString()
+			if !ele1.VrfStatus.IsNull() && !ele1.VrfStatus.IsUnknown() {
+				data.Vrfs[i1].VrfStatus = ele1.VrfStatus.ValueString()
 			} else {
-				data.Vrfs[i].VrfStatus = ""
+				data.Vrfs[i1].VrfStatus = ""
 			}
 
 			//-----inline nesting Start----
-			if !ele.LoopbackRoutingTag.IsNull() && !ele.LoopbackRoutingTag.IsUnknown() {
-				data.Vrfs[i].VrfTemplateConfig.LoopbackRoutingTag = new(int64)
-				*data.Vrfs[i].VrfTemplateConfig.LoopbackRoutingTag = ele.LoopbackRoutingTag.ValueInt64()
+			if !ele1.LoopbackRoutingTag.IsNull() && !ele1.LoopbackRoutingTag.IsUnknown() {
+				data.Vrfs[i1].VrfTemplateConfig.LoopbackRoutingTag = new(int64)
+				*data.Vrfs[i1].VrfTemplateConfig.LoopbackRoutingTag = ele1.LoopbackRoutingTag.ValueInt64()
 
 			} else {
-				data.Vrfs[i].VrfTemplateConfig.LoopbackRoutingTag = nil
-			}
-			//-----inline nesting end----
-
-			//-----inline nesting Start----
-			if !ele.RedistributeDirectRouteMap.IsNull() && !ele.RedistributeDirectRouteMap.IsUnknown() {
-				data.Vrfs[i].VrfTemplateConfig.RedistributeDirectRouteMap = ele.RedistributeDirectRouteMap.ValueString()
-			} else {
-				data.Vrfs[i].VrfTemplateConfig.RedistributeDirectRouteMap = ""
+				data.Vrfs[i1].VrfTemplateConfig.LoopbackRoutingTag = nil
 			}
 			//-----inline nesting end----
 
 			//-----inline nesting Start----
-			if !ele.MaxBgpPaths.IsNull() && !ele.MaxBgpPaths.IsUnknown() {
-				data.Vrfs[i].VrfTemplateConfig.MaxBgpPaths = new(int64)
-				*data.Vrfs[i].VrfTemplateConfig.MaxBgpPaths = ele.MaxBgpPaths.ValueInt64()
-
+			if !ele1.RedistributeDirectRouteMap.IsNull() && !ele1.RedistributeDirectRouteMap.IsUnknown() {
+				data.Vrfs[i1].VrfTemplateConfig.RedistributeDirectRouteMap = ele1.RedistributeDirectRouteMap.ValueString()
 			} else {
-				data.Vrfs[i].VrfTemplateConfig.MaxBgpPaths = nil
+				data.Vrfs[i1].VrfTemplateConfig.RedistributeDirectRouteMap = ""
 			}
 			//-----inline nesting end----
 
 			//-----inline nesting Start----
-			if !ele.MaxIbgpPaths.IsNull() && !ele.MaxIbgpPaths.IsUnknown() {
-				data.Vrfs[i].VrfTemplateConfig.MaxIbgpPaths = new(int64)
-				*data.Vrfs[i].VrfTemplateConfig.MaxIbgpPaths = ele.MaxIbgpPaths.ValueInt64()
+			if !ele1.MaxBgpPaths.IsNull() && !ele1.MaxBgpPaths.IsUnknown() {
+				data.Vrfs[i1].VrfTemplateConfig.MaxBgpPaths = new(int64)
+				*data.Vrfs[i1].VrfTemplateConfig.MaxBgpPaths = ele1.MaxBgpPaths.ValueInt64()
 
 			} else {
-				data.Vrfs[i].VrfTemplateConfig.MaxIbgpPaths = nil
+				data.Vrfs[i1].VrfTemplateConfig.MaxBgpPaths = nil
 			}
 			//-----inline nesting end----
 
 			//-----inline nesting Start----
-			if !ele.Ipv6LinkLocal.IsNull() && !ele.Ipv6LinkLocal.IsUnknown() {
-				data.Vrfs[i].VrfTemplateConfig.Ipv6LinkLocal = strconv.FormatBool(ele.Ipv6LinkLocal.ValueBool())
-			} else {
-				data.Vrfs[i].VrfTemplateConfig.Ipv6LinkLocal = ""
-			}
+			if !ele1.MaxIbgpPaths.IsNull() && !ele1.MaxIbgpPaths.IsUnknown() {
+				data.Vrfs[i1].VrfTemplateConfig.MaxIbgpPaths = new(int64)
+				*data.Vrfs[i1].VrfTemplateConfig.MaxIbgpPaths = ele1.MaxIbgpPaths.ValueInt64()
 
+			} else {
+				data.Vrfs[i1].VrfTemplateConfig.MaxIbgpPaths = nil
+			}
 			//-----inline nesting end----
 
 			//-----inline nesting Start----
-			if !ele.Trm.IsNull() && !ele.Trm.IsUnknown() {
-				data.Vrfs[i].VrfTemplateConfig.Trm = strconv.FormatBool(ele.Trm.ValueBool())
+			if !ele1.Ipv6LinkLocal.IsNull() && !ele1.Ipv6LinkLocal.IsUnknown() {
+				data.Vrfs[i1].VrfTemplateConfig.Ipv6LinkLocal = strconv.FormatBool(ele1.Ipv6LinkLocal.ValueBool())
 			} else {
-				data.Vrfs[i].VrfTemplateConfig.Trm = ""
+				data.Vrfs[i1].VrfTemplateConfig.Ipv6LinkLocal = ""
 			}
 
 			//-----inline nesting end----
 
 			//-----inline nesting Start----
-			if !ele.NoRp.IsNull() && !ele.NoRp.IsUnknown() {
-				data.Vrfs[i].VrfTemplateConfig.NoRp = strconv.FormatBool(ele.NoRp.ValueBool())
+			if !ele1.Trm.IsNull() && !ele1.Trm.IsUnknown() {
+				data.Vrfs[i1].VrfTemplateConfig.Trm = strconv.FormatBool(ele1.Trm.ValueBool())
 			} else {
-				data.Vrfs[i].VrfTemplateConfig.NoRp = ""
+				data.Vrfs[i1].VrfTemplateConfig.Trm = ""
 			}
 
 			//-----inline nesting end----
 
 			//-----inline nesting Start----
-			if !ele.RpExternal.IsNull() && !ele.RpExternal.IsUnknown() {
-				data.Vrfs[i].VrfTemplateConfig.RpExternal = strconv.FormatBool(ele.RpExternal.ValueBool())
+			if !ele1.NoRp.IsNull() && !ele1.NoRp.IsUnknown() {
+				data.Vrfs[i1].VrfTemplateConfig.NoRp = strconv.FormatBool(ele1.NoRp.ValueBool())
 			} else {
-				data.Vrfs[i].VrfTemplateConfig.RpExternal = ""
+				data.Vrfs[i1].VrfTemplateConfig.NoRp = ""
 			}
 
 			//-----inline nesting end----
 
 			//-----inline nesting Start----
-			if !ele.RpAddress.IsNull() && !ele.RpAddress.IsUnknown() {
-				data.Vrfs[i].VrfTemplateConfig.RpAddress = ele.RpAddress.ValueString()
+			if !ele1.RpExternal.IsNull() && !ele1.RpExternal.IsUnknown() {
+				data.Vrfs[i1].VrfTemplateConfig.RpExternal = strconv.FormatBool(ele1.RpExternal.ValueBool())
 			} else {
-				data.Vrfs[i].VrfTemplateConfig.RpAddress = ""
-			}
-			//-----inline nesting end----
-
-			//-----inline nesting Start----
-			if !ele.RpLoopbackId.IsNull() && !ele.RpLoopbackId.IsUnknown() {
-				data.Vrfs[i].VrfTemplateConfig.RpLoopbackId = new(Int64Custom)
-				*data.Vrfs[i].VrfTemplateConfig.RpLoopbackId = Int64Custom(ele.RpLoopbackId.ValueInt64())
-			} else {
-				data.Vrfs[i].VrfTemplateConfig.RpLoopbackId = nil
-			}
-			//-----inline nesting end----
-
-			//-----inline nesting Start----
-			if !ele.UnderlayMulticastAddress.IsNull() && !ele.UnderlayMulticastAddress.IsUnknown() {
-				data.Vrfs[i].VrfTemplateConfig.UnderlayMulticastAddress = ele.UnderlayMulticastAddress.ValueString()
-			} else {
-				data.Vrfs[i].VrfTemplateConfig.UnderlayMulticastAddress = ""
-			}
-			//-----inline nesting end----
-
-			//-----inline nesting Start----
-			if !ele.OverlayMulticastGroups.IsNull() && !ele.OverlayMulticastGroups.IsUnknown() {
-				data.Vrfs[i].VrfTemplateConfig.OverlayMulticastGroups = ele.OverlayMulticastGroups.ValueString()
-			} else {
-				data.Vrfs[i].VrfTemplateConfig.OverlayMulticastGroups = ""
-			}
-			//-----inline nesting end----
-
-			//-----inline nesting Start----
-			if !ele.MvpnInterAs.IsNull() && !ele.MvpnInterAs.IsUnknown() {
-				data.Vrfs[i].VrfTemplateConfig.MvpnInterAs = strconv.FormatBool(ele.MvpnInterAs.ValueBool())
-			} else {
-				data.Vrfs[i].VrfTemplateConfig.MvpnInterAs = ""
+				data.Vrfs[i1].VrfTemplateConfig.RpExternal = ""
 			}
 
 			//-----inline nesting end----
 
 			//-----inline nesting Start----
-			if !ele.TrmBgwMsite.IsNull() && !ele.TrmBgwMsite.IsUnknown() {
-				data.Vrfs[i].VrfTemplateConfig.TrmBgwMsite = strconv.FormatBool(ele.TrmBgwMsite.ValueBool())
+			if !ele1.RpAddress.IsNull() && !ele1.RpAddress.IsUnknown() {
+				data.Vrfs[i1].VrfTemplateConfig.RpAddress = ele1.RpAddress.ValueString()
 			} else {
-				data.Vrfs[i].VrfTemplateConfig.TrmBgwMsite = ""
+				data.Vrfs[i1].VrfTemplateConfig.RpAddress = ""
+			}
+			//-----inline nesting end----
+
+			//-----inline nesting Start----
+			if !ele1.RpLoopbackId.IsNull() && !ele1.RpLoopbackId.IsUnknown() {
+				data.Vrfs[i1].VrfTemplateConfig.RpLoopbackId = new(Int64Custom)
+				*data.Vrfs[i1].VrfTemplateConfig.RpLoopbackId = Int64Custom(ele1.RpLoopbackId.ValueInt64())
+			} else {
+				data.Vrfs[i1].VrfTemplateConfig.RpLoopbackId = nil
+			}
+			//-----inline nesting end----
+
+			//-----inline nesting Start----
+			if !ele1.UnderlayMulticastAddress.IsNull() && !ele1.UnderlayMulticastAddress.IsUnknown() {
+				data.Vrfs[i1].VrfTemplateConfig.UnderlayMulticastAddress = ele1.UnderlayMulticastAddress.ValueString()
+			} else {
+				data.Vrfs[i1].VrfTemplateConfig.UnderlayMulticastAddress = ""
+			}
+			//-----inline nesting end----
+
+			//-----inline nesting Start----
+			if !ele1.OverlayMulticastGroups.IsNull() && !ele1.OverlayMulticastGroups.IsUnknown() {
+				data.Vrfs[i1].VrfTemplateConfig.OverlayMulticastGroups = ele1.OverlayMulticastGroups.ValueString()
+			} else {
+				data.Vrfs[i1].VrfTemplateConfig.OverlayMulticastGroups = ""
+			}
+			//-----inline nesting end----
+
+			//-----inline nesting Start----
+			if !ele1.MvpnInterAs.IsNull() && !ele1.MvpnInterAs.IsUnknown() {
+				data.Vrfs[i1].VrfTemplateConfig.MvpnInterAs = strconv.FormatBool(ele1.MvpnInterAs.ValueBool())
+			} else {
+				data.Vrfs[i1].VrfTemplateConfig.MvpnInterAs = ""
 			}
 
 			//-----inline nesting end----
 
 			//-----inline nesting Start----
-			if !ele.AdvertiseHostRoutes.IsNull() && !ele.AdvertiseHostRoutes.IsUnknown() {
-				data.Vrfs[i].VrfTemplateConfig.AdvertiseHostRoutes = strconv.FormatBool(ele.AdvertiseHostRoutes.ValueBool())
+			if !ele1.TrmBgwMsite.IsNull() && !ele1.TrmBgwMsite.IsUnknown() {
+				data.Vrfs[i1].VrfTemplateConfig.TrmBgwMsite = strconv.FormatBool(ele1.TrmBgwMsite.ValueBool())
 			} else {
-				data.Vrfs[i].VrfTemplateConfig.AdvertiseHostRoutes = ""
+				data.Vrfs[i1].VrfTemplateConfig.TrmBgwMsite = ""
 			}
 
 			//-----inline nesting end----
 
 			//-----inline nesting Start----
-			if !ele.AdvertiseDefaultRoute.IsNull() && !ele.AdvertiseDefaultRoute.IsUnknown() {
-				data.Vrfs[i].VrfTemplateConfig.AdvertiseDefaultRoute = strconv.FormatBool(ele.AdvertiseDefaultRoute.ValueBool())
+			if !ele1.AdvertiseHostRoutes.IsNull() && !ele1.AdvertiseHostRoutes.IsUnknown() {
+				data.Vrfs[i1].VrfTemplateConfig.AdvertiseHostRoutes = strconv.FormatBool(ele1.AdvertiseHostRoutes.ValueBool())
 			} else {
-				data.Vrfs[i].VrfTemplateConfig.AdvertiseDefaultRoute = ""
+				data.Vrfs[i1].VrfTemplateConfig.AdvertiseHostRoutes = ""
 			}
 
 			//-----inline nesting end----
 
 			//-----inline nesting Start----
-			if !ele.ConfigureStaticDefaultRoute.IsNull() && !ele.ConfigureStaticDefaultRoute.IsUnknown() {
-				data.Vrfs[i].VrfTemplateConfig.ConfigureStaticDefaultRoute = strconv.FormatBool(ele.ConfigureStaticDefaultRoute.ValueBool())
+			if !ele1.AdvertiseDefaultRoute.IsNull() && !ele1.AdvertiseDefaultRoute.IsUnknown() {
+				data.Vrfs[i1].VrfTemplateConfig.AdvertiseDefaultRoute = strconv.FormatBool(ele1.AdvertiseDefaultRoute.ValueBool())
 			} else {
-				data.Vrfs[i].VrfTemplateConfig.ConfigureStaticDefaultRoute = ""
+				data.Vrfs[i1].VrfTemplateConfig.AdvertiseDefaultRoute = ""
 			}
 
 			//-----inline nesting end----
 
 			//-----inline nesting Start----
-			if !ele.BgpPassword.IsNull() && !ele.BgpPassword.IsUnknown() {
-				data.Vrfs[i].VrfTemplateConfig.BgpPassword = ele.BgpPassword.ValueString()
+			if !ele1.ConfigureStaticDefaultRoute.IsNull() && !ele1.ConfigureStaticDefaultRoute.IsUnknown() {
+				data.Vrfs[i1].VrfTemplateConfig.ConfigureStaticDefaultRoute = strconv.FormatBool(ele1.ConfigureStaticDefaultRoute.ValueBool())
 			} else {
-				data.Vrfs[i].VrfTemplateConfig.BgpPassword = ""
-			}
-			//-----inline nesting end----
-
-			//-----inline nesting Start----
-			if !ele.BgpPasswordType.IsNull() && !ele.BgpPasswordType.IsUnknown() {
-				data.Vrfs[i].VrfTemplateConfig.BgpPasswordType = ele.BgpPasswordType.ValueString()
-			} else {
-				data.Vrfs[i].VrfTemplateConfig.BgpPasswordType = ""
-			}
-			//-----inline nesting end----
-
-			//-----inline nesting Start----
-			if !ele.Netflow.IsNull() && !ele.Netflow.IsUnknown() {
-				data.Vrfs[i].VrfTemplateConfig.Netflow = strconv.FormatBool(ele.Netflow.ValueBool())
-			} else {
-				data.Vrfs[i].VrfTemplateConfig.Netflow = ""
+				data.Vrfs[i1].VrfTemplateConfig.ConfigureStaticDefaultRoute = ""
 			}
 
 			//-----inline nesting end----
 
 			//-----inline nesting Start----
-			if !ele.NetflowMonitor.IsNull() && !ele.NetflowMonitor.IsUnknown() {
-				data.Vrfs[i].VrfTemplateConfig.NetflowMonitor = ele.NetflowMonitor.ValueString()
+			if !ele1.BgpPassword.IsNull() && !ele1.BgpPassword.IsUnknown() {
+				data.Vrfs[i1].VrfTemplateConfig.BgpPassword = ele1.BgpPassword.ValueString()
 			} else {
-				data.Vrfs[i].VrfTemplateConfig.NetflowMonitor = ""
+				data.Vrfs[i1].VrfTemplateConfig.BgpPassword = ""
 			}
 			//-----inline nesting end----
 
 			//-----inline nesting Start----
-			if !ele.DisableRtAuto.IsNull() && !ele.DisableRtAuto.IsUnknown() {
-				data.Vrfs[i].VrfTemplateConfig.DisableRtAuto = strconv.FormatBool(ele.DisableRtAuto.ValueBool())
+			if !ele1.BgpPasswordType.IsNull() && !ele1.BgpPasswordType.IsUnknown() {
+				data.Vrfs[i1].VrfTemplateConfig.BgpPasswordType = ele1.BgpPasswordType.ValueString()
 			} else {
-				data.Vrfs[i].VrfTemplateConfig.DisableRtAuto = ""
+				data.Vrfs[i1].VrfTemplateConfig.BgpPasswordType = ""
+			}
+			//-----inline nesting end----
+
+			//-----inline nesting Start----
+			if !ele1.Netflow.IsNull() && !ele1.Netflow.IsUnknown() {
+				data.Vrfs[i1].VrfTemplateConfig.Netflow = strconv.FormatBool(ele1.Netflow.ValueBool())
+			} else {
+				data.Vrfs[i1].VrfTemplateConfig.Netflow = ""
 			}
 
 			//-----inline nesting end----
 
 			//-----inline nesting Start----
-			if !ele.RouteTargetImport.IsNull() && !ele.RouteTargetImport.IsUnknown() {
-				data.Vrfs[i].VrfTemplateConfig.RouteTargetImport = ele.RouteTargetImport.ValueString()
+			if !ele1.NetflowMonitor.IsNull() && !ele1.NetflowMonitor.IsUnknown() {
+				data.Vrfs[i1].VrfTemplateConfig.NetflowMonitor = ele1.NetflowMonitor.ValueString()
 			} else {
-				data.Vrfs[i].VrfTemplateConfig.RouteTargetImport = ""
+				data.Vrfs[i1].VrfTemplateConfig.NetflowMonitor = ""
 			}
 			//-----inline nesting end----
 
 			//-----inline nesting Start----
-			if !ele.RouteTargetExport.IsNull() && !ele.RouteTargetExport.IsUnknown() {
-				data.Vrfs[i].VrfTemplateConfig.RouteTargetExport = ele.RouteTargetExport.ValueString()
+			if !ele1.DisableRtAuto.IsNull() && !ele1.DisableRtAuto.IsUnknown() {
+				data.Vrfs[i1].VrfTemplateConfig.DisableRtAuto = strconv.FormatBool(ele1.DisableRtAuto.ValueBool())
 			} else {
-				data.Vrfs[i].VrfTemplateConfig.RouteTargetExport = ""
+				data.Vrfs[i1].VrfTemplateConfig.DisableRtAuto = ""
+			}
+
+			//-----inline nesting end----
+
+			//-----inline nesting Start----
+			if !ele1.RouteTargetImport.IsNull() && !ele1.RouteTargetImport.IsUnknown() {
+				data.Vrfs[i1].VrfTemplateConfig.RouteTargetImport = ele1.RouteTargetImport.ValueString()
+			} else {
+				data.Vrfs[i1].VrfTemplateConfig.RouteTargetImport = ""
 			}
 			//-----inline nesting end----
 
 			//-----inline nesting Start----
-			if !ele.RouteTargetImportEvpn.IsNull() && !ele.RouteTargetImportEvpn.IsUnknown() {
-				data.Vrfs[i].VrfTemplateConfig.RouteTargetImportEvpn = ele.RouteTargetImportEvpn.ValueString()
+			if !ele1.RouteTargetExport.IsNull() && !ele1.RouteTargetExport.IsUnknown() {
+				data.Vrfs[i1].VrfTemplateConfig.RouteTargetExport = ele1.RouteTargetExport.ValueString()
 			} else {
-				data.Vrfs[i].VrfTemplateConfig.RouteTargetImportEvpn = ""
+				data.Vrfs[i1].VrfTemplateConfig.RouteTargetExport = ""
 			}
 			//-----inline nesting end----
 
 			//-----inline nesting Start----
-			if !ele.RouteTargetExportEvpn.IsNull() && !ele.RouteTargetExportEvpn.IsUnknown() {
-				data.Vrfs[i].VrfTemplateConfig.RouteTargetExportEvpn = ele.RouteTargetExportEvpn.ValueString()
+			if !ele1.RouteTargetImportEvpn.IsNull() && !ele1.RouteTargetImportEvpn.IsUnknown() {
+				data.Vrfs[i1].VrfTemplateConfig.RouteTargetImportEvpn = ele1.RouteTargetImportEvpn.ValueString()
 			} else {
-				data.Vrfs[i].VrfTemplateConfig.RouteTargetExportEvpn = ""
+				data.Vrfs[i1].VrfTemplateConfig.RouteTargetImportEvpn = ""
 			}
 			//-----inline nesting end----
 
 			//-----inline nesting Start----
-			if !ele.RouteTargetImportMvpn.IsNull() && !ele.RouteTargetImportMvpn.IsUnknown() {
-				data.Vrfs[i].VrfTemplateConfig.RouteTargetImportMvpn = ele.RouteTargetImportMvpn.ValueString()
+			if !ele1.RouteTargetExportEvpn.IsNull() && !ele1.RouteTargetExportEvpn.IsUnknown() {
+				data.Vrfs[i1].VrfTemplateConfig.RouteTargetExportEvpn = ele1.RouteTargetExportEvpn.ValueString()
 			} else {
-				data.Vrfs[i].VrfTemplateConfig.RouteTargetImportMvpn = ""
+				data.Vrfs[i1].VrfTemplateConfig.RouteTargetExportEvpn = ""
 			}
 			//-----inline nesting end----
 
 			//-----inline nesting Start----
-			if !ele.RouteTargetExportMvpn.IsNull() && !ele.RouteTargetExportMvpn.IsUnknown() {
-				data.Vrfs[i].VrfTemplateConfig.RouteTargetExportMvpn = ele.RouteTargetExportMvpn.ValueString()
+			if !ele1.RouteTargetImportMvpn.IsNull() && !ele1.RouteTargetImportMvpn.IsUnknown() {
+				data.Vrfs[i1].VrfTemplateConfig.RouteTargetImportMvpn = ele1.RouteTargetImportMvpn.ValueString()
 			} else {
-				data.Vrfs[i].VrfTemplateConfig.RouteTargetExportMvpn = ""
+				data.Vrfs[i1].VrfTemplateConfig.RouteTargetImportMvpn = ""
 			}
 			//-----inline nesting end----
 
 			//-----inline nesting Start----
-			if !ele.RouteTargetImportCloudEvpn.IsNull() && !ele.RouteTargetImportCloudEvpn.IsUnknown() {
-				data.Vrfs[i].VrfTemplateConfig.RouteTargetImportCloudEvpn = ele.RouteTargetImportCloudEvpn.ValueString()
+			if !ele1.RouteTargetExportMvpn.IsNull() && !ele1.RouteTargetExportMvpn.IsUnknown() {
+				data.Vrfs[i1].VrfTemplateConfig.RouteTargetExportMvpn = ele1.RouteTargetExportMvpn.ValueString()
 			} else {
-				data.Vrfs[i].VrfTemplateConfig.RouteTargetImportCloudEvpn = ""
+				data.Vrfs[i1].VrfTemplateConfig.RouteTargetExportMvpn = ""
 			}
 			//-----inline nesting end----
 
 			//-----inline nesting Start----
-			if !ele.RouteTargetExportCloudEvpn.IsNull() && !ele.RouteTargetExportCloudEvpn.IsUnknown() {
-				data.Vrfs[i].VrfTemplateConfig.RouteTargetExportCloudEvpn = ele.RouteTargetExportCloudEvpn.ValueString()
+			if !ele1.RouteTargetImportCloudEvpn.IsNull() && !ele1.RouteTargetImportCloudEvpn.IsUnknown() {
+				data.Vrfs[i1].VrfTemplateConfig.RouteTargetImportCloudEvpn = ele1.RouteTargetImportCloudEvpn.ValueString()
 			} else {
-				data.Vrfs[i].VrfTemplateConfig.RouteTargetExportCloudEvpn = ""
+				data.Vrfs[i1].VrfTemplateConfig.RouteTargetImportCloudEvpn = ""
+			}
+			//-----inline nesting end----
+
+			//-----inline nesting Start----
+			if !ele1.RouteTargetExportCloudEvpn.IsNull() && !ele1.RouteTargetExportCloudEvpn.IsUnknown() {
+				data.Vrfs[i1].VrfTemplateConfig.RouteTargetExportCloudEvpn = ele1.RouteTargetExportCloudEvpn.ValueString()
+			} else {
+				data.Vrfs[i1].VrfTemplateConfig.RouteTargetExportCloudEvpn = ""
 			}
 			//-----inline nesting end----
 
