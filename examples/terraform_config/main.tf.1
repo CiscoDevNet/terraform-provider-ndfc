@@ -35,11 +35,12 @@ output "fabrics_current" {
 resource "ndfc_vrf_bulk" "test_evpn_vxlan_vrfs1" {
   fabric_name = "test_evpn_vxlan"
   vrfs = [
-    {
-        vrf_name = "Murali_Bulk_000"
-        vrf_id = 56599
+      {
+
+    vrf_name = "Murali_Bulk_000"
+    vrf_id = 56599
     },
-     {
+    {
 
     vrf_name = "Murali_Bulk_001"
     vrf_id = 56600
@@ -48,6 +49,7 @@ resource "ndfc_vrf_bulk" "test_evpn_vxlan_vrfs1" {
     vrf_name = "Murali_Bulk_002"
     vrf_id = 56601
     }
+    
     
   ]
 }
@@ -192,21 +194,6 @@ resource "ndfc_vrf_bulk" "test_evpn_vxlan_vrfs3" {
   ]
 }
 
-resource "ndfc_vrf_bulk" "test_evpn_vxlan_deployments1" {
-  fabric_name = "test_evpn_vxlan"
-  vrfs = [
-    {
-      vrf_name = "Murali_dep01"
-    },
-    {
-      vrf_name = "Murali_dep02"
-    },
-    {
-      vrf_name = "Murali_dep03"
-    }
-  ]
-}
-
 resource "ndfc_vrf_attachments" "test_evpn_vxlan_vrfs3" {
   fabric_name = "test_evpn_vxlan"
   vrf_attachments = [
@@ -262,12 +249,12 @@ resource "ndfc_vrf_attachments" "test_evpn_vxlan_vrfs1_attach1" {
       attach_list = [
        {
          serial_number = "90QF1EXTP9Q"
-         vlan = 2001
+         vlan = 2000
 
        }
       ]
     },
-      {
+    {
       vrf_name = resource.ndfc_vrf_bulk.test_evpn_vxlan_vrfs1.vrfs[1].vrf_name
       attach_list = [
        {
@@ -283,42 +270,6 @@ resource "ndfc_vrf_attachments" "test_evpn_vxlan_vrfs1_attach1" {
        {
          serial_number = "90QF1EXTP9Q"
          vlan = 2010
-
-       }
-      ]
-    }
-  ]
-}
-
-resource "ndfc_vrf_attachments" "test_deployment_attach1" {
-  
-  fabric_name = "test_evpn_vxlan"
-  deploy_all_attachments = true
-  vrf_attachments = [
-    {
-      vrf_name = resource.ndfc_vrf_bulk.test_evpn_vxlan_deployments1.vrfs[0].vrf_name
-      attach_list = [
-       {
-         serial_number = "90QF1EXTP9Q"
-        
-
-       }
-      ]
-    },
-    {
-      vrf_name = resource.ndfc_vrf_bulk.test_evpn_vxlan_deployments1.vrfs[1].vrf_name
-      attach_list = [
-       {
-         serial_number = "90QF1EXTP9Q"
-        
-       }
-      ]
-    },
-    {
-      vrf_name = resource.ndfc_vrf_bulk.test_evpn_vxlan_deployments1.vrfs[2].vrf_name
-      attach_list = [
-       {
-         serial_number = "90QF1EXTP9Q"
 
        }
       ]

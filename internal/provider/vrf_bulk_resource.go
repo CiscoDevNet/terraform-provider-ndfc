@@ -92,8 +92,10 @@ func (r *vrfBulkResource) Read(ctx context.Context, req resource.ReadRequest, re
 	tflog.Info(ctx, fmt.Sprintf("Incoming ID %s", unique_id))
 	dd := r.client.RscGetBulkVrf(ctx, &resp.Diagnostics, unique_id, false)
 	if dd == nil {
-		resp.Diagnostics.AddError("Read Failure", "No data received from NDFC")
-		return
+		tflog.Error(ctx, "Read Bulk VRF Failed")
+		resp.Diagnostics.AddWarning("Read Failure", "No configuration found in NDFC")
+		//resp.Diagnostics.AddError("Read Failure", "No data received from NDFC")
+
 	}
 	// Save updated data into Terraform state
 	resp.Diagnostics.Append(resp.State.Set(ctx, dd)...)

@@ -1,0 +1,101 @@
+package resource_vrf_attachments
+
+import "log"
+
+const (
+	ValuesDeeplyEqual = iota
+	RequiresReplace
+	RequiresUpdate
+)
+
+func (v NDFCAttachListValue) DeepEqual(c NDFCAttachListValue) int {
+	if v.SerialNumber != c.SerialNumber {
+		log.Printf("v.SerialNumber=%v, c.SerialNumber=%v", v.SerialNumber, c.SerialNumber)
+		return RequiresReplace
+	}
+
+	if v.Vlan != nil && c.Vlan != nil {
+		if *v.Vlan != *c.Vlan {
+			log.Printf("v.Vlan=%v, c.Vlan=%v", *v.Vlan, *c.Vlan)
+			return RequiresUpdate
+		}
+	} else {
+		if v.Vlan != nil {
+			log.Printf("v.Vlan=%v", *v.Vlan)
+			return RequiresUpdate
+		} else if c.Vlan != nil {
+			log.Printf("c.Vlan=%v", *c.Vlan)
+			return RequiresUpdate
+		}
+	}
+	if v.FreeformConfig != c.FreeformConfig {
+		log.Printf("v.FreeformConfig=%v, c.FreeformConfig=%v", v.FreeformConfig, c.FreeformConfig)
+		return RequiresUpdate
+	}
+	if v.DeployThisAttachment != c.DeployThisAttachment {
+		log.Printf("v.DeployThisAttachment=%v, c.DeployThisAttachment=%v", v.DeployThisAttachment, c.DeployThisAttachment)
+		return RequiresUpdate
+	}
+
+	if v.InstanceValues.LoopbackId != nil && c.InstanceValues.LoopbackId != nil {
+		if *v.InstanceValues.LoopbackId != *c.InstanceValues.LoopbackId {
+			log.Printf("v.InstanceValues.LoopbackId=%v, c.InstanceValues.LoopbackId=%v", *v.InstanceValues.LoopbackId, *c.InstanceValues.LoopbackId)
+			return RequiresUpdate
+		}
+	} else {
+		if v.InstanceValues.LoopbackId != nil {
+			log.Printf("v.InstanceValues.LoopbackId=%v", *v.InstanceValues.LoopbackId)
+			return RequiresUpdate
+		} else if c.InstanceValues.LoopbackId != nil {
+			log.Printf("c.InstanceValues.LoopbackId=%v", *c.InstanceValues.LoopbackId)
+			return RequiresUpdate
+		}
+	}
+	if v.InstanceValues.LoopbackIpv4 != c.InstanceValues.LoopbackIpv4 {
+		log.Printf("v.InstanceValues.LoopbackIpv4=%s, c.InstanceValues.LoopbackIpv4=%s", v.InstanceValues.LoopbackIpv4, c.InstanceValues.LoopbackIpv4)
+		return RequiresUpdate
+	}
+	if v.InstanceValues.LoopbackIpv6 != c.InstanceValues.LoopbackIpv6 {
+		log.Printf("v.InstanceValues.LoopbackIpv6=%s, c.InstanceValues.LoopbackIpv6=%s", v.InstanceValues.LoopbackIpv6, c.InstanceValues.LoopbackIpv6)
+		return RequiresUpdate
+	}
+
+	return ValuesDeeplyEqual
+}
+
+func (v *NDFCVrfAttachmentsValue) CreateSearchMap() {
+	v.AttachListMap = make(map[string]*NDFCAttachListValue)
+	for i := range v.AttachList {
+		v.AttachListMap[v.AttachList[i].SerialNumber] = &v.AttachList[i]
+	}
+}
+
+func (v NDFCVrfAttachmentsValue) DeepEqual(c NDFCVrfAttachmentsValue) int {
+	if v.VrfName != c.VrfName {
+		log.Printf("v.VrfName=%v, c.VrfName=%v", v.VrfName, c.VrfName)
+		return RequiresReplace
+	}
+	if v.DeployAllAttachments != c.DeployAllAttachments {
+		log.Printf("v.DeployAllAttachments=%v, c.DeployAllAttachments=%v", v.DeployAllAttachments, c.DeployAllAttachments)
+		return RequiresUpdate
+	}
+
+	if len(v.AttachList) != len(c.AttachList) {
+		log.Printf("len(v.AttachList)=%d, len(c.AttachList)=%d", len(v.AttachList), len(c.AttachList))
+		return RequiresUpdate
+	}
+	for i := range v.AttachList {
+		retVal := v.AttachList[i].DeepEqual(c.AttachList[i])
+		if retVal != ValuesDeeplyEqual {
+			return retVal
+		}
+	}
+	return ValuesDeeplyEqual
+}
+
+func (v *NDFCVrfAttachmentsModel) CreateSearchMap() {
+	v.VrfAttachmentsMap = make(map[string]*NDFCVrfAttachmentsValue)
+	for i := range v.VrfAttachments {
+		v.VrfAttachmentsMap[v.VrfAttachments[i].VrfName] = &v.VrfAttachments[i]
+	}
+}
