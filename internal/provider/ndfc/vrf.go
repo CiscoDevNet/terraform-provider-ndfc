@@ -96,6 +96,9 @@ func (c NDFC) RscGetBulkVrf(ctx context.Context, dg *diag.Diagnostics, ID string
 	}
 	if len(ndVrfs.Vrfs) > 0 {
 		ndVrfs.FabricName = ndVrfs.Vrfs[0].FabricName
+	} else {
+		tflog.Error(ctx, "resource_vrf_bulk: No VRFs found")
+		return nil
 	}
 	if len(filterMap) > 0 {
 		log.Printf("Filtering is configured")
@@ -116,7 +119,8 @@ func (c NDFC) RscGetBulkVrf(ctx context.Context, dg *diag.Diagnostics, ID string
 			if ok {
 				*vrf.Id = int64(i) //sort uses id - so put ascending values
 			} else {
-				log.Panicf("VRF %s missing in output", vrfs[i])
+				tflog.Error(ctx, fmt.Sprintf("VRF %s missing in output", vrfs[i]))
+				//log.Panicf("VRF %s missing in output", vrfs[i])
 			}
 		}
 	}
@@ -231,8 +235,8 @@ func (c NDFC) RscDeleteBulkVrf(ctx context.Context, dg *diag.Diagnostics, ID str
 func (c NDFC) RscUpdateBulkVrf(ctx context.Context,
 	dg *diag.Diagnostics, ID string,
 	vrfBulkPlan *resource_vrf_bulk.VrfBulkModel,
-	vrfState *resource_vrf_bulk.VrfBulkModel,
-) {
+	vrfState *resource_vrf_bulk.VrfBulkModel) {
+
 	actions, delVrfs := c.vrfBulkGetDiff(ctx, dg, vrfBulkPlan, vrfState)
 
 	// Validate the Diff

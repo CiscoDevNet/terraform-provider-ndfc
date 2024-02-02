@@ -32,6 +32,7 @@ func VrfBulkResourceSchema(ctx context.Context) schema.Schema {
 				},
 			},
 			"id": schema.StringAttribute{
+				Optional:            true,
 				Computed:            true,
 				Description:         "Terraform unique Id for the resource",
 				MarkdownDescription: "Terraform unique Id for the resource",
@@ -55,11 +56,13 @@ func VrfBulkResourceSchema(ctx context.Context) schema.Schema {
 						},
 						"bgp_password": schema.StringAttribute{
 							Optional:            true,
+							Computed:            true,
 							Description:         "VRF Lite BGP neighbor password (Hex String)",
 							MarkdownDescription: "VRF Lite BGP neighbor password (Hex String)",
 						},
 						"bgp_password_type": schema.StringAttribute{
 							Optional:            true,
+							Computed:            true,
 							Description:         "VRF Lite BGP Key Encryption Type: 3 - 3DES, 7 - Cisco",
 							MarkdownDescription: "VRF Lite BGP Key Encryption Type: 3 - 3DES, 7 - Cisco",
 						},
@@ -79,6 +82,7 @@ func VrfBulkResourceSchema(ctx context.Context) schema.Schema {
 						},
 						"interface_description": schema.StringAttribute{
 							Optional:            true,
+							Computed:            true,
 							Description:         "Interface description",
 							MarkdownDescription: "Interface description",
 						},
@@ -133,6 +137,7 @@ func VrfBulkResourceSchema(ctx context.Context) schema.Schema {
 						},
 						"netflow_monitor": schema.StringAttribute{
 							Optional:            true,
+							Computed:            true,
 							Description:         "Netflow monitor. For NX-OS only",
 							MarkdownDescription: "Netflow monitor. For NX-OS only",
 						},
@@ -145,6 +150,7 @@ func VrfBulkResourceSchema(ctx context.Context) schema.Schema {
 						},
 						"overlay_multicast_groups": schema.StringAttribute{
 							Optional:            true,
+							Computed:            true,
 							Description:         "Overlay multicast groups",
 							MarkdownDescription: "Overlay multicast groups",
 						},
@@ -157,46 +163,55 @@ func VrfBulkResourceSchema(ctx context.Context) schema.Schema {
 						},
 						"route_target_export": schema.StringAttribute{
 							Optional:            true,
+							Computed:            true,
 							Description:         "For VPN Routes Export, One or a Comma Separated List",
 							MarkdownDescription: "For VPN Routes Export, One or a Comma Separated List",
 						},
 						"route_target_export_cloud_evpn": schema.StringAttribute{
 							Optional:            true,
+							Computed:            true,
 							Description:         "For Cloud EVPN Routes Export, One or a Comma Separated List",
 							MarkdownDescription: "For Cloud EVPN Routes Export, One or a Comma Separated List",
 						},
 						"route_target_export_evpn": schema.StringAttribute{
 							Optional:            true,
+							Computed:            true,
 							Description:         "For EVPN Routes Export, One or a Comma Separated List",
 							MarkdownDescription: "For EVPN Routes Export, One or a Comma Separated List",
 						},
 						"route_target_export_mvpn": schema.StringAttribute{
 							Optional:            true,
+							Computed:            true,
 							Description:         "For MVPN Routes Export, One or a Comma Separated List",
 							MarkdownDescription: "For MVPN Routes Export, One or a Comma Separated List",
 						},
 						"route_target_import": schema.StringAttribute{
 							Optional:            true,
+							Computed:            true,
 							Description:         "For VPN Routes Import, One or a Comma Separated List",
 							MarkdownDescription: "For VPN Routes Import, One or a Comma Separated List",
 						},
 						"route_target_import_cloud_evpn": schema.StringAttribute{
 							Optional:            true,
+							Computed:            true,
 							Description:         "For Cloud EVPN Routes Import, One or a Comma Separated List",
 							MarkdownDescription: "For Cloud EVPN Routes Import, One or a Comma Separated List",
 						},
 						"route_target_import_evpn": schema.StringAttribute{
 							Optional:            true,
+							Computed:            true,
 							Description:         "For EVPN Routes Import, One or a Comma Separated List",
 							MarkdownDescription: "For EVPN Routes Import, One or a Comma Separated List",
 						},
 						"route_target_import_mvpn": schema.StringAttribute{
 							Optional:            true,
+							Computed:            true,
 							Description:         "For MVPN Routes Import, One or a Comma Separated List",
 							MarkdownDescription: "For MVPN Routes Import, One or a Comma Separated List",
 						},
 						"rp_address": schema.StringAttribute{
 							Optional:            true,
+							Computed:            true,
 							Description:         "IPv4 address",
 							MarkdownDescription: "IPv4 address",
 						},
@@ -209,6 +224,7 @@ func VrfBulkResourceSchema(ctx context.Context) schema.Schema {
 						},
 						"rp_loopback_id": schema.Int64Attribute{
 							Optional:            true,
+							Computed:            true,
 							Description:         "RP loopback ID",
 							MarkdownDescription: "RP loopback ID",
 						},
@@ -228,21 +244,25 @@ func VrfBulkResourceSchema(ctx context.Context) schema.Schema {
 						},
 						"underlay_multicast_address": schema.StringAttribute{
 							Optional:            true,
+							Computed:            true,
 							Description:         "IPv4 Multicast Address. Applicable only when TRM is enabled.",
 							MarkdownDescription: "IPv4 Multicast Address. Applicable only when TRM is enabled.",
 						},
 						"vlan_id": schema.Int64Attribute{
 							Optional:            true,
+							Computed:            true,
 							Description:         "VLAN ID",
 							MarkdownDescription: "VLAN ID",
 						},
 						"vlan_name": schema.StringAttribute{
 							Optional:            true,
+							Computed:            true,
 							Description:         "VLAN name",
 							MarkdownDescription: "VLAN name",
 						},
 						"vrf_description": schema.StringAttribute{
 							Optional:            true,
+							Computed:            true,
 							Description:         "VRF description",
 							MarkdownDescription: "VRF description",
 						},
@@ -255,6 +275,7 @@ func VrfBulkResourceSchema(ctx context.Context) schema.Schema {
 						},
 						"vrf_id": schema.Int64Attribute{
 							Optional:            true,
+							Computed:            true,
 							Description:         "VNI ID of VRF",
 							MarkdownDescription: "VNI ID of VRF",
 						},
@@ -264,6 +285,7 @@ func VrfBulkResourceSchema(ctx context.Context) schema.Schema {
 							MarkdownDescription: "The name of the VRF",
 						},
 						"vrf_status": schema.StringAttribute{
+							Optional:            true,
 							Computed:            true,
 							Description:         "VRF Deployment status",
 							MarkdownDescription: "VRF Deployment status",
