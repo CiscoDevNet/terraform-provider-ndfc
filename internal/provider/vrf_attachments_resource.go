@@ -114,5 +114,7 @@ func (r *vrfAttachmentsResource) Delete(ctx context.Context, req resource.Delete
 		return
 	}
 
+	r.client.RscDeleteVrfAttachments(ctx, &resp.Diagnostics, &data)
+	
 	// Delete API call logic
 }
