@@ -55,6 +55,7 @@ func VrfAttachmentsSplitID(id string) (string, []string) {
 }
 
 // TODO - roll back if there is partial failure
+// Creating VRF Attachment resource involves attaching all the VRFs/Switches present in the resource
 func (c NDFC) RscCreateVrfAttachments(ctx context.Context, dg *diag.Diagnostics, data *rva.VrfAttachmentsModel) *rva.VrfAttachmentsModel {
 	tflog.Debug(ctx, "RscCreateVrfAttachments: Entering Create")
 
@@ -70,21 +71,31 @@ func (c NDFC) RscCreateVrfAttachments(ctx context.Context, dg *diag.Diagnostics,
 			va.VrfAttachments[i].AttachList[j].FabricName = va.FabricName
 			va.VrfAttachments[i].AttachList[j].VrfName = va.VrfAttachments[i].VrfName
 			va.VrfAttachments[i].AttachList[j].Deployment = "true"
+			/* NDFCBUG: throws 500 Server error if vlan field is empty */
+			/* Setting to -1 to avoid this - UI does the same */
+			if va.VrfAttachments[i].AttachList[j].Vlan == nil {
+				va.VrfAttachments[i].AttachList[j].Vlan = new(rva.Int64Custom)
+				*va.VrfAttachments[i].AttachList[j].Vlan = rva.Int64Custom(-1)
+			}
 		}
 	}
 	if c.vrfAttachmentsIsPresent(ctx, dg, va.FabricName, vrfs) {
 		tflog.Error(ctx, fmt.Sprintf("RscCreateVrfAttachments: VRF Attachments already exist on %s", va.FabricName))
 		return nil
 	}
-	// Create the VRF Attachments
-	err := c.vrfAttachmentsCreate(ctx, va)
+	// Attach the VRF Attachments
+	err := c.vrfAttachmentsPost(ctx, va)
 	if err != nil {
 		tflog.Error(ctx, fmt.Sprintf("RscCreateVrfAttachments: Error creating VRF Attachments %s", err.Error()))
 		return nil
 	}
 
 	//Check and deploy
-
+	err = c.vrfAttachmentsDeploy(ctx, dg, va)
+	if err != nil {
+		tflog.Error(ctx, fmt.Sprintf("RscCreateVrfAttachments: Error deploying VRF Attachments %s", err.Error()))
+		return nil
+	}
 	//Get attachments after set
 	data.Id = types.StringValue(ID)
 	retVA := c.getVrfAttachments(ctx, dg, ID, va)
@@ -140,11 +151,17 @@ func (c NDFC) RscUpdateVrfAttachments(ctx context.Context, dg *diag.Diagnostics,
 	if updateVA == nil || len(updateVA.VrfAttachments) == 0 {
 		tflog.Warn(ctx, "RscUpdateVrfAttachments: No VRF Attachments to update")
 	} else {
-		err := c.vrfAttachmentsCreate(ctx, updateVA)
+		err := c.vrfAttachmentsPost(ctx, updateVA)
 		if err != nil {
 			tflog.Error(ctx, fmt.Sprintf("RscCreateVrfAttachments: Error creating VRF Attachments %s", err.Error()))
 			return nil
 		}
+	}
+	//Check and deploy
+	err := c.vrfAttachmentsDeploy(ctx, dg, updateVA)
+	if err != nil {
+		tflog.Error(ctx, fmt.Sprintf("RscCreateVrfAttachments: Error deploying VRF Attachments %s", err.Error()))
+		return nil
 	}
 	//Get attachments after set
 	retVA := c.getVrfAttachments(ctx, dg, ID, updateVA)
@@ -152,6 +169,34 @@ func (c NDFC) RscUpdateVrfAttachments(ctx context.Context, dg *diag.Diagnostics,
 	return retVA
 }
 
-func (c NDFC) RscDeleteVrfAttachments(ctx context.Context, gd *diag.Diagnostics, data *rva.VrfAttachmentsModel) error {
+func (c NDFC) RscDeleteVrfAttachments(ctx context.Context, dg *diag.Diagnostics, data *rva.VrfAttachmentsModel) error {
+	tflog.Debug(ctx, "RscDeleteVrfAttachments: Entering Delete")
+	va := data.GetModelData()
+	// Delete the VRF Attachments
+	for i := range va.VrfAttachments {
+		for j := range va.VrfAttachments[i].AttachList {
+			va.VrfAttachments[i].AttachList[j].FabricName = va.FabricName
+			va.VrfAttachments[i].AttachList[j].VrfName = va.VrfAttachments[i].VrfName
+			va.VrfAttachments[i].AttachList[j].Deployment = "false"
+		}
+	}
+	if len(va.VrfAttachments) == 0 {
+		tflog.Info(ctx, "vrfAttachmentsDelete: No attachments to delete")
+		return nil
+	}
+	err := c.vrfAttachmentsPost(ctx, va)
+	if err != nil {
+		tflog.Error(ctx, fmt.Sprintf("RscDeleteVrfAttachments: Error deleting VRF Attachments %s", err.Error()))
+		return err
+	}
+
+	//Delete forces a redeploy
+	va.DeployAllAttachments = true
+	err = c.vrfAttachmentsDeploy(ctx, dg, va)
+	if err != nil {
+		tflog.Error(ctx, fmt.Sprintf("RscCreateVrfAttachments: Error deploying VRF Attachments %s", err.Error()))
+		return nil
+	}
+
 	return nil
 }

@@ -8,7 +8,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/booldefault"
-	"github.com/hashicorp/terraform-plugin-framework/resource/schema/int64default"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/int64planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/types"
@@ -38,7 +38,6 @@ func VrfAttachmentsResourceSchema(ctx context.Context) schema.Schema {
 				},
 			},
 			"id": schema.StringAttribute{
-				Optional:            true,
 				Computed:            true,
 				Description:         "Terraform unique Id for the resource",
 				MarkdownDescription: "Terraform unique Id for the resource",
@@ -50,13 +49,11 @@ func VrfAttachmentsResourceSchema(ctx context.Context) schema.Schema {
 							NestedObject: schema.NestedAttributeObject{
 								Attributes: map[string]schema.Attribute{
 									"attach_state": schema.StringAttribute{
-										Optional:            true,
 										Computed:            true,
 										Description:         "The state of the attachment",
 										MarkdownDescription: "The state of the attachment",
 									},
 									"attached": schema.BoolAttribute{
-										Optional:            true,
 										Computed:            true,
 										Description:         "The state of the attachment",
 										MarkdownDescription: "The state of the attachment",
@@ -70,25 +67,21 @@ func VrfAttachmentsResourceSchema(ctx context.Context) schema.Schema {
 									},
 									"freeform_config": schema.StringAttribute{
 										Optional:            true,
-										Computed:            true,
 										Description:         "This field covers any configuration not included in overlay templates which is needed as part of this VRF attachment",
 										MarkdownDescription: "This field covers any configuration not included in overlay templates which is needed as part of this VRF attachment",
 									},
 									"loopback_id": schema.Int64Attribute{
 										Optional:            true,
-										Computed:            true,
 										Description:         "Override loopback ID",
 										MarkdownDescription: "Override loopback ID",
 									},
 									"loopback_ipv4": schema.StringAttribute{
 										Optional:            true,
-										Computed:            true,
 										Description:         "Override loopback IPv4 address",
 										MarkdownDescription: "Override loopback IPv4 address",
 									},
 									"loopback_ipv6": schema.StringAttribute{
 										Optional:            true,
-										Computed:            true,
 										Description:         "Override loopback IPv6 address",
 										MarkdownDescription: "Override loopback IPv6 address",
 									},
@@ -98,7 +91,6 @@ func VrfAttachmentsResourceSchema(ctx context.Context) schema.Schema {
 										MarkdownDescription: "Serial number of a switch",
 									},
 									"switch_name": schema.StringAttribute{
-										Optional:            true,
 										Computed:            true,
 										Description:         "The name of the switch",
 										MarkdownDescription: "The name of the switch",
@@ -108,7 +100,9 @@ func VrfAttachmentsResourceSchema(ctx context.Context) schema.Schema {
 										Computed:            true,
 										Description:         "VLAN ID",
 										MarkdownDescription: "VLAN ID",
-										Default:             int64default.StaticInt64(-1),
+										PlanModifiers: []planmodifier.Int64{
+											int64planmodifier.UseStateForUnknown(),
+										},
 									},
 								},
 								CustomType: AttachListType{

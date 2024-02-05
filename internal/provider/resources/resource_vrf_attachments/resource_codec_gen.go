@@ -3,6 +3,7 @@ package resource_vrf_attachments
 
 import (
 	"context"
+	"log"
 	"strconv"
 
 	"github.com/hashicorp/terraform-plugin-framework/attr"
@@ -118,24 +119,32 @@ func (v *VrfAttachmentsModel) SetModelData(jsonData *NDFCVrfAttachmentsModel) di
 	}
 
 	v.DeployAllAttachments = types.BoolValue(jsonData.DeployAllAttachments)
-	listData := make([]VrfAttachmentsValue, 0)
-	for _, item := range jsonData.VrfAttachments {
-		if item.FilterThisValue {
-			//Skip this entry - this parameter allows filtering
-			continue
-		}
+	if len(jsonData.VrfAttachments) == 0 {
+		log.Printf("v.VrfAttachments is empty")
+		v.VrfAttachments = types.ListNull(VrfAttachmentsValue{}.Type(context.Background()))
+	} else {
+		log.Printf("v.VrfAttachments contains %d elements", len(jsonData.VrfAttachments))
+		listData := make([]VrfAttachmentsValue, 0)
+		for _, item := range jsonData.VrfAttachments {
+			if item.FilterThisValue {
+				//Skip this entry - this parameter allows filtering
+				continue
+			}
 
-		data := new(VrfAttachmentsValue)
-		err = data.SetValue(&item)
+			data := new(VrfAttachmentsValue)
+			err = data.SetValue(&item)
+			if err != nil {
+				log.Printf("Error in VrfAttachmentsValue.SetValue")
+				return err
+			}
+			data.state = attr.ValueStateKnown
+			listData = append(listData, *data)
+		}
+		v.VrfAttachments, err = types.ListValueFrom(context.Background(), VrfAttachmentsValue{}.Type(context.Background()), listData)
 		if err != nil {
+			log.Printf("Error in converting []VrfAttachmentsValue to  List")
 			return err
 		}
-		data.state = attr.ValueStateKnown
-		listData = append(listData, *data)
-	}
-	v.VrfAttachments, err = types.ListValueFrom(context.Background(), VrfAttachmentsValue{}.Type(context.Background()), listData)
-	if err != nil {
-		return err
 	}
 
 	return err
@@ -152,24 +161,32 @@ func (v *VrfAttachmentsValue) SetValue(jsonData *NDFCVrfAttachmentsValue) diag.D
 	}
 
 	v.DeployAllAttachments = types.BoolValue(jsonData.DeployAllAttachments)
-	listData := make([]AttachListValue, 0)
-	for _, item := range jsonData.AttachList {
-		if item.FilterThisValue {
-			//Skip this entry - this parameter allows filtering
-			continue
-		}
+	if len(jsonData.AttachList) == 0 {
+		log.Printf("v.AttachList is empty")
+		v.AttachList = types.ListNull(AttachListValue{}.Type(context.Background()))
+	} else {
+		log.Printf("v.AttachList contains %d elements", len(jsonData.AttachList))
+		listData := make([]AttachListValue, 0)
+		for _, item := range jsonData.AttachList {
+			if item.FilterThisValue {
+				//Skip this entry - this parameter allows filtering
+				continue
+			}
 
-		data := new(AttachListValue)
-		err = data.SetValue(&item)
+			data := new(AttachListValue)
+			err = data.SetValue(&item)
+			if err != nil {
+				log.Printf("Error in AttachListValue.SetValue")
+				return err
+			}
+			data.state = attr.ValueStateKnown
+			listData = append(listData, *data)
+		}
+		v.AttachList, err = types.ListValueFrom(context.Background(), AttachListValue{}.Type(context.Background()), listData)
 		if err != nil {
+			log.Printf("Error in converting []AttachListValue to  List")
 			return err
 		}
-		data.state = attr.ValueStateKnown
-		listData = append(listData, *data)
-	}
-	v.AttachList, err = types.ListValueFrom(context.Background(), AttachListValue{}.Type(context.Background()), listData)
-	if err != nil {
-		return err
 	}
 
 	return err

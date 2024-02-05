@@ -27,7 +27,6 @@ func (c NDFC) vrfAttachmentsGet(ctx context.Context, fabricName string, vrfs []s
 		url += qp
 	}
 	tflog.Debug(ctx, fmt.Sprintf("vrfAttachmentsGet: url %s", url))
-
 	c.GetLock(ResourceVrfAttachments).Lock()
 	defer c.GetLock(ResourceVrfAttachments).Unlock()
 	res, err := c.apiClient.GetRawJson(url)
@@ -77,13 +76,11 @@ func (c NDFC) vrfAttachmentsIsPresent(ctx context.Context, dg *diag.Diagnostics,
 	return false
 }
 
-func (c NDFC) vrfAttachmentsCreate(ctx context.Context, va *rva.NDFCVrfAttachmentsModel) error {
-
+func (c NDFC) vrfAttachmentsPost(ctx context.Context, va *rva.NDFCVrfAttachmentsModel) error {
 	data, err := json.Marshal(va.VrfAttachments)
 	if err != nil {
 		return err
 	}
-
 	log.Println("Data to be posted", string(data))
 	c.GetLock(ResourceVrfAttachments).Lock()
 	defer c.GetLock(ResourceVrfAttachments).Unlock()
@@ -91,7 +88,6 @@ func (c NDFC) vrfAttachmentsCreate(ctx context.Context, va *rva.NDFCVrfAttachmen
 	if err != nil {
 		return err
 	}
-
 	tflog.Info(ctx, fmt.Sprintf("vrfAttachmentsCreate: Success res : %v", res.Str))
 	return nil
 }
@@ -100,6 +96,7 @@ func (c NDFC) getVrfAttachments(ctx context.Context, dg *diag.Diagnostics,
 	Id string, in *rva.NDFCVrfAttachmentsModel) *rva.VrfAttachmentsModel {
 	tflog.Debug(ctx, fmt.Sprintf("getVrfAttachments: Entering Id %s", Id))
 	fabricName, vrfs := VrfAttachmentsSplitID(Id)
+	log.Printf("getVrfAttachments:%+v", *in)
 	tflog.Debug(ctx, fmt.Sprintf("getVrfAttachments: fabricName %s vrfs %v", fabricName, vrfs))
 
 	// Get the VRF Attachments
@@ -160,10 +157,11 @@ func (c NDFC) getVrfAttachments(ctx context.Context, dg *diag.Diagnostics,
 		vrfEntry, found := in.VrfAttachmentsMap[ndVrfs.VrfAttachments[i].VrfName]
 		if found {
 			ndVrfs.VrfAttachments[i].DeployAllAttachments = vrfEntry.DeployAllAttachments
+			vrfEntry.CreateSearchMap()
 		} else {
 			log.Printf("This is not expected, VRF entry %s not found in input", ndVrfs.VrfAttachments[i].VrfName)
 		}
-		vrfEntry.CreateSearchMap()
+
 		for j := range ndVrfs.VrfAttachments[i].AttachList {
 			attachEntry, found := vrfEntry.AttachListMap[ndVrfs.VrfAttachments[i].AttachList[j].SerialNumber]
 			if found {
@@ -214,6 +212,12 @@ func (c NDFC) diffVrfAttachments(ctx context.Context, plan *rva.VrfAttachmentsMo
 			x[i].VrfName = vrf
 			x[i].FilterThisValue = false
 			x[i].FabricName = planData.FabricName
+			/* NDFCBUG: throws 500 Server error if vlan field is empty */
+			/* Setting to -1 to avoid this - UI does the same      */
+			if x[i].Vlan == nil {
+				x[i].Vlan = new(rva.Int64Custom)
+				*x[i].Vlan = rva.Int64Custom(-1)
+			}
 		}
 		vrfAttachEntry, found := updateVA.VrfAttachmentsMap[vrf]
 		if !found {
@@ -308,14 +312,17 @@ func (c NDFC) diffVrfAttachments(ctx context.Context, plan *rva.VrfAttachmentsMo
 }
 
 func (c NDFC) vrfAttachmentsDeploy(ctx context.Context, dg *diag.Diagnostics, va *rva.NDFCVrfAttachmentsModel) error {
-	tflog.Debug(ctx, "vrfAttachmentsDeploy: Entering")
-	deploy_map := make(map[string][]string)
 
+	deploy_map := make(map[string][]string)
 	deployVA := new(rva.NDFCVrfAttachmentsModel)
 	deployVA.VrfAttachments = make(rva.NDFCVrfAttachmentsValues, 0)
 	deployVA.FabricName = va.FabricName
+	deployRequired := false
+
+	tflog.Debug(ctx, "vrfAttachmentsDeploy: Entering")
 
 	if va.DeployAllAttachments {
+		deployRequired = true
 		//Deploy all attachments
 		for i := range va.VrfAttachments {
 			for j := range va.VrfAttachments[i].AttachList {
@@ -327,6 +334,7 @@ func (c NDFC) vrfAttachmentsDeploy(ctx context.Context, dg *diag.Diagnostics, va
 		// Deploy VRFs in the resource if flag is set
 		for i := range va.VrfAttachments {
 			if va.VrfAttachments[i].DeployAllAttachments {
+				deployRequired = true
 				//Deploy all attachments in the VRF
 				for j := range va.VrfAttachments[i].AttachList {
 					deploy_map[va.VrfAttachments[i].AttachList[j].SerialNumber] =
@@ -336,6 +344,7 @@ func (c NDFC) vrfAttachmentsDeploy(ctx context.Context, dg *diag.Diagnostics, va
 				//Deploy specific attachments in the VRF
 				for j := range va.VrfAttachments[i].AttachList {
 					if va.VrfAttachments[i].AttachList[j].DeployThisAttachment {
+						deployRequired = true
 						deploy_map[va.VrfAttachments[i].AttachList[j].SerialNumber] =
 							append(deploy_map[va.VrfAttachments[i].AttachList[j].SerialNumber], va.VrfAttachments[i].VrfName)
 					}
@@ -344,6 +353,12 @@ func (c NDFC) vrfAttachmentsDeploy(ctx context.Context, dg *diag.Diagnostics, va
 			}
 		}
 	}
+
+	if !deployRequired {
+		tflog.Info(ctx, "vrfAttachmentsDeploy: No attachments to deploy")
+		return nil
+	}
+
 	deploy_post_payload := "{"
 	for k, v := range deploy_map {
 		deploy_post_payload += "\"" + k + "\":\""
