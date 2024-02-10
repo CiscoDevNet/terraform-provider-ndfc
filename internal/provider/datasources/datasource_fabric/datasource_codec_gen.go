@@ -3,6 +3,7 @@ package datasource_fabric
 
 import (
 	"context"
+	"log"
 
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
@@ -30,19 +31,27 @@ func (v *FabricModel) SetModelData(jsonData *NDFCFabricModel) diag.Diagnostics {
 	var err diag.Diagnostics
 	err = nil
 
-	listData := make([]FabricsValue, 0)
-	for _, item := range jsonData.Fabrics {
-		data := new(FabricsValue)
-		err = data.SetValue(&item)
+	if len(jsonData.Fabrics) == 0 {
+		log.Printf("v.Fabrics is empty")
+		v.Fabrics = types.ListNull(FabricsValue{}.Type(context.Background()))
+	} else {
+		log.Printf("v.Fabrics contains %d elements", len(jsonData.Fabrics))
+		listData := make([]FabricsValue, 0)
+		for _, item := range jsonData.Fabrics {
+			data := new(FabricsValue)
+			err = data.SetValue(&item)
+			if err != nil {
+				log.Printf("Error in FabricsValue.SetValue")
+				return err
+			}
+			data.state = attr.ValueStateKnown
+			listData = append(listData, *data)
+		}
+		v.Fabrics, err = types.ListValueFrom(context.Background(), FabricsValue{}.Type(context.Background()), listData)
 		if err != nil {
+			log.Printf("Error in converting []FabricsValue to  List")
 			return err
 		}
-		data.state = attr.ValueStateKnown
-		listData = append(listData, *data)
-	}
-	v.Fabrics, err = types.ListValueFrom(context.Background(), FabricsValue{}.Type(context.Background()), listData)
-	if err != nil {
-		return err
 	}
 
 	return err

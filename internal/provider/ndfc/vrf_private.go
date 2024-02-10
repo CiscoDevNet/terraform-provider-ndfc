@@ -154,58 +154,54 @@ func (c NDFC) processBulkResponse(ctx context.Context, res gjson.Result) ([]stri
 	for _, v := range failed {
 		errs = append(errs, fmt.Errorf("VRF=%s Status=%s Message=%s", v["name"], v["status"], v["message"]))
 	}
-	slist := res.Get("successList.#.name").Value().([]interface{})
 	var arr []string
-	for _, v := range slist {
-		arr = append(arr, v.(string))
+	if res.Get("successList.#.name").Exists() {
+		slist := res.Get("successList.#.name").Value().([]interface{})
+		for _, v := range slist {
+			arr = append(arr, v.(string))
+		}
 	}
 	return arr, errors.Join(errs...)
 }
 
 func (c NDFC) vrfCreateFilterMap(ID string, filterMap *map[string]bool) (string, []string) {
-	idSplit := strings.Split(ID, "/")
-	fabricName := idSplit[0]
-	var vrfs []string
 
-	if len(idSplit) > 1 {
-		vrfs_string := idSplit[1]
-		log.Println(vrfs_string)
-		if vrfs_string[0] == '{' && vrfs_string[len(vrfs_string)-1] == '}' {
-			vrfs = strings.Split(vrfs_string[1:len(vrfs_string)-1], ",")
-			for _, v := range vrfs {
-				log.Printf("Set filtering of %s to true", v)
-				(*filterMap)[v] = true
+	result := c.VrfBulkSplitID(ID)
+	for _, v := range result["vrfs"] {
+		log.Printf("Set filtering of %s to true", v)
+		(*filterMap)[v] = true
+	}
+	return result["fabric"][0], result["vrfs"]
+}
+
+/*
+	func (c NDFC) vrfBulkSplitID(ID string) (string, []string) {
+		idSplit := strings.Split(ID, "/")
+		fabricName := idSplit[0]
+		var vrfs []string
+		if len(idSplit) > 1 {
+			vrfs_string := idSplit[1]
+			log.Println(vrfs_string)
+			if vrfs_string[0] == '{' && vrfs_string[len(vrfs_string)-1] == '}' {
+				vrfs = strings.Split(vrfs_string[1:len(vrfs_string)-1], ",")
 			}
 		}
+		return fabricName, vrfs
 	}
-	return fabricName, vrfs
-}
-
-func (c NDFC) vrfBulkSplitID(ID string) (string, []string) {
-	idSplit := strings.Split(ID, "/")
-	fabricName := idSplit[0]
-	var vrfs []string
-	if len(idSplit) > 1 {
-		vrfs_string := idSplit[1]
-		log.Println(vrfs_string)
-		if vrfs_string[0] == '{' && vrfs_string[len(vrfs_string)-1] == '}' {
-			vrfs = strings.Split(vrfs_string[1:len(vrfs_string)-1], ",")
-		}
-	}
-	return fabricName, vrfs
-}
-
+*/
 func (c NDFC) vrfBulkGetDiff(ctx context.Context, dg *diag.Diagnostics,
 	vPlan *resource_vrf_bulk.VrfBulkModel,
-	vState *resource_vrf_bulk.VrfBulkModel) (map[string]*resource_vrf_bulk.NDFCVrfBulkModel, []string) {
+	vState *resource_vrf_bulk.VrfBulkModel) map[string]interface{} {
 
-	actions := make(map[string]*resource_vrf_bulk.NDFCVrfBulkModel)
+	actions := make(map[string]interface{})
 	v1 := vState.GetModelData()
 	v2 := vPlan.GetModelData()
+	var delVrfs []string
+	var deployVrfs []string
 
 	putVRFs := new(resource_vrf_bulk.NDFCVrfBulkModel)
 	putVRFs.FabricName = vPlan.FabricName.ValueString()
-	var delVrfs []string
+
 	newVRFs := new(resource_vrf_bulk.NDFCVrfBulkModel)
 	newVRFs.FabricName = vPlan.FabricName.ValueString()
 	for i := range v1.Vrfs {
@@ -222,6 +218,9 @@ func (c NDFC) vrfBulkGetDiff(ctx context.Context, dg *diag.Diagnostics,
 				delVrfs = append(delVrfs, vrf.VrfName)
 				vrf.FabricName = newVRFs.FabricName
 				newVRFs.Vrfs = append(newVRFs.Vrfs, *vrf)
+			} else if updateAction == resource_vrf_bulk.ControlFlagUpdate {
+				deployVrfs = append(deployVrfs, vrf.VrfName)
+
 			} else {
 				//Case 3: attributes have changed - Do update
 				vrf.FabricName = newVRFs.FabricName
@@ -244,8 +243,11 @@ func (c NDFC) vrfBulkGetDiff(ctx context.Context, dg *diag.Diagnostics,
 	actions["add"] = newVRFs
 	actions["put"] = putVRFs
 	actions["plan"] = v2
+	actions["state"] = v1
+	actions["del"] = delVrfs
+	actions["deploy"] = deployVrfs
 
-	return actions, delVrfs
+	return actions
 
 }
 

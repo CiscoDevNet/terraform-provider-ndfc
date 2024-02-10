@@ -6,9 +6,84 @@ const (
 	ValuesDeeplyEqual = iota
 	RequiresReplace
 	RequiresUpdate
+	ControlFlagUpdate
 )
 
+func (v NDFCAttachListValue) DeepEqual(c NDFCAttachListValue) int {
+	controlFlagUpdate := false
+	if v.SerialNumber != c.SerialNumber {
+		log.Printf("v.SerialNumber=%v, c.SerialNumber=%v", v.SerialNumber, c.SerialNumber)
+		return RequiresReplace
+	}
+
+	if v.Vlan != nil && c.Vlan != nil {
+		if *v.Vlan != *c.Vlan {
+			log.Printf("v.Vlan=%v, c.Vlan=%v", *v.Vlan, *c.Vlan)
+			return RequiresUpdate
+		}
+	} else {
+		if v.Vlan != nil {
+			log.Printf("v.Vlan=%v", *v.Vlan)
+			return RequiresUpdate
+		} else if c.Vlan != nil {
+			log.Printf("c.Vlan=%v", *c.Vlan)
+			return RequiresUpdate
+		}
+	}
+	if v.FreeformConfig != c.FreeformConfig {
+		log.Printf("v.FreeformConfig=%v, c.FreeformConfig=%v", v.FreeformConfig, c.FreeformConfig)
+		return RequiresUpdate
+	}
+	if v.DeployThisAttachment != c.DeployThisAttachment {
+		log.Printf("v.DeployThisAttachment=%v, c.DeployThisAttachment=%v", v.DeployThisAttachment, c.DeployThisAttachment)
+		controlFlagUpdate = true
+	}
+
+	if v.InstanceValues.LoopbackId != nil && c.InstanceValues.LoopbackId != nil {
+		if *v.InstanceValues.LoopbackId != *c.InstanceValues.LoopbackId {
+			log.Printf("v.InstanceValues.LoopbackId=%v, c.InstanceValues.LoopbackId=%v", *v.InstanceValues.LoopbackId, *c.InstanceValues.LoopbackId)
+			return RequiresUpdate
+		}
+	} else {
+		if v.InstanceValues.LoopbackId != nil {
+			log.Printf("v.InstanceValues.LoopbackId=%v", *v.InstanceValues.LoopbackId)
+			return RequiresUpdate
+		} else if c.InstanceValues.LoopbackId != nil {
+			log.Printf("c.InstanceValues.LoopbackId=%v", *c.InstanceValues.LoopbackId)
+			return RequiresUpdate
+		}
+	}
+	if v.InstanceValues.LoopbackIpv4 != c.InstanceValues.LoopbackIpv4 {
+		log.Printf("v.InstanceValues.LoopbackIpv4=%s, c.InstanceValues.LoopbackIpv4=%s", v.InstanceValues.LoopbackIpv4, c.InstanceValues.LoopbackIpv4)
+		return RequiresUpdate
+	}
+	if v.InstanceValues.LoopbackIpv6 != c.InstanceValues.LoopbackIpv6 {
+		log.Printf("v.InstanceValues.LoopbackIpv6=%s, c.InstanceValues.LoopbackIpv6=%s", v.InstanceValues.LoopbackIpv6, c.InstanceValues.LoopbackIpv6)
+		return RequiresUpdate
+	}
+
+	if controlFlagUpdate {
+		return ControlFlagUpdate
+	}
+	return ValuesDeeplyEqual
+}
+
+func (v *NDFCVrfsValue) CreateSearchMap() {
+	v.AttachListMap = make(map[string]*NDFCAttachListValue)
+	for i := range v.AttachList {
+		key := ""
+		if v.AttachList[i].SerialNumber == "" {
+			key = v.AttachList[i].SwitchSerialNo
+		} else {
+			key = v.AttachList[i].SerialNumber
+		}
+		log.Printf("NDFCVrfsValue.CreateSearchMap: key=%s", key)
+		v.AttachListMap[key] = &v.AttachList[i]
+	}
+}
+
 func (v NDFCVrfsValue) DeepEqual(c NDFCVrfsValue) int {
+	controlFlagUpdate := false
 	if v.VrfName != c.VrfName {
 		log.Printf("v.VrfName=%v, c.VrfName=%v", v.VrfName, c.VrfName)
 		return RequiresReplace
@@ -242,13 +317,34 @@ func (v NDFCVrfsValue) DeepEqual(c NDFCVrfsValue) int {
 		log.Printf("v.VrfTemplateConfig.RouteTargetExportCloudEvpn=%s, c.VrfTemplateConfig.RouteTargetExportCloudEvpn=%s", v.VrfTemplateConfig.RouteTargetExportCloudEvpn, c.VrfTemplateConfig.RouteTargetExportCloudEvpn)
 		return RequiresUpdate
 	}
+	if v.DeployAttachments != c.DeployAttachments {
+		log.Printf("v.DeployAttachments=%v, c.DeployAttachments=%v", v.DeployAttachments, c.DeployAttachments)
+		controlFlagUpdate = true
+	}
 
+	if len(v.AttachList) != len(c.AttachList) {
+		log.Printf("len(v.AttachList)=%d, len(c.AttachList)=%d", len(v.AttachList), len(c.AttachList))
+		return RequiresUpdate
+	}
+	for i := range v.AttachList {
+		retVal := v.AttachList[i].DeepEqual(c.AttachList[i])
+		if retVal != ValuesDeeplyEqual {
+			return retVal
+		}
+	}
+	if controlFlagUpdate {
+		return ControlFlagUpdate
+	}
 	return ValuesDeeplyEqual
 }
 
 func (v *NDFCVrfBulkModel) CreateSearchMap() {
 	v.VrfsMap = make(map[string]*NDFCVrfsValue)
 	for i := range v.Vrfs {
-		v.VrfsMap[v.Vrfs[i].VrfName] = &v.Vrfs[i]
+		key := ""
+		key = v.Vrfs[i].VrfName
+		log.Printf("NDFCVrfBulkModel.CreateSearchMap: key=%s", key)
+		v.VrfsMap[key] = &v.Vrfs[i]
+		v.Vrfs[i].CreateSearchMap()
 	}
 }

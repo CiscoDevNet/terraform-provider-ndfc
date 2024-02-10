@@ -3,6 +3,7 @@ package datasource_vrf_bulk
 
 import (
 	"context"
+	"log"
 	"strconv"
 
 	"github.com/hashicorp/terraform-plugin-framework/attr"
@@ -103,19 +104,27 @@ func (v *VrfBulkModel) SetModelData(jsonData *NDFCVrfBulkModel) diag.Diagnostics
 		v.FabricName = types.StringNull()
 	}
 
-	listData := make([]VrfsValue, 0)
-	for _, item := range jsonData.Vrfs {
-		data := new(VrfsValue)
-		err = data.SetValue(&item)
+	if len(jsonData.Vrfs) == 0 {
+		log.Printf("v.Vrfs is empty")
+		v.Vrfs = types.ListNull(VrfsValue{}.Type(context.Background()))
+	} else {
+		log.Printf("v.Vrfs contains %d elements", len(jsonData.Vrfs))
+		listData := make([]VrfsValue, 0)
+		for _, item := range jsonData.Vrfs {
+			data := new(VrfsValue)
+			err = data.SetValue(&item)
+			if err != nil {
+				log.Printf("Error in VrfsValue.SetValue")
+				return err
+			}
+			data.state = attr.ValueStateKnown
+			listData = append(listData, *data)
+		}
+		v.Vrfs, err = types.ListValueFrom(context.Background(), VrfsValue{}.Type(context.Background()), listData)
 		if err != nil {
+			log.Printf("Error in converting []VrfsValue to  List")
 			return err
 		}
-		data.state = attr.ValueStateKnown
-		listData = append(listData, *data)
-	}
-	v.Vrfs, err = types.ListValueFrom(context.Background(), VrfsValue{}.Type(context.Background()), listData)
-	if err != nil {
-		return err
 	}
 
 	return err
