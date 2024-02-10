@@ -13,6 +13,21 @@ func (v NDFCAttachmentsValue) DeepEqual(c NDFCAttachmentsValue) int {
 		log.Printf("v.SerialNumber=%v, c.SerialNumber=%v", v.SerialNumber, c.SerialNumber)
 		return RequiresUpdate
 	}
+
+	if v.VlanId != nil && c.VlanId != nil {
+		if *v.VlanId != *c.VlanId {
+			log.Printf("v.VlanId=%v, c.VlanId=%v", *v.VlanId, *c.VlanId)
+			return RequiresUpdate
+		}
+	} else {
+		if v.VlanId != nil {
+			log.Printf("v.VlanId=%v", *v.VlanId)
+			return RequiresUpdate
+		} else if c.VlanId != nil {
+			log.Printf("c.VlanId=%v", *c.VlanId)
+			return RequiresUpdate
+		}
+	}
 	if v.FreeformConfig != c.FreeformConfig {
 		log.Printf("v.FreeformConfig=%v, c.FreeformConfig=%v", v.FreeformConfig, c.FreeformConfig)
 		return RequiresUpdate

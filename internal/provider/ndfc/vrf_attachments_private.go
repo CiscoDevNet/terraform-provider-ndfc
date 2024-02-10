@@ -5,19 +5,19 @@ import (
 	"encoding/json"
 	"fmt"
 	"log"
-	"sort"
 	"strings"
-	rva "terraform-provider-ndfc/internal/provider/resources/resource_vrf_attachments"
+	rva "terraform-provider-ndfc/internal/provider/resources/resource_vrf_bulk"
 
 	"github.com/hashicorp/terraform-plugin-framework/diag"
-	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-log/tflog"
+	"github.com/tidwall/gjson"
 )
 
 const UrlVrfAttachmentsCreate = "/lan-fabric/rest/top-down/v2/fabrics/%s/vrfs/attachments"
 const UrlVrfAttachmentsGet = "/lan-fabric/rest/top-down/fabrics/%s/vrfs/attachments"
 const UrlQP = "?%s=%s"
 const UrlVrfAttachmentsDeploy = "/lan-fabric/rest/top-down/v2/vrfs/deploy"
+const UrlVrfDeployment = "/lan-fabric/rest/top-down/v2/fabrics/%s/vrfs/deployments"
 
 func (c NDFC) vrfAttachmentsGet(ctx context.Context, fabricName string, vrfs []string) ([]byte, error) {
 
@@ -76,6 +76,19 @@ func (c NDFC) vrfAttachmentsIsPresent(ctx context.Context, dg *diag.Diagnostics,
 	return false
 }
 
+func (c NDFC) processAttachResponse(res gjson.Result) error {
+	err := error(nil)
+
+	res.ForEach(func(k, v gjson.Result) bool {
+		if !strings.Contains(v.String(), "SUCCESS") && !strings.Contains(v.String(), "already in detached state") {
+			err = fmt.Errorf("failed to configure attachments, got error: %s, %s", k.String(), v.String())
+		}
+		return true
+	})
+	return err
+
+}
+
 func (c NDFC) vrfAttachmentsPost(ctx context.Context, va *rva.NDFCVrfAttachmentsModel) error {
 	data, err := json.Marshal(va.VrfAttachments)
 	if err != nil {
@@ -88,17 +101,19 @@ func (c NDFC) vrfAttachmentsPost(ctx context.Context, va *rva.NDFCVrfAttachments
 	if err != nil {
 		return err
 	}
+	err = c.processAttachResponse(res)
+	if err != nil {
+		return err
+	}
+
 	tflog.Info(ctx, fmt.Sprintf("vrfAttachmentsCreate: Success res : %v", res.Str))
 	return nil
 }
 
 func (c NDFC) getVrfAttachments(ctx context.Context, dg *diag.Diagnostics,
-	Id string, in *rva.NDFCVrfAttachmentsModel) *rva.VrfAttachmentsModel {
-	tflog.Debug(ctx, fmt.Sprintf("getVrfAttachments: Entering Id %s", Id))
-	fabricName, vrfs := VrfAttachmentsSplitID(Id)
-	log.Printf("getVrfAttachments:%+v", *in)
-	tflog.Debug(ctx, fmt.Sprintf("getVrfAttachments: fabricName %s vrfs %v", fabricName, vrfs))
+	fabricName string, vrfs []string) *rva.NDFCVrfAttachmentsModel {
 
+	tflog.Debug(ctx, fmt.Sprintf("getVrfAttachments: Entering Id %s/{%v}", fabricName, vrfs))
 	// Get the VRF Attachments
 	res, err := c.vrfAttachmentsGet(ctx, fabricName, vrfs)
 	if err != nil {
@@ -126,126 +141,150 @@ func (c NDFC) getVrfAttachments(ctx context.Context, dg *diag.Diagnostics,
 					ndVrfs.VrfAttachments[i].VrfName,
 					ndVrfs.VrfAttachments[i].AttachList[j].SwitchName)
 				skip++
+			} else {
+				log.Printf("getVrfAttachments: Keeping explicit attachment %s/{%s}",
+					ndVrfs.VrfAttachments[i].VrfName,
+					ndVrfs.VrfAttachments[i].AttachList[j].SwitchName)
+
 			}
 		}
 		if skip == len(ndVrfs.VrfAttachments[i].AttachList) {
 			//All entries are implicit, skip the VRF
 			log.Printf("getVrfAttachments: Filtering out implicit VRF %s", ndVrfs.VrfAttachments[i].VrfName)
 			ndVrfs.VrfAttachments[i].FilterThisValue = true
+		} else {
+			ndVrfs.VrfAttachments[i].CreateSearchMap()
 		}
 	}
-
-	ndVrfs.CreateSearchMap()
-	for i := range vrfs {
-		if _, found := ndVrfs.VrfAttachmentsMap[vrfs[i]]; found {
-			ndVrfs.VrfAttachmentsMap[vrfs[i]].Id = new(int64)
-			log.Printf("getVrfAttachments: Setting ID for %s to %d", vrfs[i], i)
-			*(ndVrfs.VrfAttachmentsMap[vrfs[i]].Id) = int64(i)
-		}
-	}
-	sort.Sort(&ndVrfs.VrfAttachments)
 
 	//Fill all control params from input, that are not in NDFC payload
 	// - here deployment
-	in.CreateSearchMap()
-	ndVrfs.DeployAllAttachments = in.DeployAllAttachments
 
-	for i := range ndVrfs.VrfAttachments {
-		if ndVrfs.VrfAttachments[i].Id != nil {
-			log.Printf("getVrfAttachments: Sorted ID for %s is %d ", ndVrfs.VrfAttachments[i].VrfName, *(ndVrfs.VrfAttachments[i].Id))
-		}
-		vrfEntry, found := in.VrfAttachmentsMap[ndVrfs.VrfAttachments[i].VrfName]
-		if found {
-			ndVrfs.VrfAttachments[i].DeployAllAttachments = vrfEntry.DeployAllAttachments
-			vrfEntry.CreateSearchMap()
-		} else {
-			log.Printf("This is not expected, VRF entry %s not found in input", ndVrfs.VrfAttachments[i].VrfName)
-		}
-
-		for j := range ndVrfs.VrfAttachments[i].AttachList {
-			attachEntry, found := vrfEntry.AttachListMap[ndVrfs.VrfAttachments[i].AttachList[j].SerialNumber]
+	//ndVrfs.DeployAllAttachments = in.DeployAllAttachments
+	/*
+		for i := range ndVrfs.VrfAttachments {
+			if ndVrfs.VrfAttachments[i].Id != nil {
+				log.Printf("getVrfAttachments: Sorted ID for %s is %d ", ndVrfs.VrfAttachments[i].VrfName, *(ndVrfs.VrfAttachments[i].Id))
+			}
+			vrfEntry, found := in.VrfAttachmentsMap[ndVrfs.VrfAttachments[i].VrfName]
 			if found {
-				ndVrfs.VrfAttachments[i].AttachList[j].DeployThisAttachment = attachEntry.DeployThisAttachment
+				ndVrfs.VrfAttachments[i].DeployAllAttachments = vrfEntry.DeployAllAttachments
+				vrfEntry.CreateSearchMap()
 			} else {
-				log.Printf("This is not expected, Attachment entry %s{%s} not found in input", ndVrfs.VrfAttachments[i].VrfName, ndVrfs.VrfAttachments[i].AttachList[j].SerialNumber)
+				log.Printf("This is not expected, VRF entry %s not found in input", ndVrfs.VrfAttachments[i].VrfName)
 			}
 
-			if ndVrfs.VrfAttachments[i].AttachList[j].VlanId != nil {
-				log.Printf("getVrfAttachments: Sorted VlanId for %s is %v", ndVrfs.VrfAttachments[i].VrfName, *ndVrfs.VrfAttachments[i].AttachList[j].VlanId)
-			}
-			if ndVrfs.VrfAttachments[i].AttachList[j].Vlan != nil {
-				log.Printf("getVrfAttachments: Sorted Vlan for %s is %v", ndVrfs.VrfAttachments[i].VrfName, *ndVrfs.VrfAttachments[i].AttachList[j].Vlan)
-			}
+			for j := range ndVrfs.VrfAttachments[i].AttachList {
+				attachEntry, found := vrfEntry.AttachListMap[ndVrfs.VrfAttachments[i].AttachList[j].SerialNumber]
+				if found {
+					ndVrfs.VrfAttachments[i].AttachList[j].DeployThisAttachment = attachEntry.DeployThisAttachment
+				} else {
+					log.Printf("This is not expected, Attachment entry %s{%s} not found in input", ndVrfs.VrfAttachments[i].VrfName, ndVrfs.VrfAttachments[i].AttachList[j].SerialNumber)
+				}
 
-			//log.Printf("getVrfAttachments: Sorted VlanId for %s is %v %v", ndVrfs.VrfAttachments[i].VrfName, *ndVrfs.VrfAttachments[i].AttachList[j].VlanId, *ndVrfs.VrfAttachments[i].AttachList[j].Vlan)
+				if ndVrfs.VrfAttachments[i].AttachList[j].VlanId != nil {
+					log.Printf("getVrfAttachments: Sorted VlanId for %s is %v", ndVrfs.VrfAttachments[i].VrfName, *ndVrfs.VrfAttachments[i].AttachList[j].VlanId)
+				}
+				if ndVrfs.VrfAttachments[i].AttachList[j].Vlan != nil {
+					log.Printf("getVrfAttachments: Sorted Vlan for %s is %v", ndVrfs.VrfAttachments[i].VrfName, *ndVrfs.VrfAttachments[i].AttachList[j].Vlan)
+				}
+
+				//log.Printf("getVrfAttachments: Sorted VlanId for %s is %v %v", ndVrfs.VrfAttachments[i].VrfName, *ndVrfs.VrfAttachments[i].AttachList[j].VlanId, *ndVrfs.VrfAttachments[i].AttachList[j].Vlan)
+			}
 		}
-	}
-	ndVrfs.FabricName = fabricName
-	ret := rva.VrfAttachmentsModel{}
-	diagErr := ret.SetModelData(&ndVrfs)
-	if diagErr.HasError() {
-		tflog.Error(ctx, fmt.Sprintf("getVrfAttachments: Error setting model data %v", diagErr.Errors()))
-		return nil
-	}
-	ret.Id = types.StringValue(Id)
-	//Set entries that are not in Payload
-
-	return &ret
+	*/
+	//ndVrfs.FabricName = fabricName
+	/*
+		ret := rva.NDFCVrfAttachmentsModel{}
+		diagErr := ret.SetModelData(&ndVrfs)
+		if diagErr.HasError() {
+			tflog.Error(ctx, fmt.Sprintf("getVrfAttachments: Error setting model data %v", diagErr.Errors()))
+			return nil
+		}
+		ret.Id = types.StringValue(Id)
+		//Set entries that are not in Payload
+	*/
+	return &ndVrfs
 }
 
-func (c NDFC) diffVrfAttachments(ctx context.Context, plan *rva.VrfAttachmentsModel,
-	state *rva.VrfAttachmentsModel) (
-	*rva.NDFCVrfAttachmentsModel, string) {
+func addToUpdate(vrf string, updateVA *rva.NDFCVrfAttachmentsModel, y rva.NDFCVrfAttachmentsValue, x ...rva.NDFCAttachListValue) {
+	if len(updateVA.VrfAttachments) == 0 {
+		updateVA.VrfAttachments = make(rva.NDFCVrfAttachmentsValues, 0)
+	}
+	for i := range x {
+		x[i].VrfName = vrf
+		x[i].FilterThisValue = false
+		x[i].FabricName = updateVA.FabricName
+		/* NDFCBUG: throws 500 Server error if vlan field is empty */
+		/* Setting to -1 to avoid this - UI does the same      */
+		if x[i].Vlan == nil {
+			x[i].Vlan = new(rva.Int64Custom)
+			*x[i].Vlan = rva.Int64Custom(-1)
+		}
+	}
+	vrfAttachEntry, found := updateVA.VrfAttachmentsMap[vrf]
+	if !found {
+		vrfAttachEntry = new(rva.NDFCVrfAttachmentsValue)
+		*vrfAttachEntry = y
+		vrfAttachEntry.VrfName = vrf
+		//vrfAttachEntry.DeployAllAttachments = planData.DeployAllAttachments
+		vrfAttachEntry.AttachList = make(rva.NDFCAttachListValues, 0)
+		vrfAttachEntry.AttachList = append(vrfAttachEntry.AttachList, x...)
+		updateVA.VrfAttachments = append(updateVA.VrfAttachments, *vrfAttachEntry)
+		updateVA.VrfAttachmentsMap[vrf] = &updateVA.VrfAttachments[len(updateVA.VrfAttachments)-1]
+	} else {
+		vrfAttachEntry.AttachList = append(vrfAttachEntry.AttachList, x...)
+	}
+	vrfAttachEntry.CreateSearchMap()
+}
+
+func (c NDFC) diffVrfAttachments(ctx context.Context, planData *rva.NDFCVrfAttachmentsModel,
+	stateData *rva.NDFCVrfAttachmentsModel) (
+	map[string]*rva.NDFCVrfAttachmentsModel, string) {
+
+	action := make(map[string]*rva.NDFCVrfAttachmentsModel)
 
 	tflog.Debug(ctx, "diffVrfAttachments: Entering")
-	planData := plan.GetModelData()
-	stateData := state.GetModelData()
 	ID, _ := c.VrfAttachmentsCreateID(planData)
 	updateVA := new(rva.NDFCVrfAttachmentsModel)
 	updateVA.VrfAttachmentsMap = make(map[string]*rva.NDFCVrfAttachmentsValue)
 	updateVA.FabricName = planData.FabricName
-	addToUpdate := func(vrf string, x ...rva.NDFCAttachListValue) {
-		if len(updateVA.VrfAttachments) == 0 {
-			updateVA.VrfAttachments = make(rva.NDFCVrfAttachmentsValues, 0)
-		}
-		for i := range x {
-			x[i].VrfName = vrf
-			x[i].FilterThisValue = false
-			x[i].FabricName = planData.FabricName
-			/* NDFCBUG: throws 500 Server error if vlan field is empty */
-			/* Setting to -1 to avoid this - UI does the same      */
-			if x[i].Vlan == nil {
-				x[i].Vlan = new(rva.Int64Custom)
-				*x[i].Vlan = rva.Int64Custom(-1)
-			}
-		}
-		vrfAttachEntry, found := updateVA.VrfAttachmentsMap[vrf]
-		if !found {
-			vrfAttachEntry = new(rva.NDFCVrfAttachmentsValue)
-			vrfAttachEntry.VrfName = vrf
-			vrfAttachEntry.AttachList = make(rva.NDFCAttachListValues, 0)
-			vrfAttachEntry.AttachList = append(vrfAttachEntry.AttachList, x...)
-			updateVA.VrfAttachments = append(updateVA.VrfAttachments, *vrfAttachEntry)
-			updateVA.VrfAttachmentsMap[vrf] = &updateVA.VrfAttachments[len(updateVA.VrfAttachments)-1]
-		} else {
-			vrfAttachEntry.AttachList = append(vrfAttachEntry.AttachList, x...)
-		}
-		vrfAttachEntry.CreateSearchMap()
-	}
+
+	deployVA := new(rva.NDFCVrfAttachmentsModel)
+	deployVA.VrfAttachmentsMap = make(map[string]*rva.NDFCVrfAttachmentsValue)
+	deployVA.FabricName = planData.FabricName
+
+	undeployVA := new(rva.NDFCVrfAttachmentsModel)
+	undeployVA.VrfAttachmentsMap = make(map[string]*rva.NDFCVrfAttachmentsValue)
+	undeployVA.FabricName = planData.FabricName
 
 	planData.CreateSearchMap()
 	stateData.CreateSearchMap()
+
+	if stateData.DeployAllAttachments && !planData.DeployAllAttachments {
+		//Global undeploy
+		tflog.Debug(ctx, "diffVrfAttachments: Global undeploy needed")
+		undeployVA.DeployAllAttachments = true
+	} else if !stateData.DeployAllAttachments && planData.DeployAllAttachments {
+		//Global deploy
+		tflog.Debug(ctx, "diffVrfAttachments: Global deploy needed")
+		deployVA.DeployAllAttachments = true
+	} else {
+		tflog.Debug(ctx, "diffVrfAttachments: Global deploy flag unchanged")
+		deployVA.DeployAllAttachments = false
+		undeployVA.DeployAllAttachments = false
+	}
 
 	for i := range planData.VrfAttachments {
 		stateVA, found := stateData.VrfAttachmentsMap[planData.VrfAttachments[i].VrfName]
 		if !found {
 			//newAttachments[planData.VrfAttachments[i].VrfName] = planData.VrfAttachments[i].AttachList
-			tflog.Debug(ctx, fmt.Sprintf("diffVrfAttachments: New VRF %s in plan", planData.VrfAttachments[i].VrfName))
+			tflog.Debug(ctx, fmt.Sprintf("diffVrfAttachments: New VRF %s in plan, not in state - must be new ", planData.VrfAttachments[i].VrfName))
 			for j := range planData.VrfAttachments[i].AttachList {
 				//attach
 				planData.VrfAttachments[i].AttachList[j].Deployment = "true"
 			}
-			addToUpdate(planData.VrfAttachments[i].VrfName, planData.VrfAttachments[i].AttachList...)
+			addToUpdate(planData.VrfAttachments[i].VrfName, updateVA, planData.VrfAttachments[i], planData.VrfAttachments[i].AttachList...)
 			//New VRF entry in plan
 		} else {
 			stateVA.FilterThisValue = true
@@ -253,6 +292,22 @@ func (c NDFC) diffVrfAttachments(ctx context.Context, plan *rva.VrfAttachmentsMo
 			tflog.Debug(ctx, fmt.Sprintf("diffVrfAttachments: Existing VRF %s in plan",
 				planData.VrfAttachments[i].VrfName))
 			//Check if there are new attachments
+			if planData.VrfAttachments[i].DeployAllAttachments != stateVA.DeployAllAttachments {
+				//deployment flag has changed - add everything to deployList
+				tflog.Debug(ctx, fmt.Sprintf("diffVrfAttachments: DeployAllAttachments flag has changed in VRF %s in plan",
+					planData.VrfAttachments[i].VrfName))
+				if stateVA.DeployAllAttachments && !planData.VrfAttachments[i].DeployAllAttachments {
+					//Undeploy
+					tflog.Debug(ctx, fmt.Sprintf("diffVrfAttachments: VRF %s in plan needs un-deploy",
+						planData.VrfAttachments[i].VrfName))
+					addToUpdate(planData.VrfAttachments[i].VrfName, undeployVA, planData.VrfAttachments[i], planData.VrfAttachments[i].AttachList...)
+				} else {
+					//deploy
+					tflog.Debug(ctx, fmt.Sprintf("diffVrfAttachments: VRF %s in plan needs deploy",
+						planData.VrfAttachments[i].VrfName))
+					addToUpdate(planData.VrfAttachments[i].VrfName, deployVA, planData.VrfAttachments[i], planData.VrfAttachments[i].AttachList...)
+				}
+			}
 			planData.VrfAttachments[i].CreateSearchMap()
 			for j := range planData.VrfAttachments[i].AttachList {
 				stateAttachment, found := stateVA.AttachListMap[planData.VrfAttachments[i].AttachList[j].SerialNumber]
@@ -263,118 +318,81 @@ func (c NDFC) diffVrfAttachments(ctx context.Context, plan *rva.VrfAttachmentsMo
 						planData.VrfAttachments[i].AttachList[j].SerialNumber))
 					//attach
 					planData.VrfAttachments[i].AttachList[j].Deployment = "true"
-					addToUpdate(planData.VrfAttachments[i].VrfName, planData.VrfAttachments[i].AttachList[j])
+					//addToUpdate(planData.VrfAttachments[i].VrfName, planData.VrfAttachments[i].AttachList[j])
 				} else {
 					stateAttachment.FilterThisValue = true
 					//Check if parameters are different
 					retVal := planData.VrfAttachments[i].AttachList[j].DeepEqual(*stateAttachment)
-					if retVal != rva.ValuesDeeplyEqual {
+					if retVal == rva.ValuesDeeplyEqual {
+						tflog.Debug(ctx, fmt.Sprintf("diffVrfAttachments: attachment %s/%s - unchanged",
+							planData.VrfAttachments[i].VrfName,
+							planData.VrfAttachments[i].AttachList[j].SerialNumber))
+						planData.VrfAttachments[i].AttachList[j].FilterThisValue = true
+
+					} else if retVal == rva.ControlFlagUpdate {
+						//Control Flag Update
+						tflog.Debug(ctx, fmt.Sprintf("diffVrfAttachments: Deploy flag changed in attachment %s/%s in plan",
+							planData.VrfAttachments[i].VrfName,
+							planData.VrfAttachments[i].AttachList[j].SerialNumber))
+
+						if stateAttachment.DeployThisAttachment && !planData.VrfAttachments[i].AttachList[j].DeployThisAttachment {
+							//undeploy needed
+							tflog.Debug(ctx, fmt.Sprintf("diffVrfAttachments: Attachment %s/%s in plan needs un-deploy",
+								planData.VrfAttachments[i].VrfName,
+								planData.VrfAttachments[i].AttachList[j].SerialNumber))
+							addToUpdate(planData.VrfAttachments[i].VrfName, undeployVA, planData.VrfAttachments[i], planData.VrfAttachments[i].AttachList[j])
+						} else if !stateAttachment.DeployThisAttachment && planData.VrfAttachments[i].AttachList[j].DeployThisAttachment {
+							//deploy needed
+							tflog.Debug(ctx, fmt.Sprintf("diffVrfAttachments: Attachment %s/%s in plan needs deploy",
+								planData.VrfAttachments[i].VrfName,
+								planData.VrfAttachments[i].AttachList[j].SerialNumber))
+							addToUpdate(planData.VrfAttachments[i].VrfName, deployVA, planData.VrfAttachments[i], planData.VrfAttachments[i].AttachList[j])
+						}
+						planData.VrfAttachments[i].AttachList[j].FilterThisValue = true
+
+					} else {
 						//Modified attachment in plan list
 						tflog.Debug(ctx, fmt.Sprintf("diffVrfAttachments: Modified attachment %s/%s in plan",
 							planData.VrfAttachments[i].VrfName,
 							planData.VrfAttachments[i].AttachList[j].SerialNumber))
 						//attach
 						planData.VrfAttachments[i].AttachList[j].Deployment = "true"
-						addToUpdate(planData.VrfAttachments[i].VrfName, planData.VrfAttachments[i].AttachList[j])
-
+						if stateAttachment.DeployThisAttachment && !planData.VrfAttachments[i].AttachList[j].DeployThisAttachment {
+							//undeploy needed
+							tflog.Debug(ctx, fmt.Sprintf("diffVrfAttachments: Attachment %s/%s in plan needs un-deploy",
+								planData.VrfAttachments[i].VrfName,
+								planData.VrfAttachments[i].AttachList[j].SerialNumber))
+							addToUpdate(planData.VrfAttachments[i].VrfName, undeployVA, planData.VrfAttachments[i], planData.VrfAttachments[i].AttachList[j])
+						}
+						addToUpdate(planData.VrfAttachments[i].VrfName, updateVA, planData.VrfAttachments[i], planData.VrfAttachments[i].AttachList[j])
 					}
 				}
 			}
+			//addToUpdate(planData.VrfAttachments[i].VrfName, updateVA, planData.VrfAttachments[i], planData.VrfAttachments[i].AttachList...)
 		}
 	}
 	for i := range stateData.VrfAttachments {
-		if stateData.VrfAttachments[i].FilterThisValue {
-			//Look inside attachlist
-			for j := range stateData.VrfAttachments[i].AttachList {
-				if !stateData.VrfAttachments[i].AttachList[j].FilterThisValue {
-					//attachment to be deleted as its missing in plan
-					tflog.Debug(ctx, fmt.Sprintf("diffVrfAttachments: To be Deleted attachment %s",
-						stateData.VrfAttachments[i].AttachList[j].SerialNumber))
-					//Detach
-					stateData.VrfAttachments[i].AttachList[j].Deployment = "false"
-					addToUpdate(stateData.VrfAttachments[i].VrfName, stateData.VrfAttachments[i].AttachList[j])
-				}
-			}
-
-		} else {
-			tflog.Info(ctx, fmt.Sprintf("diffVrfAttachments: To be Deleted VrfAttachment %s", stateData.VrfAttachments[i].VrfName))
-			// VrfAttachments in state that are not in plan - to be detached
-			for j := range stateData.VrfAttachments[i].AttachList {
-				tflog.Debug(ctx, fmt.Sprintf("diffVrfAttachments: To be Deleted attachment %s",
+		if !stateData.VrfAttachments[i].FilterThisValue {
+			// was deleted
+			continue
+		}
+		tflog.Info(ctx, fmt.Sprintf("Check for detachments in vrf %s", stateData.VrfAttachments[i].VrfName))
+		// VrfAttachments in state that are not in plan - to be detached
+		for j := range stateData.VrfAttachments[i].AttachList {
+			if !stateData.VrfAttachments[i].AttachList[j].FilterThisValue {
+				tflog.Debug(ctx, fmt.Sprintf("diffVrfAttachments: To be Detached attachment %s/%s",
+					stateData.VrfAttachments[i].VrfName,
 					stateData.VrfAttachments[i].AttachList[j].SerialNumber))
 				//Detach
 				stateData.VrfAttachments[i].AttachList[j].Deployment = "false"
-			}
-			addToUpdate(stateData.VrfAttachments[i].VrfName, stateData.VrfAttachments[i].AttachList...)
-		}
-	}
-	return updateVA, ID
-}
-
-func (c NDFC) vrfAttachmentsDeploy(ctx context.Context, dg *diag.Diagnostics, va *rva.NDFCVrfAttachmentsModel) error {
-
-	deploy_map := make(map[string][]string)
-	deployVA := new(rva.NDFCVrfAttachmentsModel)
-	deployVA.VrfAttachments = make(rva.NDFCVrfAttachmentsValues, 0)
-	deployVA.FabricName = va.FabricName
-	deployRequired := false
-
-	tflog.Debug(ctx, "vrfAttachmentsDeploy: Entering")
-
-	if va.DeployAllAttachments {
-		deployRequired = true
-		//Deploy all attachments
-		for i := range va.VrfAttachments {
-			for j := range va.VrfAttachments[i].AttachList {
-				deploy_map[va.VrfAttachments[i].AttachList[j].SerialNumber] =
-					append(deploy_map[va.VrfAttachments[i].AttachList[j].SerialNumber], va.VrfAttachments[i].VrfName)
-			}
-		}
-	} else {
-		// Deploy VRFs in the resource if flag is set
-		for i := range va.VrfAttachments {
-			if va.VrfAttachments[i].DeployAllAttachments {
-				deployRequired = true
-				//Deploy all attachments in the VRF
-				for j := range va.VrfAttachments[i].AttachList {
-					deploy_map[va.VrfAttachments[i].AttachList[j].SerialNumber] =
-						append(deploy_map[va.VrfAttachments[i].AttachList[j].SerialNumber], va.VrfAttachments[i].VrfName)
-				}
-			} else {
-				//Deploy specific attachments in the VRF
-				for j := range va.VrfAttachments[i].AttachList {
-					if va.VrfAttachments[i].AttachList[j].DeployThisAttachment {
-						deployRequired = true
-						deploy_map[va.VrfAttachments[i].AttachList[j].SerialNumber] =
-							append(deploy_map[va.VrfAttachments[i].AttachList[j].SerialNumber], va.VrfAttachments[i].VrfName)
-					}
-				}
-
+				addToUpdate(stateData.VrfAttachments[i].VrfName, updateVA, stateData.VrfAttachments[i], stateData.VrfAttachments[i].AttachList[j])
 			}
 		}
 	}
-
-	if !deployRequired {
-		tflog.Info(ctx, "vrfAttachmentsDeploy: No attachments to deploy")
-		return nil
-	}
-
-	deploy_post_payload := "{"
-	for k, v := range deploy_map {
-		deploy_post_payload += "\"" + k + "\":\""
-		deploy_post_payload += strings.Join(v, ",")
-		deploy_post_payload += "\","
-	}
-	deploy_post_payload += "}"
-	deploy_post_payload = strings.ReplaceAll(deploy_post_payload, ",}", "}")
-
-	tflog.Info(ctx, fmt.Sprintf("vrfAttachmentsDeploy: Deploying Attachments %s", deploy_post_payload))
-	c.GetLock(ResourceVrfAttachments).Lock()
-	defer c.GetLock(ResourceVrfAttachments).Unlock()
-	res, err := c.apiClient.Post(UrlVrfAttachmentsDeploy, deploy_post_payload)
-	if err != nil {
-		return err
-	}
-	tflog.Info(ctx, fmt.Sprintf("vrfAttachmentsDeploy: Success res : %v", res.Str))
-	return nil
+	action["update"] = updateVA
+	action["deploy"] = deployVA
+	action["undeploy"] = undeployVA
+	action["plan"] = planData
+	action["state"] = stateData
+	return action, ID
 }

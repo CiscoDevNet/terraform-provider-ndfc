@@ -6,9 +6,11 @@ const (
 	ValuesDeeplyEqual = iota
 	RequiresReplace
 	RequiresUpdate
+	ControlFlagUpdate
 )
 
 func (v NDFCAttachListValue) DeepEqual(c NDFCAttachListValue) int {
+	controlFlagUpdate := false
 	if v.SerialNumber != c.SerialNumber {
 		log.Printf("v.SerialNumber=%v, c.SerialNumber=%v", v.SerialNumber, c.SerialNumber)
 		return RequiresReplace
@@ -34,7 +36,7 @@ func (v NDFCAttachListValue) DeepEqual(c NDFCAttachListValue) int {
 	}
 	if v.DeployThisAttachment != c.DeployThisAttachment {
 		log.Printf("v.DeployThisAttachment=%v, c.DeployThisAttachment=%v", v.DeployThisAttachment, c.DeployThisAttachment)
-		return RequiresUpdate
+		controlFlagUpdate = true
 	}
 
 	if v.InstanceValues.LoopbackId != nil && c.InstanceValues.LoopbackId != nil {
@@ -60,24 +62,35 @@ func (v NDFCAttachListValue) DeepEqual(c NDFCAttachListValue) int {
 		return RequiresUpdate
 	}
 
+	if controlFlagUpdate {
+		return ControlFlagUpdate
+	}
 	return ValuesDeeplyEqual
 }
 
 func (v *NDFCVrfAttachmentsValue) CreateSearchMap() {
 	v.AttachListMap = make(map[string]*NDFCAttachListValue)
 	for i := range v.AttachList {
-		v.AttachListMap[v.AttachList[i].SerialNumber] = &v.AttachList[i]
+		key := ""
+		if v.AttachList[i].SerialNumber == "" {
+			key = v.AttachList[i].SwitchSerialNo
+		} else {
+			key = v.AttachList[i].SerialNumber
+		}
+		log.Printf("NDFCVrfAttachmentsValue.CreateSearchMap: key=%s", key)
+		v.AttachListMap[key] = &v.AttachList[i]
 	}
 }
 
 func (v NDFCVrfAttachmentsValue) DeepEqual(c NDFCVrfAttachmentsValue) int {
+	controlFlagUpdate := false
 	if v.VrfName != c.VrfName {
 		log.Printf("v.VrfName=%v, c.VrfName=%v", v.VrfName, c.VrfName)
 		return RequiresReplace
 	}
 	if v.DeployAllAttachments != c.DeployAllAttachments {
 		log.Printf("v.DeployAllAttachments=%v, c.DeployAllAttachments=%v", v.DeployAllAttachments, c.DeployAllAttachments)
-		return RequiresUpdate
+		controlFlagUpdate = true
 	}
 
 	if len(v.AttachList) != len(c.AttachList) {
@@ -90,12 +103,19 @@ func (v NDFCVrfAttachmentsValue) DeepEqual(c NDFCVrfAttachmentsValue) int {
 			return retVal
 		}
 	}
+	if controlFlagUpdate {
+		return ControlFlagUpdate
+	}
 	return ValuesDeeplyEqual
 }
 
 func (v *NDFCVrfAttachmentsModel) CreateSearchMap() {
 	v.VrfAttachmentsMap = make(map[string]*NDFCVrfAttachmentsValue)
 	for i := range v.VrfAttachments {
-		v.VrfAttachmentsMap[v.VrfAttachments[i].VrfName] = &v.VrfAttachments[i]
+		key := ""
+		key = v.VrfAttachments[i].VrfName
+		log.Printf("NDFCVrfAttachmentsModel.CreateSearchMap: key=%s", key)
+		v.VrfAttachmentsMap[key] = &v.VrfAttachments[i]
+		v.VrfAttachments[i].CreateSearchMap()
 	}
 }

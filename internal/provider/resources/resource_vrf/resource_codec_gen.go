@@ -3,6 +3,7 @@ package resource_vrf
 
 import (
 	"context"
+	"log"
 	"strconv"
 
 	"github.com/hashicorp/terraform-plugin-framework/attr"
@@ -16,6 +17,7 @@ type NDFCVrfModel struct {
 	VrfTemplate          string                     `json:"vrfTemplate,omitempty"`
 	VrfExtensionTemplate string                     `json:"vrfExtensionTemplate,omitempty"`
 	VrfId                *int64                     `json:"vrfId,omitempty"`
+	DeployAttachments    bool                       `json:"-"`
 	Attachments          []NDFCAttachmentsValue     `json:"lanAttachList,omitempty"`
 	VrfTemplateConfig    NDFCVrfTemplateConfigValue `json:"vrfTemplateConfig,omitempty"`
 }
@@ -329,19 +331,28 @@ func (v *VrfModel) SetModelData(jsonData *NDFCVrfModel) diag.Diagnostics {
 		v.RouteTargetExportCloudEvpn = types.StringNull()
 	}
 
-	listData := make([]AttachmentsValue, 0)
-	for _, item := range jsonData.Attachments {
-		data := new(AttachmentsValue)
-		err = data.SetValue(&item)
+	v.DeployAttachments = types.BoolValue(jsonData.DeployAttachments)
+	if len(jsonData.Attachments) == 0 {
+		log.Printf("v.Attachments is empty")
+		v.Attachments = types.ListNull(AttachmentsValue{}.Type(context.Background()))
+	} else {
+		log.Printf("v.Attachments contains %d elements", len(jsonData.Attachments))
+		listData := make([]AttachmentsValue, 0)
+		for _, item := range jsonData.Attachments {
+			data := new(AttachmentsValue)
+			err = data.SetValue(&item)
+			if err != nil {
+				log.Printf("Error in AttachmentsValue.SetValue")
+				return err
+			}
+			data.state = attr.ValueStateKnown
+			listData = append(listData, *data)
+		}
+		v.Attachments, err = types.ListValueFrom(context.Background(), AttachmentsValue{}.Type(context.Background()), listData)
 		if err != nil {
+			log.Printf("Error in converting []AttachmentsValue to  List")
 			return err
 		}
-		data.state = attr.ValueStateKnown
-		listData = append(listData, *data)
-	}
-	v.Attachments, err = types.ListValueFrom(context.Background(), AttachmentsValue{}.Type(context.Background()), listData)
-	if err != nil {
-		return err
 	}
 
 	return err
@@ -646,6 +657,10 @@ func (v VrfModel) GetModelData() *NDFCVrfModel {
 		data.VrfTemplateConfig.RouteTargetExportCloudEvpn = v.RouteTargetExportCloudEvpn.ValueString()
 	} else {
 		data.VrfTemplateConfig.RouteTargetExportCloudEvpn = ""
+	}
+
+	if !v.DeployAttachments.IsNull() && !v.DeployAttachments.IsUnknown() {
+		data.DeployAttachments = v.DeployAttachments.ValueBool()
 	}
 
 	if !v.Attachments.IsNull() && !v.Attachments.IsUnknown() {

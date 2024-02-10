@@ -19,7 +19,7 @@
             "vrfDescription": "",
             "disableRtAuto": "false",
             "L3VniMcastGroup": "",
-            "maxBgpPaths": "",
+            "maxBgpPaths": "2",
             "maxIbgpPaths": "2",
             "routeTargetExport": "",
             "ipv6LinkLocalFlag": "true",
@@ -47,7 +47,39 @@
             "asn": "64000",
             "vrfIntfDescription": "",
             "routeTargetImportEvpn": ""
-        }
+        },
+        "lanAttachList": [
+            {
+              "vrfName": "muralidm_vrf_dnt_delete",
+              "switchName": "switch3",
+              "lanAttachState": "NA",
+              "isLanAttached": false,
+              "switchSerialNo": "9TQYTJSZ1VJ",
+              "peerSerialNo": null,
+              "switchRole": "leaf",
+              "fabricName": "test_evpn_vxlan",
+              "ipAddress": "192.168.10.5",
+              "instanceValues": null,
+              "vlanId": null,
+              "vrfId": 56601,
+              "entityName": null
+            },
+            {
+              "vrfName": "muralidm_vrf_dnt_delete",
+              "switchName": "switch1",
+              "lanAttachState": "NA",
+              "isLanAttached": false,
+              "switchSerialNo": "9FE076D8EJL",
+              "peerSerialNo": null,
+              "switchRole": "leaf",
+              "fabricName": "test_evpn_vxlan",
+              "ipAddress": "192.168.10.3",
+              "instanceValues": null,
+              "vlanId": null,
+              "vrfId": 56601,
+              "entityName": null
+            }
+        ]
     },
     {
         "fabric": "test_evpn_vxlan",

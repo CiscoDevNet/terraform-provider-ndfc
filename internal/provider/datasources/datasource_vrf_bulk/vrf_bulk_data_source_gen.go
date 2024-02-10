@@ -197,7 +197,7 @@ func VrfBulkDataSourceSchema(ctx context.Context) schema.Schema {
 							MarkdownDescription: "IPv4 Multicast Address. Applicable only when TRM is enabled.",
 						},
 						"vlan_id": schema.Int64Attribute{
-							Optional:            true,
+							Computed:            true,
 							Description:         "VLAN ID",
 							MarkdownDescription: "VLAN ID",
 						},
@@ -217,7 +217,7 @@ func VrfBulkDataSourceSchema(ctx context.Context) schema.Schema {
 							MarkdownDescription: "The name of the VRF extension template",
 						},
 						"vrf_id": schema.Int64Attribute{
-							Optional:            true,
+							Computed:            true,
 							Description:         "VNI ID of VRF",
 							MarkdownDescription: "VNI ID of VRF",
 						},
@@ -243,7 +243,7 @@ func VrfBulkDataSourceSchema(ctx context.Context) schema.Schema {
 						},
 					},
 				},
-				Computed:            true,
+				Required:            true,
 				Description:         "List of vrfs",
 				MarkdownDescription: "List of vrfs",
 			},

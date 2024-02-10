@@ -26,6 +26,7 @@ func (r *vrfBulkResource) Metadata(ctx context.Context, req resource.MetadataReq
 
 func (r *vrfBulkResource) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {
 	resp.Schema = resource_vrf_bulk.VrfBulkResourceSchema(ctx)
+	//resp.Schema.Attributes["new_attribute"] = schema.BoolAttribute{Optional: true}
 }
 
 func (d *vrfBulkResource) Configure(ctx context.Context, req resource.ConfigureRequest, resp *resource.ConfigureResponse) {
@@ -88,9 +89,25 @@ func (r *vrfBulkResource) Read(ctx context.Context, req resource.ReadRequest, re
 
 	unique_id := data.Id.ValueString()
 	// unique_id = fabric_name/[vrf1,vrf2,vrf3...]
+	dataVrf := data.GetModelData()
+	deployMap := make(map[string][]string)
+	if dataVrf.DeployAllAttachments {
+		deployMap["global"] = append(deployMap["global"], "all")
+	}
+	for _, v := range dataVrf.Vrfs {
+		if v.DeployAttachments {
+			//first element is the vrf itself - means deploy enabled at vrf level
+			deployMap[v.VrfName] = append(deployMap[v.VrfName], v.VrfName)
+		}
+		for _, s := range v.AttachList {
+			if s.DeployThisAttachment {
+				deployMap[v.VrfName] = append(deployMap[v.VrfName], s.SerialNumber)
+			}
+		}
+	}
 
 	tflog.Info(ctx, fmt.Sprintf("Incoming ID %s", unique_id))
-	dd := r.client.RscGetBulkVrf(ctx, &resp.Diagnostics, unique_id, false)
+	dd := r.client.RscGetBulkVrf(ctx, &resp.Diagnostics, unique_id, &deployMap)
 	if dd == nil {
 		tflog.Error(ctx, "Read Bulk VRF Failed")
 		resp.Diagnostics.AddWarning("Read Failure", "No configuration found in NDFC")
