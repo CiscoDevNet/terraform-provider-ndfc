@@ -102,7 +102,7 @@ func VrfBulkResourceSchema(ctx context.Context) schema.Schema {
 										MarkdownDescription: "Override loopback IPv6 address",
 									},
 									"serial_number": schema.StringAttribute{
-										Optional:            true,
+										Required:            true,
 										Description:         "Serial number of a switch",
 										MarkdownDescription: "Serial number of a switch",
 									},

@@ -5,38 +5,14 @@ import (
 	"context"
 	"log"
 	"strconv"
+	. "terraform-provider-ndfc/internal/provider/types"
 
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/types"
+
+	"terraform-provider-ndfc/internal/provider/resources/resource_vrf_attachments"
 )
-
-type Int64Custom int64
-
-func (i *Int64Custom) UnmarshalJSON(data []byte) error {
-	if string(data) == "" || string(data) == "\"\"" {
-		*i = -9223372036854775808
-	} else {
-		ss := string(data)
-		// If the string is quoted, remove the quotes
-		ssUn, err := strconv.Unquote(ss)
-		if err == nil {
-			// Quote removed
-			ss = ssUn
-		}
-		ii, _ := strconv.ParseInt(ss, 10, 64)
-		*i = Int64Custom(ii)
-	}
-
-	return nil
-}
-
-func (i Int64Custom) MarshalJSON() ([]byte, error) {
-	res := ""
-	res = strconv.FormatInt(int64(i), 10)
-	return []byte(strconv.Quote(res)), nil
-
-}
 
 type NDFCVrfBulkModel struct {
 	FabricName           string                    `json:"fabric,omitempty"`
@@ -48,58 +24,19 @@ type NDFCVrfBulkModel struct {
 type NDFCVrfsValues []NDFCVrfsValue
 
 type NDFCVrfsValue struct {
-	Id                   *int64                          `json:"id,omitempty"`
-	FilterThisValue      bool                            `json:"-"`
-	VrfName              string                          `json:"vrfName,omitempty"`
-	FabricName           string                          `json:"fabric,omitempty"`
-	VrfTemplate          string                          `json:"vrfTemplate,omitempty"`
-	VrfExtensionTemplate string                          `json:"vrfExtensionTemplate,omitempty"`
-	VrfId                *int64                          `json:"vrfId,omitempty"`
-	VrfStatus            string                          `json:"vrfStatus,omitempty"`
-	DeployAttachments    bool                            `json:"-"`
-	AttachList           NDFCAttachListValues            `json:"lanAttachList,omitempty"`
-	AttachListMap        map[string]*NDFCAttachListValue `json:"-"`
+	Id                   *int64                                                   `json:"id,omitempty"`
+	FilterThisValue      bool                                                     `json:"-"`
+	VrfName              string                                                   `json:"vrfName,omitempty"`
+	FabricName           string                                                   `json:"fabric,omitempty"`
+	VrfTemplate          string                                                   `json:"vrfTemplate,omitempty"`
+	VrfExtensionTemplate string                                                   `json:"vrfExtensionTemplate,omitempty"`
+	VrfId                *int64                                                   `json:"vrfId,omitempty"`
+	VrfStatus            string                                                   `json:"vrfStatus,omitempty"`
+	DeployAttachments    bool                                                     `json:"-"`
+	AttachList           resource_vrf_attachments.NDFCAttachListValues            `json:"lanAttachList,omitempty"`
+	AttachListMap        map[string]*resource_vrf_attachments.NDFCAttachListValue `json:"-"`
 
 	VrfTemplateConfig NDFCVrfTemplateConfigValue `json:"vrfTemplateConfig,omitempty"`
-}
-
-type NDFCAttachListValues []NDFCAttachListValue
-
-type NDFCAttachListValue struct {
-	FilterThisValue      bool                    `json:"-"`
-	Id                   *int64                  `json:"-"`
-	FabricName           string                  `json:"fabric,omitempty"`
-	VrfName              string                  `json:"vrfName,omitempty"`
-	SerialNumber         string                  `json:"serialNumber,omitempty"`
-	SwitchSerialNo       string                  `json:"switchSerialNo,omitempty"`
-	SwitchName           string                  `json:"switchName,omitempty"`
-	Vlan                 *Int64Custom            `json:"vlan,omitempty"`
-	VlanId               *Int64Custom            `json:"vlanId,omitempty"`
-	Deployment           string                  `json:"deployment,omitempty"`
-	AttachState          string                  `json:"lanAttachState,omitempty"`
-	Attached             *bool                   `json:"isLanAttached,omitempty"`
-	FreeformConfig       string                  `json:"freeformconfig,omitempty"`
-	DeployThisAttachment bool                    `json:"-"`
-	InstanceValues       NDFCInstanceValuesValue `json:"instanceValues,omitempty"`
-}
-
-type NDFCInstanceValuesValue struct {
-	LoopbackId   *Int64Custom `json:"loopbackId,omitempty"`
-	LoopbackIpv4 string       `json:"loopbackIpv4,omitempty"`
-	LoopbackIpv6 string       `json:"loopbackIpv6,omitempty"`
-}
-
-func (s NDFCAttachListValues) Len() int {
-	return len(s)
-}
-
-func (s NDFCAttachListValues) Less(i, j int) bool {
-	return (*s[i].Id < *s[j].Id)
-
-}
-
-func (s NDFCAttachListValues) Swap(i, j int) {
-	s[i], s[j] = s[j], s[i]
 }
 
 type NDFCVrfTemplateConfigValue struct {
@@ -196,6 +133,7 @@ func (v *VrfBulkModel) SetModelData(jsonData *NDFCVrfBulkModel) diag.Diagnostics
 }
 
 func (v *VrfsValue) SetValue(jsonData *NDFCVrfsValue) diag.Diagnostics {
+
 	var err diag.Diagnostics
 	err = nil
 
@@ -497,7 +435,8 @@ func (v *VrfsValue) SetValue(jsonData *NDFCVrfsValue) diag.Diagnostics {
 	return err
 }
 
-func (v *AttachListValue) SetValue(jsonData *NDFCAttachListValue) diag.Diagnostics {
+func (v *AttachListValue) SetValue(jsonData *resource_vrf_attachments.NDFCAttachListValue) diag.Diagnostics {
+
 	var err diag.Diagnostics
 	err = nil
 
@@ -595,6 +534,7 @@ func (v VrfBulkModel) GetModelData() *NDFCVrfBulkModel {
 	if !v.Vrfs.IsNull() && !v.Vrfs.IsUnknown() {
 		elements := make([]VrfsValue, len(v.Vrfs.Elements()))
 		data.Vrfs = make([]NDFCVrfsValue, len(v.Vrfs.Elements()))
+
 		diag := v.Vrfs.ElementsAs(context.Background(), &elements, false)
 		if diag != nil {
 			panic(diag)
@@ -941,11 +881,11 @@ func (v VrfBulkModel) GetModelData() *NDFCVrfBulkModel {
 				data.Vrfs[i1].DeployAttachments = ele1.DeployAttachments.ValueBool()
 			}
 
-			data.Vrfs[i1].AttachListMap = make(map[string]*NDFCAttachListValue)
+			data.Vrfs[i1].AttachListMap = make(map[string]*resource_vrf_attachments.NDFCAttachListValue)
 
 			if !ele1.AttachList.IsNull() && !ele1.AttachList.IsUnknown() {
 				elements := make([]AttachListValue, len(ele1.AttachList.Elements()))
-				data.Vrfs[i1].AttachList = make([]NDFCAttachListValue, len(ele1.AttachList.Elements()))
+				data.Vrfs[i1].AttachList = make([]resource_vrf_attachments.NDFCAttachListValue, len(ele1.AttachList.Elements()))
 				diag := ele1.AttachList.ElementsAs(context.Background(), &elements, false)
 				if diag != nil {
 					panic(diag)

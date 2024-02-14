@@ -8,6 +8,7 @@ import (
 	"log"
 	"strings"
 	"terraform-provider-ndfc/internal/provider/resources/resource_vrf_bulk"
+	. "terraform-provider-ndfc/internal/provider/types"
 
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-log/tflog"
@@ -208,17 +209,17 @@ func (c NDFC) vrfBulkGetDiff(ctx context.Context, dg *diag.Diagnostics,
 		if vrf, ok := v2.VrfsMap[v1.Vrfs[i].VrfName]; ok {
 			vrf.FilterThisValue = true
 			updateAction := v1.Vrfs[i].DeepEqual(*vrf)
-			if updateAction == resource_vrf_bulk.ValuesDeeplyEqual {
+			if updateAction == ValuesDeeplyEqual {
 				//Case 1: Both VRFs are equal - no change to the VRF entry
 				tflog.Info(ctx, fmt.Sprintf("%s not changed", v1.Vrfs[i].VrfName))
 
-			} else if updateAction == resource_vrf_bulk.RequiresReplace {
+			} else if updateAction == RequiresReplace {
 				//Case 2: attribute that cannot be modified in-place has changed - DELETE and Create
 				tflog.Info(ctx, fmt.Sprintf("%s Needs to be replaced - Delete and Add", v1.Vrfs[i].VrfName))
 				delVrfs = append(delVrfs, vrf.VrfName)
 				vrf.FabricName = newVRFs.FabricName
 				newVRFs.Vrfs = append(newVRFs.Vrfs, *vrf)
-			} else if updateAction == resource_vrf_bulk.ControlFlagUpdate {
+			} else if updateAction == ControlFlagUpdate {
 				deployVrfs = append(deployVrfs, vrf.VrfName)
 
 			} else {

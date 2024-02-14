@@ -1,3 +1,7 @@
 examples/terraform_config/*.state
-
+bkup/*
 examples/terraform_config/*.backup
+examples/terraform_config/*.log
+*.log
+*.tfstate
+

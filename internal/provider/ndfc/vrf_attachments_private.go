@@ -6,7 +6,8 @@ import (
 	"fmt"
 	"log"
 	"strings"
-	rva "terraform-provider-ndfc/internal/provider/resources/resource_vrf_bulk"
+	rva "terraform-provider-ndfc/internal/provider/resources/resource_vrf_attachments"
+	. "terraform-provider-ndfc/internal/provider/types"
 
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-log/tflog"
@@ -218,8 +219,8 @@ func addToUpdate(vrf string, updateVA *rva.NDFCVrfAttachmentsModel, y rva.NDFCVr
 		/* NDFCBUG: throws 500 Server error if vlan field is empty */
 		/* Setting to -1 to avoid this - UI does the same      */
 		if x[i].Vlan == nil {
-			x[i].Vlan = new(rva.Int64Custom)
-			*x[i].Vlan = rva.Int64Custom(-1)
+			x[i].Vlan = new(Int64Custom)
+			*x[i].Vlan = Int64Custom(-1)
 		}
 	}
 	vrfAttachEntry, found := updateVA.VrfAttachmentsMap[vrf]
@@ -323,13 +324,13 @@ func (c NDFC) diffVrfAttachments(ctx context.Context, planData *rva.NDFCVrfAttac
 					stateAttachment.FilterThisValue = true
 					//Check if parameters are different
 					retVal := planData.VrfAttachments[i].AttachList[j].DeepEqual(*stateAttachment)
-					if retVal == rva.ValuesDeeplyEqual {
+					if retVal == ValuesDeeplyEqual {
 						tflog.Debug(ctx, fmt.Sprintf("diffVrfAttachments: attachment %s/%s - unchanged",
 							planData.VrfAttachments[i].VrfName,
 							planData.VrfAttachments[i].AttachList[j].SerialNumber))
 						planData.VrfAttachments[i].AttachList[j].FilterThisValue = true
 
-					} else if retVal == rva.ControlFlagUpdate {
+					} else if retVal == ControlFlagUpdate {
 						//Control Flag Update
 						tflog.Debug(ctx, fmt.Sprintf("diffVrfAttachments: Deploy flag changed in attachment %s/%s in plan",
 							planData.VrfAttachments[i].VrfName,

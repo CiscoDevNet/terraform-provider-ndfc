@@ -409,6 +409,9 @@ resource "ndfc_vrf_bulk" "test_evpn_vxlan_vrfs3" {
       vrf_id = 56611
       vlan_id = 3103
       vlan_name = "12_Bulk"
+      attachments = [
+        
+      ]
     },
     {
       vrf_name = "Murali_Bulk_013"
