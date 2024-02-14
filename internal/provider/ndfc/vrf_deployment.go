@@ -6,7 +6,7 @@ import (
 	"fmt"
 	"log"
 	"strings"
-	rva "terraform-provider-ndfc/internal/provider/resources/resource_vrf_bulk"
+	rva "terraform-provider-ndfc/internal/provider/resources/resource_vrf_attachments"
 
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-log/tflog"

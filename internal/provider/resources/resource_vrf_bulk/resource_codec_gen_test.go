@@ -3,7 +3,7 @@ package resource_vrf_bulk
 
 import (
 	"testing"
-
+	."terraform-provider-ndfc/internal/provider/types"
 	"github.com/stretchr/testify/assert"
 )
 

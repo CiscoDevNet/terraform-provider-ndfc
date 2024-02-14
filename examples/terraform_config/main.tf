@@ -102,7 +102,7 @@ resource "ndfc_vrf_bulk" "test_evpn_vxlan_deployments1" {
       route_target_export_evpn       = "1:1"
       route_target_import_cloud_evpn = "1:1"
       route_target_export_cloud_evpn = "1:1"
-      attach_list = [
+     attach_list = [
       {
          serial_number = "9TQYTJSZ1VJ"
          deploy_this_attachment = true

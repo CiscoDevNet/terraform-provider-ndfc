@@ -1,12 +1,8 @@
 package resource_vrf_attachments
 
-import "log"
-
-const (
-	ValuesDeeplyEqual = iota
-	RequiresReplace
-	RequiresUpdate
-	ControlFlagUpdate
+import (
+	"log"
+	. "terraform-provider-ndfc/internal/provider/types"
 )
 
 func (v NDFCAttachListValue) DeepEqual(c NDFCAttachListValue) int {

@@ -5,7 +5,8 @@ import (
 	"fmt"
 	"log"
 	"strings"
-	rva "terraform-provider-ndfc/internal/provider/resources/resource_vrf_bulk"
+	rva "terraform-provider-ndfc/internal/provider/resources/resource_vrf_attachments"
+	. "terraform-provider-ndfc/internal/provider/types"
 
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-log/tflog"
@@ -72,8 +73,8 @@ func (c NDFC) RscCreateVrfAttachments(ctx context.Context, dg *diag.Diagnostics,
 			/* NDFCBUG: throws 500 Server error if vlan field is empty */
 			/* Setting to -1 to avoid this - UI does the same */
 			if va.VrfAttachments[i].AttachList[j].Vlan == nil {
-				va.VrfAttachments[i].AttachList[j].Vlan = new(rva.Int64Custom)
-				*va.VrfAttachments[i].AttachList[j].Vlan = rva.Int64Custom(-1)
+				va.VrfAttachments[i].AttachList[j].Vlan = new(Int64Custom)
+				*va.VrfAttachments[i].AttachList[j].Vlan = Int64Custom(-1)
 			}
 		}
 	}

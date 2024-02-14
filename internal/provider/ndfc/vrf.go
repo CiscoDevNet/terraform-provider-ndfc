@@ -9,6 +9,7 @@ import (
 	"strings"
 	"terraform-provider-ndfc/internal/provider/datasources/datasource_vrf"
 	"terraform-provider-ndfc/internal/provider/datasources/datasource_vrf_bulk"
+	"terraform-provider-ndfc/internal/provider/resources/resource_vrf_attachments"
 	"terraform-provider-ndfc/internal/provider/resources/resource_vrf_bulk"
 
 	"github.com/hashicorp/terraform-plugin-framework/diag"
@@ -300,9 +301,9 @@ func (c NDFC) RscCreateBulkVrf(ctx context.Context, dg *diag.Diagnostics, vrfBul
 	//Get from NDFC
 
 	//Part 2: Create Attachments if any
-	va := resource_vrf_bulk.NDFCVrfAttachmentsModel{}
+	va := resource_vrf_attachments.NDFCVrfAttachmentsModel{}
 	va.FabricName = vrf.FabricName
-	va.VrfAttachments = make(resource_vrf_bulk.NDFCVrfAttachmentsValues, 0)
+	va.VrfAttachments = make(resource_vrf_attachments.NDFCVrfAttachmentsValues, 0)
 	vrfs := []string{}
 	attachOrder := make(map[string][]string)
 
@@ -317,7 +318,7 @@ func (c NDFC) RscCreateBulkVrf(ctx context.Context, dg *diag.Diagnostics, vrfBul
 		}
 		if len(vrf.Vrfs[i].AttachList) > 0 {
 			attachOrder[vrf.Vrfs[i].VrfName] = make([]string, len(vrf.Vrfs[i].AttachList))
-			vrfAttachVal := new(resource_vrf_bulk.NDFCVrfAttachmentsValue)
+			vrfAttachVal := new(resource_vrf_attachments.NDFCVrfAttachmentsValue)
 			vrfAttachVal.VrfName = vrf.Vrfs[i].VrfName
 			vrfAttachVal.DeployAllAttachments = vrf.Vrfs[i].DeployAttachments
 
@@ -328,6 +329,7 @@ func (c NDFC) RscCreateBulkVrf(ctx context.Context, dg *diag.Diagnostics, vrfBul
 			for j := range vrf.Vrfs[i].AttachList {
 				attachOrder[vrf.Vrfs[i].VrfName][j] = vrf.Vrfs[i].AttachList[j].SerialNumber
 				if vrf.Vrfs[i].AttachList[j].DeployThisAttachment {
+					log.Printf("DeployThisAttachment %s/%s", vrf.Vrfs[i].VrfName, vrf.Vrfs[i].AttachList[j].SerialNumber)
 					depMap[vrf.Vrfs[i].VrfName] = append(depMap[vrf.Vrfs[i].VrfName], vrf.Vrfs[i].AttachList[j].SerialNumber)
 				}
 			}
@@ -382,11 +384,11 @@ func (c NDFC) RscDeleteBulkVrf(ctx context.Context, dg *diag.Diagnostics, ID str
 	}
 
 	delVrf := vrfBulk.GetModelData()
-	delVA := resource_vrf_bulk.NDFCVrfAttachmentsModel{}
+	delVA := resource_vrf_attachments.NDFCVrfAttachmentsModel{}
 	delVA.FabricName = delVrf.FabricName
 	for i := range delVrf.Vrfs {
 		if len(delVrf.Vrfs[i].AttachList) > 0 {
-			vrfAttachVal := new(resource_vrf_bulk.NDFCVrfAttachmentsValue)
+			vrfAttachVal := new(resource_vrf_attachments.NDFCVrfAttachmentsValue)
 			vrfAttachVal.VrfName = delVrf.Vrfs[i].VrfName
 			vrfAttachVal.AttachList = delVrf.Vrfs[i].AttachList
 			for j := range vrfAttachVal.AttachList {
@@ -453,9 +455,9 @@ func (c NDFC) RscUpdateBulkVrf(ctx context.Context,
 		}
 	}
 
-	updateVA := resource_vrf_bulk.NDFCVrfAttachmentsModel{}
+	updateVA := resource_vrf_attachments.NDFCVrfAttachmentsModel{}
 	updateVA.FabricName = vrfBulkPlan.FabricName.ValueString()
-	updateVA.VrfAttachments = make(resource_vrf_bulk.NDFCVrfAttachmentsValues, 0)
+	updateVA.VrfAttachments = make(resource_vrf_attachments.NDFCVrfAttachmentsValues, 0)
 
 	// Step 2 - VRFs to delete are available
 	for i := range delVrfs {
@@ -467,7 +469,7 @@ func (c NDFC) RscUpdateBulkVrf(ctx context.Context,
 		} else {
 			//Check if attachments are present
 			if len(vrfEntry.AttachList) > 0 {
-				vrfAttach := new(resource_vrf_bulk.NDFCVrfAttachmentsValue)
+				vrfAttach := new(resource_vrf_attachments.NDFCVrfAttachmentsValue)
 				vrfAttach.VrfName = vrfEntry.VrfName
 				vrfAttach.AttachList = vrfEntry.AttachList
 				updateVA.VrfAttachments = append(updateVA.VrfAttachments, *vrfAttach)
@@ -533,9 +535,9 @@ func (c NDFC) RscUpdateBulkVrf(ctx context.Context,
 		}
 	}
 	//Deal with attachments
-	updateVA.VrfAttachments = make(resource_vrf_bulk.NDFCVrfAttachmentsValues, 0)
+	updateVA.VrfAttachments = make(resource_vrf_attachments.NDFCVrfAttachmentsValues, 0)
 	copyVrfAttachments(plan, &updateVA)
-	stateVA := resource_vrf_bulk.NDFCVrfAttachmentsModel{}
+	stateVA := resource_vrf_attachments.NDFCVrfAttachmentsModel{}
 	copyVrfAttachments(state, &stateVA)
 	c.RscUpdateVrfAttachments(ctx, dg, &updateVA, &stateVA)
 	if dg.HasError() {
@@ -560,13 +562,13 @@ func (c NDFC) RscUpdateBulkVrf(ctx context.Context,
 	*(vrfBulkPlan) = *(c.RscGetBulkVrf(ctx, dg, newID, &depMap))
 }
 
-func copyVrfAttachments(src *resource_vrf_bulk.NDFCVrfBulkModel, dst *resource_vrf_bulk.NDFCVrfAttachmentsModel) {
+func copyVrfAttachments(src *resource_vrf_bulk.NDFCVrfBulkModel, dst *resource_vrf_attachments.NDFCVrfAttachmentsModel) {
 	dst.FabricName = src.FabricName
 	dst.DeployAllAttachments = src.DeployAllAttachments
-	dst.VrfAttachments = make(resource_vrf_bulk.NDFCVrfAttachmentsValues, len(src.Vrfs))
+	dst.VrfAttachments = make(resource_vrf_attachments.NDFCVrfAttachmentsValues, len(src.Vrfs))
 	for i := range src.Vrfs {
 		if len(src.Vrfs[i].AttachList) > 0 {
-			vrfAttach := new(resource_vrf_bulk.NDFCVrfAttachmentsValue)
+			vrfAttach := new(resource_vrf_attachments.NDFCVrfAttachmentsValue)
 			vrfAttach.VrfName = src.Vrfs[i].VrfName
 			vrfAttach.DeployAllAttachments = src.Vrfs[i].DeployAttachments
 			vrfAttach.AttachList = src.Vrfs[i].AttachList
