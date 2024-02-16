@@ -190,8 +190,8 @@ func (c *NDFC) createFSM(ctx context.Context, dg *diag.Diagnostics, fabricName s
 		DepVrfList:    depVrfList,
 		ndfc:          c,
 		dg:            dg,
-		PollTimer:     2,
-		MaxCheckCount: 30,
+		PollTimer:     5,
+		MaxCheckCount: 30 * (len(depVrfList) + len(depMap)),
 		TrustFactor:   5,
 		FinalStateMap: expected_state,
 	}

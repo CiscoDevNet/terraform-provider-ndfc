@@ -29,7 +29,7 @@ func (c NDFC) vrfAttachmentsDeploy(ctx context.Context, dg *diag.Diagnostics, va
 		}
 	}
 
-	tflog.Debug(ctx, "vrfAttachmentsDeploy: Entering")
+	log.Printf("============================Starting Deployment===================================")
 
 	if va.DeployAllAttachments {
 		deployVrf = true
