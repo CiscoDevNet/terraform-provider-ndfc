@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"log"
 	"strings"
+	"sync"
 	"terraform-provider-ndfc/internal/provider/resources/resource_vrf_bulk"
 	. "terraform-provider-ndfc/internal/provider/types"
 
@@ -32,6 +33,8 @@ func (c NDFC) vrfGetAll(ctx context.Context, fabricName string) ([]byte, error) 
 }
 
 func (c NDFC) vrfCreateBulk(ctx context.Context, fabricName string, vrfs *resource_vrf_bulk.NDFCVrfBulkModel) error {
+	unlockOnce := sync.Once{}
+	lock := c.GetLock(ResourceVrfBulk)
 	tflog.Info(ctx, fmt.Sprintf("Beginning Bulk VRF create in fabric %s", fabricName))
 	data, err := json.Marshal(vrfs.Vrfs)
 	if err != nil {
@@ -39,12 +42,14 @@ func (c NDFC) vrfCreateBulk(ctx context.Context, fabricName string, vrfs *resour
 		return err
 	}
 	log.Println("Data to be posted", string(data))
-	c.GetLock(ResourceVrfBulk).Lock()
-	defer c.GetLock(ResourceVrfBulk).Unlock()
+	lock.Lock()
+	defer unlockOnce.Do(lock.Unlock)
+
 	res, err := c.apiClient.Post(UrlVrfCreateBulk, string(data))
 	if err != nil {
 		tflog.Error(ctx, fmt.Sprintf("Error POST:  %s", err.Error()))
 		okList, err1 := c.processBulkResponse(ctx, res)
+		unlockOnce.Do(lock.Unlock)
 		err2 := c.vrfBulkDelete(ctx, fabricName, okList)
 		return errors.Join(err, err1, err2)
 	}
@@ -192,13 +197,33 @@ func (c NDFC) vrfCreateFilterMap(ID string, filterMap *map[string]bool) (string,
 */
 func (c NDFC) vrfBulkGetDiff(ctx context.Context, dg *diag.Diagnostics,
 	vPlan *resource_vrf_bulk.VrfBulkModel,
-	vState *resource_vrf_bulk.VrfBulkModel) map[string]interface{} {
+	vState *resource_vrf_bulk.VrfBulkModel, vConfig *resource_vrf_bulk.VrfBulkModel) map[string]interface{} {
 
 	actions := make(map[string]interface{})
 	v1 := vState.GetModelData()
 	v2 := vPlan.GetModelData()
+	v3 := vConfig.GetModelData()
+
 	var delVrfs []string
 	var deployVrfs []string
+
+	a1 := []*resource_vrf_bulk.NDFCVrfBulkModel{v1, v2, v3}
+	log.Printf("Update Dump=====================================start")
+	for i := range a1 {
+		data, err := json.Marshal(a1[i].Vrfs)
+		if err != nil {
+			log.Printf("vrfBulkGetDiff: Marshal failed state")
+		} else {
+			log.Printf("%s", string(data))
+		}
+		for j := range a1[i].Vrfs {
+			data, err := json.Marshal(a1[i].Vrfs[j].AttachList)
+			if err == nil {
+				log.Printf("%s", string(data))
+			}
+		}
+	}
+	log.Printf("Update Dump=====================================end")
 
 	putVRFs := new(resource_vrf_bulk.NDFCVrfBulkModel)
 	putVRFs.FabricName = vPlan.FabricName.ValueString()

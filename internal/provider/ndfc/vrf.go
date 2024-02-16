@@ -187,8 +187,10 @@ func (c NDFC) RscGetBulkVrf(ctx context.Context, dg *diag.Diagnostics, ID string
 			vrfLevelDep := false
 			if ok {
 				if vl, vlOk := (*depMap)[va.VrfAttachments[i].VrfName]; vlOk {
-					if vl[0] != va.VrfAttachments[i].VrfName {
+					//first element is vrf name if vrf level deploy is set
+					if vl[0] == va.VrfAttachments[i].VrfName {
 						vrf.DeployAttachments = (vrf.VrfStatus == "DEPLOYED")
+						log.Printf("Setting VRF level dep flag for %s to %v", va.VrfAttachments[i].VrfName, vrf.DeployAttachments)
 						vrfLevelDep = true
 					}
 				}
@@ -197,6 +199,7 @@ func (c NDFC) RscGetBulkVrf(ctx context.Context, dg *diag.Diagnostics, ID string
 						log.Printf("Attachment %s added to VRF %s", va.VrfAttachments[i].AttachList[j].SwitchSerialNo, va.VrfAttachments[i].VrfName)
 						if !vrfLevelDep {
 							if va.VrfAttachments[i].AttachList[j].AttachState == "DEPLOYED" {
+								log.Printf("Attachment %s deployed", va.VrfAttachments[i].AttachList[j].SwitchSerialNo)
 								va.VrfAttachments[i].AttachList[j].DeployThisAttachment = true
 							}
 						}
@@ -212,7 +215,7 @@ func (c NDFC) RscGetBulkVrf(ctx context.Context, dg *diag.Diagnostics, ID string
 							attachEntry.Id = new(int64)
 							*attachEntry.Id = int64(j)
 						} else {
-							log.Panicf("RscGetBulkVrf: Attachment %s missing in output", attachOrder[vrf.VrfName][j])
+							log.Printf("RscGetBulkVrf: Attachment %s missing in output", attachOrder[vrf.VrfName][j])
 						}
 					}
 					//Handle any entries missing in ID???
@@ -229,6 +232,7 @@ func (c NDFC) RscGetBulkVrf(ctx context.Context, dg *diag.Diagnostics, ID string
 			} else {
 				log.Panicf("RscGetBulkVrf: VRF %s missing in Attachment list", va.VrfAttachments[i].VrfName)
 			}
+
 		}
 	}
 	sort.Sort(ndVrfs.Vrfs)
@@ -341,12 +345,9 @@ func (c NDFC) RscCreateBulkVrf(ctx context.Context, dg *diag.Diagnostics, vrfBul
 		if err != nil {
 			tflog.Error(ctx, "VRF Attachments create failed")
 			tflog.Error(ctx, "Rolling back the configurations...delete VRFs")
-			err := c.vrfBulkDelete(ctx, va.FabricName, vrfs)
-			if err != nil {
-				tflog.Error(ctx, "VRF Attachments Delete failed, rollback failed")
-				dg.AddError("Rollback vrf Delete failed", err.Error())
-				return nil
-			}
+			c.RscDeleteBulkVrf(ctx, dg, ID, vrfBulk)
+			//err := c.vrfBulkDelete(ctx, va.FabricName, vrfs)
+
 			return nil
 		}
 	}
@@ -425,9 +426,9 @@ func (c NDFC) RscDeleteBulkVrf(ctx context.Context, dg *diag.Diagnostics, ID str
 func (c NDFC) RscUpdateBulkVrf(ctx context.Context,
 	dg *diag.Diagnostics, ID string,
 	vrfBulkPlan *resource_vrf_bulk.VrfBulkModel,
-	vrfState *resource_vrf_bulk.VrfBulkModel) {
+	vrfState *resource_vrf_bulk.VrfBulkModel, vrfConfig *resource_vrf_bulk.VrfBulkModel) {
 
-	actions := c.vrfBulkGetDiff(ctx, dg, vrfBulkPlan, vrfState)
+	actions := c.vrfBulkGetDiff(ctx, dg, vrfBulkPlan, vrfState, vrfConfig)
 
 	// Validate the Diff
 	//Get the current VRFs from NDFC

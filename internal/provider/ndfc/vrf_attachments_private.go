@@ -100,7 +100,9 @@ func (c NDFC) vrfAttachmentsPost(ctx context.Context, va *rva.NDFCVrfAttachments
 	defer c.GetLock(ResourceVrfAttachments).Unlock()
 	res, err := c.apiClient.Post(fmt.Sprintf(UrlVrfAttachmentsCreate, va.FabricName), string(data))
 	if err != nil {
-		return err
+		tflog.Error(ctx, fmt.Sprintf("Error POST:  %v", res))
+		err1 := fmt.Errorf("%s:%v", err.Error(), res)
+		return err1
 	}
 	err = c.processAttachResponse(res)
 	if err != nil {
@@ -319,7 +321,7 @@ func (c NDFC) diffVrfAttachments(ctx context.Context, planData *rva.NDFCVrfAttac
 						planData.VrfAttachments[i].AttachList[j].SerialNumber))
 					//attach
 					planData.VrfAttachments[i].AttachList[j].Deployment = "true"
-					//addToUpdate(planData.VrfAttachments[i].VrfName, planData.VrfAttachments[i].AttachList[j])
+					addToUpdate(planData.VrfAttachments[i].VrfName, updateVA, planData.VrfAttachments[i], planData.VrfAttachments[i].AttachList[j])
 				} else {
 					stateAttachment.FilterThisValue = true
 					//Check if parameters are different

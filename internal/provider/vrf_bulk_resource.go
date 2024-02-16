@@ -121,10 +121,12 @@ func (r *vrfBulkResource) Read(ctx context.Context, req resource.ReadRequest, re
 func (r *vrfBulkResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
 	var planData resource_vrf_bulk.VrfBulkModel
 	var stateData resource_vrf_bulk.VrfBulkModel
+	var configData resource_vrf_bulk.VrfBulkModel
 
 	// Read Terraform plan data into the model
 	resp.Diagnostics.Append(req.Plan.Get(ctx, &planData)...)
 	resp.Diagnostics.Append(req.State.Get(ctx, &stateData)...)
+	resp.Diagnostics.Append(req.Config.Get(ctx, &configData)...)
 
 	if resp.Diagnostics.HasError() {
 		return
@@ -138,7 +140,7 @@ func (r *vrfBulkResource) Update(ctx context.Context, req resource.UpdateRequest
 	// Update API call logic
 
 	// Create API call logic
-	r.client.RscUpdateBulkVrf(ctx, &resp.Diagnostics, unique_id, &planData, &stateData)
+	r.client.RscUpdateBulkVrf(ctx, &resp.Diagnostics, unique_id, &planData, &stateData, &configData)
 	if resp.Diagnostics.HasError() {
 		tflog.Error(ctx, "Create Bulk VRF Failed")
 		return

@@ -216,6 +216,10 @@ func (c NDFC) RscDeleteVrfAttachments(ctx context.Context, dg *diag.Diagnostics,
 			va.VrfAttachments[i].AttachList[j].FabricName = va.FabricName
 			va.VrfAttachments[i].AttachList[j].VrfName = va.VrfAttachments[i].VrfName
 			va.VrfAttachments[i].AttachList[j].Deployment = "false"
+			if va.VrfAttachments[i].AttachList[j].Vlan == nil {
+				va.VrfAttachments[i].AttachList[j].Vlan = new(Int64Custom)
+				*va.VrfAttachments[i].AttachList[j].Vlan = Int64Custom(-1)
+			}
 		}
 	}
 	if len(va.VrfAttachments) == 0 {
@@ -225,7 +229,9 @@ func (c NDFC) RscDeleteVrfAttachments(ctx context.Context, dg *diag.Diagnostics,
 	err := c.vrfAttachmentsPost(ctx, va)
 	if err != nil {
 		tflog.Error(ctx, fmt.Sprintf("RscDeleteVrfAttachments: Error deleting VRF Attachments %s", err.Error()))
-		return err
+		//still proceed with deployment to remove any attachments that were removed correctly
+		//return err
+		dg.AddError("Error deleting VRF Attachments", err.Error())
 	}
 	old := va.DeployAllAttachments
 	defer func() { va.DeployAllAttachments = old }()
@@ -234,7 +240,7 @@ func (c NDFC) RscDeleteVrfAttachments(ctx context.Context, dg *diag.Diagnostics,
 	va.DeployAllAttachments = true
 	err = c.vrfAttachmentsDeploy(ctx, dg, va)
 	if err != nil {
-		tflog.Error(ctx, fmt.Sprintf("RscCreateVrfAttachments: Error deploying VRF Attachments %s", err.Error()))
+		tflog.Error(ctx, fmt.Sprintf("RscDeleteVrfAttachments: Error deploying VRF Attachments %s", err.Error()))
 		return nil
 	}
 
