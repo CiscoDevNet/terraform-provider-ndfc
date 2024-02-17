@@ -526,6 +526,7 @@ func (c NDFC) RscUpdateBulkVrf(ctx context.Context,
 	} else {
 		tflog.Info(ctx, "Nothing to modify")
 	}
+	// TODO: All deployed attachments of modified VRFs must be re-deployed
 
 	if newVrfs.Vrfs.Len() > 0 {
 		tflog.Info(ctx, "Adding VRFs , as part of Bulk Update")
@@ -550,6 +551,7 @@ func (c NDFC) RscUpdateBulkVrf(ctx context.Context,
 	if plan.DeployAllAttachments {
 		depMap["global"] = append(depMap["global"], "all")
 	}
+	
 	for i := range plan.Vrfs {
 		if plan.Vrfs[i].DeployAttachments {
 			depMap[plan.Vrfs[i].VrfName] = append(depMap[plan.Vrfs[i].VrfName], plan.Vrfs[i].VrfName)

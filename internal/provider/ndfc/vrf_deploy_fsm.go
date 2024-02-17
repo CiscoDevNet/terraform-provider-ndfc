@@ -42,7 +42,7 @@ type DeployFSM struct {
 	fsm             *fsm.FSM
 	FabricName      string
 	DepMap          map[string][]string
-	FinalStateMap   map[string]string
+	FinalStateMap   map[string]DeploymentState
 	DepVrfList      []string
 	Events          []fsm.EventDesc
 	CallBacks       fsm.Callbacks
@@ -183,7 +183,7 @@ func (depfsm *DeployFSM) Init() {
 }
 
 func (c *NDFC) createFSM(ctx context.Context, dg *diag.Diagnostics, fabricName string,
-	depMap map[string][]string, depVrfList []string, expected_state map[string]string) *DeployFSM {
+	depMap map[string][]string, depVrfList []string, expected_state map[string]DeploymentState) *DeployFSM {
 	fsm := &DeployFSM{
 		FabricName:    fabricName,
 		DepMap:        depMap,
@@ -197,7 +197,7 @@ func (c *NDFC) createFSM(ctx context.Context, dg *diag.Diagnostics, fabricName s
 	}
 
 	fsm.Init()
-	return fsm
+	return fsm 
 }
 
 func (fsm *DeployFSM) Run(ctx context.Context) {

@@ -2,6 +2,7 @@ package ndfc
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"log"
 	"strings"
@@ -89,6 +90,7 @@ func (c NDFC) RscCreateVrfAttachments(ctx context.Context, dg *diag.Diagnostics,
 		dg.AddError("Attachments Failed", err.Error())
 		return err
 	}
+	//To Do logic to read and verify attachments?
 
 	//Check and deploy
 	err = c.vrfAttachmentsDeploy(ctx, dg, va)
@@ -170,13 +172,19 @@ func (c NDFC) RscUpdateVrfAttachments(ctx context.Context, dg *diag.Diagnostics,
 }
 
 func printSummary(ctx context.Context, actionMap map[string]*rva.NDFCVrfAttachmentsModel) {
-	log.Printf("Summary of changes to attachments")
+	log.Printf("==========================ATTACHMENT SUMMARY====================================start")
 	log.Printf("Modified Attachments")
 	for i := range actionMap["update"].VrfAttachments {
 		for j := range actionMap["update"].VrfAttachments[i].AttachList {
 			log.Printf("Attachment %s/%s",
 				actionMap["update"].VrfAttachments[i].VrfName,
 				actionMap["update"].VrfAttachments[i].AttachList[j].SerialNumber)
+		}
+		data, err := json.Marshal(actionMap["update"].VrfAttachments[i].AttachList)
+		if err != nil {
+			log.Printf("Marshal failed")
+		} else {
+			log.Printf("%s", string(data))
 		}
 	}
 
@@ -187,6 +195,12 @@ func printSummary(ctx context.Context, actionMap map[string]*rva.NDFCVrfAttachme
 				actionMap["undeploy"].VrfAttachments[i].VrfName,
 				actionMap["undeploy"].VrfAttachments[i].AttachList[j].SerialNumber)
 		}
+		data, err := json.Marshal(actionMap["undeploy"].VrfAttachments[i].AttachList)
+		if err != nil {
+			log.Printf("Marshal failed")
+		} else {
+			log.Printf("%s", string(data))
+		}
 	}
 
 	log.Printf("List of deploy")
@@ -195,6 +209,12 @@ func printSummary(ctx context.Context, actionMap map[string]*rva.NDFCVrfAttachme
 			log.Printf("Deploy Attachment %s/%s",
 				actionMap["deploy"].VrfAttachments[i].VrfName,
 				actionMap["deploy"].VrfAttachments[i].AttachList[j].SerialNumber)
+		}
+		data, err := json.Marshal(actionMap["deploy"].VrfAttachments[i].AttachList)
+		if err != nil {
+			log.Printf("Marshal failed")
+		} else {
+			log.Printf("%s", string(data))
 		}
 	}
 
@@ -205,6 +225,7 @@ func printSummary(ctx context.Context, actionMap map[string]*rva.NDFCVrfAttachme
 	if actionMap["undeploy"].DeployAllAttachments {
 		log.Printf("Global Deploy Changed from true to false")
 	}
+	log.Printf("==========================ATTACHMENT SUMMARY====================================end")
 }
 
 func (c NDFC) RscDeleteVrfAttachments(ctx context.Context, dg *diag.Diagnostics, va *rva.NDFCVrfAttachmentsModel) error {

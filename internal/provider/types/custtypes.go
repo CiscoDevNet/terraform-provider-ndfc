@@ -3,7 +3,8 @@ package types
 import "strconv"
 
 const (
-	ValuesDeeplyEqual = iota
+	ActionNone = iota
+	ValuesDeeplyEqual
 	RequiresReplace
 	RequiresUpdate
 	ControlFlagUpdate
