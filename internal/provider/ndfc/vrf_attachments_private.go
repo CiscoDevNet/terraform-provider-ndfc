@@ -325,8 +325,8 @@ func (c NDFC) diffVrfAttachments(ctx context.Context, planData *rva.NDFCVrfAttac
 				} else {
 					stateAttachment.FilterThisValue = true
 					//Check if parameters are different
-					retVal := planData.VrfAttachments[i].AttachList[j].DeepEqual(*stateAttachment)
-					if retVal == ValuesDeeplyEqual {
+					retVal := planData.VrfAttachments[i].AttachList[j].CreatePlan(*stateAttachment)
+					if retVal == ActionNone {
 						tflog.Debug(ctx, fmt.Sprintf("diffVrfAttachments: attachment %s/%s - unchanged",
 							planData.VrfAttachments[i].VrfName,
 							planData.VrfAttachments[i].AttachList[j].SerialNumber))

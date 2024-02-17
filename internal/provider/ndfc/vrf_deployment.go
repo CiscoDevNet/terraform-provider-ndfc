@@ -12,21 +12,30 @@ import (
 	"github.com/hashicorp/terraform-plugin-log/tflog"
 )
 
+type DeploymentState struct {
+	State string
+	Seen  bool
+}
+
 func (c NDFC) vrfAttachmentsDeploy(ctx context.Context, dg *diag.Diagnostics, va *rva.NDFCVrfAttachmentsModel) error {
 	//mapkey: serial entry list of VRFs
 	deploy_map := make(map[string][]string)
 	deployVrfList := make([]string, 0)
 	deployEach := false
 	deployVrf := false
-	expected_state := make(map[string]string)
+	expected_state := make(map[string]DeploymentState)
 
-	updateExpectedState := func(out *map[string]string, vrfName string, serial string, state string) {
+	updateExpectedState := func(out *map[string]DeploymentState, vrfName string, serial string, state string) {
 		key := vrfName + "/" + serial
+		depState := DeploymentState{}
 		if state == "false" {
-			(*out)[key] = NDFCStateNA
+			depState.State = NDFCStateNA
+
 		} else {
-			(*out)[key] = NDFCStateDeployed
+			depState.State = NDFCStateDeployed
 		}
+		depState.Seen = false
+		(*out)[key] = depState
 	}
 
 	log.Printf("============================Starting Deployment===================================")
@@ -137,7 +146,7 @@ func (c NDFC) deployPayloadBuilder(deploy_map *map[string][]string) string {
 }
 
 func (c NDFC) stateChecker(ctx context.Context, dg *diag.Diagnostics, fabricName string,
-	deployVrfList []string, deploy_map map[string][]string, expected_state map[string]string) string {
+	deployVrfList []string, deploy_map map[string][]string, expected_state map[string]DeploymentState) string {
 	//Check the state of the VRFs
 	vrfs := make([]string, 0)
 	for _, v := range deploy_map {
@@ -162,16 +171,19 @@ func (c NDFC) stateChecker(ctx context.Context, dg *diag.Diagnostics, fabricName
 
 	for i := range ndVrfs.VrfAttachments {
 		for j := range ndVrfs.VrfAttachments[i].AttachList {
-			expected, found := expected_state[ndVrfs.VrfAttachments[i].VrfName+"/"+ndVrfs.VrfAttachments[i].AttachList[j].SwitchSerialNo]
+			key := ndVrfs.VrfAttachments[i].VrfName + "/" + ndVrfs.VrfAttachments[i].AttachList[j].SwitchSerialNo
+			expected, found := expected_state[key]
 			if !found {
 				continue
 			}
+			expected.Seen = true
+			expected_state[key] = expected
 
 			tflog.Debug(ctx, fmt.Sprintf("vrfAttachmentsDeploy: VRF %s Attachment %s State %s expected %s",
 				ndVrfs.VrfAttachments[i].VrfName,
 				ndVrfs.VrfAttachments[i].AttachList[j].SwitchSerialNo,
 				ndVrfs.VrfAttachments[i].AttachList[j].AttachState, expected))
-			if ndVrfs.VrfAttachments[i].AttachList[j].AttachState != expected {
+			if ndVrfs.VrfAttachments[i].AttachList[j].AttachState != expected.State {
 				switch ndVrfs.VrfAttachments[i].AttachList[j].AttachState {
 				case NDFCStateFailed:
 					tflog.Error(ctx, fmt.Sprintf("vrfAttachmentsDeploy: VRF %s/%s deployment failed",
@@ -199,6 +211,14 @@ func (c NDFC) stateChecker(ctx context.Context, dg *diag.Diagnostics, fabricName
 			}
 		}
 	}
+	for k, v := range expected_state {
+		if !v.Seen {
+			tflog.Error(ctx, fmt.Sprintf("vrfAttachmentsDeploy:  %s has not been seen in attachments", k))
+			dg.AddError("Attachment missing", fmt.Sprintf("VRF:Attachment %s not visible in NDFC", k))
+			return EventFailed
+		}
+	}
+
 	tflog.Info(ctx, "vrfAttachmentsDeploy: All VRFs deployed successfully")
 	return EventComplete
 	//Check the state of the VRFs

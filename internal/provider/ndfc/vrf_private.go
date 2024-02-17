@@ -200,47 +200,29 @@ func (c NDFC) vrfBulkGetDiff(ctx context.Context, dg *diag.Diagnostics,
 	vState *resource_vrf_bulk.VrfBulkModel, vConfig *resource_vrf_bulk.VrfBulkModel) map[string]interface{} {
 
 	actions := make(map[string]interface{})
-	v1 := vState.GetModelData()
-	v2 := vPlan.GetModelData()
-	v3 := vConfig.GetModelData()
+	vrfState := vState.GetModelData()
+	//vrfPlan := vPlan.GetModelData()
+	vrfConfig := vConfig.GetModelData()
 
 	var delVrfs []string
 	var deployVrfs []string
-
-	a1 := []*resource_vrf_bulk.NDFCVrfBulkModel{v1, v2, v3}
-	log.Printf("Update Dump=====================================start")
-	for i := range a1 {
-		data, err := json.Marshal(a1[i].Vrfs)
-		if err != nil {
-			log.Printf("vrfBulkGetDiff: Marshal failed state")
-		} else {
-			log.Printf("%s", string(data))
-		}
-		for j := range a1[i].Vrfs {
-			data, err := json.Marshal(a1[i].Vrfs[j].AttachList)
-			if err == nil {
-				log.Printf("%s", string(data))
-			}
-		}
-	}
-	log.Printf("Update Dump=====================================end")
 
 	putVRFs := new(resource_vrf_bulk.NDFCVrfBulkModel)
 	putVRFs.FabricName = vPlan.FabricName.ValueString()
 
 	newVRFs := new(resource_vrf_bulk.NDFCVrfBulkModel)
 	newVRFs.FabricName = vPlan.FabricName.ValueString()
-	for i := range v1.Vrfs {
-		if vrf, ok := v2.VrfsMap[v1.Vrfs[i].VrfName]; ok {
+	for i := range vrfState.Vrfs {
+		if vrf, ok := vrfConfig.VrfsMap[vrfState.Vrfs[i].VrfName]; ok {
 			vrf.FilterThisValue = true
-			updateAction := v1.Vrfs[i].DeepEqual(*vrf)
-			if updateAction == ValuesDeeplyEqual {
+			updateAction := vrf.CreatePlan(vrfState.Vrfs[i]) //vrfState.Vrfs[i].DeepEqual(*vrf)
+			if updateAction == ActionNone {
 				//Case 1: Both VRFs are equal - no change to the VRF entry
-				tflog.Info(ctx, fmt.Sprintf("%s not changed", v1.Vrfs[i].VrfName))
+				tflog.Info(ctx, fmt.Sprintf("%s not changed", vrfState.Vrfs[i].VrfName))
 
 			} else if updateAction == RequiresReplace {
 				//Case 2: attribute that cannot be modified in-place has changed - DELETE and Create
-				tflog.Info(ctx, fmt.Sprintf("%s Needs to be replaced - Delete and Add", v1.Vrfs[i].VrfName))
+				tflog.Info(ctx, fmt.Sprintf("%s Needs to be replaced - Delete and Add", vrfState.Vrfs[i].VrfName))
 				delVrfs = append(delVrfs, vrf.VrfName)
 				vrf.FabricName = newVRFs.FabricName
 				newVRFs.Vrfs = append(newVRFs.Vrfs, *vrf)
@@ -251,27 +233,46 @@ func (c NDFC) vrfBulkGetDiff(ctx context.Context, dg *diag.Diagnostics,
 				//Case 3: attributes have changed - Do update
 				vrf.FabricName = newVRFs.FabricName
 				putVRFs.Vrfs = append(putVRFs.Vrfs, *vrf)
-				tflog.Info(ctx, fmt.Sprintf("%s has changed", v1.Vrfs[i].VrfName))
+				tflog.Info(ctx, fmt.Sprintf("%s has changed", vrfState.Vrfs[i].VrfName))
 			}
 		} else {
 			//case 4: VRF is missing in plan data - Delete it
-			tflog.Info(ctx, fmt.Sprintf("%s Missing in Plan - Needs deletion", v1.Vrfs[i].VrfName))
-			delVrfs = append(delVrfs, v1.Vrfs[i].VrfName)
+			tflog.Info(ctx, fmt.Sprintf("%s Missing in Plan - Needs deletion", vrfState.Vrfs[i].VrfName))
+			delVrfs = append(delVrfs, vrfState.Vrfs[i].VrfName)
 		}
 	}
 	//case 5: Deal with New VRFs in plan - Add
-	for i := range v2.Vrfs {
-		if !v2.Vrfs[i].FilterThisValue {
-			v2.Vrfs[i].FabricName = newVRFs.FabricName
-			newVRFs.Vrfs = append(newVRFs.Vrfs, v2.Vrfs[i])
+	for i := range vrfConfig.Vrfs {
+		if !vrfConfig.Vrfs[i].FilterThisValue {
+			vrfConfig.Vrfs[i].FabricName = newVRFs.FabricName
+			newVRFs.Vrfs = append(newVRFs.Vrfs, vrfConfig.Vrfs[i])
 		}
 	}
 	actions["add"] = newVRFs
 	actions["put"] = putVRFs
-	actions["plan"] = v2
-	actions["state"] = v1
+	actions["plan"] = vrfConfig
+	actions["state"] = vrfState
 	actions["del"] = delVrfs
 	actions["deploy"] = deployVrfs
+	/*
+		a1 := []*resource_vrf_bulk.NDFCVrfBulkModel{vrfState, vrfConfig, vrfPlan}
+		log.Printf("Update Dump=====================================start")
+		for i := range a1 {
+			data, err := json.Marshal(a1[i].Vrfs)
+			if err != nil {
+				log.Printf("vrfBulkGetDiff: Marshal failed state")
+			} else {
+				log.Printf("%s", string(data))
+			}
+			for j := range a1[i].Vrfs {
+				data, err := json.Marshal(a1[i].Vrfs[j].AttachList)
+				if err == nil {
+					log.Printf("%s", string(data))
+				}
+			}
+		}
+		log.Printf("Update Dump=====================================end")
+	*/
 
 	return actions
 
