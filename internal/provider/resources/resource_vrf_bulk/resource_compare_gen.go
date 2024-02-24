@@ -2,30 +2,11 @@ package resource_vrf_bulk
 
 import (
 	"log"
-	. "terraform-provider-ndfc/internal/provider/resources/resource_vrf_attachments"
 	. "terraform-provider-ndfc/internal/provider/types"
 )
 
-func (v *NDFCVrfsValue) CreateSearchMap() {
-	v.AttachListMap = make(map[string]*NDFCAttachListValue)
-	for i := range v.AttachList {
-		key := ""
-		if v.AttachList[i].SerialNumber == "" {
-			key = v.AttachList[i].SwitchSerialNo
-		} else {
-			key = v.AttachList[i].SerialNumber
-		}
-		log.Printf("NDFCVrfsValue.CreateSearchMap: key=%s", key)
-		v.AttachListMap[key] = &v.AttachList[i]
-	}
-}
-
 func (v NDFCVrfsValue) DeepEqual(c NDFCVrfsValue) int {
 	controlFlagUpdate := false
-	if v.VrfName != c.VrfName {
-		log.Printf("v.VrfName=%v, c.VrfName=%v", v.VrfName, c.VrfName)
-		return RequiresReplace
-	}
 	if v.VrfTemplate != c.VrfTemplate {
 		log.Printf("v.VrfTemplate=%v, c.VrfTemplate=%v", v.VrfTemplate, c.VrfTemplate)
 		return RequiresUpdate
@@ -260,50 +241,15 @@ func (v NDFCVrfsValue) DeepEqual(c NDFCVrfsValue) int {
 		controlFlagUpdate = true
 	}
 
-	if len(v.AttachList) != len(c.AttachList) {
-		log.Printf("len(v.AttachList)=%d, len(c.AttachList)=%d", len(v.AttachList), len(c.AttachList))
-		return RequiresUpdate
-	}
-	for i := range v.AttachList {
-		retVal := v.AttachList[i].DeepEqual(c.AttachList[i])
-		if retVal != ValuesDeeplyEqual {
-			return retVal
-		}
-	}
 	if controlFlagUpdate {
 		return ControlFlagUpdate
 	}
 	return ValuesDeeplyEqual
 }
 
-func (v *NDFCVrfBulkModel) CreateSearchMap() {
-	v.VrfsMap = make(map[string]*NDFCVrfsValue)
-	for i := range v.Vrfs {
-		key := ""
-		key = v.Vrfs[i].VrfName
-		log.Printf("NDFCVrfBulkModel.CreateSearchMap: key=%s", key)
-		v.VrfsMap[key] = &v.Vrfs[i]
-		v.Vrfs[i].CreateSearchMap()
-	}
-}
-
 func (v *NDFCVrfsValue) CreatePlan(c NDFCVrfsValue) int {
 	action := ActionNone
 	controlFlagUpdate := false
-	if v.VrfName != "" {
-
-		if v.VrfName != c.VrfName {
-			log.Printf("Config value in Plan: v.VrfName=%v, c.VrfName=%v", v.VrfName, c.VrfName)
-			if action == ActionNone || action == RequiresUpdate {
-
-				action = RequiresReplace
-			}
-		}
-	} else {
-		//v empty, fill with c
-		log.Printf("State value in Plan: v.VrfName=%v, c.VrfName=%v", v.VrfName, c.VrfName)
-		v.VrfName = c.VrfName
-	}
 	if v.VrfTemplate != "" {
 
 		if v.VrfTemplate != c.VrfTemplate {
@@ -740,12 +686,6 @@ func (v *NDFCVrfsValue) CreatePlan(c NDFCVrfsValue) int {
 		}
 	}
 
-	for i := range v.AttachList {
-		retVal := v.AttachList[i].CreatePlan(c.AttachList[i])
-		if retVal != ValuesDeeplyEqual {
-			return retVal
-		}
-	}
 	if controlFlagUpdate {
 		return ControlFlagUpdate
 	}

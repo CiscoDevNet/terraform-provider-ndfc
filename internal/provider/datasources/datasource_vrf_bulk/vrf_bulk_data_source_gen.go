@@ -2016,7 +2016,7 @@ func (t VrfsType) ValueFromTerraform(ctx context.Context, in tftypes.Value) (att
 		attributes[k] = a
 	}
 
-	return NewVrfsValueMust(t.AttrTypes, attributes), nil
+	return NewVrfsValueMust(VrfsValue{}.AttributeTypes(ctx), attributes), nil
 }
 
 func (t VrfsType) ValueType(ctx context.Context) attr.Value {
@@ -2489,6 +2489,8 @@ func (v VrfsValue) String() string {
 }
 
 func (v VrfsValue) ToObjectValue(ctx context.Context) (basetypes.ObjectValue, diag.Diagnostics) {
+	var diags diag.Diagnostics
+
 	objVal, diags := types.ObjectValue(
 		map[string]attr.Type{
 			"advertise_default_route":        basetypes.BoolType{},

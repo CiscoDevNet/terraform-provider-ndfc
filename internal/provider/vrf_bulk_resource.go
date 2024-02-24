@@ -34,29 +34,22 @@ func (d *vrfBulkResource) Configure(ctx context.Context, req resource.ConfigureR
 	if req.ProviderData == nil {
 		return
 	}
-
 	tflog.Info(ctx, "vrf_bulk Configure")
-
 	client, ok := req.ProviderData.(*ndfc.NDFC)
-
 	if !ok {
 		resp.Diagnostics.AddError(
 			"Unexpected resource  Configure Type",
 			fmt.Sprintf("Expected *nd.NDFC, got: %T. Please report this issue to the provider developers.", req.ProviderData),
 		)
-
 		return
 	}
-
 	d.client = client
 }
 
 func (r *vrfBulkResource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
 	var in resource_vrf_bulk.VrfBulkModel
-
 	// Read Terraform plan data into the model
 	resp.Diagnostics.Append(req.Plan.Get(ctx, &in)...)
-
 	if resp.Diagnostics.HasError() {
 		return
 	}
@@ -67,7 +60,6 @@ func (r *vrfBulkResource) Create(ctx context.Context, req resource.CreateRequest
 		return
 	}
 	// Example data value setting
-
 	// Save data into Terraform state
 	resp.Diagnostics.Append(resp.State.Set(ctx, vrfDone)...)
 }
@@ -77,7 +69,6 @@ func (r *vrfBulkResource) Read(ctx context.Context, req resource.ReadRequest, re
 
 	// Read Terraform prior state data into the model
 	resp.Diagnostics.Append(req.State.Get(ctx, &data)...)
-
 	if resp.Diagnostics.HasError() {
 		return
 	}
@@ -119,6 +110,7 @@ func (r *vrfBulkResource) Read(ctx context.Context, req resource.ReadRequest, re
 }
 
 func (r *vrfBulkResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
+
 	var planData resource_vrf_bulk.VrfBulkModel
 	var stateData resource_vrf_bulk.VrfBulkModel
 	var configData resource_vrf_bulk.VrfBulkModel
@@ -148,6 +140,7 @@ func (r *vrfBulkResource) Update(ctx context.Context, req resource.UpdateRequest
 	//
 
 	// Save updated data into Terraform state
+
 	resp.Diagnostics.Append(resp.State.Set(ctx, &planData)...)
 }
 

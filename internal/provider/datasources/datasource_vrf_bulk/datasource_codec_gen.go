@@ -393,11 +393,16 @@ func (v *VrfsValue) SetValue(jsonData *NDFCVrfsValue) diag.Diagnostics {
 
 func (v VrfBulkModel) GetModelData() *NDFCVrfBulkModel {
 	var data = new(NDFCVrfBulkModel)
+
+	//MARSHAL_BODY
+
 	if !v.FabricName.IsNull() && !v.FabricName.IsUnknown() {
 		data.FabricName = v.FabricName.ValueString()
 	} else {
 		data.FabricName = ""
 	}
+
+	//MARSHALL_LIST
 
 	if !v.Vrfs.IsNull() && !v.Vrfs.IsUnknown() {
 		elements := make([]VrfsValue, len(v.Vrfs.Elements()))

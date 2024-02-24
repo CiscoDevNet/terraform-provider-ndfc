@@ -32,11 +32,11 @@ func (c NDFC) vrfGetAll(ctx context.Context, fabricName string) ([]byte, error) 
 	return res, nil
 }
 
-func (c NDFC) vrfCreateBulk(ctx context.Context, fabricName string, vrfs *resource_vrf_bulk.NDFCVrfBulkModel) error {
+func (c NDFC) vrfCreateBulk(ctx context.Context, fabricName string, vrfsPayload *resource_vrf_bulk.NDFCBulkVrfPayload) error {
 	unlockOnce := sync.Once{}
 	lock := c.GetLock(ResourceVrfBulk)
 	tflog.Info(ctx, fmt.Sprintf("Beginning Bulk VRF create in fabric %s", fabricName))
-	data, err := json.Marshal(vrfs.Vrfs)
+	data, err := json.Marshal(vrfsPayload.Vrfs)
 	if err != nil {
 		tflog.Error(ctx, fmt.Sprintf("Json Marshal failure %s", err.Error()))
 		return err
@@ -76,45 +76,29 @@ func (c NDFC) vrfBulkDelete(ctx context.Context, fabricName string, vrfList []st
 
 }
 
-func (c NDFC) vrfBulkGet(ctx context.Context, fabricName string) *resource_vrf_bulk.NDFCVrfBulkModel {
+func (c NDFC) vrfBulkGet(ctx context.Context, fabricName string) (*resource_vrf_bulk.NDFCVrfBulkModel, error) {
 
-	data, err := c.vrfGetAll(ctx, fabricName)
+	res, err := c.vrfGetAll(ctx, fabricName)
 	if err != nil {
-		tflog.Error(ctx, "Error retrieving existing VRFs", map[string]interface{}{"Err": err})
-		return nil
+		return nil, err
 	}
-
-	ndVrfs := new(resource_vrf_bulk.NDFCVrfBulkModel)
-	err = json.Unmarshal(data, &ndVrfs.Vrfs)
+	tflog.Debug(ctx, fmt.Sprintf("RscGetBulkVrf: result %s", string(res)))
+	ndVrfs := resource_vrf_bulk.NDFCVrfBulkModel{}
+	vrfPayloads := resource_vrf_bulk.NDFCBulkVrfPayload{}
+	err = json.Unmarshal(res, &vrfPayloads.Vrfs)
 	if err != nil {
-		tflog.Error(ctx, "resource_vrf_bulk: unmarshal failed ", map[string]interface{}{"Err": err})
-		return nil
+		return nil, err
 	} else {
 		tflog.Debug(ctx, "resource_vrf_bulk: Unmarshal OK")
 	}
-	return ndVrfs
+	ndVrfs.FillVrfsFromPayload(&vrfPayloads)
+	return &ndVrfs, nil
 }
 
-func (c NDFC) vrfBulkIsPresent(ctx context.Context, ID string, fabricName string) ([]string, error) {
-	var retVrfs []string
-	filterMap := make(map[string]bool)
+/*
+func (c NDFC) vrfBulkCreateCheck(ctx context.Context, ID string) error {
 
-	ndVrfs := c.vrfBulkGet(ctx, fabricName)
-	c.vrfCreateFilterMap(ID, &filterMap)
-
-	for i := range ndVrfs.Vrfs {
-		ok, found := filterMap[ndVrfs.Vrfs[i].VrfName]
-		if ok && found {
-			retVrfs = append(retVrfs, ndVrfs.Vrfs[i].VrfName)
-		}
-	}
-	return retVrfs, nil
-
-}
-
-func (c NDFC) vrfBulkCreateCheck(ctx context.Context, ID string, vrfs *resource_vrf_bulk.VrfBulkModel) error {
-
-	retVrfs, err := c.vrfBulkIsPresent(ctx, ID, vrfs.FabricName.ValueString())
+	retVrfs, err := c.vrfBulkIsPresent(ctx, ID)
 	if err != nil {
 		tflog.Error(ctx, "Error while getting VRFs ", map[string]interface{}{"Err": err})
 		return err
@@ -133,7 +117,7 @@ func (c NDFC) vrfBulkCreateCheck(ctx context.Context, ID string, vrfs *resource_
 	tflog.Info(ctx, "VRFs were not found in NDFC, ok to create")
 	return nil
 }
-
+*/
 /*
 Failure Response format
 {"failureList":
@@ -201,51 +185,60 @@ func (c NDFC) vrfBulkGetDiff(ctx context.Context, dg *diag.Diagnostics,
 
 	actions := make(map[string]interface{})
 	vrfState := vState.GetModelData()
-	//vrfPlan := vPlan.GetModelData()
-	vrfConfig := vConfig.GetModelData()
+	vrfConfig := vPlan.GetModelData()
+	//vrfConfig := vConfig.GetModelData()
 
-	var delVrfs []string
+	//var delVrfs []string
 	var deployVrfs []string
 
 	putVRFs := new(resource_vrf_bulk.NDFCVrfBulkModel)
+	putVRFs.Vrfs = make(map[string]resource_vrf_bulk.NDFCVrfsValue)
 	putVRFs.FabricName = vPlan.FabricName.ValueString()
 
 	newVRFs := new(resource_vrf_bulk.NDFCVrfBulkModel)
+	newVRFs.Vrfs = make(map[string]resource_vrf_bulk.NDFCVrfsValue)
 	newVRFs.FabricName = vPlan.FabricName.ValueString()
-	for i := range vrfState.Vrfs {
-		if vrf, ok := vrfConfig.VrfsMap[vrfState.Vrfs[i].VrfName]; ok {
+
+	delVrfs := new(resource_vrf_bulk.NDFCVrfBulkModel)
+	delVrfs.Vrfs = make(map[string]resource_vrf_bulk.NDFCVrfsValue)
+	delVrfs.FabricName = vPlan.FabricName.ValueString()
+
+	for sVrfName, sVrf := range vrfState.Vrfs {
+		if vrf, ok := vrfConfig.Vrfs[sVrfName]; ok {
 			vrf.FilterThisValue = true
-			updateAction := vrf.CreatePlan(vrfState.Vrfs[i]) //vrfState.Vrfs[i].DeepEqual(*vrf)
+			vrf.FabricName = newVRFs.FabricName
+			updateAction := vrf.CreatePlan(sVrf) //vrfState.Vrfs[i].DeepEqual(*vrf)
 			if updateAction == ActionNone {
 				//Case 1: Both VRFs are equal - no change to the VRF entry
-				tflog.Info(ctx, fmt.Sprintf("%s not changed", vrfState.Vrfs[i].VrfName))
+				tflog.Info(ctx, fmt.Sprintf("%s not changed", sVrfName))
 
 			} else if updateAction == RequiresReplace {
 				//Case 2: attribute that cannot be modified in-place has changed - DELETE and Create
-				tflog.Info(ctx, fmt.Sprintf("%s Needs to be replaced - Delete and Add", vrfState.Vrfs[i].VrfName))
-				delVrfs = append(delVrfs, vrf.VrfName)
-				vrf.FabricName = newVRFs.FabricName
-				newVRFs.Vrfs = append(newVRFs.Vrfs, *vrf)
+				tflog.Info(ctx, fmt.Sprintf("%s Needs to be replaced - Delete and Add", sVrfName))
+				//use the object in state for delete
+				delVrfs.Vrfs[vrf.VrfName] = sVrf
+				newVRFs.Vrfs[vrf.VrfName] = vrf
 			} else if updateAction == ControlFlagUpdate {
 				deployVrfs = append(deployVrfs, vrf.VrfName)
 
 			} else {
 				//Case 3: attributes have changed - Do update
-				vrf.FabricName = newVRFs.FabricName
-				putVRFs.Vrfs = append(putVRFs.Vrfs, *vrf)
-				tflog.Info(ctx, fmt.Sprintf("%s has changed", vrfState.Vrfs[i].VrfName))
+				putVRFs.Vrfs[vrf.VrfName] = vrf
+				tflog.Info(ctx, fmt.Sprintf("%s has changed", vrf.VrfName))
 			}
+			//put back updates
+			vrfConfig.Vrfs[sVrfName] = vrf
 		} else {
 			//case 4: VRF is missing in plan data - Delete it
-			tflog.Info(ctx, fmt.Sprintf("%s Missing in Plan - Needs deletion", vrfState.Vrfs[i].VrfName))
-			delVrfs = append(delVrfs, vrfState.Vrfs[i].VrfName)
+			tflog.Info(ctx, fmt.Sprintf("%s Missing in Plan - Needs deletion", sVrfName))
+			delVrfs.Vrfs[sVrfName] = sVrf
 		}
 	}
 	//case 5: Deal with New VRFs in plan - Add
-	for i := range vrfConfig.Vrfs {
-		if !vrfConfig.Vrfs[i].FilterThisValue {
-			vrfConfig.Vrfs[i].FabricName = newVRFs.FabricName
-			newVRFs.Vrfs = append(newVRFs.Vrfs, vrfConfig.Vrfs[i])
+	for k, v := range vrfConfig.Vrfs {
+		if !v.FilterThisValue {
+			v.FabricName = newVRFs.FabricName
+			newVRFs.Vrfs[k] = v
 		}
 	}
 	actions["add"] = newVRFs
@@ -254,48 +247,27 @@ func (c NDFC) vrfBulkGetDiff(ctx context.Context, dg *diag.Diagnostics,
 	actions["state"] = vrfState
 	actions["del"] = delVrfs
 	actions["deploy"] = deployVrfs
-	/*
-		a1 := []*resource_vrf_bulk.NDFCVrfBulkModel{vrfState, vrfConfig, vrfPlan}
-		log.Printf("Update Dump=====================================start")
-		for i := range a1 {
-			data, err := json.Marshal(a1[i].Vrfs)
-			if err != nil {
-				log.Printf("vrfBulkGetDiff: Marshal failed state")
-			} else {
-				log.Printf("%s", string(data))
-			}
-			for j := range a1[i].Vrfs {
-				data, err := json.Marshal(a1[i].Vrfs[j].AttachList)
-				if err == nil {
-					log.Printf("%s", string(data))
-				}
-			}
-		}
-		log.Printf("Update Dump=====================================end")
-	*/
 
 	return actions
-
 }
 
 func (c NDFC) vrfBulkUpdate(ctx context.Context, dg *diag.Diagnostics, ndVRFs *resource_vrf_bulk.NDFCVrfBulkModel) {
 	// PUT for each vrf
+	payload := ndVRFs.FillVrfPayloadFromModel()
 
-	for i := range ndVRFs.Vrfs {
-		ndVRFs.Vrfs[i].FabricName = ndVRFs.FabricName
-		data, err := json.Marshal(ndVRFs.Vrfs[i])
+	for i := range payload.Vrfs {
+		data, err := json.Marshal(payload.Vrfs[i])
 		if err != nil {
-			dg.AddError("Marshal Failed", fmt.Sprintf("VRF %s Marshall error %v", ndVRFs.Vrfs[i].VrfName, err))
+			dg.AddError("Marshal Failed", fmt.Sprintf("VRF %s Marshall error %v", payload.Vrfs[i].VrfName, err))
 			return
 		}
-		tflog.Info(ctx, fmt.Sprintf("Update VRF %s", ndVRFs.Vrfs[i].VrfName))
+		tflog.Info(ctx, fmt.Sprintf("Update VRF %s", payload.Vrfs[i].VrfName))
 
-		res, err := c.apiClient.Put(fmt.Sprintf(UrlVrfUpdate, ndVRFs.FabricName, ndVRFs.Vrfs[i].VrfName), string(data))
+		res, err := c.apiClient.Put(fmt.Sprintf(UrlVrfUpdate, ndVRFs.FabricName, payload.Vrfs[i].VrfName), string(data))
 		if err != nil {
-			dg.AddError(fmt.Sprintf("VRF %s, Update failed", ndVRFs.Vrfs[i].VrfName), fmt.Sprintf("Error %v, response %s", err, res.Str))
+			dg.AddError(fmt.Sprintf("VRF %s, Update failed", payload.Vrfs[i].VrfName), fmt.Sprintf("Error %v, response %s", err, res.Str))
 			return
 		}
-		tflog.Info(ctx, fmt.Sprintf("Update VRF %s Successfull. Message %s", ndVRFs.Vrfs[i].VrfName, res.Str))
+		tflog.Info(ctx, fmt.Sprintf("Update VRF %s Successfull. Message %s", payload.Vrfs[i].VrfName, res.Str))
 	}
-
 }

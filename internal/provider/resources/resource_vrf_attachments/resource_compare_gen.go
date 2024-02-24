@@ -7,10 +7,6 @@ import (
 
 func (v NDFCAttachListValue) DeepEqual(c NDFCAttachListValue) int {
 	controlFlagUpdate := false
-	if v.SerialNumber != c.SerialNumber {
-		log.Printf("v.SerialNumber=%v, c.SerialNumber=%v", v.SerialNumber, c.SerialNumber)
-		return RequiresReplace
-	}
 
 	if v.Vlan != nil && c.Vlan != nil {
 		if *v.Vlan != *c.Vlan {
@@ -64,20 +60,6 @@ func (v NDFCAttachListValue) DeepEqual(c NDFCAttachListValue) int {
 	return ValuesDeeplyEqual
 }
 
-func (v *NDFCVrfAttachmentsValue) CreateSearchMap() {
-	v.AttachListMap = make(map[string]*NDFCAttachListValue)
-	for i := range v.AttachList {
-		key := ""
-		if v.AttachList[i].SerialNumber == "" {
-			key = v.AttachList[i].SwitchSerialNo
-		} else {
-			key = v.AttachList[i].SerialNumber
-		}
-		log.Printf("NDFCVrfAttachmentsValue.CreateSearchMap: key=%s", key)
-		v.AttachListMap[key] = &v.AttachList[i]
-	}
-}
-
 func (v NDFCVrfAttachmentsValue) DeepEqual(c NDFCVrfAttachmentsValue) int {
 	controlFlagUpdate := false
 	if v.VrfName != c.VrfName {
@@ -89,50 +71,15 @@ func (v NDFCVrfAttachmentsValue) DeepEqual(c NDFCVrfAttachmentsValue) int {
 		controlFlagUpdate = true
 	}
 
-	if len(v.AttachList) != len(c.AttachList) {
-		log.Printf("len(v.AttachList)=%d, len(c.AttachList)=%d", len(v.AttachList), len(c.AttachList))
-		return RequiresUpdate
-	}
-	for i := range v.AttachList {
-		retVal := v.AttachList[i].DeepEqual(c.AttachList[i])
-		if retVal != ValuesDeeplyEqual {
-			return retVal
-		}
-	}
 	if controlFlagUpdate {
 		return ControlFlagUpdate
 	}
 	return ValuesDeeplyEqual
 }
 
-func (v *NDFCVrfAttachmentsModel) CreateSearchMap() {
-	v.VrfAttachmentsMap = make(map[string]*NDFCVrfAttachmentsValue)
-	for i := range v.VrfAttachments {
-		key := ""
-		key = v.VrfAttachments[i].VrfName
-		log.Printf("NDFCVrfAttachmentsModel.CreateSearchMap: key=%s", key)
-		v.VrfAttachmentsMap[key] = &v.VrfAttachments[i]
-		v.VrfAttachments[i].CreateSearchMap()
-	}
-}
-
 func (v *NDFCAttachListValue) CreatePlan(c NDFCAttachListValue) int {
 	action := ActionNone
 	controlFlagUpdate := false
-	if v.SerialNumber != "" {
-
-		if v.SerialNumber != c.SerialNumber {
-			log.Printf("Config value in Plan: v.SerialNumber=%v, c.SerialNumber=%v", v.SerialNumber, c.SerialNumber)
-			if action == ActionNone || action == RequiresUpdate {
-
-				action = RequiresReplace
-			}
-		}
-	} else {
-		//v empty, fill with c
-		log.Printf("State value in Plan: v.SerialNumber=%v, c.SerialNumber=%v", v.SerialNumber, c.SerialNumber)
-		v.SerialNumber = c.SerialNumber
-	}
 
 	if v.Vlan != nil {
 		if c.Vlan != nil && (*v.Vlan != *c.Vlan) {
@@ -238,12 +185,6 @@ func (v *NDFCVrfAttachmentsValue) CreatePlan(c NDFCVrfAttachmentsValue) int {
 		}
 	}
 
-	for i := range v.AttachList {
-		retVal := v.AttachList[i].CreatePlan(c.AttachList[i])
-		if retVal != ValuesDeeplyEqual {
-			return retVal
-		}
-	}
 	if controlFlagUpdate {
 		return ControlFlagUpdate
 	}
