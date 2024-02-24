@@ -7,6 +7,7 @@ import (
 	"log"
 	"strings"
 	rva "terraform-provider-ndfc/internal/provider/resources/resource_vrf_attachments"
+	"terraform-provider-ndfc/internal/provider/resources/resource_vrf_bulk"
 
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-log/tflog"
@@ -17,83 +18,99 @@ type DeploymentState struct {
 	Seen  bool
 }
 
-func (c NDFC) vrfAttachmentsDeploy(ctx context.Context, dg *diag.Diagnostics, va *rva.NDFCVrfAttachmentsModel) error {
+type NDFCVrfDeployment struct {
+	FabricName    string
+	DeployVrfList []string
+	DeployMap     map[string][]string
+	ExpectedState map[string]DeploymentState
+}
+
+func updateExpectedState(out *map[string]DeploymentState, vrfName string, serial string, state string) {
+	key := vrfName + "/" + serial
+	depState := DeploymentState{}
+	if state == "false" {
+		depState.State = NDFCStateNA
+
+	} else {
+		depState.State = NDFCStateDeployed
+	}
+	depState.Seen = false
+	(*out)[key] = depState
+}
+
+// Called from Create/Delete Flows
+func (c NDFC) RscDeployAttachments(ctx context.Context, dg *diag.Diagnostics, va *resource_vrf_bulk.NDFCVrfBulkModel) {
 	//mapkey: serial entry list of VRFs
 	deploy_map := make(map[string][]string)
 	deployVrfList := make([]string, 0)
-	deployEach := false
-	deployVrf := false
+	deployAllVrf := false
 	expected_state := make(map[string]DeploymentState)
 
-	updateExpectedState := func(out *map[string]DeploymentState, vrfName string, serial string, state string) {
-		key := vrfName + "/" + serial
-		depState := DeploymentState{}
-		if state == "false" {
-			depState.State = NDFCStateNA
-
-		} else {
-			depState.State = NDFCStateDeployed
-		}
-		depState.Seen = false
-		(*out)[key] = depState
+	if va.DeployAllAttachments {
+		tflog.Info(ctx, "RscDeployAttachments: Deploying all attachments")
+		deployAllVrf = true
 	}
+	//Deploy all attachments
+	for vrfName, vrfEntry := range va.Vrfs {
+		for serial, attachEntry := range vrfEntry.AttachList {
+			if attachEntry.Deployment == "false" {
+				tflog.Info(ctx, fmt.Sprintf("RscDeployAttachments: Deploying Attachment %s/%s due to detach", vrfName, serial))
+			}
+			if attachEntry.Deployment == "false" || deployAllVrf ||
+				vrfEntry.DeployAttachments || attachEntry.DeployThisAttachment {
+				tflog.Info(ctx, fmt.Sprintf("RscDeployAttachments: Deploying Attachment %s/%s", vrfName, serial))
+				updateExpectedState(&expected_state, vrfName,
+					serial, attachEntry.Deployment)
+				deploy_map[serial] = append(deploy_map[serial], vrfName)
+
+			}
+		}
+	}
+
+	if len(deploy_map) == 0 && len(deployVrfList) == 0 {
+		tflog.Info(ctx, "RscDeployAttachments: No attachments to deploy")
+		//dg.AddWarning("Deployment not done", "No attachments to deploy")
+		return
+	}
+	c.DeployFSM(ctx, dg, va.FabricName, deploy_map, deployVrfList, expected_state)
+	return
+}
+
+// Called from Update
+func (c NDFC) DeployFromPayload(ctx context.Context, dg *diag.Diagnostics, payload *rva.NDFCVrfAttachmentsPayloads) {
+	deployment := NDFCVrfDeployment{}
+	deployment.FabricName = payload.FabricName
+	deployment.DeployMap = make(map[string][]string)
+	deployment.DeployVrfList = make([]string, 0)
+	deployment.ExpectedState = make(map[string]DeploymentState)
+
+	for _, vrfEntry := range payload.VrfAttachments {
+		for _, attachEntry := range vrfEntry.AttachList {
+			deployment.DeployMap[attachEntry.SerialNumber] = append(deployment.DeployMap[attachEntry.SerialNumber], vrfEntry.VrfName)
+			updateExpectedState(&deployment.ExpectedState, vrfEntry.VrfName, attachEntry.SerialNumber, attachEntry.Deployment)
+		}
+	}
+
+	if len(deployment.DeployMap) == 0 && len(deployment.DeployVrfList) == 0 {
+		tflog.Info(ctx, "vrfAttachmentsDeploy: No attachments to deploy")
+		//dg.AddWarning("Deployment not done", "No attachments to deploy")
+		return
+	}
+	c.DeployFSM(ctx, dg, payload.FabricName, deployment.DeployMap, deployment.DeployVrfList, deployment.ExpectedState)
+	return
+}
+
+func (c NDFC) DeployFSM(ctx context.Context, dg *diag.Diagnostics, fabricName string,
+	deploy_map map[string][]string, deployVrfList []string, expected_state map[string]DeploymentState) {
 
 	log.Printf("============================Starting Deployment===================================")
 
-	if va.DeployAllAttachments {
-		deployVrf = true
-		//Deploy all attachments
-		for i := range va.VrfAttachments {
-			deployVrfList = append(deployVrfList, va.VrfAttachments[i].VrfName)
-			for j := range va.VrfAttachments[i].AttachList {
-				updateExpectedState(&expected_state, va.VrfAttachments[i].VrfName,
-					va.VrfAttachments[i].AttachList[j].SerialNumber, va.VrfAttachments[i].AttachList[j].Deployment)
-			}
-		}
-	} else {
-		// Deploy VRFs in the resource if flag is set
-		for i := range va.VrfAttachments {
-			if va.VrfAttachments[i].DeployAllAttachments {
-				log.Printf("vrfAttachmentsDeploy: Deploying all attachments in VRF %s", va.VrfAttachments[i].VrfName)
-				deployVrf = true
-				deployVrfList = append(deployVrfList, va.VrfAttachments[i].VrfName)
-				for j := range va.VrfAttachments[i].AttachList {
-					updateExpectedState(&expected_state, va.VrfAttachments[i].VrfName,
-						va.VrfAttachments[i].AttachList[j].SerialNumber, va.VrfAttachments[i].AttachList[j].Deployment)
-				}
-			} else {
-				log.Printf("vrfAttachmentsDeploy: Deploying specific attachments in VRF %s", va.VrfAttachments[i].VrfName)
-				//Deploy specific attachments in the VRF
-				for j := range va.VrfAttachments[i].AttachList {
-					if va.VrfAttachments[i].AttachList[j].DeployThisAttachment ||
-						va.VrfAttachments[i].AttachList[j].Deployment == "false" {
-						tflog.Debug(ctx, "Deployment required",
-							map[string]interface{}{"vrf": va.VrfAttachments[i].VrfName,
-								"attachment": va.VrfAttachments[i].AttachList[j].SerialNumber})
-						deployEach = true
-						deploy_map[va.VrfAttachments[i].AttachList[j].SerialNumber] =
-							append(deploy_map[va.VrfAttachments[i].AttachList[j].SerialNumber], va.VrfAttachments[i].VrfName)
-						updateExpectedState(&expected_state, va.VrfAttachments[i].VrfName, va.VrfAttachments[i].AttachList[j].SerialNumber,
-							va.VrfAttachments[i].AttachList[j].Deployment)
-
-					}
-				}
-
-			}
-		}
-	}
-
-	if !deployEach && !deployVrf {
-		tflog.Info(ctx, "vrfAttachmentsDeploy: No attachments to deploy")
-		//dg.AddWarning("Deployment not done", "No attachments to deploy")
-		return nil
-	}
 	tflog.Debug(ctx, fmt.Sprintf("vrfAttachmentsDeploy: Starting FSM %v", deploy_map))
-	deployFsm := c.createFSM(ctx, dg, va.FabricName, deploy_map, deployVrfList, expected_state)
+	deployFsm := c.createFSM(ctx, dg, fabricName, deploy_map, deployVrfList, expected_state)
 	deployFsm.Run(ctx)
 	tflog.Debug(ctx, fmt.Sprintf("vrfAttachmentsDeploy: Finishing FSM %v", deploy_map))
 
-	return nil
+	return
 }
 
 func (c NDFC) deploy(ctx context.Context, dg *diag.Diagnostics, fabricName string, deployVrfList *[]string, deploy_map *map[string][]string) error {
@@ -102,8 +119,8 @@ func (c NDFC) deploy(ctx context.Context, dg *diag.Diagnostics, fabricName strin
 	if len(*deploy_map) != 0 {
 		deploy_post_payload := c.deployPayloadBuilder(deploy_map)
 		tflog.Info(ctx, fmt.Sprintf("vrfAttachmentsDeploy: Deploying Attachments %s", deploy_post_payload))
-		c.GetLock(ResourceVrfAttachments).Lock()
-		defer c.GetLock(ResourceVrfAttachments).Unlock()
+		c.GetLock(ResourceVrfBulk).Lock()
+		defer c.GetLock(ResourceVrfBulk).Unlock()
 		res, err := c.apiClient.Post(UrlVrfAttachmentsDeploy, deploy_post_payload)
 		if err != nil {
 			dg.AddError("Error in deploying attachments", err.Error())
@@ -120,8 +137,8 @@ func (c NDFC) deploy(ctx context.Context, dg *diag.Diagnostics, fabricName strin
 			return err
 		}
 		tflog.Info(ctx, fmt.Sprintf("vrfAttachmentsDeploy: Deploying VRFs %s", string(data)))
-		c.GetLock(ResourceVrfAttachments).Lock()
-		defer c.GetLock(ResourceVrfAttachments).Unlock()
+		c.GetLock(ResourceVrfBulk).Lock()
+		defer c.GetLock(ResourceVrfBulk).Unlock()
 		res, err := c.apiClient.Post(fmt.Sprintf(UrlVrfDeployment, fabricName), string(data))
 		if err != nil {
 			dg.AddError("Error in deploying attachments", err.Error())
@@ -157,16 +174,16 @@ func (c NDFC) stateChecker(ctx context.Context, dg *diag.Diagnostics, fabricName
 	res, err := c.vrfAttachmentsGet(ctx, fabricName, vrfs)
 	if err != nil {
 		tflog.Error(ctx, fmt.Sprintf("getVrfAttachments: Error getting VRF Attachments %s", err.Error()))
-		return ""
+		return EventFailed
 	}
 	tflog.Debug(ctx, fmt.Sprintf("Status Checker:  res : %v", string(res)))
 
-	ndVrfs := rva.NDFCVrfAttachmentsModel{}
+	ndVrfs := rva.NDFCVrfAttachmentsPayloads{}
 	err = json.Unmarshal(res, &ndVrfs.VrfAttachments)
 	if err != nil {
 		tflog.Error(ctx, fmt.Sprintf("getVrfAttachments: Error unmarshalling VRF Attachments %s", err.Error()))
 		log.Printf("getVrfAttachments: Error unmarshalling VRF Attachments %s", string(res))
-		return ""
+		return EventFailed
 	}
 
 	for i := range ndVrfs.VrfAttachments {
@@ -182,7 +199,7 @@ func (c NDFC) stateChecker(ctx context.Context, dg *diag.Diagnostics, fabricName
 			tflog.Debug(ctx, fmt.Sprintf("vrfAttachmentsDeploy: VRF %s Attachment %s State %s expected %s",
 				ndVrfs.VrfAttachments[i].VrfName,
 				ndVrfs.VrfAttachments[i].AttachList[j].SwitchSerialNo,
-				ndVrfs.VrfAttachments[i].AttachList[j].AttachState, expected))
+				ndVrfs.VrfAttachments[i].AttachList[j].AttachState, expected.State))
 			if ndVrfs.VrfAttachments[i].AttachList[j].AttachState != expected.State {
 				switch ndVrfs.VrfAttachments[i].AttachList[j].AttachState {
 				case NDFCStateFailed:
@@ -207,7 +224,7 @@ func (c NDFC) stateChecker(ctx context.Context, dg *diag.Diagnostics, fabricName
 			} else {
 				//TODO optimize by removing these from check - after the tolerance level has met
 				tflog.Info(ctx, fmt.Sprintf("vrfAttachmentsDeploy:  %s/%s has reached expected state %s:%s", ndVrfs.VrfAttachments[i].VrfName,
-					ndVrfs.VrfAttachments[i].AttachList[j].SwitchSerialNo, ndVrfs.VrfAttachments[i].AttachList[j].AttachState, expected))
+					ndVrfs.VrfAttachments[i].AttachList[j].SwitchSerialNo, ndVrfs.VrfAttachments[i].AttachList[j].AttachState, expected.State))
 			}
 		}
 	}

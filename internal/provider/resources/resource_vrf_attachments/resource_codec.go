@@ -52,7 +52,47 @@ func (v NDFCInstanceValuesValue) MarshalJSON() ([]byte, error) {
 	})
 }
 
-
 type NDFCVrfAttachments struct {
 	Attachments []NDFCVrfAttachmentsValue `json:"attachments"`
 }
+
+type NDFCVrfAttachmentsPayload struct {
+	VrfName    string                `json:"vrfName"`
+	AttachList []NDFCAttachListValue `json:"lanAttachList"`
+}
+
+type DeploymentState struct {
+	State string
+	Seen  bool
+}
+
+
+
+type NDFCVrfAttachmentsPayloads struct {
+	GlobalDeploy   bool
+	GlobalUndeploy bool
+	FabricName     string
+	VrfAttachments []NDFCVrfAttachmentsPayload // Attachment payload for NDFC
+	DepMap         map[string][]string         // use for backfilling DeploymentFlag in TF state        // for deployment
+}
+
+func (v *NDFCVrfAttachmentsModel) FillVrfAttachmentsFromPayload(payload *NDFCVrfAttachmentsPayloads) {
+	v.VrfAttachments = make(map[string]NDFCVrfAttachmentsValue)
+	for i := range (*payload).VrfAttachments {
+		vrfName := (*payload).VrfAttachments[i].VrfName
+		vrfAttachEntry := NDFCVrfAttachmentsValue{}
+		vrfAttachEntry.AttachList = make(map[string]NDFCAttachListValue)
+		for j := range (*payload).VrfAttachments[i].AttachList {
+			vrfAttachEntry.AttachList[(*payload).VrfAttachments[i].AttachList[j].SwitchSerialNo] = (*payload).VrfAttachments[i].AttachList[j]
+		}
+		v.VrfAttachments[vrfName] = vrfAttachEntry
+	}
+}
+
+func (p *NDFCVrfAttachmentsPayloads) AddEntry(vrfName string, attachList []NDFCAttachListValue) {
+	vrfAttachEntry := NDFCVrfAttachmentsPayload{}
+	vrfAttachEntry.VrfName = vrfName
+	vrfAttachEntry.AttachList = attachList
+	p.VrfAttachments = append(p.VrfAttachments, vrfAttachEntry)
+}
+

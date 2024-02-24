@@ -5,11 +5,9 @@ import (
 	"encoding/json"
 	"fmt"
 	"log"
-	"sort"
 	"strings"
 	"terraform-provider-ndfc/internal/provider/datasources/datasource_vrf"
 	"terraform-provider-ndfc/internal/provider/datasources/datasource_vrf_bulk"
-	"terraform-provider-ndfc/internal/provider/resources/resource_vrf_attachments"
 	"terraform-provider-ndfc/internal/provider/resources/resource_vrf_bulk"
 
 	"github.com/hashicorp/terraform-plugin-framework/diag"
@@ -63,19 +61,12 @@ func (c NDFC) VrfBulkCreateID(ndVrfs *resource_vrf_bulk.NDFCVrfBulkModel) string
 	uniqueID := "%s/%v"
 	if ndVrfs != nil {
 		fName := ndVrfs.FabricName
-		vrf_list := make([]string, len(ndVrfs.Vrfs))
-		for i, v := range ndVrfs.Vrfs {
-			if len(v.AttachList) > 0 {
-				serials := make([]string, len(v.AttachList))
-				for j := range v.AttachList {
-					serials[j] = v.AttachList[j].SerialNumber
-					if v.AttachList[j].SerialNumber == "" {
-						log.Panic("Serial number empty case")
-					}
-				}
-				vrf_list[i] = fmt.Sprintf("%s{%s}", v.VrfName, strings.Join(serials, ","))
-			} else {
-				vrf_list[i] = v.VrfName
+		vrf_list := ndVrfs.GetVrfNames()
+
+		for i := range vrf_list {
+			serials := ndVrfs.GetAttachmentNames(vrf_list[i])
+			if len(serials) > 0 {
+				vrf_list[i] = fmt.Sprintf("%s{%s}", vrf_list[i], strings.Join(serials, ","))
 			}
 		}
 		vrf_list_str := "[" + strings.Join(vrf_list, ",") + "]"
@@ -136,41 +127,25 @@ func (c NDFC) RscGetBulkVrf(ctx context.Context, dg *diag.Diagnostics, ID string
 	}
 	tflog.Debug(ctx, fmt.Sprintf("RscGetBulkVrf: result %s", string(res)))
 	ndVrfs := resource_vrf_bulk.NDFCVrfBulkModel{}
-	err = json.Unmarshal(res, &ndVrfs.Vrfs)
+	vrfPayloads := resource_vrf_bulk.NDFCBulkVrfPayload{}
+	err = json.Unmarshal(res, &vrfPayloads.Vrfs)
 	if err != nil {
 		dg.AddError("resource_vrf_bulk: unmarshal failed ", err.Error())
 		return nil
 	} else {
 		tflog.Debug(ctx, "resource_vrf_bulk: Unmarshal OK")
 	}
-	if len(ndVrfs.Vrfs) > 0 {
-		ndVrfs.FabricName = ndVrfs.Vrfs[0].FabricName
-	} else {
-		tflog.Error(ctx, "resource_vrf_bulk: No VRFs found")
-		return nil
-	}
+	ndVrfs.FillVrfsFromPayload(&vrfPayloads)
+
 	if len(filterMap) > 0 {
 		log.Printf("Filtering is configured")
 		//Set value filter - skip the vrfs that are not in ID
-		for i := range ndVrfs.Vrfs {
-			if _, found := (filterMap)[ndVrfs.Vrfs[i].VrfName]; !found {
-				log.Printf("Filtering out VRF %s", ndVrfs.Vrfs[i].VrfName)
-				ndVrfs.Vrfs[i].FilterThisValue = true
+		for i, vrfEntry := range ndVrfs.Vrfs {
+			if _, found := (filterMap)[vrfEntry.VrfName]; !found {
+				log.Printf("Filtering out VRF %s", vrfEntry.VrfName)
+				vrfEntry.FilterThisValue = true
+				ndVrfs.Vrfs[i] = vrfEntry
 			}
-		}
-	}
-	attachOrder := c.VrfBulkSplitID(ID)
-
-	ndVrfs.CreateSearchMap()
-	// VRFs should be ordered as they appear in ID field if the Get
-	// Except for create case - ideally they should come in the order of creation
-	for i := range vrfs {
-		vrf, ok := ndVrfs.VrfsMap[vrfs[i]]
-		if ok {
-			*vrf.Id = int64(i) //sort uses id - so put ascending values
-		} else {
-			tflog.Error(ctx, fmt.Sprintf("VRF %s missing in output", vrfs[i]))
-			//log.Panicf("VRF %s missing in output", vrfs[i])
 		}
 	}
 
@@ -180,62 +155,42 @@ func (c NDFC) RscGetBulkVrf(ctx context.Context, dg *diag.Diagnostics, ID string
 	}
 
 	//Get Attachments
-	va := c.RscGetVrfAttachments(ctx, dg, fabricName, vrfs)
-	if va != nil {
-		for i := range va.VrfAttachments {
-			vrf, ok := ndVrfs.VrfsMap[va.VrfAttachments[i].VrfName]
-			vrfLevelDep := false
-			if ok {
-				if vl, vlOk := (*depMap)[va.VrfAttachments[i].VrfName]; vlOk {
-					//first element is vrf name if vrf level deploy is set
-					if vl[0] == va.VrfAttachments[i].VrfName {
-						vrf.DeployAttachments = (vrf.VrfStatus == "DEPLOYED")
-						log.Printf("Setting VRF level dep flag for %s to %v", va.VrfAttachments[i].VrfName, vrf.DeployAttachments)
-						vrfLevelDep = true
-					}
-				}
-				for j := range va.VrfAttachments[i].AttachList {
-					if !va.VrfAttachments[i].AttachList[j].FilterThisValue {
-						log.Printf("Attachment %s added to VRF %s", va.VrfAttachments[i].AttachList[j].SwitchSerialNo, va.VrfAttachments[i].VrfName)
-						if !vrfLevelDep {
-							if va.VrfAttachments[i].AttachList[j].AttachState == "DEPLOYED" {
-								log.Printf("Attachment %s deployed", va.VrfAttachments[i].AttachList[j].SwitchSerialNo)
-								va.VrfAttachments[i].AttachList[j].DeployThisAttachment = true
-							}
-						}
-						vrf.AttachList = append(vrf.AttachList, va.VrfAttachments[i].AttachList[j])
-					}
-				}
-				if len(vrf.AttachList) > 0 {
-					vrf.CreateSearchMap()
-					for j := range attachOrder[vrf.VrfName] {
-						attachEntry, found := vrf.AttachListMap[attachOrder[vrf.VrfName][j]]
-						if found {
-							log.Printf("Attachment Order %d: %s", j, attachOrder[vrf.VrfName][j])
-							attachEntry.Id = new(int64)
-							*attachEntry.Id = int64(j)
-						} else {
-							log.Printf("RscGetBulkVrf: Attachment %s missing in output", attachOrder[vrf.VrfName][j])
-						}
-					}
-					//Handle any entries missing in ID???
-					for j := range vrf.AttachList {
-						if vrf.AttachList[j].Id == nil {
-							dg.AddWarning("Attachments mismatch", fmt.Sprintf("Attachment %s missing in ID", vrf.AttachList[j].SwitchSerialNo))
-							vrf.AttachList[j].Id = new(int64)
-							*vrf.AttachList[j].Id = int64(len(vrf.AttachList) + j)
-						}
-					}
-
-					sort.Sort(vrf.AttachList)
-				}
-			} else {
-				log.Panicf("RscGetBulkVrf: VRF %s missing in Attachment list", va.VrfAttachments[i].VrfName)
+	err = c.RscGetVrfAttachments(ctx, dg, &ndVrfs)
+	if err == nil {
+		for i, vrfEntry := range ndVrfs.Vrfs {
+			if vrfEntry.FilterThisValue {
+				continue
 			}
+			vrfLevelDep := false
+			if vl, vlOk := (*depMap)[i]; vlOk {
+				//first element is vrf name if vrf level deploy is set
+				if vl[0] == i {
+					vrfEntry.DeployAttachments = (vrfEntry.VrfStatus == "DEPLOYED")
+					log.Printf("Setting VRF level dep flag for %s to %v", i, vrfEntry.DeployAttachments)
+					vrfLevelDep = true
+				}
+			}
+			for j, attachEntry := range vrfEntry.AttachList {
+				if attachEntry.FilterThisValue {
+					continue
+				}
+				log.Printf("Attachment %s added to VRF %s", j, i)
+				if !vrfLevelDep {
+					if attachEntry.AttachState == "DEPLOYED" {
+						log.Printf("Attachment %s deployed", j)
+						attachEntry.DeployThisAttachment = true
+					}
+				}
+				//put modified entry back
+				vrfEntry.AttachList[j] = attachEntry
+			}
+			//put modified entry back
+			ndVrfs.Vrfs[i] = vrfEntry
 
 		}
+	} else {
+		dg.AddError("VRF Attachments read failed", err.Error())
 	}
-	sort.Sort(ndVrfs.Vrfs)
 	vModel := new(resource_vrf_bulk.VrfBulkModel)
 	vModel.Id = types.StringValue(ID)
 	d := vModel.SetModelData(&ndVrfs)
@@ -277,81 +232,60 @@ func (c NDFC) RscCreateBulkVrf(ctx context.Context, dg *diag.Diagnostics, vrfBul
 		dg.AddError("Data conversion from model failed", "GetModelData returned empty")
 		return nil
 	}
-	//Fill fabricName in each VRF
-	for i := range vrf.Vrfs {
-		vrf.Vrfs[i].FabricName = vrf.FabricName
-	}
 	//form ID
 	ID := c.VrfBulkCreateID(vrf)
 	//create
 
 	depMap := make(map[string][]string)
 
-	// check if any of the vrfs exists
-	err := c.vrfBulkCreateCheck(ctx, ID, vrfBulk)
+	retVrfs, err := c.VrfBulkIsPresent(ctx, ID)
+
+	if err != nil {
+		tflog.Error(ctx, "Error while getting VRFs ", map[string]interface{}{"Err": err})
+		dg.AddError("VRF Read Failed", err.Error())
+		return nil
+	}
+
+	var errs []string
+	for i := range retVrfs {
+		errs = append(errs, fmt.Sprintf("VRF %s is already configured on %s", retVrfs[i], vrf.FabricName))
+	}
+	if len(errs) > 0 {
+		tflog.Error(ctx, "VRFs exist", map[string]interface{}{"Err": errs})
+		dg.AddError("VRFs exist", strings.Join(errs, ","))
+		return nil
+	}
+
+	//Part 1: Create VRFs
+	ndfcVrfBulkPayload := vrf.FillVrfPayloadFromModel()
+	//ndfcVrfBulkPayload.Vrfs = vrf.GetVrfValues()
+
+	err = c.vrfCreateBulk(ctx, vrf.FabricName, ndfcVrfBulkPayload)
 	if err != nil {
 		tflog.Error(ctx, "Cannot create VRF", map[string]interface{}{"Err": err})
 		dg.AddError("Cannot create VRF ", err.Error())
 		return nil
 	}
-	//Part 1: Create VRFs
-	err = c.vrfCreateBulk(ctx, vrf.FabricName, vrf)
-	if err != nil {
-		tflog.Error(ctx, fmt.Sprintf("VRF create failed %v", err))
-		dg.AddError("VRF create failed", err.Error())
-		return nil
-	}
 	tflog.Info(ctx, fmt.Sprintf("Create Bulk VRF success ID %s", ID))
-	//Get from NDFC
-
 	//Part 2: Create Attachments if any
-	va := resource_vrf_attachments.NDFCVrfAttachmentsModel{}
-	va.FabricName = vrf.FabricName
-	va.VrfAttachments = make(resource_vrf_attachments.NDFCVrfAttachmentsValues, 0)
-	vrfs := []string{}
-	attachOrder := make(map[string][]string)
 
 	if vrf.DeployAllAttachments {
 		depMap["global"] = append(depMap["global"], "all")
 	}
+	// fill the attachment entries
+	va := vrf.FillAttachPayloadFromModel(false)
 
-	for i := range vrf.Vrfs {
-		vrfs = append(vrfs, vrf.Vrfs[i].VrfName)
-		if vrf.Vrfs[i].DeployAttachments {
-			depMap[vrf.Vrfs[i].VrfName] = append(depMap[vrf.Vrfs[i].VrfName], vrf.Vrfs[i].VrfName)
-		}
-		if len(vrf.Vrfs[i].AttachList) > 0 {
-			attachOrder[vrf.Vrfs[i].VrfName] = make([]string, len(vrf.Vrfs[i].AttachList))
-			vrfAttachVal := new(resource_vrf_attachments.NDFCVrfAttachmentsValue)
-			vrfAttachVal.VrfName = vrf.Vrfs[i].VrfName
-			vrfAttachVal.DeployAllAttachments = vrf.Vrfs[i].DeployAttachments
-
-			log.Printf("DeployAllAttachments %s/%v", vrf.Vrfs[i].VrfName, vrf.Vrfs[i].DeployAttachments)
-			vrfAttachVal.AttachList = vrf.Vrfs[i].AttachList
-
-			va.VrfAttachments = append(va.VrfAttachments, *vrfAttachVal)
-			for j := range vrf.Vrfs[i].AttachList {
-				attachOrder[vrf.Vrfs[i].VrfName][j] = vrf.Vrfs[i].AttachList[j].SerialNumber
-				if vrf.Vrfs[i].AttachList[j].DeployThisAttachment {
-					log.Printf("DeployThisAttachment %s/%s", vrf.Vrfs[i].VrfName, vrf.Vrfs[i].AttachList[j].SerialNumber)
-					depMap[vrf.Vrfs[i].VrfName] = append(depMap[vrf.Vrfs[i].VrfName], vrf.Vrfs[i].AttachList[j].SerialNumber)
-				}
-			}
-
-		}
-	}
 	if len(va.VrfAttachments) > 0 {
-		err := c.RscCreateVrfAttachments(ctx, dg, &va)
+		err := c.RscCreateVrfAttachments(ctx, dg, va)
 		if err != nil {
 			tflog.Error(ctx, "VRF Attachments create failed")
 			tflog.Error(ctx, "Rolling back the configurations...delete VRFs")
 			c.RscDeleteBulkVrf(ctx, dg, ID, vrfBulk)
-			//err := c.vrfBulkDelete(ctx, va.FabricName, vrfs)
-
 			return nil
 		}
+		//Check and deploy
+		c.RscDeployAttachments(ctx, dg, vrf)
 	}
-
 	outVrf := c.RscGetBulkVrf(ctx, dg, ID, &depMap)
 	if outVrf == nil {
 		tflog.Error(ctx, "Failed to verify: Reading from NDFC after create failed")
@@ -361,14 +295,13 @@ func (c NDFC) RscCreateBulkVrf(ctx context.Context, dg *diag.Diagnostics, vrfBul
 	if ID != "" {
 		outVrf.Id = types.StringValue(ID)
 	}
-
 	return outVrf
 
 }
 
 func (c NDFC) RscDeleteBulkVrf(ctx context.Context, dg *diag.Diagnostics, ID string, vrfBulk *resource_vrf_bulk.VrfBulkModel) {
 	tflog.Info(ctx, fmt.Sprintf("VRF Bulk Delete request %s", ID))
-	vrfs, err := c.vrfBulkIsPresent(ctx, ID, vrfBulk.FabricName.ValueString())
+	vrfs, err := c.VrfBulkIsPresent(ctx, ID)
 	if err != nil {
 		tflog.Error(ctx, "Failed to Read existing VRFs")
 		dg.AddError("VRF Read Failed", err.Error())
@@ -385,26 +318,12 @@ func (c NDFC) RscDeleteBulkVrf(ctx context.Context, dg *diag.Diagnostics, ID str
 	}
 
 	delVrf := vrfBulk.GetModelData()
-	delVA := resource_vrf_attachments.NDFCVrfAttachmentsModel{}
-	delVA.FabricName = delVrf.FabricName
-	for i := range delVrf.Vrfs {
-		if len(delVrf.Vrfs[i].AttachList) > 0 {
-			vrfAttachVal := new(resource_vrf_attachments.NDFCVrfAttachmentsValue)
-			vrfAttachVal.VrfName = delVrf.Vrfs[i].VrfName
-			vrfAttachVal.AttachList = delVrf.Vrfs[i].AttachList
-			for j := range vrfAttachVal.AttachList {
-				vrfAttachVal.AttachList[j].Deployment = "false"
-			}
-			delVA.VrfAttachments = append(delVA.VrfAttachments, *vrfAttachVal)
-		}
-	}
-	if len(delVA.VrfAttachments) > 0 {
-		err := c.RscDeleteVrfAttachments(ctx, dg, &delVA)
-		if err != nil {
-			tflog.Error(ctx, "VRF Attachments delete failed")
-			dg.AddError("VRF Attachments delete failed", err.Error())
-			return
-		}
+
+	err = c.RscDeleteVrfAttachments(ctx, dg, delVrf)
+	if err != nil {
+		tflog.Error(ctx, "VRF Attachments delete failed")
+		dg.AddError("VRF Attachments delete failed", err.Error())
+		return
 	}
 
 	err = c.vrfBulkDelete(ctx, fabricName, vrfsFromId)
@@ -433,7 +352,7 @@ func (c NDFC) RscUpdateBulkVrf(ctx context.Context,
 	// Validate the Diff
 	//Get the current VRFs from NDFC
 
-	delVrfs := actions["del"].([]string)
+	delVrfs := actions["del"].(*resource_vrf_bulk.NDFCVrfBulkModel)
 	//deployVrfs := actions["deploy"].([]string)
 
 	putVrfs := actions["put"].(*resource_vrf_bulk.NDFCVrfBulkModel)
@@ -441,57 +360,49 @@ func (c NDFC) RscUpdateBulkVrf(ctx context.Context,
 	plan := actions["plan"].(*resource_vrf_bulk.NDFCVrfBulkModel)
 	state := actions["state"].(*resource_vrf_bulk.NDFCVrfBulkModel)
 
-	ndfcVRFs := c.vrfBulkGet(ctx, vrfBulkPlan.FabricName.ValueString())
-	ndfcVRFs.CreateSearchMap()
-
+	ndfcVRFs, err := c.vrfBulkGet(ctx, vrfBulkPlan.FabricName.ValueString())
 	// Step 1 - Check if VRFs to update are present in NDFC
-	for i := range putVrfs.Vrfs {
-		name := putVrfs.Vrfs[i].VrfName
-		_, ok := ndfcVRFs.VrfsMap[name]
+	if err != nil {
+		tflog.Error(ctx, "Failed to Read existing VRFs")
+		dg.AddError("VRF Read Failed", err.Error())
+		return
+	}
+	for vrf, _ := range putVrfs.Vrfs {
+		_, ok := ndfcVRFs.Vrfs[vrf]
 		if !ok {
-			errString := fmt.Sprintf("VRF %s to update is missing in NDFC", name)
+			errString := fmt.Sprintf("VRF %s to update is missing in NDFC", vrf)
 			tflog.Error(ctx, errString)
 			dg.AddError("In place update failed", errString)
 			return
 		}
 	}
-
-	updateVA := resource_vrf_attachments.NDFCVrfAttachmentsModel{}
-	updateVA.FabricName = vrfBulkPlan.FabricName.ValueString()
-	updateVA.VrfAttachments = make(resource_vrf_attachments.NDFCVrfAttachmentsValues, 0)
-
+	/*
+		updateVA := resource_vrf_attachments.NDFCVrfAttachmentsModel{}
+		updateVA.FabricName = vrfBulkPlan.FabricName.ValueString()
+		updateVA.VrfAttachments = make(resource_vrf_attachments.NDFCVrfAttachmentsValues, 0)
+	*/
 	// Step 2 - VRFs to delete are available
-	for i := range delVrfs {
-		vrfEntry, ok := ndfcVRFs.VrfsMap[delVrfs[i]]
+	for vrf, _ := range delVrfs.Vrfs {
+		_, ok := ndfcVRFs.Vrfs[vrf]
 		if !ok {
 			// is this error a big deal? VRFs to be deleted missing - so ignore??
-			delVrfs = append(delVrfs[:i], delVrfs[i+1:]...)
-			tflog.Error(ctx, fmt.Sprintf("VRF to DELETE %s is missing in NDFC", delVrfs[i]))
-		} else {
-			//Check if attachments are present
-			if len(vrfEntry.AttachList) > 0 {
-				vrfAttach := new(resource_vrf_attachments.NDFCVrfAttachmentsValue)
-				vrfAttach.VrfName = vrfEntry.VrfName
-				vrfAttach.AttachList = vrfEntry.AttachList
-				updateVA.VrfAttachments = append(updateVA.VrfAttachments, *vrfAttach)
-			}
-
+			delete(delVrfs.Vrfs, vrf)
+			tflog.Error(ctx, fmt.Sprintf("VRF to DELETE %s is missing in NDFC", vrf))
 		}
 	}
-	// Step 3 - Check if VRFs (create-delete) are not present in NDFC
+	// Step 3 - Check if VRFs to be created (create-delete) are not present in NDFC
 
-	for i := range newVrfs.Vrfs {
-		name := newVrfs.Vrfs[i].VrfName
-		_, ok := ndfcVRFs.VrfsMap[name]
+	for vrf, _ := range newVrfs.Vrfs {
+		_, ok := ndfcVRFs.Vrfs[vrf]
 		if ok {
 			//VRF present in NDFC
 			//Check if the VRF is marked for deletion as part of Delete-Create diff
-			sort.Strings(delVrfs)
-			if sort.SearchStrings(delVrfs, name) == 0 {
-				tflog.Debug(ctx, "VRF marked for delete", map[string]interface{}{"vrfName": name})
+
+			if _, ok := delVrfs.Vrfs[vrf]; ok {
+				tflog.Debug(ctx, "VRF marked for delete", map[string]interface{}{"vrfName": vrf})
 				continue
 			}
-			errString := fmt.Sprintf("VRF %s to Create is Already Present in NDFC. Update cancelled", name)
+			errString := fmt.Sprintf("VRF %s to Create is Already Present in NDFC. Update cancelled", vrf)
 			tflog.Error(ctx, errString)
 			dg.AddError("In place update failed", errString)
 			return
@@ -500,23 +411,23 @@ func (c NDFC) RscUpdateBulkVrf(ctx context.Context,
 
 	//Begin update - No rollback from here on
 
-	if len(delVrfs) > 0 {
+	if len(delVrfs.Vrfs) > 0 {
 		// Check and delete attachments
-		err := c.RscDeleteVrfAttachments(ctx, dg, &updateVA)
+		err := c.RscDeleteVrfAttachments(ctx, dg, delVrfs)
 		if err != nil {
 			tflog.Error(ctx, "VRF Attachments delete failed")
 			dg.AddError("VRF Attachments delete failed", err.Error())
 			return
 		}
-		tflog.Info(ctx, fmt.Sprintf("Deleting VRFs %v, as part of Bulk Update", delVrfs))
-		err = c.vrfBulkDelete(ctx, vrfBulkPlan.FabricName.ValueString(), delVrfs)
+		tflog.Info(ctx, fmt.Sprintf("Deleting VRFs %v, as part of Bulk Update", delVrfs.GetVrfNames()))
+		err = c.vrfBulkDelete(ctx, vrfBulkPlan.FabricName.ValueString(), delVrfs.GetVrfNames())
 		if err != nil {
 			dg.AddError("Bulk Delete failed", err.Error())
 		}
 	} else {
 		tflog.Info(ctx, "Nothing to delete")
 	}
-	if putVrfs.Vrfs.Len() > 0 {
+	if len(putVrfs.Vrfs) > 0 {
 		tflog.Info(ctx, "Modifying VRFs , as part of Bulk Update")
 		c.vrfBulkUpdate(ctx, dg, putVrfs)
 		if dg.HasError() {
@@ -528,20 +439,22 @@ func (c NDFC) RscUpdateBulkVrf(ctx context.Context,
 	}
 	// TODO: All deployed attachments of modified VRFs must be re-deployed
 
-	if newVrfs.Vrfs.Len() > 0 {
+	if len(newVrfs.Vrfs) > 0 {
 		tflog.Info(ctx, "Adding VRFs , as part of Bulk Update")
-		err := c.vrfCreateBulk(ctx, vrfBulkPlan.FabricName.ValueString(), newVrfs)
+		newVrfPayload := newVrfs.FillVrfPayloadFromModel()
+		err := c.vrfCreateBulk(ctx, vrfBulkPlan.FabricName.ValueString(), newVrfPayload)
 		if err != nil {
 			dg.AddError("VRF create failed", err.Error())
 			return
 		}
 	}
+
 	//Deal with attachments
-	updateVA.VrfAttachments = make(resource_vrf_attachments.NDFCVrfAttachmentsValues, 0)
-	copyVrfAttachments(plan, &updateVA)
-	stateVA := resource_vrf_attachments.NDFCVrfAttachmentsModel{}
-	copyVrfAttachments(state, &stateVA)
-	c.RscUpdateVrfAttachments(ctx, dg, &updateVA, &stateVA)
+	//updateVA.VrfAttachments = make(resource_vrf_attachments.NDFCVrfAttachmentsValues, 0)
+	//copyVrfAttachments(plan, &updateVA)
+	//stateVA := resource_vrf_attachments.NDFCVrfAttachmentsModel{}
+	//copyVrfAttachments(state, &stateVA)
+	c.RscUpdateVrfAttachments(ctx, dg, plan, state)
 	if dg.HasError() {
 		tflog.Error(ctx, "Error during update")
 		return
@@ -551,7 +464,7 @@ func (c NDFC) RscUpdateBulkVrf(ctx context.Context,
 	if plan.DeployAllAttachments {
 		depMap["global"] = append(depMap["global"], "all")
 	}
-	
+
 	for i := range plan.Vrfs {
 		if plan.Vrfs[i].DeployAttachments {
 			depMap[plan.Vrfs[i].VrfName] = append(depMap[plan.Vrfs[i].VrfName], plan.Vrfs[i].VrfName)
@@ -565,21 +478,31 @@ func (c NDFC) RscUpdateBulkVrf(ctx context.Context,
 	*(vrfBulkPlan) = *(c.RscGetBulkVrf(ctx, dg, newID, &depMap))
 }
 
-func copyVrfAttachments(src *resource_vrf_bulk.NDFCVrfBulkModel, dst *resource_vrf_attachments.NDFCVrfAttachmentsModel) {
-	dst.FabricName = src.FabricName
-	dst.DeployAllAttachments = src.DeployAllAttachments
-	dst.VrfAttachments = make(resource_vrf_attachments.NDFCVrfAttachmentsValues, len(src.Vrfs))
-	for i := range src.Vrfs {
-		if len(src.Vrfs[i].AttachList) > 0 {
-			vrfAttach := new(resource_vrf_attachments.NDFCVrfAttachmentsValue)
-			vrfAttach.VrfName = src.Vrfs[i].VrfName
-			vrfAttach.DeployAllAttachments = src.Vrfs[i].DeployAttachments
-			vrfAttach.AttachList = src.Vrfs[i].AttachList
-			for j := range vrfAttach.AttachList {
-				vrfAttach.AttachList[j].FabricName = src.FabricName
-				vrfAttach.AttachList[j].VrfName = src.Vrfs[i].VrfName
-			}
-			dst.VrfAttachments = append(dst.VrfAttachments, *vrfAttach)
+func (c NDFC) VrfBulkIsPresent(ctx context.Context, ID string) ([]string, error) {
+	var retVrfs []string
+	filterMap := make(map[string]bool)
+
+	fabricName, _ := c.vrfCreateFilterMap(ID, &filterMap)
+
+	res, err := c.vrfGetAll(ctx, fabricName)
+	if err != nil {
+		tflog.Error(ctx, "Error while getting VRFs ", map[string]interface{}{"Err": err})
+		return nil, err
+	}
+
+	vrfPayload := resource_vrf_bulk.NDFCBulkVrfPayload{}
+	err = json.Unmarshal(res, &vrfPayload.Vrfs)
+	if err != nil {
+		tflog.Error(ctx, "resource_vrf_bulk: unmarshal failed ", map[string]interface{}{"Err": err})
+		return nil, err
+	}
+
+	for i := range vrfPayload.Vrfs {
+		ok, found := filterMap[vrfPayload.Vrfs[i].VrfName]
+		if ok && found {
+			retVrfs = append(retVrfs, vrfPayload.Vrfs[i].VrfName)
 		}
 	}
+	return retVrfs, nil
+
 }

@@ -3,6 +3,7 @@ package ndfc
 import (
 	"context"
 	"fmt"
+	"log"
 	"time"
 
 	"github.com/hashicorp/terraform-plugin-framework/diag"
@@ -197,7 +198,7 @@ func (c *NDFC) createFSM(ctx context.Context, dg *diag.Diagnostics, fabricName s
 	}
 
 	fsm.Init()
-	return fsm 
+	return fsm
 }
 
 func (fsm *DeployFSM) Run(ctx context.Context) {
@@ -227,6 +228,7 @@ func (fsm *DeployFSM) Run(ctx context.Context) {
 			fsm.wait(ctx)
 		default:
 			tflog.Debug(ctx, fmt.Sprintf("DeployFSM: Current state %s", fsm.fsm.Current()))
+			log.Panicf("DeployFSM: Invalid State %s", fsm.fsm.Current())
 
 		}
 	}

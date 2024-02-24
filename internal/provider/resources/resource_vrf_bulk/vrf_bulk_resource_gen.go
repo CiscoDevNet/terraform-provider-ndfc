@@ -44,7 +44,7 @@ func VrfBulkResourceSchema(ctx context.Context) schema.Schema {
 				Description:         "Terraform unique Id for the resource",
 				MarkdownDescription: "Terraform unique Id for the resource",
 			},
-			"vrfs": schema.ListNestedAttribute{
+			"vrfs": schema.MapNestedAttribute{
 				NestedObject: schema.NestedAttributeObject{
 					Attributes: map[string]schema.Attribute{
 						"advertise_default_route": schema.BoolAttribute{
@@ -61,7 +61,7 @@ func VrfBulkResourceSchema(ctx context.Context) schema.Schema {
 							MarkdownDescription: "Flag to Control Advertisement of /32 and /128 Routes to Edge Routers",
 							Default:             booldefault.StaticBool(false),
 						},
-						"attach_list": schema.ListNestedAttribute{
+						"attach_list": schema.MapNestedAttribute{
 							NestedObject: schema.NestedAttributeObject{
 								Attributes: map[string]schema.Attribute{
 									"attach_state": schema.StringAttribute{
@@ -100,11 +100,6 @@ func VrfBulkResourceSchema(ctx context.Context) schema.Schema {
 										Optional:            true,
 										Description:         "Override loopback IPv6 address",
 										MarkdownDescription: "Override loopback IPv6 address",
-									},
-									"serial_number": schema.StringAttribute{
-										Required:            true,
-										Description:         "Serial number of a switch",
-										MarkdownDescription: "Serial number of a switch",
 									},
 									"switch_name": schema.StringAttribute{
 										Computed:            true,
@@ -351,11 +346,6 @@ func VrfBulkResourceSchema(ctx context.Context) schema.Schema {
 								int64planmodifier.UseStateForUnknown(),
 							},
 						},
-						"vrf_name": schema.StringAttribute{
-							Required:            true,
-							Description:         "The name of the VRF",
-							MarkdownDescription: "The name of the VRF",
-						},
 						"vrf_status": schema.StringAttribute{
 							Computed:            true,
 							Description:         "VRF Deployment status",
@@ -387,7 +377,7 @@ type VrfBulkModel struct {
 	DeployAllAttachments types.Bool   `tfsdk:"deploy_all_attachments"`
 	FabricName           types.String `tfsdk:"fabric_name"`
 	Id                   types.String `tfsdk:"id"`
-	Vrfs                 types.List   `tfsdk:"vrfs"`
+	Vrfs                 types.Map    `tfsdk:"vrfs"`
 }
 
 var _ basetypes.ObjectTypable = VrfsType{}
@@ -461,12 +451,12 @@ func (t VrfsType) ValueFromObject(ctx context.Context, in basetypes.ObjectValue)
 		return nil, diags
 	}
 
-	attachListVal, ok := attachListAttribute.(basetypes.ListValue)
+	attachListVal, ok := attachListAttribute.(basetypes.MapValue)
 
 	if !ok {
 		diags.AddError(
 			"Attribute Wrong Type",
-			fmt.Sprintf(`attach_list expected to be basetypes.ListValue, was: %T`, attachListAttribute))
+			fmt.Sprintf(`attach_list expected to be basetypes.MapValue, was: %T`, attachListAttribute))
 	}
 
 	bgpPasswordAttribute, ok := attributes["bgp_password"]
@@ -1117,24 +1107,6 @@ func (t VrfsType) ValueFromObject(ctx context.Context, in basetypes.ObjectValue)
 			fmt.Sprintf(`vrf_id expected to be basetypes.Int64Value, was: %T`, vrfIdAttribute))
 	}
 
-	vrfNameAttribute, ok := attributes["vrf_name"]
-
-	if !ok {
-		diags.AddError(
-			"Attribute Missing",
-			`vrf_name is missing from object`)
-
-		return nil, diags
-	}
-
-	vrfNameVal, ok := vrfNameAttribute.(basetypes.StringValue)
-
-	if !ok {
-		diags.AddError(
-			"Attribute Wrong Type",
-			fmt.Sprintf(`vrf_name expected to be basetypes.StringValue, was: %T`, vrfNameAttribute))
-	}
-
 	vrfStatusAttribute, ok := attributes["vrf_status"]
 
 	if !ok {
@@ -1215,7 +1187,6 @@ func (t VrfsType) ValueFromObject(ctx context.Context, in basetypes.ObjectValue)
 		VrfDescription:              vrfDescriptionVal,
 		VrfExtensionTemplate:        vrfExtensionTemplateVal,
 		VrfId:                       vrfIdVal,
-		VrfName:                     vrfNameVal,
 		VrfStatus:                   vrfStatusVal,
 		VrfTemplate:                 vrfTemplateVal,
 		state:                       attr.ValueStateKnown,
@@ -1331,12 +1302,12 @@ func NewVrfsValue(attributeTypes map[string]attr.Type, attributes map[string]att
 		return NewVrfsValueUnknown(), diags
 	}
 
-	attachListVal, ok := attachListAttribute.(basetypes.ListValue)
+	attachListVal, ok := attachListAttribute.(basetypes.MapValue)
 
 	if !ok {
 		diags.AddError(
 			"Attribute Wrong Type",
-			fmt.Sprintf(`attach_list expected to be basetypes.ListValue, was: %T`, attachListAttribute))
+			fmt.Sprintf(`attach_list expected to be basetypes.MapValue, was: %T`, attachListAttribute))
 	}
 
 	bgpPasswordAttribute, ok := attributes["bgp_password"]
@@ -1987,24 +1958,6 @@ func NewVrfsValue(attributeTypes map[string]attr.Type, attributes map[string]att
 			fmt.Sprintf(`vrf_id expected to be basetypes.Int64Value, was: %T`, vrfIdAttribute))
 	}
 
-	vrfNameAttribute, ok := attributes["vrf_name"]
-
-	if !ok {
-		diags.AddError(
-			"Attribute Missing",
-			`vrf_name is missing from object`)
-
-		return NewVrfsValueUnknown(), diags
-	}
-
-	vrfNameVal, ok := vrfNameAttribute.(basetypes.StringValue)
-
-	if !ok {
-		diags.AddError(
-			"Attribute Wrong Type",
-			fmt.Sprintf(`vrf_name expected to be basetypes.StringValue, was: %T`, vrfNameAttribute))
-	}
-
 	vrfStatusAttribute, ok := attributes["vrf_status"]
 
 	if !ok {
@@ -2085,7 +2038,6 @@ func NewVrfsValue(attributeTypes map[string]attr.Type, attributes map[string]att
 		VrfDescription:              vrfDescriptionVal,
 		VrfExtensionTemplate:        vrfExtensionTemplateVal,
 		VrfId:                       vrfIdVal,
-		VrfName:                     vrfNameVal,
 		VrfStatus:                   vrfStatusVal,
 		VrfTemplate:                 vrfTemplateVal,
 		state:                       attr.ValueStateKnown,
@@ -2150,7 +2102,7 @@ func (t VrfsType) ValueFromTerraform(ctx context.Context, in tftypes.Value) (att
 		attributes[k] = a
 	}
 
-	return NewVrfsValueMust(t.AttrTypes, attributes), nil
+	return NewVrfsValueMust(VrfsValue{}.AttributeTypes(ctx), attributes), nil
 }
 
 func (t VrfsType) ValueType(ctx context.Context) attr.Value {
@@ -2162,7 +2114,7 @@ var _ basetypes.ObjectValuable = VrfsValue{}
 type VrfsValue struct {
 	AdvertiseDefaultRoute       basetypes.BoolValue   `tfsdk:"advertise_default_route"`
 	AdvertiseHostRoutes         basetypes.BoolValue   `tfsdk:"advertise_host_routes"`
-	AttachList                  basetypes.ListValue   `tfsdk:"attach_list"`
+	AttachList                  basetypes.MapValue    `tfsdk:"attach_list"`
 	BgpPassword                 basetypes.StringValue `tfsdk:"bgp_password"`
 	BgpPasswordType             basetypes.StringValue `tfsdk:"bgp_password_type"`
 	ConfigureStaticDefaultRoute basetypes.BoolValue   `tfsdk:"configure_static_default_route"`
@@ -2199,21 +2151,20 @@ type VrfsValue struct {
 	VrfDescription              basetypes.StringValue `tfsdk:"vrf_description"`
 	VrfExtensionTemplate        basetypes.StringValue `tfsdk:"vrf_extension_template"`
 	VrfId                       basetypes.Int64Value  `tfsdk:"vrf_id"`
-	VrfName                     basetypes.StringValue `tfsdk:"vrf_name"`
 	VrfStatus                   basetypes.StringValue `tfsdk:"vrf_status"`
 	VrfTemplate                 basetypes.StringValue `tfsdk:"vrf_template"`
 	state                       attr.ValueState
 }
 
 func (v VrfsValue) ToTerraformValue(ctx context.Context) (tftypes.Value, error) {
-	attrTypes := make(map[string]tftypes.Type, 42)
+	attrTypes := make(map[string]tftypes.Type, 41)
 
 	var val tftypes.Value
 	var err error
 
 	attrTypes["advertise_default_route"] = basetypes.BoolType{}.TerraformType(ctx)
 	attrTypes["advertise_host_routes"] = basetypes.BoolType{}.TerraformType(ctx)
-	attrTypes["attach_list"] = basetypes.ListType{
+	attrTypes["attach_list"] = basetypes.MapType{
 		ElemType: AttachListValue{}.Type(ctx),
 	}.TerraformType(ctx)
 	attrTypes["bgp_password"] = basetypes.StringType{}.TerraformType(ctx)
@@ -2252,7 +2203,6 @@ func (v VrfsValue) ToTerraformValue(ctx context.Context) (tftypes.Value, error) 
 	attrTypes["vrf_description"] = basetypes.StringType{}.TerraformType(ctx)
 	attrTypes["vrf_extension_template"] = basetypes.StringType{}.TerraformType(ctx)
 	attrTypes["vrf_id"] = basetypes.Int64Type{}.TerraformType(ctx)
-	attrTypes["vrf_name"] = basetypes.StringType{}.TerraformType(ctx)
 	attrTypes["vrf_status"] = basetypes.StringType{}.TerraformType(ctx)
 	attrTypes["vrf_template"] = basetypes.StringType{}.TerraformType(ctx)
 
@@ -2260,7 +2210,7 @@ func (v VrfsValue) ToTerraformValue(ctx context.Context) (tftypes.Value, error) 
 
 	switch v.state {
 	case attr.ValueStateKnown:
-		vals := make(map[string]tftypes.Value, 42)
+		vals := make(map[string]tftypes.Value, 41)
 
 		val, err = v.AdvertiseDefaultRoute.ToTerraformValue(ctx)
 
@@ -2574,14 +2524,6 @@ func (v VrfsValue) ToTerraformValue(ctx context.Context) (tftypes.Value, error) 
 
 		vals["vrf_id"] = val
 
-		val, err = v.VrfName.ToTerraformValue(ctx)
-
-		if err != nil {
-			return tftypes.NewValue(objectType, tftypes.UnknownValue), err
-		}
-
-		vals["vrf_name"] = val
-
 		val, err = v.VrfStatus.ToTerraformValue(ctx)
 
 		if err != nil {
@@ -2625,7 +2567,9 @@ func (v VrfsValue) String() string {
 }
 
 func (v VrfsValue) ToObjectValue(ctx context.Context) (basetypes.ObjectValue, diag.Diagnostics) {
-	attachList := types.ListValueMust(
+	var diags diag.Diagnostics
+
+	attachList := types.MapValueMust(
 		AttachListType{
 			basetypes.ObjectType{
 				AttrTypes: AttachListValue{}.AttributeTypes(ctx),
@@ -2635,7 +2579,7 @@ func (v VrfsValue) ToObjectValue(ctx context.Context) (basetypes.ObjectValue, di
 	)
 
 	if v.AttachList.IsNull() {
-		attachList = types.ListNull(
+		attachList = types.MapNull(
 			AttachListType{
 				basetypes.ObjectType{
 					AttrTypes: AttachListValue{}.AttributeTypes(ctx),
@@ -2645,7 +2589,7 @@ func (v VrfsValue) ToObjectValue(ctx context.Context) (basetypes.ObjectValue, di
 	}
 
 	if v.AttachList.IsUnknown() {
-		attachList = types.ListUnknown(
+		attachList = types.MapUnknown(
 			AttachListType{
 				basetypes.ObjectType{
 					AttrTypes: AttachListValue{}.AttributeTypes(ctx),
@@ -2658,7 +2602,7 @@ func (v VrfsValue) ToObjectValue(ctx context.Context) (basetypes.ObjectValue, di
 		map[string]attr.Type{
 			"advertise_default_route": basetypes.BoolType{},
 			"advertise_host_routes":   basetypes.BoolType{},
-			"attach_list": basetypes.ListType{
+			"attach_list": basetypes.MapType{
 				ElemType: AttachListValue{}.Type(ctx),
 			},
 			"bgp_password":                   basetypes.StringType{},
@@ -2697,7 +2641,6 @@ func (v VrfsValue) ToObjectValue(ctx context.Context) (basetypes.ObjectValue, di
 			"vrf_description":                basetypes.StringType{},
 			"vrf_extension_template":         basetypes.StringType{},
 			"vrf_id":                         basetypes.Int64Type{},
-			"vrf_name":                       basetypes.StringType{},
 			"vrf_status":                     basetypes.StringType{},
 			"vrf_template":                   basetypes.StringType{},
 		},
@@ -2741,7 +2684,6 @@ func (v VrfsValue) ToObjectValue(ctx context.Context) (basetypes.ObjectValue, di
 			"vrf_description":                v.VrfDescription,
 			"vrf_extension_template":         v.VrfExtensionTemplate,
 			"vrf_id":                         v.VrfId,
-			"vrf_name":                       v.VrfName,
 			"vrf_status":                     v.VrfStatus,
 			"vrf_template":                   v.VrfTemplate,
 		})
@@ -2920,10 +2862,6 @@ func (v VrfsValue) Equal(o attr.Value) bool {
 		return false
 	}
 
-	if !v.VrfName.Equal(other.VrfName) {
-		return false
-	}
-
 	if !v.VrfStatus.Equal(other.VrfStatus) {
 		return false
 	}
@@ -2947,7 +2885,7 @@ func (v VrfsValue) AttributeTypes(ctx context.Context) map[string]attr.Type {
 	return map[string]attr.Type{
 		"advertise_default_route": basetypes.BoolType{},
 		"advertise_host_routes":   basetypes.BoolType{},
-		"attach_list": basetypes.ListType{
+		"attach_list": basetypes.MapType{
 			ElemType: AttachListValue{}.Type(ctx),
 		},
 		"bgp_password":                   basetypes.StringType{},
@@ -2986,7 +2924,6 @@ func (v VrfsValue) AttributeTypes(ctx context.Context) map[string]attr.Type {
 		"vrf_description":                basetypes.StringType{},
 		"vrf_extension_template":         basetypes.StringType{},
 		"vrf_id":                         basetypes.Int64Type{},
-		"vrf_name":                       basetypes.StringType{},
 		"vrf_status":                     basetypes.StringType{},
 		"vrf_template":                   basetypes.StringType{},
 	}
@@ -3143,24 +3080,6 @@ func (t AttachListType) ValueFromObject(ctx context.Context, in basetypes.Object
 			fmt.Sprintf(`loopback_ipv6 expected to be basetypes.StringValue, was: %T`, loopbackIpv6Attribute))
 	}
 
-	serialNumberAttribute, ok := attributes["serial_number"]
-
-	if !ok {
-		diags.AddError(
-			"Attribute Missing",
-			`serial_number is missing from object`)
-
-		return nil, diags
-	}
-
-	serialNumberVal, ok := serialNumberAttribute.(basetypes.StringValue)
-
-	if !ok {
-		diags.AddError(
-			"Attribute Wrong Type",
-			fmt.Sprintf(`serial_number expected to be basetypes.StringValue, was: %T`, serialNumberAttribute))
-	}
-
 	switchNameAttribute, ok := attributes["switch_name"]
 
 	if !ok {
@@ -3209,7 +3128,6 @@ func (t AttachListType) ValueFromObject(ctx context.Context, in basetypes.Object
 		LoopbackId:           loopbackIdVal,
 		LoopbackIpv4:         loopbackIpv4Val,
 		LoopbackIpv6:         loopbackIpv6Val,
-		SerialNumber:         serialNumberVal,
 		SwitchName:           switchNameVal,
 		Vlan:                 vlanVal,
 		state:                attr.ValueStateKnown,
@@ -3405,24 +3323,6 @@ func NewAttachListValue(attributeTypes map[string]attr.Type, attributes map[stri
 			fmt.Sprintf(`loopback_ipv6 expected to be basetypes.StringValue, was: %T`, loopbackIpv6Attribute))
 	}
 
-	serialNumberAttribute, ok := attributes["serial_number"]
-
-	if !ok {
-		diags.AddError(
-			"Attribute Missing",
-			`serial_number is missing from object`)
-
-		return NewAttachListValueUnknown(), diags
-	}
-
-	serialNumberVal, ok := serialNumberAttribute.(basetypes.StringValue)
-
-	if !ok {
-		diags.AddError(
-			"Attribute Wrong Type",
-			fmt.Sprintf(`serial_number expected to be basetypes.StringValue, was: %T`, serialNumberAttribute))
-	}
-
 	switchNameAttribute, ok := attributes["switch_name"]
 
 	if !ok {
@@ -3471,7 +3371,6 @@ func NewAttachListValue(attributeTypes map[string]attr.Type, attributes map[stri
 		LoopbackId:           loopbackIdVal,
 		LoopbackIpv4:         loopbackIpv4Val,
 		LoopbackIpv6:         loopbackIpv6Val,
-		SerialNumber:         serialNumberVal,
 		SwitchName:           switchNameVal,
 		Vlan:                 vlanVal,
 		state:                attr.ValueStateKnown,
@@ -3536,7 +3435,7 @@ func (t AttachListType) ValueFromTerraform(ctx context.Context, in tftypes.Value
 		attributes[k] = a
 	}
 
-	return NewAttachListValueMust(t.AttrTypes, attributes), nil
+	return NewAttachListValueMust(AttachListValue{}.AttributeTypes(ctx), attributes), nil
 }
 
 func (t AttachListType) ValueType(ctx context.Context) attr.Value {
@@ -3553,14 +3452,13 @@ type AttachListValue struct {
 	LoopbackId           basetypes.Int64Value  `tfsdk:"loopback_id"`
 	LoopbackIpv4         basetypes.StringValue `tfsdk:"loopback_ipv4"`
 	LoopbackIpv6         basetypes.StringValue `tfsdk:"loopback_ipv6"`
-	SerialNumber         basetypes.StringValue `tfsdk:"serial_number"`
 	SwitchName           basetypes.StringValue `tfsdk:"switch_name"`
 	Vlan                 basetypes.Int64Value  `tfsdk:"vlan"`
 	state                attr.ValueState
 }
 
 func (v AttachListValue) ToTerraformValue(ctx context.Context) (tftypes.Value, error) {
-	attrTypes := make(map[string]tftypes.Type, 10)
+	attrTypes := make(map[string]tftypes.Type, 9)
 
 	var val tftypes.Value
 	var err error
@@ -3572,7 +3470,6 @@ func (v AttachListValue) ToTerraformValue(ctx context.Context) (tftypes.Value, e
 	attrTypes["loopback_id"] = basetypes.Int64Type{}.TerraformType(ctx)
 	attrTypes["loopback_ipv4"] = basetypes.StringType{}.TerraformType(ctx)
 	attrTypes["loopback_ipv6"] = basetypes.StringType{}.TerraformType(ctx)
-	attrTypes["serial_number"] = basetypes.StringType{}.TerraformType(ctx)
 	attrTypes["switch_name"] = basetypes.StringType{}.TerraformType(ctx)
 	attrTypes["vlan"] = basetypes.Int64Type{}.TerraformType(ctx)
 
@@ -3580,7 +3477,7 @@ func (v AttachListValue) ToTerraformValue(ctx context.Context) (tftypes.Value, e
 
 	switch v.state {
 	case attr.ValueStateKnown:
-		vals := make(map[string]tftypes.Value, 10)
+		vals := make(map[string]tftypes.Value, 9)
 
 		val, err = v.AttachState.ToTerraformValue(ctx)
 
@@ -3638,14 +3535,6 @@ func (v AttachListValue) ToTerraformValue(ctx context.Context) (tftypes.Value, e
 
 		vals["loopback_ipv6"] = val
 
-		val, err = v.SerialNumber.ToTerraformValue(ctx)
-
-		if err != nil {
-			return tftypes.NewValue(objectType, tftypes.UnknownValue), err
-		}
-
-		vals["serial_number"] = val
-
 		val, err = v.SwitchName.ToTerraformValue(ctx)
 
 		if err != nil {
@@ -3689,6 +3578,8 @@ func (v AttachListValue) String() string {
 }
 
 func (v AttachListValue) ToObjectValue(ctx context.Context) (basetypes.ObjectValue, diag.Diagnostics) {
+	var diags diag.Diagnostics
+
 	objVal, diags := types.ObjectValue(
 		map[string]attr.Type{
 			"attach_state":           basetypes.StringType{},
@@ -3698,7 +3589,6 @@ func (v AttachListValue) ToObjectValue(ctx context.Context) (basetypes.ObjectVal
 			"loopback_id":            basetypes.Int64Type{},
 			"loopback_ipv4":          basetypes.StringType{},
 			"loopback_ipv6":          basetypes.StringType{},
-			"serial_number":          basetypes.StringType{},
 			"switch_name":            basetypes.StringType{},
 			"vlan":                   basetypes.Int64Type{},
 		},
@@ -3710,7 +3600,6 @@ func (v AttachListValue) ToObjectValue(ctx context.Context) (basetypes.ObjectVal
 			"loopback_id":            v.LoopbackId,
 			"loopback_ipv4":          v.LoopbackIpv4,
 			"loopback_ipv6":          v.LoopbackIpv6,
-			"serial_number":          v.SerialNumber,
 			"switch_name":            v.SwitchName,
 			"vlan":                   v.Vlan,
 		})
@@ -3761,10 +3650,6 @@ func (v AttachListValue) Equal(o attr.Value) bool {
 		return false
 	}
 
-	if !v.SerialNumber.Equal(other.SerialNumber) {
-		return false
-	}
-
 	if !v.SwitchName.Equal(other.SwitchName) {
 		return false
 	}
@@ -3793,7 +3678,6 @@ func (v AttachListValue) AttributeTypes(ctx context.Context) map[string]attr.Typ
 		"loopback_id":            basetypes.Int64Type{},
 		"loopback_ipv4":          basetypes.StringType{},
 		"loopback_ipv6":          basetypes.StringType{},
-		"serial_number":          basetypes.StringType{},
 		"switch_name":            basetypes.StringType{},
 		"vlan":                   basetypes.Int64Type{},
 	}

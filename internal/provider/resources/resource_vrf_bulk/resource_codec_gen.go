@@ -15,28 +15,23 @@ import (
 )
 
 type NDFCVrfBulkModel struct {
-	FabricName           string                    `json:"fabric,omitempty"`
-	DeployAllAttachments bool                      `json:"-"`
-	Vrfs                 NDFCVrfsValues            `json:"vrfs,omitempty"`
-	VrfsMap              map[string]*NDFCVrfsValue `json:"-"`
+	FabricName           string                   `json:"fabric,omitempty"`
+	DeployAllAttachments bool                     `json:"-"`
+	Vrfs                 map[string]NDFCVrfsValue `json:"vrfs,omitempty"`
 }
 
-type NDFCVrfsValues []NDFCVrfsValue
-
 type NDFCVrfsValue struct {
-	Id                   *int64                                                   `json:"id,omitempty"`
-	FilterThisValue      bool                                                     `json:"-"`
-	VrfName              string                                                   `json:"vrfName,omitempty"`
-	FabricName           string                                                   `json:"fabric,omitempty"`
-	VrfTemplate          string                                                   `json:"vrfTemplate,omitempty"`
-	VrfExtensionTemplate string                                                   `json:"vrfExtensionTemplate,omitempty"`
-	VrfId                *int64                                                   `json:"vrfId,omitempty"`
-	VrfStatus            string                                                   `json:"vrfStatus,omitempty"`
-	DeployAttachments    bool                                                     `json:"-"`
-	AttachList           resource_vrf_attachments.NDFCAttachListValues            `json:"lanAttachList,omitempty"`
-	AttachListMap        map[string]*resource_vrf_attachments.NDFCAttachListValue `json:"-"`
-
-	VrfTemplateConfig NDFCVrfTemplateConfigValue `json:"vrfTemplateConfig,omitempty"`
+	Id                   *int64                                                  `json:"id,omitempty"`
+	FilterThisValue      bool                                                    `json:"-"`
+	VrfName              string                                                  `json:"vrfName,omitempty"`
+	FabricName           string                                                  `json:"fabric,omitempty"`
+	VrfTemplate          string                                                  `json:"vrfTemplate,omitempty"`
+	VrfExtensionTemplate string                                                  `json:"vrfExtensionTemplate,omitempty"`
+	VrfId                *int64                                                  `json:"vrfId,omitempty"`
+	VrfStatus            string                                                  `json:"vrfStatus,omitempty"`
+	DeployAttachments    bool                                                    `json:"-"`
+	AttachList           map[string]resource_vrf_attachments.NDFCAttachListValue `json:"lanAttachList,omitempty"`
+	VrfTemplateConfig    NDFCVrfTemplateConfigValue                              `json:"vrfTemplateConfig,omitempty"`
 }
 
 type NDFCVrfTemplateConfigValue struct {
@@ -77,19 +72,6 @@ type NDFCVrfTemplateConfigValue struct {
 	RouteTargetExportCloudEvpn  string       `json:"cloudRouteTargetExportEvpn,omitempty"`
 }
 
-func (s NDFCVrfsValues) Len() int {
-	return len(s)
-}
-
-func (s NDFCVrfsValues) Less(i, j int) bool {
-	return (*s[i].Id < *s[j].Id)
-
-}
-
-func (s NDFCVrfsValues) Swap(i, j int) {
-	s[i], s[j] = s[j], s[i]
-}
-
 func (v *VrfBulkModel) SetModelData(jsonData *NDFCVrfBulkModel) diag.Diagnostics {
 	var err diag.Diagnostics
 	err = nil
@@ -103,11 +85,10 @@ func (v *VrfBulkModel) SetModelData(jsonData *NDFCVrfBulkModel) diag.Diagnostics
 	v.DeployAllAttachments = types.BoolValue(jsonData.DeployAllAttachments)
 	if len(jsonData.Vrfs) == 0 {
 		log.Printf("v.Vrfs is empty")
-		v.Vrfs = types.ListNull(VrfsValue{}.Type(context.Background()))
+		v.Vrfs = types.MapNull(VrfsValue{}.Type(context.Background()))
 	} else {
-		log.Printf("v.Vrfs contains %d elements", len(jsonData.Vrfs))
-		listData := make([]VrfsValue, 0)
-		for _, item := range jsonData.Vrfs {
+		mapData := make(map[string]VrfsValue)
+		for key, item := range jsonData.Vrfs {
 			if item.FilterThisValue {
 				//Skip this entry - this parameter allows filtering
 				continue
@@ -120,12 +101,12 @@ func (v *VrfBulkModel) SetModelData(jsonData *NDFCVrfBulkModel) diag.Diagnostics
 				return err
 			}
 			data.state = attr.ValueStateKnown
-			listData = append(listData, *data)
+			mapData[key] = *data
 		}
-		v.Vrfs, err = types.ListValueFrom(context.Background(), VrfsValue{}.Type(context.Background()), listData)
+		v.Vrfs, err = types.MapValueFrom(context.Background(), VrfsValue{}.Type(context.Background()), mapData)
 		if err != nil {
-			log.Printf("Error in converting []VrfsValue to  List")
-			return err
+			log.Printf("Error in converting map[string]VrfsValue to  Map")
+
 		}
 	}
 
@@ -136,12 +117,6 @@ func (v *VrfsValue) SetValue(jsonData *NDFCVrfsValue) diag.Diagnostics {
 
 	var err diag.Diagnostics
 	err = nil
-
-	if jsonData.VrfName != "" {
-		v.VrfName = types.StringValue(jsonData.VrfName)
-	} else {
-		v.VrfName = types.StringNull()
-	}
 
 	if jsonData.VrfTemplate != "" {
 		v.VrfTemplate = types.StringValue(jsonData.VrfTemplate)
@@ -406,11 +381,10 @@ func (v *VrfsValue) SetValue(jsonData *NDFCVrfsValue) diag.Diagnostics {
 	v.DeployAttachments = types.BoolValue(jsonData.DeployAttachments)
 	if len(jsonData.AttachList) == 0 {
 		log.Printf("v.AttachList is empty")
-		v.AttachList = types.ListNull(AttachListValue{}.Type(context.Background()))
+		v.AttachList = types.MapNull(AttachListValue{}.Type(context.Background()))
 	} else {
-		log.Printf("v.AttachList contains %d elements", len(jsonData.AttachList))
-		listData := make([]AttachListValue, 0)
-		for _, item := range jsonData.AttachList {
+		mapData := make(map[string]AttachListValue)
+		for key, item := range jsonData.AttachList {
 			if item.FilterThisValue {
 				//Skip this entry - this parameter allows filtering
 				continue
@@ -423,12 +397,12 @@ func (v *VrfsValue) SetValue(jsonData *NDFCVrfsValue) diag.Diagnostics {
 				return err
 			}
 			data.state = attr.ValueStateKnown
-			listData = append(listData, *data)
+			mapData[key] = *data
 		}
-		v.AttachList, err = types.ListValueFrom(context.Background(), AttachListValue{}.Type(context.Background()), listData)
+		v.AttachList, err = types.MapValueFrom(context.Background(), AttachListValue{}.Type(context.Background()), mapData)
 		if err != nil {
-			log.Printf("Error in converting []AttachListValue to  List")
-			return err
+			log.Printf("Error in converting map[string]AttachListValue to  Map")
+
 		}
 	}
 
@@ -439,14 +413,6 @@ func (v *AttachListValue) SetValue(jsonData *resource_vrf_attachments.NDFCAttach
 
 	var err diag.Diagnostics
 	err = nil
-
-	if jsonData.SerialNumber != "" {
-		v.SerialNumber = types.StringValue(jsonData.SerialNumber)
-	} else if jsonData.SwitchSerialNo != "" {
-		v.SerialNumber = types.StringValue(jsonData.SwitchSerialNo)
-	} else {
-		v.SerialNumber = types.StringNull()
-	}
 
 	if jsonData.SwitchName != "" {
 		v.SwitchName = types.StringValue(jsonData.SwitchName)
@@ -519,6 +485,9 @@ func (v *AttachListValue) SetValue(jsonData *resource_vrf_attachments.NDFCAttach
 
 func (v VrfBulkModel) GetModelData() *NDFCVrfBulkModel {
 	var data = new(NDFCVrfBulkModel)
+
+	//MARSHAL_BODY
+
 	if !v.FabricName.IsNull() && !v.FabricName.IsUnknown() {
 		data.FabricName = v.FabricName.ValueString()
 	} else {
@@ -529,442 +498,461 @@ func (v VrfBulkModel) GetModelData() *NDFCVrfBulkModel {
 		data.DeployAllAttachments = v.DeployAllAttachments.ValueBool()
 	}
 
-	data.VrfsMap = make(map[string]*NDFCVrfsValue)
-
 	if !v.Vrfs.IsNull() && !v.Vrfs.IsUnknown() {
-		elements := make([]VrfsValue, len(v.Vrfs.Elements()))
-		data.Vrfs = make([]NDFCVrfsValue, len(v.Vrfs.Elements()))
+		elements1 := make(map[string]VrfsValue, len(v.Vrfs.Elements()))
 
-		diag := v.Vrfs.ElementsAs(context.Background(), &elements, false)
+		data.Vrfs = make(map[string]NDFCVrfsValue)
+
+		diag := v.Vrfs.ElementsAs(context.Background(), &elements1, false)
 		if diag != nil {
 			panic(diag)
 		}
-		for i1, ele1 := range elements {
+		for k1, ele1 := range elements1 {
+			data1 := new(NDFCVrfsValue)
+			// id | Int64| []| true
 
-			if !ele1.VrfName.IsNull() && !ele1.VrfName.IsUnknown() {
-				data.Vrfs[i1].VrfName = ele1.VrfName.ValueString()
-			} else {
-				data.Vrfs[i1].VrfName = ""
-			}
+			// filter_this_value | Bool| []| true
 
-			data.VrfsMap[data.Vrfs[i1].VrfName] = &data.Vrfs[i1]
+			// vrf_name | String| []| true
 
+			// fabric_name | String| []| true
+
+			// vrf_template | String| []| false
 			if !ele1.VrfTemplate.IsNull() && !ele1.VrfTemplate.IsUnknown() {
-				data.Vrfs[i1].VrfTemplate = ele1.VrfTemplate.ValueString()
+
+				data1.VrfTemplate = ele1.VrfTemplate.ValueString()
 			} else {
-				data.Vrfs[i1].VrfTemplate = ""
+				data1.VrfTemplate = ""
 			}
 
+			// vrf_extension_template | String| []| false
 			if !ele1.VrfExtensionTemplate.IsNull() && !ele1.VrfExtensionTemplate.IsUnknown() {
-				data.Vrfs[i1].VrfExtensionTemplate = ele1.VrfExtensionTemplate.ValueString()
+
+				data1.VrfExtensionTemplate = ele1.VrfExtensionTemplate.ValueString()
 			} else {
-				data.Vrfs[i1].VrfExtensionTemplate = ""
+				data1.VrfExtensionTemplate = ""
 			}
 
+			// vrf_id | Int64| []| false
 			if !ele1.VrfId.IsNull() && !ele1.VrfId.IsUnknown() {
-				data.Vrfs[i1].VrfId = new(int64)
-				*data.Vrfs[i1].VrfId = ele1.VrfId.ValueInt64()
+
+				data1.VrfId = new(int64)
+				*data1.VrfId = ele1.VrfId.ValueInt64()
 
 			} else {
-				data.Vrfs[i1].VrfId = nil
+				data1.VrfId = nil
 			}
 
-			//-----inline nesting Start----
+			// vlan_id | Int64| [vrfTemplateConfig]| false
 			if !ele1.VlanId.IsNull() && !ele1.VlanId.IsUnknown() {
-				data.Vrfs[i1].VrfTemplateConfig.VlanId = new(Int64Custom)
-				*data.Vrfs[i1].VrfTemplateConfig.VlanId = Int64Custom(ele1.VlanId.ValueInt64())
+				//-----inline nested----
+				data1.VrfTemplateConfig.VlanId = new(Int64Custom)
+				*data1.VrfTemplateConfig.VlanId = Int64Custom(ele1.VlanId.ValueInt64())
 			} else {
-				data.Vrfs[i1].VrfTemplateConfig.VlanId = nil
+				data1.VrfTemplateConfig.VlanId = nil
 			}
-			//-----inline nesting end----
 
-			//-----inline nesting Start----
+			// vlan_name | String| [vrfTemplateConfig]| false
 			if !ele1.VlanName.IsNull() && !ele1.VlanName.IsUnknown() {
-				data.Vrfs[i1].VrfTemplateConfig.VlanName = ele1.VlanName.ValueString()
+				//-----inline nested----
+				data1.VrfTemplateConfig.VlanName = ele1.VlanName.ValueString()
 			} else {
-				data.Vrfs[i1].VrfTemplateConfig.VlanName = ""
+				data1.VrfTemplateConfig.VlanName = ""
 			}
-			//-----inline nesting end----
 
-			//-----inline nesting Start----
+			// interface_description | String| [vrfTemplateConfig]| false
 			if !ele1.InterfaceDescription.IsNull() && !ele1.InterfaceDescription.IsUnknown() {
-				data.Vrfs[i1].VrfTemplateConfig.InterfaceDescription = ele1.InterfaceDescription.ValueString()
+				//-----inline nested----
+				data1.VrfTemplateConfig.InterfaceDescription = ele1.InterfaceDescription.ValueString()
 			} else {
-				data.Vrfs[i1].VrfTemplateConfig.InterfaceDescription = ""
+				data1.VrfTemplateConfig.InterfaceDescription = ""
 			}
-			//-----inline nesting end----
 
-			//-----inline nesting Start----
+			// vrf_description | String| [vrfTemplateConfig]| false
 			if !ele1.VrfDescription.IsNull() && !ele1.VrfDescription.IsUnknown() {
-				data.Vrfs[i1].VrfTemplateConfig.VrfDescription = ele1.VrfDescription.ValueString()
+				//-----inline nested----
+				data1.VrfTemplateConfig.VrfDescription = ele1.VrfDescription.ValueString()
 			} else {
-				data.Vrfs[i1].VrfTemplateConfig.VrfDescription = ""
+				data1.VrfTemplateConfig.VrfDescription = ""
 			}
-			//-----inline nesting end----
 
-			//-----inline nesting Start----
+			// mtu | Int64| [vrfTemplateConfig]| false
 			if !ele1.Mtu.IsNull() && !ele1.Mtu.IsUnknown() {
-				data.Vrfs[i1].VrfTemplateConfig.Mtu = new(int64)
-				*data.Vrfs[i1].VrfTemplateConfig.Mtu = ele1.Mtu.ValueInt64()
+				//-----inline nested----
+				data1.VrfTemplateConfig.Mtu = new(int64)
+				*data1.VrfTemplateConfig.Mtu = ele1.Mtu.ValueInt64()
 
 			} else {
-				data.Vrfs[i1].VrfTemplateConfig.Mtu = nil
+				data1.VrfTemplateConfig.Mtu = nil
 			}
-			//-----inline nesting end----
 
+			// vrf_status | String| []| false
 			if !ele1.VrfStatus.IsNull() && !ele1.VrfStatus.IsUnknown() {
-				data.Vrfs[i1].VrfStatus = ele1.VrfStatus.ValueString()
+
+				data1.VrfStatus = ele1.VrfStatus.ValueString()
 			} else {
-				data.Vrfs[i1].VrfStatus = ""
+				data1.VrfStatus = ""
 			}
 
-			//-----inline nesting Start----
+			// loopback_routing_tag | Int64| [vrfTemplateConfig]| false
 			if !ele1.LoopbackRoutingTag.IsNull() && !ele1.LoopbackRoutingTag.IsUnknown() {
-				data.Vrfs[i1].VrfTemplateConfig.LoopbackRoutingTag = new(int64)
-				*data.Vrfs[i1].VrfTemplateConfig.LoopbackRoutingTag = ele1.LoopbackRoutingTag.ValueInt64()
+				//-----inline nested----
+				data1.VrfTemplateConfig.LoopbackRoutingTag = new(int64)
+				*data1.VrfTemplateConfig.LoopbackRoutingTag = ele1.LoopbackRoutingTag.ValueInt64()
 
 			} else {
-				data.Vrfs[i1].VrfTemplateConfig.LoopbackRoutingTag = nil
+				data1.VrfTemplateConfig.LoopbackRoutingTag = nil
 			}
-			//-----inline nesting end----
 
-			//-----inline nesting Start----
+			// redistribute_direct_route_map | String| [vrfTemplateConfig]| false
 			if !ele1.RedistributeDirectRouteMap.IsNull() && !ele1.RedistributeDirectRouteMap.IsUnknown() {
-				data.Vrfs[i1].VrfTemplateConfig.RedistributeDirectRouteMap = ele1.RedistributeDirectRouteMap.ValueString()
+				//-----inline nested----
+				data1.VrfTemplateConfig.RedistributeDirectRouteMap = ele1.RedistributeDirectRouteMap.ValueString()
 			} else {
-				data.Vrfs[i1].VrfTemplateConfig.RedistributeDirectRouteMap = ""
+				data1.VrfTemplateConfig.RedistributeDirectRouteMap = ""
 			}
-			//-----inline nesting end----
 
-			//-----inline nesting Start----
+			// max_bgp_paths | Int64| [vrfTemplateConfig]| false
 			if !ele1.MaxBgpPaths.IsNull() && !ele1.MaxBgpPaths.IsUnknown() {
-				data.Vrfs[i1].VrfTemplateConfig.MaxBgpPaths = new(int64)
-				*data.Vrfs[i1].VrfTemplateConfig.MaxBgpPaths = ele1.MaxBgpPaths.ValueInt64()
+				//-----inline nested----
+				data1.VrfTemplateConfig.MaxBgpPaths = new(int64)
+				*data1.VrfTemplateConfig.MaxBgpPaths = ele1.MaxBgpPaths.ValueInt64()
 
 			} else {
-				data.Vrfs[i1].VrfTemplateConfig.MaxBgpPaths = nil
+				data1.VrfTemplateConfig.MaxBgpPaths = nil
 			}
-			//-----inline nesting end----
 
-			//-----inline nesting Start----
+			// max_ibgp_paths | Int64| [vrfTemplateConfig]| false
 			if !ele1.MaxIbgpPaths.IsNull() && !ele1.MaxIbgpPaths.IsUnknown() {
-				data.Vrfs[i1].VrfTemplateConfig.MaxIbgpPaths = new(int64)
-				*data.Vrfs[i1].VrfTemplateConfig.MaxIbgpPaths = ele1.MaxIbgpPaths.ValueInt64()
+				//-----inline nested----
+				data1.VrfTemplateConfig.MaxIbgpPaths = new(int64)
+				*data1.VrfTemplateConfig.MaxIbgpPaths = ele1.MaxIbgpPaths.ValueInt64()
 
 			} else {
-				data.Vrfs[i1].VrfTemplateConfig.MaxIbgpPaths = nil
+				data1.VrfTemplateConfig.MaxIbgpPaths = nil
 			}
-			//-----inline nesting end----
 
-			//-----inline nesting Start----
-			if !ele1.Ipv6LinkLocal.IsNull() && !ele1.Ipv6LinkLocal.IsUnknown() { // test signature1  NDFCType:
-				data.Vrfs[i1].VrfTemplateConfig.Ipv6LinkLocal = strconv.FormatBool(ele1.Ipv6LinkLocal.ValueBool())
+			// ipv6_link_local | Bool| [vrfTemplateConfig]| false
+			if !ele1.Ipv6LinkLocal.IsNull() && !ele1.Ipv6LinkLocal.IsUnknown() {
+				//-----inline nested----
+				data1.VrfTemplateConfig.Ipv6LinkLocal = strconv.FormatBool(ele1.Ipv6LinkLocal.ValueBool())
 			} else {
-				data.Vrfs[i1].VrfTemplateConfig.Ipv6LinkLocal = ""
+				data1.VrfTemplateConfig.Ipv6LinkLocal = ""
 			}
 
-			//-----inline nesting end----
-
-			//-----inline nesting Start----
-			if !ele1.Trm.IsNull() && !ele1.Trm.IsUnknown() { // test signature1  NDFCType:
-				data.Vrfs[i1].VrfTemplateConfig.Trm = strconv.FormatBool(ele1.Trm.ValueBool())
+			// trm | Bool| [vrfTemplateConfig]| false
+			if !ele1.Trm.IsNull() && !ele1.Trm.IsUnknown() {
+				//-----inline nested----
+				data1.VrfTemplateConfig.Trm = strconv.FormatBool(ele1.Trm.ValueBool())
 			} else {
-				data.Vrfs[i1].VrfTemplateConfig.Trm = ""
+				data1.VrfTemplateConfig.Trm = ""
 			}
 
-			//-----inline nesting end----
-
-			//-----inline nesting Start----
-			if !ele1.NoRp.IsNull() && !ele1.NoRp.IsUnknown() { // test signature1  NDFCType:
-				data.Vrfs[i1].VrfTemplateConfig.NoRp = strconv.FormatBool(ele1.NoRp.ValueBool())
+			// no_rp | Bool| [vrfTemplateConfig]| false
+			if !ele1.NoRp.IsNull() && !ele1.NoRp.IsUnknown() {
+				//-----inline nested----
+				data1.VrfTemplateConfig.NoRp = strconv.FormatBool(ele1.NoRp.ValueBool())
 			} else {
-				data.Vrfs[i1].VrfTemplateConfig.NoRp = ""
+				data1.VrfTemplateConfig.NoRp = ""
 			}
 
-			//-----inline nesting end----
-
-			//-----inline nesting Start----
-			if !ele1.RpExternal.IsNull() && !ele1.RpExternal.IsUnknown() { // test signature1  NDFCType:
-				data.Vrfs[i1].VrfTemplateConfig.RpExternal = strconv.FormatBool(ele1.RpExternal.ValueBool())
+			// rp_external | Bool| [vrfTemplateConfig]| false
+			if !ele1.RpExternal.IsNull() && !ele1.RpExternal.IsUnknown() {
+				//-----inline nested----
+				data1.VrfTemplateConfig.RpExternal = strconv.FormatBool(ele1.RpExternal.ValueBool())
 			} else {
-				data.Vrfs[i1].VrfTemplateConfig.RpExternal = ""
+				data1.VrfTemplateConfig.RpExternal = ""
 			}
 
-			//-----inline nesting end----
-
-			//-----inline nesting Start----
+			// rp_address | String| [vrfTemplateConfig]| false
 			if !ele1.RpAddress.IsNull() && !ele1.RpAddress.IsUnknown() {
-				data.Vrfs[i1].VrfTemplateConfig.RpAddress = ele1.RpAddress.ValueString()
+				//-----inline nested----
+				data1.VrfTemplateConfig.RpAddress = ele1.RpAddress.ValueString()
 			} else {
-				data.Vrfs[i1].VrfTemplateConfig.RpAddress = ""
+				data1.VrfTemplateConfig.RpAddress = ""
 			}
-			//-----inline nesting end----
 
-			//-----inline nesting Start----
+			// rp_loopback_id | Int64| [vrfTemplateConfig]| false
 			if !ele1.RpLoopbackId.IsNull() && !ele1.RpLoopbackId.IsUnknown() {
-				data.Vrfs[i1].VrfTemplateConfig.RpLoopbackId = new(Int64Custom)
-				*data.Vrfs[i1].VrfTemplateConfig.RpLoopbackId = Int64Custom(ele1.RpLoopbackId.ValueInt64())
+				//-----inline nested----
+				data1.VrfTemplateConfig.RpLoopbackId = new(Int64Custom)
+				*data1.VrfTemplateConfig.RpLoopbackId = Int64Custom(ele1.RpLoopbackId.ValueInt64())
 			} else {
-				data.Vrfs[i1].VrfTemplateConfig.RpLoopbackId = nil
+				data1.VrfTemplateConfig.RpLoopbackId = nil
 			}
-			//-----inline nesting end----
 
-			//-----inline nesting Start----
+			// underlay_multicast_address | String| [vrfTemplateConfig]| false
 			if !ele1.UnderlayMulticastAddress.IsNull() && !ele1.UnderlayMulticastAddress.IsUnknown() {
-				data.Vrfs[i1].VrfTemplateConfig.UnderlayMulticastAddress = ele1.UnderlayMulticastAddress.ValueString()
+				//-----inline nested----
+				data1.VrfTemplateConfig.UnderlayMulticastAddress = ele1.UnderlayMulticastAddress.ValueString()
 			} else {
-				data.Vrfs[i1].VrfTemplateConfig.UnderlayMulticastAddress = ""
+				data1.VrfTemplateConfig.UnderlayMulticastAddress = ""
 			}
-			//-----inline nesting end----
 
-			//-----inline nesting Start----
+			// overlay_multicast_groups | String| [vrfTemplateConfig]| false
 			if !ele1.OverlayMulticastGroups.IsNull() && !ele1.OverlayMulticastGroups.IsUnknown() {
-				data.Vrfs[i1].VrfTemplateConfig.OverlayMulticastGroups = ele1.OverlayMulticastGroups.ValueString()
+				//-----inline nested----
+				data1.VrfTemplateConfig.OverlayMulticastGroups = ele1.OverlayMulticastGroups.ValueString()
 			} else {
-				data.Vrfs[i1].VrfTemplateConfig.OverlayMulticastGroups = ""
-			}
-			//-----inline nesting end----
-
-			//-----inline nesting Start----
-			if !ele1.MvpnInterAs.IsNull() && !ele1.MvpnInterAs.IsUnknown() { // test signature1  NDFCType:
-				data.Vrfs[i1].VrfTemplateConfig.MvpnInterAs = strconv.FormatBool(ele1.MvpnInterAs.ValueBool())
-			} else {
-				data.Vrfs[i1].VrfTemplateConfig.MvpnInterAs = ""
+				data1.VrfTemplateConfig.OverlayMulticastGroups = ""
 			}
 
-			//-----inline nesting end----
-
-			//-----inline nesting Start----
-			if !ele1.TrmBgwMsite.IsNull() && !ele1.TrmBgwMsite.IsUnknown() { // test signature1  NDFCType:
-				data.Vrfs[i1].VrfTemplateConfig.TrmBgwMsite = strconv.FormatBool(ele1.TrmBgwMsite.ValueBool())
+			// mvpn_inter_as | Bool| [vrfTemplateConfig]| false
+			if !ele1.MvpnInterAs.IsNull() && !ele1.MvpnInterAs.IsUnknown() {
+				//-----inline nested----
+				data1.VrfTemplateConfig.MvpnInterAs = strconv.FormatBool(ele1.MvpnInterAs.ValueBool())
 			} else {
-				data.Vrfs[i1].VrfTemplateConfig.TrmBgwMsite = ""
+				data1.VrfTemplateConfig.MvpnInterAs = ""
 			}
 
-			//-----inline nesting end----
-
-			//-----inline nesting Start----
-			if !ele1.AdvertiseHostRoutes.IsNull() && !ele1.AdvertiseHostRoutes.IsUnknown() { // test signature1  NDFCType:
-				data.Vrfs[i1].VrfTemplateConfig.AdvertiseHostRoutes = strconv.FormatBool(ele1.AdvertiseHostRoutes.ValueBool())
+			// trm_bgw_msite | Bool| [vrfTemplateConfig]| false
+			if !ele1.TrmBgwMsite.IsNull() && !ele1.TrmBgwMsite.IsUnknown() {
+				//-----inline nested----
+				data1.VrfTemplateConfig.TrmBgwMsite = strconv.FormatBool(ele1.TrmBgwMsite.ValueBool())
 			} else {
-				data.Vrfs[i1].VrfTemplateConfig.AdvertiseHostRoutes = ""
+				data1.VrfTemplateConfig.TrmBgwMsite = ""
 			}
 
-			//-----inline nesting end----
-
-			//-----inline nesting Start----
-			if !ele1.AdvertiseDefaultRoute.IsNull() && !ele1.AdvertiseDefaultRoute.IsUnknown() { // test signature1  NDFCType:
-				data.Vrfs[i1].VrfTemplateConfig.AdvertiseDefaultRoute = strconv.FormatBool(ele1.AdvertiseDefaultRoute.ValueBool())
+			// advertise_host_routes | Bool| [vrfTemplateConfig]| false
+			if !ele1.AdvertiseHostRoutes.IsNull() && !ele1.AdvertiseHostRoutes.IsUnknown() {
+				//-----inline nested----
+				data1.VrfTemplateConfig.AdvertiseHostRoutes = strconv.FormatBool(ele1.AdvertiseHostRoutes.ValueBool())
 			} else {
-				data.Vrfs[i1].VrfTemplateConfig.AdvertiseDefaultRoute = ""
+				data1.VrfTemplateConfig.AdvertiseHostRoutes = ""
 			}
 
-			//-----inline nesting end----
-
-			//-----inline nesting Start----
-			if !ele1.ConfigureStaticDefaultRoute.IsNull() && !ele1.ConfigureStaticDefaultRoute.IsUnknown() { // test signature1  NDFCType:
-				data.Vrfs[i1].VrfTemplateConfig.ConfigureStaticDefaultRoute = strconv.FormatBool(ele1.ConfigureStaticDefaultRoute.ValueBool())
+			// advertise_default_route | Bool| [vrfTemplateConfig]| false
+			if !ele1.AdvertiseDefaultRoute.IsNull() && !ele1.AdvertiseDefaultRoute.IsUnknown() {
+				//-----inline nested----
+				data1.VrfTemplateConfig.AdvertiseDefaultRoute = strconv.FormatBool(ele1.AdvertiseDefaultRoute.ValueBool())
 			} else {
-				data.Vrfs[i1].VrfTemplateConfig.ConfigureStaticDefaultRoute = ""
+				data1.VrfTemplateConfig.AdvertiseDefaultRoute = ""
 			}
 
-			//-----inline nesting end----
+			// configure_static_default_route | Bool| [vrfTemplateConfig]| false
+			if !ele1.ConfigureStaticDefaultRoute.IsNull() && !ele1.ConfigureStaticDefaultRoute.IsUnknown() {
+				//-----inline nested----
+				data1.VrfTemplateConfig.ConfigureStaticDefaultRoute = strconv.FormatBool(ele1.ConfigureStaticDefaultRoute.ValueBool())
+			} else {
+				data1.VrfTemplateConfig.ConfigureStaticDefaultRoute = ""
+			}
 
-			//-----inline nesting Start----
+			// bgp_password | String| [vrfTemplateConfig]| false
 			if !ele1.BgpPassword.IsNull() && !ele1.BgpPassword.IsUnknown() {
-				data.Vrfs[i1].VrfTemplateConfig.BgpPassword = ele1.BgpPassword.ValueString()
+				//-----inline nested----
+				data1.VrfTemplateConfig.BgpPassword = ele1.BgpPassword.ValueString()
 			} else {
-				data.Vrfs[i1].VrfTemplateConfig.BgpPassword = ""
+				data1.VrfTemplateConfig.BgpPassword = ""
 			}
-			//-----inline nesting end----
 
-			//-----inline nesting Start----
+			// bgp_password_type | String| [vrfTemplateConfig]| false
 			if !ele1.BgpPasswordType.IsNull() && !ele1.BgpPasswordType.IsUnknown() {
-				data.Vrfs[i1].VrfTemplateConfig.BgpPasswordType = ele1.BgpPasswordType.ValueString()
+				//-----inline nested----
+				data1.VrfTemplateConfig.BgpPasswordType = ele1.BgpPasswordType.ValueString()
 			} else {
-				data.Vrfs[i1].VrfTemplateConfig.BgpPasswordType = ""
-			}
-			//-----inline nesting end----
-
-			//-----inline nesting Start----
-			if !ele1.Netflow.IsNull() && !ele1.Netflow.IsUnknown() { // test signature1  NDFCType:
-				data.Vrfs[i1].VrfTemplateConfig.Netflow = strconv.FormatBool(ele1.Netflow.ValueBool())
-			} else {
-				data.Vrfs[i1].VrfTemplateConfig.Netflow = ""
+				data1.VrfTemplateConfig.BgpPasswordType = ""
 			}
 
-			//-----inline nesting end----
+			// netflow | Bool| [vrfTemplateConfig]| false
+			if !ele1.Netflow.IsNull() && !ele1.Netflow.IsUnknown() {
+				//-----inline nested----
+				data1.VrfTemplateConfig.Netflow = strconv.FormatBool(ele1.Netflow.ValueBool())
+			} else {
+				data1.VrfTemplateConfig.Netflow = ""
+			}
 
-			//-----inline nesting Start----
+			// netflow_monitor | String| [vrfTemplateConfig]| false
 			if !ele1.NetflowMonitor.IsNull() && !ele1.NetflowMonitor.IsUnknown() {
-				data.Vrfs[i1].VrfTemplateConfig.NetflowMonitor = ele1.NetflowMonitor.ValueString()
+				//-----inline nested----
+				data1.VrfTemplateConfig.NetflowMonitor = ele1.NetflowMonitor.ValueString()
 			} else {
-				data.Vrfs[i1].VrfTemplateConfig.NetflowMonitor = ""
-			}
-			//-----inline nesting end----
-
-			//-----inline nesting Start----
-			if !ele1.DisableRtAuto.IsNull() && !ele1.DisableRtAuto.IsUnknown() { // test signature1  NDFCType:
-				data.Vrfs[i1].VrfTemplateConfig.DisableRtAuto = strconv.FormatBool(ele1.DisableRtAuto.ValueBool())
-			} else {
-				data.Vrfs[i1].VrfTemplateConfig.DisableRtAuto = ""
+				data1.VrfTemplateConfig.NetflowMonitor = ""
 			}
 
-			//-----inline nesting end----
+			// disable_rt_auto | Bool| [vrfTemplateConfig]| false
+			if !ele1.DisableRtAuto.IsNull() && !ele1.DisableRtAuto.IsUnknown() {
+				//-----inline nested----
+				data1.VrfTemplateConfig.DisableRtAuto = strconv.FormatBool(ele1.DisableRtAuto.ValueBool())
+			} else {
+				data1.VrfTemplateConfig.DisableRtAuto = ""
+			}
 
-			//-----inline nesting Start----
+			// route_target_import | String| [vrfTemplateConfig]| false
 			if !ele1.RouteTargetImport.IsNull() && !ele1.RouteTargetImport.IsUnknown() {
-				data.Vrfs[i1].VrfTemplateConfig.RouteTargetImport = ele1.RouteTargetImport.ValueString()
+				//-----inline nested----
+				data1.VrfTemplateConfig.RouteTargetImport = ele1.RouteTargetImport.ValueString()
 			} else {
-				data.Vrfs[i1].VrfTemplateConfig.RouteTargetImport = ""
+				data1.VrfTemplateConfig.RouteTargetImport = ""
 			}
-			//-----inline nesting end----
 
-			//-----inline nesting Start----
+			// route_target_export | String| [vrfTemplateConfig]| false
 			if !ele1.RouteTargetExport.IsNull() && !ele1.RouteTargetExport.IsUnknown() {
-				data.Vrfs[i1].VrfTemplateConfig.RouteTargetExport = ele1.RouteTargetExport.ValueString()
+				//-----inline nested----
+				data1.VrfTemplateConfig.RouteTargetExport = ele1.RouteTargetExport.ValueString()
 			} else {
-				data.Vrfs[i1].VrfTemplateConfig.RouteTargetExport = ""
+				data1.VrfTemplateConfig.RouteTargetExport = ""
 			}
-			//-----inline nesting end----
 
-			//-----inline nesting Start----
+			// route_target_import_evpn | String| [vrfTemplateConfig]| false
 			if !ele1.RouteTargetImportEvpn.IsNull() && !ele1.RouteTargetImportEvpn.IsUnknown() {
-				data.Vrfs[i1].VrfTemplateConfig.RouteTargetImportEvpn = ele1.RouteTargetImportEvpn.ValueString()
+				//-----inline nested----
+				data1.VrfTemplateConfig.RouteTargetImportEvpn = ele1.RouteTargetImportEvpn.ValueString()
 			} else {
-				data.Vrfs[i1].VrfTemplateConfig.RouteTargetImportEvpn = ""
+				data1.VrfTemplateConfig.RouteTargetImportEvpn = ""
 			}
-			//-----inline nesting end----
 
-			//-----inline nesting Start----
+			// route_target_export_evpn | String| [vrfTemplateConfig]| false
 			if !ele1.RouteTargetExportEvpn.IsNull() && !ele1.RouteTargetExportEvpn.IsUnknown() {
-				data.Vrfs[i1].VrfTemplateConfig.RouteTargetExportEvpn = ele1.RouteTargetExportEvpn.ValueString()
+				//-----inline nested----
+				data1.VrfTemplateConfig.RouteTargetExportEvpn = ele1.RouteTargetExportEvpn.ValueString()
 			} else {
-				data.Vrfs[i1].VrfTemplateConfig.RouteTargetExportEvpn = ""
+				data1.VrfTemplateConfig.RouteTargetExportEvpn = ""
 			}
-			//-----inline nesting end----
 
-			//-----inline nesting Start----
+			// route_target_import_mvpn | String| [vrfTemplateConfig]| false
 			if !ele1.RouteTargetImportMvpn.IsNull() && !ele1.RouteTargetImportMvpn.IsUnknown() {
-				data.Vrfs[i1].VrfTemplateConfig.RouteTargetImportMvpn = ele1.RouteTargetImportMvpn.ValueString()
+				//-----inline nested----
+				data1.VrfTemplateConfig.RouteTargetImportMvpn = ele1.RouteTargetImportMvpn.ValueString()
 			} else {
-				data.Vrfs[i1].VrfTemplateConfig.RouteTargetImportMvpn = ""
+				data1.VrfTemplateConfig.RouteTargetImportMvpn = ""
 			}
-			//-----inline nesting end----
 
-			//-----inline nesting Start----
+			// route_target_export_mvpn | String| [vrfTemplateConfig]| false
 			if !ele1.RouteTargetExportMvpn.IsNull() && !ele1.RouteTargetExportMvpn.IsUnknown() {
-				data.Vrfs[i1].VrfTemplateConfig.RouteTargetExportMvpn = ele1.RouteTargetExportMvpn.ValueString()
+				//-----inline nested----
+				data1.VrfTemplateConfig.RouteTargetExportMvpn = ele1.RouteTargetExportMvpn.ValueString()
 			} else {
-				data.Vrfs[i1].VrfTemplateConfig.RouteTargetExportMvpn = ""
+				data1.VrfTemplateConfig.RouteTargetExportMvpn = ""
 			}
-			//-----inline nesting end----
 
-			//-----inline nesting Start----
+			// route_target_import_cloud_evpn | String| [vrfTemplateConfig]| false
 			if !ele1.RouteTargetImportCloudEvpn.IsNull() && !ele1.RouteTargetImportCloudEvpn.IsUnknown() {
-				data.Vrfs[i1].VrfTemplateConfig.RouteTargetImportCloudEvpn = ele1.RouteTargetImportCloudEvpn.ValueString()
+				//-----inline nested----
+				data1.VrfTemplateConfig.RouteTargetImportCloudEvpn = ele1.RouteTargetImportCloudEvpn.ValueString()
 			} else {
-				data.Vrfs[i1].VrfTemplateConfig.RouteTargetImportCloudEvpn = ""
+				data1.VrfTemplateConfig.RouteTargetImportCloudEvpn = ""
 			}
-			//-----inline nesting end----
 
-			//-----inline nesting Start----
+			// route_target_export_cloud_evpn | String| [vrfTemplateConfig]| false
 			if !ele1.RouteTargetExportCloudEvpn.IsNull() && !ele1.RouteTargetExportCloudEvpn.IsUnknown() {
-				data.Vrfs[i1].VrfTemplateConfig.RouteTargetExportCloudEvpn = ele1.RouteTargetExportCloudEvpn.ValueString()
+				//-----inline nested----
+				data1.VrfTemplateConfig.RouteTargetExportCloudEvpn = ele1.RouteTargetExportCloudEvpn.ValueString()
 			} else {
-				data.Vrfs[i1].VrfTemplateConfig.RouteTargetExportCloudEvpn = ""
+				data1.VrfTemplateConfig.RouteTargetExportCloudEvpn = ""
 			}
-			//-----inline nesting end----
 
+			// deploy_attachments | Bool| []| false
 			if !ele1.DeployAttachments.IsNull() && !ele1.DeployAttachments.IsUnknown() {
 
-				data.Vrfs[i1].DeployAttachments = ele1.DeployAttachments.ValueBool()
+				data1.DeployAttachments = ele1.DeployAttachments.ValueBool()
+
 			}
 
-			data.Vrfs[i1].AttachListMap = make(map[string]*resource_vrf_attachments.NDFCAttachListValue)
+			// attach_list | MapNested| []| false
 
 			if !ele1.AttachList.IsNull() && !ele1.AttachList.IsUnknown() {
-				elements := make([]AttachListValue, len(ele1.AttachList.Elements()))
-				data.Vrfs[i1].AttachList = make([]resource_vrf_attachments.NDFCAttachListValue, len(ele1.AttachList.Elements()))
-				diag := ele1.AttachList.ElementsAs(context.Background(), &elements, false)
+				elements2 := make(map[string]AttachListValue, len(ele1.AttachList.Elements()))
+
+				data1.AttachList = make(map[string]resource_vrf_attachments.NDFCAttachListValue)
+				diag := ele1.AttachList.ElementsAs(context.Background(), &elements2, false)
 				if diag != nil {
 					panic(diag)
 				}
-				for i2, ele2 := range elements {
+				for k2, ele2 := range elements2 {
+					data2 := new(resource_vrf_attachments.NDFCAttachListValue)
 
-					if !ele2.SerialNumber.IsNull() && !ele2.SerialNumber.IsUnknown() {
-						data.Vrfs[i1].AttachList[i2].SerialNumber = ele2.SerialNumber.ValueString()
-					} else {
-						data.Vrfs[i1].AttachList[i2].SerialNumber = ""
-					}
+					// filter_this_value | Bool| []| true
 
-					data.Vrfs[i1].AttachListMap[data.Vrfs[i1].AttachList[i2].SerialNumber] = &data.Vrfs[i1].AttachList[i2]
+					// id | Int64| []| true
 
+					// fabric_name | String| []| true
+
+					// vrf_name | String| []| true
+
+					// serial_number | String| []| true
+
+					// switch_name | String| []| false
 					if !ele2.SwitchName.IsNull() && !ele2.SwitchName.IsUnknown() {
-						data.Vrfs[i1].AttachList[i2].SwitchName = ele2.SwitchName.ValueString()
+
+						data2.SwitchName = ele2.SwitchName.ValueString()
 					} else {
-						data.Vrfs[i1].AttachList[i2].SwitchName = ""
+						data2.SwitchName = ""
 					}
 
+					// vlan | Int64| []| false
 					if !ele2.Vlan.IsNull() && !ele2.Vlan.IsUnknown() {
-						data.Vrfs[i1].AttachList[i2].Vlan = new(Int64Custom)
-						*data.Vrfs[i1].AttachList[i2].Vlan = Int64Custom(ele2.Vlan.ValueInt64())
+						data2.Vlan = new(Int64Custom)
+						*data2.Vlan = Int64Custom(ele2.Vlan.ValueInt64())
 					} else {
-						data.Vrfs[i1].AttachList[i2].Vlan = nil
+						data2.Vlan = nil
 					}
 
+					// deployment | Bool| []| true
+
+					// attach_state | String| []| false
 					if !ele2.AttachState.IsNull() && !ele2.AttachState.IsUnknown() {
-						data.Vrfs[i1].AttachList[i2].AttachState = ele2.AttachState.ValueString()
+
+						data2.AttachState = ele2.AttachState.ValueString()
 					} else {
-						data.Vrfs[i1].AttachList[i2].AttachState = ""
+						data2.AttachState = ""
 					}
 
+					// attached | Bool| []| false
 					if !ele2.Attached.IsNull() && !ele2.Attached.IsUnknown() {
 
-						data.Vrfs[i1].AttachList[i2].Attached = new(bool)
-						*data.Vrfs[i1].AttachList[i2].Attached = ele2.Attached.ValueBool()
-					} else {
-						data.Vrfs[i1].AttachList[i2].Attached = nil
+						data2.Attached = new(bool)
+						*data2.Attached = ele2.Attached.ValueBool()
+
 					}
 
+					// freeform_config | String| []| false
 					if !ele2.FreeformConfig.IsNull() && !ele2.FreeformConfig.IsUnknown() {
-						data.Vrfs[i1].AttachList[i2].FreeformConfig = ele2.FreeformConfig.ValueString()
+
+						data2.FreeformConfig = ele2.FreeformConfig.ValueString()
 					} else {
-						data.Vrfs[i1].AttachList[i2].FreeformConfig = ""
+						data2.FreeformConfig = ""
 					}
 
+					// deploy_this_attachment | Bool| []| false
 					if !ele2.DeployThisAttachment.IsNull() && !ele2.DeployThisAttachment.IsUnknown() {
 
-						data.Vrfs[i1].AttachList[i2].DeployThisAttachment = ele2.DeployThisAttachment.ValueBool()
+						data2.DeployThisAttachment = ele2.DeployThisAttachment.ValueBool()
+
 					}
 
-					//-----inline nesting Start----
+					// loopback_id | Int64| [instanceValues]| false
 					if !ele2.LoopbackId.IsNull() && !ele2.LoopbackId.IsUnknown() {
-						data.Vrfs[i1].AttachList[i2].InstanceValues.LoopbackId = new(Int64Custom)
-						*data.Vrfs[i1].AttachList[i2].InstanceValues.LoopbackId = Int64Custom(ele2.LoopbackId.ValueInt64())
+						//-----inline nested----
+						data2.InstanceValues.LoopbackId = new(Int64Custom)
+						*data2.InstanceValues.LoopbackId = Int64Custom(ele2.LoopbackId.ValueInt64())
 					} else {
-						data.Vrfs[i1].AttachList[i2].InstanceValues.LoopbackId = nil
+						data2.InstanceValues.LoopbackId = nil
 					}
-					//-----inline nesting end----
 
-					//-----inline nesting Start----
+					// loopback_ipv4 | String| [instanceValues]| false
 					if !ele2.LoopbackIpv4.IsNull() && !ele2.LoopbackIpv4.IsUnknown() {
-						data.Vrfs[i1].AttachList[i2].InstanceValues.LoopbackIpv4 = ele2.LoopbackIpv4.ValueString()
+						//-----inline nested----
+						data2.InstanceValues.LoopbackIpv4 = ele2.LoopbackIpv4.ValueString()
 					} else {
-						data.Vrfs[i1].AttachList[i2].InstanceValues.LoopbackIpv4 = ""
+						data2.InstanceValues.LoopbackIpv4 = ""
 					}
-					//-----inline nesting end----
 
-					//-----inline nesting Start----
+					// loopback_ipv6 | String| [instanceValues]| false
 					if !ele2.LoopbackIpv6.IsNull() && !ele2.LoopbackIpv6.IsUnknown() {
-						data.Vrfs[i1].AttachList[i2].InstanceValues.LoopbackIpv6 = ele2.LoopbackIpv6.ValueString()
+						//-----inline nested----
+						data2.InstanceValues.LoopbackIpv6 = ele2.LoopbackIpv6.ValueString()
 					} else {
-						data.Vrfs[i1].AttachList[i2].InstanceValues.LoopbackIpv6 = ""
+						data2.InstanceValues.LoopbackIpv6 = ""
 					}
-					//-----inline nesting end----
+
+					// update_action | BitMask| []| true
+
+					data1.AttachList[k2] = *data2
 
 				}
 			}
+
+			data.Vrfs[k1] = *data1
 
 		}
 	}

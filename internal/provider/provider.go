@@ -61,7 +61,7 @@ func (p *ndfcProvider) Configure(ctx context.Context, req provider.ConfigureRequ
 		return
 	}
 	ndfc.NewResource(ndfc.ResourceVrfBulk)
-	ndfc.NewResource(ndfc.ResourceVrfAttachments)
+	//ndfc.NewResource(ndfc.ResourceVrfAttachments)
 
 	// Make the HashiCups client available during DataSource and Resource
 	// type Configure methods.
@@ -78,7 +78,7 @@ func (p *ndfcProvider) Metadata(ctx context.Context, req provider.MetadataReques
 
 func (p *ndfcProvider) DataSources(ctx context.Context) []func() datasource.DataSource {
 	tflog.Info(ctx, "Provider Datasources  called")
-	return []func() datasource.DataSource{NewVrfBulkDataSource,
+	return []func() datasource.DataSource{
 		NewFabricDataSource}
 }
 
