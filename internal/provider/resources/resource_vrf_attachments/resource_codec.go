@@ -66,8 +66,6 @@ type DeploymentState struct {
 	Seen  bool
 }
 
-
-
 type NDFCVrfAttachmentsPayloads struct {
 	GlobalDeploy   bool
 	GlobalUndeploy bool
@@ -90,9 +88,11 @@ func (v *NDFCVrfAttachmentsModel) FillVrfAttachmentsFromPayload(payload *NDFCVrf
 }
 
 func (p *NDFCVrfAttachmentsPayloads) AddEntry(vrfName string, attachList []NDFCAttachListValue) {
+	if len(attachList) == 0 {
+		return
+	}
 	vrfAttachEntry := NDFCVrfAttachmentsPayload{}
 	vrfAttachEntry.VrfName = vrfName
 	vrfAttachEntry.AttachList = attachList
 	p.VrfAttachments = append(p.VrfAttachments, vrfAttachEntry)
 }
-

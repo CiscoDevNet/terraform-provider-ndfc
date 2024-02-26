@@ -6,7 +6,7 @@ import (
 )
 
 func (v NDFCVrfsValue) DeepEqual(c NDFCVrfsValue) int {
-	controlFlagUpdate := false
+	cf := false
 	if v.VrfTemplate != c.VrfTemplate {
 		log.Printf("v.VrfTemplate=%v, c.VrfTemplate=%v", v.VrfTemplate, c.VrfTemplate)
 		return RequiresUpdate
@@ -238,10 +238,10 @@ func (v NDFCVrfsValue) DeepEqual(c NDFCVrfsValue) int {
 	}
 	if v.DeployAttachments != c.DeployAttachments {
 		log.Printf("v.DeployAttachments=%v, c.DeployAttachments=%v", v.DeployAttachments, c.DeployAttachments)
-		controlFlagUpdate = true
+		cf = true
 	}
 
-	if controlFlagUpdate {
+	if cf {
 		return ControlFlagUpdate
 	}
 	return ValuesDeeplyEqual

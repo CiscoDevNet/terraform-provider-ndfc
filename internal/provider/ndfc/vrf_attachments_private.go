@@ -2,7 +2,6 @@ package ndfc
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
 	"log"
 	"strings"
@@ -38,49 +37,8 @@ func (c NDFC) vrfAttachmentsGet(ctx context.Context, fabricName string, vrfs []s
 	return res, nil
 }
 
-func (c NDFC) vrfAttachmentsIsPresent(ctx context.Context, dg *diag.Diagnostics, fabricName string, vrfs []string) bool {
-	tflog.Debug(ctx, "vrfAttachmentsIsPresent: Entering")
-
-	res, err := c.vrfAttachmentsGet(ctx, fabricName, vrfs)
-	if err != nil {
-		tflog.Error(ctx, fmt.Sprintf("vrfAttachmentsIsPresent: Error getting VRF Attachments %s", err.Error()))
-		dg.AddError("Error in getting VRF Attachments from NDFC", err.Error())
-		return false
-	}
-	ndVrfs := rva.NDFCVrfAttachmentsModel{}
-	err = json.Unmarshal(res, &ndVrfs.VrfAttachments)
-	if err != nil {
-		tflog.Error(ctx, fmt.Sprintf("vrfAttachmentsIsPresent: Error unmarshalling VRF Attachments %s", err.Error()))
-		log.Printf("vrfAttachmentsIsPresent: Error unmarshalling VRF Attachments %s", string(res))
-		dg.AddError("Error in Payload format,when retrieving attachments from NDFC", err.Error())
-		return false
-	}
-	if len(ndVrfs.VrfAttachments) > 0 {
-		tflog.Info(ctx, fmt.Sprintf("vrfAttachmentsIsPresent: VRF Attachments exists on %s", fabricName))
-		// Check if they were created and not implicit attachments present in NDFC GET
-		for i := range ndVrfs.VrfAttachments {
-			for j := range ndVrfs.VrfAttachments[i].AttachList {
-				if ndVrfs.VrfAttachments[i].AttachList[j].Attached != nil &&
-					*(ndVrfs.VrfAttachments[i].AttachList[j].Attached) {
-					tflog.Info(ctx, fmt.Sprintf("vrfAttachmentsIsPresent: VRF Attachments were created on %s", fabricName))
-					dg.AddError("VRF Attachments were created on "+fabricName,
-						fmt.Sprintf("VRF %s Attachment {Switch: %s, Attached: %v, State:%s}",
-							ndVrfs.VrfAttachments[i].VrfName,
-							ndVrfs.VrfAttachments[i].AttachList[j].SwitchName,
-							*ndVrfs.VrfAttachments[i].AttachList[j].Attached,
-							ndVrfs.VrfAttachments[i].AttachList[j].AttachState))
-					return true
-				}
-			}
-		}
-	}
-	tflog.Info(ctx, fmt.Sprintf("vrfAttachmentsIsPresent: VRF Attachments does not exist on %s", fabricName))
-	return false
-}
-
 func (c NDFC) processAttachResponse(res gjson.Result) error {
 	err := error(nil)
-
 	res.ForEach(func(k, v gjson.Result) bool {
 		if !strings.Contains(v.String(), "SUCCESS") && !strings.Contains(v.String(), "already in detached state") {
 			err = fmt.Errorf("failed to configure attachments, got error: %s, %s", k.String(), v.String())
@@ -88,7 +46,6 @@ func (c NDFC) processAttachResponse(res gjson.Result) error {
 		return true
 	})
 	return err
-
 }
 
 func (c NDFC) vrfAttachmentsPost(ctx context.Context, fabricName string, data []byte) error {
@@ -106,7 +63,6 @@ func (c NDFC) vrfAttachmentsPost(ctx context.Context, fabricName string, data []
 	if err != nil {
 		return err
 	}
-
 	tflog.Info(ctx, fmt.Sprintf("vrfAttachmentsCreate: Success res : %v", res.Str))
 	return nil
 }
@@ -122,54 +78,6 @@ func (c NDFC) getVrfAttachments(ctx context.Context, dg *diag.Diagnostics,
 		return nil, err
 	}
 	tflog.Debug(ctx, fmt.Sprintf("getVrfAttachments: data read from NDFC: %s", string(res)))
-
-	//Fill all control params from input, that are not in NDFC payload
-	// - here deployment
-
-	//ndVrfs.DeployAllAttachments = in.DeployAllAttachments
-	/*
-		for i := range ndVrfs.VrfAttachments {
-			if ndVrfs.VrfAttachments[i].Id != nil {
-				log.Printf("getVrfAttachments: Sorted ID for %s is %d ", ndVrfs.VrfAttachments[i].VrfName, *(ndVrfs.VrfAttachments[i].Id))
-			}
-			vrfEntry, found := in.VrfAttachmentsMap[ndVrfs.VrfAttachments[i].VrfName]
-			if found {
-				ndVrfs.VrfAttachments[i].DeployAllAttachments = vrfEntry.DeployAllAttachments
-				vrfEntry.CreateSearchMap()
-			} else {
-				log.Printf("This is not expected, VRF entry %s not found in input", ndVrfs.VrfAttachments[i].VrfName)
-			}
-
-			for j := range ndVrfs.VrfAttachments[i].AttachList {
-				attachEntry, found := vrfEntry.AttachListMap[ndVrfs.VrfAttachments[i].AttachList[j].SerialNumber]
-				if found {
-					ndVrfs.VrfAttachments[i].AttachList[j].DeployThisAttachment = attachEntry.DeployThisAttachment
-				} else {
-					log.Printf("This is not expected, Attachment entry %s{%s} not found in input", ndVrfs.VrfAttachments[i].VrfName, ndVrfs.VrfAttachments[i].AttachList[j].SerialNumber)
-				}
-
-				if ndVrfs.VrfAttachments[i].AttachList[j].VlanId != nil {
-					log.Printf("getVrfAttachments: Sorted VlanId for %s is %v", ndVrfs.VrfAttachments[i].VrfName, *ndVrfs.VrfAttachments[i].AttachList[j].VlanId)
-				}
-				if ndVrfs.VrfAttachments[i].AttachList[j].Vlan != nil {
-					log.Printf("getVrfAttachments: Sorted Vlan for %s is %v", ndVrfs.VrfAttachments[i].VrfName, *ndVrfs.VrfAttachments[i].AttachList[j].Vlan)
-				}
-
-				//log.Printf("getVrfAttachments: Sorted VlanId for %s is %v %v", ndVrfs.VrfAttachments[i].VrfName, *ndVrfs.VrfAttachments[i].AttachList[j].VlanId, *ndVrfs.VrfAttachments[i].AttachList[j].Vlan)
-			}
-		}
-	*/
-	//ndVrfs.FabricName = fabricName
-	/*
-		ret := rva.NDFCVrfAttachmentsModel{}
-		diagErr := ret.SetModelData(&ndVrfs)
-		if diagErr.HasError() {
-			tflog.Error(ctx, fmt.Sprintf("getVrfAttachments: Error setting model data %v", diagErr.Errors()))
-			return nil
-		}
-		ret.Id = types.StringValue(Id)
-		//Set entries that are not in Payload
-	*/
 	return res, nil
 }
 
@@ -239,7 +147,8 @@ func (c NDFC) updateVRFAttachmentAction(ctx context.Context, plan *resource_vrf_
 				plan.VrfName, serial))
 			//Check if parameters are different
 			retVal := planAttach.DeepEqual(stateAttachment)
-			if retVal == ActionNone {
+			log.Printf("compareAttachments: Attachment %s/%s  - DeepEqual %d", plan.VrfName, serial, retVal)
+			if retVal == ValuesDeeplyEqual {
 				tflog.Debug(ctx, fmt.Sprintf("compareAttachments: attachment %s/%s - unchanged",
 					plan.VrfName, serial))
 
@@ -325,13 +234,13 @@ func (c NDFC) diffVrfAttachments(ctx context.Context, planData *resource_vrf_bul
 		vaDeployPayload.GlobalUndeploy = false
 	}
 	for vrf, planVrf := range planData.Vrfs {
+		planVrf.FabricName = planData.FabricName
+		planVrf.VrfName = vrf
 		//Look for vrf in state
 		if sVrf, ok := stateData.Vrfs[vrf]; ok {
 			tflog.Debug(ctx, fmt.Sprintf("diffVrfAttachments: Existing VRF %s in plan", vrf))
 			//found - now compare attachments
 			//Check if there are new attachments
-			planVrf.FabricName = planData.FabricName
-			planVrf.VrfName = vrf
 			action := c.updateVRFAttachmentAction(ctx, &planVrf, &sVrf)
 			planData.Vrfs[vrf] = planVrf
 			stateData.Vrfs[vrf] = sVrf
@@ -373,10 +282,17 @@ func (c NDFC) diffVrfAttachments(ctx context.Context, planData *resource_vrf_bul
 			tflog.Debug(ctx, fmt.Sprintf("diffVrfAttachments: New VRF %s in plan, not in state - must be new ", vrf))
 			//New VRF entry in plan - Get all attachments without any filtering
 			vaUpdatePayload.AddEntry(vrf, planVrf.GetAttachmentValues(0, "true"))
-			planVrf.FabricName = planData.FabricName
-			planVrf.VrfName = vrf
 			if planVrf.DeployAttachments {
 				vaDeployPayload.AddEntry(vrf, planVrf.GetAttachmentValues(0, ""))
+			} else {
+				//Check each entry for deploy flag and mark the bitmask
+				for serial, attachEntry := range planVrf.AttachList {
+					if attachEntry.DeployThisAttachment {
+						attachEntry.UpdateAction |= Deploy
+						planVrf.AttachList[serial] = attachEntry
+					}
+				}
+				vaDeployPayload.AddEntry(vrf, planVrf.GetAttachmentValues(Deploy, ""))
 			}
 
 		}
