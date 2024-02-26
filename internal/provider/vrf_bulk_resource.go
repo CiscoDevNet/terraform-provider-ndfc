@@ -6,6 +6,7 @@ import (
 	"terraform-provider-ndfc/internal/provider/ndfc"
 	"terraform-provider-ndfc/internal/provider/resources/resource_vrf_bulk"
 
+	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-log/tflog"
 )
@@ -163,4 +164,92 @@ func (r *vrfBulkResource) Delete(ctx context.Context, req resource.DeleteRequest
 	r.client.RscDeleteBulkVrf(ctx, &resp.Diagnostics, data.Id.ValueString(), &data)
 
 	// Delete API call logic
+}
+
+/* DONOT use the deployment flags at different level at the same time */
+/* use only one at a time */
+/* eg. if global deploy_all_attachments is set, then do not use deploy_attachments or deploy_this_attachment at vrf/attachment level */
+func (r vrfBulkResource) ValidateConfig(ctx context.Context, req resource.ValidateConfigRequest, resp *resource.ValidateConfigResponse) {
+	var data resource_vrf_bulk.VrfBulkModel
+
+	resp.Diagnostics.Append(req.Config.Get(ctx, &data)...)
+
+	if resp.Diagnostics.HasError() {
+		return
+	}
+	globalDeploy := false
+	if !data.DeployAllAttachments.IsNull() || !data.DeployAllAttachments.IsUnknown() {
+		tflog.Debug(ctx, "DeployAllAttachments is set")
+		globalDeploy = data.DeployAllAttachments.ValueBool()
+	}
+
+	elements1 := make(map[string]resource_vrf_bulk.VrfsValue)
+	dg := data.Vrfs.ElementsAs(ctx, &elements1, false)
+	if dg.HasError() {
+		resp.Diagnostics.AddError("Vrfs", "Error in reading Vrfs")
+		return
+	}
+
+	for vrf, v := range elements1 {
+		vrfDeploy := false
+		if !v.DeployAttachments.IsNull() && !v.DeployAttachments.IsUnknown() {
+			tflog.Debug(ctx, fmt.Sprintf("DeployAttachments is set for vrf %s", vrf))
+			vrfDeploy = v.DeployAttachments.ValueBool()
+			if globalDeploy && vrfDeploy {
+				tflog.Error(ctx, "Conflicting Deployment Flags - Global & vrf level")
+				resp.Diagnostics.AddAttributeError(
+					path.Root("deploy_all_attachments"),
+					"Conflicting Deployment Flags",
+					"Use only one deployment flag at a time",
+				)
+				resp.Diagnostics.AddAttributeError(
+					path.Root("vrfs").AtMapKey(vrf).AtName("deploy_attachments"),
+					"Conflicting Deployment Flags",
+					"Use only one deployment flag at a time",
+				)
+				return
+			}
+		}
+
+		elements2 := make(map[string]resource_vrf_bulk.AttachListValue)
+		dg := v.AttachList.ElementsAs(ctx, &elements2, false)
+		if dg.HasError() {
+			resp.Diagnostics.AddError("AttachList", "Error in reading AttachList")
+			return
+		}
+		for serial, s := range elements2 {
+			if !s.DeployThisAttachment.IsNull() && !s.DeployThisAttachment.IsUnknown() {
+				attachDeploy := s.DeployThisAttachment.ValueBool()
+				tflog.Debug(ctx, fmt.Sprintf("DeployThisAttachment is set for %s/%s", vrf, serial))
+				if globalDeploy && attachDeploy {
+					tflog.Error(ctx, "Conflicting Deployment Flags - Global & attachment level")
+					resp.Diagnostics.AddAttributeError(
+						path.Root("deploy_all_attachments"),
+						"Conflicting Deployment Flags",
+						"Use only one deployment flag at a time",
+					)
+					resp.Diagnostics.AddAttributeError(
+						path.Root("vrfs").AtMapKey(vrf).AtName("attach_list").AtMapKey(serial).AtName("deploy_this_attachment"),
+						"Conflicting Deployment Flags",
+						"Use only one deployment flag at a time",
+					)
+					return
+				}
+				if vrfDeploy && attachDeploy {
+					tflog.Error(ctx, "Conflicting Deployment Flags - vrf & attachment level")
+					resp.Diagnostics.AddAttributeError(
+						path.Root("vrfs").AtMapKey(vrf).AtName("deploy_attachments"),
+						"Conflicting Deployment Flags",
+						"Use only one deployment flag at a time",
+					)
+					resp.Diagnostics.AddAttributeError(
+						path.Root("vrfs").AtMapKey(vrf).AtName("attach_list").AtMapKey(serial).AtName("deploy_this_attachment"),
+						"Conflicting Deployment Flags",
+						"Use only one deployment flag at a time",
+					)
+					return
+				}
+			}
+		}
+	}
 }
