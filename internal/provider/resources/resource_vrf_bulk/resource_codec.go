@@ -77,7 +77,9 @@ func (v NDFCVrfBulkModel) GetAttachmentValues(vrf string) []rva.NDFCAttachListVa
 }
 
 func (v NDFCVrfsValue) GetAttachmentValues(filters uint16, attach string) []rva.NDFCAttachListValue {
+	log.Printf("GetAttachmentValues: %s %s", v.VrfName, v.FabricName)
 	update := func(a *rva.NDFCAttachListValue, serial string) {
+		log.Printf("GetAttachmentValues: update %s %s", v.VrfName, v.FabricName)
 		a.FabricName = v.FabricName
 		a.VrfName = v.VrfName
 		a.SerialNumber = serial

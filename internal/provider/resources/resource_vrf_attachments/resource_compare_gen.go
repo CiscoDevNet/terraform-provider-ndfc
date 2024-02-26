@@ -6,7 +6,7 @@ import (
 )
 
 func (v NDFCAttachListValue) DeepEqual(c NDFCAttachListValue) int {
-	controlFlagUpdate := false
+	cf := false
 
 	if v.Vlan != nil && c.Vlan != nil {
 		if *v.Vlan != *c.Vlan {
@@ -28,7 +28,7 @@ func (v NDFCAttachListValue) DeepEqual(c NDFCAttachListValue) int {
 	}
 	if v.DeployThisAttachment != c.DeployThisAttachment {
 		log.Printf("v.DeployThisAttachment=%v, c.DeployThisAttachment=%v", v.DeployThisAttachment, c.DeployThisAttachment)
-		controlFlagUpdate = true
+		cf = true
 	}
 
 	if v.InstanceValues.LoopbackId != nil && c.InstanceValues.LoopbackId != nil {
@@ -54,24 +54,24 @@ func (v NDFCAttachListValue) DeepEqual(c NDFCAttachListValue) int {
 		return RequiresUpdate
 	}
 
-	if controlFlagUpdate {
+	if cf {
 		return ControlFlagUpdate
 	}
 	return ValuesDeeplyEqual
 }
 
 func (v NDFCVrfAttachmentsValue) DeepEqual(c NDFCVrfAttachmentsValue) int {
-	controlFlagUpdate := false
+	cf := false
 	if v.VrfName != c.VrfName {
 		log.Printf("v.VrfName=%v, c.VrfName=%v", v.VrfName, c.VrfName)
 		return RequiresReplace
 	}
 	if v.DeployAllAttachments != c.DeployAllAttachments {
 		log.Printf("v.DeployAllAttachments=%v, c.DeployAllAttachments=%v", v.DeployAllAttachments, c.DeployAllAttachments)
-		controlFlagUpdate = true
+		cf = true
 	}
 
-	if controlFlagUpdate {
+	if cf {
 		return ControlFlagUpdate
 	}
 	return ValuesDeeplyEqual

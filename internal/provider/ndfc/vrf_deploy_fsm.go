@@ -41,10 +41,7 @@ const (
 
 type DeployFSM struct {
 	fsm             *fsm.FSM
-	FabricName      string
-	DepMap          map[string][]string
-	FinalStateMap   map[string]DeploymentState
-	DepVrfList      []string
+	Deployment      *NDFCVrfDeployment
 	Events          []fsm.EventDesc
 	CallBacks       fsm.Callbacks
 	ndfc            *NDFC
@@ -54,13 +51,15 @@ type DeployFSM struct {
 	PollTimer       time.Duration
 	TrustFactor     int
 	RxCompleteCount int
+	FailureRetry    int
+	failCount       int
 	eventChannel    chan string
 }
 
 func (fsm *DeployFSM) StartDeploymentHandler(ctx context.Context, e *fsm.Event) {
 	tflog.Debug(ctx, "StartDeploymentHandler: Entering")
 	// Start the deployment
-	err := fsm.ndfc.deploy(ctx, fsm.dg, fsm.FabricName, &fsm.DepVrfList, &fsm.DepMap)
+	err := fsm.ndfc.DeployBulk(ctx, fsm.dg, fsm.Deployment)
 	if err != nil {
 		tflog.Error(ctx, "StartDeploymentHandler: Error in deployment", map[string]interface{}{"error": err.Error()})
 		//fsm.fsm.Event(ctx, EventFailed)
@@ -93,7 +92,12 @@ func (fsm *DeployFSM) PollTimerHandler(ctx context.Context, e *fsm.Event) {
 
 func (fsm *DeployFSM) RetryDeploymentHandler(ctx context.Context, e *fsm.Event) {
 	tflog.Debug(ctx, "DeployFSM: RetryDeploymentHandler: Retrying Deployment", map[string]interface{}{"event": e.Event})
-	// ReDo the deployment
+	// ReDo the deployment for failed items
+	if len(fsm.Deployment.RetryList) > 0 {
+		tflog.Debug(ctx, "DeployFSM: RetryDeploymentHandler: Retrylist is non-empty", map[string]interface{}{"Retrylist": fsm.Deployment.RetryList})
+		fsm.Deployment.retryFlag = true
+	}
+
 	fsm.postEvent(ctx, EventStartDeployment)
 	//fsm.fsm.Event(ctx, EventStartDeployment)
 
@@ -118,18 +122,27 @@ func (fsm *DeployFSM) InProHandler(ctx context.Context, e *fsm.Event) {
 
 func (fsm *DeployFSM) CheckStateHandler(ctx context.Context, e *fsm.Event) {
 	fsm.checkCount++
+	tflog.Debug(ctx, "DeployFSM: CheckStateHandler ", map[string]interface{}{"CheckCount": fsm.checkCount, "event": e.Event, "MaxChecks": fsm.MaxCheckCount})
 	if fsm.checkCount > fsm.MaxCheckCount {
 		tflog.Error(ctx, "DeployFSM: CheckStateHandler: Max Check Count Exceeded")
 		fsm.postEvent(ctx, EventTimeout)
 		//fsm.fsm.Event(ctx, EventTimeout)
 		return
 	}
-	tflog.Debug(ctx, "DeployFSM: CheckStateHandler", map[string]interface{}{"event": e.Event})
-	ret := fsm.ndfc.stateChecker(ctx, fsm.dg, fsm.FabricName, fsm.DepVrfList, fsm.DepMap, fsm.FinalStateMap)
+	//tflog.Debug(ctx, "DeployFSM: CheckStateHandler", map[string]interface{}{"event": e.Event})
+	ret := fsm.ndfc.stateChecker(ctx, fsm.dg, fsm.Deployment)
 	if ret == EventComplete {
 		if fsm.RxCompleteCount < fsm.TrustFactor {
 			fsm.RxCompleteCount++
 			ret = EventWait
+		}
+	} else if ret == EventFailed {
+		fsm.failCount++
+		// NDFC states are not trustworthy
+		// Its important to retry
+		if fsm.failCount < fsm.FailureRetry {
+			tflog.Debug(ctx, "DeployFSM: CheckStateHandler: Failure - retrying", map[string]interface{}{"Status": ret})
+			ret = EventRetry
 		}
 	}
 	tflog.Debug(ctx, "DeployFSM: CheckStateHandler: StateChecker completed", map[string]interface{}{"Status": ret})
@@ -181,20 +194,23 @@ func (depfsm *DeployFSM) Init() {
 	depfsm.checkCount = 0
 	depfsm.RxCompleteCount = 0
 	depfsm.eventChannel = make(chan string, 10)
+	noAttachments := len(depfsm.Deployment.ExpectedState)
+	depfsm.MaxCheckCount = noAttachments * 10
+	if depfsm.MaxCheckCount < 60 {
+		depfsm.MaxCheckCount = 60
+	}
+	tflog.Debug(context.Background(), "DeployFSM: MaxCheckCount", map[string]interface{}{"MaxCheckCount": depfsm.MaxCheckCount})
 }
 
-func (c *NDFC) createFSM(ctx context.Context, dg *diag.Diagnostics, fabricName string,
-	depMap map[string][]string, depVrfList []string, expected_state map[string]DeploymentState) *DeployFSM {
+func (c *NDFC) CreateFSM(ctx context.Context, dg *diag.Diagnostics, d *NDFCVrfDeployment) *DeployFSM {
 	fsm := &DeployFSM{
-		FabricName:    fabricName,
-		DepMap:        depMap,
-		DepVrfList:    depVrfList,
-		ndfc:          c,
-		dg:            dg,
-		PollTimer:     5,
-		MaxCheckCount: 30 * (len(depVrfList) + len(depMap)),
-		TrustFactor:   5,
-		FinalStateMap: expected_state,
+		Deployment:   d,
+		ndfc:         c,
+		dg:           dg,
+		PollTimer:    5,
+		TrustFactor:  5,
+		failCount:    0,
+		FailureRetry: 3,
 	}
 
 	fsm.Init()
