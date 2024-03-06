@@ -2,6 +2,7 @@ package provider
 
 import (
 	"context"
+	"log"
 	"terraform-provider-ndfc/internal/provider/ndfc"
 	"terraform-provider-ndfc/internal/provider/provider/provider_ndfc"
 
@@ -15,9 +16,11 @@ import (
 var _ provider.Provider = (*ndfcProvider)(nil)
 
 func New() func() provider.Provider {
-	return func() provider.Provider {
-		return &ndfcProvider{}
-	}
+	return NewNDFCProvider
+}
+
+func NewNDFCProvider() provider.Provider {
+	return &ndfcProvider{}
 }
 
 type ndfcProvider struct {
@@ -27,12 +30,14 @@ type ndfcProvider struct {
 func (p *ndfcProvider) Schema(ctx context.Context, req provider.SchemaRequest, resp *provider.SchemaResponse) {
 	resp.Schema = provider_ndfc.NdfcProviderSchema(ctx)
 	tflog.Info(ctx, "Provider Schema  called")
+	log.Printf("Provider Schema  called")
 }
 
 func (p *ndfcProvider) Configure(ctx context.Context, req provider.ConfigureRequest, resp *provider.ConfigureResponse) {
 	tflog.Info(ctx, "Configure Provider   called")
 	var config = provider_ndfc.NdfcModel{}
 	diags := req.Config.Get(ctx, &config)
+	log.Printf("Configure Provider   called")
 
 	resp.Diagnostics.Append(diags...)
 	if resp.Diagnostics.HasError() {

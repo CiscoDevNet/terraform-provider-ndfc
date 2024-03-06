@@ -1,0 +1,47 @@
+terraform {
+  required_providers {
+    ndfc = {
+      source = "registry.terraform.io/cisco/ndfc"
+    }
+  }
+}
+
+provider "ndfc" {
+  username = {{.User}}
+  password = {{.Password}}
+  host     = {{.Host}}
+  insecure = {{.Insecure}}
+}
+
+resource "ndfc_vrf_bulk" "vrf_test" {
+    fabric = {{.FabricName}}
+    deploy_all_attachments = {{.DeployAllAttachments}}
+    vrfs = {
+    {{range $vrf, $vrfEntry := .Vrfs}}
+        "{{$vrf}}" : {
+            deploy_attachment = "{{$vrfEntry.DeployAttachment}}"
+            description = "{{$vrfEntry.Description}}"
+            rd = "{{$vrfEntry.Rd}}"
+            vrf_id = "{{$vrfEntry.VrfId}}"
+            vlan_id = "{{$vrfEntry.VlanId}}"
+            rt_export = "{{$vrfEntry.RtExport}}"
+            rt_import = "{{$vrfEntry.RtImport}}"
+            vni = "{{$vrfEntry.Vni}}"
+            vrf_template = "{{$vrfEntry.VrfTemplate}}"
+            vrf_type = "{{$vrfEntry.VrfType}}"
+            vrf_vni = "{{$vrfEntry.VrfVni}}"
+
+            attach_list = {
+            {{range $attach, $attachEntry := $vrfEntry.AttachList}}
+                "{{$attach}}" : {
+                    serial_number = "{{$attachEntry.SerialNumber}}"
+                    vlan = "{{$attachEntry.Vlan}}"
+                    deploy_this_attachment = "{{$attachEntry.DeployThisAttachment}}"
+                },
+            {{end}}
+            }
+        }
+    {{end}}
+    }
+  {{end}}
+}

@@ -45,11 +45,16 @@ func (v NDFCInstanceValuesValue) MarshalJSON() ([]byte, error) {
 	if v.LoopbackId == nil && v.LoopbackIpv4 == "" && v.LoopbackIpv6 == "" {
 		return []byte("\"\""), nil
 	}
-	return json.Marshal(&CustomNDFCInstanceValue{
+	retBytes, err :=  json.Marshal(&CustomNDFCInstanceValue{
 		LoopbackId:   v.LoopbackId,
 		LoopbackIpv4: v.LoopbackIpv4,
 		LoopbackIpv6: v.LoopbackIpv6,
 	})
+	if err != nil {
+		return []byte("\"\""), err
+	}
+	ret := strconv.Quote(string(retBytes))
+	return []byte(ret), nil
 }
 
 type NDFCVrfAttachments struct {

@@ -40,6 +40,6 @@ type NDFCAttachListValue struct {
 
 type NDFCInstanceValuesValue struct {
 	LoopbackId   *Int64Custom `json:"loopbackId,omitempty"`
-	LoopbackIpv4 string       `json:"loopbackIpv4,omitempty"`
-	LoopbackIpv6 string       `json:"loopbackIpv6,omitempty"`
+	LoopbackIpv4 string       `json:"loopbackIpAddress,omitempty"`
+	LoopbackIpv6 string       `json:"loopbackIpv6Address,omitempty"`
 }

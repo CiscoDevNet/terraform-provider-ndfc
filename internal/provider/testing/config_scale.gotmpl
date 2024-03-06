@@ -1,0 +1,56 @@
+{{ define "HEADER" }}
+terraform {
+  required_providers {
+    ndfc = {
+      source = "registry.terraform.io/cisco/ndfc"
+    }
+  }
+}
+{{end}}
+
+{{ define "NDFC" }}
+provider "ndfc" {
+  username = "{{.User}}"
+  password = "{{.Password}}"
+  host     = "{{.Host}}"
+  insecure = {{.Insecure}}
+}
+{{end}}
+
+{{ define "NDFC_VRF_RESOURCE" }}
+resource "ndfc_{{.RscType}}" "{{.RscName}}" {
+{{with .Vrf}}
+    fabric_name = "{{.FabricName}}"
+    deploy_all_attachments = {{.DeployAllAttachments}}
+    vrfs = {
+    {{- range $vrf, $vrfEntry := .Vrfs}}
+        "{{$vrf}}" : {
+            deploy_attachments = {{$vrfEntry.DeployAttachments}}
+            {{- if $vrfEntry.AttachList}}
+            attach_list = {
+                {{- range $attach, $attachEntry := $vrfEntry.AttachList}}
+                "{{$attach}}" : {
+                    serial_number = "{{$attachEntry.SerialNumber}}"
+                    {{- if $attachEntry.Vlan}}
+                    vlan = "{{$attachEntry.Vlan}}"
+                    {{- end}}
+                    deploy_this_attachment = {{$attachEntry.DeployThisAttachment}}
+                    {{- if $attachEntry.InstanceValues.LoopbackId }}
+                    loopback_id = "{{$attachEntry.InstanceValues.LoopbackId}}"
+                    {{- end}}
+                    {{- if $attachEntry.InstanceValues.LoopbackIpv4 }}
+                    loopback_ipv4 = "{{$attachEntry.InstanceValues.LoopbackIpv4}}"
+                    {{- end}}
+                    {{- if $attachEntry.InstanceValues.LoopbackIpv6 }}
+                    loopback_ipv6 = "{{$attachEntry.InstanceValues.LoopbackIpv6}}"
+                    {{- end}}
+                }
+                {{end}}
+            }
+            {{- end}}
+        }
+    {{end}}
+    }
+  {{end}}
+}
+{{end}}

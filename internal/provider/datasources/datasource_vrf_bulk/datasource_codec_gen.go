@@ -439,12 +439,6 @@ func (v VrfBulkModel) GetModelData() *NDFCVrfBulkModel {
 				data.Vrfs[i1].VrfTemplate = ""
 			}
 
-			if !ele1.VrfStatus.IsNull() && !ele1.VrfStatus.IsUnknown() {
-				data.Vrfs[i1].VrfStatus = ele1.VrfStatus.ValueString()
-			} else {
-				data.Vrfs[i1].VrfStatus = ""
-			}
-
 			if !ele1.VrfExtensionTemplate.IsNull() && !ele1.VrfExtensionTemplate.IsUnknown() {
 				data.Vrfs[i1].VrfExtensionTemplate = ele1.VrfExtensionTemplate.ValueString()
 			} else {
