@@ -587,12 +587,6 @@ func (v VrfBulkModel) GetModelData() *NDFCVrfBulkModel {
 			}
 
 			// vrf_status | String| []| false
-			if !ele1.VrfStatus.IsNull() && !ele1.VrfStatus.IsUnknown() {
-
-				data1.VrfStatus = ele1.VrfStatus.ValueString()
-			} else {
-				data1.VrfStatus = ""
-			}
 
 			// loopback_routing_tag | Int64| [vrfTemplateConfig]| false
 			if !ele1.LoopbackRoutingTag.IsNull() && !ele1.LoopbackRoutingTag.IsUnknown() {
@@ -872,12 +866,6 @@ func (v VrfBulkModel) GetModelData() *NDFCVrfBulkModel {
 					// serial_number | String| []| true
 
 					// switch_name | String| []| false
-					if !ele2.SwitchName.IsNull() && !ele2.SwitchName.IsUnknown() {
-
-						data2.SwitchName = ele2.SwitchName.ValueString()
-					} else {
-						data2.SwitchName = ""
-					}
 
 					// vlan | Int64| []| false
 					if !ele2.Vlan.IsNull() && !ele2.Vlan.IsUnknown() {
@@ -890,20 +878,8 @@ func (v VrfBulkModel) GetModelData() *NDFCVrfBulkModel {
 					// deployment | Bool| []| true
 
 					// attach_state | String| []| false
-					if !ele2.AttachState.IsNull() && !ele2.AttachState.IsUnknown() {
-
-						data2.AttachState = ele2.AttachState.ValueString()
-					} else {
-						data2.AttachState = ""
-					}
 
 					// attached | Bool| []| false
-					if !ele2.Attached.IsNull() && !ele2.Attached.IsUnknown() {
-
-						data2.Attached = new(bool)
-						*data2.Attached = ele2.Attached.ValueBool()
-
-					}
 
 					// freeform_config | String| []| false
 					if !ele2.FreeformConfig.IsNull() && !ele2.FreeformConfig.IsUnknown() {
