@@ -283,7 +283,7 @@ func (c NDFC) diffVrfAttachments(ctx context.Context, planData *resource_vrf_bul
 			//New VRF entry in plan - Get all attachments without any filtering
 			vaUpdatePayload.AddEntry(vrf, planVrf.GetAttachmentValues(0, "true"))
 			if planVrf.DeployAttachments {
-				vaDeployPayload.AddEntry(vrf, planVrf.GetAttachmentValues(0, ""))
+				vaDeployPayload.AddEntry(vrf, planVrf.GetAttachmentValues(0, "true"))
 			} else {
 				//Check each entry for deploy flag and mark the bitmask
 				for serial, attachEntry := range planVrf.AttachList {
@@ -292,7 +292,7 @@ func (c NDFC) diffVrfAttachments(ctx context.Context, planData *resource_vrf_bul
 						planVrf.AttachList[serial] = attachEntry
 					}
 				}
-				vaDeployPayload.AddEntry(vrf, planVrf.GetAttachmentValues(Deploy, ""))
+				vaDeployPayload.AddEntry(vrf, planVrf.GetAttachmentValues(Deploy, "true"))
 			}
 
 		}
@@ -316,7 +316,7 @@ func (c NDFC) diffVrfAttachments(ctx context.Context, planData *resource_vrf_bul
 			vrfEntry.AttachList[serial] = attachEntry
 		}
 		vaUpdatePayload.AddEntry(vrf, vrfEntry.GetAttachmentValues(Detach, "false"))
-		vaDeployPayload.AddEntry(vrf, vrfEntry.GetAttachmentValues(Detach, ""))
+		vaDeployPayload.AddEntry(vrf, vrfEntry.GetAttachmentValues(Detach, "false"))
 	}
 
 	action["update"] = vaUpdatePayload

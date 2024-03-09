@@ -42,12 +42,12 @@ func GenerateVrfBulkObject(bulk **resource_vrf_bulk.NDFCVrfBulkModel, fabric str
 	*bulk = vrfBulk
 }
 
-func GenerateSingleVrfObject(vrfDptr **resource_vrf_bulk.NDFCVrfBulkModel, fabric string, vrfNo int, globaldeploy, vrf_deploy, deployNeeded bool, serials []string) {
+func GenerateSingleVrfObject(vrfDptr **resource_vrf_bulk.NDFCVrfBulkModel, namePrefix, fabric string, vrfNo int, globaldeploy, vrf_deploy, deployNeeded bool, serials []string) {
 	vrfBulk := new(resource_vrf_bulk.NDFCVrfBulkModel)
 	vrfBulk.FabricName = fabric
 	vrfBulk.DeployAllAttachments = globaldeploy
 	vrfBulk.Vrfs = make(map[string]resource_vrf_bulk.NDFCVrfsValue)
-	vrfName := "vrf_acc_" + strconv.Itoa(vrfNo)
+	vrfName := namePrefix + strconv.Itoa(vrfNo)
 	vrf := resource_vrf_bulk.NDFCVrfsValue{}
 
 	vrf.DeployAttachments = vrf_deploy

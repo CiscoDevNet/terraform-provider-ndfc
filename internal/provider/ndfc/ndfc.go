@@ -7,9 +7,14 @@ import (
 )
 
 type NDFC struct {
-	url       string
-	apiClient nd.Client
-	rscMutex  map[string]*sync.Mutex
+	url                   string
+	apiClient             nd.Client
+	DeployPollTimer       int
+	DeployTrustFactor     int
+	MaxParallelDeploy     int
+	FailureRetry          int
+	rscMutex              map[string]*sync.Mutex
+	WaitForDeployComplete bool
 }
 
 var instance *NDFC
@@ -18,6 +23,11 @@ func NewNDFCClient(host string, user string, pass string, domain string, insecur
 	log.Printf("New NDFC client")
 	ndfc := new(NDFC)
 	ndfc.url = "/appcenter/cisco/ndfc/api/v1"
+	ndfc.DeployPollTimer = 5
+	ndfc.DeployTrustFactor = 1
+	ndfc.FailureRetry = 3
+	ndfc.MaxParallelDeploy = 0
+	ndfc.WaitForDeployComplete = true
 	var err error
 	ndfc.apiClient, err = nd.NewClient(host, ndfc.url, user, pass, domain, insecure, nd.MaxRetries(500))
 	if err != nil {
