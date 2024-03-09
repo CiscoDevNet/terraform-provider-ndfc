@@ -8,6 +8,7 @@ import (
 	"strings"
 	"terraform-provider-ndfc/internal/provider/resources/resource_vrf_bulk"
 	"text/template"
+	"time"
 )
 
 func GetTFConfigWithSingleResource(tt string, cfg map[string]string, vrfBulk resource_vrf_bulk.NDFCVrfBulkModel, out **string) {
@@ -108,7 +109,9 @@ func GetTFConfigWithMultipleResource(tt string, cfg map[string]string, vrfBulk *
 	log.Println(output.String())
 	*x = output.String()
 	if tmpDir == "" {
-		tmpDir, err = os.MkdirTemp("/tmp", "tftest_*")
+		ct := time.Now()
+		tmpDir = fmt.Sprintf("/tmp/tftest_%s", ct.Format("2006_01_02_15-04-05"))
+		err = os.MkdirAll(tmpDir, 0755)
 		if err != nil {
 			panic(err)
 		}

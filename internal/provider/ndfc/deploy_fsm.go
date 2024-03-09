@@ -26,11 +26,12 @@ const (
 	NDFCStateDeployed  = "DEPLOYED"
 	NDFCStateOutOfSync = "OUT-OF-SYNC"
 	NDFCStateFailed    = "FAILED"
+	NDFCHanging        = "HANGING"
 )
 
 const (
 	EventStartDeployment = "StartDeployment"
-	EventDeployed        = "Deploy"
+	EventDeploy          = "Deploy"
 	EventTimeout         = "Timeout"
 	EventFailed          = "Failure"
 	EventRetry           = "Retry"
@@ -40,30 +41,29 @@ const (
 )
 
 type DeployFSM struct {
-	fsm             *fsm.FSM
-	Deployment      *NDFCVrfDeployment
-	Events          []fsm.EventDesc
-	CallBacks       fsm.Callbacks
-	ndfc            *NDFC
-	dg              *diag.Diagnostics
-	checkCount      int
-	MaxCheckCount   int
-	PollTimer       time.Duration
-	TrustFactor     int
-	RxCompleteCount int
-	FailureRetry    int
-	failCount       int
-	eventChannel    chan string
+	fsm        *fsm.FSM
+	Deployment *NDFCDeployment
+	Events     []fsm.EventDesc
+	CallBacks  fsm.Callbacks
+	//ndfc              *NDFC
+	dg                *diag.Diagnostics
+	checkCount        int
+	MaxCheckCount     int
+	PollTimer         time.Duration
+	MaxParallelDeploy int
+	TrustFactor       int
+	RxCompleteCount   int
+	FailureRetry      int
+	failCount         int
+	eventChannel      chan string
 }
 
-func (fsm *DeployFSM) StartDeploymentHandler(ctx context.Context, e *fsm.Event) {
+func (fsm *DeployFSM) DeploymentHandler(ctx context.Context, e *fsm.Event) {
 	tflog.Debug(ctx, "StartDeploymentHandler: Entering")
 	// Start the deployment
-	err := fsm.ndfc.DeployBulk(ctx, fsm.dg, fsm.Deployment)
-	if err != nil {
-		tflog.Error(ctx, "StartDeploymentHandler: Error in deployment", map[string]interface{}{"error": err.Error()})
-		//fsm.fsm.Event(ctx, EventFailed)
-	}
+	// Move maxParallel Rsc from pending to in pro
+	// call deploy with the in pro list
+	fsm.Deployment.Deploy(ctx, fsm.dg, nil, false)
 }
 
 func (fsm *DeployFSM) DeployHandler(ctx context.Context, e *fsm.Event) {
@@ -90,14 +90,8 @@ func (fsm *DeployFSM) PollTimerHandler(ctx context.Context, e *fsm.Event) {
 	tflog.Debug(ctx, "DeployFSM: PollTimerHandler: Entering", map[string]interface{}{"event": e.Event, "state": fsm.fsm.Current()})
 }
 
-func (fsm *DeployFSM) RetryDeploymentHandler(ctx context.Context, e *fsm.Event) {
+func (fsm *DeployFSM) BatchDeploymentHandler(ctx context.Context, e *fsm.Event) {
 	tflog.Debug(ctx, "DeployFSM: RetryDeploymentHandler: Retrying Deployment", map[string]interface{}{"event": e.Event})
-	// ReDo the deployment for failed items
-	if len(fsm.Deployment.RetryList) > 0 {
-		tflog.Debug(ctx, "DeployFSM: RetryDeploymentHandler: Retrylist is non-empty", map[string]interface{}{"Retrylist": fsm.Deployment.RetryList})
-		fsm.Deployment.retryFlag = true
-	}
-
 	fsm.postEvent(ctx, EventStartDeployment)
 	//fsm.fsm.Event(ctx, EventStartDeployment)
 
@@ -130,21 +124,8 @@ func (fsm *DeployFSM) CheckStateHandler(ctx context.Context, e *fsm.Event) {
 		return
 	}
 	//tflog.Debug(ctx, "DeployFSM: CheckStateHandler", map[string]interface{}{"event": e.Event})
-	ret := fsm.ndfc.stateChecker(ctx, fsm.dg, fsm.Deployment)
-	if ret == EventComplete {
-		if fsm.RxCompleteCount < fsm.TrustFactor {
-			fsm.RxCompleteCount++
-			ret = EventWait
-		}
-	} else if ret == EventFailed {
-		fsm.failCount++
-		// NDFC states are not trustworthy
-		// Its important to retry
-		if fsm.failCount < fsm.FailureRetry {
-			tflog.Debug(ctx, "DeployFSM: CheckStateHandler: Failure - retrying", map[string]interface{}{"Status": ret})
-			ret = EventRetry
-		}
-	}
+
+	ret := fsm.Deployment.CheckState(ctx, fsm.dg, nil)
 	tflog.Debug(ctx, "DeployFSM: CheckStateHandler: StateChecker completed", map[string]interface{}{"Status": ret})
 	fsm.postEvent(ctx, ret)
 	//fsm.fsm.Event(ctx, ret)
@@ -175,15 +156,15 @@ func (depfsm *DeployFSM) Init() {
 		EventTimeout:            depfsm.TimeoutHandler,
 		StateFailed:             depfsm.FailedHandler,
 		StateComplete:           depfsm.CompleteHandler,
-		"enter_" + StatePending: depfsm.RetryDeploymentHandler,
-		"leave_" + StatePending: depfsm.StartDeploymentHandler,
+		"enter_" + StatePending: depfsm.BatchDeploymentHandler,
+		"leave_" + StatePending: depfsm.DeploymentHandler,
 		StateInPro:              depfsm.InProHandler,
 		StateCheck:              depfsm.CheckStateHandler,
 	}
 
 	depfsm.Events = []fsm.EventDesc{
 		{Name: EventStartDeployment, Src: []string{StatePending}, Dst: StateInPro},
-		{Name: EventRetry, Src: []string{StateCheck}, Dst: StatePending},
+		{Name: EventDeploy, Src: []string{StateCheck}, Dst: StatePending},
 		{Name: EventPoll, Src: []string{StateInPro}, Dst: StateCheck},
 		{Name: EventWait, Src: []string{StateCheck}, Dst: StateInPro},
 		{Name: EventTimeout, Src: []string{StateCheck}, Dst: StateFailed},
@@ -194,7 +175,7 @@ func (depfsm *DeployFSM) Init() {
 	depfsm.checkCount = 0
 	depfsm.RxCompleteCount = 0
 	depfsm.eventChannel = make(chan string, 10)
-	noAttachments := len(depfsm.Deployment.ExpectedState)
+	noAttachments := len(depfsm.Deployment.DeployRscDB[DeployPending])
 	depfsm.MaxCheckCount = noAttachments * 10
 	if depfsm.MaxCheckCount < 60 {
 		depfsm.MaxCheckCount = 60
@@ -202,15 +183,16 @@ func (depfsm *DeployFSM) Init() {
 	tflog.Debug(context.Background(), "DeployFSM: MaxCheckCount", map[string]interface{}{"MaxCheckCount": depfsm.MaxCheckCount})
 }
 
-func (c *NDFC) CreateFSM(ctx context.Context, dg *diag.Diagnostics, d *NDFCVrfDeployment) *DeployFSM {
+func NewDeployFSM(ctx context.Context, dg *diag.Diagnostics, d *NDFCDeployment) *DeployFSM {
 	fsm := &DeployFSM{
-		Deployment:   d,
-		ndfc:         c,
-		dg:           dg,
-		PollTimer:    5,
-		TrustFactor:  5,
-		failCount:    0,
-		FailureRetry: 3,
+		Deployment: d,
+		//ndfc:         c,
+		dg:                dg,
+		PollTimer:         time.Duration(d.ctrlr.DeployPollTimer),
+		TrustFactor:       d.ctrlr.DeployTrustFactor,
+		failCount:         0,
+		FailureRetry:      d.ctrlr.FailureRetry,
+		MaxParallelDeploy: d.ctrlr.MaxParallelDeploy,
 	}
 
 	fsm.Init()

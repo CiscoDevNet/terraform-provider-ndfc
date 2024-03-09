@@ -21,7 +21,7 @@ import (
 When a test is ran,
 Terraform runs plan, apply, refresh, and then final plan for each TestStep in the TestCase.
 */
-func TestAccVrfBulkGenerateSingleConfig(t *testing.T) {
+func TestAccVrfBulkGenerate(t *testing.T) {
 	x := &map[string]string{
 		"RscType":  ndfc.ResourceVrfBulk,
 		"RscName":  "vrf_test",
@@ -35,6 +35,10 @@ func TestAccVrfBulkGenerateSingleConfig(t *testing.T) {
 	helper.GenerateVrfBulkObject(&vrfScaledBulk, "test_evpn_vxlan",
 		50, false, false, true, []string{"9FE076D8EJL", "9TQYTJSZ1VJ", "9QBCTIN0FMY"})
 	helper.GetTFConfigWithSingleResource(t.Name(), *x, *vrfScaledBulk, &tf_config)
+}
+
+func TestAccVrfGenerate(t *testing.T) {
+	testGenerateVrfMultipleResource(50, "vrf_scale", "vrf_test")
 }
 
 func TestAccNDFCVrfBulkResourceCRUD(t *testing.T) {
@@ -292,7 +296,7 @@ func TestAccNDFCMultiResourceWithDeploy(t *testing.T) {
 					tf_config := new(string)
 					for i := 0; i < 20; i++ {
 						vrfScaledBulk[i] = new(resource_vrf_bulk.NDFCVrfBulkModel)
-						helper.GenerateSingleVrfObject(&(vrfScaledBulk[i]), "test_evpn_vxlan",
+						helper.GenerateSingleVrfObject(&(vrfScaledBulk[i]), "vrf_acc_", "test_evpn_vxlan",
 							i+1, false, false, true, []string{"9FE076D8EJL", "9TQYTJSZ1VJ"})
 						if (*x)["RscName"] == "" {
 							(*x)["RscName"] = fmt.Sprintf("vrf_test_%d", i+1)
@@ -316,4 +320,29 @@ func TestAccNDFCMultiResourceWithDeploy(t *testing.T) {
 
 func testAccCheckVrfBulkResourceDestroy(vrfBulk *resource_vrf_bulk.VrfBulkModel) resource.TestCheckFunc {
 	return nil
+}
+
+func testGenerateVrfMultipleResource(count int, vrfName string, rscName string) string {
+	x := &map[string]string{
+		"RscType":  ndfc.ResourceVrfBulk,
+		"RscName":  "vrf_test",
+		"User":     "admin",
+		"Password": "admin!@#",
+		"Host":     "https://10.78.210.161",
+		"Insecure": "true",
+	}
+	vrfScaledBulk := make([]*resource_vrf_bulk.NDFCVrfBulkModel, count)
+	tf_config := new(string)
+	for i := 0; i < count; i++ {
+		vrfScaledBulk[i] = new(resource_vrf_bulk.NDFCVrfBulkModel)
+		helper.GenerateSingleVrfObject(&(vrfScaledBulk[i]), vrfName, "test_evpn_vxlan",
+			i+1, false, false, true, []string{"9FE076D8EJL", "9TQYTJSZ1VJ"})
+		if (*x)["RscName"] == "" {
+			(*x)["RscName"] = fmt.Sprintf("%s_%d", rscName, i+1)
+		} else {
+			(*x)["RscName"] = (*x)["RscName"] + "," + fmt.Sprintf("vrf_test_%d", i+1)
+		}
+	}
+	helper.GetTFConfigWithMultipleResource("multiple_rsc_", *x, &vrfScaledBulk, &tf_config)
+	return *tf_config
 }

@@ -3,6 +3,7 @@ package provider
 import (
 	"context"
 	"fmt"
+	"log"
 	"terraform-provider-ndfc/internal/provider/ndfc"
 	"terraform-provider-ndfc/internal/provider/resources/resource_vrf_bulk"
 
@@ -50,6 +51,7 @@ func (d *vrfBulkResource) Configure(ctx context.Context, req resource.ConfigureR
 func (r *vrfBulkResource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
 	var in resource_vrf_bulk.VrfBulkModel
 	// Read Terraform plan data into the model
+	log.Printf("[TRACE] Create VRF Bulk")
 	resp.Diagnostics.Append(req.Plan.Get(ctx, &in)...)
 	if resp.Diagnostics.HasError() {
 		return
@@ -189,9 +191,15 @@ func (r vrfBulkResource) ValidateConfig(ctx context.Context, req resource.Valida
 		resp.Diagnostics.AddError("Vrfs", "Error in reading Vrfs")
 		return
 	}
-
+	seen := make(map[string]bool)
 	for vrf, v := range elements1 {
 		vrfDeploy := false
+		if got, ok := seen[vrf]; ok && got {
+			tflog.Error(ctx, fmt.Sprintf("Duplicate VRF %s", vrf))
+			resp.Diagnostics.AddError("Vrfs", fmt.Sprintf("Duplicate entry for VRF %s", vrf))
+			return
+		}
+		seen[vrf] = true
 		if !v.DeployAttachments.IsNull() && !v.DeployAttachments.IsUnknown() {
 			tflog.Debug(ctx, fmt.Sprintf("DeployAttachments is set for vrf %s", vrf))
 			vrfDeploy = v.DeployAttachments.ValueBool()
@@ -217,7 +225,14 @@ func (r vrfBulkResource) ValidateConfig(ctx context.Context, req resource.Valida
 			resp.Diagnostics.AddError("AttachList", "Error in reading AttachList")
 			return
 		}
+		seen := make(map[string]bool)
 		for serial, s := range elements2 {
+			if got, ok := seen[serial]; ok && got {
+				tflog.Error(ctx, fmt.Sprintf("Duplicate Serial %s", serial))
+				resp.Diagnostics.AddError("AttachList", fmt.Sprintf("Duplicate entry for Attachment %s/%s", vrf, serial))
+				return
+			}
+			seen[serial] = true
 			if !s.DeployThisAttachment.IsNull() && !s.DeployThisAttachment.IsUnknown() {
 				attachDeploy := s.DeployThisAttachment.ValueBool()
 				tflog.Debug(ctx, fmt.Sprintf("DeployThisAttachment is set for %s/%s", vrf, serial))

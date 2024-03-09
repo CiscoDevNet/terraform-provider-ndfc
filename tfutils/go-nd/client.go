@@ -232,6 +232,15 @@ func (client *Client) Do(req Req) (Res, error) {
 			} else if httpRes.StatusCode == 408 || (httpRes.StatusCode >= 501 && httpRes.StatusCode <= 599) {
 				log.Printf("[ERROR] HTTP Request failed: StatusCode %v, Retries: %v", httpRes.StatusCode, attempts)
 				continue
+			} else if httpRes.StatusCode == 401 && strings.Contains(res.Get("error").String(), "token has expired") {
+				log.Printf("[ERROR] HTTP Request failed: StatusCode %v, Retries: %v", httpRes.StatusCode, attempts)
+				client.Token = ""
+				err := client.Authenticate()
+				if err != nil {
+					log.Printf("[ERROR] Authentication failed: StatusCode %v, Retries: %v", httpRes.StatusCode, attempts)
+					log.Printf("[DEBUG] Exit from Do method")
+					return res, fmt.Errorf("HTTP Request failed: StatusCode %v", httpRes.StatusCode)
+				}
 			} else {
 				log.Printf("[ERROR] HTTP Request failed: StatusCode %v", httpRes.StatusCode)
 				log.Printf("[DEBUG] Exit from Do method")
@@ -275,6 +284,7 @@ func (client *Client) DoRaw(req Req) ([]byte, error) {
 		defer httpRes.Body.Close()
 
 		bodyBytes, err = io.ReadAll(httpRes.Body)
+		res := Res(gjson.ParseBytes(bodyBytes))
 		if err != nil {
 			if ok := client.Backoff(attempts); !ok {
 				log.Printf("[ERROR] Cannot decode response body: %+v", err)
@@ -297,6 +307,15 @@ func (client *Client) DoRaw(req Req) ([]byte, error) {
 			} else if httpRes.StatusCode == 408 || (httpRes.StatusCode >= 501 && httpRes.StatusCode <= 599) {
 				log.Printf("[ERROR] HTTP Request failed: StatusCode %v, Retries: %v", httpRes.StatusCode, attempts)
 				continue
+			} else if httpRes.StatusCode == 401 && strings.Contains(res.Get("error").String(), "token has expired") {
+				log.Printf("[ERROR] HTTP Request failed: StatusCode %v, Retries: %v", httpRes.StatusCode, attempts)
+				client.Token = ""
+				err := client.Authenticate()
+				if err != nil {
+					log.Printf("[ERROR] Authentication failed: StatusCode %v, Retries: %v", httpRes.StatusCode, attempts)
+					log.Printf("[DEBUG] Exit from Do method")
+					return bodyBytes, fmt.Errorf("HTTP Request failed: StatusCode %v", httpRes.StatusCode)
+				}
 			} else {
 				log.Printf("[ERROR] HTTP Request failed: StatusCode %v", httpRes.StatusCode)
 				log.Printf("[DEBUG] Exit from Do method")
