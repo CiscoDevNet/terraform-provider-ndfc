@@ -36,8 +36,14 @@ func (c NDFC) DSGetBulkVrf(ctx context.Context, dg *diag.Diagnostics, fabricName
 		tflog.Debug(ctx, "datasource_vrf_bulk: Unmarshal OK")
 	}
 	if len(ndVrfs.Vrfs) > 0 {
-		ndVrfs.FabricName = ndVrfs.Vrfs[0].FabricName
+		ndVrfs.FabricName = fabricName
 	}
+
+	err = c.DsGetVrfAttachments(ctx, dg, &ndVrfs)
+	if err != nil {
+		dg.AddError("VRF Attachments read failed", err.Error())
+	}
+
 	data := new(datasource_vrf_bulk.VrfBulkModel)
 	d := data.SetModelData(&ndVrfs)
 	if d != nil {

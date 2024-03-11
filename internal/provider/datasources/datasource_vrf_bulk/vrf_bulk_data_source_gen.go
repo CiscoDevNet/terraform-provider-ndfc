@@ -36,6 +36,71 @@ func VrfBulkDataSourceSchema(ctx context.Context) schema.Schema {
 							Description:         "Flag to Control Advertisement of /32 and /128 Routes to Edge Routers",
 							MarkdownDescription: "Flag to Control Advertisement of /32 and /128 Routes to Edge Routers",
 						},
+						"attach_list": schema.ListNestedAttribute{
+							NestedObject: schema.NestedAttributeObject{
+								Attributes: map[string]schema.Attribute{
+									"attach_state": schema.StringAttribute{
+										Computed:            true,
+										Description:         "The state of the attachment",
+										MarkdownDescription: "The state of the attachment",
+									},
+									"attached": schema.BoolAttribute{
+										Computed:            true,
+										Description:         "The state of the attachment",
+										MarkdownDescription: "The state of the attachment",
+									},
+									"freeform_config": schema.StringAttribute{
+										Optional:            true,
+										Description:         "This field covers any configuration not included in overlay templates which is needed as part of this VRF attachment",
+										MarkdownDescription: "This field covers any configuration not included in overlay templates which is needed as part of this VRF attachment",
+									},
+									"id": schema.Int64Attribute{
+										Optional:            true,
+										Description:         "",
+										MarkdownDescription: "",
+									},
+									"loopback_id": schema.Int64Attribute{
+										Optional:            true,
+										Description:         "Override loopback ID",
+										MarkdownDescription: "Override loopback ID",
+									},
+									"loopback_ipv4": schema.StringAttribute{
+										Optional:            true,
+										Description:         "Override loopback IPv4 address",
+										MarkdownDescription: "Override loopback IPv4 address",
+									},
+									"loopback_ipv6": schema.StringAttribute{
+										Optional:            true,
+										Description:         "Override loopback IPv6 address",
+										MarkdownDescription: "Override loopback IPv6 address",
+									},
+									"serial_number": schema.StringAttribute{
+										Optional:            true,
+										Description:         "Serial number of a switch",
+										MarkdownDescription: "Serial number of a switch",
+									},
+									"switch_name": schema.StringAttribute{
+										Computed:            true,
+										Description:         "The name of the switch",
+										MarkdownDescription: "The name of the switch",
+									},
+									"vlan": schema.Int64Attribute{
+										Optional:            true,
+										Computed:            true,
+										Description:         "VLAN ID",
+										MarkdownDescription: "VLAN ID",
+									},
+								},
+								CustomType: AttachListType{
+									ObjectType: types.ObjectType{
+										AttrTypes: AttachListValue{}.AttributeTypes(ctx),
+									},
+								},
+							},
+							Computed:            true,
+							Description:         "List of switches attached to the VRF",
+							MarkdownDescription: "List of switches attached to the VRF",
+						},
 						"bgp_password": schema.StringAttribute{
 							Optional:            true,
 							Description:         "VRF Lite BGP neighbor password (Hex String)",
@@ -55,11 +120,6 @@ func VrfBulkDataSourceSchema(ctx context.Context) schema.Schema {
 							Optional:            true,
 							Description:         "Applicable to IPv4, IPv6 VPN/EVPN/MVPN",
 							MarkdownDescription: "Applicable to IPv4, IPv6 VPN/EVPN/MVPN",
-						},
-						"fabric_name": schema.StringAttribute{
-							Required:            true,
-							Description:         "The name of the fabric",
-							MarkdownDescription: "The name of the fabric",
 						},
 						"id": schema.Int64Attribute{
 							Optional:            true,
@@ -197,6 +257,7 @@ func VrfBulkDataSourceSchema(ctx context.Context) schema.Schema {
 							MarkdownDescription: "IPv4 Multicast Address. Applicable only when TRM is enabled.",
 						},
 						"vlan_id": schema.Int64Attribute{
+							Optional:            true,
 							Computed:            true,
 							Description:         "VLAN ID",
 							MarkdownDescription: "VLAN ID",
@@ -217,6 +278,7 @@ func VrfBulkDataSourceSchema(ctx context.Context) schema.Schema {
 							MarkdownDescription: "The name of the VRF extension template",
 						},
 						"vrf_id": schema.Int64Attribute{
+							Optional:            true,
 							Computed:            true,
 							Description:         "VNI ID of VRF",
 							MarkdownDescription: "VNI ID of VRF",
@@ -243,7 +305,7 @@ func VrfBulkDataSourceSchema(ctx context.Context) schema.Schema {
 						},
 					},
 				},
-				Required:            true,
+				Optional:            true,
 				Description:         "List of vrfs",
 				MarkdownDescription: "List of vrfs",
 			},
@@ -317,6 +379,24 @@ func (t VrfsType) ValueFromObject(ctx context.Context, in basetypes.ObjectValue)
 			fmt.Sprintf(`advertise_host_routes expected to be basetypes.BoolValue, was: %T`, advertiseHostRoutesAttribute))
 	}
 
+	attachListAttribute, ok := attributes["attach_list"]
+
+	if !ok {
+		diags.AddError(
+			"Attribute Missing",
+			`attach_list is missing from object`)
+
+		return nil, diags
+	}
+
+	attachListVal, ok := attachListAttribute.(basetypes.ListValue)
+
+	if !ok {
+		diags.AddError(
+			"Attribute Wrong Type",
+			fmt.Sprintf(`attach_list expected to be basetypes.ListValue, was: %T`, attachListAttribute))
+	}
+
 	bgpPasswordAttribute, ok := attributes["bgp_password"]
 
 	if !ok {
@@ -387,24 +467,6 @@ func (t VrfsType) ValueFromObject(ctx context.Context, in basetypes.ObjectValue)
 		diags.AddError(
 			"Attribute Wrong Type",
 			fmt.Sprintf(`disable_rt_auto expected to be basetypes.BoolValue, was: %T`, disableRtAutoAttribute))
-	}
-
-	fabricNameAttribute, ok := attributes["fabric_name"]
-
-	if !ok {
-		diags.AddError(
-			"Attribute Missing",
-			`fabric_name is missing from object`)
-
-		return nil, diags
-	}
-
-	fabricNameVal, ok := fabricNameAttribute.(basetypes.StringValue)
-
-	if !ok {
-		diags.AddError(
-			"Attribute Wrong Type",
-			fmt.Sprintf(`fabric_name expected to be basetypes.StringValue, was: %T`, fabricNameAttribute))
 	}
 
 	idAttribute, ok := attributes["id"]
@@ -1044,11 +1106,11 @@ func (t VrfsType) ValueFromObject(ctx context.Context, in basetypes.ObjectValue)
 	return VrfsValue{
 		AdvertiseDefaultRoute:       advertiseDefaultRouteVal,
 		AdvertiseHostRoutes:         advertiseHostRoutesVal,
+		AttachList:                  attachListVal,
 		BgpPassword:                 bgpPasswordVal,
 		BgpPasswordType:             bgpPasswordTypeVal,
 		ConfigureStaticDefaultRoute: configureStaticDefaultRouteVal,
 		DisableRtAuto:               disableRtAutoVal,
-		FabricName:                  fabricNameVal,
 		Id:                          idVal,
 		InterfaceDescription:        interfaceDescriptionVal,
 		Ipv6LinkLocal:               ipv6LinkLocalVal,
@@ -1187,6 +1249,24 @@ func NewVrfsValue(attributeTypes map[string]attr.Type, attributes map[string]att
 			fmt.Sprintf(`advertise_host_routes expected to be basetypes.BoolValue, was: %T`, advertiseHostRoutesAttribute))
 	}
 
+	attachListAttribute, ok := attributes["attach_list"]
+
+	if !ok {
+		diags.AddError(
+			"Attribute Missing",
+			`attach_list is missing from object`)
+
+		return NewVrfsValueUnknown(), diags
+	}
+
+	attachListVal, ok := attachListAttribute.(basetypes.ListValue)
+
+	if !ok {
+		diags.AddError(
+			"Attribute Wrong Type",
+			fmt.Sprintf(`attach_list expected to be basetypes.ListValue, was: %T`, attachListAttribute))
+	}
+
 	bgpPasswordAttribute, ok := attributes["bgp_password"]
 
 	if !ok {
@@ -1257,24 +1337,6 @@ func NewVrfsValue(attributeTypes map[string]attr.Type, attributes map[string]att
 		diags.AddError(
 			"Attribute Wrong Type",
 			fmt.Sprintf(`disable_rt_auto expected to be basetypes.BoolValue, was: %T`, disableRtAutoAttribute))
-	}
-
-	fabricNameAttribute, ok := attributes["fabric_name"]
-
-	if !ok {
-		diags.AddError(
-			"Attribute Missing",
-			`fabric_name is missing from object`)
-
-		return NewVrfsValueUnknown(), diags
-	}
-
-	fabricNameVal, ok := fabricNameAttribute.(basetypes.StringValue)
-
-	if !ok {
-		diags.AddError(
-			"Attribute Wrong Type",
-			fmt.Sprintf(`fabric_name expected to be basetypes.StringValue, was: %T`, fabricNameAttribute))
 	}
 
 	idAttribute, ok := attributes["id"]
@@ -1914,11 +1976,11 @@ func NewVrfsValue(attributeTypes map[string]attr.Type, attributes map[string]att
 	return VrfsValue{
 		AdvertiseDefaultRoute:       advertiseDefaultRouteVal,
 		AdvertiseHostRoutes:         advertiseHostRoutesVal,
+		AttachList:                  attachListVal,
 		BgpPassword:                 bgpPasswordVal,
 		BgpPasswordType:             bgpPasswordTypeVal,
 		ConfigureStaticDefaultRoute: configureStaticDefaultRouteVal,
 		DisableRtAuto:               disableRtAutoVal,
-		FabricName:                  fabricNameVal,
 		Id:                          idVal,
 		InterfaceDescription:        interfaceDescriptionVal,
 		Ipv6LinkLocal:               ipv6LinkLocalVal,
@@ -2028,11 +2090,11 @@ var _ basetypes.ObjectValuable = VrfsValue{}
 type VrfsValue struct {
 	AdvertiseDefaultRoute       basetypes.BoolValue   `tfsdk:"advertise_default_route"`
 	AdvertiseHostRoutes         basetypes.BoolValue   `tfsdk:"advertise_host_routes"`
+	AttachList                  basetypes.ListValue   `tfsdk:"attach_list"`
 	BgpPassword                 basetypes.StringValue `tfsdk:"bgp_password"`
 	BgpPasswordType             basetypes.StringValue `tfsdk:"bgp_password_type"`
 	ConfigureStaticDefaultRoute basetypes.BoolValue   `tfsdk:"configure_static_default_route"`
 	DisableRtAuto               basetypes.BoolValue   `tfsdk:"disable_rt_auto"`
-	FabricName                  basetypes.StringValue `tfsdk:"fabric_name"`
 	Id                          basetypes.Int64Value  `tfsdk:"id"`
 	InterfaceDescription        basetypes.StringValue `tfsdk:"interface_description"`
 	Ipv6LinkLocal               basetypes.BoolValue   `tfsdk:"ipv6_link_local"`
@@ -2079,11 +2141,13 @@ func (v VrfsValue) ToTerraformValue(ctx context.Context) (tftypes.Value, error) 
 
 	attrTypes["advertise_default_route"] = basetypes.BoolType{}.TerraformType(ctx)
 	attrTypes["advertise_host_routes"] = basetypes.BoolType{}.TerraformType(ctx)
+	attrTypes["attach_list"] = basetypes.ListType{
+		ElemType: AttachListValue{}.Type(ctx),
+	}.TerraformType(ctx)
 	attrTypes["bgp_password"] = basetypes.StringType{}.TerraformType(ctx)
 	attrTypes["bgp_password_type"] = basetypes.StringType{}.TerraformType(ctx)
 	attrTypes["configure_static_default_route"] = basetypes.BoolType{}.TerraformType(ctx)
 	attrTypes["disable_rt_auto"] = basetypes.BoolType{}.TerraformType(ctx)
-	attrTypes["fabric_name"] = basetypes.StringType{}.TerraformType(ctx)
 	attrTypes["id"] = basetypes.Int64Type{}.TerraformType(ctx)
 	attrTypes["interface_description"] = basetypes.StringType{}.TerraformType(ctx)
 	attrTypes["ipv6_link_local"] = basetypes.BoolType{}.TerraformType(ctx)
@@ -2142,6 +2206,14 @@ func (v VrfsValue) ToTerraformValue(ctx context.Context) (tftypes.Value, error) 
 
 		vals["advertise_host_routes"] = val
 
+		val, err = v.AttachList.ToTerraformValue(ctx)
+
+		if err != nil {
+			return tftypes.NewValue(objectType, tftypes.UnknownValue), err
+		}
+
+		vals["attach_list"] = val
+
 		val, err = v.BgpPassword.ToTerraformValue(ctx)
 
 		if err != nil {
@@ -2173,14 +2245,6 @@ func (v VrfsValue) ToTerraformValue(ctx context.Context) (tftypes.Value, error) 
 		}
 
 		vals["disable_rt_auto"] = val
-
-		val, err = v.FabricName.ToTerraformValue(ctx)
-
-		if err != nil {
-			return tftypes.NewValue(objectType, tftypes.UnknownValue), err
-		}
-
-		vals["fabric_name"] = val
 
 		val, err = v.Id.ToTerraformValue(ctx)
 
@@ -2491,15 +2555,46 @@ func (v VrfsValue) String() string {
 func (v VrfsValue) ToObjectValue(ctx context.Context) (basetypes.ObjectValue, diag.Diagnostics) {
 	var diags diag.Diagnostics
 
+	attachList := types.ListValueMust(
+		AttachListType{
+			basetypes.ObjectType{
+				AttrTypes: AttachListValue{}.AttributeTypes(ctx),
+			},
+		},
+		v.AttachList.Elements(),
+	)
+
+	if v.AttachList.IsNull() {
+		attachList = types.ListNull(
+			AttachListType{
+				basetypes.ObjectType{
+					AttrTypes: AttachListValue{}.AttributeTypes(ctx),
+				},
+			},
+		)
+	}
+
+	if v.AttachList.IsUnknown() {
+		attachList = types.ListUnknown(
+			AttachListType{
+				basetypes.ObjectType{
+					AttrTypes: AttachListValue{}.AttributeTypes(ctx),
+				},
+			},
+		)
+	}
+
 	objVal, diags := types.ObjectValue(
 		map[string]attr.Type{
-			"advertise_default_route":        basetypes.BoolType{},
-			"advertise_host_routes":          basetypes.BoolType{},
+			"advertise_default_route": basetypes.BoolType{},
+			"advertise_host_routes":   basetypes.BoolType{},
+			"attach_list": basetypes.ListType{
+				ElemType: AttachListValue{}.Type(ctx),
+			},
 			"bgp_password":                   basetypes.StringType{},
 			"bgp_password_type":              basetypes.StringType{},
 			"configure_static_default_route": basetypes.BoolType{},
 			"disable_rt_auto":                basetypes.BoolType{},
-			"fabric_name":                    basetypes.StringType{},
 			"id":                             basetypes.Int64Type{},
 			"interface_description":          basetypes.StringType{},
 			"ipv6_link_local":                basetypes.BoolType{},
@@ -2539,11 +2634,11 @@ func (v VrfsValue) ToObjectValue(ctx context.Context) (basetypes.ObjectValue, di
 		map[string]attr.Value{
 			"advertise_default_route":        v.AdvertiseDefaultRoute,
 			"advertise_host_routes":          v.AdvertiseHostRoutes,
+			"attach_list":                    attachList,
 			"bgp_password":                   v.BgpPassword,
 			"bgp_password_type":              v.BgpPasswordType,
 			"configure_static_default_route": v.ConfigureStaticDefaultRoute,
 			"disable_rt_auto":                v.DisableRtAuto,
-			"fabric_name":                    v.FabricName,
 			"id":                             v.Id,
 			"interface_description":          v.InterfaceDescription,
 			"ipv6_link_local":                v.Ipv6LinkLocal,
@@ -2607,6 +2702,10 @@ func (v VrfsValue) Equal(o attr.Value) bool {
 		return false
 	}
 
+	if !v.AttachList.Equal(other.AttachList) {
+		return false
+	}
+
 	if !v.BgpPassword.Equal(other.BgpPassword) {
 		return false
 	}
@@ -2620,10 +2719,6 @@ func (v VrfsValue) Equal(o attr.Value) bool {
 	}
 
 	if !v.DisableRtAuto.Equal(other.DisableRtAuto) {
-		return false
-	}
-
-	if !v.FabricName.Equal(other.FabricName) {
 		return false
 	}
 
@@ -2780,13 +2875,15 @@ func (v VrfsValue) Type(ctx context.Context) attr.Type {
 
 func (v VrfsValue) AttributeTypes(ctx context.Context) map[string]attr.Type {
 	return map[string]attr.Type{
-		"advertise_default_route":        basetypes.BoolType{},
-		"advertise_host_routes":          basetypes.BoolType{},
+		"advertise_default_route": basetypes.BoolType{},
+		"advertise_host_routes":   basetypes.BoolType{},
+		"attach_list": basetypes.ListType{
+			ElemType: AttachListValue{}.Type(ctx),
+		},
 		"bgp_password":                   basetypes.StringType{},
 		"bgp_password_type":              basetypes.StringType{},
 		"configure_static_default_route": basetypes.BoolType{},
 		"disable_rt_auto":                basetypes.BoolType{},
-		"fabric_name":                    basetypes.StringType{},
 		"id":                             basetypes.Int64Type{},
 		"interface_description":          basetypes.StringType{},
 		"ipv6_link_local":                basetypes.BoolType{},
@@ -2822,5 +2919,814 @@ func (v VrfsValue) AttributeTypes(ctx context.Context) map[string]attr.Type {
 		"vrf_name":                       basetypes.StringType{},
 		"vrf_status":                     basetypes.StringType{},
 		"vrf_template":                   basetypes.StringType{},
+	}
+}
+
+var _ basetypes.ObjectTypable = AttachListType{}
+
+type AttachListType struct {
+	basetypes.ObjectType
+}
+
+func (t AttachListType) Equal(o attr.Type) bool {
+	other, ok := o.(AttachListType)
+
+	if !ok {
+		return false
+	}
+
+	return t.ObjectType.Equal(other.ObjectType)
+}
+
+func (t AttachListType) String() string {
+	return "AttachListType"
+}
+
+func (t AttachListType) ValueFromObject(ctx context.Context, in basetypes.ObjectValue) (basetypes.ObjectValuable, diag.Diagnostics) {
+	var diags diag.Diagnostics
+
+	attributes := in.Attributes()
+
+	attachStateAttribute, ok := attributes["attach_state"]
+
+	if !ok {
+		diags.AddError(
+			"Attribute Missing",
+			`attach_state is missing from object`)
+
+		return nil, diags
+	}
+
+	attachStateVal, ok := attachStateAttribute.(basetypes.StringValue)
+
+	if !ok {
+		diags.AddError(
+			"Attribute Wrong Type",
+			fmt.Sprintf(`attach_state expected to be basetypes.StringValue, was: %T`, attachStateAttribute))
+	}
+
+	attachedAttribute, ok := attributes["attached"]
+
+	if !ok {
+		diags.AddError(
+			"Attribute Missing",
+			`attached is missing from object`)
+
+		return nil, diags
+	}
+
+	attachedVal, ok := attachedAttribute.(basetypes.BoolValue)
+
+	if !ok {
+		diags.AddError(
+			"Attribute Wrong Type",
+			fmt.Sprintf(`attached expected to be basetypes.BoolValue, was: %T`, attachedAttribute))
+	}
+
+	freeformConfigAttribute, ok := attributes["freeform_config"]
+
+	if !ok {
+		diags.AddError(
+			"Attribute Missing",
+			`freeform_config is missing from object`)
+
+		return nil, diags
+	}
+
+	freeformConfigVal, ok := freeformConfigAttribute.(basetypes.StringValue)
+
+	if !ok {
+		diags.AddError(
+			"Attribute Wrong Type",
+			fmt.Sprintf(`freeform_config expected to be basetypes.StringValue, was: %T`, freeformConfigAttribute))
+	}
+
+	idAttribute, ok := attributes["id"]
+
+	if !ok {
+		diags.AddError(
+			"Attribute Missing",
+			`id is missing from object`)
+
+		return nil, diags
+	}
+
+	idVal, ok := idAttribute.(basetypes.Int64Value)
+
+	if !ok {
+		diags.AddError(
+			"Attribute Wrong Type",
+			fmt.Sprintf(`id expected to be basetypes.Int64Value, was: %T`, idAttribute))
+	}
+
+	loopbackIdAttribute, ok := attributes["loopback_id"]
+
+	if !ok {
+		diags.AddError(
+			"Attribute Missing",
+			`loopback_id is missing from object`)
+
+		return nil, diags
+	}
+
+	loopbackIdVal, ok := loopbackIdAttribute.(basetypes.Int64Value)
+
+	if !ok {
+		diags.AddError(
+			"Attribute Wrong Type",
+			fmt.Sprintf(`loopback_id expected to be basetypes.Int64Value, was: %T`, loopbackIdAttribute))
+	}
+
+	loopbackIpv4Attribute, ok := attributes["loopback_ipv4"]
+
+	if !ok {
+		diags.AddError(
+			"Attribute Missing",
+			`loopback_ipv4 is missing from object`)
+
+		return nil, diags
+	}
+
+	loopbackIpv4Val, ok := loopbackIpv4Attribute.(basetypes.StringValue)
+
+	if !ok {
+		diags.AddError(
+			"Attribute Wrong Type",
+			fmt.Sprintf(`loopback_ipv4 expected to be basetypes.StringValue, was: %T`, loopbackIpv4Attribute))
+	}
+
+	loopbackIpv6Attribute, ok := attributes["loopback_ipv6"]
+
+	if !ok {
+		diags.AddError(
+			"Attribute Missing",
+			`loopback_ipv6 is missing from object`)
+
+		return nil, diags
+	}
+
+	loopbackIpv6Val, ok := loopbackIpv6Attribute.(basetypes.StringValue)
+
+	if !ok {
+		diags.AddError(
+			"Attribute Wrong Type",
+			fmt.Sprintf(`loopback_ipv6 expected to be basetypes.StringValue, was: %T`, loopbackIpv6Attribute))
+	}
+
+	serialNumberAttribute, ok := attributes["serial_number"]
+
+	if !ok {
+		diags.AddError(
+			"Attribute Missing",
+			`serial_number is missing from object`)
+
+		return nil, diags
+	}
+
+	serialNumberVal, ok := serialNumberAttribute.(basetypes.StringValue)
+
+	if !ok {
+		diags.AddError(
+			"Attribute Wrong Type",
+			fmt.Sprintf(`serial_number expected to be basetypes.StringValue, was: %T`, serialNumberAttribute))
+	}
+
+	switchNameAttribute, ok := attributes["switch_name"]
+
+	if !ok {
+		diags.AddError(
+			"Attribute Missing",
+			`switch_name is missing from object`)
+
+		return nil, diags
+	}
+
+	switchNameVal, ok := switchNameAttribute.(basetypes.StringValue)
+
+	if !ok {
+		diags.AddError(
+			"Attribute Wrong Type",
+			fmt.Sprintf(`switch_name expected to be basetypes.StringValue, was: %T`, switchNameAttribute))
+	}
+
+	vlanAttribute, ok := attributes["vlan"]
+
+	if !ok {
+		diags.AddError(
+			"Attribute Missing",
+			`vlan is missing from object`)
+
+		return nil, diags
+	}
+
+	vlanVal, ok := vlanAttribute.(basetypes.Int64Value)
+
+	if !ok {
+		diags.AddError(
+			"Attribute Wrong Type",
+			fmt.Sprintf(`vlan expected to be basetypes.Int64Value, was: %T`, vlanAttribute))
+	}
+
+	if diags.HasError() {
+		return nil, diags
+	}
+
+	return AttachListValue{
+		AttachState:    attachStateVal,
+		Attached:       attachedVal,
+		FreeformConfig: freeformConfigVal,
+		Id:             idVal,
+		LoopbackId:     loopbackIdVal,
+		LoopbackIpv4:   loopbackIpv4Val,
+		LoopbackIpv6:   loopbackIpv6Val,
+		SerialNumber:   serialNumberVal,
+		SwitchName:     switchNameVal,
+		Vlan:           vlanVal,
+		state:          attr.ValueStateKnown,
+	}, diags
+}
+
+func NewAttachListValueNull() AttachListValue {
+	return AttachListValue{
+		state: attr.ValueStateNull,
+	}
+}
+
+func NewAttachListValueUnknown() AttachListValue {
+	return AttachListValue{
+		state: attr.ValueStateUnknown,
+	}
+}
+
+func NewAttachListValue(attributeTypes map[string]attr.Type, attributes map[string]attr.Value) (AttachListValue, diag.Diagnostics) {
+	var diags diag.Diagnostics
+
+	// Reference: https://github.com/hashicorp/terraform-plugin-framework/issues/521
+	ctx := context.Background()
+
+	for name, attributeType := range attributeTypes {
+		attribute, ok := attributes[name]
+
+		if !ok {
+			diags.AddError(
+				"Missing AttachListValue Attribute Value",
+				"While creating a AttachListValue value, a missing attribute value was detected. "+
+					"A AttachListValue must contain values for all attributes, even if null or unknown. "+
+					"This is always an issue with the provider and should be reported to the provider developers.\n\n"+
+					fmt.Sprintf("AttachListValue Attribute Name (%s) Expected Type: %s", name, attributeType.String()),
+			)
+
+			continue
+		}
+
+		if !attributeType.Equal(attribute.Type(ctx)) {
+			diags.AddError(
+				"Invalid AttachListValue Attribute Type",
+				"While creating a AttachListValue value, an invalid attribute value was detected. "+
+					"A AttachListValue must use a matching attribute type for the value. "+
+					"This is always an issue with the provider and should be reported to the provider developers.\n\n"+
+					fmt.Sprintf("AttachListValue Attribute Name (%s) Expected Type: %s\n", name, attributeType.String())+
+					fmt.Sprintf("AttachListValue Attribute Name (%s) Given Type: %s", name, attribute.Type(ctx)),
+			)
+		}
+	}
+
+	for name := range attributes {
+		_, ok := attributeTypes[name]
+
+		if !ok {
+			diags.AddError(
+				"Extra AttachListValue Attribute Value",
+				"While creating a AttachListValue value, an extra attribute value was detected. "+
+					"A AttachListValue must not contain values beyond the expected attribute types. "+
+					"This is always an issue with the provider and should be reported to the provider developers.\n\n"+
+					fmt.Sprintf("Extra AttachListValue Attribute Name: %s", name),
+			)
+		}
+	}
+
+	if diags.HasError() {
+		return NewAttachListValueUnknown(), diags
+	}
+
+	attachStateAttribute, ok := attributes["attach_state"]
+
+	if !ok {
+		diags.AddError(
+			"Attribute Missing",
+			`attach_state is missing from object`)
+
+		return NewAttachListValueUnknown(), diags
+	}
+
+	attachStateVal, ok := attachStateAttribute.(basetypes.StringValue)
+
+	if !ok {
+		diags.AddError(
+			"Attribute Wrong Type",
+			fmt.Sprintf(`attach_state expected to be basetypes.StringValue, was: %T`, attachStateAttribute))
+	}
+
+	attachedAttribute, ok := attributes["attached"]
+
+	if !ok {
+		diags.AddError(
+			"Attribute Missing",
+			`attached is missing from object`)
+
+		return NewAttachListValueUnknown(), diags
+	}
+
+	attachedVal, ok := attachedAttribute.(basetypes.BoolValue)
+
+	if !ok {
+		diags.AddError(
+			"Attribute Wrong Type",
+			fmt.Sprintf(`attached expected to be basetypes.BoolValue, was: %T`, attachedAttribute))
+	}
+
+	freeformConfigAttribute, ok := attributes["freeform_config"]
+
+	if !ok {
+		diags.AddError(
+			"Attribute Missing",
+			`freeform_config is missing from object`)
+
+		return NewAttachListValueUnknown(), diags
+	}
+
+	freeformConfigVal, ok := freeformConfigAttribute.(basetypes.StringValue)
+
+	if !ok {
+		diags.AddError(
+			"Attribute Wrong Type",
+			fmt.Sprintf(`freeform_config expected to be basetypes.StringValue, was: %T`, freeformConfigAttribute))
+	}
+
+	idAttribute, ok := attributes["id"]
+
+	if !ok {
+		diags.AddError(
+			"Attribute Missing",
+			`id is missing from object`)
+
+		return NewAttachListValueUnknown(), diags
+	}
+
+	idVal, ok := idAttribute.(basetypes.Int64Value)
+
+	if !ok {
+		diags.AddError(
+			"Attribute Wrong Type",
+			fmt.Sprintf(`id expected to be basetypes.Int64Value, was: %T`, idAttribute))
+	}
+
+	loopbackIdAttribute, ok := attributes["loopback_id"]
+
+	if !ok {
+		diags.AddError(
+			"Attribute Missing",
+			`loopback_id is missing from object`)
+
+		return NewAttachListValueUnknown(), diags
+	}
+
+	loopbackIdVal, ok := loopbackIdAttribute.(basetypes.Int64Value)
+
+	if !ok {
+		diags.AddError(
+			"Attribute Wrong Type",
+			fmt.Sprintf(`loopback_id expected to be basetypes.Int64Value, was: %T`, loopbackIdAttribute))
+	}
+
+	loopbackIpv4Attribute, ok := attributes["loopback_ipv4"]
+
+	if !ok {
+		diags.AddError(
+			"Attribute Missing",
+			`loopback_ipv4 is missing from object`)
+
+		return NewAttachListValueUnknown(), diags
+	}
+
+	loopbackIpv4Val, ok := loopbackIpv4Attribute.(basetypes.StringValue)
+
+	if !ok {
+		diags.AddError(
+			"Attribute Wrong Type",
+			fmt.Sprintf(`loopback_ipv4 expected to be basetypes.StringValue, was: %T`, loopbackIpv4Attribute))
+	}
+
+	loopbackIpv6Attribute, ok := attributes["loopback_ipv6"]
+
+	if !ok {
+		diags.AddError(
+			"Attribute Missing",
+			`loopback_ipv6 is missing from object`)
+
+		return NewAttachListValueUnknown(), diags
+	}
+
+	loopbackIpv6Val, ok := loopbackIpv6Attribute.(basetypes.StringValue)
+
+	if !ok {
+		diags.AddError(
+			"Attribute Wrong Type",
+			fmt.Sprintf(`loopback_ipv6 expected to be basetypes.StringValue, was: %T`, loopbackIpv6Attribute))
+	}
+
+	serialNumberAttribute, ok := attributes["serial_number"]
+
+	if !ok {
+		diags.AddError(
+			"Attribute Missing",
+			`serial_number is missing from object`)
+
+		return NewAttachListValueUnknown(), diags
+	}
+
+	serialNumberVal, ok := serialNumberAttribute.(basetypes.StringValue)
+
+	if !ok {
+		diags.AddError(
+			"Attribute Wrong Type",
+			fmt.Sprintf(`serial_number expected to be basetypes.StringValue, was: %T`, serialNumberAttribute))
+	}
+
+	switchNameAttribute, ok := attributes["switch_name"]
+
+	if !ok {
+		diags.AddError(
+			"Attribute Missing",
+			`switch_name is missing from object`)
+
+		return NewAttachListValueUnknown(), diags
+	}
+
+	switchNameVal, ok := switchNameAttribute.(basetypes.StringValue)
+
+	if !ok {
+		diags.AddError(
+			"Attribute Wrong Type",
+			fmt.Sprintf(`switch_name expected to be basetypes.StringValue, was: %T`, switchNameAttribute))
+	}
+
+	vlanAttribute, ok := attributes["vlan"]
+
+	if !ok {
+		diags.AddError(
+			"Attribute Missing",
+			`vlan is missing from object`)
+
+		return NewAttachListValueUnknown(), diags
+	}
+
+	vlanVal, ok := vlanAttribute.(basetypes.Int64Value)
+
+	if !ok {
+		diags.AddError(
+			"Attribute Wrong Type",
+			fmt.Sprintf(`vlan expected to be basetypes.Int64Value, was: %T`, vlanAttribute))
+	}
+
+	if diags.HasError() {
+		return NewAttachListValueUnknown(), diags
+	}
+
+	return AttachListValue{
+		AttachState:    attachStateVal,
+		Attached:       attachedVal,
+		FreeformConfig: freeformConfigVal,
+		Id:             idVal,
+		LoopbackId:     loopbackIdVal,
+		LoopbackIpv4:   loopbackIpv4Val,
+		LoopbackIpv6:   loopbackIpv6Val,
+		SerialNumber:   serialNumberVal,
+		SwitchName:     switchNameVal,
+		Vlan:           vlanVal,
+		state:          attr.ValueStateKnown,
+	}, diags
+}
+
+func NewAttachListValueMust(attributeTypes map[string]attr.Type, attributes map[string]attr.Value) AttachListValue {
+	object, diags := NewAttachListValue(attributeTypes, attributes)
+
+	if diags.HasError() {
+		// This could potentially be added to the diag package.
+		diagsStrings := make([]string, 0, len(diags))
+
+		for _, diagnostic := range diags {
+			diagsStrings = append(diagsStrings, fmt.Sprintf(
+				"%s | %s | %s",
+				diagnostic.Severity(),
+				diagnostic.Summary(),
+				diagnostic.Detail()))
+		}
+
+		panic("NewAttachListValueMust received error(s): " + strings.Join(diagsStrings, "\n"))
+	}
+
+	return object
+}
+
+func (t AttachListType) ValueFromTerraform(ctx context.Context, in tftypes.Value) (attr.Value, error) {
+	if in.Type() == nil {
+		return NewAttachListValueNull(), nil
+	}
+
+	if !in.Type().Equal(t.TerraformType(ctx)) {
+		return nil, fmt.Errorf("expected %s, got %s", t.TerraformType(ctx), in.Type())
+	}
+
+	if !in.IsKnown() {
+		return NewAttachListValueUnknown(), nil
+	}
+
+	if in.IsNull() {
+		return NewAttachListValueNull(), nil
+	}
+
+	attributes := map[string]attr.Value{}
+
+	val := map[string]tftypes.Value{}
+
+	err := in.As(&val)
+
+	if err != nil {
+		return nil, err
+	}
+
+	for k, v := range val {
+		a, err := t.AttrTypes[k].ValueFromTerraform(ctx, v)
+
+		if err != nil {
+			return nil, err
+		}
+
+		attributes[k] = a
+	}
+
+	return NewAttachListValueMust(AttachListValue{}.AttributeTypes(ctx), attributes), nil
+}
+
+func (t AttachListType) ValueType(ctx context.Context) attr.Value {
+	return AttachListValue{}
+}
+
+var _ basetypes.ObjectValuable = AttachListValue{}
+
+type AttachListValue struct {
+	AttachState    basetypes.StringValue `tfsdk:"attach_state"`
+	Attached       basetypes.BoolValue   `tfsdk:"attached"`
+	FreeformConfig basetypes.StringValue `tfsdk:"freeform_config"`
+	Id             basetypes.Int64Value  `tfsdk:"id"`
+	LoopbackId     basetypes.Int64Value  `tfsdk:"loopback_id"`
+	LoopbackIpv4   basetypes.StringValue `tfsdk:"loopback_ipv4"`
+	LoopbackIpv6   basetypes.StringValue `tfsdk:"loopback_ipv6"`
+	SerialNumber   basetypes.StringValue `tfsdk:"serial_number"`
+	SwitchName     basetypes.StringValue `tfsdk:"switch_name"`
+	Vlan           basetypes.Int64Value  `tfsdk:"vlan"`
+	state          attr.ValueState
+}
+
+func (v AttachListValue) ToTerraformValue(ctx context.Context) (tftypes.Value, error) {
+	attrTypes := make(map[string]tftypes.Type, 10)
+
+	var val tftypes.Value
+	var err error
+
+	attrTypes["attach_state"] = basetypes.StringType{}.TerraformType(ctx)
+	attrTypes["attached"] = basetypes.BoolType{}.TerraformType(ctx)
+	attrTypes["freeform_config"] = basetypes.StringType{}.TerraformType(ctx)
+	attrTypes["id"] = basetypes.Int64Type{}.TerraformType(ctx)
+	attrTypes["loopback_id"] = basetypes.Int64Type{}.TerraformType(ctx)
+	attrTypes["loopback_ipv4"] = basetypes.StringType{}.TerraformType(ctx)
+	attrTypes["loopback_ipv6"] = basetypes.StringType{}.TerraformType(ctx)
+	attrTypes["serial_number"] = basetypes.StringType{}.TerraformType(ctx)
+	attrTypes["switch_name"] = basetypes.StringType{}.TerraformType(ctx)
+	attrTypes["vlan"] = basetypes.Int64Type{}.TerraformType(ctx)
+
+	objectType := tftypes.Object{AttributeTypes: attrTypes}
+
+	switch v.state {
+	case attr.ValueStateKnown:
+		vals := make(map[string]tftypes.Value, 10)
+
+		val, err = v.AttachState.ToTerraformValue(ctx)
+
+		if err != nil {
+			return tftypes.NewValue(objectType, tftypes.UnknownValue), err
+		}
+
+		vals["attach_state"] = val
+
+		val, err = v.Attached.ToTerraformValue(ctx)
+
+		if err != nil {
+			return tftypes.NewValue(objectType, tftypes.UnknownValue), err
+		}
+
+		vals["attached"] = val
+
+		val, err = v.FreeformConfig.ToTerraformValue(ctx)
+
+		if err != nil {
+			return tftypes.NewValue(objectType, tftypes.UnknownValue), err
+		}
+
+		vals["freeform_config"] = val
+
+		val, err = v.Id.ToTerraformValue(ctx)
+
+		if err != nil {
+			return tftypes.NewValue(objectType, tftypes.UnknownValue), err
+		}
+
+		vals["id"] = val
+
+		val, err = v.LoopbackId.ToTerraformValue(ctx)
+
+		if err != nil {
+			return tftypes.NewValue(objectType, tftypes.UnknownValue), err
+		}
+
+		vals["loopback_id"] = val
+
+		val, err = v.LoopbackIpv4.ToTerraformValue(ctx)
+
+		if err != nil {
+			return tftypes.NewValue(objectType, tftypes.UnknownValue), err
+		}
+
+		vals["loopback_ipv4"] = val
+
+		val, err = v.LoopbackIpv6.ToTerraformValue(ctx)
+
+		if err != nil {
+			return tftypes.NewValue(objectType, tftypes.UnknownValue), err
+		}
+
+		vals["loopback_ipv6"] = val
+
+		val, err = v.SerialNumber.ToTerraformValue(ctx)
+
+		if err != nil {
+			return tftypes.NewValue(objectType, tftypes.UnknownValue), err
+		}
+
+		vals["serial_number"] = val
+
+		val, err = v.SwitchName.ToTerraformValue(ctx)
+
+		if err != nil {
+			return tftypes.NewValue(objectType, tftypes.UnknownValue), err
+		}
+
+		vals["switch_name"] = val
+
+		val, err = v.Vlan.ToTerraformValue(ctx)
+
+		if err != nil {
+			return tftypes.NewValue(objectType, tftypes.UnknownValue), err
+		}
+
+		vals["vlan"] = val
+
+		if err := tftypes.ValidateValue(objectType, vals); err != nil {
+			return tftypes.NewValue(objectType, tftypes.UnknownValue), err
+		}
+
+		return tftypes.NewValue(objectType, vals), nil
+	case attr.ValueStateNull:
+		return tftypes.NewValue(objectType, nil), nil
+	case attr.ValueStateUnknown:
+		return tftypes.NewValue(objectType, tftypes.UnknownValue), nil
+	default:
+		panic(fmt.Sprintf("unhandled Object state in ToTerraformValue: %s", v.state))
+	}
+}
+
+func (v AttachListValue) IsNull() bool {
+	return v.state == attr.ValueStateNull
+}
+
+func (v AttachListValue) IsUnknown() bool {
+	return v.state == attr.ValueStateUnknown
+}
+
+func (v AttachListValue) String() string {
+	return "AttachListValue"
+}
+
+func (v AttachListValue) ToObjectValue(ctx context.Context) (basetypes.ObjectValue, diag.Diagnostics) {
+	var diags diag.Diagnostics
+
+	objVal, diags := types.ObjectValue(
+		map[string]attr.Type{
+			"attach_state":    basetypes.StringType{},
+			"attached":        basetypes.BoolType{},
+			"freeform_config": basetypes.StringType{},
+			"id":              basetypes.Int64Type{},
+			"loopback_id":     basetypes.Int64Type{},
+			"loopback_ipv4":   basetypes.StringType{},
+			"loopback_ipv6":   basetypes.StringType{},
+			"serial_number":   basetypes.StringType{},
+			"switch_name":     basetypes.StringType{},
+			"vlan":            basetypes.Int64Type{},
+		},
+		map[string]attr.Value{
+			"attach_state":    v.AttachState,
+			"attached":        v.Attached,
+			"freeform_config": v.FreeformConfig,
+			"id":              v.Id,
+			"loopback_id":     v.LoopbackId,
+			"loopback_ipv4":   v.LoopbackIpv4,
+			"loopback_ipv6":   v.LoopbackIpv6,
+			"serial_number":   v.SerialNumber,
+			"switch_name":     v.SwitchName,
+			"vlan":            v.Vlan,
+		})
+
+	return objVal, diags
+}
+
+func (v AttachListValue) Equal(o attr.Value) bool {
+	other, ok := o.(AttachListValue)
+
+	if !ok {
+		return false
+	}
+
+	if v.state != other.state {
+		return false
+	}
+
+	if v.state != attr.ValueStateKnown {
+		return true
+	}
+
+	if !v.AttachState.Equal(other.AttachState) {
+		return false
+	}
+
+	if !v.Attached.Equal(other.Attached) {
+		return false
+	}
+
+	if !v.FreeformConfig.Equal(other.FreeformConfig) {
+		return false
+	}
+
+	if !v.Id.Equal(other.Id) {
+		return false
+	}
+
+	if !v.LoopbackId.Equal(other.LoopbackId) {
+		return false
+	}
+
+	if !v.LoopbackIpv4.Equal(other.LoopbackIpv4) {
+		return false
+	}
+
+	if !v.LoopbackIpv6.Equal(other.LoopbackIpv6) {
+		return false
+	}
+
+	if !v.SerialNumber.Equal(other.SerialNumber) {
+		return false
+	}
+
+	if !v.SwitchName.Equal(other.SwitchName) {
+		return false
+	}
+
+	if !v.Vlan.Equal(other.Vlan) {
+		return false
+	}
+
+	return true
+}
+
+func (v AttachListValue) Type(ctx context.Context) attr.Type {
+	return AttachListType{
+		basetypes.ObjectType{
+			AttrTypes: v.AttributeTypes(ctx),
+		},
+	}
+}
+
+func (v AttachListValue) AttributeTypes(ctx context.Context) map[string]attr.Type {
+	return map[string]attr.Type{
+		"attach_state":    basetypes.StringType{},
+		"attached":        basetypes.BoolType{},
+		"freeform_config": basetypes.StringType{},
+		"id":              basetypes.Int64Type{},
+		"loopback_id":     basetypes.Int64Type{},
+		"loopback_ipv4":   basetypes.StringType{},
+		"loopback_ipv6":   basetypes.StringType{},
+		"serial_number":   basetypes.StringType{},
+		"switch_name":     basetypes.StringType{},
+		"vlan":            basetypes.Int64Type{},
 	}
 }

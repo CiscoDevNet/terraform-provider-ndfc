@@ -84,7 +84,7 @@ func (p *ndfcProvider) Metadata(ctx context.Context, req provider.MetadataReques
 func (p *ndfcProvider) DataSources(ctx context.Context) []func() datasource.DataSource {
 	tflog.Info(ctx, "Provider Datasources  called")
 	return []func() datasource.DataSource{
-		NewFabricDataSource}
+		NewFabricDataSource, NewVrfBulkDataSource}
 }
 
 func (p *ndfcProvider) Resources(ctx context.Context) []func() resource.Resource {

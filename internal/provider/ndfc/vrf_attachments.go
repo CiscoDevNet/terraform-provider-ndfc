@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"log"
 	"strings"
+	"terraform-provider-ndfc/internal/provider/datasources/datasource_vrf_bulk"
 	rva "terraform-provider-ndfc/internal/provider/resources/resource_vrf_attachments"
 	"terraform-provider-ndfc/internal/provider/resources/resource_vrf_bulk"
 
@@ -284,5 +285,66 @@ func (c NDFC) RscDeleteVrfAttachments(ctx context.Context, dg *diag.Diagnostics,
 		dg.AddError("Error deleting VRF Attachments", err.Error())
 	}
 	c.RscDeployAttachments(ctx, dg, delVrf)
+	return nil
+}
+
+func (c NDFC) DsGetVrfAttachments(ctx context.Context, dg *diag.Diagnostics, vrf *datasource_vrf_bulk.NDFCVrfBulkModel) error {
+	tflog.Debug(ctx, "DsGetVrfAttachments: Entering Get")
+	vrfs := make([]string, 0)
+	vrfMap := make(map[string]*datasource_vrf_bulk.NDFCVrfsValue)
+	for i := range vrf.Vrfs {
+		vrfs = append(vrfs, vrf.Vrfs[i].VrfName)
+		vrfMap[vrf.Vrfs[i].VrfName] = &vrf.Vrfs[i]
+	}
+	res, err := c.getVrfAttachments(ctx, dg, vrf.FabricName, vrfs)
+	if err != nil {
+		tflog.Error(ctx, fmt.Sprintf("RscGetVrfAttachments: Error getting VRF Attachments %s", err.Error()))
+		return err
+	}
+	vaPayload := rva.NDFCVrfAttachmentsPayloads{}
+
+	err = json.Unmarshal(res, &vaPayload.VrfAttachments)
+	if err != nil {
+		tflog.Error(ctx, fmt.Sprintf("getVrfAttachments: Error unmarshalling VRF Attachments %s", err.Error()))
+		log.Printf("getVrfAttachments: Error unmarshalling VRF Attachments %s", string(res))
+		return err
+	}
+
+	for i := range vaPayload.VrfAttachments {
+		vrfName := vaPayload.VrfAttachments[i].VrfName
+		vrfEntry, ok := vrfMap[vrfName]
+		if !ok {
+			tflog.Warn(ctx, fmt.Sprintf("DsGetVrfAttachments: VRF %s not found in the datasource", vrfName))
+			continue
+		}
+		vrfEntry.AttachList = make([]datasource_vrf_bulk.NDFCAttachListValue, 0)
+		skip := 0
+		for j := range vaPayload.VrfAttachments[i].AttachList {
+			if vaPayload.VrfAttachments[i].AttachList[j].Attached != nil &&
+				!*vaPayload.VrfAttachments[i].AttachList[j].Attached {
+				skip++
+				//implicit attachment, ignore
+				continue
+			}
+			//vrfAttachEntry.AttachList = [(*payload).VrfAttachments[i].AttachList[j].SwitchSerialNo] = (*payload).VrfAttachments[i].AttachList[j]
+			vrfAttachEntry := datasource_vrf_bulk.NDFCAttachListValue{}
+			vrfAttachEntry.SwitchName = vaPayload.VrfAttachments[i].AttachList[j].SwitchName
+			vrfAttachEntry.SerialNumber = vaPayload.VrfAttachments[i].AttachList[j].SwitchSerialNo
+			vrfAttachEntry.Vlan = vaPayload.VrfAttachments[i].AttachList[j].Vlan
+			vrfAttachEntry.AttachState = vaPayload.VrfAttachments[i].AttachList[j].AttachState
+			vrfAttachEntry.Attached = vaPayload.VrfAttachments[i].AttachList[j].Attached
+			vrfAttachEntry.FreeformConfig = vaPayload.VrfAttachments[i].AttachList[j].FreeformConfig
+			//vrfAttachEntry.DeployThisAttachment = vaPayload.VrfAttachments[i].AttachList[j].DeployThisAttachment
+			vrfAttachEntry.InstanceValues.LoopbackId = vaPayload.VrfAttachments[i].AttachList[j].InstanceValues.LoopbackId
+			vrfAttachEntry.InstanceValues.LoopbackIpv4 = vaPayload.VrfAttachments[i].AttachList[j].InstanceValues.LoopbackIpv4
+			vrfAttachEntry.InstanceValues.LoopbackIpv6 = vaPayload.VrfAttachments[i].AttachList[j].InstanceValues.LoopbackIpv6
+			vrfEntry.AttachList = append(vrfEntry.AttachList, vrfAttachEntry)
+		}
+		if skip == len(vaPayload.VrfAttachments[i].AttachList) {
+			//All entries are implicit, skip the VRF
+			vrfEntry.AttachList = nil
+		}
+
+	}
 	return nil
 }
