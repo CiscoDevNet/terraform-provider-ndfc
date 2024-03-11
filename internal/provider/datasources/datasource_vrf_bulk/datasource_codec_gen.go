@@ -21,13 +21,34 @@ type NDFCVrfsValues []NDFCVrfsValue
 
 type NDFCVrfsValue struct {
 	Id                   *int64                     `json:"Id,omitempty"`
-	FabricName           string                     `json:"fabric,omitempty"`
 	VrfName              string                     `json:"vrfName,omitempty"`
 	VrfTemplate          string                     `json:"vrfTemplate,omitempty"`
 	VrfStatus            string                     `json:"vrfStatus,omitempty"`
 	VrfExtensionTemplate string                     `json:"vrfExtensionTemplate,omitempty"`
 	VrfId                *int64                     `json:"vrfId,omitempty"`
+	AttachList           NDFCAttachListValues       `json:"lanAttachList,omitempty"`
 	VrfTemplateConfig    NDFCVrfTemplateConfigValue `json:"vrfTemplateConfig,omitempty"`
+}
+
+type NDFCAttachListValues []NDFCAttachListValue
+
+type NDFCAttachListValue struct {
+	Id             *int64                  `json:"id,omitempty"`
+	SerialNumber   string                  `json:"serialNumber,omitempty"`
+	SwitchSerialNo string                  `json:"switchSerialNo,omitempty"`
+	SwitchName     string                  `json:"switchName,omitempty"`
+	Vlan           *Int64Custom            `json:"vlan,omitempty"`
+	VlanId         *Int64Custom            `json:"vlanId,omitempty"`
+	AttachState    string                  `json:"lanAttachState,omitempty"`
+	Attached       *bool                   `json:"isLanAttached,omitempty"`
+	FreeformConfig string                  `json:"freeformconfig,omitempty"`
+	InstanceValues NDFCInstanceValuesValue `json:"instanceValues,omitempty"`
+}
+
+type NDFCInstanceValuesValue struct {
+	LoopbackId   *Int64Custom `json:"loopbackId,omitempty"`
+	LoopbackIpv4 string       `json:"loopbackIpAddress,omitempty"`
+	LoopbackIpv6 string       `json:"loopbackIpv6Address,omitempty"`
 }
 
 type NDFCVrfTemplateConfigValue struct {
@@ -114,12 +135,6 @@ func (v *VrfsValue) SetValue(jsonData *NDFCVrfsValue) diag.Diagnostics {
 
 	} else {
 		v.Id = types.Int64Null()
-	}
-
-	if jsonData.FabricName != "" {
-		v.FabricName = types.StringValue(jsonData.FabricName)
-	} else {
-		v.FabricName = types.StringNull()
 	}
 
 	if jsonData.VrfName != "" {
@@ -388,6 +403,116 @@ func (v *VrfsValue) SetValue(jsonData *NDFCVrfsValue) diag.Diagnostics {
 		v.RouteTargetExportCloudEvpn = types.StringNull()
 	}
 
+	if len(jsonData.AttachList) == 0 {
+		log.Printf("v.AttachList is empty")
+		v.AttachList = types.ListNull(AttachListValue{}.Type(context.Background()))
+	} else {
+		log.Printf("v.AttachList contains %d elements", len(jsonData.AttachList))
+		listData := make([]AttachListValue, 0)
+		for _, item := range jsonData.AttachList {
+			data := new(AttachListValue)
+			err = data.SetValue(&item)
+			if err != nil {
+				log.Printf("Error in AttachListValue.SetValue")
+				return err
+			}
+			data.state = attr.ValueStateKnown
+			listData = append(listData, *data)
+		}
+		v.AttachList, err = types.ListValueFrom(context.Background(), AttachListValue{}.Type(context.Background()), listData)
+		if err != nil {
+			log.Printf("Error in converting []AttachListValue to  List")
+			return err
+		}
+	}
+
+	return err
+}
+
+func (v *AttachListValue) SetValue(jsonData *NDFCAttachListValue) diag.Diagnostics {
+
+	var err diag.Diagnostics
+	err = nil
+
+	if jsonData.Id != nil {
+		v.Id = types.Int64Value(*jsonData.Id)
+
+	} else {
+		v.Id = types.Int64Null()
+	}
+
+	if jsonData.SerialNumber != "" {
+		v.SerialNumber = types.StringValue(jsonData.SerialNumber)
+	} else if jsonData.SwitchSerialNo != "" {
+		v.SerialNumber = types.StringValue(jsonData.SwitchSerialNo)
+	} else {
+		v.SerialNumber = types.StringNull()
+	}
+
+	if jsonData.SwitchName != "" {
+		v.SwitchName = types.StringValue(jsonData.SwitchName)
+	} else {
+		v.SwitchName = types.StringNull()
+	}
+
+	if jsonData.Vlan != nil {
+		if int64(*jsonData.Vlan) == -9223372036854775808 {
+			v.Vlan = types.Int64Null()
+		} else {
+			v.Vlan = types.Int64Value(int64(*jsonData.Vlan))
+		}
+	} else if jsonData.VlanId != nil {
+		if int64(*jsonData.VlanId) == -9223372036854775808 {
+			v.Vlan = types.Int64Null()
+		} else {
+			v.Vlan = types.Int64Value(int64(*jsonData.VlanId))
+		}
+	} else {
+		v.Vlan = types.Int64Null()
+	}
+
+	if jsonData.AttachState != "" {
+		v.AttachState = types.StringValue(jsonData.AttachState)
+	} else {
+		v.AttachState = types.StringNull()
+	}
+
+	if jsonData.Attached != nil {
+		v.Attached = types.BoolValue(*jsonData.Attached)
+
+	} else {
+		v.Attached = types.BoolNull()
+	}
+
+	if jsonData.FreeformConfig != "" {
+		v.FreeformConfig = types.StringValue(jsonData.FreeformConfig)
+	} else {
+		v.FreeformConfig = types.StringNull()
+	}
+
+	if jsonData.InstanceValues.LoopbackId != nil {
+		if int64(*jsonData.InstanceValues.LoopbackId) == -9223372036854775808 {
+			v.LoopbackId = types.Int64Null()
+		} else {
+			v.LoopbackId = types.Int64Value(int64(*jsonData.InstanceValues.LoopbackId))
+		}
+
+	} else {
+		v.LoopbackId = types.Int64Null()
+	}
+
+	if jsonData.InstanceValues.LoopbackIpv4 != "" {
+		v.LoopbackIpv4 = types.StringValue(jsonData.InstanceValues.LoopbackIpv4)
+	} else {
+		v.LoopbackIpv4 = types.StringNull()
+	}
+
+	if jsonData.InstanceValues.LoopbackIpv6 != "" {
+		v.LoopbackIpv6 = types.StringValue(jsonData.InstanceValues.LoopbackIpv6)
+	} else {
+		v.LoopbackIpv6 = types.StringNull()
+	}
+
 	return err
 }
 
@@ -419,12 +544,6 @@ func (v VrfBulkModel) GetModelData() *NDFCVrfBulkModel {
 
 			} else {
 				data.Vrfs[i1].Id = nil
-			}
-
-			if !ele1.FabricName.IsNull() && !ele1.FabricName.IsUnknown() {
-				data.Vrfs[i1].FabricName = ele1.FabricName.ValueString()
-			} else {
-				data.Vrfs[i1].FabricName = ""
 			}
 
 			if !ele1.VrfName.IsNull() && !ele1.VrfName.IsUnknown() {
