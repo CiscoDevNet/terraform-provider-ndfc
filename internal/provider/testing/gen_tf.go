@@ -50,7 +50,9 @@ func GetTFConfigWithSingleResource(tt string, cfg map[string]string, vrfBulk res
 	log.Println(output.String())
 	*x = output.String()
 	if tmpDir == "" {
-		tmpDir, err = os.MkdirTemp("/tmp", "tftest_*")
+		ct := time.Now()
+		tmpDir = fmt.Sprintf("/tmp/tftest_%s", ct.Format("2006_01_02_15-04-05"))
+		err = os.MkdirAll(tmpDir, 0755)
 		if err != nil {
 			panic(err)
 		}
@@ -96,7 +98,7 @@ func GetTFConfigWithMultipleResource(tt string, cfg map[string]string, vrfBulk *
 		panic(err)
 	}
 	rscNames := strings.Split(cfg["RscName"], ",")
-
+	
 	for i := range *vrfBulk {
 		args["Vrf"] = &(*vrfBulk)[i]
 		args["RscName"] = rscNames[i]
