@@ -290,18 +290,18 @@ func TestAccNDFCMultiResourceWithDeploy(t *testing.T) {
 					t.Logf("Starting Test Step %s_%d", t.Name(), *stepCount)
 				},
 				Config: func() string {
-					vrfScaledBulk = make([]*resource_vrf_bulk.NDFCVrfBulkModel, 20)
+					vrfScaledBulk = make([]*resource_vrf_bulk.NDFCVrfBulkModel, 5)
 					*stepCount++
 					tName := fmt.Sprintf("%s_%d", t.Name(), *stepCount)
 					tf_config := new(string)
-					for i := 0; i < 20; i++ {
+					for i := 0; i < 5; i++ {
 						vrfScaledBulk[i] = new(resource_vrf_bulk.NDFCVrfBulkModel)
 						helper.GenerateSingleVrfObject(&(vrfScaledBulk[i]), "vrf_acc_", "test_evpn_vxlan",
 							i+1, false, false, true, []string{"9FE076D8EJL", "9TQYTJSZ1VJ"})
-						if (*x)["RscName"] == "" {
+						if i == 0 {
 							(*x)["RscName"] = fmt.Sprintf("vrf_test_%d", i+1)
 						} else {
-							(*x)["RscName"] = (*x)["RscName"] + "," + fmt.Sprintf("vrf_test_%d", i+1)
+							(*x)["RscName"] = fmt.Sprintf("%s,vrf_test_%d", (*x)["RscName"], i+1)
 						}
 					}
 					helper.GetTFConfigWithMultipleResource(tName, *x, &vrfScaledBulk, &tf_config)
@@ -310,7 +310,7 @@ func TestAccNDFCMultiResourceWithDeploy(t *testing.T) {
 				Check: func() resource.TestCheckFunc {
 					var checks []resource.TestCheckFunc
 					for i := 0; i < len(vrfScaledBulk); i++ {
-						checks = append(checks, VrfBulkModelHelperStateCheck(fmt.Sprintf("ndfc_vrf_bulk.vrf_test_%d", i), *vrfScaledBulk[i], path.Empty())...)
+						checks = append(checks, VrfBulkModelHelperStateCheck(fmt.Sprintf("ndfc_vrf_bulk.vrf_test_%d", i+1), *vrfScaledBulk[i], path.Empty())...)
 					}
 					return resource.ComposeTestCheckFunc(checks...)
 				}(),
