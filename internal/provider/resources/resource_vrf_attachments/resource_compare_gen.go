@@ -8,16 +8,16 @@ import (
 func (v NDFCAttachListValue) DeepEqual(c NDFCAttachListValue) int {
 	cf := false
 
-	if v.Vlan != nil && c.Vlan != nil {
+	if !v.Vlan.IsEmpty() && !c.Vlan.IsEmpty() {
 		if *v.Vlan != *c.Vlan {
 			log.Printf("v.Vlan=%v, c.Vlan=%v", *v.Vlan, *c.Vlan)
 			return RequiresUpdate
 		}
 	} else {
-		if v.Vlan != nil {
+		if !v.Vlan.IsEmpty() {
 			log.Printf("v.Vlan=%v", *v.Vlan)
 			return RequiresUpdate
-		} else if c.Vlan != nil {
+		} else if !c.Vlan.IsEmpty() {
 			log.Printf("c.Vlan=%v", *c.Vlan)
 			return RequiresUpdate
 		}
@@ -31,16 +31,16 @@ func (v NDFCAttachListValue) DeepEqual(c NDFCAttachListValue) int {
 		cf = true
 	}
 
-	if v.InstanceValues.LoopbackId != nil && c.InstanceValues.LoopbackId != nil {
+	if !v.InstanceValues.LoopbackId.IsEmpty() && !c.InstanceValues.LoopbackId.IsEmpty() {
 		if *v.InstanceValues.LoopbackId != *c.InstanceValues.LoopbackId {
 			log.Printf("v.InstanceValues.LoopbackId=%v, c.InstanceValues.LoopbackId=%v", *v.InstanceValues.LoopbackId, *c.InstanceValues.LoopbackId)
 			return RequiresUpdate
 		}
 	} else {
-		if v.InstanceValues.LoopbackId != nil {
+		if !v.InstanceValues.LoopbackId.IsEmpty() {
 			log.Printf("v.InstanceValues.LoopbackId=%v", *v.InstanceValues.LoopbackId)
 			return RequiresUpdate
-		} else if c.InstanceValues.LoopbackId != nil {
+		} else if !c.InstanceValues.LoopbackId.IsEmpty() {
 			log.Printf("c.InstanceValues.LoopbackId=%v", *c.InstanceValues.LoopbackId)
 			return RequiresUpdate
 		}
@@ -81,76 +81,94 @@ func (v *NDFCAttachListValue) CreatePlan(c NDFCAttachListValue) int {
 	action := ActionNone
 	controlFlagUpdate := false
 
-	if v.Vlan != nil {
-		if c.Vlan != nil && (*v.Vlan != *c.Vlan) {
-			if action == ActionNone || action == RequiresUpdate {
-				action = RequiresUpdate
-			}
-			log.Printf("Config value in plan: v.Vlan=%v, c.Vlan=%v", *v.Vlan, *c.Vlan)
-		}
-	} else if c.Vlan != nil {
-		v.Vlan = new(Int64Custom)
-		log.Printf("State value in plan: v.Vlan=%v, c.Vlan=%v", *v.Vlan, *c.Vlan)
-		*v.Vlan = *c.Vlan
-	}
-	if v.FreeformConfig != "" {
-
-		if v.FreeformConfig != c.FreeformConfig {
-			log.Printf("Config value in Plan: v.FreeformConfig=%v, c.FreeformConfig=%v", v.FreeformConfig, c.FreeformConfig)
+	if !v.Vlan.IsEmpty() && !c.Vlan.IsEmpty() {
+		if *v.Vlan != *c.Vlan {
+			log.Printf("Update: v.Vlan=%v, c.Vlan=%v", *v.Vlan, *c.Vlan)
 			if action == ActionNone || action == RequiresUpdate {
 				action = RequiresUpdate
 			}
 		}
 	} else {
+		if !v.Vlan.IsEmpty() {
+			log.Printf("Update: v.Vlan=%v", *v.Vlan)
+			if action == ActionNone || action == RequiresUpdate {
+				action = RequiresUpdate
+			}
+		} else if !c.Vlan.IsEmpty() {
+			log.Printf("Copy from State: c.Vlan=%v", *c.Vlan)
+			v.Vlan = new(Int64Custom)
+			*v.Vlan = *c.Vlan
+			if action == ActionNone || action == RequiresUpdate {
+				action = RequiresUpdate
+			}
+		}
+	}
+	if v.FreeformConfig != "" {
+
+		if v.FreeformConfig != c.FreeformConfig {
+			log.Printf("Update: v.FreeformConfig=%v, c.FreeformConfig=%v", v.FreeformConfig, c.FreeformConfig)
+			if action == ActionNone || action == RequiresUpdate {
+				action = RequiresUpdate
+			}
+		}
+
+	} else {
 		//v empty, fill with c
-		log.Printf("State value in Plan: v.FreeformConfig=%v, c.FreeformConfig=%v", v.FreeformConfig, c.FreeformConfig)
+		log.Printf("Copy from state: v.FreeformConfig=%v, c.FreeformConfig=%v", v.FreeformConfig, c.FreeformConfig)
 		v.FreeformConfig = c.FreeformConfig
 	}
 
 	if v.DeployThisAttachment != c.DeployThisAttachment {
-		log.Printf("Config value in Plan: v.DeployThisAttachment=%v, c.DeployThisAttachment=%v", v.DeployThisAttachment, c.DeployThisAttachment)
+		log.Printf("Update: v.DeployThisAttachment=%v, c.DeployThisAttachment=%v", v.DeployThisAttachment, c.DeployThisAttachment)
 		if action == ActionNone || action == RequiresUpdate {
 			action = RequiresUpdate
 		}
 	}
 
-	if v.InstanceValues.LoopbackId != nil {
-		if c.InstanceValues.LoopbackId != nil &&
-			(*v.InstanceValues.LoopbackId != *c.InstanceValues.LoopbackId) {
+	if !v.InstanceValues.LoopbackId.IsEmpty() && !c.InstanceValues.LoopbackId.IsEmpty() {
+		if *v.InstanceValues.LoopbackId != *c.InstanceValues.LoopbackId {
+			log.Printf("Update: v.InstanceValues.LoopbackId=%v, c.InstanceValues.LoopbackId=%v", *v.InstanceValues.LoopbackId, *c.InstanceValues.LoopbackId)
 			if action == ActionNone || action == RequiresUpdate {
 				action = RequiresUpdate
 			}
-			log.Printf("Config value in plan: v.InstanceValues.LoopbackId=%v, c.InstanceValues.LoopbackId=%v", *v.InstanceValues.LoopbackId, *c.InstanceValues.LoopbackId)
 		}
-	} else if c.InstanceValues.LoopbackId != nil {
+	} else if !v.InstanceValues.LoopbackId.IsEmpty() {
+		log.Printf("Update: v.InstanceValues.LoopbackId=%v", *v.InstanceValues.LoopbackId)
+		if action == ActionNone || action == RequiresUpdate {
+			action = RequiresUpdate
+		}
+	} else if !c.InstanceValues.LoopbackId.IsEmpty() {
+		log.Printf("Copy from State: c.InstanceValues.LoopbackId=%v", *c.InstanceValues.LoopbackId)
 		v.InstanceValues.LoopbackId = new(Int64Custom)
-		log.Printf("State value in plan: v.InstanceValues.LoopbackId=%v, c.InstanceValues.LoopbackId=%v", *v.InstanceValues.LoopbackId, *c.InstanceValues.LoopbackId)
 		*v.InstanceValues.LoopbackId = *c.InstanceValues.LoopbackId
+		if action == ActionNone || action == RequiresUpdate {
+			action = RequiresUpdate
+		}
 	}
 
 	if v.InstanceValues.LoopbackIpv4 != "" {
 		if v.InstanceValues.LoopbackIpv4 != c.InstanceValues.LoopbackIpv4 {
-			log.Printf("Config value in Plan: v.InstanceValues.LoopbackIpv4=%v, c.InstanceValues.LoopbackIpv4=%v", v.InstanceValues.LoopbackIpv4, c.InstanceValues.LoopbackIpv4)
+			log.Printf("Update: v.InstanceValues.LoopbackIpv4=%v, c.InstanceValues.LoopbackIpv4=%v", v.InstanceValues.LoopbackIpv4, c.InstanceValues.LoopbackIpv4)
 			if action == ActionNone || action == RequiresUpdate {
 				action = RequiresUpdate
 			}
 		}
 	} else {
 		//v empty, fill with c
-		log.Printf("State value in Plan: v.InstanceValues.LoopbackIpv4=%v, c.InstanceValues.LoopbackIpv4=%v", v.InstanceValues.LoopbackIpv4, c.InstanceValues.LoopbackIpv4)
+		log.Printf("Copy from state: v.InstanceValues.LoopbackIpv4=%v, c.InstanceValues.LoopbackIpv4=%v", v.InstanceValues.LoopbackIpv4, c.InstanceValues.LoopbackIpv4)
 		v.InstanceValues.LoopbackIpv4 = c.InstanceValues.LoopbackIpv4
 	}
 
 	if v.InstanceValues.LoopbackIpv6 != "" {
 		if v.InstanceValues.LoopbackIpv6 != c.InstanceValues.LoopbackIpv6 {
-			log.Printf("Config value in Plan: v.InstanceValues.LoopbackIpv6=%v, c.InstanceValues.LoopbackIpv6=%v", v.InstanceValues.LoopbackIpv6, c.InstanceValues.LoopbackIpv6)
+			log.Printf("Update: v.InstanceValues.LoopbackIpv6=%v, c.InstanceValues.LoopbackIpv6=%v", v.InstanceValues.LoopbackIpv6, c.InstanceValues.LoopbackIpv6)
 			if action == ActionNone || action == RequiresUpdate {
 				action = RequiresUpdate
 			}
 		}
 	} else {
 		//v empty, fill with c
-		log.Printf("State value in Plan: v.InstanceValues.LoopbackIpv6=%v, c.InstanceValues.LoopbackIpv6=%v", v.InstanceValues.LoopbackIpv6, c.InstanceValues.LoopbackIpv6)
+		log.Printf("Copy from state: v.InstanceValues.LoopbackIpv6=%v, c.InstanceValues.LoopbackIpv6=%v", v.InstanceValues.LoopbackIpv6, c.InstanceValues.LoopbackIpv6)
 		v.InstanceValues.LoopbackIpv6 = c.InstanceValues.LoopbackIpv6
 	}
 
@@ -163,23 +181,24 @@ func (v *NDFCAttachListValue) CreatePlan(c NDFCAttachListValue) int {
 func (v *NDFCVrfAttachmentsValue) CreatePlan(c NDFCVrfAttachmentsValue) int {
 	action := ActionNone
 	controlFlagUpdate := false
+
 	if v.VrfName != "" {
 
 		if v.VrfName != c.VrfName {
-			log.Printf("Config value in Plan: v.VrfName=%v, c.VrfName=%v", v.VrfName, c.VrfName)
+			log.Printf("Update: v.VrfName=%v, c.VrfName=%v", v.VrfName, c.VrfName)
 			if action == ActionNone || action == RequiresUpdate {
-
 				action = RequiresReplace
 			}
 		}
+
 	} else {
 		//v empty, fill with c
-		log.Printf("State value in Plan: v.VrfName=%v, c.VrfName=%v", v.VrfName, c.VrfName)
+		log.Printf("Copy from state: v.VrfName=%v, c.VrfName=%v", v.VrfName, c.VrfName)
 		v.VrfName = c.VrfName
 	}
 
 	if v.DeployAllAttachments != c.DeployAllAttachments {
-		log.Printf("Config value in Plan: v.DeployAllAttachments=%v, c.DeployAllAttachments=%v", v.DeployAllAttachments, c.DeployAllAttachments)
+		log.Printf("Update: v.DeployAllAttachments=%v, c.DeployAllAttachments=%v", v.DeployAllAttachments, c.DeployAllAttachments)
 		if action == ActionNone || action == RequiresUpdate {
 			action = RequiresUpdate
 		}

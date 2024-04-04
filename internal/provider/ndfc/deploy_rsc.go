@@ -9,7 +9,7 @@ type DeployRsc interface {
 	GetFailureCount() int
 	GetCheckTick() int
 
-	//SetCurrentState(string)
+	SetCurrentState(string)
 }
 
 type NDFCDeployRsc struct {

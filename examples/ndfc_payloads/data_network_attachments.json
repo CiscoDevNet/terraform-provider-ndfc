@@ -1,0 +1,72 @@
+[
+
+    {
+    
+        "networkName": "MyNetwork_30000",
+        "lanAttachList": [
+        {
+    
+        "networkName": "MyNetwork_30000",
+        "displayName": "MyNetwork_30000",
+        "switchName": "n9k-leaf02",
+        "switchRole": "leaf",
+        "fabricName": "test_evpn_vxlan",
+        "lanAttachState": "DEPLOYED",
+        "isLanAttached": true,
+        "portNames": "Ethernet1/1,Ethernet1/2,Ethernet1/3",
+        "switchSerialNo": "9TQYTJSZ1VJ",
+        "peerSerialNo": null,
+        "switchDbId": 2110,
+        "ipAddress": "192.168.20.103",
+        "networkId": 30000,
+        "vlanId": 2300,
+        "instanceValues": "{\"isVPC\":\"false\"}",
+        "entityName": "MyNetwork_30000",
+        "interfaceGroups": null
+    
+    },
+    {
+    
+        "networkName": "MyNetwork_30000",
+        "displayName": "MyNetwork_30000",
+        "switchName": "n9k-spine01",
+        "switchRole": "leaf",
+        "fabricName": "test_evpn_vxlan",
+        "lanAttachState": "NA",
+        "isLanAttached": false,
+        "portNames": null,
+        "switchSerialNo": "9QBCTIN0FMY",
+        "peerSerialNo": null,
+        "switchDbId": 2060,
+        "ipAddress": "192.168.20.102",
+        "networkId": 30000,
+        "vlanId": null,
+        "instanceValues": null,
+        "entityName": null,
+        "interfaceGroups": null
+    
+    },
+    
+                {
+                    "networkName": "MyNetwork_30000",
+                    "displayName": "MyNetwork_30000",
+                    "switchName": "n9k-leaf01",
+                    "switchRole": "leaf",
+                    "fabricName": "test_evpn_vxlan",
+                    "lanAttachState": "NA",
+                    "isLanAttached": false,
+                    "portNames": null,
+                    "switchSerialNo": "9FE076D8EJL",
+                    "peerSerialNo": null,
+                    "switchDbId": 2010,
+                    "ipAddress": "192.168.20.101",
+                    "networkId": 30000,
+                    "vlanId": null,
+                    "instanceValues": null,
+                    "entityName": null,
+                    "interfaceGroups": null
+                }
+            ]
+        }
+    
+    ]

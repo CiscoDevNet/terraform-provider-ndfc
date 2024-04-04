@@ -1,0 +1,136 @@
+[
+    {
+        "id": 2,
+        "fabric": "test_evpn_vxlan",
+        "networkName": "MyNetwork_30001",
+        "displayName": "MyNetwork_30001",
+        "networkId": 30001,
+        "networkTemplate": "Default_Network_Universal",
+        "networkExtensionTemplate": "Default_Network_Extension_Universal",
+        "vrf": "vrf_acc_1",
+        "tenantName": null,
+        "serviceNetworkTemplate": null,
+        "source": null,
+        "interfaceGroups": null,
+        "primaryNetworkId": -1,
+        "type": "Normal",
+        "primaryNetworkName": null,
+        "vlanId": null,
+        "networkStatus": "NA",
+        "hierarchicalKey": "test_evpn_vxlan",
+        "networkTemplateConfig": {
+            "secondaryGW3": "",
+            "suppressArp": "",
+            "secondaryGW2": "192.0.4.2/24",
+            "secondaryGW1": "192.0.3.2/24",
+            "loopbackId": "",
+            "enableL3OnBorder": "false",
+            "gen_address": "",
+            "type": "Normal",
+            "SVI_NETFLOW_MONITOR": "",
+            "enableIR": "false",
+            "rtBothAuto": "false",
+            "isLayer2Only": "false",
+            "ENABLE_NETFLOW": "false",
+            "vrfDhcp2": "management",
+            "dhcpServerAddr3": "",
+            "gatewayIpV6Address": "",
+            "dhcpServerAddr2": "40.1.1.1",
+            "tag": "12345",
+            "flagSet": "",
+            "dhcpServerAddr1": "20.1.1.1",
+            "nveId": "1",
+            "vrfDhcp": "management",
+            "secondaryGW4": "",
+            "vlanId": "2301",
+            "gatewayIpAddress": "192.0.2.1/24",
+            "vlanName": "cvb",
+            "gen_mask": "",
+            "mtu": "2348",
+            "intfDescription": "wer",
+            "mcastGroup": "239.1.1.1",
+            "igmpVersion": "",
+            "trmEnabled": "",
+            "VLAN_NETFLOW_MONITOR": "",
+            "dhcpServers": {
+                "dhcpServers": [
+                    {
+                        "srvrAddr": "20.1.1.1",
+                        "srvrVrf": "management"
+                    },
+                    {
+                        "srvrAddr": "40.1.1.1",
+                        "srvrVrf": "management"
+                    }
+                ]
+            }
+        }
+    },
+    {
+        "id": 19,
+        "fabric": "test_evpn_vxlan",
+        "networkName": "MyNetwork_30002",
+        "displayName": "MyNetwork_30002",
+        "networkId": 30002,
+        "networkTemplate": "Default_Network_Universal",
+        "networkExtensionTemplate": "Default_Network_Extension_Universal",
+        "vrf": "Murali_vrf_01",
+        "tenantName": null,
+        "serviceNetworkTemplate": null,
+        "source": null,
+        "interfaceGroups": null,
+        "primaryNetworkId": -1,
+        "type": "Normal",
+        "primaryNetworkName": null,
+        "vlanId": null,
+        "networkStatus": "NA",
+        "hierarchicalKey": "test_evpn_vxlan",
+        "networkTemplateConfig": {
+          "secondaryGW3": "",
+          "suppressArp": "",
+          "secondaryGW2": "",
+          "secondaryGW1": "",
+          "loopbackId": "",
+          "enableL3OnBorder": "false",
+          "gen_address": "",
+          "type": "Normal",
+          "SVI_NETFLOW_MONITOR": "",
+          "enableIR": "false",
+          "rtBothAuto": "false",
+          "isLayer2Only": "false",
+          "ENABLE_NETFLOW": "false",
+          "vrfDhcp2": "default",
+          "dhcpServerAddr3": "",
+          "gatewayIpV6Address": "",
+          "dhcpServerAddr2": "20.1.1.1",
+          "tag": "12345",
+          "flagSet": "",
+          "dhcpServerAddr1": "10.1.1.1",
+          "nveId": "1",
+          "vrfDhcp": "management",
+          "secondaryGW4": "",
+          "vlanId": "2300",
+          "gatewayIpAddress": "",
+          "vlanName": "",
+          "gen_mask": "",
+          "mtu": "",
+          "intfDescription": "",
+          "mcastGroup": "239.1.1.1",
+          "igmpVersion": "",
+          "trmEnabled": "",
+          "VLAN_NETFLOW_MONITOR": "",
+          "dhcpServers": {
+            "dhcpServers": [
+              {
+                "srvrAddr": "10.1.1.1",
+                "srvrVrf": "management"
+              },
+              {
+                "srvrAddr": "20.1.1.1",
+                "srvrVrf": "default"
+              }
+            ]
+          }
+        }
+    }
+]

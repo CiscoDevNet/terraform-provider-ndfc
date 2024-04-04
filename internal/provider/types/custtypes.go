@@ -1,6 +1,9 @@
 package types
 
-import "strconv"
+import (
+	"strconv"
+	"strings"
+)
 
 const (
 	ActionNone = iota
@@ -8,9 +11,43 @@ const (
 	RequiresReplace
 	RequiresUpdate
 	ControlFlagUpdate
+	PortListUpdate
 )
 
+type CSVString []string
+
+func (i *CSVString) UnmarshalJSON(data []byte) error {
+	if string(data) == "" || string(data) == "\"\"" {
+		*i = make(CSVString, 0)
+		return nil
+	}
+	ss := string(data)
+	// If the string is quoted, remove the quotes
+	ssUn, err := strconv.Unquote(ss)
+	if err == nil {
+		// Quote removed
+		ss = ssUn
+	}
+	*i = strings.Split(ss, ",")
+
+	return nil
+}
+
+func (i CSVString) MarshalJSON() ([]byte, error) {
+	res := ""
+	res = strings.Join(i, ",")
+	return []byte(strconv.Quote(res)), nil
+
+}
+
 type Int64Custom int64
+
+func (i *Int64Custom) IsEmpty() bool {
+	if i == nil {
+		return true
+	}
+	return *i == -9223372036854775808
+}
 
 func (i *Int64Custom) UnmarshalJSON(data []byte) error {
 	if string(data) == "" || string(data) == "\"\"" {
@@ -26,7 +63,6 @@ func (i *Int64Custom) UnmarshalJSON(data []byte) error {
 		ii, _ := strconv.ParseInt(ss, 10, 64)
 		*i = Int64Custom(ii)
 	}
-
 	return nil
 }
 

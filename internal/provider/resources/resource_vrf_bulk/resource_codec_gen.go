@@ -138,7 +138,7 @@ func (v *VrfsValue) SetValue(jsonData *NDFCVrfsValue) diag.Diagnostics {
 	}
 
 	if jsonData.VrfTemplateConfig.VlanId != nil {
-		if int64(*jsonData.VrfTemplateConfig.VlanId) == -9223372036854775808 {
+		if jsonData.VrfTemplateConfig.VlanId.IsEmpty() {
 			v.VlanId = types.Int64Null()
 		} else {
 			v.VlanId = types.Int64Value(int64(*jsonData.VrfTemplateConfig.VlanId))
@@ -241,7 +241,7 @@ func (v *VrfsValue) SetValue(jsonData *NDFCVrfsValue) diag.Diagnostics {
 	}
 
 	if jsonData.VrfTemplateConfig.RpLoopbackId != nil {
-		if int64(*jsonData.VrfTemplateConfig.RpLoopbackId) == -9223372036854775808 {
+		if jsonData.VrfTemplateConfig.RpLoopbackId.IsEmpty() {
 			v.RpLoopbackId = types.Int64Null()
 		} else {
 			v.RpLoopbackId = types.Int64Value(int64(*jsonData.VrfTemplateConfig.RpLoopbackId))
@@ -421,13 +421,13 @@ func (v *AttachListValue) SetValue(jsonData *resource_vrf_attachments.NDFCAttach
 	}
 
 	if jsonData.Vlan != nil {
-		if int64(*jsonData.Vlan) == -9223372036854775808 {
+		if jsonData.Vlan.IsEmpty() {
 			v.Vlan = types.Int64Null()
 		} else {
 			v.Vlan = types.Int64Value(int64(*jsonData.Vlan))
 		}
 	} else if jsonData.VlanId != nil {
-		if int64(*jsonData.VlanId) == -9223372036854775808 {
+		if jsonData.VlanId.IsEmpty() {
 			v.Vlan = types.Int64Null()
 		} else {
 			v.Vlan = types.Int64Value(int64(*jsonData.VlanId))
@@ -458,7 +458,7 @@ func (v *AttachListValue) SetValue(jsonData *resource_vrf_attachments.NDFCAttach
 	v.DeployThisAttachment = types.BoolValue(jsonData.DeployThisAttachment)
 
 	if jsonData.InstanceValues.LoopbackId != nil {
-		if int64(*jsonData.InstanceValues.LoopbackId) == -9223372036854775808 {
+		if jsonData.InstanceValues.LoopbackId.IsEmpty() {
 			v.LoopbackId = types.Int64Null()
 		} else {
 			v.LoopbackId = types.Int64Value(int64(*jsonData.InstanceValues.LoopbackId))
@@ -510,13 +510,9 @@ func (v VrfBulkModel) GetModelData() *NDFCVrfBulkModel {
 		for k1, ele1 := range elements1 {
 			data1 := new(NDFCVrfsValue)
 			// id | Int64| []| true
-
 			// filter_this_value | Bool| []| true
-
 			// vrf_name | String| []| true
-
 			// fabric_name | String| []| true
-
 			// vrf_template | String| []| false
 			if !ele1.VrfTemplate.IsNull() && !ele1.VrfTemplate.IsUnknown() {
 
@@ -587,7 +583,6 @@ func (v VrfBulkModel) GetModelData() *NDFCVrfBulkModel {
 			}
 
 			// vrf_status | String| []| false
-
 			// loopback_routing_tag | Int64| [vrfTemplateConfig]| false
 			if !ele1.LoopbackRoutingTag.IsNull() && !ele1.LoopbackRoutingTag.IsUnknown() {
 				//-----inline nested----
@@ -856,17 +851,11 @@ func (v VrfBulkModel) GetModelData() *NDFCVrfBulkModel {
 					data2 := new(resource_vrf_attachments.NDFCAttachListValue)
 
 					// filter_this_value | Bool| []| true
-
 					// id | Int64| []| true
-
 					// fabric_name | String| []| true
-
 					// vrf_name | String| []| true
-
 					// serial_number | String| []| true
-
 					// switch_name | String| []| false
-
 					// vlan | Int64| []| false
 					if !ele2.Vlan.IsNull() && !ele2.Vlan.IsUnknown() {
 						data2.Vlan = new(Int64Custom)
@@ -876,11 +865,8 @@ func (v VrfBulkModel) GetModelData() *NDFCVrfBulkModel {
 					}
 
 					// deployment | Bool| []| true
-
 					// attach_state | String| []| false
-
 					// attached | Bool| []| false
-
 					// freeform_config | String| []| false
 					if !ele2.FreeformConfig.IsNull() && !ele2.FreeformConfig.IsUnknown() {
 
@@ -922,7 +908,6 @@ func (v VrfBulkModel) GetModelData() *NDFCVrfBulkModel {
 					}
 
 					// update_action | BitMask| []| true
-
 					data1.AttachList[k2] = *data2
 
 				}

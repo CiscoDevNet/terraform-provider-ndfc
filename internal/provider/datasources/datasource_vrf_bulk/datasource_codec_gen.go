@@ -169,7 +169,7 @@ func (v *VrfsValue) SetValue(jsonData *NDFCVrfsValue) diag.Diagnostics {
 	}
 
 	if jsonData.VrfTemplateConfig.VlanId != nil {
-		if int64(*jsonData.VrfTemplateConfig.VlanId) == -9223372036854775808 {
+		if jsonData.VrfTemplateConfig.VlanId.IsEmpty() {
 			v.VlanId = types.Int64Null()
 		} else {
 			v.VlanId = types.Int64Value(int64(*jsonData.VrfTemplateConfig.VlanId))
@@ -266,7 +266,7 @@ func (v *VrfsValue) SetValue(jsonData *NDFCVrfsValue) diag.Diagnostics {
 	}
 
 	if jsonData.VrfTemplateConfig.RpLoopbackId != nil {
-		if int64(*jsonData.VrfTemplateConfig.RpLoopbackId) == -9223372036854775808 {
+		if jsonData.VrfTemplateConfig.RpLoopbackId.IsEmpty() {
 			v.RpLoopbackId = types.Int64Null()
 		} else {
 			v.RpLoopbackId = types.Int64Value(int64(*jsonData.VrfTemplateConfig.RpLoopbackId))
@@ -456,13 +456,13 @@ func (v *AttachListValue) SetValue(jsonData *NDFCAttachListValue) diag.Diagnosti
 	}
 
 	if jsonData.Vlan != nil {
-		if int64(*jsonData.Vlan) == -9223372036854775808 {
+		if jsonData.Vlan.IsEmpty() {
 			v.Vlan = types.Int64Null()
 		} else {
 			v.Vlan = types.Int64Value(int64(*jsonData.Vlan))
 		}
 	} else if jsonData.VlanId != nil {
-		if int64(*jsonData.VlanId) == -9223372036854775808 {
+		if jsonData.VlanId.IsEmpty() {
 			v.Vlan = types.Int64Null()
 		} else {
 			v.Vlan = types.Int64Value(int64(*jsonData.VlanId))
@@ -491,7 +491,7 @@ func (v *AttachListValue) SetValue(jsonData *NDFCAttachListValue) diag.Diagnosti
 	}
 
 	if jsonData.InstanceValues.LoopbackId != nil {
-		if int64(*jsonData.InstanceValues.LoopbackId) == -9223372036854775808 {
+		if jsonData.InstanceValues.LoopbackId.IsEmpty() {
 			v.LoopbackId = types.Int64Null()
 		} else {
 			v.LoopbackId = types.Int64Value(int64(*jsonData.InstanceValues.LoopbackId))

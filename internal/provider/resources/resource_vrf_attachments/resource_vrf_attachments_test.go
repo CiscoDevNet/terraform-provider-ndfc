@@ -1,66 +1,57 @@
 package resource_vrf_attachments
 
 import (
-	"encoding/json"
-	"os"
-	"testing"
+	"strconv"
 
-	"github.com/stretchr/testify/require"
+	"github.com/hashicorp/terraform-plugin-framework/path"
+	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 )
 
-func TestResourceVrfAttachments(t *testing.T) {
-	type args struct {
-		rscType  string
-		rscName  string
-		dataFile string
+// Inside TEST_HELPER_STATE_CHECK
+
+func (c *NDFCVrfAttachmentsModel) HelperStateCheck(RscName string, attrPath path.Path) []resource.TestCheckFunc {
+	ret := []resource.TestCheckFunc{
+
+		resource.TestCheckResourceAttr(RscName, attrPath.AtName("fabric_name").String(), c.FabricName),
 	}
-	tests := []struct {
-		name string
-		args args
-	}{
-		{
-			name: "Test_resource_vrf_attachments",
-			args: args{
-				rscType:  "resource",
-				rscName:  "vrf_attachments",
-				dataFile: "/examples/ndfc_payloads/data_vrf_attachments.json",
-			},
-		},
+	for key, value := range c.VrfAttachments {
+		attrNewPath := attrPath.AtMapKey(key)
+		ret = append(ret, value.HelperStateCheck(RscName, attrNewPath)...)
 	}
-	for _, tt := range tests {
-		t.Run(tt.name+"model_read", func(t *testing.T) {
-			fileName := os.Getenv("GOPATH") + "/src/terraform-provider-ndfc" + tt.args.dataFile
-			rsType := tt.args.rscType
-			rscName := tt.args.rscName
-			dataFromFile, err := os.ReadFile(fileName)
-			if err != nil {
-				t.Errorf("File read failure %v", err)
-				return
-			}
-			modelData := NDFCVrfAttachmentsModel{}
-			v := VrfAttachmentsModel{}
+	return ret
+}
 
-			err = json.Unmarshal(dataFromFile, &modelData)
-			if err != nil {
-				t.Errorf("Json Unmarshal failed %s_%s: %v", rsType, rscName, err)
-			}
-			if err := v.SetModelData(&modelData); err != nil {
-				t.Errorf("SetModelData failed %s_%s: %v", rsType, rscName, err)
-			}
-			t.Logf("%s_%s Read and Set ok", rsType, rscName)
+// Inside TEST_HELPER_STATE_CHECK
+func (c *NDFCAttachListValue) HelperStateCheck(RscName string, attrPath path.Path) []resource.TestCheckFunc {
+	ret := []resource.TestCheckFunc{
 
-			var dataFromModel []byte
+		resource.TestCheckResourceAttr(RscName, attrPath.AtName("switch_name").String(), c.SwitchName),
 
-			modelDataRead := v.GetModelData()
+		resource.TestCheckResourceAttr(RscName, attrPath.AtName("attach_state").String(), c.AttachState),
 
-			dataFromModel, err = json.Marshal(&modelDataRead)
-			if err != nil {
-				t.Errorf("Json marshal failed %s_%s: %v", rsType, rscName, err)
-			}
-			t.Logf("%s_%s Marshall ok", rsType, rscName)
+		resource.TestCheckResourceAttr(RscName, attrPath.AtName("freeform_config").String(), c.FreeformConfig),
 
-			require.JSONEq(t, string(dataFromModel), string(dataFromFile))
-
-		})
+		resource.TestCheckResourceAttr(RscName, attrPath.AtName("loopback_ipv4").String(), c.InstanceValues.LoopbackIpv4),
+		resource.TestCheckResourceAttr(RscName, attrPath.AtName("loopback_ipv6").String(), c.InstanceValues.LoopbackIpv6),
 	}
+	if c.Vlan != nil {
+		ret = append(ret, resource.TestCheckResourceAttr(RscName, attrPath.AtName("vlan").String(), strconv.Itoa(int(*c.Vlan))))
+	}
+	if c.InstanceValues.LoopbackId != nil {
+		ret = append(ret, resource.TestCheckResourceAttr(RscName, attrPath.AtName("loopback_id").String(), strconv.Itoa(int(*c.InstanceValues.LoopbackId))))
+	}
+	return ret
+}
+
+// Inside TEST_HELPER_STATE_CHECK
+func (c *NDFCVrfAttachmentsValue) HelperStateCheck(RscName string, attrPath path.Path) []resource.TestCheckFunc {
+	ret := []resource.TestCheckFunc{
+
+		resource.TestCheckResourceAttr(RscName, attrPath.AtName("vrf_name").String(), c.VrfName),
+	}
+	for key, value := range c.AttachList {
+		attrNewPath := attrPath.AtMapKey(key)
+		ret = append(ret, value.HelperStateCheck(RscName, attrNewPath)...)
+	}
+	return ret
 }

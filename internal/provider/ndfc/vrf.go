@@ -6,8 +6,8 @@ import (
 	"fmt"
 	"log"
 	"strings"
-	"terraform-provider-ndfc/internal/provider/datasources/datasource_vrf"
 	"terraform-provider-ndfc/internal/provider/datasources/datasource_vrf_bulk"
+	"terraform-provider-ndfc/internal/provider/ndfc/api"
 	"terraform-provider-ndfc/internal/provider/resources/resource_vrf_bulk"
 
 	"github.com/hashicorp/terraform-plugin-framework/diag"
@@ -19,9 +19,9 @@ const ResourceVrfBulk = "vrf_bulk"
 
 func (c NDFC) DSGetBulkVrf(ctx context.Context, dg *diag.Diagnostics, fabricName string) *datasource_vrf_bulk.VrfBulkModel {
 	log.Printf("DSGetBulkVrf entry fabirc %s", fabricName)
-	//tflog.Debug(ctx, fmt.Sprintf("DSGetBulkVrf entry fabirc %s", fabricName))
-	//time.Sleep(1 * time.Second)
-	res, err := c.vrfGetAll(ctx, fabricName)
+
+	vrfObj := api.NewVrfAPI(fabricName, c.GetLock(ResourceVrfBulk), &c.apiClient)
+	res, err := vrfObj.Get()
 	if err != nil {
 		dg.AddError("VRF Get Failed", err.Error())
 		return nil
@@ -55,12 +55,6 @@ func (c NDFC) DSGetBulkVrf(ctx context.Context, dg *diag.Diagnostics, fabricName
 	return data
 }
 
-func (c NDFC) DSGetVrf(ctx context.Context, dg *diag.Diagnostics, fabricName string, vrfName string) *datasource_vrf.NDFCVrfModel {
-	tflog.Debug(ctx, fmt.Sprintf("DSGetVrf entry fabirc %s vrfName %s", fabricName, vrfName))
-
-	return nil
-}
-
 // ID = fabricName/[vrf1{attachment1,attachment2,attachment3},vrf2{attachment1,attachment2,attachment3},vrf3{attachment1,attachment2,attachment3}]
 
 func (c NDFC) VrfBulkCreateID(ndVrfs *resource_vrf_bulk.NDFCVrfBulkModel) string {
@@ -68,7 +62,6 @@ func (c NDFC) VrfBulkCreateID(ndVrfs *resource_vrf_bulk.NDFCVrfBulkModel) string
 	if ndVrfs != nil {
 		fName := ndVrfs.FabricName
 		vrf_list := ndVrfs.GetVrfNames()
-
 		for i := range vrf_list {
 			serials := ndVrfs.GetAttachmentNames(vrf_list[i])
 			if len(serials) > 0 {
@@ -81,52 +74,19 @@ func (c NDFC) VrfBulkCreateID(ndVrfs *resource_vrf_bulk.NDFCVrfBulkModel) string
 	return ""
 }
 
-func (c NDFC) VrfBulkSplitID(ID string) map[string][]string {
-	// Split the ID into its components
-	result := map[string][]string{}
-	vrfs := make([]string, 0)
-	components := strings.Split(ID, "/[")
-	vrfData := components[1]
-	start := 0
-	for i := 0; i < len(vrfData); i++ {
-		if vrfData[i] == '{' {
-			vrfName := vrfData[start:i]
-			vrfs = append(vrfs, vrfName)
-			for j := i + 1; j < len(vrfData); j++ {
-				if vrfData[j] == '}' {
-					attachs := vrfData[i+1 : j]
-					fmt.Println(attachs)
-					attachments := strings.Split(attachs, ",")
-					result[vrfName] = attachments
-					i = j + 1
-					start = j + 2
-					break
-				}
-			}
-		} else if vrfData[i] == ',' || vrfData[i] == ']' {
-			vrfName := vrfData[start:i]
-			vrfs = append(vrfs, vrfName)
-			result[vrfName] = []string{}
-			start = i + 1
-		}
-	}
-	result["fabric"] = []string{components[0]}
-	result["vrfs"] = vrfs
-	return result
-}
-
 func (c NDFC) RscGetBulkVrf(ctx context.Context, dg *diag.Diagnostics, ID string, depMap *map[string][]string) *resource_vrf_bulk.VrfBulkModel {
 	var filterMap map[string]bool
 	tflog.Debug(ctx, fmt.Sprintf("RscGetBulkVrf entry fabirc %s", ID))
 
 	filterMap = make(map[string]bool)
-	fabricName, vrfs := c.vrfCreateFilterMap(ID, &filterMap)
+	fabricName, vrfs := c.CreateFilterMap(ID, &filterMap)
 	log.Printf("FilterMap: %v vrfs %v", filterMap, vrfs)
 	if fabricName == "" {
 		dg.AddError("ID format error", "ID is incorrect")
 		return nil
 	}
-	res, err := c.vrfGetAll(ctx, fabricName)
+	vrfObj := api.NewVrfAPI(fabricName, c.GetLock(ResourceVrfBulk), &c.apiClient)
+	res, err := vrfObj.Get()
 	if err != nil {
 		dg.AddError("VRF Get Failed", err.Error())
 		return nil
@@ -313,9 +273,9 @@ func (c NDFC) RscDeleteBulkVrf(ctx context.Context, dg *diag.Diagnostics, ID str
 		dg.AddError("VRF Read Failed", err.Error())
 		return
 	}
-	results := c.VrfBulkSplitID(ID)
+	results := c.RscBulkSplitID(ID)
 	fabricName := results["fabric"][0]
-	vrfsFromId := results["vrfs"]
+	vrfsFromId := results["rsc"]
 	if len(vrfs) != len(vrfsFromId) {
 		errString := fmt.Sprintf("Mismatch in VRF data: fabric %s Read %v, from ID %v", fabricName, vrfs, vrfsFromId)
 		tflog.Error(ctx, errString)
@@ -488,9 +448,10 @@ func (c NDFC) VrfBulkIsPresent(ctx context.Context, ID string) ([]string, error)
 	var retVrfs []string
 	filterMap := make(map[string]bool)
 
-	fabricName, _ := c.vrfCreateFilterMap(ID, &filterMap)
+	fabricName, _ := c.CreateFilterMap(ID, &filterMap)
 
-	res, err := c.vrfGetAll(ctx, fabricName)
+	vrfObj := api.NewVrfAPI(fabricName, c.GetLock(ResourceVrfBulk), &c.apiClient)
+	res, err := vrfObj.Get()
 	if err != nil {
 		tflog.Error(ctx, "Error while getting VRFs ", map[string]interface{}{"Err": err})
 		return nil, err
