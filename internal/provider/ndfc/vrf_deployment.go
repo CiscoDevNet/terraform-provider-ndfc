@@ -215,7 +215,7 @@ func (d *NDFCVrfDeployment) CheckState(ctx context.Context, dg *diag.Diagnostics
 					// Deployed coming here would be a case of deletion where expected is NA
 					// This is a special case - NDFC keeps detached entries in "DEPLOYED" state for a while
 					// before moving to NA
-					// Keep such entries in pending list and check again
+					// Keep such entries in hanging list and check again at the end
 					if rsc.State.ExpectedState == NDFCStateNA {
 						rsc.SetCurrentState(NDFCHanging)
 					} else {

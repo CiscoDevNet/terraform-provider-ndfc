@@ -24,7 +24,7 @@ func NewNDFCClient(host string, user string, pass string, domain string, insecur
 	ndfc := new(NDFC)
 	ndfc.url = "/appcenter/cisco/ndfc/api/v1"
 	ndfc.DeployPollTimer = 5
-	ndfc.DeployTrustFactor = 1
+	ndfc.DeployTrustFactor = 5
 	ndfc.FailureRetry = 3
 	ndfc.MaxParallelDeploy = 0
 	ndfc.WaitForDeployComplete = true
@@ -41,11 +41,14 @@ func NewNDFCClient(host string, user string, pass string, domain string, insecur
 func NewResource(rscName string) {
 	log.Printf("New Resource %s\n", rscName)
 	if _, ok := instance.rscMutex[rscName]; !ok {
-
 		instance.rscMutex[rscName] = new(sync.Mutex)
 	}
 }
 
 func (c NDFC) GetLock(rscName string) *sync.Mutex {
 	return (instance.rscMutex[rscName])
+}
+
+func GetLock(rscName string) *sync.Mutex {
+	return instance.GetLock(rscName)
 }

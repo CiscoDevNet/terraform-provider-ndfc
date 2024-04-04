@@ -6,35 +6,17 @@ import (
 	"errors"
 	"fmt"
 	"log"
-	"strings"
-	"sync"
 	"terraform-provider-ndfc/internal/provider/resources/resource_vrf_bulk"
 	. "terraform-provider-ndfc/internal/provider/types"
+
+	api "terraform-provider-ndfc/internal/provider/ndfc/api"
 
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-log/tflog"
 	"github.com/tidwall/gjson"
 )
 
-const UrlVrfGetBulk = "/lan-fabric/rest/top-down/v2/fabrics/%s/vrfs"
-const UrlVrfCreateBulk = "/lan-fabric/rest/top-down/v2/bulk-create/vrfs"
-const UrlVrfDeleteBulk = "/lan-fabric/rest/top-down/v2/fabrics/%s/bulk-delete/vrfs"
-const UrlVrfGet = "/lan-fabric/rest/top-down/v2/fabrics/%s/vrf/%s"
-const UrlVrfUpdate = "/lan-fabric/rest/top-down/v2/fabrics/%s/vrfs/%s"
-
-func (c NDFC) vrfGetAll(ctx context.Context, fabricName string) ([]byte, error) {
-	c.GetLock(ResourceVrfBulk).Lock()
-	defer c.GetLock(ResourceVrfBulk).Unlock()
-	res, err := c.apiClient.GetRawJson(fmt.Sprintf(UrlVrfGetBulk, fabricName))
-	if err != nil {
-		return nil, err
-	}
-	return res, nil
-}
-
 func (c NDFC) vrfCreateBulk(ctx context.Context, fabricName string, vrfsPayload *resource_vrf_bulk.NDFCBulkVrfPayload) error {
-	unlockOnce := sync.Once{}
-	lock := c.GetLock(ResourceVrfBulk)
 	tflog.Info(ctx, fmt.Sprintf("Beginning Bulk VRF create in fabric %s", fabricName))
 	data, err := json.Marshal(vrfsPayload.Vrfs)
 	if err != nil {
@@ -42,14 +24,12 @@ func (c NDFC) vrfCreateBulk(ctx context.Context, fabricName string, vrfsPayload 
 		return err
 	}
 	log.Println("Data to be posted", string(data))
-	lock.Lock()
-	defer unlockOnce.Do(lock.Unlock)
 
-	res, err := c.apiClient.Post(UrlVrfCreateBulk, string(data))
+	vrfObj := api.NewVrfAPI(fabricName, c.GetLock(ResourceVrfBulk), &c.apiClient)
+	res, err := vrfObj.Post(data)
 	if err != nil {
 		tflog.Error(ctx, fmt.Sprintf("Error POST:  %s", err.Error()))
 		okList, err1 := c.processBulkResponse(ctx, res)
-		unlockOnce.Do(lock.Unlock)
 		err2 := c.vrfBulkDelete(ctx, fabricName, okList)
 		return errors.Join(err, err1, err2)
 	}
@@ -63,11 +43,12 @@ func (c NDFC) vrfBulkDelete(ctx context.Context, fabricName string, vrfList []st
 		return nil
 	}
 	tflog.Info(ctx, fmt.Sprintf("Attempting to delete VRFs fabric_name=%s, vrfs = %v", fabricName, vrfList))
-	qp := []string{"vrf-names=" + strings.Join(vrfList, ",")}
-	c.GetLock(ResourceVrfBulk).Lock()
-	defer c.GetLock(ResourceVrfBulk).Unlock()
-	res, err := c.apiClient.DeleteRaw(fmt.Sprintf(UrlVrfDeleteBulk, fabricName), qp)
+
+	vrfObj := api.NewVrfAPI(fabricName, c.GetLock(ResourceVrfBulk), &c.apiClient)
+	vrfObj.SetDeleteList(vrfList)
+	res, err := vrfObj.Delete()
 	if err != nil {
+
 		_, err1 := c.processBulkResponse(ctx, res)
 		return err1
 	}
@@ -78,7 +59,8 @@ func (c NDFC) vrfBulkDelete(ctx context.Context, fabricName string, vrfList []st
 
 func (c NDFC) vrfBulkGet(ctx context.Context, fabricName string) (*resource_vrf_bulk.NDFCVrfBulkModel, error) {
 
-	res, err := c.vrfGetAll(ctx, fabricName)
+	vrfObj := api.NewVrfAPI(fabricName, c.GetLock(ResourceVrfBulk), &c.apiClient)
+	res, err := vrfObj.Get()
 	if err != nil {
 		return nil, err
 	}
@@ -154,16 +136,6 @@ func (c NDFC) processBulkResponse(ctx context.Context, res gjson.Result) ([]stri
 	return arr, errors.Join(errs...)
 }
 
-func (c NDFC) vrfCreateFilterMap(ID string, filterMap *map[string]bool) (string, []string) {
-
-	result := c.VrfBulkSplitID(ID)
-	for _, v := range result["vrfs"] {
-		log.Printf("Set filtering of %s to true", v)
-		(*filterMap)[v] = true
-	}
-	return result["fabric"][0], result["vrfs"]
-}
-
 /*
 	func (c NDFC) vrfBulkSplitID(ID string) (string, []string) {
 		idSplit := strings.Split(ID, "/")
@@ -205,8 +177,10 @@ func (c NDFC) vrfBulkGetDiff(ctx context.Context, dg *diag.Diagnostics,
 
 	for sVrfName, sVrf := range vrfState.Vrfs {
 		if vrf, ok := vrfConfig.Vrfs[sVrfName]; ok {
+
 			vrf.FilterThisValue = true
 			vrf.FabricName = newVRFs.FabricName
+			vrf.VrfName = sVrfName
 			updateAction := vrf.CreatePlan(sVrf) //vrfState.Vrfs[i].DeepEqual(*vrf)
 			if updateAction == ActionNone {
 				//Case 1: Both VRFs are equal - no change to the VRF entry
@@ -214,7 +188,7 @@ func (c NDFC) vrfBulkGetDiff(ctx context.Context, dg *diag.Diagnostics,
 
 			} else if updateAction == RequiresReplace {
 				//Case 2: attribute that cannot be modified in-place has changed - DELETE and Create
-				tflog.Info(ctx, fmt.Sprintf("%s Needs to be replaced - Delete and Add", sVrfName))
+				tflog.Info(ctx, fmt.Sprintf("%s Needs to be replaced - Delete and Add |%s|", sVrfName, vrf.VrfName))
 				//use the object in state for delete
 				delVrfs.Vrfs[vrf.VrfName] = sVrf
 				newVRFs.Vrfs[vrf.VrfName] = vrf
@@ -255,6 +229,8 @@ func (c NDFC) vrfBulkUpdate(ctx context.Context, dg *diag.Diagnostics, ndVRFs *r
 	// PUT for each vrf
 	payload := ndVRFs.FillVrfPayloadFromModel()
 
+	vrfObj := api.NewVrfAPI(ndVRFs.FabricName, c.GetLock(ResourceVrfBulk), &c.apiClient)
+
 	for i := range payload.Vrfs {
 		data, err := json.Marshal(payload.Vrfs[i])
 		if err != nil {
@@ -262,8 +238,8 @@ func (c NDFC) vrfBulkUpdate(ctx context.Context, dg *diag.Diagnostics, ndVRFs *r
 			return
 		}
 		tflog.Info(ctx, fmt.Sprintf("Update VRF %s", payload.Vrfs[i].VrfName))
-
-		res, err := c.apiClient.Put(fmt.Sprintf(UrlVrfUpdate, ndVRFs.FabricName, payload.Vrfs[i].VrfName), string(data))
+		vrfObj.PutVrf = payload.Vrfs[i].VrfName
+		res, err := vrfObj.Put(data)
 		if err != nil {
 			dg.AddError(fmt.Sprintf("VRF %s, Update failed", payload.Vrfs[i].VrfName), fmt.Sprintf("Error %v, response %s", err, res.Str))
 			return

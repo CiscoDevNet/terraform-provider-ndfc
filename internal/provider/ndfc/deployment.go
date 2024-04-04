@@ -95,6 +95,11 @@ func (n *NDFCDeployment) Deploy(ctx context.Context, dg *diag.Diagnostics, rsc [
 	//Check if there was a deploy failure
 	for _, v := range rscList {
 		if v.GetCurrentState() == NDFCStateFailed {
+			tflog.Error(ctx, "Deploy: Resource failed to deploy due to error in deploy operation. ", map[string]interface{}{
+				"resource": v.GetKey(),
+				"state":    v.GetCurrentState(),
+			})
+
 			n.MoveList(DeployInpro, DeployFailed, v)
 		}
 	}
@@ -131,8 +136,10 @@ func (n *NDFCDeployment) CheckState(ctx context.Context, dg *diag.Diagnostics, r
 						"state":       v.GetCurrentState(),
 						"retry-count": v.GetFailureCount(),
 						"max-retry":   n.ctrlr.FailureRetry,
+						"new-state":   NDFCStatePending,
 					})
 					n.retryFlag = true
+					v.SetCurrentState(NDFCStatePending)
 					n.MoveList(DeployInpro, DeployPending, v)
 				} else {
 					tflog.Error(ctx, "CheckState: Resource failed. Max retry reached. Moving to failed list", map[string]interface{}{
