@@ -3,6 +3,7 @@ package provider
 import (
 	"context"
 	"log"
+	"os"
 	"terraform-provider-ndfc/internal/provider/ndfc"
 	"terraform-provider-ndfc/internal/provider/provider/provider_ndfc"
 
@@ -54,10 +55,30 @@ func (p *ndfcProvider) Configure(ctx context.Context, req provider.ConfigureRequ
 
 	tflog.Debug(ctx, "Creating NDFC client")
 
+	host := os.Getenv("NDFC_HOST")
+	domain := os.Getenv("NDFC_DOMAIN")
+	user := os.Getenv("NDFC_USER")
+	password := os.Getenv("NDFC_PASSWORD")
+
+	if host == "" {
+		host = config.Host.ValueString()
+	}
+	if domain == "" {
+		domain = config.Domain.ValueString()
+	}
+
+	if user == "" {
+		user = config.Username.ValueString()
+	}
+
+	if password == "" {
+		password = config.Password.ValueString()
+	}
+
 	// If any of the expected configurations are missing, return
 	// errors with provider-specific guidance.
-	client, err := ndfc.NewNDFCClient(config.Host.ValueString(), config.Username.ValueString(),
-		config.Password.ValueString(), config.Domain.ValueString(), config.Insecure.ValueBool())
+	client, err := ndfc.NewNDFCClient(host, user,
+		password, domain, config.Insecure.ValueBool())
 	if err != nil {
 		resp.Diagnostics.AddError(
 			"Unable to create NDFC API client",

@@ -255,7 +255,7 @@ func (c NDFC) RscCreateBulkVrf(ctx context.Context, dg *diag.Diagnostics, vrfBul
 			return nil
 		}
 		//Check and deploy
-		c.RscDeployAttachments(ctx, dg, vrf)
+		c.RscDeployVrfAttachments(ctx, dg, vrf)
 	}
 	outVrf := c.RscGetBulkVrf(ctx, dg, ID, &depMap)
 	if outVrf == nil {
@@ -478,3 +478,19 @@ func (c NDFC) VrfBulkIsPresent(ctx context.Context, ID string) ([]string, error)
 	return retVrfs, nil
 
 }
+
+/*
+func (c NDFC) vrfGet(fabric, vrfName string) *resource_vrf_bulk.NDFCVrfsValue {
+	vrfObj := api.NewVrfAPI(fabric, c.GetLock(ResourceVrfBulk), &c.apiClient)
+	res, err := vrfObj.GetSingleVRF(fabric, vrfName)
+	if err != nil {
+		return nil
+	}
+	vrf := resource_vrf_bulk.NDFCVrfsValue{}
+	err = json.Unmarshal(res, &vrf)
+	if err != nil {
+		return nil
+	}
+	return &vrf
+}
+*/

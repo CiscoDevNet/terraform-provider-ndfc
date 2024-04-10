@@ -39,23 +39,11 @@ func TestResourceNetworks(t *testing.T) {
 			}
 			modelData := NDFCNetworksModel{}
 			v := NetworksModel{}
-			vP := NDFCNetworksPayload{}
 
-			err = json.Unmarshal(dataFromFile, &vP.Networks)
-
+			err = json.Unmarshal(dataFromFile, &modelData)
 			if err != nil {
 				t.Errorf("Json Unmarshal failed %s_%s: %v", RsType, rscName, err)
 			}
-			modelData.FillNetworksFromPayload(&vP)
-			for _, network := range vP.Networks {
-				t.Logf("Network: %s", network.NetworkName)
-				t.Logf("Network: %s", network.NetworkType)
-				for _, subnet := range network.NetworkTemplateConfig.DhcpRelayServers {
-					t.Logf("Address: %s Vrf %s", subnet.Address, subnet.Vrf)
-				}
-			}
-			t.Logf("%v", modelData)
-
 			if err := v.SetModelData(&modelData); err != nil {
 				t.Errorf("SetModelData failed %s_%s: %v", RsType, rscName, err)
 			}
@@ -65,14 +53,12 @@ func TestResourceNetworks(t *testing.T) {
 
 			modelDataRead := v.GetModelData()
 
-			payloadData := modelDataRead.FillNetworksPayloadFromModel()
-
-			dataFromModel, err = json.Marshal(&payloadData.Networks)
+			dataFromModel, err = json.Marshal(&modelDataRead)
 			if err != nil {
 				t.Errorf("Json marshal failed %s_%s: %v", RsType, rscName, err)
-				t.Fatalf("Json marshal failed %s_%s: %v", RsType, rscName, err)
 			}
-			t.Logf("%s_%s Marshall ok\n%v", RsType, rscName, string(dataFromModel))
+			t.Logf("%s_%s Marshall ok", RsType, rscName)
+
 			require.JSONEq(t, string(dataFromModel), string(dataFromFile))
 
 		})

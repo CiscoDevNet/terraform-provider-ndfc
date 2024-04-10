@@ -145,10 +145,12 @@ func (v *NDFCNetworksModel) FillAttachmentsPayloadFromModel(payload *rna.NDFCNet
 				attachEntry.Deployment = "false"
 			}
 			nwPayload.Attachments = append(nwPayload.Attachments, attachEntry)
+			nwEntry.Attachments[serial] = attachEntry
 		}
 		if len(nwPayload.Attachments) > 0 {
 			payload.NetworkAttachments = append(payload.NetworkAttachments, *nwPayload)
 		}
+		v.Networks[nwName] = nwEntry
 	}
 }
 

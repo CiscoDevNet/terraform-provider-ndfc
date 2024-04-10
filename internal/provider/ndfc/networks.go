@@ -46,6 +46,13 @@ func (c *NDFC) RscCreateNetworks(ctx context.Context, dg *diag.Diagnostics, in *
 		dg.AddError("Networks exist", strings.Join(errs, ","))
 		return nil
 	}
+	// Check if VRFs referenced in the networks exist and they have same attachments
+
+	err = c.CheckNetworkVrfConfig(ctx, dg, nw)
+	if err != nil {
+		tflog.Error(ctx, "CheckNetworkVrfConfig failed", map[string]interface{}{"Err": err})
+		return nil
+	}
 
 	//Part 1: Create Networks
 
@@ -71,7 +78,7 @@ func (c *NDFC) RscCreateNetworks(ctx context.Context, dg *diag.Diagnostics, in *
 		return nil
 	}
 	//Part 3: Deploy Attachments if any
-	//c.RscDeployAttachments(ctx, dg, nw)
+	c.RscDeployNetworkAttachments(ctx, dg, nw)
 
 	out := c.RscGetNetworks(ctx, dg, ID, &depMap)
 	if out == nil {
@@ -105,6 +112,11 @@ func (c *NDFC) RscGetNetworks(ctx context.Context, dg *diag.Diagnostics, ID stri
 		return nil
 	}
 
+	if len(ndNets.Networks) == 0 {
+		dg.AddWarning("No Networks found", "No Networks found in NDFC")
+		return nil
+	}
+	netCount := 0
 	if len(filterMap) > 0 {
 		log.Printf("Filtering is configured")
 		//Set value filter - skip the nws that are not in ID
@@ -113,8 +125,14 @@ func (c *NDFC) RscGetNetworks(ctx context.Context, dg *diag.Diagnostics, ID stri
 				log.Printf("Filtering out Network %s", entry.NetworkName)
 				entry.FilterThisValue = true
 				ndNets.Networks[i] = entry
+			} else {
+				netCount++
 			}
 		}
+	}
+	if netCount == 0 {
+		dg.AddWarning("No Networks found", "No Networks found in NDFC")
+		return nil
 	}
 
 	if _, ok := (*depMap)["global"]; ok {
@@ -188,21 +206,34 @@ func (c *NDFC) RscUpdateNetworks(ctx context.Context, dg *diag.Diagnostics, ID s
 	state *resource_networks.NetworksModel,
 	config *resource_networks.NetworksModel) {
 
-	actions := c.networksGetDiff(ctx, dg, plan, state, config)
+	netActions := c.networksGetDiff(ctx, dg, plan, state, config)
 
-	delNw := actions["del"].(*resource_networks.NDFCNetworksModel)
-	putNw := actions["put"].(*resource_networks.NDFCNetworksModel)
-	newNw := actions["add"].(*resource_networks.NDFCNetworksModel)
-	planNw := actions["plan"].(*resource_networks.NDFCNetworksModel)
-	stateNw := actions["state"].(*resource_networks.NDFCNetworksModel)
+	delNw := netActions["del"].(*resource_networks.NDFCNetworksModel)
+	putNw := netActions["put"].(*resource_networks.NDFCNetworksModel)
+	newNw := netActions["add"].(*resource_networks.NDFCNetworksModel)
+	planNw := netActions["plan"].(*resource_networks.NDFCNetworksModel)
+	stateNw := netActions["state"].(*resource_networks.NDFCNetworksModel)
 
-	// Check if networks to be added exists
+	netAttachActions := c.networkAttachmentsGetDiff(ctx, dg, planNw, stateNw)
+
+	//******** validations begin *****************************************************
+
+	// 1. Check if networks to be added exists
 	nws, err := c.networksGet(ctx, plan.FabricName.ValueString())
 	if err != nil {
 		tflog.Error(ctx, "Network Get Failed", map[string]interface{}{"Err": err})
 		dg.AddError("Network Get Failed", err.Error())
 		return
 	}
+
+	// 2. Check VRF dependencies of networks to be added
+
+	err = c.CheckNetworkVrfConfig(ctx, dg, planNw)
+	if err != nil {
+		tflog.Error(ctx, "CheckNetworkVrfConfig failed", map[string]interface{}{"Err": err})
+		return
+	}
+
 	for k, _ := range newNw.Networks {
 		if _, ok := nws.Networks[k]; ok {
 			// check if the network is marked for deletion
@@ -216,7 +247,7 @@ func (c *NDFC) RscUpdateNetworks(ctx context.Context, dg *diag.Diagnostics, ID s
 		}
 	}
 
-	//Check if networks to be deleted exists
+	// 3 Check if networks to be deleted exists
 
 	for k, _ := range delNw.Networks {
 		if _, ok := nws.Networks[k]; !ok {
@@ -224,9 +255,14 @@ func (c *NDFC) RscUpdateNetworks(ctx context.Context, dg *diag.Diagnostics, ID s
 			tflog.Error(ctx, "Network does not exist", map[string]interface{}{"Network": k})
 			dg.AddWarning("Network does not exist", fmt.Sprintf("Network %s does not exist", k))
 		}
+		// deleting a network affects the VRF attachments
+		// add a warning so that user is aware
+		if len(nws.Networks[k].Attachments) > 0 {
+			dg.AddWarning("NDFC VRF config change!", fmt.Sprintf("Network %s has attachments, which may affect attachments in associated VRF %s", k, nws.Networks[k].VrfName))
+		}
 	}
 
-	// Check if networks to be updated exists
+	// 4 Check if networks to be updated exists
 
 	for k, _ := range putNw.Networks {
 		if _, ok := nws.Networks[k]; !ok {
@@ -234,21 +270,24 @@ func (c *NDFC) RscUpdateNetworks(ctx context.Context, dg *diag.Diagnostics, ID s
 			dg.AddError("Network does not exist", fmt.Sprintf("Network %s does not exist", k))
 			return
 		}
+		// check and add warning if VRF is changed
+		// NDFC changes associated VRF attachments when a network is changed
+		if stateNw.Networks[k].VrfName != planNw.Networks[k].VrfName {
+			dg.AddWarning("Changing VRF association in network", fmt.Sprintf("VRF change  from %s to %s in network %s would impact the VRF attachments in both", stateNw.Networks[k].VrfName, planNw.Networks[k].VrfName, k))
+		}
 	}
+	// ************** validations end ****************************************************
+	// ************** update begin *******************************************************
 
-	// Update API call logic
 	// 1. Delete items marked for delete as well as re-create
 
 	if len(delNw.Networks) > 0 {
 		// Detach Attachments
-		err := c.netAttachmentsDetach(ctx, delNw)
+		err := c.RscDeleteNetAttachments(ctx, dg, delNw)
 		if err != nil {
 			tflog.Error(ctx, "Network Attachments delete failed", map[string]interface{}{"Err": err})
-			dg.AddError("Network Attachments delete failed", err.Error())
 			return
 		}
-		//TBD: Deploy so that attachments are re-deployed
-
 		// Delete Networks
 		err = c.networksDelete(ctx, delNw.FabricName, delNw.GetNetworksNames())
 		if err != nil {
@@ -272,6 +311,7 @@ func (c *NDFC) RscUpdateNetworks(ctx context.Context, dg *diag.Diagnostics, ID s
 
 	//3. Create new items
 	if len(newNw.Networks) > 0 {
+
 		err := c.networksCreate(ctx, newNw.FabricName, newNw)
 		if err != nil {
 			//On failure - creation api deletes any successful entry
@@ -282,7 +322,7 @@ func (c *NDFC) RscUpdateNetworks(ctx context.Context, dg *diag.Diagnostics, ID s
 	}
 
 	// Deal with attachments
-	c.RscUpdateNetAttachments(ctx, dg, planNw, stateNw)
+	c.RscUpdateNetAttachments(ctx, dg, netAttachActions)
 	if dg.HasError() {
 		tflog.Error(ctx, "Network Attachments update failed")
 		return
@@ -317,9 +357,21 @@ func (c *NDFC) RscDeleteNetworks(ctx context.Context, dg *diag.Diagnostics, ID s
 	nwFromId := results["rsc"]
 
 	if len(nwFromId) != len(rsList) {
-		tflog.Error(ctx, "Mismatch in Network - ID not accurate", map[string]interface{}{"ID": ID})
-		dg.AddError("Mismatch in network names in ID", "ID is incorrect")
-		rsList = nwFromId
+		tflog.Error(ctx, "Mismatch in Network - Some entries are already deleted", map[string]interface{}{
+			"ID":       ID,
+			"nwFromId": nwFromId,
+			"rsList":   rsList,
+		})
+		dg.AddWarning("Deleting only what is available in NDFC", "ID is not up to date")
+		//rsList = nwFromId
+	}
+
+	// Detach Attachments
+	err = c.RscDeleteNetAttachments(ctx, dg, in.GetModelData())
+	if err != nil {
+		tflog.Error(ctx, "Network Attachments delete failed", map[string]interface{}{"Err": err})
+		dg.AddError("Network Attachments delete failed", err.Error())
+		return
 	}
 
 	err = c.networksDelete(ctx, fabricName, rsList)

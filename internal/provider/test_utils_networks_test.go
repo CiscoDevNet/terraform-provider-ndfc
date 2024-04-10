@@ -125,8 +125,10 @@ func NetworksValueHelperStateCheck(RscName string, c resource_networks.NDFCNetwo
 	if c.NetworkTemplateConfig.DhcpRelayLoopbackId != nil {
 		ret = append(ret, resource.TestCheckResourceAttr(RscName, attrPath.AtName("dhcp_relay_loopback_id").String(), strconv.Itoa(int(*c.NetworkTemplateConfig.DhcpRelayLoopbackId))))
 	}
-	if c.NetworkTemplateConfig.LoopbackRoutingTag != nil {
-		ret = append(ret, resource.TestCheckResourceAttr(RscName, attrPath.AtName("loopback_routing_tag").String(), strconv.Itoa(int(*c.NetworkTemplateConfig.LoopbackRoutingTag))))
+	if c.NetworkTemplateConfig.RoutingTag != nil {
+		ret = append(ret, resource.TestCheckResourceAttr(RscName, attrPath.AtName("routing_tag").String(), strconv.Itoa(int(*c.NetworkTemplateConfig.RoutingTag))))
+	} else {
+		ret = append(ret, resource.TestCheckResourceAttr(RscName, attrPath.AtName("routing_tag").String(), "12345"))
 	}
 	if c.NetworkTemplateConfig.Trm != "" {
 		ret = append(ret, resource.TestCheckResourceAttr(RscName, attrPath.AtName("trm").String(), c.NetworkTemplateConfig.Trm))

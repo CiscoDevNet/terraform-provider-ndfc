@@ -74,7 +74,7 @@ func (r *networkBulkResource) Read(ctx context.Context, req resource.ReadRequest
 
 	// Read Terraform prior state data into the model
 	resp.Diagnostics.Append(req.State.Get(ctx, &data)...)
-	
+
 	if resp.Diagnostics.HasError() {
 		return
 	}
@@ -125,7 +125,6 @@ func (r *networkBulkResource) Read(ctx context.Context, req resource.ReadRequest
 	dd := r.client.RscGetNetworks(ctx, &resp.Diagnostics, unique_id, &deployMap)
 	if dd == nil {
 		tflog.Error(ctx, "Read Networks Failed")
-		resp.Diagnostics.AddWarning("Read Failure", "No configuration found in NDFC")
 		//resp.Diagnostics.AddError("Read Failure", "No data received from NDFC")
 
 	}
@@ -253,7 +252,7 @@ func (r networkBulkResource) ValidateConfig(ctx context.Context, req resource.Va
 						"Use only one deployment flag at a time",
 					)
 					resp.Diagnostics.AddAttributeError(
-						path.Root("networks").AtMapKey(network).AtName("attach_list").AtMapKey(serial).AtName("deploy_this_attachment"),
+						path.Root("networks").AtMapKey(network).AtName("attachments").AtMapKey(serial).AtName("deploy_this_attachment"),
 						"Conflicting Deployment Flags",
 						"Use only one deployment flag at a time",
 					)

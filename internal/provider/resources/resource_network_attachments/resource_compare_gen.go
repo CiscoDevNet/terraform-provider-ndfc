@@ -80,9 +80,8 @@ func (v NDFCNetworkAttachmentsValue) DeepEqual(c NDFCNetworkAttachmentsValue) in
 	return ValuesDeeplyEqual
 }
 
-func (v *NDFCAttachmentsValue) CreatePlan(c NDFCAttachmentsValue) int {
+func (v *NDFCAttachmentsValue) CreatePlan(c NDFCAttachmentsValue, cf *bool) int {
 	action := ActionNone
-	controlFlagUpdate := false
 
 	if v.DisplayName != "" {
 
@@ -138,9 +137,7 @@ func (v *NDFCAttachmentsValue) CreatePlan(c NDFCAttachmentsValue) int {
 
 	if v.DeployThisAttachment != c.DeployThisAttachment {
 		log.Printf("Update: v.DeployThisAttachment=%v, c.DeployThisAttachment=%v", v.DeployThisAttachment, c.DeployThisAttachment)
-		if action == ActionNone || action == RequiresUpdate {
-			action = RequiresUpdate
-		}
+		*cf = true
 	}
 
 	if len(v.SwitchPorts) != len(c.SwitchPorts) {
@@ -180,15 +177,11 @@ func (v *NDFCAttachmentsValue) CreatePlan(c NDFCAttachmentsValue) int {
 		v.InstanceValues = c.InstanceValues
 	}
 
-	if controlFlagUpdate {
-		return ControlFlagUpdate
-	}
 	return action
 }
 
-func (v *NDFCNetworkAttachmentsValue) CreatePlan(c NDFCNetworkAttachmentsValue) int {
+func (v *NDFCNetworkAttachmentsValue) CreatePlan(c NDFCNetworkAttachmentsValue, cf *bool) int {
 	action := ActionNone
-	controlFlagUpdate := false
 
 	if v.NetworkName != "" {
 
@@ -205,8 +198,5 @@ func (v *NDFCNetworkAttachmentsValue) CreatePlan(c NDFCNetworkAttachmentsValue) 
 		v.NetworkName = c.NetworkName
 	}
 
-	if controlFlagUpdate {
-		return ControlFlagUpdate
-	}
 	return action
 }

@@ -187,7 +187,8 @@ func (c NDFC) RscUpdateVrfAttachments(ctx context.Context, dg *diag.Diagnostics,
 	//Check and deploy
 	if deployVA.GlobalDeploy {
 		//Using update to deploy everything in update
-		c.DeployFromPayload(ctx, dg, updateVA)
+		c.RscDeployVrfAttachments(ctx, dg, updateVA)
+		//c.DeployVrfFromPayload(ctx, dg, updateVA)
 	} else if undeployVA.GlobalUndeploy {
 		// This is pretty complex to handle
 		// Detach everything in update, mark all true to false
@@ -196,7 +197,8 @@ func (c NDFC) RscUpdateVrfAttachments(ctx context.Context, dg *diag.Diagnostics,
 		tflog.Warn(ctx, "RscUpdateVrfAttachments: Global Undeploy not supported yet")
 	} else {
 		tflog.Info(ctx, "RscUpdateVrfAttachments: Deploying the changes")
-		c.DeployFromPayload(ctx, dg, deployVA)
+		c.RscDeployVrfAttachments(ctx, dg, deployVA)	
+		//c.DeployVrfFromPayload(ctx, dg, deployVA)
 	}
 
 	if len(undeployVA.VrfAttachments) > 0 {
@@ -284,7 +286,7 @@ func (c NDFC) RscDeleteVrfAttachments(ctx context.Context, dg *diag.Diagnostics,
 		//return err
 		dg.AddError("Error deleting VRF Attachments", err.Error())
 	}
-	c.RscDeployAttachments(ctx, dg, delVrf)
+	c.RscDeployVrfAttachments(ctx, dg, delVrf)
 	return nil
 }
 

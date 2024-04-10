@@ -187,7 +187,8 @@ func (c NDFC) networksGetDiff(ctx context.Context, dg *diag.Diagnostics,
 			rsPlan.FilterThisValue = true
 			rsPlan.FabricName = newRscs.FabricName
 			rsPlan.NetworkName = sRsName
-			updateAction := rsPlan.CreatePlan(sRsc) //rsState.Networks[i].DeepEqual(*rsPlan)
+			cf := false
+			updateAction := rsPlan.CreatePlan(sRsc, &cf) //dummy cf
 			if updateAction == ActionNone {
 				//Case 1: Both networks entries are equal - no change
 				tflog.Info(ctx, fmt.Sprintf("%s not changed", sRsName))

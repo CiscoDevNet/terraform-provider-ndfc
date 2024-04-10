@@ -69,7 +69,6 @@ func (c NDFCAPICommon) Get() ([]byte, error) {
 
 func (c NDFCAPICommon) Post(payload []byte) (gjson.Result, error) {
 	log.Printf("Post URL: %s\n", c.NDFCAPI.PostUrl())
-
 	lock := c.NDFCAPI.GetLock()
 	lock.Lock()
 	defer lock.Unlock()

@@ -211,11 +211,6 @@ func NetworksResourceSchema(ctx context.Context) schema.Schema {
 							MarkdownDescription: "Layer-2 only flag",
 							Default:             booldefault.StaticBool(false),
 						},
-						"loopback_routing_tag": schema.Int64Attribute{
-							Optional:            true,
-							Description:         "Loopback routing tag",
-							MarkdownDescription: "Loopback routing tag",
-						},
 						"mtu": schema.Int64Attribute{
 							Optional:            true,
 							Computed:            true,
@@ -286,6 +281,13 @@ func NetworksResourceSchema(ctx context.Context) schema.Schema {
 							Description:         "L2 VNI Route-Target Both Enable. NX-OS specific.",
 							MarkdownDescription: "L2 VNI Route-Target Both Enable. NX-OS specific.",
 							Default:             booldefault.StaticBool(false),
+						},
+						"routing_tag": schema.Int64Attribute{
+							Optional:            true,
+							Computed:            true,
+							Description:         "Routing tag",
+							MarkdownDescription: "Routing tag",
+							Default:             int64default.StaticInt64(12345),
 						},
 						"secondary_gateway_1": schema.StringAttribute{
 							Optional:            true,
@@ -622,24 +624,6 @@ func (t NetworksType) ValueFromObject(ctx context.Context, in basetypes.ObjectVa
 			fmt.Sprintf(`layer2_only expected to be basetypes.BoolValue, was: %T`, layer2OnlyAttribute))
 	}
 
-	loopbackRoutingTagAttribute, ok := attributes["loopback_routing_tag"]
-
-	if !ok {
-		diags.AddError(
-			"Attribute Missing",
-			`loopback_routing_tag is missing from object`)
-
-		return nil, diags
-	}
-
-	loopbackRoutingTagVal, ok := loopbackRoutingTagAttribute.(basetypes.Int64Value)
-
-	if !ok {
-		diags.AddError(
-			"Attribute Wrong Type",
-			fmt.Sprintf(`loopback_routing_tag expected to be basetypes.Int64Value, was: %T`, loopbackRoutingTagAttribute))
-	}
-
 	mtuAttribute, ok := attributes["mtu"]
 
 	if !ok {
@@ -818,6 +802,24 @@ func (t NetworksType) ValueFromObject(ctx context.Context, in basetypes.ObjectVa
 		diags.AddError(
 			"Attribute Wrong Type",
 			fmt.Sprintf(`route_target_both expected to be basetypes.BoolValue, was: %T`, routeTargetBothAttribute))
+	}
+
+	routingTagAttribute, ok := attributes["routing_tag"]
+
+	if !ok {
+		diags.AddError(
+			"Attribute Missing",
+			`routing_tag is missing from object`)
+
+		return nil, diags
+	}
+
+	routingTagVal, ok := routingTagAttribute.(basetypes.Int64Value)
+
+	if !ok {
+		diags.AddError(
+			"Attribute Wrong Type",
+			fmt.Sprintf(`routing_tag expected to be basetypes.Int64Value, was: %T`, routingTagAttribute))
 	}
 
 	secondaryGateway1Attribute, ok := attributes["secondary_gateway_1"]
@@ -1018,7 +1020,6 @@ func (t NetworksType) ValueFromObject(ctx context.Context, in basetypes.ObjectVa
 		InterfaceDescription:     interfaceDescriptionVal,
 		L3GatwayBorder:           l3GatwayBorderVal,
 		Layer2Only:               layer2OnlyVal,
-		LoopbackRoutingTag:       loopbackRoutingTagVal,
 		Mtu:                      mtuVal,
 		MulticastGroup:           multicastGroupVal,
 		Netflow:                  netflowVal,
@@ -1029,6 +1030,7 @@ func (t NetworksType) ValueFromObject(ctx context.Context, in basetypes.ObjectVa
 		NetworkType:              networkTypeVal,
 		PrimaryNetworkId:         primaryNetworkIdVal,
 		RouteTargetBoth:          routeTargetBothVal,
+		RoutingTag:               routingTagVal,
 		SecondaryGateway1:        secondaryGateway1Val,
 		SecondaryGateway2:        secondaryGateway2Val,
 		SecondaryGateway3:        secondaryGateway3Val,
@@ -1340,24 +1342,6 @@ func NewNetworksValue(attributeTypes map[string]attr.Type, attributes map[string
 			fmt.Sprintf(`layer2_only expected to be basetypes.BoolValue, was: %T`, layer2OnlyAttribute))
 	}
 
-	loopbackRoutingTagAttribute, ok := attributes["loopback_routing_tag"]
-
-	if !ok {
-		diags.AddError(
-			"Attribute Missing",
-			`loopback_routing_tag is missing from object`)
-
-		return NewNetworksValueUnknown(), diags
-	}
-
-	loopbackRoutingTagVal, ok := loopbackRoutingTagAttribute.(basetypes.Int64Value)
-
-	if !ok {
-		diags.AddError(
-			"Attribute Wrong Type",
-			fmt.Sprintf(`loopback_routing_tag expected to be basetypes.Int64Value, was: %T`, loopbackRoutingTagAttribute))
-	}
-
 	mtuAttribute, ok := attributes["mtu"]
 
 	if !ok {
@@ -1536,6 +1520,24 @@ func NewNetworksValue(attributeTypes map[string]attr.Type, attributes map[string
 		diags.AddError(
 			"Attribute Wrong Type",
 			fmt.Sprintf(`route_target_both expected to be basetypes.BoolValue, was: %T`, routeTargetBothAttribute))
+	}
+
+	routingTagAttribute, ok := attributes["routing_tag"]
+
+	if !ok {
+		diags.AddError(
+			"Attribute Missing",
+			`routing_tag is missing from object`)
+
+		return NewNetworksValueUnknown(), diags
+	}
+
+	routingTagVal, ok := routingTagAttribute.(basetypes.Int64Value)
+
+	if !ok {
+		diags.AddError(
+			"Attribute Wrong Type",
+			fmt.Sprintf(`routing_tag expected to be basetypes.Int64Value, was: %T`, routingTagAttribute))
 	}
 
 	secondaryGateway1Attribute, ok := attributes["secondary_gateway_1"]
@@ -1736,7 +1738,6 @@ func NewNetworksValue(attributeTypes map[string]attr.Type, attributes map[string
 		InterfaceDescription:     interfaceDescriptionVal,
 		L3GatwayBorder:           l3GatwayBorderVal,
 		Layer2Only:               layer2OnlyVal,
-		LoopbackRoutingTag:       loopbackRoutingTagVal,
 		Mtu:                      mtuVal,
 		MulticastGroup:           multicastGroupVal,
 		Netflow:                  netflowVal,
@@ -1747,6 +1748,7 @@ func NewNetworksValue(attributeTypes map[string]attr.Type, attributes map[string
 		NetworkType:              networkTypeVal,
 		PrimaryNetworkId:         primaryNetworkIdVal,
 		RouteTargetBoth:          routeTargetBothVal,
+		RoutingTag:               routingTagVal,
 		SecondaryGateway1:        secondaryGateway1Val,
 		SecondaryGateway2:        secondaryGateway2Val,
 		SecondaryGateway3:        secondaryGateway3Val,
@@ -1842,7 +1844,6 @@ type NetworksValue struct {
 	InterfaceDescription     basetypes.StringValue `tfsdk:"interface_description"`
 	L3GatwayBorder           basetypes.BoolValue   `tfsdk:"l3_gatway_border"`
 	Layer2Only               basetypes.BoolValue   `tfsdk:"layer2_only"`
-	LoopbackRoutingTag       basetypes.Int64Value  `tfsdk:"loopback_routing_tag"`
 	Mtu                      basetypes.Int64Value  `tfsdk:"mtu"`
 	MulticastGroup           basetypes.StringValue `tfsdk:"multicast_group"`
 	Netflow                  basetypes.BoolValue   `tfsdk:"netflow"`
@@ -1853,6 +1854,7 @@ type NetworksValue struct {
 	NetworkType              basetypes.StringValue `tfsdk:"network_type"`
 	PrimaryNetworkId         basetypes.Int64Value  `tfsdk:"primary_network_id"`
 	RouteTargetBoth          basetypes.BoolValue   `tfsdk:"route_target_both"`
+	RoutingTag               basetypes.Int64Value  `tfsdk:"routing_tag"`
 	SecondaryGateway1        basetypes.StringValue `tfsdk:"secondary_gateway_1"`
 	SecondaryGateway2        basetypes.StringValue `tfsdk:"secondary_gateway_2"`
 	SecondaryGateway3        basetypes.StringValue `tfsdk:"secondary_gateway_3"`
@@ -1889,7 +1891,6 @@ func (v NetworksValue) ToTerraformValue(ctx context.Context) (tftypes.Value, err
 	attrTypes["interface_description"] = basetypes.StringType{}.TerraformType(ctx)
 	attrTypes["l3_gatway_border"] = basetypes.BoolType{}.TerraformType(ctx)
 	attrTypes["layer2_only"] = basetypes.BoolType{}.TerraformType(ctx)
-	attrTypes["loopback_routing_tag"] = basetypes.Int64Type{}.TerraformType(ctx)
 	attrTypes["mtu"] = basetypes.Int64Type{}.TerraformType(ctx)
 	attrTypes["multicast_group"] = basetypes.StringType{}.TerraformType(ctx)
 	attrTypes["netflow"] = basetypes.BoolType{}.TerraformType(ctx)
@@ -1900,6 +1901,7 @@ func (v NetworksValue) ToTerraformValue(ctx context.Context) (tftypes.Value, err
 	attrTypes["network_type"] = basetypes.StringType{}.TerraformType(ctx)
 	attrTypes["primary_network_id"] = basetypes.Int64Type{}.TerraformType(ctx)
 	attrTypes["route_target_both"] = basetypes.BoolType{}.TerraformType(ctx)
+	attrTypes["routing_tag"] = basetypes.Int64Type{}.TerraformType(ctx)
 	attrTypes["secondary_gateway_1"] = basetypes.StringType{}.TerraformType(ctx)
 	attrTypes["secondary_gateway_2"] = basetypes.StringType{}.TerraformType(ctx)
 	attrTypes["secondary_gateway_3"] = basetypes.StringType{}.TerraformType(ctx)
@@ -2021,14 +2023,6 @@ func (v NetworksValue) ToTerraformValue(ctx context.Context) (tftypes.Value, err
 
 		vals["layer2_only"] = val
 
-		val, err = v.LoopbackRoutingTag.ToTerraformValue(ctx)
-
-		if err != nil {
-			return tftypes.NewValue(objectType, tftypes.UnknownValue), err
-		}
-
-		vals["loopback_routing_tag"] = val
-
 		val, err = v.Mtu.ToTerraformValue(ctx)
 
 		if err != nil {
@@ -2108,6 +2102,14 @@ func (v NetworksValue) ToTerraformValue(ctx context.Context) (tftypes.Value, err
 		}
 
 		vals["route_target_both"] = val
+
+		val, err = v.RoutingTag.ToTerraformValue(ctx)
+
+		if err != nil {
+			return tftypes.NewValue(objectType, tftypes.UnknownValue), err
+		}
+
+		vals["routing_tag"] = val
 
 		val, err = v.SecondaryGateway1.ToTerraformValue(ctx)
 
@@ -2295,7 +2297,6 @@ func (v NetworksValue) ToObjectValue(ctx context.Context) (basetypes.ObjectValue
 			"interface_description":      basetypes.StringType{},
 			"l3_gatway_border":           basetypes.BoolType{},
 			"layer2_only":                basetypes.BoolType{},
-			"loopback_routing_tag":       basetypes.Int64Type{},
 			"mtu":                        basetypes.Int64Type{},
 			"multicast_group":            basetypes.StringType{},
 			"netflow":                    basetypes.BoolType{},
@@ -2306,6 +2307,7 @@ func (v NetworksValue) ToObjectValue(ctx context.Context) (basetypes.ObjectValue
 			"network_type":               basetypes.StringType{},
 			"primary_network_id":         basetypes.Int64Type{},
 			"route_target_both":          basetypes.BoolType{},
+			"routing_tag":                basetypes.Int64Type{},
 			"secondary_gateway_1":        basetypes.StringType{},
 			"secondary_gateway_2":        basetypes.StringType{},
 			"secondary_gateway_3":        basetypes.StringType{},
@@ -2331,7 +2333,6 @@ func (v NetworksValue) ToObjectValue(ctx context.Context) (basetypes.ObjectValue
 			"interface_description":      v.InterfaceDescription,
 			"l3_gatway_border":           v.L3GatwayBorder,
 			"layer2_only":                v.Layer2Only,
-			"loopback_routing_tag":       v.LoopbackRoutingTag,
 			"mtu":                        v.Mtu,
 			"multicast_group":            v.MulticastGroup,
 			"netflow":                    v.Netflow,
@@ -2342,6 +2343,7 @@ func (v NetworksValue) ToObjectValue(ctx context.Context) (basetypes.ObjectValue
 			"network_type":               v.NetworkType,
 			"primary_network_id":         v.PrimaryNetworkId,
 			"route_target_both":          v.RouteTargetBoth,
+			"routing_tag":                v.RoutingTag,
 			"secondary_gateway_1":        v.SecondaryGateway1,
 			"secondary_gateway_2":        v.SecondaryGateway2,
 			"secondary_gateway_3":        v.SecondaryGateway3,
@@ -2424,10 +2426,6 @@ func (v NetworksValue) Equal(o attr.Value) bool {
 		return false
 	}
 
-	if !v.LoopbackRoutingTag.Equal(other.LoopbackRoutingTag) {
-		return false
-	}
-
 	if !v.Mtu.Equal(other.Mtu) {
 		return false
 	}
@@ -2465,6 +2463,10 @@ func (v NetworksValue) Equal(o attr.Value) bool {
 	}
 
 	if !v.RouteTargetBoth.Equal(other.RouteTargetBoth) {
+		return false
+	}
+
+	if !v.RoutingTag.Equal(other.RoutingTag) {
 		return false
 	}
 
@@ -2538,7 +2540,6 @@ func (v NetworksValue) AttributeTypes(ctx context.Context) map[string]attr.Type 
 		"interface_description":      basetypes.StringType{},
 		"l3_gatway_border":           basetypes.BoolType{},
 		"layer2_only":                basetypes.BoolType{},
-		"loopback_routing_tag":       basetypes.Int64Type{},
 		"mtu":                        basetypes.Int64Type{},
 		"multicast_group":            basetypes.StringType{},
 		"netflow":                    basetypes.BoolType{},
@@ -2549,6 +2550,7 @@ func (v NetworksValue) AttributeTypes(ctx context.Context) map[string]attr.Type 
 		"network_type":               basetypes.StringType{},
 		"primary_network_id":         basetypes.Int64Type{},
 		"route_target_both":          basetypes.BoolType{},
+		"routing_tag":                basetypes.Int64Type{},
 		"secondary_gateway_1":        basetypes.StringType{},
 		"secondary_gateway_2":        basetypes.StringType{},
 		"secondary_gateway_3":        basetypes.StringType{},

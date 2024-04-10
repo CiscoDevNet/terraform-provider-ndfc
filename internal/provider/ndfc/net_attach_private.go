@@ -34,17 +34,22 @@ func (c NDFC) netAttachmentsAttach(ctx context.Context, rscModel *resource_netwo
 
 }
 
-func (c NDFC) netAttachmentsDetach(ctx context.Context, rscModel *resource_networks.NDFCNetworksModel) error {
+func (c NDFC) netAttachmentsDetach(ctx context.Context, rscModel *resource_networks.NDFCNetworksModel) (error, int) {
 	tflog.Info(ctx, fmt.Sprintf("Beginning Bulk NetworkAttachments delete in fabric %s", rscModel.FabricName))
 	payload := rna.NDFCNetworkAttachments{}
 	rscModel.FillAttachmentsPayloadFromModel(&payload, resource_networks.NwAttachmentDetach)
 
+	if len(payload.NetworkAttachments) == 0 {
+		tflog.Info(ctx, "No Attachments to delete")
+		return nil, 0
+	}
+
 	data, err := json.Marshal(payload.NetworkAttachments)
 	if err != nil {
 		tflog.Error(ctx, fmt.Sprintf("Json Marshal failure %s", err.Error()))
-		return err
+		return err, len(payload.NetworkAttachments)
 	}
-	return c.netAttachmentsPostPayload(ctx, rscModel.FabricName, data)
+	return c.netAttachmentsPostPayload(ctx, rscModel.FabricName, data), len(payload.NetworkAttachments)
 }
 
 func (c NDFC) netAttachmentsPostPayload(ctx context.Context, fabricName string, payload []byte) error {
@@ -167,17 +172,17 @@ func (c NDFC) checkNwAttachmentsAction(ctx context.Context, plan *resource_netwo
 	state *resource_networks.NDFCNetworksValue) uint16 {
 
 	actionFlag := NoChange
-	/*
-		if plan.DeployAttachments && !state.DeployAttachments {
-			tflog.Debug(ctx, fmt.Sprintf("compareAttachments: VRF %s, deployment flag changed from false to true", plan.VrfName))
-			actionFlag |= DeployAll
-		} else if !plan.DeployAttachments && state.DeployAttachments {
-			tflog.Debug(ctx, fmt.Sprintf("compareAttachments: VRF %s, deployment flag changed from true to false", plan.VrfName))
-			actionFlag |= UnDeployAll
-		} else {
-			tflog.Debug(ctx, fmt.Sprintf("compareAttachments: VRF %s, deployment flag unchanged", plan.VrfName))
-		}
-	*/
+
+	if plan.DeployAttachments && !state.DeployAttachments {
+		tflog.Debug(ctx, fmt.Sprintf("compareAttachments: Net %s, deployment flag changed from false to true", plan.NetworkName))
+		actionFlag |= DeployAll
+	} else if !plan.DeployAttachments && state.DeployAttachments {
+		tflog.Debug(ctx, fmt.Sprintf("compareAttachments: Net %s, deployment flag changed from true to false", plan.NetworkName))
+		actionFlag |= UnDeployAll
+	} else {
+		tflog.Debug(ctx, fmt.Sprintf("compareAttachments: Net %s, deployment flag unchanged", plan.NetworkName))
+	}
+
 	for serial, planAttach := range plan.Attachments {
 		tflog.Debug(ctx, fmt.Sprintf("compareAttachments: Attachment %s/%s in plan", plan.NetworkName, serial))
 		planAttach.SerialNumber = serial
@@ -194,28 +199,51 @@ func (c NDFC) checkNwAttachmentsAction(ctx context.Context, plan *resource_netwo
 			tflog.Debug(ctx, fmt.Sprintf("compareAttachments: New attachment %s/%s in plan",
 				plan.NetworkName, serial))
 			planAttach.Deployment = "true"
-			/* TBD Deployment implementation
-			if planAttach.DeployThisAttachment {
+			if planAttach.DeployThisAttachment || plan.DeployAttachments {
 				tflog.Debug(ctx, fmt.Sprintf("compareAttachments: Attachment %s/%s in plan needs deploy",
 					plan.NetworkName, serial))
 				controlFlag |= Deploy
 			}
-			*/
+
 		} else {
 			stateAttachment.FilterThisValue = true
 			//Existing attachment in plan
 			tflog.Debug(ctx, fmt.Sprintf("compareAttachments: Existing attachment %s/%s in plan",
 				plan.NetworkName, serial))
 			//Check if parameters are different
-			retVal := planAttach.CreatePlan(stateAttachment)
+			cf := false
+			retVal := planAttach.CreatePlan(stateAttachment, &cf)
 			log.Printf("compareAttachments: Attachment %s/%s  - CreatePlan returned %d", plan.NetworkName, serial, retVal)
 			if retVal == ActionNone {
 				tflog.Debug(ctx, fmt.Sprintf("compareAttachments: attachment %s/%s - unchanged",
 					plan.NetworkName, serial))
 
-			} else if retVal == ControlFlagUpdate {
+			} else if retVal == RequiresUpdate {
+
+				//Modified attachment in plan list
+				tflog.Debug(ctx, fmt.Sprintf("compareAttachments: attachment %s/%s modified in plan",
+					plan.NetworkName, serial))
+				controlFlag |= Update
+				planAttach.Deployment = "true"
+
+				if stateAttachment.DeployThisAttachment && !planAttach.DeployThisAttachment {
+					//undeploy needed
+					tflog.Debug(ctx, fmt.Sprintf("compareAttachments: Attachment %s/%s in plan needs un-deploy",
+						plan.NetworkName, serial))
+					controlFlag |= UnDeploy
+				} else if !stateAttachment.DeployThisAttachment && planAttach.DeployThisAttachment {
+					//deploy needed
+					tflog.Debug(ctx, fmt.Sprintf("compareAttachments: Attachment %s/%s in plan needs deploy",
+						plan.NetworkName, serial))
+					controlFlag |= Deploy
+				}
+
+				// Look inside port lists to see if something has changed
+				planAttach.SwitchPorts, planAttach.DetachSwitchPorts = portListDiff(planAttach.SwitchPorts, stateAttachment.SwitchPorts)
+				//TODO Tor Ports
+			}
+			if cf {
 				//Control Flag Update
-				/* TBD Deployment implementation
 				tflog.Debug(ctx, fmt.Sprintf("compareAttachments: Deploy flag changed in attachment %s/%s in plan",
 					plan.NetworkName, serial))
 				if stateAttachment.DeployThisAttachment && !planAttach.DeployThisAttachment {
@@ -229,30 +257,6 @@ func (c NDFC) checkNwAttachmentsAction(ctx context.Context, plan *resource_netwo
 						plan.NetworkName, serial))
 					controlFlag |= Deploy
 				}
-				*/
-			} else {
-
-				//Modified attachment in plan list
-				tflog.Debug(ctx, fmt.Sprintf("compareAttachments: attachment %s/%s modified in plan",
-					plan.NetworkName, serial))
-				controlFlag |= Update
-				planAttach.Deployment = "true"
-				/*
-					if stateAttachment.DeployThisAttachment && !planAttach.DeployThisAttachment {
-						//undeploy needed
-						tflog.Debug(ctx, fmt.Sprintf("compareAttachments: Attachment %s/%s in plan needs un-deploy",
-							plan.NetworkName, serial))
-						controlFlag |= UnDeploy
-					} else if !stateAttachment.DeployThisAttachment && planAttach.DeployThisAttachment {
-						//deploy needed
-						tflog.Debug(ctx, fmt.Sprintf("compareAttachments: Attachment %s/%s in plan needs deploy",
-							plan.NetworkName, serial))
-						controlFlag |= Deploy
-					}
-				*/
-				// Look inside port lists to see if something has changed
-				planAttach.SwitchPorts, planAttach.DetachSwitchPorts = portListDiff(planAttach.SwitchPorts, stateAttachment.SwitchPorts)
-				//TODO Tor Ports
 			}
 			//put modified entry back
 			state.Attachments[serial] = stateAttachment
@@ -272,7 +276,28 @@ func (c NDFC) networkAttachmentsGetDiff(ctx context.Context, dg *diag.Diagnostic
 
 	actions := make(map[string]interface{})
 	naUpdate := new(rna.NDFCNetworkAttachments)
+	naDeploy := new(rna.NDFCNetworkAttachments)
+	naUnDeploy := new(rna.NDFCNetworkAttachments)
+
 	naUpdate.FabricName = vPlan.FabricName
+	naDeploy.FabricName = vPlan.FabricName
+	naUnDeploy.FabricName = vPlan.FabricName
+
+	if vState.DeployAllAttachments && !vPlan.DeployAllAttachments {
+		//Global undeploy
+		tflog.Debug(ctx, "networkAttachmentsGetDiff: Global undeploy needed")
+		naUnDeploy.GlobalUndeploy = true
+	} else if !vState.DeployAllAttachments && vPlan.DeployAllAttachments {
+		//Global deploy
+		tflog.Debug(ctx, "networkAttachmentsGetDiff: Global deploy needed")
+		naDeploy.GlobalDeploy = true
+	} else {
+		tflog.Debug(ctx, "networkAttachmentsGetDiff: Global deploy flag unchanged")
+		naUnDeploy.GlobalDeploy = false
+		naUnDeploy.GlobalUndeploy = false
+		naDeploy.GlobalDeploy = false
+		naDeploy.GlobalUndeploy = false
+	}
 
 	for nw, planNw := range vPlan.Networks {
 		planNw.NetworkName = nw
@@ -288,12 +313,23 @@ func (c NDFC) networkAttachmentsGetDiff(ctx context.Context, dg *diag.Diagnostic
 			if action&Update > 0 {
 				naUpdate.AddEntry(nw, planNw.GetAttachmentValues(Update, "true"))
 			}
-
 			if action&NewEntry > 0 {
 				naUpdate.AddEntry(nw, planNw.GetAttachmentValues(NewEntry, "true"))
 			}
-			// TODO: Implement Deploy/UnDeploy
-
+			if action&DeployAll > 0 {
+				naDeploy.AddEntry(nw, planNw.GetAttachmentValues(DeployAll, "true"))
+			}
+			if action&UnDeployAll > 0 {
+				naUnDeploy.AddEntry(nw, planNw.GetAttachmentValues(UnDeployAll, "false"))
+				// undeploy needs a detach first
+				naUpdate.AddEntry(nw, planNw.GetAttachmentValues(UnDeployAll, "false"))
+			}
+			if action&Deploy > 0 {
+				naDeploy.AddEntry(nw, planNw.GetAttachmentValues(Deploy, "true"))
+			}
+			if action&UnDeploy > 0 {
+				naUnDeploy.AddEntry(nw, planNw.GetAttachmentValues(UnDeploy, "false"))
+			}
 		} else {
 			tflog.Debug(ctx, fmt.Sprintf("New Network %s in plan", nw))
 			naUpdate.AddEntry(nw, planNw.GetAttachmentValues(NewEntry, "true"))
@@ -315,12 +351,17 @@ func (c NDFC) networkAttachmentsGetDiff(ctx context.Context, dg *diag.Diagnostic
 				serial))
 			attachEntry.Deployment = "false"
 			attachEntry.UpdateAction = NoChange
-			attachEntry.UpdateAction |= Detach
+			attachEntry.UpdateAction |= (Detach | Deploy)
 			nwEntry.Attachments[serial] = attachEntry
 		}
 		naUpdate.AddEntry(nw, nwEntry.GetAttachmentValues(Detach, "false"))
+		naDeploy.AddEntry(nw, nwEntry.GetAttachmentValues(Deploy, "false"))
 	}
 	actions["update"] = naUpdate
+	actions["plan"] = vPlan
+	actions["state"] = vState
+	actions["deploy"] = naDeploy
+	actions["undeploy"] = naUnDeploy
 	return actions
 }
 

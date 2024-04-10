@@ -17,8 +17,6 @@ import (
 const UrlVrfAttachmentsCreate = "/lan-fabric/rest/top-down/v2/fabrics/%s/vrfs/attachments"
 const UrlVrfAttachmentsGet = "/lan-fabric/rest/top-down/fabrics/%s/vrfs/attachments"
 const UrlQP = "?%s=%s"
-const UrlVrfAttachmentsDeploy = "/lan-fabric/rest/top-down/v2/vrfs/deploy"
-const UrlVrfDeployment = "/lan-fabric/rest/top-down/v2/fabrics/%s/vrfs/deployments"
 
 func (c NDFC) vrfAttachmentsGet(ctx context.Context, fabricName string, vrfs []string) ([]byte, error) {
 
@@ -135,7 +133,7 @@ func (c NDFC) updateVRFAttachmentAction(ctx context.Context, plan *resource_vrf_
 				plan.VrfName, serial))
 			planAttach.SerialNumber = serial
 			planAttach.Deployment = "true"
-			if planAttach.DeployThisAttachment {
+			if planAttach.DeployThisAttachment || plan.DeployAttachments {
 				tflog.Debug(ctx, fmt.Sprintf("compareAttachments: Attachment %s/%s in plan needs deploy",
 					plan.VrfName, serial))
 				controlFlag |= Deploy
@@ -178,7 +176,7 @@ func (c NDFC) updateVRFAttachmentAction(ctx context.Context, plan *resource_vrf_
 					tflog.Debug(ctx, fmt.Sprintf("compareAttachments: Attachment %s/%s in plan needs un-deploy",
 						plan.VrfName, serial))
 					controlFlag |= UnDeploy
-				} else if !stateAttachment.DeployThisAttachment && planAttach.DeployThisAttachment {
+				} else if planAttach.DeployThisAttachment || plan.DeployAttachments {
 					//deploy needed
 					tflog.Debug(ctx, fmt.Sprintf("compareAttachments: Attachment %s/%s in plan needs deploy",
 						plan.VrfName, serial))
