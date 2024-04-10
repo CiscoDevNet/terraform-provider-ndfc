@@ -8,10 +8,8 @@ terraform {
 }
 
 provider "ndfc" {
-  username = "admin"
-  password = "admin!@#"
-  #  password = "ins3965!"
-  #  host      = "https://10.195.225.193"
+  username = "test"
+  password = "test"
   host     = "https://10.78.210.161"
   insecure = true
 }
@@ -30,28 +28,26 @@ resource "ndfc_vrf_bulk" "test_evpn_vxlan_deployment_vrf1" {
     "Murali_vrf_01" : {
       attach_list : {
         "9FE076D8EJL" : {
-          deploy_this_attachment = false
+          deploy_this_attachment = true
         },
         "9TQYTJSZ1VJ" : {
-          deploy_this_attachment = false
+          deploy_this_attachment = true
         },
         "9QBCTIN0FMY" : {
-          deploy_this_attachment = false
+          deploy_this_attachment = true
         }
       }
     },
     "Murali_vrf_02" : {
       attach_list : {
         "9FE076D8EJL" : {
-          deploy_this_attachment = false
-          vlan                   = 3000
+          deploy_this_attachment = true
         },
         "9TQYTJSZ1VJ" : {
-          deploy_this_attachment = false
-          vlan                   = 3001
+          deploy_this_attachment = true
         },
         "9QBCTIN0FMY" : {
-          deploy_this_attachment = false
+          deploy_this_attachment = true
         }
       }
     },
@@ -132,24 +128,28 @@ resource "ndfc_networks" "test_evpn_vxlan_deployment_nw1" {
         {
           address = "20.1.1.1"
           vrf     = "default"
+        },
+        {
+          address = "20.1.1.5"
+          vrf     = "default"
         }
       ]
       dhcp_relay_loopback_id = 999
-      tag                    = 1234
+      //tag                    = 1234
       l3_gatway_border       = true
       igmp_version           = 3
       attachments = {
         "9FE076D8EJL" : {
           switch_ports           = ["Ethernet1/1", "Ethernet1/2"]
-          deploy_this_attachment = false
+          deploy_this_attachment = true
         },
         "9TQYTJSZ1VJ" : {
           switch_ports           = ["Ethernet1/2", "Ethernet1/1"]
-          deploy_this_attachment = false
+          deploy_this_attachment = true
         },
         "9QBCTIN0FMY" : {
           switch_ports           = ["Ethernet1/2","Ethernet1/1"]
-          deploy_this_attachment = false
+          deploy_this_attachment = true
         }
       }
     },
@@ -159,15 +159,15 @@ resource "ndfc_networks" "test_evpn_vxlan_deployment_nw1" {
        attachments = {
         "9FE076D8EJL" : {
           switch_ports           = ["Ethernet1/3", "Ethernet1/4", "Ethernet1/5"]
-          deploy_this_attachment = false
+          deploy_this_attachment = true
         },
         "9TQYTJSZ1VJ" : {
-          switch_ports           = ["Ethernet1/3", "Ethernet1/4"]
-          deploy_this_attachment = false
+          switch_ports           = ["Ethernet1/4", "Ethernet1/5", "Ethernet1/3"]
+          deploy_this_attachment = true
         },
         "9QBCTIN0FMY" : {
-          switch_ports           = ["Ethernet1/3","Ethernet1/4"]
-          deploy_this_attachment = false
+          switch_ports           = ["Ethernet1/5", "Ethernet1/3", "Ethernet1/4"]
+          deploy_this_attachment = true
         }
       }
      }

@@ -181,7 +181,8 @@ func (c NDFC) vrfBulkGetDiff(ctx context.Context, dg *diag.Diagnostics,
 			vrf.FilterThisValue = true
 			vrf.FabricName = newVRFs.FabricName
 			vrf.VrfName = sVrfName
-			updateAction := vrf.CreatePlan(sVrf) //vrfState.Vrfs[i].DeepEqual(*vrf)
+			cf := false //ignored here - should be taken care in attachments
+			updateAction := vrf.CreatePlan(sVrf, &cf) //vrfState.Vrfs[i].DeepEqual(*vrf)
 			if updateAction == ActionNone {
 				//Case 1: Both VRFs are equal - no change to the VRF entry
 				tflog.Info(ctx, fmt.Sprintf("%s not changed", sVrfName))

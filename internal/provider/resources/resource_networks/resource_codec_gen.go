@@ -58,7 +58,7 @@ type NDFCNetworkTemplateConfigValue struct {
 	MulticastGroup       string                     `json:"mcastGroup,omitempty"`
 	DhcpRelayServers     NDFCDhcpRelayServersValues `json:"dhcpServers,omitempty"`
 	DhcpRelayLoopbackId  *Int64Custom               `json:"loopbackId,omitempty"`
-	LoopbackRoutingTag   *Int64Custom               `json:"tag,omitempty"`
+	RoutingTag           *Int64Custom               `json:"tag,omitempty"`
 	Trm                  string                     `json:"trmEnabled,omitempty"`
 	RouteTargetBoth      string                     `json:"rtBothAuto,omitempty"`
 	Netflow              string                     `json:"ENABLE_NETFLOW,omitempty"`
@@ -300,15 +300,15 @@ func (v *NetworksValue) SetValue(jsonData *NDFCNetworksValue) diag.Diagnostics {
 		v.DhcpRelayLoopbackId = types.Int64Null()
 	}
 
-	if jsonData.NetworkTemplateConfig.LoopbackRoutingTag != nil {
-		if jsonData.NetworkTemplateConfig.LoopbackRoutingTag.IsEmpty() {
-			v.LoopbackRoutingTag = types.Int64Null()
+	if jsonData.NetworkTemplateConfig.RoutingTag != nil {
+		if jsonData.NetworkTemplateConfig.RoutingTag.IsEmpty() {
+			v.RoutingTag = types.Int64Null()
 		} else {
-			v.LoopbackRoutingTag = types.Int64Value(int64(*jsonData.NetworkTemplateConfig.LoopbackRoutingTag))
+			v.RoutingTag = types.Int64Value(int64(*jsonData.NetworkTemplateConfig.RoutingTag))
 		}
 
 	} else {
-		v.LoopbackRoutingTag = types.Int64Null()
+		v.RoutingTag = types.Int64Null()
 	}
 
 	if jsonData.NetworkTemplateConfig.Trm != "" {
@@ -777,13 +777,13 @@ func (v NetworksModel) GetModelData() *NDFCNetworksModel {
 				data1.NetworkTemplateConfig.DhcpRelayLoopbackId = nil
 			}
 
-			// loopback_routing_tag | Int64| [networkTemplateConfig]| false
-			if !ele1.LoopbackRoutingTag.IsNull() && !ele1.LoopbackRoutingTag.IsUnknown() {
+			// routing_tag | Int64| [networkTemplateConfig]| false
+			if !ele1.RoutingTag.IsNull() && !ele1.RoutingTag.IsUnknown() {
 				//-----inline nested----
-				data1.NetworkTemplateConfig.LoopbackRoutingTag = new(Int64Custom)
-				*data1.NetworkTemplateConfig.LoopbackRoutingTag = Int64Custom(ele1.LoopbackRoutingTag.ValueInt64())
+				data1.NetworkTemplateConfig.RoutingTag = new(Int64Custom)
+				*data1.NetworkTemplateConfig.RoutingTag = Int64Custom(ele1.RoutingTag.ValueInt64())
 			} else {
-				data1.NetworkTemplateConfig.LoopbackRoutingTag = nil
+				data1.NetworkTemplateConfig.RoutingTag = nil
 			}
 
 			// trm | Bool| [networkTemplateConfig]| false

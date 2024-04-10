@@ -20,8 +20,9 @@ type VrfAPI struct {
 const UrlVrfGetBulk = "/lan-fabric/rest/top-down/v2/fabrics/%s/vrfs"
 const UrlVrfCreateBulk = "/lan-fabric/rest/top-down/v2/bulk-create/vrfs"
 const UrlVrfDeleteBulk = "/lan-fabric/rest/top-down/v2/fabrics/%s/bulk-delete/vrfs"
-const UrlVrfGet = "/lan-fabric/rest/top-down/v2/fabrics/%s/vrf/%s"
+const UrlVrfGet = "/lan-fabric/rest/top-down/v2/fabrics/%s/vrfs/%s"
 const UrlVrfUpdate = "/lan-fabric/rest/top-down/v2/fabrics/%s/vrfs/%s"
+const UrlVrfAttachmentsGet = "/lan-fabric/rest/top-down/fabrics/%s/vrfs/attachments"
 
 func (c *VrfAPI) GetLock() *sync.Mutex {
 	log.Printf("GetLock - VrfAPI %v", c.mutex)
@@ -59,6 +60,19 @@ func (c *VrfAPI) GetDeleteQP() []string {
 	return []string{"vrf-names=" + strings.Join(c.DelList, ",")}
 }
 
+/*
+	func (c *VrfAPI) GetSingleVRF(fabricName, vrfName string) ([]byte, error) {
+		log.Printf("GetSingleVRF - VrfAPI")
+		return c.client.GetRawJson(fmt.Sprintf(UrlVrfGet, fabricName, vrfName))
+	}
+
+	func (c *VrfAPI) GetVrfAttachments(fabricName, vrfName string) ([]byte, error) {
+		log.Printf("GetVrfAttachment - VrfAPI")
+		url := fmt.Sprintf(UrlVrfAttachmentsGet, fabricName)
+		url += "?vrf-names=" + vrfName
+		return c.client.GetRawJson(url)
+	}
+*/
 func NewVrfAPI(fabricName string, lock *sync.Mutex, client *nd.Client) *VrfAPI {
 	api := new(VrfAPI)
 	api.fabricName = fabricName

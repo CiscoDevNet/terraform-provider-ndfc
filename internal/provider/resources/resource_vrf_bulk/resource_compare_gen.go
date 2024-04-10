@@ -249,9 +249,8 @@ func (v NDFCVrfsValue) DeepEqual(c NDFCVrfsValue) int {
 	return ValuesDeeplyEqual
 }
 
-func (v *NDFCVrfsValue) CreatePlan(c NDFCVrfsValue) int {
+func (v *NDFCVrfsValue) CreatePlan(c NDFCVrfsValue, cf *bool) int {
 	action := ActionNone
-	controlFlagUpdate := false
 
 	if v.VrfTemplate != "" {
 
@@ -727,13 +726,8 @@ func (v *NDFCVrfsValue) CreatePlan(c NDFCVrfsValue) int {
 
 	if v.DeployAttachments != c.DeployAttachments {
 		log.Printf("Update: v.DeployAttachments=%v, c.DeployAttachments=%v", v.DeployAttachments, c.DeployAttachments)
-		if action == ActionNone || action == RequiresUpdate {
-			action = RequiresUpdate
-		}
+		*cf = true
 	}
 
-	if controlFlagUpdate {
-		return ControlFlagUpdate
-	}
 	return action
 }

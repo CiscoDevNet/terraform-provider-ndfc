@@ -179,17 +179,17 @@ func (v NDFCNetworksValue) DeepEqual(c NDFCNetworksValue) int {
 		}
 	}
 
-	if !v.NetworkTemplateConfig.LoopbackRoutingTag.IsEmpty() && !c.NetworkTemplateConfig.LoopbackRoutingTag.IsEmpty() {
-		if *v.NetworkTemplateConfig.LoopbackRoutingTag != *c.NetworkTemplateConfig.LoopbackRoutingTag {
-			log.Printf("v.NetworkTemplateConfig.LoopbackRoutingTag=%v, c.NetworkTemplateConfig.LoopbackRoutingTag=%v", *v.NetworkTemplateConfig.LoopbackRoutingTag, *c.NetworkTemplateConfig.LoopbackRoutingTag)
+	if !v.NetworkTemplateConfig.RoutingTag.IsEmpty() && !c.NetworkTemplateConfig.RoutingTag.IsEmpty() {
+		if *v.NetworkTemplateConfig.RoutingTag != *c.NetworkTemplateConfig.RoutingTag {
+			log.Printf("v.NetworkTemplateConfig.RoutingTag=%v, c.NetworkTemplateConfig.RoutingTag=%v", *v.NetworkTemplateConfig.RoutingTag, *c.NetworkTemplateConfig.RoutingTag)
 			return RequiresUpdate
 		}
 	} else {
-		if !v.NetworkTemplateConfig.LoopbackRoutingTag.IsEmpty() {
-			log.Printf("v.NetworkTemplateConfig.LoopbackRoutingTag=%v", *v.NetworkTemplateConfig.LoopbackRoutingTag)
+		if !v.NetworkTemplateConfig.RoutingTag.IsEmpty() {
+			log.Printf("v.NetworkTemplateConfig.RoutingTag=%v", *v.NetworkTemplateConfig.RoutingTag)
 			return RequiresUpdate
-		} else if !c.NetworkTemplateConfig.LoopbackRoutingTag.IsEmpty() {
-			log.Printf("c.NetworkTemplateConfig.LoopbackRoutingTag=%v", *c.NetworkTemplateConfig.LoopbackRoutingTag)
+		} else if !c.NetworkTemplateConfig.RoutingTag.IsEmpty() {
+			log.Printf("c.NetworkTemplateConfig.RoutingTag=%v", *c.NetworkTemplateConfig.RoutingTag)
 			return RequiresUpdate
 		}
 	}
@@ -232,9 +232,8 @@ func (v NDFCNetworksValue) DeepEqual(c NDFCNetworksValue) int {
 	return ValuesDeeplyEqual
 }
 
-func (v *NDFCDhcpRelayServersValue) CreatePlan(c NDFCDhcpRelayServersValue) int {
+func (v *NDFCDhcpRelayServersValue) CreatePlan(c NDFCDhcpRelayServersValue, cf *bool) int {
 	action := ActionNone
-	controlFlagUpdate := false
 
 	if v.Address != "" {
 
@@ -266,15 +265,11 @@ func (v *NDFCDhcpRelayServersValue) CreatePlan(c NDFCDhcpRelayServersValue) int 
 		v.Vrf = c.Vrf
 	}
 
-	if controlFlagUpdate {
-		return ControlFlagUpdate
-	}
 	return action
 }
 
-func (v *NDFCNetworksValue) CreatePlan(c NDFCNetworksValue) int {
+func (v *NDFCNetworksValue) CreatePlan(c NDFCNetworksValue, cf *bool) int {
 	action := ActionNone
-	controlFlagUpdate := false
 
 	if v.DisplayName != "" {
 
@@ -577,7 +572,7 @@ func (v *NDFCNetworksValue) CreatePlan(c NDFCNetworksValue) int {
 		}
 	}
 	for i := range v.NetworkTemplateConfig.DhcpRelayServers {
-		retVal := v.NetworkTemplateConfig.DhcpRelayServers[i].CreatePlan(c.NetworkTemplateConfig.DhcpRelayServers[i])
+		retVal := v.NetworkTemplateConfig.DhcpRelayServers[i].CreatePlan(c.NetworkTemplateConfig.DhcpRelayServers[i], cf)
 		if retVal != ActionNone {
 			if action == ActionNone || action == RequiresUpdate {
 				action = retVal
@@ -605,22 +600,22 @@ func (v *NDFCNetworksValue) CreatePlan(c NDFCNetworksValue) int {
 		}
 	}
 
-	if !v.NetworkTemplateConfig.LoopbackRoutingTag.IsEmpty() && !c.NetworkTemplateConfig.LoopbackRoutingTag.IsEmpty() {
-		if *v.NetworkTemplateConfig.LoopbackRoutingTag != *c.NetworkTemplateConfig.LoopbackRoutingTag {
-			log.Printf("Update: v.NetworkTemplateConfig.LoopbackRoutingTag=%v, c.NetworkTemplateConfig.LoopbackRoutingTag=%v", *v.NetworkTemplateConfig.LoopbackRoutingTag, *c.NetworkTemplateConfig.LoopbackRoutingTag)
+	if !v.NetworkTemplateConfig.RoutingTag.IsEmpty() && !c.NetworkTemplateConfig.RoutingTag.IsEmpty() {
+		if *v.NetworkTemplateConfig.RoutingTag != *c.NetworkTemplateConfig.RoutingTag {
+			log.Printf("Update: v.NetworkTemplateConfig.RoutingTag=%v, c.NetworkTemplateConfig.RoutingTag=%v", *v.NetworkTemplateConfig.RoutingTag, *c.NetworkTemplateConfig.RoutingTag)
 			if action == ActionNone || action == RequiresUpdate {
 				action = RequiresUpdate
 			}
 		}
-	} else if !v.NetworkTemplateConfig.LoopbackRoutingTag.IsEmpty() {
-		log.Printf("Update: v.NetworkTemplateConfig.LoopbackRoutingTag=%v", *v.NetworkTemplateConfig.LoopbackRoutingTag)
+	} else if !v.NetworkTemplateConfig.RoutingTag.IsEmpty() {
+		log.Printf("Update: v.NetworkTemplateConfig.RoutingTag=%v", *v.NetworkTemplateConfig.RoutingTag)
 		if action == ActionNone || action == RequiresUpdate {
 			action = RequiresUpdate
 		}
-	} else if !c.NetworkTemplateConfig.LoopbackRoutingTag.IsEmpty() {
-		log.Printf("Copy from State: c.NetworkTemplateConfig.LoopbackRoutingTag=%v", *c.NetworkTemplateConfig.LoopbackRoutingTag)
-		v.NetworkTemplateConfig.LoopbackRoutingTag = new(Int64Custom)
-		*v.NetworkTemplateConfig.LoopbackRoutingTag = *c.NetworkTemplateConfig.LoopbackRoutingTag
+	} else if !c.NetworkTemplateConfig.RoutingTag.IsEmpty() {
+		log.Printf("Copy from State: c.NetworkTemplateConfig.RoutingTag=%v", *c.NetworkTemplateConfig.RoutingTag)
+		v.NetworkTemplateConfig.RoutingTag = new(Int64Custom)
+		*v.NetworkTemplateConfig.RoutingTag = *c.NetworkTemplateConfig.RoutingTag
 		if action == ActionNone || action == RequiresUpdate {
 			action = RequiresUpdate
 		}
@@ -695,13 +690,8 @@ func (v *NDFCNetworksValue) CreatePlan(c NDFCNetworksValue) int {
 
 	if v.DeployAttachments != c.DeployAttachments {
 		log.Printf("Update: v.DeployAttachments=%v, c.DeployAttachments=%v", v.DeployAttachments, c.DeployAttachments)
-		if action == ActionNone || action == RequiresUpdate {
-			action = RequiresUpdate
-		}
+		*cf = true
 	}
 
-	if controlFlagUpdate {
-		return ControlFlagUpdate
-	}
 	return action
 }

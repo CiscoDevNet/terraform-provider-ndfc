@@ -77,9 +77,8 @@ func (v NDFCVrfAttachmentsValue) DeepEqual(c NDFCVrfAttachmentsValue) int {
 	return ValuesDeeplyEqual
 }
 
-func (v *NDFCAttachListValue) CreatePlan(c NDFCAttachListValue) int {
+func (v *NDFCAttachListValue) CreatePlan(c NDFCAttachListValue, cf *bool) int {
 	action := ActionNone
-	controlFlagUpdate := false
 
 	if !v.Vlan.IsEmpty() && !c.Vlan.IsEmpty() {
 		if *v.Vlan != *c.Vlan {
@@ -120,9 +119,7 @@ func (v *NDFCAttachListValue) CreatePlan(c NDFCAttachListValue) int {
 
 	if v.DeployThisAttachment != c.DeployThisAttachment {
 		log.Printf("Update: v.DeployThisAttachment=%v, c.DeployThisAttachment=%v", v.DeployThisAttachment, c.DeployThisAttachment)
-		if action == ActionNone || action == RequiresUpdate {
-			action = RequiresUpdate
-		}
+		*cf = true
 	}
 
 	if !v.InstanceValues.LoopbackId.IsEmpty() && !c.InstanceValues.LoopbackId.IsEmpty() {
@@ -172,15 +169,11 @@ func (v *NDFCAttachListValue) CreatePlan(c NDFCAttachListValue) int {
 		v.InstanceValues.LoopbackIpv6 = c.InstanceValues.LoopbackIpv6
 	}
 
-	if controlFlagUpdate {
-		return ControlFlagUpdate
-	}
 	return action
 }
 
-func (v *NDFCVrfAttachmentsValue) CreatePlan(c NDFCVrfAttachmentsValue) int {
+func (v *NDFCVrfAttachmentsValue) CreatePlan(c NDFCVrfAttachmentsValue, cf *bool) int {
 	action := ActionNone
-	controlFlagUpdate := false
 
 	if v.VrfName != "" {
 
@@ -199,13 +192,8 @@ func (v *NDFCVrfAttachmentsValue) CreatePlan(c NDFCVrfAttachmentsValue) int {
 
 	if v.DeployAllAttachments != c.DeployAllAttachments {
 		log.Printf("Update: v.DeployAllAttachments=%v, c.DeployAllAttachments=%v", v.DeployAllAttachments, c.DeployAllAttachments)
-		if action == ActionNone || action == RequiresUpdate {
-			action = RequiresUpdate
-		}
+		*cf = true
 	}
 
-	if controlFlagUpdate {
-		return ControlFlagUpdate
-	}
 	return action
 }
