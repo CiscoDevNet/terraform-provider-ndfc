@@ -227,7 +227,7 @@ func (c NDFC) vrfBulkGetDiff(ctx context.Context, dg *diag.Diagnostics,
 
 func (c NDFC) vrfBulkUpdate(ctx context.Context, dg *diag.Diagnostics, ndVRFs *resource_vrf_bulk.NDFCVrfBulkModel) {
 	// PUT for each vrf
-	payload := ndVRFs.FillVrfPayloadFromModel()
+	payload := ndVRFs.FillVrfPayloadFromModel(nil)
 
 	vrfObj := api.NewVrfAPI(ndVRFs.FabricName, c.GetLock(ResourceVrfBulk), &c.apiClient)
 

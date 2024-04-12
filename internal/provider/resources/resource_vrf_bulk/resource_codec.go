@@ -119,13 +119,19 @@ func (v *NDFCVrfBulkModel) FillVrfsFromPayload(payload *NDFCBulkVrfPayload) {
 	}
 }
 
-func (v *NDFCVrfBulkModel) FillVrfPayloadFromModel() *NDFCBulkVrfPayload {
+func (v *NDFCVrfBulkModel) FillVrfPayloadFromModel(depMap *map[string][]string) *NDFCBulkVrfPayload {
 	payload := new(NDFCBulkVrfPayload)
 	payload.Vrfs = make([]NDFCVrfsValue, 0)
 	for vrfName, vrfEntry := range v.Vrfs {
 		vrfEntry.FabricName = v.FabricName
 		vrfEntry.VrfName = vrfName
 		payload.Vrfs = append(payload.Vrfs, vrfEntry)
+		if depMap != nil {
+			if vrfEntry.DeployAttachments {
+				(*depMap)[vrfName] = append((*depMap)[vrfName], vrfName)
+
+			}
+		}
 	}
 	return payload
 }
