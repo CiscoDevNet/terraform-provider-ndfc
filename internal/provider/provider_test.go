@@ -4,7 +4,10 @@
 package provider
 
 import (
+	"os"
 	"testing"
+
+	helper "terraform-provider-ndfc/internal/provider/testing"
 
 	"github.com/hashicorp/terraform-plugin-framework/provider"
 	"github.com/hashicorp/terraform-plugin-framework/providerserver"
@@ -14,14 +17,25 @@ import (
 
 var ndProvider provider.Provider
 
-func init() {
-	ndProvider = NewNDFCProvider()
-
-}
-
 // var dnsClient *DNSClient
 var testAccProtoV6ProviderFactories = map[string]func() (tfprotov6.ProviderServer, error){
 	"ndfc": providerserver.NewProtocol6WithError(ndProvider),
+}
+
+func TestMain(m *testing.M) {
+	accTest := os.Getenv("TF_ACC")
+	if accTest == "" {
+		//UT run
+		os.Exit(m.Run())
+	}
+	// This is TF acceptance tests, initialize NDFC details
+	testConfigPath := os.Getenv("NDFC_TEST_CONFIG_FILE")
+	if testConfigPath == "" {
+		panic("NDFC_TEST_CONFIG_FILE env variable not set")
+	}
+	helper.InitConfig(testConfigPath)
+	ndProvider = NewNDFCProvider()
+	os.Exit(m.Run())
 }
 
 func testAccPreCheck(t *testing.T) {

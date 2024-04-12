@@ -1,0 +1,13 @@
+---
+ndfc: 
+  url: "https://10.78.210.161"
+  user: admin
+  pwd: "admin!@#"
+  insecure: true
+  fabric: test_evpn_vxlan
+  switches:
+    - "9FE076D8EJL"
+    - "9TQYTJSZ1VJ"
+    - "9QBCTIN0FMY"
+  vrf_prefix: "vrf_acc_test_"
+  net_prefix: "net_acc_test_"

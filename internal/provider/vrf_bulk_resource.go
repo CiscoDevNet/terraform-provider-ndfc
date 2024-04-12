@@ -86,18 +86,23 @@ func (r *vrfBulkResource) Read(ctx context.Context, req resource.ReadRequest, re
 	dataVrf := data.GetModelData()
 	deployMap := make(map[string][]string)
 	if dataVrf.DeployAllAttachments {
+		log.Printf("[DEBUG] DeployAllAttachments flag set")
 		deployMap["global"] = append(deployMap["global"], "all")
 	}
-	for _, v := range dataVrf.Vrfs {
+	for vrfName, v := range dataVrf.Vrfs {
+		v.VrfName = vrfName
 		if v.DeployAttachments {
 			//first element is the vrf itself - means deploy enabled at vrf level
 			deployMap[v.VrfName] = append(deployMap[v.VrfName], v.VrfName)
 		}
-		for _, s := range v.AttachList {
+		for serial, s := range v.AttachList {
+			s.SerialNumber = serial
 			if s.DeployThisAttachment {
 				deployMap[v.VrfName] = append(deployMap[v.VrfName], s.SerialNumber)
 			}
+			v.AttachList[serial] = s
 		}
+		dataVrf.Vrfs[vrfName] = v
 	}
 
 	tflog.Info(ctx, fmt.Sprintf("Incoming ID %s", unique_id))

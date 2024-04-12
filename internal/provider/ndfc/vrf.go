@@ -117,6 +117,7 @@ func (c NDFC) RscGetBulkVrf(ctx context.Context, dg *diag.Diagnostics, ID string
 
 	if _, ok := (*depMap)["global"]; ok {
 		//This cannot be validated - as we don't know if all deployments were ok
+		log.Printf("[DEBUG]: Setting DeployAllAttachments flag")
 		ndVrfs.DeployAllAttachments = true
 	}
 
@@ -128,12 +129,15 @@ func (c NDFC) RscGetBulkVrf(ctx context.Context, dg *diag.Diagnostics, ID string
 				continue
 			}
 			vrfLevelDep := false
-			if vl, vlOk := (*depMap)[i]; vlOk {
-				//first element is vrf name if vrf level deploy is set
-				if vl[0] == i {
-					vrfEntry.DeployAttachments = (vrfEntry.VrfStatus == "DEPLOYED")
-					log.Printf("Setting VRF level dep flag for %s to %v", i, vrfEntry.DeployAttachments)
-					vrfLevelDep = true
+
+			if !ndVrfs.DeployAllAttachments {
+				if vl, vlOk := (*depMap)[i]; vlOk {
+					//first element is vrf name if vrf level deploy is set
+					if vl[0] == i {
+						vrfEntry.DeployAttachments = (vrfEntry.VrfStatus == "DEPLOYED")
+						log.Printf("Setting VRF level dep flag for %s to %v", i, vrfEntry.DeployAttachments)
+						vrfLevelDep = true
+					}
 				}
 			}
 			for j, attachEntry := range vrfEntry.AttachList {
@@ -141,11 +145,11 @@ func (c NDFC) RscGetBulkVrf(ctx context.Context, dg *diag.Diagnostics, ID string
 					continue
 				}
 				log.Printf("Attachment %s added to VRF %s", j, i)
-				if !vrfLevelDep {
+				if !ndVrfs.DeployAllAttachments && !vrfLevelDep {
 					if attachEntry.AttachState == "DEPLOYED" {
-						log.Printf("Attachment %s deployed", j)
 						attachEntry.DeployThisAttachment = true
 					}
+					log.Printf("[DEBUG] Set Attachment level deploy flag %s/%s:%v", i, j, attachEntry.DeployThisAttachment)
 				}
 				//put modified entry back
 				vrfEntry.AttachList[j] = attachEntry
@@ -223,7 +227,7 @@ func (c NDFC) RscCreateBulkVrf(ctx context.Context, dg *diag.Diagnostics, vrfBul
 	}
 
 	//Part 1: Create VRFs
-	ndfcVrfBulkPayload := vrf.FillVrfPayloadFromModel()
+	ndfcVrfBulkPayload := vrf.FillVrfPayloadFromModel(&depMap)
 	//ndfcVrfBulkPayload.Vrfs = vrf.GetVrfValues()
 
 	err = c.vrfCreateBulk(ctx, vrf.FabricName, ndfcVrfBulkPayload)
@@ -236,6 +240,7 @@ func (c NDFC) RscCreateBulkVrf(ctx context.Context, dg *diag.Diagnostics, vrfBul
 	//Part 2: Create Attachments if any
 
 	if vrf.DeployAllAttachments {
+		log.Printf("[DEBUG] DeployAllAttachments flag set")
 		depMap["global"] = append(depMap["global"], "all")
 	}
 	// fill the attachment entries
@@ -407,7 +412,7 @@ func (c NDFC) RscUpdateBulkVrf(ctx context.Context,
 
 	if len(newVrfs.Vrfs) > 0 {
 		tflog.Info(ctx, "Adding VRFs , as part of Bulk Update")
-		newVrfPayload := newVrfs.FillVrfPayloadFromModel()
+		newVrfPayload := newVrfs.FillVrfPayloadFromModel(nil)
 		err := c.vrfCreateBulk(ctx, vrfBulkPlan.FabricName.ValueString(), newVrfPayload)
 		if err != nil {
 			dg.AddError("VRF create failed", err.Error())
