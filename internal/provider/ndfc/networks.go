@@ -68,6 +68,16 @@ func (c *NDFC) RscCreateNetworks(ctx context.Context, dg *diag.Diagnostics, in *
 	if nw.DeployAllAttachments {
 		depMap["global"] = append(depMap["global"], "all")
 	}
+	for i, entry := range nw.Networks {
+		if entry.DeployAttachments {
+			depMap[i] = append(depMap[i], i)
+		}
+		for j, attachEntry := range entry.Attachments {
+			if attachEntry.DeployThisAttachment {
+				depMap[i] = append(depMap[i], j)
+			}
+		}
+	}
 
 	err = c.netAttachmentsAttach(ctx, nw)
 	if err != nil {
@@ -134,8 +144,10 @@ func (c *NDFC) RscGetNetworks(ctx context.Context, dg *diag.Diagnostics, ID stri
 		dg.AddWarning("No Networks found", "No Networks found in NDFC")
 		return nil
 	}
+	globalDep := false
 
 	if _, ok := (*depMap)["global"]; ok {
+		globalDep = true
 		//This cannot be validated - as we don't know if all deployments were ok
 		ndNets.DeployAllAttachments = true
 	}
@@ -151,6 +163,7 @@ func (c *NDFC) RscGetNetworks(ctx context.Context, dg *diag.Diagnostics, ID stri
 				continue
 			}
 			vrfLevelDep := false
+
 			if vl, vlOk := (*depMap)[i]; vlOk {
 				//first element is vrf name if vrf level deploy is set
 				if vl[0] == i {
@@ -164,7 +177,7 @@ func (c *NDFC) RscGetNetworks(ctx context.Context, dg *diag.Diagnostics, ID stri
 					continue
 				}
 				log.Printf("Attachment %s added to Network %s", j, i)
-				if !vrfLevelDep {
+				if !globalDep && !vrfLevelDep {
 					if attachEntry.AttachState == "DEPLOYED" {
 						log.Printf("Attachment %s deployed", j)
 						attachEntry.DeployThisAttachment = true

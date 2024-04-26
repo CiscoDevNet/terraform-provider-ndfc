@@ -8,7 +8,7 @@ export TF_ACC=1
 export TF_LOG=DEBUG
 export TF_ACC_LOG=DEBUG
 export TF_ACC_LOG_PATH=/tmp/terraform-acceptance-tests.log
-
+export NDFC_TEST_CONFIG_FILE=$(pwd)/internal/provider/testing/ndfc_config.yaml
 
 # Run the Terraform acceptance tests
 rm -rf "$TF_ACC_LOG_PATH"

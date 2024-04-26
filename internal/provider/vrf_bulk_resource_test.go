@@ -3,17 +3,12 @@ package provider
 import (
 	"fmt"
 	"regexp"
-	"testing"
-
-	//"github.com/hashicorp/terraform-plugin-framework/resource"
-
-	"github.com/hashicorp/terraform-plugin-framework/path"
-
 	"terraform-provider-ndfc/internal/provider/ndfc"
 	"terraform-provider-ndfc/internal/provider/resources/resource_vrf_bulk"
-
 	helper "terraform-provider-ndfc/internal/provider/testing"
+	"testing"
 
+	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 )
 
@@ -62,7 +57,7 @@ func TestAccNDFCVrfBulkResourceCRUD(t *testing.T) {
 
 					helper.GenerateVrfBulkObject(&vrfScaledBulk, helper.GetConfig().NDFC.Fabric,
 						10, false, false, false, nil)
-					helper.GetTFConfigWithSingleResource(tName, *x, *vrfScaledBulk, &tf_config)
+					helper.GetTFConfigWithSingleResource(tName, *x, []interface{}{vrfScaledBulk}, &tf_config)
 					return *tf_config
 				}(),
 				Check: resource.ComposeTestCheckFunc(VrfBulkModelHelperStateCheck("ndfc_vrf_bulk.vrf_test", *vrfScaledBulk, path.Empty())...),
@@ -75,7 +70,7 @@ func TestAccNDFCVrfBulkResourceCRUD(t *testing.T) {
 
 					helper.IncreaseVrfCount(&vrfScaledBulk,
 						10, false, false, false, nil)
-					helper.GetTFConfigWithSingleResource(tName, *x, *vrfScaledBulk, &tf_config)
+					helper.GetTFConfigWithSingleResource(tName, *x, []interface{}{vrfScaledBulk}, &tf_config)
 					return *tf_config
 				}(),
 				Check: resource.ComposeTestCheckFunc(VrfBulkModelHelperStateCheck("ndfc_vrf_bulk.vrf_test", *vrfScaledBulk, path.Empty())...),
@@ -87,7 +82,7 @@ func TestAccNDFCVrfBulkResourceCRUD(t *testing.T) {
 
 					helper.DeleteVrfs(&vrfScaledBulk,
 						11, 20)
-					helper.GetTFConfigWithSingleResource(tName, *x, *vrfScaledBulk, &tf_config)
+					helper.GetTFConfigWithSingleResource(tName, *x, []interface{}{vrfScaledBulk}, &tf_config)
 					return *tf_config
 				}(),
 				Check: resource.ComposeTestCheckFunc(VrfBulkModelHelperStateCheck("ndfc_vrf_bulk.vrf_test", *vrfScaledBulk, path.Empty())...),
@@ -98,8 +93,8 @@ func TestAccNDFCVrfBulkResourceCRUD(t *testing.T) {
 					*stepCount++
 					tName := fmt.Sprintf("%s_%d", t.Name(), *stepCount)
 
-					(*x)["RscName"] = "vrf_test_1"
-					helper.GetTFConfigWithSingleResource(tName, *x, *vrfScaledBulk, &tf_config)
+					(*x)["RscName"] = "vrf_test,vrf_test_1"
+					helper.GetTFConfigWithSingleResource(tName, *x, []interface{}{vrfScaledBulk, vrfScaledBulk}, &tf_config)
 					return *tf_config
 				}(),
 				ExpectError: regexp.MustCompile(".*VRFs exist.*"),
@@ -117,7 +112,7 @@ func TestAccNDFCVrfBulkResourceCRUD(t *testing.T) {
 						"loopback_routing_tag": 2459,
 						"mtu":                  9100,
 						"max_bgp_paths":        2,
-						"ipv6_link_local":      "fe80::9afb",
+						"ipv6_link_local":      "true",
 					})
 					helper.ModifyVrfBulkObject(&vrfScaledBulk, 10, map[string]interface{}{
 						"vlan_id":              110,
@@ -125,12 +120,14 @@ func TestAccNDFCVrfBulkResourceCRUD(t *testing.T) {
 						"loopback_routing_tag": 2459,
 						"mtu":                  9100,
 						"max_bgp_paths":        2,
-						"ipv6_link_local":      "fe80::9afb",
+						"ipv6_link_local":      "true",
 					})
+					(*x)["RscName"] = "vrf_test"
 
-					helper.GetTFConfigWithSingleResource(tName, *x, *vrfScaledBulk, &tf_config)
+					helper.GetTFConfigWithSingleResource(tName, *x, []interface{}{vrfScaledBulk}, &tf_config)
 					return *tf_config
 				}(),
+				Check: resource.ComposeTestCheckFunc(VrfBulkModelHelperStateCheck("ndfc_vrf_bulk.vrf_test", *vrfScaledBulk, path.Empty())...),
 			},
 		}})
 }
@@ -163,7 +160,7 @@ func TestAccNDFCVrfBulkResourceAttachmentCRUD(t *testing.T) {
 					tf_config := new(string)
 					helper.GenerateVrfBulkObject(&vrfScaledBulk, helper.GetConfig().NDFC.Fabric,
 						20, false, false, false, []string{helper.GetConfig().NDFC.Switches[0], helper.GetConfig().NDFC.Switches[1]})
-					helper.GetTFConfigWithSingleResource(tName, *x, *vrfScaledBulk, &tf_config)
+					helper.GetTFConfigWithSingleResource(tName, *x, []interface{}{vrfScaledBulk}, &tf_config)
 					return *tf_config
 				}(),
 				Check: resource.ComposeTestCheckFunc(VrfBulkModelHelperStateCheck("ndfc_vrf_bulk.vrf_test", *vrfScaledBulk, path.Empty())...),
@@ -174,7 +171,7 @@ func TestAccNDFCVrfBulkResourceAttachmentCRUD(t *testing.T) {
 					tName := fmt.Sprintf("%s_%d", t.Name(), *stepCount)
 					tf_config := new(string)
 					helper.VrfAttachmentsMod(&vrfScaledBulk, 1, len(vrfScaledBulk.Vrfs), nil, "", nil)
-					helper.GetTFConfigWithSingleResource(tName, *x, *vrfScaledBulk, &tf_config)
+					helper.GetTFConfigWithSingleResource(tName, *x, []interface{}{vrfScaledBulk}, &tf_config)
 					return *tf_config
 				}(),
 				Check: resource.ComposeTestCheckFunc(VrfBulkModelHelperStateCheck("ndfc_vrf_bulk.vrf_test", *vrfScaledBulk, path.Empty())...),
@@ -186,7 +183,7 @@ func TestAccNDFCVrfBulkResourceAttachmentCRUD(t *testing.T) {
 					tName := fmt.Sprintf("%s_%d", t.Name(), *stepCount)
 					tf_config := new(string)
 					helper.VrfAttachmentsMod(&vrfScaledBulk, 1, len(vrfScaledBulk.Vrfs), []string{helper.GetConfig().NDFC.Switches[0], helper.GetConfig().NDFC.Switches[1]}, "", nil)
-					helper.GetTFConfigWithSingleResource(tName, *x, *vrfScaledBulk, &tf_config)
+					helper.GetTFConfigWithSingleResource(tName, *x, []interface{}{vrfScaledBulk}, &tf_config)
 					return *tf_config
 				}(),
 				Check: resource.ComposeTestCheckFunc(VrfBulkModelHelperStateCheck("ndfc_vrf_bulk.vrf_test", *vrfScaledBulk, path.Empty())...),
@@ -198,7 +195,7 @@ func TestAccNDFCVrfBulkResourceAttachmentCRUD(t *testing.T) {
 					tName := fmt.Sprintf("%s_%d", t.Name(), *stepCount)
 					tf_config := new(string)
 					helper.VrfAttachmentsMod(&vrfScaledBulk, 1, len(vrfScaledBulk.Vrfs)/2, helper.GetConfig().NDFC.Switches, "", nil)
-					helper.GetTFConfigWithSingleResource(tName, *x, *vrfScaledBulk, &tf_config)
+					helper.GetTFConfigWithSingleResource(tName, *x, []interface{}{vrfScaledBulk}, &tf_config)
 					return *tf_config
 				}(),
 				Check: resource.ComposeTestCheckFunc(VrfBulkModelHelperStateCheck("ndfc_vrf_bulk.vrf_test", *vrfScaledBulk, path.Empty())...),
@@ -213,7 +210,7 @@ func TestAccNDFCVrfBulkResourceAttachmentCRUD(t *testing.T) {
 
 					helper.VrfAttachmentsMod(&vrfScaledBulk, 1, len(vrfScaledBulk.Vrfs)/2, []string{helper.GetConfig().NDFC.Switches[0], helper.GetConfig().NDFC.Switches[1]}, "", nil)
 					helper.VrfAttachmentsMod(&vrfScaledBulk, (len(vrfScaledBulk.Vrfs)/2)+1, len(vrfScaledBulk.Vrfs)/2, helper.GetConfig().NDFC.Switches, "", nil)
-					helper.GetTFConfigWithSingleResource(tName, *x, *vrfScaledBulk, &tf_config)
+					helper.GetTFConfigWithSingleResource(tName, *x, []interface{}{vrfScaledBulk}, &tf_config)
 					return *tf_config
 				}(),
 				Check: resource.ComposeTestCheckFunc(VrfBulkModelHelperStateCheck("ndfc_vrf_bulk.vrf_test", *vrfScaledBulk, path.Empty())...),
@@ -238,7 +235,7 @@ func TestAccNDFCVrfBulkResourceAttachmentCRUD(t *testing.T) {
 						"loopback_ipv4": "10.1.1.10",
 						"loopback_ipv6": "2001:db8::610",
 					})
-					helper.GetTFConfigWithSingleResource(tName, *x, *vrfScaledBulk, &tf_config)
+					helper.GetTFConfigWithSingleResource(tName, *x, []interface{}{vrfScaledBulk}, &tf_config)
 					return *tf_config
 				}(),
 				Check: resource.ComposeTestCheckFunc(VrfBulkModelHelperStateCheck("ndfc_vrf_bulk.vrf_test", *vrfScaledBulk, path.Empty())...),
@@ -276,7 +273,7 @@ func TestAccNDFCVrfBulkGlobalDeploy(t *testing.T) {
 					tf_config := new(string)
 					helper.GenerateVrfBulkObject(&vrfScaledBulk, helper.GetConfig().NDFC.Fabric,
 						5, true, false, false, []string{helper.GetConfig().NDFC.Switches[0], helper.GetConfig().NDFC.Switches[1]})
-					helper.GetTFConfigWithSingleResource(tName, *x, *vrfScaledBulk, &tf_config)
+					helper.GetTFConfigWithSingleResource(tName, *x, []interface{}{vrfScaledBulk}, &tf_config)
 					return *tf_config
 				}(),
 				Check: resource.ComposeTestCheckFunc(VrfBulkModelHelperStateCheck("ndfc_vrf_bulk.vrf_test", *vrfScaledBulk, path.Empty())...),
@@ -288,7 +285,7 @@ func TestAccNDFCVrfBulkGlobalDeploy(t *testing.T) {
 					tName := fmt.Sprintf("%s_%d", t.Name(), *stepCount)
 					tf_config := new(string)
 					helper.VrfAttachmentsMod(&vrfScaledBulk, 1, len(vrfScaledBulk.Vrfs), helper.GetConfig().NDFC.Switches, "", nil)
-					helper.GetTFConfigWithSingleResource(tName, *x, *vrfScaledBulk, &tf_config)
+					helper.GetTFConfigWithSingleResource(tName, *x, []interface{}{vrfScaledBulk}, &tf_config)
 					return *tf_config
 				}(),
 				Check: resource.ComposeTestCheckFunc(VrfBulkModelHelperStateCheck("ndfc_vrf_bulk.vrf_test", *vrfScaledBulk, path.Empty())...),
@@ -327,7 +324,7 @@ func TestAccNDFCVrfBulkVrfLevelDeploy(t *testing.T) {
 					tf_config := new(string)
 					helper.GenerateVrfBulkObject(&vrfScaledBulk, helper.GetConfig().NDFC.Fabric,
 						10, false, true, false, []string{helper.GetConfig().NDFC.Switches[0], helper.GetConfig().NDFC.Switches[1]})
-					helper.GetTFConfigWithSingleResource(tName, *x, *vrfScaledBulk, &tf_config)
+					helper.GetTFConfigWithSingleResource(tName, *x, []interface{}{vrfScaledBulk}, &tf_config)
 					return *tf_config
 				}(),
 				Check: resource.ComposeTestCheckFunc(VrfBulkModelHelperStateCheck("ndfc_vrf_bulk.vrf_test", *vrfScaledBulk, path.Empty())...),
@@ -339,7 +336,7 @@ func TestAccNDFCVrfBulkVrfLevelDeploy(t *testing.T) {
 					tName := fmt.Sprintf("%s_%d", t.Name(), *stepCount)
 					tf_config := new(string)
 					helper.VrfAttachmentsMod(&vrfScaledBulk, 1, len(vrfScaledBulk.Vrfs), helper.GetConfig().NDFC.Switches, "", nil)
-					helper.GetTFConfigWithSingleResource(tName, *x, *vrfScaledBulk, &tf_config)
+					helper.GetTFConfigWithSingleResource(tName, *x, []interface{}{vrfScaledBulk}, &tf_config)
 					return *tf_config
 				}(),
 				Check: resource.ComposeTestCheckFunc(VrfBulkModelHelperStateCheck("ndfc_vrf_bulk.vrf_test", *vrfScaledBulk, path.Empty())...),
@@ -377,7 +374,7 @@ func TestAccNDFCVrfBulkVrfAttachLevelDeploy(t *testing.T) {
 					tf_config := new(string)
 					helper.GenerateVrfBulkObject(&vrfScaledBulk, helper.GetConfig().NDFC.Fabric,
 						5, false, false, true, []string{helper.GetConfig().NDFC.Switches[0], helper.GetConfig().NDFC.Switches[1]})
-					helper.GetTFConfigWithSingleResource(tName, *x, *vrfScaledBulk, &tf_config)
+					helper.GetTFConfigWithSingleResource(tName, *x, []interface{}{vrfScaledBulk}, &tf_config)
 					return *tf_config
 				}(),
 				Check: resource.ComposeTestCheckFunc(VrfBulkModelHelperStateCheck("ndfc_vrf_bulk.vrf_test", *vrfScaledBulk, path.Empty())...),
