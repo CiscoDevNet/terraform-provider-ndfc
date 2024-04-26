@@ -70,7 +70,7 @@ func ModifyVrfBulkObject(vrfs **resource_vrf_bulk.NDFCVrfBulkModel, vrfNo int, v
 	vrfBulk := *vrfs
 	vrfName := GetConfig().NDFC.VrfPrefix + strconv.Itoa(vrfNo)
 	vrf, ok := vrfBulk.Vrfs[vrfName]
-	if !ok {
+	if ok {
 		for key, value := range values {
 			switch key {
 			case "vrf_description":
@@ -97,6 +97,7 @@ func ModifyVrfBulkObject(vrfs **resource_vrf_bulk.NDFCVrfBulkModel, vrfNo int, v
 				*vrf.VrfId = int64(value.(int))
 			}
 		}
+		vrfBulk.Vrfs[vrfName] = vrf
 	}
 
 }
@@ -130,8 +131,8 @@ func IncreaseVrfCount(vrf **resource_vrf_bulk.NDFCVrfBulkModel, vrfToAdd int,
 
 func AddAttachments(vrfBulk *resource_vrf_bulk.NDFCVrfBulkModel, serials []string, deployNeeded bool, start, end int) *resource_vrf_bulk.NDFCVrfBulkModel {
 	for vrfName, vrf := range vrfBulk.Vrfs {
-		//vrf_acc_<id>
-		id, err := strconv.Atoi(strings.Split(vrfName, "_")[2])
+		ids := strings.Split(vrfName, "_")
+		id, err := strconv.Atoi(ids[len(ids)-1])
 		if err != nil {
 			panic(err)
 		}

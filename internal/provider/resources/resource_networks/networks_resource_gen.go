@@ -97,6 +97,7 @@ func NetworksResourceSchema(ctx context.Context) schema.Schema {
 									"switch_ports": schema.SetAttribute{
 										ElementType:         types.StringType,
 										Optional:            true,
+										Computed:            true,
 										Description:         "List of switch ports",
 										MarkdownDescription: "List of switch ports",
 									},

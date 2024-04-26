@@ -391,8 +391,12 @@ func portListDiff(plan types.CSVString, state types.CSVString) (types.CSVString,
 
 func processPortList(attachEntry *rna.NDFCAttachmentsValue) {
 	//Fill SwitchPorts  and TorPorts from PortNames
-	attachEntry.SwitchPorts = append(attachEntry.SwitchPorts, strings.Split(attachEntry.PortNames, ",")...)
-
+	if attachEntry.PortNames == "" {
+		attachEntry.SwitchPorts = nil
+		attachEntry.TorPorts = nil
+	} else {
+		attachEntry.SwitchPorts = append(attachEntry.SwitchPorts, strings.Split(attachEntry.PortNames, ",")...)
+	}
 }
 
 func processPortListOrder(portList *types.CSVString, order []string) {

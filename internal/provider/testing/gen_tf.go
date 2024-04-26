@@ -6,29 +6,35 @@ import (
 	"log"
 	"os"
 	"strings"
+	"terraform-provider-ndfc/internal/provider/resources/resource_networks"
 	"terraform-provider-ndfc/internal/provider/resources/resource_vrf_bulk"
 	"text/template"
 	"time"
 )
 
-func GetTFConfigWithSingleResource(tt string, cfg map[string]string, vrfBulk resource_vrf_bulk.NDFCVrfBulkModel, out **string) {
+func GetTFConfigWithSingleResource(tt string, cfg map[string]string, rscs []interface{}, out **string) {
 	x := new(string)
 	args := map[string]interface{}{
 		"User":     cfg["User"],
 		"Password": cfg["Password"],
 		"Host":     cfg["Host"],
 		"Insecure": cfg["Insecure"],
-		"Vrf":      &vrfBulk,
 		"RscType":  cfg["RscType"],
 		"RscName":  cfg["RscName"],
 	}
+	functions := template.FuncMap{
+		"add": func(a, b int) int {
+			return a + b
+		},
+	}
+
 	root_path, _ := os.Getwd()
 	tmpl, err := os.ReadFile(root_path + "/testing/config_scale.gotmpl")
 	if err != nil {
 		panic(err)
 	}
 
-	t, err := template.New("config").Parse(string(tmpl))
+	t, err := template.New("config").Funcs(functions).Parse(string(tmpl))
 	if err != nil {
 		panic(err)
 	}
@@ -42,9 +48,36 @@ func GetTFConfigWithSingleResource(tt string, cfg map[string]string, vrfBulk res
 		panic(err)
 	}
 
-	err = t.ExecuteTemplate(&output, "NDFC_VRF_RESOURCE", args)
-	if err != nil {
-		panic(err)
+	if len(rscs) == 0 {
+		panic("Empty arr")
+	}
+	vrfRscName := ""
+	rsNames := strings.Split(cfg["RscName"], ",")
+	for i, rsc := range rscs {
+
+		vrfBulk, ok := rsc.(*resource_vrf_bulk.NDFCVrfBulkModel)
+		if ok {
+			args["Vrf"] = vrfBulk
+			args["RscName"] = rsNames[i]
+			args["RscType"] = "vrf_bulk"
+			vrfRscName = rsNames[i]
+			err = t.ExecuteTemplate(&output, "NDFC_VRF_RESOURCE", args)
+			if err != nil {
+				panic(err)
+			}
+		}
+		nwRsc, ok := rsc.(*resource_networks.NDFCNetworksModel)
+		if ok {
+			args["Network"] = nwRsc
+			args["RscName"] = rsNames[i]
+			args["RscType"] = "networks"
+			args["VrfRscName"] = vrfRscName
+			err = t.ExecuteTemplate(&output, "NDFC_NETWORK_RESOURCE", args)
+			if err != nil {
+				panic(err)
+			}
+		}
+
 	}
 
 	log.Println(output.String())
@@ -98,7 +131,7 @@ func GetTFConfigWithMultipleResource(tt string, cfg map[string]string, vrfBulk *
 		panic(err)
 	}
 	rscNames := strings.Split(cfg["RscName"], ",")
-	
+
 	for i := range *vrfBulk {
 		args["Vrf"] = &(*vrfBulk)[i]
 		args["RscName"] = rscNames[i]
