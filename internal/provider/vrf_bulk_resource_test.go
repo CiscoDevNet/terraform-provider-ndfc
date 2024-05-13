@@ -421,7 +421,7 @@ func TestAccNDFCMultiResourceWithDeploy(t *testing.T) {
 							(*x)["RscName"] = fmt.Sprintf("%s,vrf_test_%d", (*x)["RscName"], i+1)
 						}
 					}
-					helper.GetTFConfigWithMultipleResource(tName, *x, &vrfScaledBulk, &tf_config)
+					helper.GetVRFTFConfigWithMultipleResource(tName, *x, &vrfScaledBulk, &tf_config)
 					return *tf_config
 				}(),
 				Check: func() resource.TestCheckFunc {
@@ -460,6 +460,6 @@ func testGenerateVrfMultipleResource(count int, vrfName string, rscName string) 
 			(*x)["RscName"] = (*x)["RscName"] + "," + fmt.Sprintf("vrf_test_%d", i+1)
 		}
 	}
-	helper.GetTFConfigWithMultipleResource("multiple_rsc_", *x, &vrfScaledBulk, &tf_config)
+	helper.GetVRFTFConfigWithMultipleResource("multiple_rsc_", *x, &vrfScaledBulk, &tf_config)
 	return *tf_config
 }

@@ -284,6 +284,7 @@ func (v *NetworksValue) SetValue(jsonData *NDFCNetworksValue) diag.Diagnostics {
 			listData[i].state = attr.ValueStateKnown
 		}
 		v.DhcpRelayServers, err = types.ListValueFrom(context.Background(), DhcpRelayServersValue{}.Type(context.Background()), listData)
+
 		if err != nil {
 			return err
 		}
@@ -565,6 +566,7 @@ func (v NetworksModel) GetModelData() *NDFCNetworksModel {
 		}
 		for k1, ele1 := range elements1 {
 			data1 := new(NDFCNetworksValue)
+
 			// filter_this_value | Bool| []| true
 			// network_name | String| []| true
 			// fabric_name | String| []| true
@@ -746,6 +748,7 @@ func (v NetworksModel) GetModelData() *NDFCNetworksModel {
 			if !ele1.DhcpRelayServers.IsNull() && !ele1.DhcpRelayServers.IsUnknown() {
 
 				data1.NetworkTemplateConfig.DhcpRelayServers = make([]NDFCDhcpRelayServersValue, len(ele1.DhcpRelayServers.Elements()))
+
 				elements2 := make([]DhcpRelayServersValue, len(ele1.DhcpRelayServers.Elements()))
 				diag := ele1.DhcpRelayServers.ElementsAs(context.Background(), &elements2, false)
 				if diag.HasError() {
@@ -753,6 +756,7 @@ func (v NetworksModel) GetModelData() *NDFCNetworksModel {
 				}
 				for i2, ele2 := range elements2 {
 					data2 := new(NDFCDhcpRelayServersValue)
+
 					if !ele2.Address.IsNull() && !ele2.Address.IsUnknown() {
 						data2.Address = ele2.Address.ValueString()
 					} else {
@@ -855,6 +859,7 @@ func (v NetworksModel) GetModelData() *NDFCNetworksModel {
 				elements2 := make(map[string]AttachmentsValue, len(ele1.Attachments.Elements()))
 
 				data1.Attachments = make(map[string]resource_network_attachments.NDFCAttachmentsValue)
+
 				diag := ele1.Attachments.ElementsAs(context.Background(), &elements2, false)
 				if diag != nil {
 					panic(diag)

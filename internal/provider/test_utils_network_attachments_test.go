@@ -8,7 +8,6 @@ import (
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 )
 
-// Inside TEST_HELPER_STATE_CHECK
 func NetworkAttachmentsModelHelperStateCheck(RscName string, c resource_network_attachments.NDFCNetworkAttachmentsModel, attrPath path.Path) []resource.TestCheckFunc {
 	ret := []resource.TestCheckFunc{}
 
@@ -19,7 +18,6 @@ func NetworkAttachmentsModelHelperStateCheck(RscName string, c resource_network_
 	return ret
 }
 
-// Inside TEST_HELPER_STATE_CHECK
 func AttachmentsValueHelperStateCheck(RscName string, c resource_network_attachments.NDFCAttachmentsValue, attrPath path.Path) []resource.TestCheckFunc {
 	ret := []resource.TestCheckFunc{}
 
@@ -55,7 +53,6 @@ func AttachmentsValueHelperStateCheck(RscName string, c resource_network_attachm
 	return ret
 }
 
-// Inside TEST_HELPER_STATE_CHECK
 func NetworkAttachmentsValueHelperStateCheck(RscName string, c resource_network_attachments.NDFCNetworkAttachmentsValue, attrPath path.Path) []resource.TestCheckFunc {
 	ret := []resource.TestCheckFunc{}
 

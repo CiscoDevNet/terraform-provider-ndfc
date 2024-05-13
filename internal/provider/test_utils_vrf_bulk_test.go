@@ -8,7 +8,6 @@ import (
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 )
 
-// Inside TEST_HELPER_STATE_CHECK
 func VrfBulkModelHelperStateCheck(RscName string, c resource_vrf_bulk.NDFCVrfBulkModel, attrPath path.Path) []resource.TestCheckFunc {
 	ret := []resource.TestCheckFunc{}
 
@@ -27,7 +26,6 @@ func VrfBulkModelHelperStateCheck(RscName string, c resource_vrf_bulk.NDFCVrfBul
 	return ret
 }
 
-// Inside TEST_HELPER_STATE_CHECK
 func VrfsValueHelperStateCheck(RscName string, c resource_vrf_bulk.NDFCVrfsValue, attrPath path.Path) []resource.TestCheckFunc {
 	ret := []resource.TestCheckFunc{}
 

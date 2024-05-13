@@ -6,6 +6,7 @@ import (
 	"log"
 	"os"
 	"strings"
+	"terraform-provider-ndfc/internal/provider/resources/resource_interface_common"
 	"terraform-provider-ndfc/internal/provider/resources/resource_networks"
 	"terraform-provider-ndfc/internal/provider/resources/resource_vrf_bulk"
 	"text/template"
@@ -26,15 +27,31 @@ func GetTFConfigWithSingleResource(tt string, cfg map[string]string, rscs []inte
 		"add": func(a, b int) int {
 			return a + b
 		},
+		"deref": func(a *int64) int64 {
+			if a == nil {
+				return 0
+			}
+			return *a
+		},
 	}
 
 	root_path, _ := os.Getwd()
-	tmpl, err := os.ReadFile(root_path + "/testing/config_scale.gotmpl")
+	tmpl := bytes.Buffer{}
+	files, err := os.ReadDir(root_path + "/testing/")
 	if err != nil {
-		panic(err)
+		log.Panicf("Err reading dir %v", err)
+	}
+	for _, file := range files {
+		if strings.Contains(file.Name(), ".gotmpl") {
+			tmplFile, err := os.ReadFile(root_path + "/testing/" + file.Name())
+			if err != nil {
+				log.Panicf("Err reading file %v", err)
+			}
+			tmpl.Write(tmplFile)
+		}
 	}
 
-	t, err := template.New("config").Funcs(functions).Parse(string(tmpl))
+	t, err := template.New("config").Funcs(functions).Parse(tmpl.String())
 	if err != nil {
 		panic(err)
 	}
@@ -78,8 +95,18 @@ func GetTFConfigWithSingleResource(tt string, cfg map[string]string, rscs []inte
 			}
 		}
 
-	}
+		ifRsc, ok := rsc.(*resource_interface_common.NDFCInterfaceCommonModel)
+		if ok {
+			args["Interface"] = ifRsc
+			args["RscName"] = rsNames[i]
+			args["RscType"] = "interface_" + cfg["RscSubType"]
+			err = t.ExecuteTemplate(&output, "NDFC_INT_RSC", args)
+			if err != nil {
+				panic(err)
+			}
+		}
 
+	}
 	log.Println(output.String())
 	*x = output.String()
 	if tmpDir == "" {
@@ -99,7 +126,7 @@ func GetTFConfigWithSingleResource(tt string, cfg map[string]string, rscs []inte
 	*out = x
 }
 
-func GetTFConfigWithMultipleResource(tt string, cfg map[string]string, vrfBulk *[]*resource_vrf_bulk.NDFCVrfBulkModel, out **string) {
+func GetVRFTFConfigWithMultipleResource(tt string, cfg map[string]string, vrfBulk *[]*resource_vrf_bulk.NDFCVrfBulkModel, out **string) {
 	x := new(string)
 	args := map[string]interface{}{
 		"User":     cfg["User"],
@@ -110,13 +137,28 @@ func GetTFConfigWithMultipleResource(tt string, cfg map[string]string, vrfBulk *
 		"RscType":  cfg["RscType"],
 		"RscName":  cfg["RscName"],
 	}
-	root_path, _ := os.Getwd()
-	tmpl, err := os.ReadFile(root_path + "/testing/config_scale.gotmpl")
-	if err != nil {
-		panic(err)
-	}
 
-	t, err := template.New("config").Parse(string(tmpl))
+	functions := template.FuncMap{
+		"add": func(a, b int) int {
+			return a + b
+		},
+	}
+	tmpl := bytes.Buffer{}
+	root_path, _ := os.Getwd()
+	files, err := os.ReadDir(root_path + "/testing/")
+	if err != nil {
+		log.Panicf("Err reading dir %v", err)
+	}
+	for _, file := range files {
+		if strings.Contains(file.Name(), ".gotmpl") {
+			tmplFile, err := os.ReadFile(root_path + "/testing/" + file.Name())
+			if err != nil {
+				log.Panicf("Err reading file %v", err)
+			}
+			tmpl.Write(tmplFile)
+		}
+	}
+	t, err := template.New("config").Funcs(functions).Parse(tmpl.String())
 	if err != nil {
 		panic(err)
 	}
