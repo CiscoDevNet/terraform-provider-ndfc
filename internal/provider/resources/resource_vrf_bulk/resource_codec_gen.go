@@ -509,6 +509,7 @@ func (v VrfBulkModel) GetModelData() *NDFCVrfBulkModel {
 		}
 		for k1, ele1 := range elements1 {
 			data1 := new(NDFCVrfsValue)
+
 			// id | Int64| []| true
 			// filter_this_value | Bool| []| true
 			// vrf_name | String| []| true
@@ -843,6 +844,7 @@ func (v VrfBulkModel) GetModelData() *NDFCVrfBulkModel {
 				elements2 := make(map[string]AttachListValue, len(ele1.AttachList.Elements()))
 
 				data1.AttachList = make(map[string]resource_vrf_attachments.NDFCAttachListValue)
+
 				diag := ele1.AttachList.ElementsAs(context.Background(), &elements2, false)
 				if diag != nil {
 					panic(diag)

@@ -86,8 +86,10 @@ func (p *ndfcProvider) Configure(ctx context.Context, req provider.ConfigureRequ
 		)
 		return
 	}
+	// For creating mutexes
 	ndfc.NewResource(ndfc.ResourceVrfBulk)
 	ndfc.NewResource(ndfc.ResourceNetworks)
+	ndfc.NewResource(ndfc.ResourceInterfaces)
 
 	// Make the HashiCups client available during DataSource and Resource
 	// type Configure methods.
@@ -109,5 +111,10 @@ func (p *ndfcProvider) DataSources(ctx context.Context) []func() datasource.Data
 }
 
 func (p *ndfcProvider) Resources(ctx context.Context) []func() resource.Resource {
-	return []func() resource.Resource{NewVrfBulkResource, NewNetworksResource}
+	return []func() resource.Resource{
+		NewVrfBulkResource,
+		NewNetworksResource,
+		NewInterfaceEthernetResource,
+		NewInterfaceLoopbackResource,
+	}
 }

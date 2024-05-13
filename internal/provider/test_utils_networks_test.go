@@ -8,7 +8,6 @@ import (
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 )
 
-// Inside TEST_HELPER_STATE_CHECK
 func NetworksModelHelperStateCheck(RscName string, c resource_networks.NDFCNetworksModel, attrPath path.Path) []resource.TestCheckFunc {
 	ret := []resource.TestCheckFunc{}
 
@@ -27,7 +26,6 @@ func NetworksModelHelperStateCheck(RscName string, c resource_networks.NDFCNetwo
 	return ret
 }
 
-// Inside TEST_HELPER_STATE_CHECK
 func DhcpRelayServersValueHelperStateCheck(RscName string, c resource_networks.NDFCDhcpRelayServersValue, attrPath path.Path) []resource.TestCheckFunc {
 	ret := []resource.TestCheckFunc{}
 
@@ -40,7 +38,6 @@ func DhcpRelayServersValueHelperStateCheck(RscName string, c resource_networks.N
 	return ret
 }
 
-// Inside TEST_HELPER_STATE_CHECK
 func NetworksValueHelperStateCheck(RscName string, c resource_networks.NDFCNetworksValue, attrPath path.Path) []resource.TestCheckFunc {
 	ret := []resource.TestCheckFunc{}
 

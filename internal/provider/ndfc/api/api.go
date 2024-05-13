@@ -102,3 +102,13 @@ func (c NDFCAPICommon) Delete() (gjson.Result, error) {
 	}
 	return res, nil
 }
+
+func (c NDFCAPICommon) DeleteWithPayload(payload []byte) (gjson.Result, error) {
+	c.NDFCAPI.GetLock().Lock()
+	defer c.NDFCAPI.GetLock().Unlock()
+	res, err := c.client.Delete(c.NDFCAPI.DeleteUrl(), string(payload))
+	if err != nil {
+		return res, err
+	}
+	return res, nil
+}
