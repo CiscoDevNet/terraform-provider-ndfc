@@ -1,0 +1,230 @@
+---
+# Master list of attributes for all interfaces
+resource: 
+  name: interface_common
+  generate_tf_resource: false
+  inherited_model: true
+  attributes:
+    - model_name: id
+      tf_name: id
+      type: String
+      description: "Unique identifier for the interface"
+      example: 1
+      computed: true
+      id: true
+    - model_name: policy
+      tf_name: policy
+      type: String
+      default_value: int_trunk_host
+      validator: OneOf("int_trunk_host", "int_access_host")
+      description: "Name of the policy. Examples: `int_trunk_host`, `int_access_host`"
+      example: int_access_host
+    - model_name: deploy
+      tf_name: deploy
+      type: Bool
+      default_value: false
+      payload_hide: true
+      description: "Deploy the configuration"
+      example: true
+      ndfc_type: bool
+    - model_name: serial_number
+      tf_name: serial_number
+      type: String
+      description: Serial number of switch to configure
+      example: 9DBYO6WQJ46
+      payload_hide: true
+      tf_requires_replace: true
+      validator: ConflictsWith(path.Expressions {path.MatchRoot("interfaces").AtAnyMapKey().AtName("serial_number")}...)
+    - model_name: interfaces
+      tf_name: interfaces
+      bulk: true
+      filtered: true
+      type: Map
+      mandatory: true
+      description: "interfaces to configure"
+      attributes:
+      - model_name: filterThisValue
+        tf_name: filter_this_value
+        type: Bool
+        tf_hide: true
+        payload_hide: true
+      - model_name: serialNumber
+        tf_name: serial_number
+        type: String
+        description: Serial number of switch to configure
+        example: 9DBYO6WQJ46
+      - &ifName
+        model_name: ifName
+        tf_name: interface_name
+        type: String
+        description: "Name of the Interface. Example: `Ethernet1/3`"
+        example: Ethernet1/13
+        mandatory: true
+        requires_replace: true
+      - &ifType
+        model_name: interfaceType
+        tf_name: interface_type
+        tf_hide: true
+        type: String
+        description: "Type of interface. Examples: `ethernet`, `port-channel`"
+        example: ethernet
+        validator: OneOf("ethernet", "port-channel", "loopback", "vlan", "mgmt", "port-channel-sub")
+      - <<: *ifName
+        tf_hide: true
+        payload_hide: false
+        model_name: INTF_NAME
+        ndfc_nested: [nvPairs]
+      - model_name: ADMIN_STATE
+        ndfc_nested: [nvPairs]
+        tf_name: admin_state
+        type: Bool
+        model_type_string: true
+        default_value: true
+        description: Enable or disable the interface
+        example: false
+      - model_name: CONF
+        ndfc_nested: [nvPairs]
+        tf_name: freeform_config
+        type: String
+        description: Additional CLI for the interface
+        default_value: ""
+        example: delay 200
+      - model_name: DESC
+        ndfc_nested: [nvPairs]
+        tf_name: interface_description
+        type: String
+        description: Interface description
+        example: My interface description
+      - model_name: INTF_VRF
+        ndfc_nested: [nvPairs]
+        tf_name: vrf
+        type: String
+        description: VRF name
+        example: my_vrf
+        default_value: default
+      - model_name: IP
+        ndfc_nested: [nvPairs]
+        tf_name: ipv4_address
+        type: String
+        description: IPv4 address
+        example:
+      - model_name: V6IP
+        ndfc_nested: [nvPairs]
+        tf_name: ipv6_address
+        type: String
+        description: IPv6 address
+        example:
+      - model_name: ROUTE_MAP_TAG
+        ndfc_nested: [nvPairs]
+        tf_name: route_map_tag
+        type: String
+        description: Route map tag
+        example: my_route_map
+        default_value: 12345
+      - model_name: BPDUGUARD_ENABLED
+        ndfc_nested: [nvPairs]
+        tf_name: bpdu_guard
+        type: String
+        default_value: "true"
+        validator: OneOf("true", "false", "no")
+        enum_values: ["true", "false", "no"]
+        description: "Enable spanning-tree bpduguard: true='enable', false='disable', no='return to default settings'"
+        example: true
+      - model_name: PORTTYPE_FAST_ENABLED
+        ndfc_nested: [nvPairs]
+        tf_name: port_type_fast
+        type: Bool
+        model_type_string: true
+        default_value: true
+        description: Enable spanning-tree edge port behavior
+        example: false
+      - model_name: MTU
+        ndfc_nested: [nvPairs]
+        tf_name: mtu
+        type: String
+        enum_values: [default,jumbo]
+        default_value: jumbo
+        description: MTU for the interface
+        example: default
+      - model_name: SPEED
+        ndfc_nested: [nvPairs]
+        tf_name: speed
+        type: String
+        validator: OneOf("Auto","10Mb","100Mb","1Gb","2.5Gb","5Gb","10Gb","25Gb","40Gb","50Gb","100Gb","200Gb","400Gb")
+        enum_values: [Auto,10Mb,100Mb,1Gb,2.5Gb,5Gb,10Gb,25Gb,40Gb,50Gb,100Gb,200Gb,400Gb]
+        default_value: Auto
+        description: Interface speed
+        example: Auto
+      - model_name: ACCESS_VLAN
+        ndfc_nested: [nvPairs]
+        tf_name: access_vlan
+        type: Int64
+        ndfc_type: string
+        model_type_string: true
+        min_int: 1
+        max_int: 4094
+        validator: Between(1, 4094)
+        description: Access VLAN ID
+        example: 500
+      - model_name: ENABLE_ORPHAN_PORT
+        ndfc_nested: [nvPairs]
+        tf_name: orphan_port
+        type: Bool
+        model_type_string: true
+        default_value: false
+        description: If enabled, configure the interface as a vPC orphan port to be suspended by the secondary peer in vPC failures
+        example: false
+      - model_name: PTP
+        ndfc_nested: [nvPairs]
+        tf_name: ptp
+        type: Bool
+        model_type_string: true
+        default_value: false
+        description: Enable PTP
+        example: false
+      - model_name: ENABLE_NETFLOW
+        ndfc_nested: [nvPairs]
+        tf_name: netflow
+        type: Bool
+        model_type_string: true
+        default_value: false
+        description: Netflow is supported only if it is enabled on fabric
+        example: false
+      - model_name: NETFLOW_MONITOR
+        ndfc_nested: [nvPairs]
+        tf_name: netflow_monitor
+        type: String
+        description: Provide the Layer 2 Monitor Name
+        default_value: ""
+        example: MON1
+        exclude_test: true
+      - model_name: NETFLOW_SAMPLER
+        ndfc_nested: [nvPairs]
+        tf_name: netflow_sampler
+        type: String
+        description: Netflow sampler name, applicable to N7K only
+        example: SAMPLER1
+        exclude_test: true
+        default_value: ""
+      - model_name: ALLOWED_VLANS
+        ndfc_nested: [nvPairs]
+        tf_name: allowed_vlans
+        type: String
+        description: Allowed vlans for the ethernet interface. Allowed values are `none`, `all` or VLAN ranges (1-200,500-2000,3000)
+        example: 10-20
+        default_value: "none"
+      - model_name: NATIVE_VLAN
+        ndfc_nested: [nvPairs]
+        tf_name: native_vlan
+        type: Int64
+        model_type_string: true
+        min_int: 1
+        max_int: 4094
+        ndfc_type: string
+        description: Set native VLAN for the interface
+        example: 1
+        exclude_test: true
+     
+
+      
+      

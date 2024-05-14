@@ -1,0 +1,539 @@
+---
+resource:
+  name: vrf_bulk
+  rest_endpoint: /lan-fabric/rest/top-down/v2/fabrics/%v/vrfs/
+  doc_category: Fabric
+  generate_tf_resource: true
+  attributes:
+    - model_name: id
+      tf_name: id
+      description: Terraform unique Id for the resource
+      type: String
+      id: true
+      computed: true
+    - &fname
+      model_name: fabric
+      tf_name: fabric_name
+      reference: true
+      description: The name of the fabric
+      type: String
+      example: CML
+      mandatory: true
+      tf_requires_replace: true
+    - &deploy
+      model_name: deployAllAttachments
+      tf_name: deploy_all_attachments
+      type: Bool
+      default_value: false
+      payload_hide: true
+      description: Deploy all attachments in this resource
+      ndfc_type: bool
+      example: true
+    - model_name: vrfs
+      tf_name: vrfs
+      description: List of vrfs
+      type: Map
+      bulk: true
+      mandatory: true
+      filtered: true
+      attributes:
+      - model_name: id
+        tf_name: id
+        type: Int64
+        tf_hide: true
+        sort: true
+      - model_name: filterThisValue
+        tf_name: filter_this_value
+        type: Bool
+        tf_hide: true
+        payload_hide: true
+      - &vrfName
+        model_name: vrfName
+        tf_name: vrf_name
+        type: String
+        id: false
+        description: The name of the VRF
+        example: VRF1
+        map_key: true
+        tf_hide: true
+      - model_name: fabric
+        tf_name: fabric_name
+        reference: true
+        description: The name of the fabric
+        type: String
+        example: CML
+        tf_hide: true
+      - &vrfTemplate
+        model_name: vrfTemplate
+        tf_name: vrf_template
+        type: String
+        description: The name of the VRF template
+        default_value: Default_VRF_Universal
+        example: Default_VRF_Universal
+      - &vrfExtensionTemplate
+        model_name: vrfExtensionTemplate  
+        tf_name: vrf_extension_template
+        type: String
+        description: The name of the VRF extension template
+        default_value: Default_VRF_Extension_Universal
+        example: Default_VRF_Extension_Universal
+      - &vrfId
+        model_name: vrfId
+        tf_name: vrf_id
+        type: Int64
+        optional: true
+        computed: true
+        min_int: 1
+        max_int: 16777214
+        description: VNI ID of VRF
+        example: 50000
+        requires_replace: true
+        use_state: true
+      - &vrfVlanId
+        model_name: vrfVlanId
+        ndfc_nested: [vrfTemplateConfig]
+        tf_name: vlan_id
+        type: Int64
+        optional: true
+        computed: true
+        use_state: true
+        min_int: 2
+        max_int: 4094
+        description: VLAN ID
+        example: 1500
+        handle_empty: true
+      - &vrfVlanName
+        model_name: vrfVlanName
+        ndfc_nested: [vrfTemplateConfig]
+        tf_name: vlan_name
+        type: String
+        string_patterns: ['^[^\?,\\,\s]{1,128}$']
+        description: VLAN name
+        example: VLAN1500
+      - &vrfIntfDescription
+        model_name: vrfIntfDescription
+        ndfc_nested: [vrfTemplateConfig]
+        tf_name: interface_description
+        type: String
+        description: Interface description
+        example: My int description
+      - &vrfDescription 
+        model_name: vrfDescription
+        ndfc_nested: [vrfTemplateConfig]
+        tf_name: vrf_description
+        type: String
+        description: VRF description
+        example: My vrf description
+      - &mtu
+        model_name: mtu
+        ndfc_nested: [vrfTemplateConfig]
+        tf_name: mtu
+        type: Int64
+        ndfc_type: string
+        min_int: 68
+        max_int: 9216
+        default_value: 9216
+        description: Interface MTU
+        example: 9200
+      - &vrfStatus
+        model_name: vrfStatus
+        ndfc_nested:
+        tf_name: vrf_status
+        type: String
+        computed: true
+        description: VRF Deployment status
+        example: "DEPLOYED"
+      - &tag
+        model_name: tag
+        ndfc_nested: [vrfTemplateConfig]
+        tf_name: loopback_routing_tag
+        type: Int64
+        ndfc_type: string
+        min_int: 0
+        max_int: 4294967295
+        default_value: 12345
+        description: Loopback routing tag
+        example: 11111
+      - &vrfRouteMap
+        model_name: vrfRouteMap
+        ndfc_nested: [vrfTemplateConfig]
+        tf_name: redistribute_direct_route_map
+        type: String
+        default_value: FABRIC-RMAP-REDIST-SUBNET
+        description: Redistribute direct route map
+        example: FABRIC-RMAP-REDIST
+      - &maxBgpPaths
+        model_name: maxBgpPaths
+        ndfc_nested: [vrfTemplateConfig]
+        tf_name: max_bgp_paths
+        type: Int64
+        ndfc_type: string
+        min_int: 1
+        max_int: 64
+        default_value: 1
+        description: Maximum BGP paths
+        example: 2
+      - &maxIbgpPaths
+        model_name: maxIbgpPaths
+        ndfc_nested: [vrfTemplateConfig]
+        tf_name: max_ibgp_paths
+        type: Int64
+        ndfc_type: string
+        min_int: 1
+        max_int: 64
+        default_value: 2
+        description: Maximum iBGP paths
+        example: 3
+      - &ipv6LinkLocalFlag
+        model_name: ipv6LinkLocalFlag
+        ndfc_nested: [vrfTemplateConfig]
+        tf_name: ipv6_link_local
+        type: Bool
+        default_value: true
+        description: Enables IPv6 link-local Option under VRF SVI
+        example: false
+      - &trmEnabled
+        model_name: trmEnabled
+        ndfc_nested: [vrfTemplateConfig]
+        tf_name: trm
+        type: Bool
+        default_value: false
+        description: Enable Tenant Routed Multicast
+        example: true
+      - &isRPAbsent
+        model_name: isRPAbsent
+        ndfc_nested: [vrfTemplateConfig]
+        tf_name: no_rp
+        type: Bool
+        default_value: false
+        description: There is no RP as only SSM is used
+        example: false
+      - &isRPExternal
+        model_name: isRPExternal
+        ndfc_nested: [vrfTemplateConfig]
+        tf_name: rp_external
+        type: Bool
+        default_value: false
+        description: Is RP external to the fabric
+        example: true
+      - &rpAddress
+        model_name: rpAddress
+        ndfc_nested: [vrfTemplateConfig]
+        tf_name: rp_address
+        type: String
+        description: IPv4 address
+        example: 1.2.3.4
+      - &loopbackNumber
+        model_name: loopbackNumber
+        ndfc_nested: [vrfTemplateConfig]
+        tf_name: rp_loopback_id
+        type: Int64
+        handle_empty: true
+        min_int: 0
+        max_int: 1023
+        description: RP loopback ID
+        example: 100
+      - &L3VniMcastGroup
+        model_name: L3VniMcastGroup
+        ndfc_nested: [vrfTemplateConfig]
+        tf_name: underlay_multicast_address
+        type: String
+        description: IPv4 Multicast Address. Applicable only when TRM is enabled.
+        example: 233.1.1.1
+      - &multicastGroup
+        model_name: multicastGroup
+        ndfc_nested: [vrfTemplateConfig]
+        tf_name: overlay_multicast_groups
+        type: String
+        description: Overlay multicast groups
+        example: 234.0.0.0/8
+      - &mvpnInterAs
+        model_name: mvpnInterAs
+        ndfc_nested: [vrfTemplateConfig]
+        tf_name: mvpn_inter_as
+        type: Bool
+        default_value: false
+        description: Use the inter-as keyword for the MVPN address family routes to cross the BGP autonomous system (AS) boundaries, applicable when TRM is enabled. IOS XE Specific
+        example: false
+      - &trmBGWMSiteEnabled
+        model_name: trmBGWMSiteEnabled
+        ndfc_nested: [vrfTemplateConfig]
+        tf_name: trm_bgw_msite
+        type: Bool
+        default_value: false
+        description: Enable TRM on Border Gateway Multisite
+        example: true
+      - &advertiseHostRouteFlag
+        model_name: advertiseHostRouteFlag
+        ndfc_nested: [vrfTemplateConfig]
+        tf_name: advertise_host_routes
+        type: Bool
+        default_value: false
+        description: Flag to Control Advertisement of /32 and /128 Routes to Edge Routers
+        example: true
+      - &advertiseDefaultRouteFlag
+        model_name: advertiseDefaultRouteFlag
+        ndfc_nested: [vrfTemplateConfig]
+        tf_name: advertise_default_route
+        type: Bool
+        default_value: true
+        description: Flag to Control Advertisement of Default Route Internally
+        example: false
+      - &configureStaticDefaultRouteFlag
+        model_name: configureStaticDefaultRouteFlag
+        ndfc_nested: [vrfTemplateConfig]
+        tf_name: configure_static_default_route
+        type: Bool
+        default_value: true
+        description: Flag to Control Static Default Route Configuration
+        example: false
+      - &bgpPassword
+        model_name: bgpPassword
+        ndfc_nested: [vrfTemplateConfig]
+        tf_name: bgp_password
+        type: String
+        string_patterns: ['^[a-fA-F0-9]+$']
+        description: VRF Lite BGP neighbor password (Hex String)
+        example: 1234567890ABCDEF
+      - &bgpPasswordKeyType
+        model_name: bgpPasswordKeyType
+        ndfc_nested: [vrfTemplateConfig]
+        tf_name: bgp_password_type
+        type: String
+        enum_values: ["3", "7"]
+        description: "VRF Lite BGP Key Encryption Type: 3 - 3DES, 7 - Cisco"
+        example: 7
+      - &ENABLE_NETFLOW
+        model_name: ENABLE_NETFLOW
+        ndfc_nested: [vrfTemplateConfig]
+        tf_name: netflow
+        type: Bool
+        default_value: false
+        description: For netflow on VRF-LITE Sub-interface. Supported only if netflow is enabled on fabric. For NX-OS only
+        example: false
+      - &NETFLOW_MONITOR
+        model_name: NETFLOW_MONITOR
+        ndfc_nested: [vrfTemplateConfig]
+        tf_name: netflow_monitor
+        type: String
+        description: Netflow monitor. For NX-OS only
+        example: MON1
+      - &disableRtAuto
+        model_name: disableRtAuto
+        ndfc_nested: [vrfTemplateConfig]
+        tf_name: disable_rt_auto
+        type: Bool
+        default_value: false
+        description: Applicable to IPv4, IPv6 VPN/EVPN/MVPN
+        example: true
+      - &routeTargetImport
+        model_name: routeTargetImport
+        ndfc_nested: [vrfTemplateConfig]
+        tf_name: route_target_import
+        type: String
+        description: For VPN Routes Import, One or a Comma Separated List
+        example: "1:1"
+      - &routeTargetExport
+        model_name: routeTargetExport
+        ndfc_nested: [vrfTemplateConfig]
+        tf_name: route_target_export
+        type: String
+        description: For VPN Routes Export, One or a Comma Separated List
+        example: "1:1"
+      - &routeTargetImportEvpn
+        model_name: routeTargetImportEvpn
+        ndfc_nested: [vrfTemplateConfig]
+        tf_name: route_target_import_evpn
+        type: String
+        description: For EVPN Routes Import, One or a Comma Separated List
+        example: "1:1"
+      - &routeTargetExportEvpn
+        model_name: routeTargetExportEvpn
+        ndfc_nested: [vrfTemplateConfig]
+        tf_name: route_target_export_evpn
+        type: String
+        description: For EVPN Routes Export, One or a Comma Separated List
+        example: "1:1"
+      - &routeTargetImportMvpn
+        model_name: routeTargetImportMvpn
+        ndfc_nested: [vrfTemplateConfig]
+        tf_name: route_target_import_mvpn
+        type: String
+        description: For MVPN Routes Import, One or a Comma Separated List
+        example: "1:1"
+        exclude_test: true
+      - &routeTargetExportMvpn
+        model_name: routeTargetExportMvpn
+        ndfc_nested: [vrfTemplateConfig]
+        tf_name: route_target_export_mvpn
+        type: String
+        description: For MVPN Routes Export, One or a Comma Separated List
+        example: "1:1"
+        exclude_test: true
+      - &cloudRouteTargetImportEvpn
+        model_name: cloudRouteTargetImportEvpn
+        ndfc_nested: [vrfTemplateConfig]
+        tf_name: route_target_import_cloud_evpn
+        type: String
+        description: For Cloud EVPN Routes Import, One or a Comma Separated List
+        example: "1:1"
+      - &cloudRouteTargetExportEvpn
+        model_name: cloudRouteTargetExportEvpn
+        ndfc_nested: [vrfTemplateConfig]
+        tf_name: route_target_export_cloud_evpn
+        type: String
+        description: For Cloud EVPN Routes Export, One or a Comma Separated List
+        example: "1:1"
+      - model_name: deploy_attachments
+        tf_name: deploy_attachments
+        type: Bool
+        default_value: false
+        payload_hide: true
+        description: Deploy all attachments in this VRF
+        ndfc_type: bool
+        example: true
+      - model_name: lanAttachList
+        augment_from: vrf_attachments.attachments.lanAttachList
+        
+datasource:
+  name: vrf_bulk
+  doc_category: Fabric
+  generate_tf_resource: true
+  attributes:
+    - <<: *fname
+      mandatory: true
+    - model_name: vrfs
+      tf_name: vrfs
+      description: List of vrfs
+      type: List
+      mandatory: false
+      attributes: 
+      - model_name: Id
+        tf_name: id
+        type: Int64
+        description: Internal ID of VRF generated by NDFC
+        example: 10
+        exclude_test: true 
+      - <<: *vrfName
+        mandatory: false
+        tf_hide: false
+      - *vrfTemplate
+      - *vrfStatus
+      - *vrfExtensionTemplate
+      - *vrfId
+      - *vrfVlanId
+      - *vrfVlanName
+      - *vrfIntfDescription
+      - *vrfDescription 
+      - *mtu
+      - *tag
+      - *vrfRouteMap
+      - *maxBgpPaths
+      - *maxIbgpPaths
+      - *ipv6LinkLocalFlag
+      - *trmEnabled
+      - *isRPAbsent
+      - *isRPExternal
+      - *rpAddress
+      - *loopbackNumber
+      - *L3VniMcastGroup
+      - *multicastGroup
+      - *mvpnInterAs
+      - *trmBGWMSiteEnabled
+      - *advertiseHostRouteFlag
+      - *advertiseDefaultRouteFlag
+      - *configureStaticDefaultRouteFlag
+      - *bgpPassword
+      - *bgpPasswordKeyType
+      - *ENABLE_NETFLOW
+      - *NETFLOW_MONITOR
+      - *disableRtAuto
+      - *routeTargetImport
+      - *routeTargetExport
+      - *routeTargetImportEvpn
+      - *routeTargetExportEvpn
+      - *routeTargetImportMvpn
+      - *routeTargetExportMvpn
+      - *cloudRouteTargetImportEvpn
+      - *cloudRouteTargetExportEvpn
+      - model_name: lanAttachList
+        tf_name: attach_list
+        type: List
+        description: List of switches attached to the VRF
+        computed: true
+        attributes:
+          - model_name: id
+            tf_name: id
+            type: Int64
+          - model_name: serialNumber
+            tf_name: serial_number
+            unmarshal_tag: switchSerialNo
+            type: String
+            description: Serial number of a switch
+            example: FDO245206N5
+          - &switchName
+            model_name: switchName
+            tf_name: switch_name
+            type: String
+            computed: true
+            description: The name of the switch
+            example: switch1
+          - &VlanId
+            model_name: vlan
+            tf_name: vlan
+            unmarshal_tag: vlanId
+            type: Int64
+            optional: true
+            computed: true
+            use_state: true
+            min_int: 2
+            max_int: 4094
+            description: VLAN ID
+            example: 1500
+            handle_empty: true
+          - &attach_state
+            model_name: lanAttachState
+            tf_name: attach_state
+            type: String
+            description: The state of the attachment
+            example: attached
+            computed: true
+          - &attached_flag
+            model_name: isLanAttached
+            tf_name: attached
+            type: Bool
+            description: The state of the attachment
+            example: true
+            computed: true
+            ndfc_type: bool
+          - model_name: freeformconfig
+            tf_name: freeform_config
+            type: String
+            description: This field covers any configuration not included in overlay templates which is needed as part of this VRF attachment
+            example: "interface Vlan2000\\r\\n  delay 200"
+            exclude_test: true
+          - model_name: loopbackId
+            tf_name: loopback_id
+            type: Int64
+            handle_empty: true
+            ndfc_nested: [instanceValues]
+            min_int: 0
+            max_int: 1023
+            description: Override loopback ID
+            example: 101
+            exclude_test: true
+          - model_name: loopbackIpAddress
+            tf_name: loopback_ipv4
+            ndfc_nested: [instanceValues]
+            type: String
+            description: Override loopback IPv4 address
+            example: 1.2.3.4
+            exclude_test: true
+          - model_name: loopbackIpv6Address
+            ndfc_nested: [instanceValues]
+            tf_name: loopback_ipv6
+            type: String
+            description: Override loopback IPv6 address
+            example: 2001::1
+            exclude_test: true
+  
