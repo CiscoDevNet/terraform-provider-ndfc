@@ -1,0 +1,60 @@
+---
+datasource:
+  name: fabric
+  doc_category: Fabric
+  attributes:
+    - model_name: "fabrics"
+      tf_name: fabrics
+      reference: true
+      description: List of Fabrics
+      type: List
+      computed: true
+      attributes:
+        - model_name: fabricId
+          tf_name: fabric_id
+          type: String
+          description: Fabric Id
+          computed: true
+        - model_name: fabricName
+          tf_name: fabric_name
+          type: String
+          description: Fabric Name
+          computed: true
+        - model_name: fabricType
+          tf_name: fabric_type
+          type: String
+          description: Fabric Type
+          computed: true
+        - model_name: fabricTechnology
+          tf_name: fabric_technology
+          type: String
+          description: Fabric Technology
+          computed: true
+        - model_name: provisionMode
+          tf_name: provision_mode
+          type: String
+          description: Provision Mode
+          computed: true
+        - model_name: deviceType
+          tf_name: device_type
+          type: String
+          description: Type of Device
+          computed: true
+        - model_name: asn
+          tf_name: as_number
+          type: String
+          description: AS Number
+          computed: true
+        - model_name: siteId
+          tf_name: site_id
+          type: String
+          description: Site ID
+          computed: true
+
+
+        
+               
+        
+        
+      
+

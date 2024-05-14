@@ -1,0 +1,12 @@
+---
+files:
+  - ndfc.yaml
+  - vrf-bulk.yaml
+  - vrf-attachments.yaml
+  - networks.yaml
+  - network-attachments.yaml
+  - interface_common.yaml
+  - interface_eth.yaml
+  - interface_loopback.yaml
+  - fabric.yaml
+
