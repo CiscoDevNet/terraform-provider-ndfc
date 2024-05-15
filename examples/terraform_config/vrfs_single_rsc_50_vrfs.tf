@@ -1,4 +1,18 @@
 
+terraform {
+  required_providers {
+    ndfc = {
+      source = "registry.terraform.io/cisco/ndfc"
+    }
+  }
+}
+
+provider "ndfc" {
+  username = "test"
+  password = "test"
+  host     = "https://10.78.210.161"
+  insecure = true
+}
 
 resource "ndfc_vrf_bulk" "vrf_test" {
 

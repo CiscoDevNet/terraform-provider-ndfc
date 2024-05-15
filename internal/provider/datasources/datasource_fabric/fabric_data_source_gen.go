@@ -22,42 +22,42 @@ func FabricDataSourceSchema(ctx context.Context) schema.Schema {
 				NestedObject: schema.NestedAttributeObject{
 					Attributes: map[string]schema.Attribute{
 						"as_number": schema.StringAttribute{
-							Computed:            true,
+							Optional:            true,
 							Description:         "AS Number",
 							MarkdownDescription: "AS Number",
 						},
 						"device_type": schema.StringAttribute{
-							Computed:            true,
+							Optional:            true,
 							Description:         "Type of Device",
 							MarkdownDescription: "Type of Device",
 						},
 						"fabric_id": schema.StringAttribute{
-							Computed:            true,
+							Optional:            true,
 							Description:         "Fabric Id",
 							MarkdownDescription: "Fabric Id",
 						},
 						"fabric_name": schema.StringAttribute{
-							Computed:            true,
+							Optional:            true,
 							Description:         "Fabric Name",
 							MarkdownDescription: "Fabric Name",
 						},
 						"fabric_technology": schema.StringAttribute{
-							Computed:            true,
+							Optional:            true,
 							Description:         "Fabric Technology",
 							MarkdownDescription: "Fabric Technology",
 						},
 						"fabric_type": schema.StringAttribute{
-							Computed:            true,
+							Optional:            true,
 							Description:         "Fabric Type",
 							MarkdownDescription: "Fabric Type",
 						},
 						"provision_mode": schema.StringAttribute{
-							Computed:            true,
+							Optional:            true,
 							Description:         "Provision Mode",
 							MarkdownDescription: "Provision Mode",
 						},
 						"site_id": schema.StringAttribute{
-							Computed:            true,
+							Optional:            true,
 							Description:         "Site ID",
 							MarkdownDescription: "Site ID",
 						},
@@ -68,7 +68,7 @@ func FabricDataSourceSchema(ctx context.Context) schema.Schema {
 						},
 					},
 				},
-				Computed:            true,
+				Optional:            true,
 				Description:         "List of Fabrics",
 				MarkdownDescription: "List of Fabrics",
 			},
@@ -548,7 +548,7 @@ func (t FabricsType) ValueFromTerraform(ctx context.Context, in tftypes.Value) (
 		attributes[k] = a
 	}
 
-	return NewFabricsValueMust(t.AttrTypes, attributes), nil
+	return NewFabricsValueMust(FabricsValue{}.AttributeTypes(ctx), attributes), nil
 }
 
 func (t FabricsType) ValueType(ctx context.Context) attr.Value {
@@ -681,6 +681,8 @@ func (v FabricsValue) String() string {
 }
 
 func (v FabricsValue) ToObjectValue(ctx context.Context) (basetypes.ObjectValue, diag.Diagnostics) {
+	var diags diag.Diagnostics
+
 	objVal, diags := types.ObjectValue(
 		map[string]attr.Type{
 			"as_number":         basetypes.StringType{},

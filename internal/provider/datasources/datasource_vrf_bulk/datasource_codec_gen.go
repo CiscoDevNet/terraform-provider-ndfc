@@ -539,6 +539,7 @@ func (v VrfBulkModel) GetModelData() *NDFCVrfBulkModel {
 		}
 		for i1, ele1 := range elements {
 			if !ele1.Id.IsNull() && !ele1.Id.IsUnknown() {
+
 				data.Vrfs[i1].Id = new(int64)
 				*data.Vrfs[i1].Id = ele1.Id.ValueInt64()
 
@@ -547,24 +548,28 @@ func (v VrfBulkModel) GetModelData() *NDFCVrfBulkModel {
 			}
 
 			if !ele1.VrfName.IsNull() && !ele1.VrfName.IsUnknown() {
+
 				data.Vrfs[i1].VrfName = ele1.VrfName.ValueString()
 			} else {
 				data.Vrfs[i1].VrfName = ""
 			}
 
 			if !ele1.VrfTemplate.IsNull() && !ele1.VrfTemplate.IsUnknown() {
+
 				data.Vrfs[i1].VrfTemplate = ele1.VrfTemplate.ValueString()
 			} else {
 				data.Vrfs[i1].VrfTemplate = ""
 			}
 
 			if !ele1.VrfExtensionTemplate.IsNull() && !ele1.VrfExtensionTemplate.IsUnknown() {
+
 				data.Vrfs[i1].VrfExtensionTemplate = ele1.VrfExtensionTemplate.ValueString()
 			} else {
 				data.Vrfs[i1].VrfExtensionTemplate = ""
 			}
 
 			if !ele1.VrfId.IsNull() && !ele1.VrfId.IsUnknown() {
+
 				data.Vrfs[i1].VrfId = new(int64)
 				*data.Vrfs[i1].VrfId = ele1.VrfId.ValueInt64()
 
@@ -654,7 +659,8 @@ func (v VrfBulkModel) GetModelData() *NDFCVrfBulkModel {
 			//-----inline nesting end----
 
 			//-----inline nesting Start----
-			if !ele1.Ipv6LinkLocal.IsNull() && !ele1.Ipv6LinkLocal.IsUnknown() { // test signature1  NDFCType:
+			if !ele1.Ipv6LinkLocal.IsNull() && !ele1.Ipv6LinkLocal.IsUnknown() {
+				// test signature1  NDFCType:
 				data.Vrfs[i1].VrfTemplateConfig.Ipv6LinkLocal = strconv.FormatBool(ele1.Ipv6LinkLocal.ValueBool())
 			} else {
 				data.Vrfs[i1].VrfTemplateConfig.Ipv6LinkLocal = ""
@@ -663,7 +669,8 @@ func (v VrfBulkModel) GetModelData() *NDFCVrfBulkModel {
 			//-----inline nesting end----
 
 			//-----inline nesting Start----
-			if !ele1.Trm.IsNull() && !ele1.Trm.IsUnknown() { // test signature1  NDFCType:
+			if !ele1.Trm.IsNull() && !ele1.Trm.IsUnknown() {
+				// test signature1  NDFCType:
 				data.Vrfs[i1].VrfTemplateConfig.Trm = strconv.FormatBool(ele1.Trm.ValueBool())
 			} else {
 				data.Vrfs[i1].VrfTemplateConfig.Trm = ""
@@ -672,7 +679,8 @@ func (v VrfBulkModel) GetModelData() *NDFCVrfBulkModel {
 			//-----inline nesting end----
 
 			//-----inline nesting Start----
-			if !ele1.NoRp.IsNull() && !ele1.NoRp.IsUnknown() { // test signature1  NDFCType:
+			if !ele1.NoRp.IsNull() && !ele1.NoRp.IsUnknown() {
+				// test signature1  NDFCType:
 				data.Vrfs[i1].VrfTemplateConfig.NoRp = strconv.FormatBool(ele1.NoRp.ValueBool())
 			} else {
 				data.Vrfs[i1].VrfTemplateConfig.NoRp = ""
@@ -681,7 +689,8 @@ func (v VrfBulkModel) GetModelData() *NDFCVrfBulkModel {
 			//-----inline nesting end----
 
 			//-----inline nesting Start----
-			if !ele1.RpExternal.IsNull() && !ele1.RpExternal.IsUnknown() { // test signature1  NDFCType:
+			if !ele1.RpExternal.IsNull() && !ele1.RpExternal.IsUnknown() {
+				// test signature1  NDFCType:
 				data.Vrfs[i1].VrfTemplateConfig.RpExternal = strconv.FormatBool(ele1.RpExternal.ValueBool())
 			} else {
 				data.Vrfs[i1].VrfTemplateConfig.RpExternal = ""
@@ -723,7 +732,8 @@ func (v VrfBulkModel) GetModelData() *NDFCVrfBulkModel {
 			//-----inline nesting end----
 
 			//-----inline nesting Start----
-			if !ele1.MvpnInterAs.IsNull() && !ele1.MvpnInterAs.IsUnknown() { // test signature1  NDFCType:
+			if !ele1.MvpnInterAs.IsNull() && !ele1.MvpnInterAs.IsUnknown() {
+				// test signature1  NDFCType:
 				data.Vrfs[i1].VrfTemplateConfig.MvpnInterAs = strconv.FormatBool(ele1.MvpnInterAs.ValueBool())
 			} else {
 				data.Vrfs[i1].VrfTemplateConfig.MvpnInterAs = ""
@@ -732,7 +742,8 @@ func (v VrfBulkModel) GetModelData() *NDFCVrfBulkModel {
 			//-----inline nesting end----
 
 			//-----inline nesting Start----
-			if !ele1.TrmBgwMsite.IsNull() && !ele1.TrmBgwMsite.IsUnknown() { // test signature1  NDFCType:
+			if !ele1.TrmBgwMsite.IsNull() && !ele1.TrmBgwMsite.IsUnknown() {
+				// test signature1  NDFCType:
 				data.Vrfs[i1].VrfTemplateConfig.TrmBgwMsite = strconv.FormatBool(ele1.TrmBgwMsite.ValueBool())
 			} else {
 				data.Vrfs[i1].VrfTemplateConfig.TrmBgwMsite = ""
@@ -741,7 +752,8 @@ func (v VrfBulkModel) GetModelData() *NDFCVrfBulkModel {
 			//-----inline nesting end----
 
 			//-----inline nesting Start----
-			if !ele1.AdvertiseHostRoutes.IsNull() && !ele1.AdvertiseHostRoutes.IsUnknown() { // test signature1  NDFCType:
+			if !ele1.AdvertiseHostRoutes.IsNull() && !ele1.AdvertiseHostRoutes.IsUnknown() {
+				// test signature1  NDFCType:
 				data.Vrfs[i1].VrfTemplateConfig.AdvertiseHostRoutes = strconv.FormatBool(ele1.AdvertiseHostRoutes.ValueBool())
 			} else {
 				data.Vrfs[i1].VrfTemplateConfig.AdvertiseHostRoutes = ""
@@ -750,7 +762,8 @@ func (v VrfBulkModel) GetModelData() *NDFCVrfBulkModel {
 			//-----inline nesting end----
 
 			//-----inline nesting Start----
-			if !ele1.AdvertiseDefaultRoute.IsNull() && !ele1.AdvertiseDefaultRoute.IsUnknown() { // test signature1  NDFCType:
+			if !ele1.AdvertiseDefaultRoute.IsNull() && !ele1.AdvertiseDefaultRoute.IsUnknown() {
+				// test signature1  NDFCType:
 				data.Vrfs[i1].VrfTemplateConfig.AdvertiseDefaultRoute = strconv.FormatBool(ele1.AdvertiseDefaultRoute.ValueBool())
 			} else {
 				data.Vrfs[i1].VrfTemplateConfig.AdvertiseDefaultRoute = ""
@@ -759,7 +772,8 @@ func (v VrfBulkModel) GetModelData() *NDFCVrfBulkModel {
 			//-----inline nesting end----
 
 			//-----inline nesting Start----
-			if !ele1.ConfigureStaticDefaultRoute.IsNull() && !ele1.ConfigureStaticDefaultRoute.IsUnknown() { // test signature1  NDFCType:
+			if !ele1.ConfigureStaticDefaultRoute.IsNull() && !ele1.ConfigureStaticDefaultRoute.IsUnknown() {
+				// test signature1  NDFCType:
 				data.Vrfs[i1].VrfTemplateConfig.ConfigureStaticDefaultRoute = strconv.FormatBool(ele1.ConfigureStaticDefaultRoute.ValueBool())
 			} else {
 				data.Vrfs[i1].VrfTemplateConfig.ConfigureStaticDefaultRoute = ""
@@ -784,7 +798,8 @@ func (v VrfBulkModel) GetModelData() *NDFCVrfBulkModel {
 			//-----inline nesting end----
 
 			//-----inline nesting Start----
-			if !ele1.Netflow.IsNull() && !ele1.Netflow.IsUnknown() { // test signature1  NDFCType:
+			if !ele1.Netflow.IsNull() && !ele1.Netflow.IsUnknown() {
+				// test signature1  NDFCType:
 				data.Vrfs[i1].VrfTemplateConfig.Netflow = strconv.FormatBool(ele1.Netflow.ValueBool())
 			} else {
 				data.Vrfs[i1].VrfTemplateConfig.Netflow = ""
@@ -801,7 +816,8 @@ func (v VrfBulkModel) GetModelData() *NDFCVrfBulkModel {
 			//-----inline nesting end----
 
 			//-----inline nesting Start----
-			if !ele1.DisableRtAuto.IsNull() && !ele1.DisableRtAuto.IsUnknown() { // test signature1  NDFCType:
+			if !ele1.DisableRtAuto.IsNull() && !ele1.DisableRtAuto.IsUnknown() {
+				// test signature1  NDFCType:
 				data.Vrfs[i1].VrfTemplateConfig.DisableRtAuto = strconv.FormatBool(ele1.DisableRtAuto.ValueBool())
 			} else {
 				data.Vrfs[i1].VrfTemplateConfig.DisableRtAuto = ""

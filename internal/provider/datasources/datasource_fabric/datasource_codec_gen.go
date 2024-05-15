@@ -58,6 +58,7 @@ func (v *FabricModel) SetModelData(jsonData *NDFCFabricModel) diag.Diagnostics {
 }
 
 func (v *FabricsValue) SetValue(jsonData *NDFCFabricsValue) diag.Diagnostics {
+
 	var err diag.Diagnostics
 	err = nil
 
@@ -115,57 +116,70 @@ func (v *FabricsValue) SetValue(jsonData *NDFCFabricsValue) diag.Diagnostics {
 func (v FabricModel) GetModelData() *NDFCFabricModel {
 	var data = new(NDFCFabricModel)
 
+	//MARSHAL_BODY
+
+	//MARSHALL_LIST
+
 	if !v.Fabrics.IsNull() && !v.Fabrics.IsUnknown() {
 		elements := make([]FabricsValue, len(v.Fabrics.Elements()))
 		data.Fabrics = make([]NDFCFabricsValue, len(v.Fabrics.Elements()))
+
 		diag := v.Fabrics.ElementsAs(context.Background(), &elements, false)
 		if diag != nil {
 			panic(diag)
 		}
 		for i1, ele1 := range elements {
 			if !ele1.FabricId.IsNull() && !ele1.FabricId.IsUnknown() {
+
 				data.Fabrics[i1].FabricId = ele1.FabricId.ValueString()
 			} else {
 				data.Fabrics[i1].FabricId = ""
 			}
 
 			if !ele1.FabricName.IsNull() && !ele1.FabricName.IsUnknown() {
+
 				data.Fabrics[i1].FabricName = ele1.FabricName.ValueString()
 			} else {
 				data.Fabrics[i1].FabricName = ""
 			}
 
 			if !ele1.FabricType.IsNull() && !ele1.FabricType.IsUnknown() {
+
 				data.Fabrics[i1].FabricType = ele1.FabricType.ValueString()
 			} else {
 				data.Fabrics[i1].FabricType = ""
 			}
 
 			if !ele1.FabricTechnology.IsNull() && !ele1.FabricTechnology.IsUnknown() {
+
 				data.Fabrics[i1].FabricTechnology = ele1.FabricTechnology.ValueString()
 			} else {
 				data.Fabrics[i1].FabricTechnology = ""
 			}
 
 			if !ele1.ProvisionMode.IsNull() && !ele1.ProvisionMode.IsUnknown() {
+
 				data.Fabrics[i1].ProvisionMode = ele1.ProvisionMode.ValueString()
 			} else {
 				data.Fabrics[i1].ProvisionMode = ""
 			}
 
 			if !ele1.DeviceType.IsNull() && !ele1.DeviceType.IsUnknown() {
+
 				data.Fabrics[i1].DeviceType = ele1.DeviceType.ValueString()
 			} else {
 				data.Fabrics[i1].DeviceType = ""
 			}
 
 			if !ele1.AsNumber.IsNull() && !ele1.AsNumber.IsUnknown() {
+
 				data.Fabrics[i1].AsNumber = ele1.AsNumber.ValueString()
 			} else {
 				data.Fabrics[i1].AsNumber = ""
 			}
 
 			if !ele1.SiteId.IsNull() && !ele1.SiteId.IsUnknown() {
+
 				data.Fabrics[i1].SiteId = ele1.SiteId.ValueString()
 			} else {
 				data.Fabrics[i1].SiteId = ""

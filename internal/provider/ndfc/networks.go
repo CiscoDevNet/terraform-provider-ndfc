@@ -2,9 +2,12 @@ package ndfc
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"log"
 	"strings"
+	"terraform-provider-ndfc/internal/provider/datasources/datasource_networks"
+	"terraform-provider-ndfc/internal/provider/ndfc/api"
 	"terraform-provider-ndfc/internal/provider/resources/resource_networks"
 
 	"github.com/hashicorp/terraform-plugin-framework/diag"
@@ -395,4 +398,89 @@ func (c *NDFC) RscDeleteNetworks(ctx context.Context, dg *diag.Diagnostics, ID s
 	}
 	tflog.Info(ctx, "Networks delete success")
 
+}
+
+func (c *NDFC) DsGetNetworks(ctx context.Context, dg *diag.Diagnostics, fabricName string) *datasource_networks.NetworksModel {
+	// Read API call logic
+	tflog.Debug(ctx, fmt.Sprintf("DsGetNetworks entry fabirc %s", fabricName))
+
+	if fabricName == "" {
+		dg.AddError("ID format error", "ID is incorrect")
+		return nil
+	}
+	rsObj := api.NewNetworksAPI(fabricName, c.GetLock(ResourceNetworks), &c.apiClient)
+	res, err := rsObj.Get()
+	if err != nil {
+		dg.AddError("Network Get Failed", err.Error())
+		return nil
+	}
+	ndNets := new(datasource_networks.NDFCNetworksModel)
+
+	err = json.Unmarshal(res, &ndNets.Networks)
+	if err != nil {
+		dg.AddError("Network Unmarshal Failed", err.Error())
+		return nil
+	}
+	if len(ndNets.Networks) == 0 {
+		dg.AddWarning("No Networks found", "No Networks found in NDFC")
+		return nil
+	}
+	/*
+		err = c.RscGetNetworkAttachments(ctx, ndNets)
+		if err == nil {
+			tflog.Debug(ctx, "Network Attachments read success")
+
+			for i, nwEntry := range ndNets.Networks {
+				if nwEntry.FilterThisValue {
+					continue
+				}
+				vrfLevelDep := false
+
+				if vl, vlOk := (*depMap)[i]; vlOk {
+					//first element is vrf name if vrf level deploy is set
+					if vl[0] == i {
+						nwEntry.DeployAttachments = (nwEntry.NetworkStatus == "DEPLOYED")
+						log.Printf("Setting Network level dep flag for %s to %v", i, nwEntry.DeployAttachments)
+						vrfLevelDep = true
+					}
+				}
+				for j, attachEntry := range nwEntry.Attachments {
+					if attachEntry.FilterThisValue {
+						continue
+					}
+					log.Printf("Attachment %s added to Network %s", j, i)
+					if !globalDep && !vrfLevelDep {
+						if attachEntry.AttachState == "DEPLOYED" {
+							log.Printf("Attachment %s deployed", j)
+							attachEntry.DeployThisAttachment = true
+						}
+					}
+
+					if portOrder, ok := (*depMap)["SwitchPorts:"+i+"/"+j]; ok {
+						log.Printf("SwitchPorts order %v", portOrder)
+						processPortListOrder(&attachEntry.SwitchPorts, portOrder)
+					}
+					if portOrder, ok := (*depMap)["TorPorts:"+i+"/"+j]; ok {
+						log.Printf("TorPorts order %v", portOrder)
+						processPortListOrder(&attachEntry.TorPorts, portOrder)
+					}
+					//put modified entry back
+					nwEntry.Attachments[j] = attachEntry
+				}
+				//put modified entry back
+				ndNets.Networks[i] = nwEntry
+			}
+
+		} else {
+			tflog.Error(ctx, "Network Attachments read failed", map[string]interface{}{"Err": err})
+			dg.AddError("Network Attachments read failed", err.Error())
+		}
+	*/
+	vModel := new(datasource_networks.NetworksModel)
+	vModel.FabricName = types.StringValue(fabricName)
+	d := vModel.SetModelData(ndNets)
+	if d != nil {
+		dg.Append(d.Errors()...)
+	}
+	return vModel
 }
