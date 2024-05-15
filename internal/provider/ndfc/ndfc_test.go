@@ -13,9 +13,10 @@ func TestMain(m *testing.M) {
 	user := "admin"
 	password := "admin"
 	domain := "local"
+	timeout := int64(1000)
 	var err error
 	log.Print("Running TestMain for NDFC package")
-	ut_client, err = NewNDFCClient(host, user, password, domain, true)
+	ut_client, err = NewNDFCClient(host, user, password, domain, true, timeout)
 	if err != nil {
 		log.Fatal("Failed to create new NDFC client")
 		return

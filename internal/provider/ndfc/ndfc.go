@@ -4,6 +4,7 @@ import (
 	"log"
 	"sync"
 	"terraform-provider-ndfc/tfutils/go-nd"
+	"time"
 )
 
 type NDFC struct {
@@ -19,7 +20,7 @@ type NDFC struct {
 
 var instance *NDFC
 
-func NewNDFCClient(host string, user string, pass string, domain string, insecure bool) (*NDFC, error) {
+func NewNDFCClient(host string, user string, pass string, domain string, insecure bool, timeout int64) (*NDFC, error) {
 	log.Printf("New NDFC client")
 	ndfc := new(NDFC)
 	ndfc.url = "/appcenter/cisco/ndfc/api/v1"
@@ -29,11 +30,20 @@ func NewNDFCClient(host string, user string, pass string, domain string, insecur
 	ndfc.MaxParallelDeploy = 0
 	ndfc.WaitForDeployComplete = true
 	var err error
-	ndfc.apiClient, err = nd.NewClient(host, ndfc.url, user, pass, domain, insecure, nd.MaxRetries(500))
+	ndfc.apiClient, err = nd.NewClient(host, ndfc.url, user, pass, domain, insecure, nd.MaxRetries(500), nd.RequestTimeout(time.Duration(timeout)))
 	if err != nil {
 		return nil, err
 	}
 	ndfc.rscMutex = make(map[string]*sync.Mutex)
+
+	log.Printf("[DEBUG] Authentication during creation of NewNDFCClient")
+	err = ndfc.apiClient.Authenticate()
+	if err != nil {
+		log.Printf("[DEBUG] Authentication failed during creation of NewNDFCClient")
+		return nil, err
+	}
+	log.Printf("[DEBUG] Authentication succesful during creation of NewNDFCClient with token: %s", ndfc.apiClient.Token)
+
 	instance = ndfc
 	return ndfc, nil
 }

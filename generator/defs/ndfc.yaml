@@ -28,3 +28,9 @@ provider:
       type: Bool
       mandatory: true 
       description: NDFC Login  - ignore certificate issues
+    - model_name: timeout
+      tf_name: timeout
+      type: Int64
+      min_int: 1
+      default_value: 1000
+      description: NDFC HTTP request timeout - timeout
