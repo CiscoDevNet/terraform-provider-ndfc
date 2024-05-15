@@ -1,4 +1,4 @@
-package datasource_fabric
+package datasource_networks
 
 import (
 	"encoding/json"
@@ -6,7 +6,7 @@ import (
 	"testing"
 )
 
-func TestDatasourceFabric(t *testing.T) {
+func TestDatasourceNetworks(t *testing.T) {
 	type args struct {
 		rscType  string
 		rscName  string
@@ -17,11 +17,11 @@ func TestDatasourceFabric(t *testing.T) {
 		args args
 	}{
 		{
-			name: "Test_datasource_fabric",
+			name: "Test_datasource_networks",
 			args: args{
 				rscType:  "datasource",
-				rscName:  "fabric",
-				dataFile: "/examples/ndfc_payloads/data_fabric.json",
+				rscName:  "networks",
+				dataFile: "/examples/ndfc_payloads/data_networks.json",
 			},
 		},
 	}
@@ -35,8 +35,8 @@ func TestDatasourceFabric(t *testing.T) {
 				t.Errorf("File read failure %v", err)
 				return
 			}
-			modelData := NDFCFabricModel{}
-			v := FabricModel{}
+			modelData := NDFCNetworksModel{}
+			v := NetworksModel{}
 
 			err = json.Unmarshal(dataFromFile, &modelData)
 			if err != nil {

@@ -46,6 +46,8 @@ done
 #Generated in the same output folder of Stage 2
 echo "Stage 3 - Generating additional codec code"
 $GOPATH/bin/generator code -in generator/defs -template generator/templates -out $OUTDIR $REPLACE
+rm -rf ./out
+
 
 
 

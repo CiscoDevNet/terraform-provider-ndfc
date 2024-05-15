@@ -337,5 +337,145 @@ resource:
         example: true
       - model_name: lanAttachList
         augment_from: network_attachments.networkAttachments.lanAttachList
+datasource:
+  name: networks
+  doc_category: Fabric
+  generate_tf_resource: true
+  attributes:
+    - <<: *fname
+      mandatory: true
+    - model_name: networks
+      tf_name: networks
+      description: List of Networks
+      type: List
+      attributes:
+        - <<: *netName
+          tf_hide: false
+        - *displayName
+        - *netId
+        - *netTemplate
+        - *netExtensionTemplate
+        - *vrf
+        - *primaryNetworkId
+        - *type
+        - *nwStatus
+        - *gatewayIpAddress
+        - *gatewayIpV6Address
+        - *vlanId
+        - *vlanName
+        - *isLayer2Only
+        - *intfDescription
+        - *mtu
+        - *secondaryGW1
+        - *secondaryGW2
+        - *secondaryGW3
+        - *secondaryGW4
+        - *suppressArp
+        - *enableIR
+        - *mcastGroup
+        - *dhcpServers
+        - *loopbackId
+        - *tag
+        - *trmEnabled
+        - *rtBothAuto
+        - *enableNetflow
+        - *sviNetflowMonitor
+        - *vlanNetflowMonitor
+        - *enableL3OnBorder
+        - *igmpVerion
+        - model_name: lanAttachList
+          tf_name: attachments
+          type: List
+          description: List of switches attached to the network
+          attributes:
+            - model_name: serialNumber
+              tf_name: serial_number
+              unmarshal_tag: switchSerialNo
+              type: String
+              tf_hide: false
+              description: Serial number of a switch
+              example: FDO245206N5
+              requires_replace: true
+              list_key: true
+            - &switchName
+              model_name: switchName
+              tf_name: switch_name
+              type: String
+              computed: true
+              description: The name of the switch
+              example: switch1
+            - &dispName
+              model_name: displayName
+              tf_name: display_name
+              type: String
+              computed: true
+              optional: true
+              description: The name of the switch
+              example: switch1
+            - &VlanId
+              model_name: vlan
+              tf_name: vlan
+              unmarshal_tag: vlanId
+              type: Int64
+              optional: true
+              computed: true
+              use_state: true
+              min_int: 2
+              max_int: 4094
+              description: VLAN ID
+              example: 1500
+              handle_empty: true
+            - &attach_state
+              model_name: lanAttachState
+              tf_name: attach_state
+              type: String
+              description: The state of the attachment
+              example: attached
+              computed: true
+            - &attached_flag
+              model_name: isLanAttached
+              tf_name: attached
+              type: Bool
+              description: The state of the attachment
+              example: true
+              computed: true
+              ndfc_type: bool
+            - model_name: freeformconfig
+              tf_name: freeform_config
+              type: String
+              description: This field covers any configuration not included in overlay templates which is needed as part of this VRF attachment
+              example: "interface Vlan2000\\r\\n  delay 200"
+              exclude_test: true
+            - model_name: switchPorts
+              tf_name: switch_ports
+              type: List:String
+              description: List of switch ports
+              ndfc_type: csv
+              optional: true
+              computed: true
+              example: "[Ethernet1/1, Ethernet1/2]"
+            - model_name: portNames
+              tf_name: port_names
+              type: String
+              description: Combined port list in response of ndfc
+              example: "[Ethernet1/1, Ethernet1/2]"
+              tf_hide: true
+            - model_name: torPorts
+              tf_name: tor_ports
+              type: List:String
+              description: List of TOR ports
+              optional: true
+              computed: true
+              ndfc_type: csv
+              example: "[Ethernet1/1, Ethernet1/2]"
+            - model_name: instanceValues
+              tf_name: instance_values
+              type: String
+              optional: true
+              computed: true
+              description: Instance values
+              example: "isActive=false"
+
+
 
 
