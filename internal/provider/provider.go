@@ -2,8 +2,10 @@ package provider
 
 import (
 	"context"
+	"fmt"
 	"log"
 	"os"
+	"strconv"
 	"terraform-provider-ndfc/internal/provider/ndfc"
 	"terraform-provider-ndfc/internal/provider/provider/provider_ndfc"
 
@@ -50,6 +52,23 @@ func (p *ndfcProvider) Configure(ctx context.Context, req provider.ConfigureRequ
 	ctx = tflog.SetField(ctx, "ndfc_password", config.Password.ValueString())
 	ctx = tflog.SetField(ctx, "ndfc_domain", config.Domain.ValueString())
 	ctx = tflog.SetField(ctx, "allow_insecure", config.Insecure.ValueBool())
+	ctx = tflog.SetField(ctx, "timeout", config.Timeout.ValueInt64())
+
+	// WORKAROUND default setting in provider schema is not supported
+	timeout := int64(1000)
+	var err error
+	if os.Getenv("NDFC_TIMEOUT") != "" {
+		timeout, err = strconv.ParseInt(os.Getenv("NDFC_TIMEOUT"), 10, 64)
+		if err != nil {
+			resp.Diagnostics.AddError(
+				fmt.Sprintf("Invalid input '%s'", os.Getenv("NDFC_TIMEOUT")),
+				"A int64 value must be provided for NDFC_TIMEOUT",
+			)
+			return
+		}
+	} else if !config.Timeout.IsUnknown() && !config.Timeout.IsNull() {
+		timeout = config.Timeout.ValueInt64()
+	}
 
 	ctx = tflog.MaskFieldValuesWithFieldKeys(ctx, "ndfc_password")
 
@@ -77,8 +96,8 @@ func (p *ndfcProvider) Configure(ctx context.Context, req provider.ConfigureRequ
 
 	// If any of the expected configurations are missing, return
 	// errors with provider-specific guidance.
-	client, err := ndfc.NewNDFCClient(host, user,
-		password, domain, config.Insecure.ValueBool())
+	client, err := ndfc.NewNDFCClient(host, user, password, domain, config.Insecure.ValueBool(), timeout)
+
 	if err != nil {
 		resp.Diagnostics.AddError(
 			"Unable to create NDFC API client",
@@ -86,6 +105,7 @@ func (p *ndfcProvider) Configure(ctx context.Context, req provider.ConfigureRequ
 		)
 		return
 	}
+
 	// For creating mutexes
 	ndfc.NewResource(ndfc.ResourceVrfBulk)
 	ndfc.NewResource(ndfc.ResourceNetworks)
@@ -111,6 +131,8 @@ func (p *ndfcProvider) DataSources(ctx context.Context) []func() datasource.Data
 		NewVrfBulkDataSource,
 		NewNetworksDataSource,
 		NewInterfacesDataSource,
+		// NewInventoryDevicesDataSource,
+		// NewInventoryReachabilityDataSource,
 	}
 }
 
@@ -121,5 +143,7 @@ func (p *ndfcProvider) Resources(ctx context.Context) []func() resource.Resource
 		NewInterfaceEthernetResource,
 		NewInterfaceLoopbackResource,
 		NewInterfaceVlanResource,
+		// NewInventoryDevicesResource,
+		// NewConfigDeployResource,
 	}
 }

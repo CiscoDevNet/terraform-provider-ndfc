@@ -33,6 +33,11 @@ func NdfcProviderSchema(ctx context.Context) schema.Schema {
 				Description:         "NDFC Login credentials - password",
 				MarkdownDescription: "NDFC Login credentials - password",
 			},
+			"timeout": schema.Int64Attribute{
+				Optional:            true,
+				Description:         "NDFC HTTP request timeout - timeout",
+				MarkdownDescription: "NDFC HTTP request timeout - timeout",
+			},
 			"username": schema.StringAttribute{
 				Required:            true,
 				Description:         "NDFC Login credentials - user",
@@ -47,5 +52,6 @@ type NdfcModel struct {
 	Host     types.String `tfsdk:"host"`
 	Insecure types.Bool   `tfsdk:"insecure"`
 	Password types.String `tfsdk:"password"`
+	Timeout  types.Int64  `tfsdk:"timeout"`
 	Username types.String `tfsdk:"username"`
 }

@@ -67,7 +67,6 @@ func NewClient(url, basePath, usr, pwd, domain string, insecure bool, mods ...fu
 
 	cookieJar, _ := cookiejar.New(nil)
 	httpClient := http.Client{
-		Timeout:   60 * time.Second,
 		Transport: tr,
 		Jar:       cookieJar,
 	}
@@ -184,6 +183,7 @@ func (client *Client) Do(req Req) (Res, error) {
 	var res Res
 
 	for attempts := 0; ; attempts++ {
+
 		req.HttpReq.Body = io.NopCloser(bytes.NewBuffer(body))
 		if req.LogPayload {
 			log.Printf("[DEBUG] HTTP Request: %s, %s, %s", req.HttpReq.Method, req.HttpReq.URL, req.HttpReq.Body)
@@ -243,8 +243,9 @@ func (client *Client) Do(req Req) (Res, error) {
 				}
 			} else {
 				log.Printf("[ERROR] HTTP Request failed: StatusCode %v", httpRes.StatusCode)
+				log.Printf("[ERROR] HTTP Request failed: Full Response %v", httpRes)
 				log.Printf("[DEBUG] Exit from Do method")
-				return res, fmt.Errorf("HTTP Request failed: StatusCode %v", httpRes.StatusCode)
+				return res, fmt.Errorf("HTTP Request failed: StatusCode %v, Body: %v", httpRes.StatusCode, res)
 			}
 		}
 	}
@@ -426,6 +427,7 @@ func (client *Client) Authenticate() error {
 	log.Printf("Attempting authentication...")
 	client.AuthenticationMutex.Lock()
 	if client.Token == "" {
+		log.Printf("No token available, attempting login...")
 		err = client.Login()
 	}
 	client.AuthenticationMutex.Unlock()
