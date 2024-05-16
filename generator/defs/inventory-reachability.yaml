@@ -1,0 +1,208 @@
+---
+datasource:
+  name: inventory_reachability
+  rest_endpoint: /lan-fabric/rest/control/fabrics/%s/inventory/test-reachability
+  doc_category: Fabric
+  generate_tf_resource: true
+  attributes:
+    - &id
+      model_name: id
+      tf_name: id
+      description: The Terraform Unique Identifier for the Inventory Devices resource
+      type: String
+      id: true
+      use_state: true
+      computed: true
+    - &fabric_name
+      model_name: fabricName
+      tf_name: fabric_name
+      reference: true
+      description: The name of the fabric
+      type: String
+      example: CML
+      mandatory: true
+    - &auth_protocol
+      model_name: snmpV3AuthProtocol
+      tf_name: auth_protocol
+      type: String
+      validator: OneOf("md5", "sha", "md5_des", "md5_aes", "sha_des", "sha_aes")
+      description: The authentication protocol to use for the devices
+      mandatory: true
+      example: sha
+      ndfc_type: string
+    - &username
+      model_name: username
+      tf_name: username
+      type: String
+      description: The username to use for the devices
+      example: admin
+      mandatory: true
+      ndfc_type: string
+    - &password
+      model_name: password
+      tf_name: password
+      type: String
+      description: The password to use for the devices
+      example: admin_password
+      mandatory: true
+      sensitive: true
+      ndfc_type: string
+    - &seed_ip
+      model_name: seedIP
+      tf_name: seed_ip
+      type: String
+      description: The seed IP address to use for the discovery devices
+      example: 10.0.0.1
+      mandatory: true
+    - &max_hops
+      model_name: maxHops
+      tf_name: max_hops
+      type: Int64
+      description: The maximum number of hops to use during the discovery of devices
+      example: 10
+      mandatory: true
+      ndfc_type: int
+    - &set_as_individual_device_write_credential
+      model_name: discoveryCredForLan
+      tf_name: set_as_individual_device_write_credential
+      type: Bool
+      description: Set and use discovery credentials for LAN devices
+      mandatory: true
+      ndfc_type: bool
+      example: true
+    - &preserve_config
+      model_name: preserveConfig
+      tf_name: preserve_config
+      type: Bool
+      description: Preserve the configuration of the devices
+      mandatory: true
+      ndfc_type: bool
+      example: true
+    - &reachability_details
+      model_name: reachability_details
+      tf_name: reachability_details
+      description: The reachability details of the devices
+      type: Set
+      computed: true
+      ndfc_type: set
+      attributes:
+      - &ip_address
+        model_name: ip_address
+        tf_name: ip_address
+        type: String
+        description:  The ip address of the device
+        example: 10.0.0.1
+        computed: true
+        ndfc_type: string
+      - &hostname
+        model_name: hostname
+        tf_name: hostname
+        type: String
+        description: The hostname of the device
+        example: s1-leaf-101
+        computed: true
+        ndfc_type: string
+      - &device_index
+        model_name: device_index
+        tf_name: device_index
+        type: String
+        description: The NDFC device index
+        example: s1-leaf-101(FGE20360RRZ)
+        computed: true
+        ndfc_type: string
+      - &model
+        model_name: model
+        tf_name: model
+        type: String
+        description: The model of the device
+        example: N9K-9000v
+        computed: true
+        ndfc_type: string
+      - &version
+        model_name: version
+        tf_name: version
+        type: String
+        description: The software version of the device
+        example: 9.2(1)
+        computed: true
+        ndfc_type: string
+      - &serial_number
+        model_name: serial_number
+        tf_name: serial_number
+        type: String
+        description:  The serial number of the device
+        example: FGE20360RRZ
+        computed: true
+        ndfc_type: string
+      - &vdc_id
+        model_name: vdc_id
+        tf_name: vdc_id
+        type: String
+        description: The VDC ID of the device
+        example: "0"
+        computed: true
+        ndfc_type: string
+      - &vdc_mac
+        model_name: vdc_mac
+        tf_name: vdc_mac
+        type: String
+        description: The VDC MAC of the device
+        example: ""
+        computed: true
+        ndfc_type: string
+      - &reachable
+        model_name: reachable
+        tf_name: reachable
+        type: Bool
+        description: The reachable status of the device
+        example: true
+        computed: true
+        ndfc_type: bool
+      - &selectable
+        model_name: selectable
+        tf_name: selectable
+        type: Bool
+        description: The selectable status of the device
+        example: true
+        computed: true
+        ndfc_type: bool
+      - &authenticated
+        model_name: authenticated
+        tf_name: authenticated
+        type: Bool
+        description: The authenticated status of the device
+        example: true
+        computed: true
+        ndfc_type: bool
+      - &valid
+        model_name: valid
+        tf_name: valid
+        type: Bool
+        description: The valid status of the device
+        example: true
+        computed: true
+        ndfc_type: bool
+      - &known
+        model_name: known
+        tf_name: known
+        type: Bool
+        description: The known status of the device
+        example: true
+        computed: true
+        ndfc_type: bool
+      - &last_changed
+        model_name: last_changed
+        tf_name: last_changed
+        type: String
+        description: The last change of the device
+        example: ""
+        computed: true
+        ndfc_type: string
+      - &status_reason
+        model_name: status_reason
+        tf_name: status_reason
+        type: String
+        description: The status reason of the device
+        example: "already managed in abr_fabric"
+        computed: true
+        ndfc_type: string

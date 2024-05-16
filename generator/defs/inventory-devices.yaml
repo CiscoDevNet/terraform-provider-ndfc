@@ -1,0 +1,392 @@
+---
+resource:
+  name: inventory_devices
+  rest_endpoint: /lan-fabric/rest/control/fabrics/%s/inventory/switchesByFabric
+  doc_category: Fabric
+  generate_tf_resource: true
+  attributes:
+    - &id
+      model_name: id
+      tf_name: id
+      description: The Terraform Unique Identifier for the Inventory Devices resource
+      type: String
+      id: true
+      use_state: true
+      computed: true
+    - &fabric_name
+      model_name: fabricName
+      tf_name: fabric_name
+      reference: true
+      description: The name of the fabric
+      type: String
+      example: CML
+      mandatory: true
+      tf_requires_replace: true
+    - &auth_protocol
+      model_name: snmpV3AuthProtocol
+      tf_name: auth_protocol
+      type: String
+      validator: OneOf("md5", "sha", "md5_des", "md5_aes", "sha_des", "sha_aes")
+      description: The authentication protocol to use for the devices
+      default_value: md5
+      example: sha
+      ndfc_type: string
+    - &username
+      model_name: username
+      tf_name: username
+      type: String
+      description: The username to use for the devices
+      example: admin
+      mandatory: true
+      ndfc_type: string
+    - &password
+      model_name: password
+      tf_name: password
+      type: String
+      description: The password to use for the devices
+      example: admin_password
+      mandatory: true
+      sensitive: true
+      ndfc_type: string
+    - &seed_ip
+      model_name: seedIP
+      tf_name: seed_ip
+      type: String
+      description: The seed IP address to use for the discovery devices
+      example: 10.0.0.1
+    - &max_hops
+      model_name: maxHops
+      tf_name: max_hops
+      type: Int64
+      description: The maximum number of hops to use during the discovery of devices
+      example: 10
+      ndfc_type: int
+    - &set_as_individual_device_write_credential
+      model_name: discoveryCredForLan
+      tf_name: set_as_individual_device_write_credential
+      type: Bool
+      description: Set and use discovery credentials for LAN devices
+      default_value: false
+      ndfc_type: bool
+      example: true
+    - &preserve_config
+      model_name: preserveConfig
+      tf_name: preserve_config
+      type: Bool
+      description: Preserve the configuration of the devices
+      default_value: false
+      ndfc_type: bool
+      example: true
+    - &save
+      model_name: save
+      tf_name: save
+      type: Bool
+      default_value: false
+      description: Save the configuration of the devices
+      ndfc_type: bool
+      example: true
+    - &deploy
+      model_name: deploy
+      tf_name: deploy
+      type: Bool
+      default_value: false
+      description: Deploy the configuration of the devices
+      ndfc_type: bool
+      example: true
+    - &retries
+      model_name: retries
+      tf_name: retries
+      type: Int64
+      default_value: 300
+      description: The number of retries to use validate fabric status before execution of requests
+      example: 500
+      ndfc_type: int
+    - &retry_wait_timeout
+      model_name: retryWaitTimeout
+      tf_name: retry_wait_timeout
+      type: Int64
+      default_value: 5
+      description: The time to wait between retries to validate fabric status before execution of requests
+      example: 20
+      ndfc_type: int
+    - &devices
+      model_name: devices
+      tf_name: devices
+      description: The devices to manage in the inventory
+      type: Map
+      bulk: true
+      mandatory: true
+      ndfc_type: map
+      validator: SizeAtLeast(1) 
+      attributes:
+      - &role
+        model_name: role
+        tf_name: role
+        type: String
+        default_value: "leaf"
+        validator: OneOf("leaf", "spine", "border", "border_spine", "border_gateway", "border_gateway_spine", "super_spine", "border_super_spine", "border_gateway_super_spine", "access", "aggregation", "edge_router", "core_router", "tor")
+        description: The role of the device
+        example: spine
+        ndfc_type: string
+      - &discovery_type
+        model_name: discovery_type
+        tf_name: discovery_type
+        type: String
+        default_value: "discover"
+        validator: OneOf("bootstrap", "discover", "pre_provision", "rma")
+        description:  The discovery type of the device
+        example: pre_provision
+        ndfc_type: string
+      - &discovery_username
+        model_name: discovery_username
+        tf_name: discovery_username
+        type: String
+        description:  The discovery username to use for the device
+        example: username
+        optional: true
+        ndfc_type: string
+      - &discovery_password
+        model_name: discovery_password
+        tf_name: discovery_password
+        type: String
+        description:  The discovery password to use for the device
+        example: password
+        optional: true
+        sensitive: true
+        ndfc_type: string
+      - &discovery_auth_protocol
+        model_name: snmpV3AuthProtocol
+        tf_name: discovery_auth_protocol
+        type: String
+        validator: OneOf("md5", "sha", "md5_des", "md5_aes", "sha_des", "sha_aes")
+        description: The discovery authentication protocol to use for the device
+        example: sha
+        optional: true
+        ndfc_type: string
+      - &serial_number
+        model_name: serial_number
+        tf_name: serial_number
+        type: String
+        description:  The serial number of the device
+        example: FGE20360RRZ
+        optional: true
+        computed: true
+        ndfc_type: string
+      - &model
+        model_name: model
+        tf_name: model
+        type: String
+        description: The model of the device
+        example: N9K-9000v
+        optional: true
+        computed: true
+        ndfc_type: string
+      - &version
+        model_name: version
+        tf_name: version
+        type: String
+        description: The software version of the device
+        example: 9.2(1)
+        optional: true
+        computed: true
+        ndfc_type: string
+      - &hostname
+        model_name: hostname
+        tf_name: hostname
+        type: String
+        description: The hostname of the device
+        example: s1-leaf-101
+        optional: true
+        computed: true
+        ndfc_type: string
+      - &image_policy
+        model_name: image_policy
+        tf_name: image_policy
+        type: String
+        description: The image policy to use for the device
+        example: TODO_CHOOSE_EXAMPLE
+        optional: true
+        ndfc_type: string
+      - &gateway
+        model_name: gateway
+        tf_name: gateway
+        type: String
+        description: The gateway to use for the device
+        example: 10.61.124.1/24
+        optional: true
+        ndfc_type: string
+      - &modules_model
+        model_name: modules_model
+        tf_name: modules_model
+        description: The switch modules model information.
+        type: List:String
+        example: "[ \"N9K-X9736C-EX\", \"N9K-X9732C-FX\" ]"
+        optional: true
+        computed: true
+        ndfc_type: set
+      - &breakout
+        model_name: breakout
+        tf_name: breakout
+        type: String
+        description: The breakout command provided to teh device
+        example: "interface breakout module 1 port 1,11,19 map 10g-4x; interface breakout module 1 port 7 map 25g-4x"
+        optional: true
+        ndfc_type: string
+      - &port_mode
+        model_name: port_mode
+        tf_name: port_mode
+        type: String
+        description: The port mode of the breakout interface
+        example: "hardware profile portmode 48x25G + 2x100G + 4x40G"
+        optional: true
+        ndfc_type: string
+      - &uuid
+        model_name: uuid
+        tf_name: uuid
+        type: String
+        description: The NDFC UUID of the device
+        example: "DCNM-UUID-2581280"
+        computed: true
+        ndfc_type: string
+      - &switch_db_id
+        model_name: switch_db_id
+        tf_name: switch_db_id
+        type: String
+        description: The NDFC switch DB ID of the device
+        example: "2702780"
+        computed: true
+        ndfc_type: string
+      - &device_index
+        model_name: device_index
+        tf_name: device_index
+        type: String
+        description: The NDFC device index
+        example: s1-leaf-101(FGE20360RRZ)
+        computed: true
+        ndfc_type: string
+      - &vdc_id
+        model_name: vdc_id
+        tf_name: vdc_id
+        type: String
+        description: The VDC ID of the device
+        example: "0"
+        computed: true
+        ndfc_type: string
+      - &vdc_mac
+        model_name: vdc_mac
+        tf_name: vdc_mac
+        type: String
+        description: The VDC MAC of the device
+        example: ""
+        computed: true
+        ndfc_type: string
+      - &mode
+        model_name: mode
+        tf_name: mode
+        type: String
+        description: The mode of the device
+        example: "Normal"
+        computed: true
+        ndfc_type: string
+      - &config_status
+        model_name: config_status
+        tf_name: config_status
+        type: String
+        description: The configuration status of the device
+        example: "NA"
+        computed: true
+        ndfc_type: string
+      - &oper_status
+        model_name: oper_status
+        tf_name: oper_status
+        type: String
+        description: The operational status of the device
+        example: "Minor"
+        computed: true
+        ndfc_type: string
+      - &discovery_status
+        model_name: discovery_status
+        tf_name: discovery_status
+        type: String
+        description: The operational status of the device
+        example: "ok"
+        computed: true
+        ndfc_type: string
+      - &managable
+        model_name: managable
+        tf_name: managable
+        type: Bool
+        description: The managable status of the device
+        example: true
+        computed: true
+        ndfc_type: bool
+      
+datasource:
+  name: inventory_devices
+  doc_category: Fabric
+  generate_tf_resource: true
+  attributes:
+    - <<: *id
+    - <<: *fabric_name
+    - model_name: devices
+      tf_name: devices
+      description: The devices to manage in the inventory
+      type: Set
+      bulk: true
+      computed: true
+      ndfc_type: set
+      attributes:
+      - &ip_address
+        model_name: ip_address
+        tf_name: ip_address
+        type: String
+        description:  The ip address to use for the device
+        example: 10.0.0.1
+        computed: true
+        ndfc_type: string
+      - <<: *role
+        computed: true
+        optional: false
+      - <<: *serial_number
+        computed: true
+        optional: false
+      - <<: *model
+        computed: true
+        optional: false
+      - <<: *version
+        computed: true
+        optional: false
+      - <<: *hostname
+        computed: true
+        optional: false
+      - <<: *uuid
+        computed: true
+        optional: false
+      - <<: *switch_db_id
+        computed: true
+        optional: false
+      - <<: *device_index
+        computed: true
+        optional: false
+      - <<: *vdc_id
+        computed: true
+        optional: false
+      - <<: *vdc_mac
+        computed: true
+        optional: false
+      - <<: *mode
+        computed: true
+        optional: false
+      - <<: *config_status
+        computed: true
+        optional: false
+      - <<: *oper_status
+        computed: true
+        optional: false
+      - <<: *discovery_status
+        computed: true
+        optional: false
+      - <<: *managable
+        computed: true
+        optional: false
+      

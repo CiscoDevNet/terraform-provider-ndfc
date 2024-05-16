@@ -131,8 +131,8 @@ func (p *ndfcProvider) DataSources(ctx context.Context) []func() datasource.Data
 		NewVrfBulkDataSource,
 		NewNetworksDataSource,
 		NewInterfacesDataSource,
-		// NewInventoryDevicesDataSource,
-		// NewInventoryReachabilityDataSource,
+		NewInventoryDevicesDataSource,
+		NewInventoryReachabilityDataSource,
 	}
 }
 
@@ -143,7 +143,7 @@ func (p *ndfcProvider) Resources(ctx context.Context) []func() resource.Resource
 		NewInterfaceEthernetResource,
 		NewInterfaceLoopbackResource,
 		NewInterfaceVlanResource,
-		// NewInventoryDevicesResource,
-		// NewConfigDeployResource,
+		NewInventoryDevicesResource,
+		NewConfigDeployResource,
 	}
 }
