@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"log"
 	"sync"
+	"terraform-provider-ndfc/internal/provider/datasources/datasource_interfaces"
 	"terraform-provider-ndfc/internal/provider/ndfc/api"
 	"terraform-provider-ndfc/internal/provider/resources/resource_interface_common"
 	"terraform-provider-ndfc/tfutils/go-nd"
@@ -37,6 +38,11 @@ func (c NDFC) NewInterfaceObject(ifType string, client *nd.Client, lock *sync.Mu
 		return intf
 	case "loopback":
 		intf := new(NDFCLoopbackInterface)
+		intf.client = client
+		intf.lock = lock
+		return intf
+	case "datasource":
+		intf := new(NDFCInterfaceCommon)
 		intf.client = client
 		intf.lock = lock
 		return intf
@@ -201,4 +207,32 @@ func (i *NDFCInterfaceCommon) deleteInterface(ctx context.Context, diags *diag.D
 		return
 	}
 	tflog.Debug(ctx, fmt.Sprintf("Response: %s", res))
+}
+
+func (i *NDFCInterfaceCommon) DsGetInterfaceDetails(ctx context.Context, diags *diag.Diagnostics,
+	inData *datasource_interfaces.NDFCInterfacesModel) {
+
+	ifApi := api.NewInterfaceAPI(i.lock, i.client)
+	ifApi.SwitchSerial = inData.SerialNumber
+	ifApi.PortMode = inData.PortModes
+	ifApi.Excludes = inData.Excludes
+	ifApi.IfTypes = inData.InterfaceTypes
+	ifApi.SetAPI(api.GetInterfaceDetailed)
+	tflog.Debug(ctx, fmt.Sprintf("DsGetInterfaceDetails: Getting interfaces for serial=|%s|,PortMode=|%s| ifTypes=|%s| excludes=|%s|",
+		inData.SerialNumber,
+		inData.PortModes,
+		inData.InterfaceTypes,
+		inData.Excludes))
+	res, err := ifApi.Get()
+	if err != nil {
+		diags.AddError("Error getting interfaces", err.Error()+string(res))
+		tflog.Error(ctx, fmt.Sprintf("Error getting interfaces: %s: %v", err.Error(), string(res)))
+		return
+	}
+	log.Printf("Response=%s", string(res))
+	err = json.Unmarshal((res), &inData.Interfaces)
+	if err != nil {
+		diags.AddError("Error unmarshalling data", err.Error())
+		return
+	}
 }

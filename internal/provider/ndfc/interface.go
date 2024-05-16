@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log"
 
+	"terraform-provider-ndfc/internal/provider/datasources/datasource_interfaces"
 	"terraform-provider-ndfc/internal/provider/resources/resource_interface_common"
 
 	"github.com/hashicorp/terraform-plugin-framework/diag"
@@ -192,4 +193,12 @@ func (c NDFC) RscDeleteInterfaces(ctx context.Context, dg *diag.Diagnostics, in 
 			return
 		}
 	*/
+}
+
+func (c NDFC) DsGetInterfaces(ctx context.Context, dg *diag.Diagnostics, in *datasource_interfaces.NDFCInterfacesModel) {
+	// Get API call logic
+	tflog.Debug(ctx, "DsGetInterfaces: Getting interfaces")
+	ifObj := c.NewInterfaceObject("datasource", &c.apiClient, c.GetLock(ResourceInterfaces))
+	ifObj.(*NDFCInterfaceCommon).DsGetInterfaceDetails(ctx, dg, in)
+
 }

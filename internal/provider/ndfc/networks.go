@@ -425,57 +425,37 @@ func (c *NDFC) DsGetNetworks(ctx context.Context, dg *diag.Diagnostics, fabricNa
 		dg.AddWarning("No Networks found", "No Networks found in NDFC")
 		return nil
 	}
-	/*
-		err = c.RscGetNetworkAttachments(ctx, ndNets)
-		if err == nil {
-			tflog.Debug(ctx, "Network Attachments read success")
 
-			for i, nwEntry := range ndNets.Networks {
-				if nwEntry.FilterThisValue {
-					continue
-				}
-				vrfLevelDep := false
+	ndNets.CreateSearchMap()
+	//Get Attachments
+	var nwAttachments []datasource_networks.NDFCNetworkAttachmentsPayload
+	rsObjAttach := api.NewNetAttachAPI(fabricName, c.GetLock(ResourceNetworks), &c.apiClient)
 
-				if vl, vlOk := (*depMap)[i]; vlOk {
-					//first element is vrf name if vrf level deploy is set
-					if vl[0] == i {
-						nwEntry.DeployAttachments = (nwEntry.NetworkStatus == "DEPLOYED")
-						log.Printf("Setting Network level dep flag for %s to %v", i, nwEntry.DeployAttachments)
-						vrfLevelDep = true
-					}
-				}
-				for j, attachEntry := range nwEntry.Attachments {
-					if attachEntry.FilterThisValue {
-						continue
-					}
-					log.Printf("Attachment %s added to Network %s", j, i)
-					if !globalDep && !vrfLevelDep {
-						if attachEntry.AttachState == "DEPLOYED" {
-							log.Printf("Attachment %s deployed", j)
-							attachEntry.DeployThisAttachment = true
-						}
-					}
+	rsObjAttach.GetnwList = ndNets.GetNetworksNames()
+	resAttach, err := rsObjAttach.Get()
+	if err != nil {
+		dg.AddError("Network Attachments Get Failed", err.Error())
+		return nil
+	}
+	err = json.Unmarshal(resAttach, &nwAttachments)
+	if err != nil {
+		dg.AddError("Network Attachments Unmarshal Failed", err.Error())
+		return nil
+	}
 
-					if portOrder, ok := (*depMap)["SwitchPorts:"+i+"/"+j]; ok {
-						log.Printf("SwitchPorts order %v", portOrder)
-						processPortListOrder(&attachEntry.SwitchPorts, portOrder)
-					}
-					if portOrder, ok := (*depMap)["TorPorts:"+i+"/"+j]; ok {
-						log.Printf("TorPorts order %v", portOrder)
-						processPortListOrder(&attachEntry.TorPorts, portOrder)
-					}
-					//put modified entry back
-					nwEntry.Attachments[j] = attachEntry
+	//Fill Attachments
+
+	for _, attach := range nwAttachments {
+
+		if nwEntry, ok := ndNets.NetworksMap[attach.NetworkName]; ok {
+			for _, attachEntry := range attach.Attachments {
+				//skip implicit attachments
+				if *attachEntry.Attached {
+					nwEntry.Attachments = append(nwEntry.Attachments, attachEntry)
 				}
-				//put modified entry back
-				ndNets.Networks[i] = nwEntry
 			}
-
-		} else {
-			tflog.Error(ctx, "Network Attachments read failed", map[string]interface{}{"Err": err})
-			dg.AddError("Network Attachments read failed", err.Error())
 		}
-	*/
+	}
 	vModel := new(datasource_networks.NetworksModel)
 	vModel.FabricName = types.StringValue(fabricName)
 	d := vModel.SetModelData(ndNets)

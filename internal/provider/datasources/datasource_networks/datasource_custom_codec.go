@@ -36,6 +36,11 @@ type NDFCDHCPRelayInnerPayload struct {
 	ServersInner CustomNDFCDhcpRelayServersValues `json:"dhcpServers"`
 }
 
+type NDFCNetworkAttachmentsPayload struct {
+	NetworkName string                 `json:"networkName,omitempty"`
+	Attachments []NDFCAttachmentsValue `json:"lanAttachList,omitempty"`
+}
+
 func (v *NDFCDhcpRelayServersValues) UnmarshalJSON(data []byte) error {
 	log.Printf("Unmarshalling NDFCDhcpRelayServersValues")
 	if string(data) == "null" {
@@ -95,4 +100,19 @@ func (v NDFCDhcpRelayServersValues) MarshalJSON() ([]byte, error) {
 		return []byte("\"\""), err
 	}
 	return retBytes, nil
+}
+
+func (v NDFCNetworksModel) GetNetworksNames() []string {
+	var ret []string
+	for _, nw := range v.Networks {
+		ret = append(ret, nw.NetworkName)
+	}
+	return ret
+}
+
+func (v *NDFCNetworksModel) CreateSearchMap() {
+	v.NetworksMap = make(map[string]*NDFCNetworksValue)
+	for i := range v.Networks {
+		v.NetworksMap[v.Networks[i].NetworkName] = &v.Networks[i]
+	}
 }

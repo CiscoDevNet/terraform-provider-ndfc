@@ -17,7 +17,7 @@ When a test is ran,
 Terraform runs plan, apply, refresh, and then final plan for each TestStep in the TestCase.
 */
 
-func TestAccNDFCVrfBulkResourceCRUD(t *testing.T) {
+func TestAccVRFResourceCRUD(t *testing.T) {
 
 	x := &map[string]string{
 		"RscType":  ndfc.ResourceVrfBulk,
@@ -132,7 +132,7 @@ func TestAccNDFCVrfBulkResourceCRUD(t *testing.T) {
 		}})
 }
 
-func TestAccNDFCVrfBulkResourceAttachmentCRUD(t *testing.T) {
+func TestAccVRFResourceAttachmentCRUD(t *testing.T) {
 
 	x := &map[string]string{
 		"RscType":  ndfc.ResourceVrfBulk,
@@ -244,7 +244,7 @@ func TestAccNDFCVrfBulkResourceAttachmentCRUD(t *testing.T) {
 }
 
 // GLOBAL_DEPLOY_TEST Add 10 VRFs with 2 attachments, and global deployment
-func TestAccNDFCVrfBulkGlobalDeploy(t *testing.T) {
+func TestAccVRFResourceGlobalDeploy(t *testing.T) {
 
 	x := &map[string]string{
 		"RscType":  ndfc.ResourceVrfBulk,
@@ -295,7 +295,7 @@ func TestAccNDFCVrfBulkGlobalDeploy(t *testing.T) {
 }
 
 // GLOBAL_DEPLOY_TEST Add 10 VRFs with 2 attachments, VRF level deployment
-func TestAccNDFCVrfBulkVrfLevelDeploy(t *testing.T) {
+func TestAccVRFResourceVrfLevelDeploy(t *testing.T) {
 
 	x := &map[string]string{
 		"RscType":  ndfc.ResourceVrfBulk,
@@ -345,7 +345,7 @@ func TestAccNDFCVrfBulkVrfLevelDeploy(t *testing.T) {
 	})
 }
 
-func TestAccNDFCVrfBulkVrfAttachLevelDeploy(t *testing.T) {
+func TestAccVRFResourceVrfAttachLevelDeploy(t *testing.T) {
 
 	x := &map[string]string{
 		"RscType":  ndfc.ResourceVrfBulk,
@@ -383,7 +383,7 @@ func TestAccNDFCVrfBulkVrfAttachLevelDeploy(t *testing.T) {
 	})
 }
 
-func TestAccNDFCMultiResourceWithDeploy(t *testing.T) {
+func TestAccVRFResourceMultiResourceWithDeploy(t *testing.T) {
 
 	x := &map[string]string{
 		"RscType":  ndfc.ResourceVrfBulk,
