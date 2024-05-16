@@ -24,7 +24,7 @@ When a test is ran,
 Terraform runs plan, apply, refresh, and then final plan for each TestStep in the TestCase.
 */
 
-func TestAccNDFCNetworksResourceCRUD(t *testing.T) {
+func TestAccNetworksResourceCRUD(t *testing.T) {
 
 	x := &map[string]string{
 		"RscType":  ndfc.ResourceNetworks,
@@ -147,7 +147,7 @@ func TestAccNDFCNetworksResourceCRUD(t *testing.T) {
 		}})
 }
 
-func TestAccNDFCNetworkAttachmentCRUD(t *testing.T) {
+func TestAccNetworksResourceAttachmentCRUD(t *testing.T) {
 
 	x := &map[string]string{
 		"RscType":  ndfc.ResourceVrfBulk,
@@ -285,7 +285,7 @@ func TestAccNDFCNetworkAttachmentCRUD(t *testing.T) {
 		}})
 }
 
-func TestAccNDFCNetworksGlobalDeploy(t *testing.T) {
+func TestAccNetworksResourceGlobalDeploy(t *testing.T) {
 	x := &map[string]string{
 		"RscType":  ndfc.ResourceNetworks,
 		"RscName":  "network_test",
@@ -336,7 +336,7 @@ func TestAccNDFCNetworksGlobalDeploy(t *testing.T) {
 		}})
 }
 
-func TestAccNetworkAttachmentDeployNetLevel(t *testing.T) {
+func TestAccNetworksResourceAttachmentDeployNetLevel(t *testing.T) {
 	x := &map[string]string{
 		"RscType":  ndfc.ResourceNetworks,
 		"RscName":  "network_test",
@@ -387,7 +387,7 @@ func TestAccNetworkAttachmentDeployNetLevel(t *testing.T) {
 		}})
 }
 
-func TestAccNetworkAttachmentDeployAttachments(t *testing.T) {
+func TestAccNetworksResourceAttachmentDeployAttachments(t *testing.T) {
 	x := &map[string]string{
 		"RscType":  ndfc.ResourceNetworks,
 		"RscName":  "network_test",

@@ -1,6 +1,7 @@
 package api
 
 import (
+	"log"
 	"sync"
 	"terraform-provider-ndfc/tfutils/go-nd"
 )
@@ -9,6 +10,9 @@ type InterfaceAPI struct {
 	NDFCAPICommon
 	SwitchSerial string
 	Policy       string
+	IfTypes      string
+	PortMode     string
+	Excludes     string
 	mutex        *sync.Mutex
 	deployFlag   bool
 	APIFunction  int
@@ -16,7 +20,7 @@ type InterfaceAPI struct {
 
 const UrlInterface = "/lan-fabric/rest/interface"
 const UrlInterfaceDeploy = "/lan-fabric/rest/interface/deploy"
-const UrlGetInterfaceDetailed = "lan-fabric/rest/interface/detail/filter"
+const UrlGetInterfaceDetailed = "/lan-fabric/rest/interface/detail/filter"
 const UrlInterfaceGlobal = "/lan-fabric/rest/globalInterface"
 
 const (
@@ -34,10 +38,22 @@ func (c *InterfaceAPI) GetLock() *sync.Mutex {
 func (c *InterfaceAPI) GetUrl() string {
 	switch c.APIFunction {
 	case GetInterfaceDetailed:
-		if c.SwitchSerial != "" {
-			return (UrlGetInterfaceDetailed + "?serialNumber=" + c.SwitchSerial)
+		url := UrlGetInterfaceDetailed
+		if c.SwitchSerial == "" {
+			log.Fatalf("SwitchSerial is required for GetInterfaceDetailed")
+			return ""
 		}
-		return UrlGetInterfaceDetailed
+		url += "?serialNumber=" + c.SwitchSerial
+		if c.PortMode != "" {
+			url += "&portModes=" + c.PortMode
+		}
+		if c.Excludes != "" {
+			url += "&excludes=" + c.Excludes
+		}
+		if c.IfTypes != "" {
+			url += "&ifTypes=" + c.IfTypes
+		}
+		return url
 	case GetInterface:
 		fallthrough
 	default:
@@ -49,7 +65,6 @@ func (c *InterfaceAPI) GetUrl() string {
 		}
 		return UrlInterface
 	}
-	return ""
 }
 
 func (c *InterfaceAPI) PostUrl() string {

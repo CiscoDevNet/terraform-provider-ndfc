@@ -119,7 +119,7 @@ func ModifyNetworksObject(nws **resource_networks.NDFCNetworksModel, nwNo int, v
 }
 
 func IncreaseNetCount(nw **resource_networks.NDFCNetworksModel, nwToAdd int,
-	globaldeploy, net_deploy, deployNeeded bool, nwName string, serials []string) {
+	globaldeploy, net_deploy, deployNeeded bool, vrfName string, serials []string) {
 	nets := *nw
 	nets.DeployAllAttachments = globaldeploy
 	log.Printf("Add more Networks  Network Count: %d", nwToAdd)
@@ -132,7 +132,7 @@ func IncreaseNetCount(nw **resource_networks.NDFCNetworksModel, nwToAdd int,
 		//nw.VrfTemplateConfig.VrfDescription = "Network Description"
 		//nw.NetworkName = nwName
 		nw.DeployAttachments = net_deploy
-		nw.VrfName = nwName
+		nw.VrfName = vrfName
 		if len(serials) > 0 {
 			nw.Attachments = make(map[string]rna.NDFCAttachmentsValue)
 			for j := range serials {

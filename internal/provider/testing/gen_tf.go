@@ -142,6 +142,12 @@ func GetVRFTFConfigWithMultipleResource(tt string, cfg map[string]string, vrfBul
 		"add": func(a, b int) int {
 			return a + b
 		},
+		"deref": func(a *int64) int64 {
+			if a == nil {
+				return 0
+			}
+			return *a
+		},
 	}
 	tmpl := bytes.Buffer{}
 	root_path, _ := os.Getwd()

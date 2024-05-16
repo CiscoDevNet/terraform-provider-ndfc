@@ -348,6 +348,7 @@ datasource:
       tf_name: networks
       description: List of Networks
       type: List
+      bulk: true
       attributes:
         - <<: *netName
           tf_hide: false

@@ -12,7 +12,8 @@ resource:
       example: 1
       computed: true
       id: true
-    - model_name: policy
+    - &policy
+      model_name: policy
       tf_name: policy
       type: String
       default_value: int_trunk_host
@@ -27,7 +28,8 @@ resource:
       description: "Deploy the configuration"
       example: true
       ndfc_type: bool
-    - model_name: serial_number
+    - &serialNumber
+      model_name: serial_number
       tf_name: serial_number
       type: String
       description: Serial number of switch to configure
@@ -35,7 +37,8 @@ resource:
       payload_hide: true
       tf_requires_replace: true
       validator: ConflictsWith(path.Expressions {path.MatchRoot("interfaces").AtAnyMapKey().AtName("serial_number")}...)
-    - model_name: interfaces
+    - &interfaces 
+      model_name: interfaces
       tf_name: interfaces
       bulk: true
       filtered: true

@@ -13,8 +13,9 @@ import (
 )
 
 type NDFCNetworksModel struct {
-	FabricName string             `json:"fabric,omitempty"`
-	Networks   NDFCNetworksValues `json:"networks,omitempty"`
+	FabricName  string                        `json:"fabric,omitempty"`
+	Networks    NDFCNetworksValues            `json:"networks,omitempty"`
+	NetworksMap map[string]*NDFCNetworksValue `json:"-"`
 }
 
 type NDFCNetworksValues []NDFCNetworksValue
@@ -533,6 +534,8 @@ func (v NetworksModel) GetModelData() *NDFCNetworksModel {
 	}
 
 	//MARSHALL_LIST
+
+	data.NetworksMap = make(map[string]*NDFCNetworksValue)
 
 	if !v.Networks.IsNull() && !v.Networks.IsUnknown() {
 		elements := make([]NetworksValue, len(v.Networks.Elements()))
