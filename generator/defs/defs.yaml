@@ -10,4 +10,6 @@ files:
   - interface_loopback.yaml
   - fabric.yaml
   - interface_vlan.yaml
-
+  - inventory-reachability.yaml
+  - configuration-deploy.yaml
+  - inventory-devices.yaml
