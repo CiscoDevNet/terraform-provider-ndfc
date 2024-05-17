@@ -64,6 +64,10 @@ resource "ndfc_{{.RscType}}" "{{.RscName}}" {
             {{- if ne $ifEntry.NvPairs.RouteMapTag  ""}}
             route_map_tag = "{{$ifEntry.NvPairs.RouteMapTag}}"
             {{- end}}
+            {{- if eq $ifEntry.InterfaceType "vlan" }}
+            ipv4_prefix_length = "{{$ifEntry.NvPairs.Ipv4PrefixLength}}"
+            {{end}}
+            
         }
     {{- end}}
     }

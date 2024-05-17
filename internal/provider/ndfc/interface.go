@@ -79,13 +79,10 @@ func (c NDFC) RscGetInterfaces(ctx context.Context, dg *diag.Diagnostics, in res
 
 func (c NDFC) RscCreateInterfaces(ctx context.Context, dg *diag.Diagnostics, in resource_interface_common.InterfaceModel) {
 	// Create API call logic
-	var inData *resource_interface_common.NDFCInterfaceCommonModel
-
-	inData = in.GetModelData()
+	tflog.Debug(ctx, fmt.Sprintf("RscCreateInterfaces: Creating interfaces for type %s", in.GetInterfaceType()))
+	inData := in.GetModelData()
 	c.IfTypeSet(inData, in.GetInterfaceType())
-
 	c.IfPreProcess(inData)
-
 	intfObj := c.NewInterfaceObject(in.GetInterfaceType(), &c.apiClient, c.GetLock(ResourceInterfaces))
 	intfObj.CreateInterface(ctx, dg, inData)
 	if dg.HasError() {
@@ -124,6 +121,7 @@ func (c NDFC) RscUpdateInterfaces(ctx context.Context, dg *diag.Diagnostics, uni
 	ifObj := c.NewInterfaceObject(planData.GetInterfaceType(), &c.apiClient, c.GetLock(ResourceInterfaces))
 
 	//Delete any interfaces marked for delete
+	tflog.Debug(ctx, "Deleting interfaces marked for delete")
 	delIntf := actions["del"].(*resource_interface_common.NDFCInterfaceCommonModel)
 	ifObj.DeleteInterface(ctx, dg, delIntf)
 	if dg.HasError() {
@@ -131,6 +129,7 @@ func (c NDFC) RscUpdateInterfaces(ctx context.Context, dg *diag.Diagnostics, uni
 		return
 	}
 	// Perform updates
+	tflog.Debug(ctx, "Creating new interfaces")
 	createIntf := actions["create"].(*resource_interface_common.NDFCInterfaceCommonModel)
 	c.IfPreProcess(createIntf)
 	ifObj.CreateInterface(ctx, dg, createIntf)
@@ -139,6 +138,7 @@ func (c NDFC) RscUpdateInterfaces(ctx context.Context, dg *diag.Diagnostics, uni
 		return
 	}
 
+	tflog.Debug(ctx, "Updating interfaces")
 	updateIntf := actions["update"].(*resource_interface_common.NDFCInterfaceCommonModel)
 	c.IfPreProcess(updateIntf)
 	ifObj.ModifyInterface(ctx, dg, updateIntf)

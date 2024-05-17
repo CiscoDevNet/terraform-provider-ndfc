@@ -86,11 +86,6 @@ func InterfacesDataSourceSchema(ctx context.Context) schema.Schema {
 							Description:         "Mode of the interface",
 							MarkdownDescription: "Mode of the interface",
 						},
-						"mtu": schema.Int64Attribute{
-							Optional:            true,
-							Description:         "MTU of the interface",
-							MarkdownDescription: "MTU of the interface",
-						},
 						"native_vlan_id": schema.Int64Attribute{
 							Optional:            true,
 							Description:         "Native VLAN ID",
@@ -387,24 +382,6 @@ func (t InterfacesType) ValueFromObject(ctx context.Context, in basetypes.Object
 			fmt.Sprintf(`mode expected to be basetypes.StringValue, was: %T`, modeAttribute))
 	}
 
-	mtuAttribute, ok := attributes["mtu"]
-
-	if !ok {
-		diags.AddError(
-			"Attribute Missing",
-			`mtu is missing from object`)
-
-		return nil, diags
-	}
-
-	mtuVal, ok := mtuAttribute.(basetypes.Int64Value)
-
-	if !ok {
-		diags.AddError(
-			"Attribute Wrong Type",
-			fmt.Sprintf(`mtu expected to be basetypes.Int64Value, was: %T`, mtuAttribute))
-	}
-
 	nativeVlanIdAttribute, ok := attributes["native_vlan_id"]
 
 	if !ok {
@@ -565,7 +542,6 @@ func (t InterfacesType) ValueFromObject(ctx context.Context, in basetypes.Object
 		Ipv4Address:      ipv4AddressVal,
 		IsPhysical:       isPhysicalVal,
 		Mode:             modeVal,
-		Mtu:              mtuVal,
 		NativeVlanId:     nativeVlanIdVal,
 		OperStatus:       operStatusVal,
 		OperStatusCause:  operStatusCauseVal,
@@ -839,24 +815,6 @@ func NewInterfacesValue(attributeTypes map[string]attr.Type, attributes map[stri
 			fmt.Sprintf(`mode expected to be basetypes.StringValue, was: %T`, modeAttribute))
 	}
 
-	mtuAttribute, ok := attributes["mtu"]
-
-	if !ok {
-		diags.AddError(
-			"Attribute Missing",
-			`mtu is missing from object`)
-
-		return NewInterfacesValueUnknown(), diags
-	}
-
-	mtuVal, ok := mtuAttribute.(basetypes.Int64Value)
-
-	if !ok {
-		diags.AddError(
-			"Attribute Wrong Type",
-			fmt.Sprintf(`mtu expected to be basetypes.Int64Value, was: %T`, mtuAttribute))
-	}
-
 	nativeVlanIdAttribute, ok := attributes["native_vlan_id"]
 
 	if !ok {
@@ -1017,7 +975,6 @@ func NewInterfacesValue(attributeTypes map[string]attr.Type, attributes map[stri
 		Ipv4Address:      ipv4AddressVal,
 		IsPhysical:       isPhysicalVal,
 		Mode:             modeVal,
-		Mtu:              mtuVal,
 		NativeVlanId:     nativeVlanIdVal,
 		OperStatus:       operStatusVal,
 		OperStatusCause:  operStatusCauseVal,
@@ -1109,7 +1066,6 @@ type InterfacesValue struct {
 	Ipv4Address      basetypes.StringValue `tfsdk:"ipv4_address"`
 	IsPhysical       basetypes.BoolValue   `tfsdk:"is_physical"`
 	Mode             basetypes.StringValue `tfsdk:"mode"`
-	Mtu              basetypes.Int64Value  `tfsdk:"mtu"`
 	NativeVlanId     basetypes.Int64Value  `tfsdk:"native_vlan_id"`
 	OperStatus       basetypes.StringValue `tfsdk:"oper_status"`
 	OperStatusCause  basetypes.StringValue `tfsdk:"oper_status_cause"`
@@ -1122,7 +1078,7 @@ type InterfacesValue struct {
 }
 
 func (v InterfacesValue) ToTerraformValue(ctx context.Context) (tftypes.Value, error) {
-	attrTypes := make(map[string]tftypes.Type, 20)
+	attrTypes := make(map[string]tftypes.Type, 19)
 
 	var val tftypes.Value
 	var err error
@@ -1138,7 +1094,6 @@ func (v InterfacesValue) ToTerraformValue(ctx context.Context) (tftypes.Value, e
 	attrTypes["ipv4_address"] = basetypes.StringType{}.TerraformType(ctx)
 	attrTypes["is_physical"] = basetypes.BoolType{}.TerraformType(ctx)
 	attrTypes["mode"] = basetypes.StringType{}.TerraformType(ctx)
-	attrTypes["mtu"] = basetypes.Int64Type{}.TerraformType(ctx)
 	attrTypes["native_vlan_id"] = basetypes.Int64Type{}.TerraformType(ctx)
 	attrTypes["oper_status"] = basetypes.StringType{}.TerraformType(ctx)
 	attrTypes["oper_status_cause"] = basetypes.StringType{}.TerraformType(ctx)
@@ -1152,7 +1107,7 @@ func (v InterfacesValue) ToTerraformValue(ctx context.Context) (tftypes.Value, e
 
 	switch v.state {
 	case attr.ValueStateKnown:
-		vals := make(map[string]tftypes.Value, 20)
+		vals := make(map[string]tftypes.Value, 19)
 
 		val, err = v.AdminStatus.ToTerraformValue(ctx)
 
@@ -1241,14 +1196,6 @@ func (v InterfacesValue) ToTerraformValue(ctx context.Context) (tftypes.Value, e
 		}
 
 		vals["mode"] = val
-
-		val, err = v.Mtu.ToTerraformValue(ctx)
-
-		if err != nil {
-			return tftypes.NewValue(objectType, tftypes.UnknownValue), err
-		}
-
-		vals["mtu"] = val
 
 		val, err = v.NativeVlanId.ToTerraformValue(ctx)
 
@@ -1356,7 +1303,6 @@ func (v InterfacesValue) ToObjectValue(ctx context.Context) (basetypes.ObjectVal
 			"ipv4_address":      basetypes.StringType{},
 			"is_physical":       basetypes.BoolType{},
 			"mode":              basetypes.StringType{},
-			"mtu":               basetypes.Int64Type{},
 			"native_vlan_id":    basetypes.Int64Type{},
 			"oper_status":       basetypes.StringType{},
 			"oper_status_cause": basetypes.StringType{},
@@ -1378,7 +1324,6 @@ func (v InterfacesValue) ToObjectValue(ctx context.Context) (basetypes.ObjectVal
 			"ipv4_address":      v.Ipv4Address,
 			"is_physical":       v.IsPhysical,
 			"mode":              v.Mode,
-			"mtu":               v.Mtu,
 			"native_vlan_id":    v.NativeVlanId,
 			"oper_status":       v.OperStatus,
 			"oper_status_cause": v.OperStatusCause,
@@ -1451,10 +1396,6 @@ func (v InterfacesValue) Equal(o attr.Value) bool {
 		return false
 	}
 
-	if !v.Mtu.Equal(other.Mtu) {
-		return false
-	}
-
 	if !v.NativeVlanId.Equal(other.NativeVlanId) {
 		return false
 	}
@@ -1511,7 +1452,6 @@ func (v InterfacesValue) AttributeTypes(ctx context.Context) map[string]attr.Typ
 		"ipv4_address":      basetypes.StringType{},
 		"is_physical":       basetypes.BoolType{},
 		"mode":              basetypes.StringType{},
-		"mtu":               basetypes.Int64Type{},
 		"native_vlan_id":    basetypes.Int64Type{},
 		"oper_status":       basetypes.StringType{},
 		"oper_status_cause": basetypes.StringType{},

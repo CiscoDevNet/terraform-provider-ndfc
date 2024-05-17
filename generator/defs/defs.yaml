@@ -9,4 +9,5 @@ files:
   - interface_eth.yaml
   - interface_loopback.yaml
   - fabric.yaml
+  - interface_vlan.yaml
 

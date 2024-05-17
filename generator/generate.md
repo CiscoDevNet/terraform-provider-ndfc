@@ -24,6 +24,8 @@ For detailed working of the `tfgenerator` tool, check the documentation in https
 See https://github.com/mdmohan/tfgenerator/blob/main/generator/Field-help.md for detailed help on the fields in yaml file.
 * Add the new yaml file to the list in generator/defs/defs.yaml. The tool only processes the files in this list.       
 * Run `go generate` 
+** Note: Before Running `go generate` Please make sure that `tfgenerator` is on `master` branch and up to date **
+** Always remember to build `tfgenerator` after `git pull`**
 
 On successful completion, following files are generated
 

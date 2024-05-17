@@ -2,8 +2,10 @@ package ndfc
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"log"
+	"strings"
 	"terraform-provider-ndfc/internal/provider/resources/resource_interface_common"
 
 	"github.com/hashicorp/terraform-plugin-framework/diag"
@@ -19,17 +21,19 @@ const ResourceEthernetInterface = "interface_ethernet"
 func (i *NDFCEthernetInterface) CreateInterface(ctx context.Context, diags *diag.Diagnostics, inData *resource_interface_common.NDFCInterfaceCommonModel) {
 	intfPayload := resource_interface_common.NDFCInterfacesPayload{}
 	intfPayload.Policy = inData.Policy
+	if len(inData.Interfaces) <= 0 {
+		tflog.Debug(ctx, "No interfaces to create")
+		return
+	}
 	for i, intf := range inData.Interfaces {
 		inData.Interfaces[i] = intf
 		intfPayload.Interfaces = append(intfPayload.Interfaces, intf)
 	}
 	i.modifyInterface(ctx, diags, &intfPayload)
-
 }
 
 func (i *NDFCEthernetInterface) DeleteInterface(ctx context.Context, dg *diag.Diagnostics,
 	inData *resource_interface_common.NDFCInterfaceCommonModel) {
-
 	tflog.Debug(ctx, "Deleting interfaces")
 	if len(inData.Interfaces) <= 0 {
 		tflog.Debug(ctx, "No interfaces to delete")
@@ -61,6 +65,27 @@ func (i *NDFCEthernetInterface) DeleteInterface(ctx context.Context, dg *diag.Di
 		return
 	}
 	i.deployInterface(ctx, dg, ifDeployPayload)
+}
+
+func (i *NDFCEthernetInterface) GetPayload(ctx context.Context, diags *diag.Diagnostics,
+	intfPayload *resource_interface_common.NDFCInterfacesPayload) ([]byte, error) {
+
+	tflog.Debug(ctx, "GetPayload - overrided call for NDFCEthernetInterface")
+
+	rawData, err := json.Marshal(intfPayload)
+	if err != nil {
+		return nil, err
+	}
+	removeAttributes := []string{
+		",\"ROUTING_TAG\":\"\"",
+	}
+	log.Printf("Removing attributes from payload before sending to API")
+	log.Printf("Data %s", string(rawData))
+	for _, attr := range removeAttributes {
+		rawData = []byte(strings.Replace(string(rawData), attr, "", -1))
+	}
+	log.Printf("Data after removing attributes %s", string(rawData))
+	return rawData, nil
 }
 
 func printModel(model resource_interface_common.InterfaceModel) {

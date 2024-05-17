@@ -290,13 +290,13 @@ func (v *NDFCVrfsValue) CreatePlan(c NDFCVrfsValue, cf *bool) int {
 			log.Printf("Update:: v.VrfId=%v, c.VrfId=%v", *v.VrfId, *c.VrfId)
 		}
 	} else if v.VrfId != nil {
-		log.Printf("Update: v.VrfId=%v, c.VrfId=%v", *v.VrfId, *c.VrfId)
+		log.Printf("Update: v.VrfId=%v, c.VrfId=nil", *v.VrfId)
 		if action == ActionNone || action == RequiresUpdate {
 			action = RequiresReplace
 		}
 	} else if c.VrfId != nil {
 		v.VrfId = new(int64)
-		log.Printf("Copy from state: v.VrfId=%v, c.VrfId=%v", *v.VrfId, *c.VrfId)
+		log.Printf("Copy from state: v.VrfId=nil, c.VrfId=%v", *c.VrfId)
 		*v.VrfId = *c.VrfId
 	}
 	if !v.VrfTemplateConfig.VlanId.IsEmpty() && !c.VrfTemplateConfig.VlanId.IsEmpty() {
@@ -367,13 +367,13 @@ func (v *NDFCVrfsValue) CreatePlan(c NDFCVrfsValue, cf *bool) int {
 			log.Printf("Update: v.VrfTemplateConfig.Mtu=%v, c.VrfTemplateConfig.Mtu=%v", *v.VrfTemplateConfig.Mtu, *c.VrfTemplateConfig.Mtu)
 		}
 	} else if v.VrfTemplateConfig.Mtu != nil {
-		log.Printf("Update: v.VrfTemplateConfig.Mtu=%v, c.VrfTemplateConfig.Mtu=%v", *v.VrfTemplateConfig.Mtu, *c.VrfTemplateConfig.Mtu)
+		log.Printf("Update: v.VrfTemplateConfig.Mtu=%v, c.VrfTemplateConfig.Mtu=nil", *v.VrfTemplateConfig.Mtu)
 		if action == ActionNone || action == RequiresUpdate {
 			action = RequiresUpdate
 		}
 	} else if c.VrfTemplateConfig.Mtu != nil {
 		v.VrfTemplateConfig.Mtu = new(int64)
-		log.Printf("Copy from state: v.VrfTemplateConfig.Mtu=%v, c.VrfTemplateConfig.Mtu=%v", *v.VrfTemplateConfig.Mtu, *c.VrfTemplateConfig.Mtu)
+		log.Printf("Copy from state: v.VrfTemplateConfig.Mtu=nil, c.VrfTemplateConfig.Mtu=%v", *c.VrfTemplateConfig.Mtu)
 		*v.VrfTemplateConfig.Mtu = *c.VrfTemplateConfig.Mtu
 	}
 
@@ -385,13 +385,13 @@ func (v *NDFCVrfsValue) CreatePlan(c NDFCVrfsValue, cf *bool) int {
 			log.Printf("Update: v.VrfTemplateConfig.LoopbackRoutingTag=%v, c.VrfTemplateConfig.LoopbackRoutingTag=%v", *v.VrfTemplateConfig.LoopbackRoutingTag, *c.VrfTemplateConfig.LoopbackRoutingTag)
 		}
 	} else if v.VrfTemplateConfig.LoopbackRoutingTag != nil {
-		log.Printf("Update: v.VrfTemplateConfig.LoopbackRoutingTag=%v, c.VrfTemplateConfig.LoopbackRoutingTag=%v", *v.VrfTemplateConfig.LoopbackRoutingTag, *c.VrfTemplateConfig.LoopbackRoutingTag)
+		log.Printf("Update: v.VrfTemplateConfig.LoopbackRoutingTag=%v, c.VrfTemplateConfig.LoopbackRoutingTag=nil", *v.VrfTemplateConfig.LoopbackRoutingTag)
 		if action == ActionNone || action == RequiresUpdate {
 			action = RequiresUpdate
 		}
 	} else if c.VrfTemplateConfig.LoopbackRoutingTag != nil {
 		v.VrfTemplateConfig.LoopbackRoutingTag = new(int64)
-		log.Printf("Copy from state: v.VrfTemplateConfig.LoopbackRoutingTag=%v, c.VrfTemplateConfig.LoopbackRoutingTag=%v", *v.VrfTemplateConfig.LoopbackRoutingTag, *c.VrfTemplateConfig.LoopbackRoutingTag)
+		log.Printf("Copy from state: v.VrfTemplateConfig.LoopbackRoutingTag=nil, c.VrfTemplateConfig.LoopbackRoutingTag=%v", *c.VrfTemplateConfig.LoopbackRoutingTag)
 		*v.VrfTemplateConfig.LoopbackRoutingTag = *c.VrfTemplateConfig.LoopbackRoutingTag
 	}
 
@@ -416,13 +416,13 @@ func (v *NDFCVrfsValue) CreatePlan(c NDFCVrfsValue, cf *bool) int {
 			log.Printf("Update: v.VrfTemplateConfig.MaxBgpPaths=%v, c.VrfTemplateConfig.MaxBgpPaths=%v", *v.VrfTemplateConfig.MaxBgpPaths, *c.VrfTemplateConfig.MaxBgpPaths)
 		}
 	} else if v.VrfTemplateConfig.MaxBgpPaths != nil {
-		log.Printf("Update: v.VrfTemplateConfig.MaxBgpPaths=%v, c.VrfTemplateConfig.MaxBgpPaths=%v", *v.VrfTemplateConfig.MaxBgpPaths, *c.VrfTemplateConfig.MaxBgpPaths)
+		log.Printf("Update: v.VrfTemplateConfig.MaxBgpPaths=%v, c.VrfTemplateConfig.MaxBgpPaths=nil", *v.VrfTemplateConfig.MaxBgpPaths)
 		if action == ActionNone || action == RequiresUpdate {
 			action = RequiresUpdate
 		}
 	} else if c.VrfTemplateConfig.MaxBgpPaths != nil {
 		v.VrfTemplateConfig.MaxBgpPaths = new(int64)
-		log.Printf("Copy from state: v.VrfTemplateConfig.MaxBgpPaths=%v, c.VrfTemplateConfig.MaxBgpPaths=%v", *v.VrfTemplateConfig.MaxBgpPaths, *c.VrfTemplateConfig.MaxBgpPaths)
+		log.Printf("Copy from state: v.VrfTemplateConfig.MaxBgpPaths=nil, c.VrfTemplateConfig.MaxBgpPaths=%v", *c.VrfTemplateConfig.MaxBgpPaths)
 		*v.VrfTemplateConfig.MaxBgpPaths = *c.VrfTemplateConfig.MaxBgpPaths
 	}
 
@@ -434,13 +434,13 @@ func (v *NDFCVrfsValue) CreatePlan(c NDFCVrfsValue, cf *bool) int {
 			log.Printf("Update: v.VrfTemplateConfig.MaxIbgpPaths=%v, c.VrfTemplateConfig.MaxIbgpPaths=%v", *v.VrfTemplateConfig.MaxIbgpPaths, *c.VrfTemplateConfig.MaxIbgpPaths)
 		}
 	} else if v.VrfTemplateConfig.MaxIbgpPaths != nil {
-		log.Printf("Update: v.VrfTemplateConfig.MaxIbgpPaths=%v, c.VrfTemplateConfig.MaxIbgpPaths=%v", *v.VrfTemplateConfig.MaxIbgpPaths, *c.VrfTemplateConfig.MaxIbgpPaths)
+		log.Printf("Update: v.VrfTemplateConfig.MaxIbgpPaths=%v, c.VrfTemplateConfig.MaxIbgpPaths=nil", *v.VrfTemplateConfig.MaxIbgpPaths)
 		if action == ActionNone || action == RequiresUpdate {
 			action = RequiresUpdate
 		}
 	} else if c.VrfTemplateConfig.MaxIbgpPaths != nil {
 		v.VrfTemplateConfig.MaxIbgpPaths = new(int64)
-		log.Printf("Copy from state: v.VrfTemplateConfig.MaxIbgpPaths=%v, c.VrfTemplateConfig.MaxIbgpPaths=%v", *v.VrfTemplateConfig.MaxIbgpPaths, *c.VrfTemplateConfig.MaxIbgpPaths)
+		log.Printf("Copy from state: v.VrfTemplateConfig.MaxIbgpPaths=nil, c.VrfTemplateConfig.MaxIbgpPaths=%v", *c.VrfTemplateConfig.MaxIbgpPaths)
 		*v.VrfTemplateConfig.MaxIbgpPaths = *c.VrfTemplateConfig.MaxIbgpPaths
 	}
 
