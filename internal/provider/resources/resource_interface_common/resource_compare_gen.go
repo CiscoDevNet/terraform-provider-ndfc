@@ -115,6 +115,99 @@ func (v NDFCInterfacesValue) DeepEqual(c NDFCInterfacesValue) int {
 		}
 	}
 
+	if v.NvPairs.Ipv4PrefixLength != c.NvPairs.Ipv4PrefixLength {
+		log.Printf("v.NvPairs.Ipv4PrefixLength=%s, c.NvPairs.Ipv4PrefixLength=%s", v.NvPairs.Ipv4PrefixLength, c.NvPairs.Ipv4PrefixLength)
+		return RequiresUpdate
+	}
+	if v.NvPairs.RoutingTag != c.NvPairs.RoutingTag {
+		log.Printf("v.NvPairs.RoutingTag=%s, c.NvPairs.RoutingTag=%s", v.NvPairs.RoutingTag, c.NvPairs.RoutingTag)
+		return RequiresUpdate
+	}
+	if v.NvPairs.DisableIpRedirects != c.NvPairs.DisableIpRedirects {
+		log.Printf("v.NvPairs.DisableIpRedirects=%s, c.NvPairs.DisableIpRedirects=%s", v.NvPairs.DisableIpRedirects, c.NvPairs.DisableIpRedirects)
+		return RequiresUpdate
+	}
+	if v.NvPairs.EnableHsrp != c.NvPairs.EnableHsrp {
+		log.Printf("v.NvPairs.EnableHsrp=%s, c.NvPairs.EnableHsrp=%s", v.NvPairs.EnableHsrp, c.NvPairs.EnableHsrp)
+		return RequiresUpdate
+	}
+
+	if v.NvPairs.HsrpGroup != nil && c.NvPairs.HsrpGroup != nil {
+		if *v.NvPairs.HsrpGroup != *c.NvPairs.HsrpGroup {
+			log.Printf("v.NvPairs.HsrpGroup=%v, c.NvPairs.HsrpGroup=%v", *v.NvPairs.HsrpGroup, *c.NvPairs.HsrpGroup)
+			return RequiresUpdate
+		}
+	} else {
+		if v.NvPairs.HsrpGroup != nil {
+			log.Printf("v.NvPairs.HsrpGroup=%v", *v.NvPairs.HsrpGroup)
+			return RequiresUpdate
+		} else if c.NvPairs.HsrpGroup != nil {
+			log.Printf("c.NvPairs.HsrpGroup=%v", *c.NvPairs.HsrpGroup)
+			return RequiresUpdate
+		}
+	}
+
+	if v.NvPairs.HsrpVip != c.NvPairs.HsrpVip {
+		log.Printf("v.NvPairs.HsrpVip=%s, c.NvPairs.HsrpVip=%s", v.NvPairs.HsrpVip, c.NvPairs.HsrpVip)
+		return RequiresUpdate
+	}
+
+	if v.NvPairs.HsrpPriority != nil && c.NvPairs.HsrpPriority != nil {
+		if *v.NvPairs.HsrpPriority != *c.NvPairs.HsrpPriority {
+			log.Printf("v.NvPairs.HsrpPriority=%v, c.NvPairs.HsrpPriority=%v", *v.NvPairs.HsrpPriority, *c.NvPairs.HsrpPriority)
+			return RequiresUpdate
+		}
+	} else {
+		if v.NvPairs.HsrpPriority != nil {
+			log.Printf("v.NvPairs.HsrpPriority=%v", *v.NvPairs.HsrpPriority)
+			return RequiresUpdate
+		} else if c.NvPairs.HsrpPriority != nil {
+			log.Printf("c.NvPairs.HsrpPriority=%v", *c.NvPairs.HsrpPriority)
+			return RequiresUpdate
+		}
+	}
+
+	if v.NvPairs.HsrpVersion != c.NvPairs.HsrpVersion {
+		log.Printf("v.NvPairs.HsrpVersion=%s, c.NvPairs.HsrpVersion=%s", v.NvPairs.HsrpVersion, c.NvPairs.HsrpVersion)
+		return RequiresUpdate
+	}
+	if v.NvPairs.Preempt != c.NvPairs.Preempt {
+		log.Printf("v.NvPairs.Preempt=%s, c.NvPairs.Preempt=%s", v.NvPairs.Preempt, c.NvPairs.Preempt)
+		return RequiresUpdate
+	}
+	if v.NvPairs.Mac != c.NvPairs.Mac {
+		log.Printf("v.NvPairs.Mac=%s, c.NvPairs.Mac=%s", v.NvPairs.Mac, c.NvPairs.Mac)
+		return RequiresUpdate
+	}
+	if v.NvPairs.DhcpServerAddr1 != c.NvPairs.DhcpServerAddr1 {
+		log.Printf("v.NvPairs.DhcpServerAddr1=%s, c.NvPairs.DhcpServerAddr1=%s", v.NvPairs.DhcpServerAddr1, c.NvPairs.DhcpServerAddr1)
+		return RequiresUpdate
+	}
+	if v.NvPairs.DhcpServerAddr2 != c.NvPairs.DhcpServerAddr2 {
+		log.Printf("v.NvPairs.DhcpServerAddr2=%s, c.NvPairs.DhcpServerAddr2=%s", v.NvPairs.DhcpServerAddr2, c.NvPairs.DhcpServerAddr2)
+		return RequiresUpdate
+	}
+	if v.NvPairs.DhcpServerAddr3 != c.NvPairs.DhcpServerAddr3 {
+		log.Printf("v.NvPairs.DhcpServerAddr3=%s, c.NvPairs.DhcpServerAddr3=%s", v.NvPairs.DhcpServerAddr3, c.NvPairs.DhcpServerAddr3)
+		return RequiresUpdate
+	}
+	if v.NvPairs.VrfDhcp1 != c.NvPairs.VrfDhcp1 {
+		log.Printf("v.NvPairs.VrfDhcp1=%s, c.NvPairs.VrfDhcp1=%s", v.NvPairs.VrfDhcp1, c.NvPairs.VrfDhcp1)
+		return RequiresUpdate
+	}
+	if v.NvPairs.VrfDhcp2 != c.NvPairs.VrfDhcp2 {
+		log.Printf("v.NvPairs.VrfDhcp2=%s, c.NvPairs.VrfDhcp2=%s", v.NvPairs.VrfDhcp2, c.NvPairs.VrfDhcp2)
+		return RequiresUpdate
+	}
+	if v.NvPairs.VrfDhcp3 != c.NvPairs.VrfDhcp3 {
+		log.Printf("v.NvPairs.VrfDhcp3=%s, c.NvPairs.VrfDhcp3=%s", v.NvPairs.VrfDhcp3, c.NvPairs.VrfDhcp3)
+		return RequiresUpdate
+	}
+	if v.NvPairs.AdvertiseSubnetInUnderlay != c.NvPairs.AdvertiseSubnetInUnderlay {
+		log.Printf("v.NvPairs.AdvertiseSubnetInUnderlay=%s, c.NvPairs.AdvertiseSubnetInUnderlay=%s", v.NvPairs.AdvertiseSubnetInUnderlay, c.NvPairs.AdvertiseSubnetInUnderlay)
+		return RequiresUpdate
+	}
+
 	if cf {
 		return ControlFlagUpdate
 	}
@@ -293,13 +386,13 @@ func (v *NDFCInterfacesValue) CreatePlan(c NDFCInterfacesValue, cf *bool) int {
 			log.Printf("Update: v.NvPairs.AccessVlan=%v, c.NvPairs.AccessVlan=%v", *v.NvPairs.AccessVlan, *c.NvPairs.AccessVlan)
 		}
 	} else if v.NvPairs.AccessVlan != nil {
-		log.Printf("Update: v.NvPairs.AccessVlan=%v, c.NvPairs.AccessVlan=%v", *v.NvPairs.AccessVlan, *c.NvPairs.AccessVlan)
+		log.Printf("Update: v.NvPairs.AccessVlan=%v, c.NvPairs.AccessVlan=nil", *v.NvPairs.AccessVlan)
 		if action == ActionNone || action == RequiresUpdate {
 			action = RequiresUpdate
 		}
 	} else if c.NvPairs.AccessVlan != nil {
 		v.NvPairs.AccessVlan = new(int64)
-		log.Printf("Copy from state: v.NvPairs.AccessVlan=%v, c.NvPairs.AccessVlan=%v", *v.NvPairs.AccessVlan, *c.NvPairs.AccessVlan)
+		log.Printf("Copy from state: v.NvPairs.AccessVlan=nil, c.NvPairs.AccessVlan=%v", *c.NvPairs.AccessVlan)
 		*v.NvPairs.AccessVlan = *c.NvPairs.AccessVlan
 	}
 
@@ -371,14 +464,221 @@ func (v *NDFCInterfacesValue) CreatePlan(c NDFCInterfacesValue, cf *bool) int {
 			log.Printf("Update: v.NvPairs.NativeVlan=%v, c.NvPairs.NativeVlan=%v", *v.NvPairs.NativeVlan, *c.NvPairs.NativeVlan)
 		}
 	} else if v.NvPairs.NativeVlan != nil {
-		log.Printf("Update: v.NvPairs.NativeVlan=%v, c.NvPairs.NativeVlan=%v", *v.NvPairs.NativeVlan, *c.NvPairs.NativeVlan)
+		log.Printf("Update: v.NvPairs.NativeVlan=%v, c.NvPairs.NativeVlan=nil", *v.NvPairs.NativeVlan)
 		if action == ActionNone || action == RequiresUpdate {
 			action = RequiresUpdate
 		}
 	} else if c.NvPairs.NativeVlan != nil {
 		v.NvPairs.NativeVlan = new(int64)
-		log.Printf("Copy from state: v.NvPairs.NativeVlan=%v, c.NvPairs.NativeVlan=%v", *v.NvPairs.NativeVlan, *c.NvPairs.NativeVlan)
+		log.Printf("Copy from state: v.NvPairs.NativeVlan=nil, c.NvPairs.NativeVlan=%v", *c.NvPairs.NativeVlan)
 		*v.NvPairs.NativeVlan = *c.NvPairs.NativeVlan
+	}
+
+	if v.NvPairs.Ipv4PrefixLength != "" {
+		if v.NvPairs.Ipv4PrefixLength != c.NvPairs.Ipv4PrefixLength {
+			log.Printf("Update: v.NvPairs.Ipv4PrefixLength=%v, c.NvPairs.Ipv4PrefixLength=%v", v.NvPairs.Ipv4PrefixLength, c.NvPairs.Ipv4PrefixLength)
+			if action == ActionNone || action == RequiresUpdate {
+				action = RequiresUpdate
+			}
+		}
+	} else {
+		//v empty, fill with c
+		log.Printf("Copy from state: v.NvPairs.Ipv4PrefixLength=%v, c.NvPairs.Ipv4PrefixLength=%v", v.NvPairs.Ipv4PrefixLength, c.NvPairs.Ipv4PrefixLength)
+		v.NvPairs.Ipv4PrefixLength = c.NvPairs.Ipv4PrefixLength
+	}
+
+	if v.NvPairs.RoutingTag != "" {
+		if v.NvPairs.RoutingTag != c.NvPairs.RoutingTag {
+			log.Printf("Update: v.NvPairs.RoutingTag=%v, c.NvPairs.RoutingTag=%v", v.NvPairs.RoutingTag, c.NvPairs.RoutingTag)
+			if action == ActionNone || action == RequiresUpdate {
+				action = RequiresUpdate
+			}
+		}
+	} else {
+		//v empty, fill with c
+		log.Printf("Copy from state: v.NvPairs.RoutingTag=%v, c.NvPairs.RoutingTag=%v", v.NvPairs.RoutingTag, c.NvPairs.RoutingTag)
+		v.NvPairs.RoutingTag = c.NvPairs.RoutingTag
+	}
+
+	if v.NvPairs.DisableIpRedirects != c.NvPairs.DisableIpRedirects {
+		log.Printf("Update: v.NvPairs.DisableIpRedirects=%v, c.NvPairs.DisableIpRedirects=%v", v.NvPairs.DisableIpRedirects, c.NvPairs.DisableIpRedirects)
+		if action == ActionNone || action == RequiresUpdate {
+			action = RequiresUpdate
+		}
+	}
+
+	if v.NvPairs.EnableHsrp != c.NvPairs.EnableHsrp {
+		log.Printf("Update: v.NvPairs.EnableHsrp=%v, c.NvPairs.EnableHsrp=%v", v.NvPairs.EnableHsrp, c.NvPairs.EnableHsrp)
+		if action == ActionNone || action == RequiresUpdate {
+			action = RequiresUpdate
+		}
+	}
+
+	if v.NvPairs.HsrpGroup != nil && c.NvPairs.HsrpGroup != nil {
+		if *v.NvPairs.HsrpGroup != *c.NvPairs.HsrpGroup {
+			if action == ActionNone || action == RequiresUpdate {
+				action = RequiresUpdate
+			}
+			log.Printf("Update: v.NvPairs.HsrpGroup=%v, c.NvPairs.HsrpGroup=%v", *v.NvPairs.HsrpGroup, *c.NvPairs.HsrpGroup)
+		}
+	} else if v.NvPairs.HsrpGroup != nil {
+		log.Printf("Update: v.NvPairs.HsrpGroup=%v, c.NvPairs.HsrpGroup=nil", *v.NvPairs.HsrpGroup)
+		if action == ActionNone || action == RequiresUpdate {
+			action = RequiresUpdate
+		}
+	} else if c.NvPairs.HsrpGroup != nil {
+		v.NvPairs.HsrpGroup = new(int64)
+		log.Printf("Copy from state: v.NvPairs.HsrpGroup=nil, c.NvPairs.HsrpGroup=%v", *c.NvPairs.HsrpGroup)
+		*v.NvPairs.HsrpGroup = *c.NvPairs.HsrpGroup
+	}
+
+	if v.NvPairs.HsrpVip != "" {
+		if v.NvPairs.HsrpVip != c.NvPairs.HsrpVip {
+			log.Printf("Update: v.NvPairs.HsrpVip=%v, c.NvPairs.HsrpVip=%v", v.NvPairs.HsrpVip, c.NvPairs.HsrpVip)
+			if action == ActionNone || action == RequiresUpdate {
+				action = RequiresUpdate
+			}
+		}
+	} else {
+		//v empty, fill with c
+		log.Printf("Copy from state: v.NvPairs.HsrpVip=%v, c.NvPairs.HsrpVip=%v", v.NvPairs.HsrpVip, c.NvPairs.HsrpVip)
+		v.NvPairs.HsrpVip = c.NvPairs.HsrpVip
+	}
+
+	if v.NvPairs.HsrpPriority != nil && c.NvPairs.HsrpPriority != nil {
+		if *v.NvPairs.HsrpPriority != *c.NvPairs.HsrpPriority {
+			if action == ActionNone || action == RequiresUpdate {
+				action = RequiresUpdate
+			}
+			log.Printf("Update: v.NvPairs.HsrpPriority=%v, c.NvPairs.HsrpPriority=%v", *v.NvPairs.HsrpPriority, *c.NvPairs.HsrpPriority)
+		}
+	} else if v.NvPairs.HsrpPriority != nil {
+		log.Printf("Update: v.NvPairs.HsrpPriority=%v, c.NvPairs.HsrpPriority=nil", *v.NvPairs.HsrpPriority)
+		if action == ActionNone || action == RequiresUpdate {
+			action = RequiresUpdate
+		}
+	} else if c.NvPairs.HsrpPriority != nil {
+		v.NvPairs.HsrpPriority = new(int64)
+		log.Printf("Copy from state: v.NvPairs.HsrpPriority=nil, c.NvPairs.HsrpPriority=%v", *c.NvPairs.HsrpPriority)
+		*v.NvPairs.HsrpPriority = *c.NvPairs.HsrpPriority
+	}
+
+	if v.NvPairs.HsrpVersion != "" {
+		if v.NvPairs.HsrpVersion != c.NvPairs.HsrpVersion {
+			log.Printf("Update: v.NvPairs.HsrpVersion=%v, c.NvPairs.HsrpVersion=%v", v.NvPairs.HsrpVersion, c.NvPairs.HsrpVersion)
+			if action == ActionNone || action == RequiresUpdate {
+				action = RequiresUpdate
+			}
+		}
+	} else {
+		//v empty, fill with c
+		log.Printf("Copy from state: v.NvPairs.HsrpVersion=%v, c.NvPairs.HsrpVersion=%v", v.NvPairs.HsrpVersion, c.NvPairs.HsrpVersion)
+		v.NvPairs.HsrpVersion = c.NvPairs.HsrpVersion
+	}
+
+	if v.NvPairs.Preempt != c.NvPairs.Preempt {
+		log.Printf("Update: v.NvPairs.Preempt=%v, c.NvPairs.Preempt=%v", v.NvPairs.Preempt, c.NvPairs.Preempt)
+		if action == ActionNone || action == RequiresUpdate {
+			action = RequiresUpdate
+		}
+	}
+
+	if v.NvPairs.Mac != "" {
+		if v.NvPairs.Mac != c.NvPairs.Mac {
+			log.Printf("Update: v.NvPairs.Mac=%v, c.NvPairs.Mac=%v", v.NvPairs.Mac, c.NvPairs.Mac)
+			if action == ActionNone || action == RequiresUpdate {
+				action = RequiresUpdate
+			}
+		}
+	} else {
+		//v empty, fill with c
+		log.Printf("Copy from state: v.NvPairs.Mac=%v, c.NvPairs.Mac=%v", v.NvPairs.Mac, c.NvPairs.Mac)
+		v.NvPairs.Mac = c.NvPairs.Mac
+	}
+
+	if v.NvPairs.DhcpServerAddr1 != "" {
+		if v.NvPairs.DhcpServerAddr1 != c.NvPairs.DhcpServerAddr1 {
+			log.Printf("Update: v.NvPairs.DhcpServerAddr1=%v, c.NvPairs.DhcpServerAddr1=%v", v.NvPairs.DhcpServerAddr1, c.NvPairs.DhcpServerAddr1)
+			if action == ActionNone || action == RequiresUpdate {
+				action = RequiresUpdate
+			}
+		}
+	} else {
+		//v empty, fill with c
+		log.Printf("Copy from state: v.NvPairs.DhcpServerAddr1=%v, c.NvPairs.DhcpServerAddr1=%v", v.NvPairs.DhcpServerAddr1, c.NvPairs.DhcpServerAddr1)
+		v.NvPairs.DhcpServerAddr1 = c.NvPairs.DhcpServerAddr1
+	}
+
+	if v.NvPairs.DhcpServerAddr2 != "" {
+		if v.NvPairs.DhcpServerAddr2 != c.NvPairs.DhcpServerAddr2 {
+			log.Printf("Update: v.NvPairs.DhcpServerAddr2=%v, c.NvPairs.DhcpServerAddr2=%v", v.NvPairs.DhcpServerAddr2, c.NvPairs.DhcpServerAddr2)
+			if action == ActionNone || action == RequiresUpdate {
+				action = RequiresUpdate
+			}
+		}
+	} else {
+		//v empty, fill with c
+		log.Printf("Copy from state: v.NvPairs.DhcpServerAddr2=%v, c.NvPairs.DhcpServerAddr2=%v", v.NvPairs.DhcpServerAddr2, c.NvPairs.DhcpServerAddr2)
+		v.NvPairs.DhcpServerAddr2 = c.NvPairs.DhcpServerAddr2
+	}
+
+	if v.NvPairs.DhcpServerAddr3 != "" {
+		if v.NvPairs.DhcpServerAddr3 != c.NvPairs.DhcpServerAddr3 {
+			log.Printf("Update: v.NvPairs.DhcpServerAddr3=%v, c.NvPairs.DhcpServerAddr3=%v", v.NvPairs.DhcpServerAddr3, c.NvPairs.DhcpServerAddr3)
+			if action == ActionNone || action == RequiresUpdate {
+				action = RequiresUpdate
+			}
+		}
+	} else {
+		//v empty, fill with c
+		log.Printf("Copy from state: v.NvPairs.DhcpServerAddr3=%v, c.NvPairs.DhcpServerAddr3=%v", v.NvPairs.DhcpServerAddr3, c.NvPairs.DhcpServerAddr3)
+		v.NvPairs.DhcpServerAddr3 = c.NvPairs.DhcpServerAddr3
+	}
+
+	if v.NvPairs.VrfDhcp1 != "" {
+		if v.NvPairs.VrfDhcp1 != c.NvPairs.VrfDhcp1 {
+			log.Printf("Update: v.NvPairs.VrfDhcp1=%v, c.NvPairs.VrfDhcp1=%v", v.NvPairs.VrfDhcp1, c.NvPairs.VrfDhcp1)
+			if action == ActionNone || action == RequiresUpdate {
+				action = RequiresUpdate
+			}
+		}
+	} else {
+		//v empty, fill with c
+		log.Printf("Copy from state: v.NvPairs.VrfDhcp1=%v, c.NvPairs.VrfDhcp1=%v", v.NvPairs.VrfDhcp1, c.NvPairs.VrfDhcp1)
+		v.NvPairs.VrfDhcp1 = c.NvPairs.VrfDhcp1
+	}
+
+	if v.NvPairs.VrfDhcp2 != "" {
+		if v.NvPairs.VrfDhcp2 != c.NvPairs.VrfDhcp2 {
+			log.Printf("Update: v.NvPairs.VrfDhcp2=%v, c.NvPairs.VrfDhcp2=%v", v.NvPairs.VrfDhcp2, c.NvPairs.VrfDhcp2)
+			if action == ActionNone || action == RequiresUpdate {
+				action = RequiresUpdate
+			}
+		}
+	} else {
+		//v empty, fill with c
+		log.Printf("Copy from state: v.NvPairs.VrfDhcp2=%v, c.NvPairs.VrfDhcp2=%v", v.NvPairs.VrfDhcp2, c.NvPairs.VrfDhcp2)
+		v.NvPairs.VrfDhcp2 = c.NvPairs.VrfDhcp2
+	}
+
+	if v.NvPairs.VrfDhcp3 != "" {
+		if v.NvPairs.VrfDhcp3 != c.NvPairs.VrfDhcp3 {
+			log.Printf("Update: v.NvPairs.VrfDhcp3=%v, c.NvPairs.VrfDhcp3=%v", v.NvPairs.VrfDhcp3, c.NvPairs.VrfDhcp3)
+			if action == ActionNone || action == RequiresUpdate {
+				action = RequiresUpdate
+			}
+		}
+	} else {
+		//v empty, fill with c
+		log.Printf("Copy from state: v.NvPairs.VrfDhcp3=%v, c.NvPairs.VrfDhcp3=%v", v.NvPairs.VrfDhcp3, c.NvPairs.VrfDhcp3)
+		v.NvPairs.VrfDhcp3 = c.NvPairs.VrfDhcp3
+	}
+
+	if v.NvPairs.AdvertiseSubnetInUnderlay != c.NvPairs.AdvertiseSubnetInUnderlay {
+		log.Printf("Update: v.NvPairs.AdvertiseSubnetInUnderlay=%v, c.NvPairs.AdvertiseSubnetInUnderlay=%v", v.NvPairs.AdvertiseSubnetInUnderlay, c.NvPairs.AdvertiseSubnetInUnderlay)
+		if action == ActionNone || action == RequiresUpdate {
+			action = RequiresUpdate
+		}
 	}
 
 	return action

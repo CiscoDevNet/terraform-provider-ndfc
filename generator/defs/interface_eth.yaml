@@ -122,6 +122,7 @@ resource:
         tf_name: mtu
         type: String
         enum_values: [default,jumbo]
+        validator: OneOf("default", "jumbo")
         default_value: jumbo
         description: MTU for the interface
         example: default

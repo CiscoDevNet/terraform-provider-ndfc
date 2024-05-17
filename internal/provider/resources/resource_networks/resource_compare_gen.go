@@ -294,13 +294,13 @@ func (v *NDFCNetworksValue) CreatePlan(c NDFCNetworksValue, cf *bool) int {
 			log.Printf("Update:: v.NetworkId=%v, c.NetworkId=%v", *v.NetworkId, *c.NetworkId)
 		}
 	} else if v.NetworkId != nil {
-		log.Printf("Update: v.NetworkId=%v, c.NetworkId=%v", *v.NetworkId, *c.NetworkId)
+		log.Printf("Update: v.NetworkId=%v, c.NetworkId=nil", *v.NetworkId)
 		if action == ActionNone || action == RequiresUpdate {
 			action = RequiresReplace
 		}
 	} else if c.NetworkId != nil {
 		v.NetworkId = new(int64)
-		log.Printf("Copy from state: v.NetworkId=%v, c.NetworkId=%v", *v.NetworkId, *c.NetworkId)
+		log.Printf("Copy from state: v.NetworkId=nil, c.NetworkId=%v", *c.NetworkId)
 		*v.NetworkId = *c.NetworkId
 	}
 	if v.NetworkTemplate != "" {

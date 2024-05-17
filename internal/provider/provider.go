@@ -120,5 +120,6 @@ func (p *ndfcProvider) Resources(ctx context.Context) []func() resource.Resource
 		NewNetworksResource,
 		NewInterfaceEthernetResource,
 		NewInterfaceLoopbackResource,
+		NewInterfaceVlanResource,
 	}
 }

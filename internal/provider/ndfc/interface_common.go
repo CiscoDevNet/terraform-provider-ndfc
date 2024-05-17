@@ -15,12 +15,14 @@ import (
 	"github.com/hashicorp/terraform-plugin-log/tflog"
 )
 
+// Common Implementation - override for changing behaviour
 type NDFCInterface interface {
 	CreateInterface(ctx context.Context, diags *diag.Diagnostics, inData *resource_interface_common.NDFCInterfaceCommonModel)
 	DeleteInterface(ctx context.Context, diags *diag.Diagnostics, inData *resource_interface_common.NDFCInterfaceCommonModel)
 	ModifyInterface(ctx context.Context, diags *diag.Diagnostics, inData *resource_interface_common.NDFCInterfaceCommonModel)
 	GetInterface(ctx context.Context, diags *diag.Diagnostics, serial string, policy string) []resource_interface_common.NDFCInterfacesValue
 	DeployInterface(ctx context.Context, diags *diag.Diagnostics, inData *resource_interface_common.NDFCInterfaceCommonModel)
+	GetPayload(ctx context.Context, diags *diag.Diagnostics, inData *resource_interface_common.NDFCInterfacesPayload) ([]byte, error)
 }
 
 type NDFCInterfaceCommon struct {
@@ -35,16 +37,25 @@ func (c NDFC) NewInterfaceObject(ifType string, client *nd.Client, lock *sync.Mu
 		intf := new(NDFCEthernetInterface)
 		intf.client = client
 		intf.lock = lock
+		intf.NDFCInterface = intf
 		return intf
 	case "loopback":
 		intf := new(NDFCLoopbackInterface)
 		intf.client = client
 		intf.lock = lock
+		intf.NDFCInterface = intf
 		return intf
 	case "datasource":
 		intf := new(NDFCInterfaceCommon)
 		intf.client = client
 		intf.lock = lock
+		intf.NDFCInterface = intf
+		return intf
+	case "vlan":
+		intf := new(NDFCVlanInterface)
+		intf.client = client
+		intf.lock = lock
+		intf.NDFCInterface = intf
 		return intf
 	case "default":
 		log.Panicf("Interface type not supported: %s", ifType)
@@ -100,6 +111,11 @@ func (i *NDFCInterfaceCommon) DeployInterface(ctx context.Context, dg *diag.Diag
 	i.deployInterface(ctx, dg, payload)
 }
 
+func (i *NDFCInterfaceCommon) GetPayload(ctx context.Context, diags *diag.Diagnostics,
+	intfPayload *resource_interface_common.NDFCInterfacesPayload) ([]byte, error) {
+	return json.Marshal(intfPayload)
+}
+
 func (i *NDFCInterfaceCommon) deployInterface(ctx context.Context, dg *diag.Diagnostics, payload resource_interface_common.NDFCInterfacesDeploy) {
 	data, err := json.Marshal(payload)
 	if err != nil {
@@ -141,7 +157,7 @@ func (i *NDFCInterfaceCommon) getInterfaces(ctx context.Context, diags *diag.Dia
 func (i *NDFCInterfaceCommon) modifyInterface(ctx context.Context, diags *diag.Diagnostics,
 	intfPayload *resource_interface_common.NDFCInterfacesPayload) {
 
-	data, err := json.Marshal(intfPayload)
+	data, err := i.NDFCInterface.GetPayload(ctx, diags, intfPayload)
 	if err != nil {
 		diags.AddError("Error marshalling data", err.Error())
 		return
@@ -172,7 +188,7 @@ func (i *NDFCInterfaceCommon) getDeployStatus(ctx context.Context, diags *diag.D
 func (i *NDFCInterfaceCommon) createInterface(ctx context.Context, diags *diag.Diagnostics,
 	intfPayload *resource_interface_common.NDFCInterfacesPayload) {
 
-	data, err := json.Marshal(intfPayload)
+	data, err := i.NDFCInterface.GetPayload(ctx, diags, intfPayload)
 	if err != nil {
 		diags.AddError("Error marshalling data", err.Error())
 		return

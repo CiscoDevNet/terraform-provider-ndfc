@@ -93,7 +93,10 @@ func InterfaceEthernetResourceSchema(ctx context.Context) schema.Schema {
 							Computed:            true,
 							Description:         "MTU for the interface",
 							MarkdownDescription: "MTU for the interface",
-							Default:             stringdefault.StaticString("jumbo"),
+							Validators: []validator.String{
+								stringvalidator.OneOf("default", "jumbo"),
+							},
+							Default: stringdefault.StaticString("jumbo"),
 						},
 						"native_vlan": schema.Int64Attribute{
 							Optional:            true,

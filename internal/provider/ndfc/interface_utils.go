@@ -64,6 +64,10 @@ func (c NDFC) IfTypeSet(inData *resource_interface_common.NDFCInterfaceCommonMod
 		fallthrough
 	case "INTERFACE_LOOPBACK":
 		ifType = "INTERFACE_LOOPBACK"
+	case "vlan":
+		fallthrough
+	case "INTERFACE_VLAN":
+		ifType = "INTERFACE_VLAN"
 	default:
 		log.Panicf("Interface type not supported: %s", ifType)
 	}

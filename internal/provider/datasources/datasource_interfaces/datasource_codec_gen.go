@@ -27,7 +27,6 @@ type NDFCInterfacesValue struct {
 	InterfaceIndex   *int64 `json:"ifIndex,omitempty"`
 	IsPhysical       string `json:"isPhysical,omitempty"`
 	Mode             string `json:"mode,omitempty"`
-	Mtu              *int64 `json:"mtu,omitempty"`
 	NativeVlanId     *int64 `json:"nativeVlanId,omitempty"`
 	OperStatus       string `json:"operStatusStr,omitempty"`
 	OperStatusCause  string `json:"operStatusCause,omitempty"`
@@ -133,13 +132,6 @@ func (v *InterfacesValue) SetValue(jsonData *NDFCInterfacesValue) diag.Diagnosti
 		v.Mode = types.StringValue(jsonData.Mode)
 	} else {
 		v.Mode = types.StringNull()
-	}
-
-	if jsonData.Mtu != nil {
-		v.Mtu = types.Int64Value(*jsonData.Mtu)
-
-	} else {
-		v.Mtu = types.Int64Null()
 	}
 
 	if jsonData.NativeVlanId != nil {
@@ -306,15 +298,6 @@ func (v InterfacesModel) GetModelData() *NDFCInterfacesModel {
 				data.Interfaces[i1].Mode = ele1.Mode.ValueString()
 			} else {
 				data.Interfaces[i1].Mode = ""
-			}
-
-			if !ele1.Mtu.IsNull() && !ele1.Mtu.IsUnknown() {
-
-				data.Interfaces[i1].Mtu = new(int64)
-				*data.Interfaces[i1].Mtu = ele1.Mtu.ValueInt64()
-
-			} else {
-				data.Interfaces[i1].Mtu = nil
 			}
 
 			if !ele1.NativeVlanId.IsNull() && !ele1.NativeVlanId.IsUnknown() {

@@ -79,7 +79,6 @@ resource:
         ndfc_nested: [nvPairs]
         tf_name: admin_state
         type: Bool
-        model_type_string: true
         default_value: true
         description: Enable or disable the interface
         example: false
@@ -135,7 +134,6 @@ resource:
         ndfc_nested: [nvPairs]
         tf_name: port_type_fast
         type: Bool
-        model_type_string: true
         default_value: true
         description: Enable spanning-tree edge port behavior
         example: false
@@ -147,6 +145,7 @@ resource:
         default_value: jumbo
         description: MTU for the interface
         example: default
+        include_empty: true
       - model_name: SPEED
         ndfc_nested: [nvPairs]
         tf_name: speed
@@ -161,7 +160,6 @@ resource:
         tf_name: access_vlan
         type: Int64
         ndfc_type: string
-        model_type_string: true
         min_int: 1
         max_int: 4094
         validator: Between(1, 4094)
@@ -171,7 +169,6 @@ resource:
         ndfc_nested: [nvPairs]
         tf_name: orphan_port
         type: Bool
-        model_type_string: true
         default_value: false
         description: If enabled, configure the interface as a vPC orphan port to be suspended by the secondary peer in vPC failures
         example: false
@@ -179,7 +176,6 @@ resource:
         ndfc_nested: [nvPairs]
         tf_name: ptp
         type: Bool
-        model_type_string: true
         default_value: false
         description: Enable PTP
         example: false
@@ -187,7 +183,6 @@ resource:
         ndfc_nested: [nvPairs]
         tf_name: netflow
         type: Bool
-        model_type_string: true
         default_value: false
         description: Netflow is supported only if it is enabled on fabric
         example: false
@@ -218,13 +213,127 @@ resource:
         ndfc_nested: [nvPairs]
         tf_name: native_vlan
         type: Int64
-        model_type_string: true
         min_int: 1
         max_int: 4094
         ndfc_type: string
         description: Set native VLAN for the interface
         example: 1
         exclude_test: true
+      - model_name: PREFIX
+        ndfc_nested: [nvPairs]
+        tf_name: ipv4_prefix_length
+        type: String
+        description: Prefix length for the IPv4 address
+        example: 24
+      - model_name: ROUTING_TAG
+        ndfc_nested: [nvPairs]
+        tf_name: routing_tag
+        type: String
+        include_empty: true
+        description: Routing tag
+        example: my_routing_tag
+      - model_name: DISABLE_IP_REDIRECTS
+        ndfc_nested: [nvPairs]
+        tf_name: disable_ip_redirects
+        type: Bool
+        default_value: true
+        description: Disable IP redirects
+        example: false
+      - model_name: ENABLE_HSRP
+        ndfc_nested: [nvPairs]
+        tf_name: enable_hsrp
+        type: Bool
+        default_value: false
+        description: Enable HSRP
+        example: true
+      - model_name: HSRP_GROUP
+        ndfc_nested: [nvPairs]
+        tf_name: hsrp_group
+        type: Int64
+        min_int: 0
+        max_int: 255
+        description: HSRP group number
+        example: 1
+      - model_name: HSRP_VIP
+        ndfc_nested: [nvPairs]
+        tf_name: hsrp_vip
+        type: String
+        description: HSRP virtual IP address
+        example:
+      - model_name: HSRP_PRIORITY
+        ndfc_nested: [nvPairs]
+        tf_name: hsrp_priority
+        type: Int64
+        ndfc_type: string
+        min_int: 1
+        max_int: 255
+        description: HSRP priority
+        example: 100
+      - model_name: HSRP_VERSION
+        ndfc_nested: [nvPairs]
+        tf_name: hsrp_version
+        type: String
+        validator: OneOf("1", "2")
+        enum_values: ["1", "2"]
+        default_value: "2"
+        description: HSRP version
+        example: 2
+      - model_name: PREEMPT
+        ndfc_nested: [nvPairs]
+        tf_name: preempt
+        type: Bool
+        default_value: false
+        description: Enable HSRP preempt
+        example: false
+      - model_name: MAC
+        ndfc_nested: [nvPairs]
+        tf_name: mac
+        type: String
+        description: MAC address
+        example: 00:00:00:00:00:00
+      - model_name: dhcpServerAddr1
+        ndfc_nested: [nvPairs]
+        tf_name: dhcp_server_addr1
+        type: String
+        description: DHCP server address 1
+        example:
+      - model_name: dhcpServerAddr2
+        ndfc_nested: [nvPairs]
+        tf_name: dhcp_server_addr2
+        type: String
+        description: DHCP server address 2
+        example:
+      - model_name: dhcpServerAddr3
+        ndfc_nested: [nvPairs]
+        tf_name: dhcp_server_addr3
+        type: String
+        description: DHCP server address 3
+        example:
+      - model_name: vrfDhcp1
+        ndfc_nested: [nvPairs]
+        tf_name: vrf_dhcp1
+        type: String
+        description: VRF for DHCP server 1
+        example:
+      - model_name: vrfDhcp2
+        ndfc_nested: [nvPairs]
+        tf_name: vrf_dhcp2
+        type: String
+        description: VRF for DHCP server 2
+        example:
+      - model_name: vrfDhcp3
+        ndfc_nested: [nvPairs]
+        tf_name: vrf_dhcp3
+        type: String
+        description: VRF for DHCP server 3
+        example:
+      - model_name: advSubnetInUnderlay
+        ndfc_nested: [nvPairs]
+        tf_name: advertise_subnet_in_underlay
+        type: Bool
+        default_value: false
+        description: Advertise subnet in underlay
+        example: true
 datasource:
   name: interfaces
   generate_tf_resource: true
@@ -278,11 +387,6 @@ datasource:
           type: String
           description: "Mode of the interface"
           example: trunk
-        - model_name: mtu
-          tf_name: mtu
-          type: Int64
-          description: "MTU of the interface"
-          example: 1500
         - model_name: nativeVlanId
           tf_name: native_vlan_id
           type: Int64
