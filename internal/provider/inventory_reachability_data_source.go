@@ -123,7 +123,7 @@ func (d *InventoryReachabilityDataSource) Read(ctx context.Context, req datasour
 			VdcMac:        types.StringValue(device.Get("vdcMac").String()),
 			Reachable:     types.BoolValue(device.Get("reachable").Bool()),
 			Selectable:    types.BoolValue(device.Get("selectable").Bool()),
-			Authenticated: types.BoolValue(device.Get("authenticated").Bool()),
+			Authenticated: types.BoolValue(device.Get("auth").Bool()),
 			Valid:         types.BoolValue(device.Get("valid").Bool()),
 			Known:         types.BoolValue(device.Get("known").Bool()),
 			LastChanged:   types.StringValue(device.Get("lastChanged").String()),

@@ -114,7 +114,7 @@ func (r InventoryDevicesResource) ValidateConfig(ctx context.Context, req resour
 	data.Devices.ElementsAs(ctx, &devices, false)
 
 	for ipAddress, device := range devices {
-		if device.DiscoveryType.ValueString() == "discover" {
+		if device.DiscoveryType.ValueString() == "discover" || device.DiscoveryType.ValueString() == "" {
 			if !device.SerialNumber.IsUnknown() && !device.SerialNumber.IsNull() {
 				resp.Diagnostics.AddError("Schema Validation Error", fmt.Sprintf("device with ip address '%s' has set discovery_type 'discover' which does not allow providing a serial number", ipAddress))
 			}
