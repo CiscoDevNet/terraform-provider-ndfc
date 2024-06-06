@@ -16,10 +16,10 @@ func TestAccInterfaceLoopbackResourceBasic(t *testing.T) {
 		"RscType":    "ndfc_interface_loopback",
 		"RscSubType": "loopback",
 		"RscName":    "test_loopback",
-		"User":       helper.GetConfig().NDFC.User,
-		"Password":   helper.GetConfig().NDFC.Password,
-		"Host":       helper.GetConfig().NDFC.URL,
-		"Insecure":   helper.GetConfig().NDFC.Insecure,
+		"User":       helper.GetConfig("loopback").NDFC.User,
+		"Password":   helper.GetConfig("loopback").NDFC.Password,
+		"Host":       helper.GetConfig("loopback").NDFC.URL,
+		"Insecure":   helper.GetConfig("loopback").NDFC.Insecure,
 	}
 
 	tf_config := new(string)
@@ -40,7 +40,7 @@ func TestAccInterfaceLoopbackResourceBasic(t *testing.T) {
 
 	intfRsc := new(resource_interface_common.NDFCInterfaceCommonModel)
 	resource.Test(t, resource.TestCase{
-		PreCheck:                 func() { testAccPreCheck(t) },
+		PreCheck:                 func() { testAccPreCheck(t, "loopback") },
 		ProtoV6ProviderFactories: testAccProtoV6ProviderFactories,
 		//CheckDestroy:             testAccCheckVrfBulkResourceDestroy(networkRsc),
 		Steps: []resource.TestStep{
@@ -48,7 +48,7 @@ func TestAccInterfaceLoopbackResourceBasic(t *testing.T) {
 				Config: func() string {
 					*stepCount++
 					tName := fmt.Sprintf("%s_%d", t.Name(), *stepCount)
-					helper.GenerateIntfResource(&intfRsc, 30, 10, "loopback", true, helper.GetConfig().NDFC.Switches, true, false)
+					helper.GenerateIntfResource(&intfRsc, 30, 10, "loopback", true, helper.GetConfig("loopback").NDFC.Switches, true, false)
 					(*x)["RscName"] = "lb_intf_test"
 					helper.GetTFConfigWithSingleResource(tName, *x, []interface{}{intfRsc}, &tf_config)
 					return *tf_config
@@ -67,10 +67,10 @@ func TestAccInterfaceLoopbackResourceCreateAndAdd(t *testing.T) {
 		"RscType":    "ndfc_interface_loopback",
 		"RscSubType": "loopback",
 		"RscName":    "test_loopback",
-		"User":       helper.GetConfig().NDFC.User,
-		"Password":   helper.GetConfig().NDFC.Password,
-		"Host":       helper.GetConfig().NDFC.URL,
-		"Insecure":   helper.GetConfig().NDFC.Insecure,
+		"User":       helper.GetConfig("loopback").NDFC.User,
+		"Password":   helper.GetConfig("loopback").NDFC.Password,
+		"Host":       helper.GetConfig("loopback").NDFC.URL,
+		"Insecure":   helper.GetConfig("loopback").NDFC.Insecure,
 	}
 
 	tf_config := new(string)
@@ -92,7 +92,7 @@ func TestAccInterfaceLoopbackResourceCreateAndAdd(t *testing.T) {
 	intfRsc := new(resource_interface_common.NDFCInterfaceCommonModel)
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:                 func() { testAccPreCheck(t) },
+		PreCheck:                 func() { testAccPreCheck(t, "loopback") },
 		ProtoV6ProviderFactories: testAccProtoV6ProviderFactories,
 		//CheckDestroy:             testAccCheckVrfBulkResourceDestroy(networkRsc),
 		Steps: []resource.TestStep{
@@ -102,7 +102,7 @@ func TestAccInterfaceLoopbackResourceCreateAndAdd(t *testing.T) {
 					*stepCount++
 					tName := fmt.Sprintf("%s_%d", t.Name(), *stepCount)
 					//Starting from 10 to consider anything pre-existing on ndfc
-					helper.GenerateIntfResource(&intfRsc, 10, 10, "loopback", true, helper.GetConfig().NDFC.Switches, true, false)
+					helper.GenerateIntfResource(&intfRsc, 10, 10, "loopback", true, helper.GetConfig("loopback").NDFC.Switches, true, false)
 					(*x)["RscName"] = "lb_intf_test"
 					helper.GetTFConfigWithSingleResource(tName, *x, []interface{}{intfRsc}, &tf_config)
 					return *tf_config
@@ -114,7 +114,7 @@ func TestAccInterfaceLoopbackResourceCreateAndAdd(t *testing.T) {
 				Config: func() string {
 					*stepCount++
 					tName := fmt.Sprintf("%s_%d", t.Name(), *stepCount)
-					helper.GenerateIntfResource(&intfRsc, 20, 10, "loopback", true, helper.GetConfig().NDFC.Switches, true, true)
+					helper.GenerateIntfResource(&intfRsc, 20, 10, "loopback", true, helper.GetConfig("loopback").NDFC.Switches, true, true)
 					(*x)["RscName"] = "lb_intf_test"
 					helper.GetTFConfigWithSingleResource(tName, *x, []interface{}{intfRsc}, &tf_config)
 					return *tf_config
@@ -131,10 +131,10 @@ func TestAccInterfaceLoopbackResourceCreateAndReduce(t *testing.T) {
 		"RscType":    "ndfc_interface_loopback",
 		"RscSubType": "loopback",
 		"RscName":    "test_loopback",
-		"User":       helper.GetConfig().NDFC.User,
-		"Password":   helper.GetConfig().NDFC.Password,
-		"Host":       helper.GetConfig().NDFC.URL,
-		"Insecure":   helper.GetConfig().NDFC.Insecure,
+		"User":       helper.GetConfig("loopback").NDFC.User,
+		"Password":   helper.GetConfig("loopback").NDFC.Password,
+		"Host":       helper.GetConfig("loopback").NDFC.URL,
+		"Insecure":   helper.GetConfig("loopback").NDFC.Insecure,
 	}
 
 	tf_config := new(string)
@@ -156,7 +156,7 @@ func TestAccInterfaceLoopbackResourceCreateAndReduce(t *testing.T) {
 	intfRsc := new(resource_interface_common.NDFCInterfaceCommonModel)
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:                 func() { testAccPreCheck(t) },
+		PreCheck:                 func() { testAccPreCheck(t, "loopback") },
 		ProtoV6ProviderFactories: testAccProtoV6ProviderFactories,
 		//CheckDestroy:             testAccCheckVrfBulkResourceDestroy(networkRsc),
 		Steps: []resource.TestStep{
@@ -166,7 +166,7 @@ func TestAccInterfaceLoopbackResourceCreateAndReduce(t *testing.T) {
 					*stepCount++
 					tName := fmt.Sprintf("%s_%d", t.Name(), *stepCount)
 					//Starting from 20 to consider anything pre-existing on ndfc
-					helper.GenerateIntfResource(&intfRsc, 10, 20, "loopback", true, helper.GetConfig().NDFC.Switches, true, false)
+					helper.GenerateIntfResource(&intfRsc, 10, 20, "loopback", true, helper.GetConfig("loopback").NDFC.Switches, true, false)
 					(*x)["RscName"] = "lb_intf_test"
 					helper.GetTFConfigWithSingleResource(tName, *x, []interface{}{intfRsc}, &tf_config)
 					return *tf_config
@@ -178,7 +178,7 @@ func TestAccInterfaceLoopbackResourceCreateAndReduce(t *testing.T) {
 				Config: func() string {
 					*stepCount++
 					tName := fmt.Sprintf("%s_%d", t.Name(), *stepCount)
-					helper.GenerateIntfResource(&intfRsc, 10, -10, "loopback", true, helper.GetConfig().NDFC.Switches, true, true)
+					helper.GenerateIntfResource(&intfRsc, 10, -10, "loopback", true, helper.GetConfig("loopback").NDFC.Switches, true, true)
 					(*x)["RscName"] = "lb_intf_test"
 					helper.GetTFConfigWithSingleResource(tName, *x, []interface{}{intfRsc}, &tf_config)
 					return *tf_config
@@ -196,10 +196,10 @@ func TestAccInterfaceLoopbackResourceCreateAndModify(t *testing.T) {
 		"RscType":    "ndfc_interface_loopback",
 		"RscSubType": "loopback",
 		"RscName":    "test_loopback",
-		"User":       helper.GetConfig().NDFC.User,
-		"Password":   helper.GetConfig().NDFC.Password,
-		"Host":       helper.GetConfig().NDFC.URL,
-		"Insecure":   helper.GetConfig().NDFC.Insecure,
+		"User":       helper.GetConfig("loopback").NDFC.User,
+		"Password":   helper.GetConfig("loopback").NDFC.Password,
+		"Host":       helper.GetConfig("loopback").NDFC.URL,
+		"Insecure":   helper.GetConfig("loopback").NDFC.Insecure,
 	}
 
 	tf_config := new(string)
@@ -221,7 +221,7 @@ func TestAccInterfaceLoopbackResourceCreateAndModify(t *testing.T) {
 	intfRsc := new(resource_interface_common.NDFCInterfaceCommonModel)
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:                 func() { testAccPreCheck(t) },
+		PreCheck:                 func() { testAccPreCheck(t, "loopback") },
 		ProtoV6ProviderFactories: testAccProtoV6ProviderFactories,
 		//CheckDestroy:             testAccCheckVrfBulkResourceDestroy(networkRsc),
 		Steps: []resource.TestStep{
@@ -231,7 +231,7 @@ func TestAccInterfaceLoopbackResourceCreateAndModify(t *testing.T) {
 					*stepCount++
 					tName := fmt.Sprintf("%s_%d", t.Name(), *stepCount)
 					//Starting from 20 to consider anything pre-existing on ndfc
-					helper.GenerateIntfResource(&intfRsc, 10, 20, "loopback", true, helper.GetConfig().NDFC.Switches, true, false)
+					helper.GenerateIntfResource(&intfRsc, 10, 20, "loopback", true, helper.GetConfig("loopback").NDFC.Switches, true, false)
 					(*x)["RscName"] = "lb_intf_test"
 					helper.GetTFConfigWithSingleResource(tName, *x, []interface{}{intfRsc}, &tf_config)
 					return *tf_config
@@ -263,10 +263,10 @@ func TestAccInterfaceLoopbackResourceCombinedUpdate(t *testing.T) {
 		"RscType":    "ndfc_interface_loopback",
 		"RscSubType": "loopback",
 		"RscName":    "test_loopback",
-		"User":       helper.GetConfig().NDFC.User,
-		"Password":   helper.GetConfig().NDFC.Password,
-		"Host":       helper.GetConfig().NDFC.URL,
-		"Insecure":   helper.GetConfig().NDFC.Insecure,
+		"User":       helper.GetConfig("loopback").NDFC.User,
+		"Password":   helper.GetConfig("loopback").NDFC.Password,
+		"Host":       helper.GetConfig("loopback").NDFC.URL,
+		"Insecure":   helper.GetConfig("loopback").NDFC.Insecure,
 	}
 
 	tf_config := new(string)
@@ -288,7 +288,7 @@ func TestAccInterfaceLoopbackResourceCombinedUpdate(t *testing.T) {
 	intfRsc := new(resource_interface_common.NDFCInterfaceCommonModel)
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:                 func() { testAccPreCheck(t) },
+		PreCheck:                 func() { testAccPreCheck(t, "loopback") },
 		ProtoV6ProviderFactories: testAccProtoV6ProviderFactories,
 		//CheckDestroy:             testAccCheckVrfBulkResourceDestroy(networkRsc),
 		Steps: []resource.TestStep{
@@ -298,7 +298,7 @@ func TestAccInterfaceLoopbackResourceCombinedUpdate(t *testing.T) {
 					*stepCount++
 					tName := fmt.Sprintf("%s_%d", t.Name(), *stepCount)
 					//Starting from 20 to consider anything pre-existing on ndfc
-					helper.GenerateIntfResource(&intfRsc, 10, 10, "loopback", true, helper.GetConfig().NDFC.Switches, true, false)
+					helper.GenerateIntfResource(&intfRsc, 10, 10, "loopback", true, helper.GetConfig("loopback").NDFC.Switches, true, false)
 					(*x)["RscName"] = "lb_intf_test"
 					helper.GetTFConfigWithSingleResource(tName, *x, []interface{}{intfRsc}, &tf_config)
 					return *tf_config
@@ -310,9 +310,9 @@ func TestAccInterfaceLoopbackResourceCombinedUpdate(t *testing.T) {
 					*stepCount++
 					tName := fmt.Sprintf("%s_%d", t.Name(), *stepCount)
 					//Add 10
-					helper.GenerateIntfResource(&intfRsc, 20, 10, "loopback", true, helper.GetConfig().NDFC.Switches, true, true)
+					helper.GenerateIntfResource(&intfRsc, 20, 10, "loopback", true, helper.GetConfig("loopback").NDFC.Switches, true, true)
 					//Delete 5
-					helper.GenerateIntfResource(&intfRsc, 10, -5, "loopback", true, helper.GetConfig().NDFC.Switches, true, true)
+					helper.GenerateIntfResource(&intfRsc, 10, -5, "loopback", true, helper.GetConfig("loopback").NDFC.Switches, true, true)
 					//Modify 5
 					helper.ModifyInterface(&intfRsc, 20, 5, "loopback", map[string]interface{}{
 						"admin_state": "up",

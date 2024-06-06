@@ -174,8 +174,10 @@ resource:
         type: Int64
         min_int: 0
         max_int: 255
+        validator: Between(0, 255)
         description: HSRP group number
         example: 1
+        handle_empty: true
       - model_name: HSRP_VIP
         ndfc_nested: [nvPairs]
         tf_name: hsrp_vip
@@ -191,6 +193,8 @@ resource:
         max_int: 255
         description: HSRP priority
         example: 100
+        handle_empty: true
+        validator: Between(1, 255)
       - model_name: HSRP_VERSION
         ndfc_nested: [nvPairs]
         tf_name: hsrp_version

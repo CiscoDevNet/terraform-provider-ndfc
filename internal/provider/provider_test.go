@@ -6,6 +6,7 @@ package provider
 import (
 	"os"
 	"testing"
+	"time"
 
 	helper "terraform-provider-ndfc/internal/provider/testing"
 
@@ -33,13 +34,20 @@ func TestMain(m *testing.M) {
 	if testConfigPath == "" {
 		panic("NDFC_TEST_CONFIG_FILE env variable not set")
 	}
-	helper.InitConfig(testConfigPath)
+	mockedServer := os.Getenv("NDFC_MOCKED_SERVER")
+	helper.InitConfig(testConfigPath, mockedServer)
 	ndProvider = NewNDFCProvider()
-	os.Exit(m.Run())
+	res := m.Run()
+	helper.StopMock()
+	os.Exit(res)
 }
 
-func testAccPreCheck(t *testing.T) {
-
+func testAccPreCheck(t *testing.T, module string) {
+	if !helper.IsMocked() {
+		return
+	}
+	go helper.StartMockServer(module)
+	time.Sleep(10 * time.Second)
 }
 
 /*

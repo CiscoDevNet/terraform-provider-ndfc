@@ -12,7 +12,7 @@ func VrfAttachmentsMod(vrfs **resource_vrf_bulk.NDFCVrfBulkModel, start, end int
 	var vrf []string
 	var vrfName string
 	for i := start; i <= end; i++ {
-		vrfName = GetConfig().NDFC.VrfPrefix + strconv.Itoa(i)
+		vrfName = GetConfig("network").NDFC.VrfPrefix + strconv.Itoa(i)
 		_, ok := vrfBulk.Vrfs[vrfName]
 		if !ok {
 			panic("VRF not found")

@@ -29,10 +29,10 @@ func TestAccNetworksResourceCRUD(t *testing.T) {
 	x := &map[string]string{
 		"RscType":  ndfc.ResourceNetworks,
 		"RscName":  "network_test",
-		"User":     helper.GetConfig().NDFC.User,
-		"Password": helper.GetConfig().NDFC.Password,
-		"Host":     helper.GetConfig().NDFC.URL,
-		"Insecure": helper.GetConfig().NDFC.Insecure,
+		"User":     helper.GetConfig("network").NDFC.User,
+		"Password": helper.GetConfig("network").NDFC.Password,
+		"Host":     helper.GetConfig("network").NDFC.URL,
+		"Insecure": helper.GetConfig("network").NDFC.Insecure,
 	}
 
 	tf_config := new(string)
@@ -54,7 +54,7 @@ func TestAccNetworksResourceCRUD(t *testing.T) {
 	networkRsc := new(resource_networks.NDFCNetworksModel)
 	vrfRsc := new(resource_vrf_bulk.NDFCVrfBulkModel)
 	resource.Test(t, resource.TestCase{
-		PreCheck:                 func() { testAccPreCheck(t) },
+		PreCheck:                 func() { testAccPreCheck(t, "network") },
 		ProtoV6ProviderFactories: testAccProtoV6ProviderFactories,
 		//CheckDestroy:             testAccCheckVrfBulkResourceDestroy(networkRsc),
 		Steps: []resource.TestStep{
@@ -62,9 +62,9 @@ func TestAccNetworksResourceCRUD(t *testing.T) {
 				Config: func() string {
 					*stepCount++
 					tName := fmt.Sprintf("%s_%d", t.Name(), *stepCount)
-					helper.GenerateSingleVrfObject(&vrfRsc, helper.GetConfig().NDFC.VrfPrefix, helper.GetConfig().NDFC.Fabric, 1, false, false, false, helper.GetConfig().NDFC.Switches)
-					helper.GenerateNetworksObject(&networkRsc, helper.GetConfig().NDFC.Fabric,
-						10, false, false, false, helper.GetConfig().NDFC.VrfPrefix+"1", nil)
+					helper.GenerateSingleVrfObject(&vrfRsc, helper.GetConfig("network").NDFC.VrfPrefix, helper.GetConfig("network").NDFC.Fabric, 1, false, false, false, helper.GetConfig("network").NDFC.Switches)
+					helper.GenerateNetworksObject(&networkRsc, helper.GetConfig("network").NDFC.Fabric,
+						10, false, false, false, helper.GetConfig("network").NDFC.VrfPrefix+"1", nil)
 					(*x)["RscName"] = "vrf_test,network_test"
 					helper.GetTFConfigWithSingleResource(tName, *x, []interface{}{vrfRsc, networkRsc}, &tf_config)
 					return *tf_config
@@ -79,7 +79,7 @@ func TestAccNetworksResourceCRUD(t *testing.T) {
 					tName := fmt.Sprintf("%s_%d", t.Name(), *stepCount)
 
 					helper.IncreaseNetCount(&networkRsc,
-						10, false, false, false, helper.GetConfig().NDFC.VrfPrefix+"1", nil)
+						10, false, false, false, helper.GetConfig("network").NDFC.VrfPrefix+"1", nil)
 					(*x)["RscName"] = "vrf_test,network_test"
 					helper.GetTFConfigWithSingleResource(tName, *x, []interface{}{vrfRsc, networkRsc}, &tf_config)
 					return *tf_config
@@ -107,8 +107,8 @@ func TestAccNetworksResourceCRUD(t *testing.T) {
 					*stepCount++
 					tName := fmt.Sprintf("%s_%d", t.Name(), *stepCount)
 					netNewRsc := new(resource_networks.NDFCNetworksModel)
-					helper.GenerateNetworksObject(&netNewRsc, helper.GetConfig().NDFC.Fabric,
-						10, false, false, false, helper.GetConfig().NDFC.VrfPrefix+"1", nil)
+					helper.GenerateNetworksObject(&netNewRsc, helper.GetConfig("network").NDFC.Fabric,
+						10, false, false, false, helper.GetConfig("network").NDFC.VrfPrefix+"1", nil)
 
 					(*x)["RscName"] = "vrf_test,network_test,network_test1"
 					helper.GetTFConfigWithSingleResource(tName, *x, []interface{}{vrfRsc, networkRsc, netNewRsc}, &tf_config)
@@ -152,10 +152,10 @@ func TestAccNetworksResourceAttachmentCRUD(t *testing.T) {
 	x := &map[string]string{
 		"RscType":  ndfc.ResourceVrfBulk,
 		"RscName":  "vrf_test,network_test",
-		"User":     helper.GetConfig().NDFC.User,
-		"Password": helper.GetConfig().NDFC.Password,
-		"Host":     helper.GetConfig().NDFC.URL,
-		"Insecure": helper.GetConfig().NDFC.Insecure,
+		"User":     helper.GetConfig("network").NDFC.User,
+		"Password": helper.GetConfig("network").NDFC.Password,
+		"Host":     helper.GetConfig("network").NDFC.URL,
+		"Insecure": helper.GetConfig("network").NDFC.Insecure,
 	}
 	stepCount := new(int)
 	*stepCount = 0
@@ -164,7 +164,7 @@ func TestAccNetworksResourceAttachmentCRUD(t *testing.T) {
 
 	resource.Test(t, resource.TestCase{
 
-		PreCheck:                 func() { testAccPreCheck(t) },
+		PreCheck:                 func() { testAccPreCheck(t, "network") },
 		ProtoV6ProviderFactories: testAccProtoV6ProviderFactories,
 		Steps: []resource.TestStep{
 			//Create VRFs with 2 attachments
@@ -174,9 +174,9 @@ func TestAccNetworksResourceAttachmentCRUD(t *testing.T) {
 					tName := fmt.Sprintf("%s_%d", t.Name(), *stepCount)
 
 					tf_config := new(string)
-					helper.GenerateSingleVrfObject(&vrfRsc, helper.GetConfig().NDFC.VrfPrefix, helper.GetConfig().NDFC.Fabric, 1, false, false, false, helper.GetConfig().NDFC.Switches)
-					helper.GenerateNetworksObject(&networkRsc, helper.GetConfig().NDFC.Fabric,
-						10, false, false, false, helper.GetConfig().NDFC.VrfPrefix+"1", []string{helper.GetConfig().NDFC.Switches[0], helper.GetConfig().NDFC.Switches[1]})
+					helper.GenerateSingleVrfObject(&vrfRsc, helper.GetConfig("network").NDFC.VrfPrefix, helper.GetConfig("network").NDFC.Fabric, 1, false, false, false, helper.GetConfig("network").NDFC.Switches)
+					helper.GenerateNetworksObject(&networkRsc, helper.GetConfig("network").NDFC.Fabric,
+						10, false, false, false, helper.GetConfig("network").NDFC.VrfPrefix+"1", []string{helper.GetConfig("network").NDFC.Switches[0], helper.GetConfig("network").NDFC.Switches[1]})
 					(*x)["RscName"] = "vrf_test,network_test"
 					helper.GetTFConfigWithSingleResource(tName, *x, []interface{}{vrfRsc, networkRsc}, &tf_config)
 					return *tf_config
@@ -208,7 +208,7 @@ func TestAccNetworksResourceAttachmentCRUD(t *testing.T) {
 					*stepCount++
 					tName := fmt.Sprintf("%s_%d", t.Name(), *stepCount)
 					tf_config := new(string)
-					helper.NetAttachmentsMod(&networkRsc, 1, len(networkRsc.Networks), []string{helper.GetConfig().NDFC.Switches[0], helper.GetConfig().NDFC.Switches[1]}, "", nil)
+					helper.NetAttachmentsMod(&networkRsc, 1, len(networkRsc.Networks), []string{helper.GetConfig("network").NDFC.Switches[0], helper.GetConfig("network").NDFC.Switches[1]}, "", nil)
 					helper.GetTFConfigWithSingleResource(tName, *x, []interface{}{vrfRsc, networkRsc}, &tf_config)
 					return *tf_config
 				}(),
@@ -221,7 +221,7 @@ func TestAccNetworksResourceAttachmentCRUD(t *testing.T) {
 					*stepCount++
 					tName := fmt.Sprintf("%s_%d", t.Name(), *stepCount)
 					tf_config := new(string)
-					helper.NetAttachmentsMod(&networkRsc, 1, len(networkRsc.Networks)/2, helper.GetConfig().NDFC.Switches, "", nil)
+					helper.NetAttachmentsMod(&networkRsc, 1, len(networkRsc.Networks)/2, helper.GetConfig("network").NDFC.Switches, "", nil)
 					helper.GetTFConfigWithSingleResource(tName, *x, []interface{}{vrfRsc, networkRsc}, &tf_config)
 					return *tf_config
 				}(),
@@ -236,8 +236,8 @@ func TestAccNetworksResourceAttachmentCRUD(t *testing.T) {
 					*stepCount++
 					tName := fmt.Sprintf("%s_%d", t.Name(), *stepCount)
 
-					helper.NetAttachmentsMod(&networkRsc, 1, len(networkRsc.Networks)/2, []string{helper.GetConfig().NDFC.Switches[0], helper.GetConfig().NDFC.Switches[1]}, "", nil)
-					helper.NetAttachmentsMod(&networkRsc, (len(networkRsc.Networks)/2)+1, len(networkRsc.Networks)/2, helper.GetConfig().NDFC.Switches, "", nil)
+					helper.NetAttachmentsMod(&networkRsc, 1, len(networkRsc.Networks)/2, []string{helper.GetConfig("network").NDFC.Switches[0], helper.GetConfig("network").NDFC.Switches[1]}, "", nil)
+					helper.NetAttachmentsMod(&networkRsc, (len(networkRsc.Networks)/2)+1, len(networkRsc.Networks)/2, helper.GetConfig("network").NDFC.Switches, "", nil)
 					helper.GetTFConfigWithSingleResource(tName, *x, []interface{}{vrfRsc, networkRsc}, &tf_config)
 					return *tf_config
 				}(),
@@ -254,10 +254,10 @@ func TestAccNetworksResourceAttachmentCRUD(t *testing.T) {
 					tf_config := new(string)
 					*stepCount++
 					tName := fmt.Sprintf("%s_%d", t.Name(), *stepCount)
-					helper.NetAttachmentsMod(&networkRsc, 1, 1, helper.GetConfig().NDFC.Switches, helper.GetConfig().NDFC.Switches[2], map[string]interface{}{
+					helper.NetAttachmentsMod(&networkRsc, 1, 1, helper.GetConfig("network").NDFC.Switches, helper.GetConfig("network").NDFC.Switches[2], map[string]interface{}{
 						"switch_ports": types.CSVString{"Ethernet1/1", "Ethernet1/2"},
 					})
-					helper.NetAttachmentsMod(&networkRsc, 10, 10, helper.GetConfig().NDFC.Switches, helper.GetConfig().NDFC.Switches[2], map[string]interface{}{
+					helper.NetAttachmentsMod(&networkRsc, 10, 10, helper.GetConfig("network").NDFC.Switches, helper.GetConfig("network").NDFC.Switches[2], map[string]interface{}{
 						"switch_ports": types.CSVString{"Ethernet1/1", "Ethernet1/2"},
 					})
 					helper.GetTFConfigWithSingleResource(tName, *x, []interface{}{vrfRsc, networkRsc}, &tf_config)
@@ -271,10 +271,10 @@ func TestAccNetworksResourceAttachmentCRUD(t *testing.T) {
 					tf_config := new(string)
 					*stepCount++
 					tName := fmt.Sprintf("%s_%d", t.Name(), *stepCount)
-					helper.NetAttachmentsMod(&networkRsc, 1, 1, helper.GetConfig().NDFC.Switches, helper.GetConfig().NDFC.Switches[2], map[string]interface{}{
+					helper.NetAttachmentsMod(&networkRsc, 1, 1, helper.GetConfig("network").NDFC.Switches, helper.GetConfig("network").NDFC.Switches[2], map[string]interface{}{
 						"switch_ports": types.CSVString{"Ethernet1/2"},
 					})
-					helper.NetAttachmentsMod(&networkRsc, 10, 10, helper.GetConfig().NDFC.Switches, helper.GetConfig().NDFC.Switches[2], map[string]interface{}{
+					helper.NetAttachmentsMod(&networkRsc, 10, 10, helper.GetConfig("network").NDFC.Switches, helper.GetConfig("network").NDFC.Switches[2], map[string]interface{}{
 						"switch_ports": types.CSVString{"Ethernet1/2", "Ethernet1/3"},
 					})
 					helper.GetTFConfigWithSingleResource(tName, *x, []interface{}{vrfRsc, networkRsc}, &tf_config)
@@ -289,10 +289,10 @@ func TestAccNetworksResourceGlobalDeploy(t *testing.T) {
 	x := &map[string]string{
 		"RscType":  ndfc.ResourceNetworks,
 		"RscName":  "network_test",
-		"User":     helper.GetConfig().NDFC.User,
-		"Password": helper.GetConfig().NDFC.Password,
-		"Host":     helper.GetConfig().NDFC.URL,
-		"Insecure": helper.GetConfig().NDFC.Insecure,
+		"User":     helper.GetConfig("network").NDFC.User,
+		"Password": helper.GetConfig("network").NDFC.Password,
+		"Host":     helper.GetConfig("network").NDFC.URL,
+		"Insecure": helper.GetConfig("network").NDFC.Insecure,
 	}
 
 	tf_config := new(string)
@@ -314,7 +314,7 @@ func TestAccNetworksResourceGlobalDeploy(t *testing.T) {
 	networkRsc := new(resource_networks.NDFCNetworksModel)
 	vrfRsc := new(resource_vrf_bulk.NDFCVrfBulkModel)
 	resource.Test(t, resource.TestCase{
-		PreCheck:                 func() { testAccPreCheck(t) },
+		PreCheck:                 func() { testAccPreCheck(t, "network") },
 		ProtoV6ProviderFactories: testAccProtoV6ProviderFactories,
 		Steps: []resource.TestStep{
 			{
@@ -322,9 +322,9 @@ func TestAccNetworksResourceGlobalDeploy(t *testing.T) {
 				Config: func() string {
 					*stepCount++
 					tName := fmt.Sprintf("%s_%d", t.Name(), *stepCount)
-					helper.GenerateSingleVrfObject(&vrfRsc, helper.GetConfig().NDFC.VrfPrefix, helper.GetConfig().NDFC.Fabric, 1, false, false, false, helper.GetConfig().NDFC.Switches)
-					helper.GenerateNetworksObject(&networkRsc, helper.GetConfig().NDFC.Fabric,
-						10, true, false, false, helper.GetConfig().NDFC.VrfPrefix+"1", helper.GetConfig().NDFC.Switches)
+					helper.GenerateSingleVrfObject(&vrfRsc, helper.GetConfig("network").NDFC.VrfPrefix, helper.GetConfig("network").NDFC.Fabric, 1, false, false, false, helper.GetConfig("network").NDFC.Switches)
+					helper.GenerateNetworksObject(&networkRsc, helper.GetConfig("network").NDFC.Fabric,
+						10, true, false, false, helper.GetConfig("network").NDFC.VrfPrefix+"1", helper.GetConfig("network").NDFC.Switches)
 					(*x)["RscName"] = "vrf_test,network_test"
 					helper.GetTFConfigWithSingleResource(tName, *x, []interface{}{vrfRsc, networkRsc}, &tf_config)
 					return *tf_config
@@ -340,10 +340,10 @@ func TestAccNetworksResourceAttachmentDeployNetLevel(t *testing.T) {
 	x := &map[string]string{
 		"RscType":  ndfc.ResourceNetworks,
 		"RscName":  "network_test",
-		"User":     helper.GetConfig().NDFC.User,
-		"Password": helper.GetConfig().NDFC.Password,
-		"Host":     helper.GetConfig().NDFC.URL,
-		"Insecure": helper.GetConfig().NDFC.Insecure,
+		"User":     helper.GetConfig("network").NDFC.User,
+		"Password": helper.GetConfig("network").NDFC.Password,
+		"Host":     helper.GetConfig("network").NDFC.URL,
+		"Insecure": helper.GetConfig("network").NDFC.Insecure,
 	}
 
 	tf_config := new(string)
@@ -365,7 +365,7 @@ func TestAccNetworksResourceAttachmentDeployNetLevel(t *testing.T) {
 	networkRsc := new(resource_networks.NDFCNetworksModel)
 	vrfRsc := new(resource_vrf_bulk.NDFCVrfBulkModel)
 	resource.Test(t, resource.TestCase{
-		PreCheck:                 func() { testAccPreCheck(t) },
+		PreCheck:                 func() { testAccPreCheck(t, "network") },
 		ProtoV6ProviderFactories: testAccProtoV6ProviderFactories,
 		Steps: []resource.TestStep{
 			{
@@ -373,9 +373,9 @@ func TestAccNetworksResourceAttachmentDeployNetLevel(t *testing.T) {
 				Config: func() string {
 					*stepCount++
 					tName := fmt.Sprintf("%s_%d", t.Name(), *stepCount)
-					helper.GenerateSingleVrfObject(&vrfRsc, helper.GetConfig().NDFC.VrfPrefix, helper.GetConfig().NDFC.Fabric, 1, false, false, false, helper.GetConfig().NDFC.Switches)
-					helper.GenerateNetworksObject(&networkRsc, helper.GetConfig().NDFC.Fabric,
-						10, false, true, false, helper.GetConfig().NDFC.VrfPrefix+"1", helper.GetConfig().NDFC.Switches)
+					helper.GenerateSingleVrfObject(&vrfRsc, helper.GetConfig("network").NDFC.VrfPrefix, helper.GetConfig("network").NDFC.Fabric, 1, false, false, false, helper.GetConfig("network").NDFC.Switches)
+					helper.GenerateNetworksObject(&networkRsc, helper.GetConfig("network").NDFC.Fabric,
+						10, false, true, false, helper.GetConfig("network").NDFC.VrfPrefix+"1", helper.GetConfig("network").NDFC.Switches)
 					(*x)["RscName"] = "vrf_test,network_test"
 					helper.GetTFConfigWithSingleResource(tName, *x, []interface{}{vrfRsc, networkRsc}, &tf_config)
 					return *tf_config
@@ -391,10 +391,10 @@ func TestAccNetworksResourceAttachmentDeployAttachments(t *testing.T) {
 	x := &map[string]string{
 		"RscType":  ndfc.ResourceNetworks,
 		"RscName":  "network_test",
-		"User":     helper.GetConfig().NDFC.User,
-		"Password": helper.GetConfig().NDFC.Password,
-		"Host":     helper.GetConfig().NDFC.URL,
-		"Insecure": helper.GetConfig().NDFC.Insecure,
+		"User":     helper.GetConfig("network").NDFC.User,
+		"Password": helper.GetConfig("network").NDFC.Password,
+		"Host":     helper.GetConfig("network").NDFC.URL,
+		"Insecure": helper.GetConfig("network").NDFC.Insecure,
 	}
 
 	tf_config := new(string)
@@ -416,7 +416,7 @@ func TestAccNetworksResourceAttachmentDeployAttachments(t *testing.T) {
 	networkRsc := new(resource_networks.NDFCNetworksModel)
 	vrfRsc := new(resource_vrf_bulk.NDFCVrfBulkModel)
 	resource.Test(t, resource.TestCase{
-		PreCheck:                 func() { testAccPreCheck(t) },
+		PreCheck:                 func() { testAccPreCheck(t, "network") },
 		ProtoV6ProviderFactories: testAccProtoV6ProviderFactories,
 		Steps: []resource.TestStep{
 			{
@@ -424,9 +424,9 @@ func TestAccNetworksResourceAttachmentDeployAttachments(t *testing.T) {
 				Config: func() string {
 					*stepCount++
 					tName := fmt.Sprintf("%s_%d", t.Name(), *stepCount)
-					helper.GenerateSingleVrfObject(&vrfRsc, helper.GetConfig().NDFC.VrfPrefix, helper.GetConfig().NDFC.Fabric, 1, false, false, false, helper.GetConfig().NDFC.Switches)
-					helper.GenerateNetworksObject(&networkRsc, helper.GetConfig().NDFC.Fabric,
-						10, false, false, true, helper.GetConfig().NDFC.VrfPrefix+"1", helper.GetConfig().NDFC.Switches)
+					helper.GenerateSingleVrfObject(&vrfRsc, helper.GetConfig("network").NDFC.VrfPrefix, helper.GetConfig("network").NDFC.Fabric, 1, false, false, false, helper.GetConfig("network").NDFC.Switches)
+					helper.GenerateNetworksObject(&networkRsc, helper.GetConfig("network").NDFC.Fabric,
+						10, false, false, true, helper.GetConfig("network").NDFC.VrfPrefix+"1", helper.GetConfig("network").NDFC.Switches)
 					(*x)["RscName"] = "vrf_test,network_test"
 					helper.GetTFConfigWithSingleResource(tName, *x, []interface{}{vrfRsc, networkRsc}, &tf_config)
 					return *tf_config

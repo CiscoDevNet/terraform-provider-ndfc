@@ -5,6 +5,7 @@ package resource_interface_vlan
 import (
 	"context"
 	"fmt"
+	"github.com/hashicorp/terraform-plugin-framework-validators/int64validator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
@@ -92,11 +93,17 @@ func InterfaceVlanResourceSchema(ctx context.Context) schema.Schema {
 							Optional:            true,
 							Description:         "HSRP group number",
 							MarkdownDescription: "HSRP group number",
+							Validators: []validator.Int64{
+								int64validator.Between(0, 255),
+							},
 						},
 						"hsrp_priority": schema.Int64Attribute{
 							Optional:            true,
 							Description:         "HSRP priority",
 							MarkdownDescription: "HSRP priority",
+							Validators: []validator.Int64{
+								int64validator.Between(1, 255),
+							},
 						},
 						"hsrp_version": schema.StringAttribute{
 							Optional:            true,

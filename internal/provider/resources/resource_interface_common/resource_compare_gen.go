@@ -60,21 +60,20 @@ func (v NDFCInterfacesValue) DeepEqual(c NDFCInterfacesValue) int {
 		return RequiresUpdate
 	}
 
-	if v.NvPairs.AccessVlan != nil && c.NvPairs.AccessVlan != nil {
+	if !v.NvPairs.AccessVlan.IsEmpty() && !c.NvPairs.AccessVlan.IsEmpty() {
 		if *v.NvPairs.AccessVlan != *c.NvPairs.AccessVlan {
 			log.Printf("v.NvPairs.AccessVlan=%v, c.NvPairs.AccessVlan=%v", *v.NvPairs.AccessVlan, *c.NvPairs.AccessVlan)
 			return RequiresUpdate
 		}
 	} else {
-		if v.NvPairs.AccessVlan != nil {
+		if !v.NvPairs.AccessVlan.IsEmpty() {
 			log.Printf("v.NvPairs.AccessVlan=%v", *v.NvPairs.AccessVlan)
 			return RequiresUpdate
-		} else if c.NvPairs.AccessVlan != nil {
+		} else if !c.NvPairs.AccessVlan.IsEmpty() {
 			log.Printf("c.NvPairs.AccessVlan=%v", *c.NvPairs.AccessVlan)
 			return RequiresUpdate
 		}
 	}
-
 	if v.NvPairs.OrphanPort != c.NvPairs.OrphanPort {
 		log.Printf("v.NvPairs.OrphanPort=%s, c.NvPairs.OrphanPort=%s", v.NvPairs.OrphanPort, c.NvPairs.OrphanPort)
 		return RequiresUpdate
@@ -100,21 +99,20 @@ func (v NDFCInterfacesValue) DeepEqual(c NDFCInterfacesValue) int {
 		return RequiresUpdate
 	}
 
-	if v.NvPairs.NativeVlan != nil && c.NvPairs.NativeVlan != nil {
+	if !v.NvPairs.NativeVlan.IsEmpty() && !c.NvPairs.NativeVlan.IsEmpty() {
 		if *v.NvPairs.NativeVlan != *c.NvPairs.NativeVlan {
 			log.Printf("v.NvPairs.NativeVlan=%v, c.NvPairs.NativeVlan=%v", *v.NvPairs.NativeVlan, *c.NvPairs.NativeVlan)
 			return RequiresUpdate
 		}
 	} else {
-		if v.NvPairs.NativeVlan != nil {
+		if !v.NvPairs.NativeVlan.IsEmpty() {
 			log.Printf("v.NvPairs.NativeVlan=%v", *v.NvPairs.NativeVlan)
 			return RequiresUpdate
-		} else if c.NvPairs.NativeVlan != nil {
+		} else if !c.NvPairs.NativeVlan.IsEmpty() {
 			log.Printf("c.NvPairs.NativeVlan=%v", *c.NvPairs.NativeVlan)
 			return RequiresUpdate
 		}
 	}
-
 	if v.NvPairs.Ipv4PrefixLength != c.NvPairs.Ipv4PrefixLength {
 		log.Printf("v.NvPairs.Ipv4PrefixLength=%s, c.NvPairs.Ipv4PrefixLength=%s", v.NvPairs.Ipv4PrefixLength, c.NvPairs.Ipv4PrefixLength)
 		return RequiresUpdate
@@ -132,41 +130,39 @@ func (v NDFCInterfacesValue) DeepEqual(c NDFCInterfacesValue) int {
 		return RequiresUpdate
 	}
 
-	if v.NvPairs.HsrpGroup != nil && c.NvPairs.HsrpGroup != nil {
+	if !v.NvPairs.HsrpGroup.IsEmpty() && !c.NvPairs.HsrpGroup.IsEmpty() {
 		if *v.NvPairs.HsrpGroup != *c.NvPairs.HsrpGroup {
 			log.Printf("v.NvPairs.HsrpGroup=%v, c.NvPairs.HsrpGroup=%v", *v.NvPairs.HsrpGroup, *c.NvPairs.HsrpGroup)
 			return RequiresUpdate
 		}
 	} else {
-		if v.NvPairs.HsrpGroup != nil {
+		if !v.NvPairs.HsrpGroup.IsEmpty() {
 			log.Printf("v.NvPairs.HsrpGroup=%v", *v.NvPairs.HsrpGroup)
 			return RequiresUpdate
-		} else if c.NvPairs.HsrpGroup != nil {
+		} else if !c.NvPairs.HsrpGroup.IsEmpty() {
 			log.Printf("c.NvPairs.HsrpGroup=%v", *c.NvPairs.HsrpGroup)
 			return RequiresUpdate
 		}
 	}
-
 	if v.NvPairs.HsrpVip != c.NvPairs.HsrpVip {
 		log.Printf("v.NvPairs.HsrpVip=%s, c.NvPairs.HsrpVip=%s", v.NvPairs.HsrpVip, c.NvPairs.HsrpVip)
 		return RequiresUpdate
 	}
 
-	if v.NvPairs.HsrpPriority != nil && c.NvPairs.HsrpPriority != nil {
+	if !v.NvPairs.HsrpPriority.IsEmpty() && !c.NvPairs.HsrpPriority.IsEmpty() {
 		if *v.NvPairs.HsrpPriority != *c.NvPairs.HsrpPriority {
 			log.Printf("v.NvPairs.HsrpPriority=%v, c.NvPairs.HsrpPriority=%v", *v.NvPairs.HsrpPriority, *c.NvPairs.HsrpPriority)
 			return RequiresUpdate
 		}
 	} else {
-		if v.NvPairs.HsrpPriority != nil {
+		if !v.NvPairs.HsrpPriority.IsEmpty() {
 			log.Printf("v.NvPairs.HsrpPriority=%v", *v.NvPairs.HsrpPriority)
 			return RequiresUpdate
-		} else if c.NvPairs.HsrpPriority != nil {
+		} else if !c.NvPairs.HsrpPriority.IsEmpty() {
 			log.Printf("c.NvPairs.HsrpPriority=%v", *c.NvPairs.HsrpPriority)
 			return RequiresUpdate
 		}
 	}
-
 	if v.NvPairs.HsrpVersion != c.NvPairs.HsrpVersion {
 		log.Printf("v.NvPairs.HsrpVersion=%s, c.NvPairs.HsrpVersion=%s", v.NvPairs.HsrpVersion, c.NvPairs.HsrpVersion)
 		return RequiresUpdate
@@ -378,22 +374,25 @@ func (v *NDFCInterfacesValue) CreatePlan(c NDFCInterfacesValue, cf *bool) int {
 		v.NvPairs.Speed = c.NvPairs.Speed
 	}
 
-	if v.NvPairs.AccessVlan != nil && c.NvPairs.AccessVlan != nil {
+	if !v.NvPairs.AccessVlan.IsEmpty() && !c.NvPairs.AccessVlan.IsEmpty() {
 		if *v.NvPairs.AccessVlan != *c.NvPairs.AccessVlan {
+			log.Printf("Update: v.NvPairs.AccessVlan=%v, c.NvPairs.AccessVlan=%v", *v.NvPairs.AccessVlan, *c.NvPairs.AccessVlan)
 			if action == ActionNone || action == RequiresUpdate {
 				action = RequiresUpdate
 			}
-			log.Printf("Update: v.NvPairs.AccessVlan=%v, c.NvPairs.AccessVlan=%v", *v.NvPairs.AccessVlan, *c.NvPairs.AccessVlan)
 		}
-	} else if v.NvPairs.AccessVlan != nil {
-		log.Printf("Update: v.NvPairs.AccessVlan=%v, c.NvPairs.AccessVlan=nil", *v.NvPairs.AccessVlan)
+	} else if !v.NvPairs.AccessVlan.IsEmpty() {
+		log.Printf("Update: v.NvPairs.AccessVlan=%v", *v.NvPairs.AccessVlan)
 		if action == ActionNone || action == RequiresUpdate {
 			action = RequiresUpdate
 		}
-	} else if c.NvPairs.AccessVlan != nil {
-		v.NvPairs.AccessVlan = new(int64)
-		log.Printf("Copy from state: v.NvPairs.AccessVlan=nil, c.NvPairs.AccessVlan=%v", *c.NvPairs.AccessVlan)
+	} else if !c.NvPairs.AccessVlan.IsEmpty() {
+		log.Printf("Copy from State: c.NvPairs.AccessVlan=%v", *c.NvPairs.AccessVlan)
+		v.NvPairs.AccessVlan = new(Int64Custom)
 		*v.NvPairs.AccessVlan = *c.NvPairs.AccessVlan
+		if action == ActionNone || action == RequiresUpdate {
+			action = RequiresUpdate
+		}
 	}
 
 	if v.NvPairs.OrphanPort != c.NvPairs.OrphanPort {
@@ -456,22 +455,25 @@ func (v *NDFCInterfacesValue) CreatePlan(c NDFCInterfacesValue, cf *bool) int {
 		v.NvPairs.AllowedVlans = c.NvPairs.AllowedVlans
 	}
 
-	if v.NvPairs.NativeVlan != nil && c.NvPairs.NativeVlan != nil {
+	if !v.NvPairs.NativeVlan.IsEmpty() && !c.NvPairs.NativeVlan.IsEmpty() {
 		if *v.NvPairs.NativeVlan != *c.NvPairs.NativeVlan {
+			log.Printf("Update: v.NvPairs.NativeVlan=%v, c.NvPairs.NativeVlan=%v", *v.NvPairs.NativeVlan, *c.NvPairs.NativeVlan)
 			if action == ActionNone || action == RequiresUpdate {
 				action = RequiresUpdate
 			}
-			log.Printf("Update: v.NvPairs.NativeVlan=%v, c.NvPairs.NativeVlan=%v", *v.NvPairs.NativeVlan, *c.NvPairs.NativeVlan)
 		}
-	} else if v.NvPairs.NativeVlan != nil {
-		log.Printf("Update: v.NvPairs.NativeVlan=%v, c.NvPairs.NativeVlan=nil", *v.NvPairs.NativeVlan)
+	} else if !v.NvPairs.NativeVlan.IsEmpty() {
+		log.Printf("Update: v.NvPairs.NativeVlan=%v", *v.NvPairs.NativeVlan)
 		if action == ActionNone || action == RequiresUpdate {
 			action = RequiresUpdate
 		}
-	} else if c.NvPairs.NativeVlan != nil {
-		v.NvPairs.NativeVlan = new(int64)
-		log.Printf("Copy from state: v.NvPairs.NativeVlan=nil, c.NvPairs.NativeVlan=%v", *c.NvPairs.NativeVlan)
+	} else if !c.NvPairs.NativeVlan.IsEmpty() {
+		log.Printf("Copy from State: c.NvPairs.NativeVlan=%v", *c.NvPairs.NativeVlan)
+		v.NvPairs.NativeVlan = new(Int64Custom)
 		*v.NvPairs.NativeVlan = *c.NvPairs.NativeVlan
+		if action == ActionNone || action == RequiresUpdate {
+			action = RequiresUpdate
+		}
 	}
 
 	if v.NvPairs.Ipv4PrefixLength != "" {
@@ -514,22 +516,25 @@ func (v *NDFCInterfacesValue) CreatePlan(c NDFCInterfacesValue, cf *bool) int {
 		}
 	}
 
-	if v.NvPairs.HsrpGroup != nil && c.NvPairs.HsrpGroup != nil {
+	if !v.NvPairs.HsrpGroup.IsEmpty() && !c.NvPairs.HsrpGroup.IsEmpty() {
 		if *v.NvPairs.HsrpGroup != *c.NvPairs.HsrpGroup {
+			log.Printf("Update: v.NvPairs.HsrpGroup=%v, c.NvPairs.HsrpGroup=%v", *v.NvPairs.HsrpGroup, *c.NvPairs.HsrpGroup)
 			if action == ActionNone || action == RequiresUpdate {
 				action = RequiresUpdate
 			}
-			log.Printf("Update: v.NvPairs.HsrpGroup=%v, c.NvPairs.HsrpGroup=%v", *v.NvPairs.HsrpGroup, *c.NvPairs.HsrpGroup)
 		}
-	} else if v.NvPairs.HsrpGroup != nil {
-		log.Printf("Update: v.NvPairs.HsrpGroup=%v, c.NvPairs.HsrpGroup=nil", *v.NvPairs.HsrpGroup)
+	} else if !v.NvPairs.HsrpGroup.IsEmpty() {
+		log.Printf("Update: v.NvPairs.HsrpGroup=%v", *v.NvPairs.HsrpGroup)
 		if action == ActionNone || action == RequiresUpdate {
 			action = RequiresUpdate
 		}
-	} else if c.NvPairs.HsrpGroup != nil {
-		v.NvPairs.HsrpGroup = new(int64)
-		log.Printf("Copy from state: v.NvPairs.HsrpGroup=nil, c.NvPairs.HsrpGroup=%v", *c.NvPairs.HsrpGroup)
+	} else if !c.NvPairs.HsrpGroup.IsEmpty() {
+		log.Printf("Copy from State: c.NvPairs.HsrpGroup=%v", *c.NvPairs.HsrpGroup)
+		v.NvPairs.HsrpGroup = new(Int64Custom)
 		*v.NvPairs.HsrpGroup = *c.NvPairs.HsrpGroup
+		if action == ActionNone || action == RequiresUpdate {
+			action = RequiresUpdate
+		}
 	}
 
 	if v.NvPairs.HsrpVip != "" {
@@ -545,22 +550,25 @@ func (v *NDFCInterfacesValue) CreatePlan(c NDFCInterfacesValue, cf *bool) int {
 		v.NvPairs.HsrpVip = c.NvPairs.HsrpVip
 	}
 
-	if v.NvPairs.HsrpPriority != nil && c.NvPairs.HsrpPriority != nil {
+	if !v.NvPairs.HsrpPriority.IsEmpty() && !c.NvPairs.HsrpPriority.IsEmpty() {
 		if *v.NvPairs.HsrpPriority != *c.NvPairs.HsrpPriority {
+			log.Printf("Update: v.NvPairs.HsrpPriority=%v, c.NvPairs.HsrpPriority=%v", *v.NvPairs.HsrpPriority, *c.NvPairs.HsrpPriority)
 			if action == ActionNone || action == RequiresUpdate {
 				action = RequiresUpdate
 			}
-			log.Printf("Update: v.NvPairs.HsrpPriority=%v, c.NvPairs.HsrpPriority=%v", *v.NvPairs.HsrpPriority, *c.NvPairs.HsrpPriority)
 		}
-	} else if v.NvPairs.HsrpPriority != nil {
-		log.Printf("Update: v.NvPairs.HsrpPriority=%v, c.NvPairs.HsrpPriority=nil", *v.NvPairs.HsrpPriority)
+	} else if !v.NvPairs.HsrpPriority.IsEmpty() {
+		log.Printf("Update: v.NvPairs.HsrpPriority=%v", *v.NvPairs.HsrpPriority)
 		if action == ActionNone || action == RequiresUpdate {
 			action = RequiresUpdate
 		}
-	} else if c.NvPairs.HsrpPriority != nil {
-		v.NvPairs.HsrpPriority = new(int64)
-		log.Printf("Copy from state: v.NvPairs.HsrpPriority=nil, c.NvPairs.HsrpPriority=%v", *c.NvPairs.HsrpPriority)
+	} else if !c.NvPairs.HsrpPriority.IsEmpty() {
+		log.Printf("Copy from State: c.NvPairs.HsrpPriority=%v", *c.NvPairs.HsrpPriority)
+		v.NvPairs.HsrpPriority = new(Int64Custom)
 		*v.NvPairs.HsrpPriority = *c.NvPairs.HsrpPriority
+		if action == ActionNone || action == RequiresUpdate {
+			action = RequiresUpdate
+		}
 	}
 
 	if v.NvPairs.HsrpVersion != "" {

@@ -7,6 +7,7 @@ import (
 	"log"
 	"strings"
 	"terraform-provider-ndfc/internal/provider/resources/resource_interface_common"
+	"terraform-provider-ndfc/internal/provider/types"
 
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-log/tflog"
@@ -46,11 +47,24 @@ func (i *NDFCEthernetInterface) DeleteInterface(ctx context.Context, dg *diag.Di
 
 	for k, intf := range inData.Interfaces {
 		tflog.Debug(ctx, fmt.Sprintf("Deleting interface: %s:%s", intf.SerialNumber, intf.InterfaceName))
-		intf.NvPairs.AdminState = "false"
-		intf.NvPairs.InterfaceDescription = "DELETED BY TERRAFORM"
-		intf.NvPairs.FreeformConfig = " "
+
+		//Empty out some parameters
+		intf.NvPairs.InterfaceDescription = "###"
+		intf.NvPairs.FreeformConfig = "###"
+		intf.NvPairs.NativeVlan = new(types.Int64Custom)
+		*intf.NvPairs.NativeVlan = types.Int64Custom(-4096)
+		intf.NvPairs.AccessVlan = new(types.Int64Custom)
+		*intf.NvPairs.AccessVlan = types.Int64Custom(-4096)
+		intf.NvPairs.Netflow = "false"
+		intf.NvPairs.NetflowMonitor = "###"
+		intf.NvPairs.NetflowSampler = "###"
+
+		//Set some default values
 		intf.NvPairs.Speed = "Auto"
-		intf.NvPairs.Mtu = "jumbo"
+		intf.NvPairs.Mtu = "default"
+		intf.NvPairs.AdminState = "false"
+		intf.NvPairs.AllowedVlans = "none"
+
 		inData.Interfaces[k] = intf
 		intfPayload.Interfaces = append(intfPayload.Interfaces, intf)
 		ifDeployPayload = append(ifDeployPayload, resource_interface_common.NDFCInterfaceDeploy{
@@ -79,11 +93,22 @@ func (i *NDFCEthernetInterface) GetPayload(ctx context.Context, diags *diag.Diag
 	removeAttributes := []string{
 		",\"ROUTING_TAG\":\"\"",
 	}
+
+	emptyOutAttributes := []string{
+		"\"###\"",   //Empty string
+		"\"-4096\"", //Empty VLAN
+	}
+
 	log.Printf("Removing attributes from payload before sending to API")
 	log.Printf("Data %s", string(rawData))
 	for _, attr := range removeAttributes {
 		rawData = []byte(strings.Replace(string(rawData), attr, "", -1))
 	}
+
+	for _, attr := range emptyOutAttributes {
+		rawData = []byte(strings.Replace(string(rawData), attr, "\"\"", -1))
+	}
+
 	log.Printf("Data after removing attributes %s", string(rawData))
 	return rawData, nil
 }

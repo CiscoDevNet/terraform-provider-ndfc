@@ -1,7 +1,9 @@
 package testing
 
 import (
+	"fmt"
 	"os"
+	"os/exec"
 
 	yaml "gopkg.in/yaml.v2"
 )
@@ -11,45 +13,142 @@ type Config struct {
 }
 
 type NDFCConfig struct {
-	URL       string   `yaml:"url"`
-	User      string   `yaml:"user"`
-	Password  string   `yaml:"pwd"`
-	Insecure  string   `yaml:"insecure"`
-	Fabric    string   `yaml:"fabric"`
-	Switches  []string `yaml:"switches"`
-	VrfPrefix string   `yaml:"vrf_prefix"`
-	NetPrefix string   `yaml:"net_prefix"`
+	URL               string   `yaml:"url"`
+	User              string   `yaml:"user"`
+	Password          string   `yaml:"pwd"`
+	Insecure          string   `yaml:"insecure"`
+	Fabric            string   `yaml:"fabric"`
+	Switches          []string `yaml:"switches"`
+	VrfPrefix         string   `yaml:"vrf_prefix"`
+	NetPrefix         string   `yaml:"net_prefix"`
+	mockPort          int
+	mockServerStarted bool
+	mockConfigFile    string
 }
 
-var config *Config
+var config map[string]*Config
+var testModules = []string{
+	"vrf",
+	"network",
+	"ethernet",
+	"loopback",
+	"vlan",
+}
 
 func LoadConfigFromYAML(yamlContent string) (*Config, error) {
-	config = new(Config)
-	err := yaml.Unmarshal([]byte(yamlContent), &config)
+	cf := new(Config)
+	err := yaml.Unmarshal([]byte(yamlContent), cf)
 	if err != nil {
 		return nil, err
 	}
-	return config, nil
+	cf.NDFC.mockPort = 0
+	cf.NDFC.mockServerStarted = false
+	return cf, nil
 }
 
-func InitConfig(path string) {
+func InitConfig(path string, mock string) {
 	if config != nil {
 		return
 	}
-	config = new(Config)
+	config = make(map[string]*Config)
 	cfg, err := os.ReadFile(path)
 	if err != nil {
 		panic(err)
 	}
-	config, err = LoadConfigFromYAML(string(cfg))
-	if err != nil {
-		panic(err)
+
+	if mock == "" {
+		config["global"], err = LoadConfigFromYAML(string(cfg))
+		if err != nil {
+			panic(err)
+		}
+		return
+	}
+	for i, module := range testModules {
+
+		config[module], err = LoadConfigFromYAML(string(cfg))
+		if err != nil {
+			panic(err)
+		}
+		config[module].NDFC.mockPort = 3000 + i
+		config[module].NDFC.URL = fmt.Sprintf("https://localhost:%d", config[module].NDFC.mockPort)
+		switch module {
+		case "ethernet":
+			fallthrough
+		case "loopback":
+			fallthrough
+		case "vlan":
+			config[module].NDFC.mockConfigFile = "./testdata/interfaces.json"
+		default:
+			fmt.Println("Mocking not supported for this module")
+		}
 	}
 }
 
-func GetConfig() *Config {
-	if config == nil {
+func GetConfig(module string) *Config {
+	if len(config) == 0 {
 		panic("Config not initialized")
 	}
-	return config
+	if len(config) == 1 {
+		return config["global"]
+	}
+	return config[module]
+}
+
+func IsMocked() bool {
+	return len(config) > 1
+}
+
+func StartMockServer(module string) {
+	// not mocked
+	if len(config) == 1 {
+		return
+	}
+	if config[module].NDFC.mockServerStarted {
+		return
+	}
+	rpath, _ := os.Getwd()
+	config[module].NDFC.mockServerStarted = true
+	mockScript := rpath + "/../../mock.sh"
+	fmt.Println(rpath, rpath+"../../"+config[module].NDFC.mockConfigFile)
+	cmd := exec.Command("/bin/bash", mockScript, "start",
+		rpath+"/../../"+config[module].NDFC.mockConfigFile,
+		fmt.Sprint(config[module].NDFC.mockPort))
+	out, err := cmd.Output()
+	if err != nil {
+		fmt.Println(err, string(out))
+		panic(err)
+	}
+	fmt.Println(string(out))
+
+}
+
+func stopMockServer(module string) {
+	rpath, _ := os.Getwd()
+	rpath = rpath + "/../../mock.sh"
+
+	if len(config) == 1 {
+		return
+	}
+	if !config[module].NDFC.mockServerStarted {
+		return
+	}
+	fmt.Println(rpath)
+	cmd := exec.Command("/bin/bash", rpath, "stop",
+		fmt.Sprint(config[module].NDFC.mockPort))
+	out, err := cmd.Output()
+	if err != nil {
+		panic(err)
+	}
+	fmt.Println(string(out))
+	config[module].NDFC.mockServerStarted = false
+
+}
+
+func StopMock() {
+	if len(config) == 1 {
+		return
+	}
+	for _, module := range testModules {
+		stopMockServer(module)
+	}
 }

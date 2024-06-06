@@ -5,11 +5,13 @@ import (
 	"context"
 	"log"
 	"strconv"
-	"terraform-provider-ndfc/internal/provider/resources/resource_interface_common"
+	. "terraform-provider-ndfc/internal/provider/types"
 
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/types"
+
+	"terraform-provider-ndfc/internal/provider/resources/resource_interface_common"
 )
 
 func (v *InterfaceVlanModel) SetModelData(jsonData *resource_interface_common.NDFCInterfaceCommonModel) diag.Diagnostics {
@@ -158,7 +160,11 @@ func (v *InterfacesValue) SetValue(jsonData *resource_interface_common.NDFCInter
 	}
 
 	if jsonData.NvPairs.HsrpGroup != nil {
-		v.HsrpGroup = types.Int64Value(*jsonData.NvPairs.HsrpGroup)
+		if jsonData.NvPairs.HsrpGroup.IsEmpty() {
+			v.HsrpGroup = types.Int64Null()
+		} else {
+			v.HsrpGroup = types.Int64Value(int64(*jsonData.NvPairs.HsrpGroup))
+		}
 
 	} else {
 		v.HsrpGroup = types.Int64Null()
@@ -171,7 +177,11 @@ func (v *InterfacesValue) SetValue(jsonData *resource_interface_common.NDFCInter
 	}
 
 	if jsonData.NvPairs.HsrpPriority != nil {
-		v.HsrpPriority = types.Int64Value(*jsonData.NvPairs.HsrpPriority)
+		if jsonData.NvPairs.HsrpPriority.IsEmpty() {
+			v.HsrpPriority = types.Int64Null()
+		} else {
+			v.HsrpPriority = types.Int64Value(int64(*jsonData.NvPairs.HsrpPriority))
+		}
 
 	} else {
 		v.HsrpPriority = types.Int64Null()
@@ -399,9 +409,8 @@ func (v InterfaceVlanModel) GetModelData() *resource_interface_common.NDFCInterf
 			// hsrp_group | Int64| [nvPairs]| false
 			if !ele1.HsrpGroup.IsNull() && !ele1.HsrpGroup.IsUnknown() {
 				//-----inline nested----
-				data1.NvPairs.HsrpGroup = new(int64)
-				*data1.NvPairs.HsrpGroup = ele1.HsrpGroup.ValueInt64()
-
+				data1.NvPairs.HsrpGroup = new(Int64Custom)
+				*data1.NvPairs.HsrpGroup = Int64Custom(ele1.HsrpGroup.ValueInt64())
 			} else {
 				data1.NvPairs.HsrpGroup = nil
 			}
@@ -417,9 +426,8 @@ func (v InterfaceVlanModel) GetModelData() *resource_interface_common.NDFCInterf
 			// hsrp_priority | Int64| [nvPairs]| false
 			if !ele1.HsrpPriority.IsNull() && !ele1.HsrpPriority.IsUnknown() {
 				//-----inline nested----
-				data1.NvPairs.HsrpPriority = new(int64)
-				*data1.NvPairs.HsrpPriority = ele1.HsrpPriority.ValueInt64()
-
+				data1.NvPairs.HsrpPriority = new(Int64Custom)
+				*data1.NvPairs.HsrpPriority = Int64Custom(ele1.HsrpPriority.ValueInt64())
 			} else {
 				data1.NvPairs.HsrpPriority = nil
 			}

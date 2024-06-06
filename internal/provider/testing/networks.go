@@ -20,7 +20,7 @@ func GenerateNetworksObject(bulk **resource_networks.NDFCNetworksModel, fabric s
 	log.Printf("Creating Bulk Network object Network Count: %d", count)
 
 	for i := 0; i < count; i++ {
-		nwName := GetConfig().NDFC.NetPrefix + strconv.Itoa(i+1)
+		nwName := GetConfig("network").NDFC.NetPrefix + strconv.Itoa(i+1)
 		log.Printf("Creating Network: %s", nwName)
 		nw := resource_networks.NDFCNetworksValue{}
 		//nw.VrfTemplateConfig.VrfDescription = "Network Description"
@@ -70,7 +70,7 @@ func GenerateSingleNetworkObject(nwDptr **resource_networks.NDFCNetworksModel, n
 
 func ModifyNetworksObject(nws **resource_networks.NDFCNetworksModel, nwNo int, values map[string]interface{}) {
 	nets := *nws
-	nwName := GetConfig().NDFC.NetPrefix + strconv.Itoa(nwNo)
+	nwName := GetConfig("network").NDFC.NetPrefix + strconv.Itoa(nwNo)
 	nw, ok := nets.Networks[nwName]
 	if ok {
 		for key, value := range values {
@@ -126,7 +126,7 @@ func IncreaseNetCount(nw **resource_networks.NDFCNetworksModel, nwToAdd int,
 
 	currentCount := len(nets.Networks)
 	for i := 0; i < nwToAdd; i++ {
-		nwName := GetConfig().NDFC.NetPrefix + strconv.Itoa(currentCount+i+1)
+		nwName := GetConfig("network").NDFC.NetPrefix + strconv.Itoa(currentCount+i+1)
 		log.Printf("Creating Network: %s", nwName)
 		nw := resource_networks.NDFCNetworksValue{}
 		//nw.VrfTemplateConfig.VrfDescription = "Network Description"
@@ -214,7 +214,7 @@ func NetAttachmentsMod(nw **resource_networks.NDFCNetworksModel, start, end int,
 	var net []string
 	var nwName string
 	for i := start; i <= end; i++ {
-		nwName = GetConfig().NDFC.NetPrefix + strconv.Itoa(i)
+		nwName = GetConfig("network").NDFC.NetPrefix + strconv.Itoa(i)
 		_, ok := nwRsc.Networks[nwName]
 		if !ok {
 			panic("Net not found")
