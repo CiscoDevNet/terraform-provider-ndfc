@@ -15,10 +15,10 @@ func TestAccInterfaceVlanResourceBasic(t *testing.T) {
 		"RscType":    "ndfc_interface_vlsn",
 		"RscSubType": "vlan",
 		"RscName":    "test_vlan",
-		"User":       helper.GetConfig().NDFC.User,
-		"Password":   helper.GetConfig().NDFC.Password,
-		"Host":       helper.GetConfig().NDFC.URL,
-		"Insecure":   helper.GetConfig().NDFC.Insecure,
+		"User":       helper.GetConfig("vlan").NDFC.User,
+		"Password":   helper.GetConfig("vlan").NDFC.Password,
+		"Host":       helper.GetConfig("vlan").NDFC.URL,
+		"Insecure":   helper.GetConfig("vlan").NDFC.Insecure,
 	}
 
 	tf_config := new(string)
@@ -38,14 +38,14 @@ func TestAccInterfaceVlanResourceBasic(t *testing.T) {
 	// Create a new instance of the NDFC client
 	intfRsc := new(resource_interface_common.NDFCInterfaceCommonModel)
 	resource.Test(t, resource.TestCase{
-		PreCheck:                 func() { testAccPreCheck(t) },
+		PreCheck:                 func() { testAccPreCheck(t, "vlan") },
 		ProtoV6ProviderFactories: testAccProtoV6ProviderFactories,
 		Steps: []resource.TestStep{
 			{
 				Config: func() string {
 					*stepCount++
 					tName := fmt.Sprintf("%s_%d", t.Name(), *stepCount)
-					helper.GenerateIntfResource(&intfRsc, 200, 10, "vlan", true, helper.GetConfig().NDFC.Switches, true, false)
+					helper.GenerateIntfResource(&intfRsc, 200, 10, "vlan", true, helper.GetConfig("vlan").NDFC.Switches, true, false)
 					(*x)["RscName"] = "vlan_intf_test"
 					helper.GetTFConfigWithSingleResource(tName, *x, []interface{}{intfRsc}, &tf_config)
 					return *tf_config
@@ -63,10 +63,10 @@ func TestAccInterfaceVlanResourceCreateAndAdd(t *testing.T) {
 		"RscType":    "ndfc_interface_vlan",
 		"RscSubType": "vlan",
 		"RscName":    "test_vlan",
-		"User":       helper.GetConfig().NDFC.User,
-		"Password":   helper.GetConfig().NDFC.Password,
-		"Host":       helper.GetConfig().NDFC.URL,
-		"Insecure":   helper.GetConfig().NDFC.Insecure,
+		"User":       helper.GetConfig("vlan").NDFC.User,
+		"Password":   helper.GetConfig("vlan").NDFC.Password,
+		"Host":       helper.GetConfig("vlan").NDFC.URL,
+		"Insecure":   helper.GetConfig("vlan").NDFC.Insecure,
 	}
 
 	tf_config := new(string)
@@ -88,7 +88,7 @@ func TestAccInterfaceVlanResourceCreateAndAdd(t *testing.T) {
 	intfRsc := new(resource_interface_common.NDFCInterfaceCommonModel)
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:                 func() { testAccPreCheck(t) },
+		PreCheck:                 func() { testAccPreCheck(t, "vlan") },
 		ProtoV6ProviderFactories: testAccProtoV6ProviderFactories,
 		//CheckDestroy:             testAccCheckVrfBulkResourceDestroy(networkRsc),
 		Steps: []resource.TestStep{
@@ -98,7 +98,7 @@ func TestAccInterfaceVlanResourceCreateAndAdd(t *testing.T) {
 					*stepCount++
 					tName := fmt.Sprintf("%s_%d", t.Name(), *stepCount)
 					//Starting from 10 to consider anything pre-existing on ndfc
-					helper.GenerateIntfResource(&intfRsc, 10, 10, "vlan", true, helper.GetConfig().NDFC.Switches, true, false)
+					helper.GenerateIntfResource(&intfRsc, 10, 10, "vlan", true, helper.GetConfig("vlan").NDFC.Switches, true, false)
 					(*x)["RscName"] = "vlan_intf_test"
 					helper.GetTFConfigWithSingleResource(tName, *x, []interface{}{intfRsc}, &tf_config)
 					return *tf_config
@@ -110,7 +110,7 @@ func TestAccInterfaceVlanResourceCreateAndAdd(t *testing.T) {
 				Config: func() string {
 					*stepCount++
 					tName := fmt.Sprintf("%s_%d", t.Name(), *stepCount)
-					helper.GenerateIntfResource(&intfRsc, 20, 10, "vlan", true, helper.GetConfig().NDFC.Switches, true, true)
+					helper.GenerateIntfResource(&intfRsc, 20, 10, "vlan", true, helper.GetConfig("vlan").NDFC.Switches, true, true)
 					(*x)["RscName"] = "vlan_intf_test"
 					helper.GetTFConfigWithSingleResource(tName, *x, []interface{}{intfRsc}, &tf_config)
 					return *tf_config
@@ -127,10 +127,10 @@ func TestAccInterfaceVlanResourceCreateAndReduce(t *testing.T) {
 		"RscType":    "ndfc_interface_vlan",
 		"RscSubType": "vlan",
 		"RscName":    "test_vlan",
-		"User":       helper.GetConfig().NDFC.User,
-		"Password":   helper.GetConfig().NDFC.Password,
-		"Host":       helper.GetConfig().NDFC.URL,
-		"Insecure":   helper.GetConfig().NDFC.Insecure,
+		"User":       helper.GetConfig("vlan").NDFC.User,
+		"Password":   helper.GetConfig("vlan").NDFC.Password,
+		"Host":       helper.GetConfig("vlan").NDFC.URL,
+		"Insecure":   helper.GetConfig("vlan").NDFC.Insecure,
 	}
 
 	tf_config := new(string)
@@ -152,7 +152,7 @@ func TestAccInterfaceVlanResourceCreateAndReduce(t *testing.T) {
 	intfRsc := new(resource_interface_common.NDFCInterfaceCommonModel)
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:                 func() { testAccPreCheck(t) },
+		PreCheck:                 func() { testAccPreCheck(t, "vlan") },
 		ProtoV6ProviderFactories: testAccProtoV6ProviderFactories,
 		//CheckDestroy:             testAccCheckVrfBulkResourceDestroy(networkRsc),
 		Steps: []resource.TestStep{
@@ -162,7 +162,7 @@ func TestAccInterfaceVlanResourceCreateAndReduce(t *testing.T) {
 					*stepCount++
 					tName := fmt.Sprintf("%s_%d", t.Name(), *stepCount)
 					//Starting from 20 to consider anything pre-existing on ndfc
-					helper.GenerateIntfResource(&intfRsc, 10, 20, "vlan", true, helper.GetConfig().NDFC.Switches, true, false)
+					helper.GenerateIntfResource(&intfRsc, 10, 20, "vlan", true, helper.GetConfig("vlan").NDFC.Switches, true, false)
 					(*x)["RscName"] = "vlan_intf_test"
 					helper.GetTFConfigWithSingleResource(tName, *x, []interface{}{intfRsc}, &tf_config)
 					return *tf_config
@@ -174,7 +174,7 @@ func TestAccInterfaceVlanResourceCreateAndReduce(t *testing.T) {
 				Config: func() string {
 					*stepCount++
 					tName := fmt.Sprintf("%s_%d", t.Name(), *stepCount)
-					helper.GenerateIntfResource(&intfRsc, 10, -10, "vlan", true, helper.GetConfig().NDFC.Switches, true, true)
+					helper.GenerateIntfResource(&intfRsc, 10, -10, "vlan", true, helper.GetConfig("vlan").NDFC.Switches, true, true)
 					(*x)["RscName"] = "vlan_intf_test"
 					helper.GetTFConfigWithSingleResource(tName, *x, []interface{}{intfRsc}, &tf_config)
 					return *tf_config
@@ -192,10 +192,10 @@ func TestAccInterfaceVlanResourceCreateAndModify(t *testing.T) {
 		"RscType":    "ndfc_interface_vlan",
 		"RscSubType": "vlan",
 		"RscName":    "test_vlan",
-		"User":       helper.GetConfig().NDFC.User,
-		"Password":   helper.GetConfig().NDFC.Password,
-		"Host":       helper.GetConfig().NDFC.URL,
-		"Insecure":   helper.GetConfig().NDFC.Insecure,
+		"User":       helper.GetConfig("vlan").NDFC.User,
+		"Password":   helper.GetConfig("vlan").NDFC.Password,
+		"Host":       helper.GetConfig("vlan").NDFC.URL,
+		"Insecure":   helper.GetConfig("vlan").NDFC.Insecure,
 	}
 
 	tf_config := new(string)
@@ -217,7 +217,7 @@ func TestAccInterfaceVlanResourceCreateAndModify(t *testing.T) {
 	intfRsc := new(resource_interface_common.NDFCInterfaceCommonModel)
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:                 func() { testAccPreCheck(t) },
+		PreCheck:                 func() { testAccPreCheck(t, "vlan") },
 		ProtoV6ProviderFactories: testAccProtoV6ProviderFactories,
 		//CheckDestroy:             testAccCheckVrfBulkResourceDestroy(networkRsc),
 		Steps: []resource.TestStep{
@@ -227,7 +227,7 @@ func TestAccInterfaceVlanResourceCreateAndModify(t *testing.T) {
 					*stepCount++
 					tName := fmt.Sprintf("%s_%d", t.Name(), *stepCount)
 					//Starting from 20 to consider anything pre-existing on ndfc
-					helper.GenerateIntfResource(&intfRsc, 10, 20, "vlan", true, helper.GetConfig().NDFC.Switches, true, false)
+					helper.GenerateIntfResource(&intfRsc, 10, 20, "vlan", true, helper.GetConfig("vlan").NDFC.Switches, true, false)
 					(*x)["RscName"] = "vlan_intf_test"
 					helper.GetTFConfigWithSingleResource(tName, *x, []interface{}{intfRsc}, &tf_config)
 					return *tf_config
@@ -241,7 +241,6 @@ func TestAccInterfaceVlanResourceCreateAndModify(t *testing.T) {
 					helper.ModifyInterface(&intfRsc, 20, 5, "vlan", map[string]interface{}{
 						"admin_state": "down",
 						"vrf":         "default",
-						
 					})
 					(*x)["RscName"] = "vlan_intf_test"
 					helper.GetTFConfigWithSingleResource(tName, *x, []interface{}{intfRsc}, &tf_config)
@@ -260,10 +259,10 @@ func TestAccInterfaceVlanResourceCombinedUpdate(t *testing.T) {
 		"RscType":    "ndfc_interface_vlan",
 		"RscSubType": "vlan",
 		"RscName":    "test_vlan",
-		"User":       helper.GetConfig().NDFC.User,
-		"Password":   helper.GetConfig().NDFC.Password,
-		"Host":       helper.GetConfig().NDFC.URL,
-		"Insecure":   helper.GetConfig().NDFC.Insecure,
+		"User":       helper.GetConfig("vlan").NDFC.User,
+		"Password":   helper.GetConfig("vlan").NDFC.Password,
+		"Host":       helper.GetConfig("vlan").NDFC.URL,
+		"Insecure":   helper.GetConfig("vlan").NDFC.Insecure,
 	}
 
 	tf_config := new(string)
@@ -285,7 +284,7 @@ func TestAccInterfaceVlanResourceCombinedUpdate(t *testing.T) {
 	intfRsc := new(resource_interface_common.NDFCInterfaceCommonModel)
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:                 func() { testAccPreCheck(t) },
+		PreCheck:                 func() { testAccPreCheck(t, "vlan") },
 		ProtoV6ProviderFactories: testAccProtoV6ProviderFactories,
 		//CheckDestroy:             testAccCheckVrfBulkResourceDestroy(networkRsc),
 		Steps: []resource.TestStep{
@@ -295,7 +294,7 @@ func TestAccInterfaceVlanResourceCombinedUpdate(t *testing.T) {
 					*stepCount++
 					tName := fmt.Sprintf("%s_%d", t.Name(), *stepCount)
 					//Starting from 20 to consider anything pre-existing on ndfc
-					helper.GenerateIntfResource(&intfRsc, 10, 10, "vlan", true, helper.GetConfig().NDFC.Switches, true, false)
+					helper.GenerateIntfResource(&intfRsc, 10, 10, "vlan", true, helper.GetConfig("vlan").NDFC.Switches, true, false)
 					(*x)["RscName"] = "vlan_intf_test"
 					helper.GetTFConfigWithSingleResource(tName, *x, []interface{}{intfRsc}, &tf_config)
 					return *tf_config
@@ -307,9 +306,9 @@ func TestAccInterfaceVlanResourceCombinedUpdate(t *testing.T) {
 					*stepCount++
 					tName := fmt.Sprintf("%s_%d", t.Name(), *stepCount)
 					//Add 10
-					helper.GenerateIntfResource(&intfRsc, 20, 10, "vlan", true, helper.GetConfig().NDFC.Switches, true, true)
+					helper.GenerateIntfResource(&intfRsc, 20, 10, "vlan", true, helper.GetConfig("vlan").NDFC.Switches, true, true)
 					//Delete 5
-					helper.GenerateIntfResource(&intfRsc, 10, -5, "vlan", true, helper.GetConfig().NDFC.Switches, true, true)
+					helper.GenerateIntfResource(&intfRsc, 10, -5, "vlan", true, helper.GetConfig("vlan").NDFC.Switches, true, true)
 					//Modify 5
 					helper.ModifyInterface(&intfRsc, 20, 5, "vlan", map[string]interface{}{
 						"admin_state": "up",
@@ -324,4 +323,3 @@ func TestAccInterfaceVlanResourceCombinedUpdate(t *testing.T) {
 	})
 
 }
-

@@ -9,6 +9,7 @@ import (
 	"terraform-provider-ndfc/internal/provider/resources/resource_interface_common"
 	"terraform-provider-ndfc/internal/provider/resources/resource_networks"
 	"terraform-provider-ndfc/internal/provider/resources/resource_vrf_bulk"
+	"terraform-provider-ndfc/internal/provider/types"
 	"text/template"
 	"time"
 )
@@ -27,11 +28,11 @@ func GetTFConfigWithSingleResource(tt string, cfg map[string]string, rscs []inte
 		"add": func(a, b int) int {
 			return a + b
 		},
-		"deref": func(a *int64) int64 {
+		"deref": func(a *types.Int64Custom) int64 {
 			if a == nil {
 				return 0
 			}
-			return *a
+			return int64(*a)
 		},
 	}
 

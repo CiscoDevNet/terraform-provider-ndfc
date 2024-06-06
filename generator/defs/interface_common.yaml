@@ -159,11 +159,11 @@ resource:
         ndfc_nested: [nvPairs]
         tf_name: access_vlan
         type: Int64
-        ndfc_type: string
         min_int: 1
         max_int: 4094
         validator: Between(1, 4094)
         description: Access VLAN ID
+        handle_empty: true
         example: 500
       - model_name: ENABLE_ORPHAN_PORT
         ndfc_nested: [nvPairs]
@@ -215,7 +215,7 @@ resource:
         type: Int64
         min_int: 1
         max_int: 4094
-        ndfc_type: string
+        handle_empty: true
         description: Set native VLAN for the interface
         example: 1
         exclude_test: true
@@ -254,6 +254,7 @@ resource:
         max_int: 255
         description: HSRP group number
         example: 1
+        handle_empty: true
       - model_name: HSRP_VIP
         ndfc_nested: [nvPairs]
         tf_name: hsrp_vip
@@ -264,10 +265,10 @@ resource:
         ndfc_nested: [nvPairs]
         tf_name: hsrp_priority
         type: Int64
-        ndfc_type: string
         min_int: 1
         max_int: 255
         description: HSRP priority
+        handle_empty: true
         example: 100
       - model_name: HSRP_VERSION
         ndfc_nested: [nvPairs]

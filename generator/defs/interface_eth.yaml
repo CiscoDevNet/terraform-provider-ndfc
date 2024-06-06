@@ -146,6 +146,7 @@ resource:
         validator: Between(1, 4094)
         description: Access VLAN ID
         example: 500
+        handle_empty: true
       
       - model_name: ENABLE_ORPHAN_PORT
         ndfc_nested: [nvPairs]
@@ -205,4 +206,5 @@ resource:
         description: Set native VLAN for the interface
         example: 1
         exclude_test: true
+        handle_empty: true
      

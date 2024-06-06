@@ -20,7 +20,7 @@ func GenerateVrfBulkObject(bulk **resource_vrf_bulk.NDFCVrfBulkModel, fabric str
 	log.Printf("Creating Bulk VRF object VRF Count: %d", vrfCount)
 
 	for i := 0; i < vrfCount; i++ {
-		vrfName := GetConfig().NDFC.VrfPrefix + strconv.Itoa(i+1)
+		vrfName := GetConfig("vrf").NDFC.VrfPrefix + strconv.Itoa(i+1)
 		log.Printf("Creating VRF: %s", vrfName)
 		vrf := resource_vrf_bulk.NDFCVrfsValue{}
 		//vrf.VrfTemplateConfig.VrfDescription = "VRF Description"
@@ -68,7 +68,7 @@ func GenerateSingleVrfObject(vrfDptr **resource_vrf_bulk.NDFCVrfBulkModel, nameP
 
 func ModifyVrfBulkObject(vrfs **resource_vrf_bulk.NDFCVrfBulkModel, vrfNo int, values map[string]interface{}) {
 	vrfBulk := *vrfs
-	vrfName := GetConfig().NDFC.VrfPrefix + strconv.Itoa(vrfNo)
+	vrfName := GetConfig("vrf").NDFC.VrfPrefix + strconv.Itoa(vrfNo)
 	vrf, ok := vrfBulk.Vrfs[vrfName]
 	if ok {
 		for key, value := range values {
@@ -110,7 +110,7 @@ func IncreaseVrfCount(vrf **resource_vrf_bulk.NDFCVrfBulkModel, vrfToAdd int,
 
 	currentCount := len(vrfBulk.Vrfs)
 	for i := 0; i < vrfToAdd; i++ {
-		vrfName := GetConfig().NDFC.VrfPrefix + strconv.Itoa(currentCount+i+1)
+		vrfName := GetConfig("vrf").NDFC.VrfPrefix + strconv.Itoa(currentCount+i+1)
 		log.Printf("Creating VRF: %s", vrfName)
 		vrf := resource_vrf_bulk.NDFCVrfsValue{}
 		//vrf.VrfTemplateConfig.VrfDescription = "VRF Description"

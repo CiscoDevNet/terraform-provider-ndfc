@@ -5,11 +5,13 @@ import (
 	"context"
 	"log"
 	"strconv"
-	"terraform-provider-ndfc/internal/provider/resources/resource_interface_common"
+	. "terraform-provider-ndfc/internal/provider/types"
 
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/types"
+
+	"terraform-provider-ndfc/internal/provider/resources/resource_interface_common"
 )
 
 func (v *InterfaceEthernetModel) SetModelData(jsonData *resource_interface_common.NDFCInterfaceCommonModel) diag.Diagnostics {
@@ -120,7 +122,11 @@ func (v *InterfacesValue) SetValue(jsonData *resource_interface_common.NDFCInter
 	}
 
 	if jsonData.NvPairs.AccessVlan != nil {
-		v.AccessVlan = types.Int64Value(*jsonData.NvPairs.AccessVlan)
+		if jsonData.NvPairs.AccessVlan.IsEmpty() {
+			v.AccessVlan = types.Int64Null()
+		} else {
+			v.AccessVlan = types.Int64Value(int64(*jsonData.NvPairs.AccessVlan))
+		}
 
 	} else {
 		v.AccessVlan = types.Int64Null()
@@ -166,7 +172,11 @@ func (v *InterfacesValue) SetValue(jsonData *resource_interface_common.NDFCInter
 	}
 
 	if jsonData.NvPairs.NativeVlan != nil {
-		v.NativeVlan = types.Int64Value(*jsonData.NvPairs.NativeVlan)
+		if jsonData.NvPairs.NativeVlan.IsEmpty() {
+			v.NativeVlan = types.Int64Null()
+		} else {
+			v.NativeVlan = types.Int64Value(int64(*jsonData.NvPairs.NativeVlan))
+		}
 
 	} else {
 		v.NativeVlan = types.Int64Null()
@@ -284,9 +294,8 @@ func (v InterfaceEthernetModel) GetModelData() *resource_interface_common.NDFCIn
 			// access_vlan | Int64| [nvPairs]| false
 			if !ele1.AccessVlan.IsNull() && !ele1.AccessVlan.IsUnknown() {
 				//-----inline nested----
-				data1.NvPairs.AccessVlan = new(int64)
-				*data1.NvPairs.AccessVlan = ele1.AccessVlan.ValueInt64()
-
+				data1.NvPairs.AccessVlan = new(Int64Custom)
+				*data1.NvPairs.AccessVlan = Int64Custom(ele1.AccessVlan.ValueInt64())
 			} else {
 				data1.NvPairs.AccessVlan = nil
 			}
@@ -342,9 +351,8 @@ func (v InterfaceEthernetModel) GetModelData() *resource_interface_common.NDFCIn
 			// native_vlan | Int64| [nvPairs]| false
 			if !ele1.NativeVlan.IsNull() && !ele1.NativeVlan.IsUnknown() {
 				//-----inline nested----
-				data1.NvPairs.NativeVlan = new(int64)
-				*data1.NvPairs.NativeVlan = ele1.NativeVlan.ValueInt64()
-
+				data1.NvPairs.NativeVlan = new(Int64Custom)
+				*data1.NvPairs.NativeVlan = Int64Custom(ele1.NativeVlan.ValueInt64())
 			} else {
 				data1.NvPairs.NativeVlan = nil
 			}

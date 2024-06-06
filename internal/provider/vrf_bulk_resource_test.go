@@ -22,10 +22,10 @@ func TestAccVRFResourceCRUD(t *testing.T) {
 	x := &map[string]string{
 		"RscType":  ndfc.ResourceVrfBulk,
 		"RscName":  "vrf_test",
-		"User":     helper.GetConfig().NDFC.User,
-		"Password": helper.GetConfig().NDFC.Password,
-		"Host":     helper.GetConfig().NDFC.URL,
-		"Insecure": helper.GetConfig().NDFC.Insecure,
+		"User":     helper.GetConfig("vrf").NDFC.User,
+		"Password": helper.GetConfig("vrf").NDFC.Password,
+		"Host":     helper.GetConfig("vrf").NDFC.URL,
+		"Insecure": helper.GetConfig("vrf").NDFC.Insecure,
 	}
 
 	tf_config := new(string)
@@ -46,7 +46,7 @@ func TestAccVRFResourceCRUD(t *testing.T) {
 	vrfBulk := new(resource_vrf_bulk.VrfBulkModel)
 	vrfScaledBulk := new(resource_vrf_bulk.NDFCVrfBulkModel)
 	resource.Test(t, resource.TestCase{
-		PreCheck:                 func() { testAccPreCheck(t) },
+		PreCheck:                 func() { testAccPreCheck(t, "vrf") },
 		ProtoV6ProviderFactories: testAccProtoV6ProviderFactories,
 		CheckDestroy:             testAccCheckVrfBulkResourceDestroy(vrfBulk),
 		Steps: []resource.TestStep{
@@ -55,7 +55,7 @@ func TestAccVRFResourceCRUD(t *testing.T) {
 					*stepCount++
 					tName := fmt.Sprintf("%s_%d", t.Name(), *stepCount)
 
-					helper.GenerateVrfBulkObject(&vrfScaledBulk, helper.GetConfig().NDFC.Fabric,
+					helper.GenerateVrfBulkObject(&vrfScaledBulk, helper.GetConfig("vrf").NDFC.Fabric,
 						10, false, false, false, nil)
 					helper.GetTFConfigWithSingleResource(tName, *x, []interface{}{vrfScaledBulk}, &tf_config)
 					return *tf_config
@@ -137,10 +137,10 @@ func TestAccVRFResourceAttachmentCRUD(t *testing.T) {
 	x := &map[string]string{
 		"RscType":  ndfc.ResourceVrfBulk,
 		"RscName":  "vrf_test",
-		"User":     helper.GetConfig().NDFC.User,
-		"Password": helper.GetConfig().NDFC.Password,
-		"Host":     helper.GetConfig().NDFC.URL,
-		"Insecure": helper.GetConfig().NDFC.Insecure,
+		"User":     helper.GetConfig("vrf").NDFC.User,
+		"Password": helper.GetConfig("vrf").NDFC.Password,
+		"Host":     helper.GetConfig("vrf").NDFC.URL,
+		"Insecure": helper.GetConfig("vrf").NDFC.Insecure,
 	}
 	vrfScaledBulk := new(resource_vrf_bulk.NDFCVrfBulkModel)
 	stepCount := new(int)
@@ -148,7 +148,7 @@ func TestAccVRFResourceAttachmentCRUD(t *testing.T) {
 
 	resource.Test(t, resource.TestCase{
 
-		PreCheck:                 func() { testAccPreCheck(t) },
+		PreCheck:                 func() { testAccPreCheck(t, "vrf") },
 		ProtoV6ProviderFactories: testAccProtoV6ProviderFactories,
 		Steps: []resource.TestStep{
 			//Create VRFs with 2 attachments _Attach
@@ -158,8 +158,8 @@ func TestAccVRFResourceAttachmentCRUD(t *testing.T) {
 					tName := fmt.Sprintf("%s_%d", t.Name(), *stepCount)
 
 					tf_config := new(string)
-					helper.GenerateVrfBulkObject(&vrfScaledBulk, helper.GetConfig().NDFC.Fabric,
-						20, false, false, false, []string{helper.GetConfig().NDFC.Switches[0], helper.GetConfig().NDFC.Switches[1]})
+					helper.GenerateVrfBulkObject(&vrfScaledBulk, helper.GetConfig("vrf").NDFC.Fabric,
+						20, false, false, false, []string{helper.GetConfig("vrf").NDFC.Switches[0], helper.GetConfig("vrf").NDFC.Switches[1]})
 					helper.GetTFConfigWithSingleResource(tName, *x, []interface{}{vrfScaledBulk}, &tf_config)
 					return *tf_config
 				}(),
@@ -182,7 +182,7 @@ func TestAccVRFResourceAttachmentCRUD(t *testing.T) {
 					*stepCount++
 					tName := fmt.Sprintf("%s_%d", t.Name(), *stepCount)
 					tf_config := new(string)
-					helper.VrfAttachmentsMod(&vrfScaledBulk, 1, len(vrfScaledBulk.Vrfs), []string{helper.GetConfig().NDFC.Switches[0], helper.GetConfig().NDFC.Switches[1]}, "", nil)
+					helper.VrfAttachmentsMod(&vrfScaledBulk, 1, len(vrfScaledBulk.Vrfs), []string{helper.GetConfig("vrf").NDFC.Switches[0], helper.GetConfig("vrf").NDFC.Switches[1]}, "", nil)
 					helper.GetTFConfigWithSingleResource(tName, *x, []interface{}{vrfScaledBulk}, &tf_config)
 					return *tf_config
 				}(),
@@ -194,7 +194,7 @@ func TestAccVRFResourceAttachmentCRUD(t *testing.T) {
 					*stepCount++
 					tName := fmt.Sprintf("%s_%d", t.Name(), *stepCount)
 					tf_config := new(string)
-					helper.VrfAttachmentsMod(&vrfScaledBulk, 1, len(vrfScaledBulk.Vrfs)/2, helper.GetConfig().NDFC.Switches, "", nil)
+					helper.VrfAttachmentsMod(&vrfScaledBulk, 1, len(vrfScaledBulk.Vrfs)/2, helper.GetConfig("vrf").NDFC.Switches, "", nil)
 					helper.GetTFConfigWithSingleResource(tName, *x, []interface{}{vrfScaledBulk}, &tf_config)
 					return *tf_config
 				}(),
@@ -208,8 +208,8 @@ func TestAccVRFResourceAttachmentCRUD(t *testing.T) {
 					*stepCount++
 					tName := fmt.Sprintf("%s_%d", t.Name(), *stepCount)
 
-					helper.VrfAttachmentsMod(&vrfScaledBulk, 1, len(vrfScaledBulk.Vrfs)/2, []string{helper.GetConfig().NDFC.Switches[0], helper.GetConfig().NDFC.Switches[1]}, "", nil)
-					helper.VrfAttachmentsMod(&vrfScaledBulk, (len(vrfScaledBulk.Vrfs)/2)+1, len(vrfScaledBulk.Vrfs)/2, helper.GetConfig().NDFC.Switches, "", nil)
+					helper.VrfAttachmentsMod(&vrfScaledBulk, 1, len(vrfScaledBulk.Vrfs)/2, []string{helper.GetConfig("vrf").NDFC.Switches[0], helper.GetConfig("vrf").NDFC.Switches[1]}, "", nil)
+					helper.VrfAttachmentsMod(&vrfScaledBulk, (len(vrfScaledBulk.Vrfs)/2)+1, len(vrfScaledBulk.Vrfs)/2, helper.GetConfig("vrf").NDFC.Switches, "", nil)
 					helper.GetTFConfigWithSingleResource(tName, *x, []interface{}{vrfScaledBulk}, &tf_config)
 					return *tf_config
 				}(),
@@ -222,14 +222,14 @@ func TestAccVRFResourceAttachmentCRUD(t *testing.T) {
 					*stepCount++
 					tName := fmt.Sprintf("%s_%d", t.Name(), *stepCount)
 
-					helper.VrfAttachmentsMod(&vrfScaledBulk, 1, 1, helper.GetConfig().NDFC.Switches, helper.GetConfig().NDFC.Switches[2], map[string]interface{}{
+					helper.VrfAttachmentsMod(&vrfScaledBulk, 1, 1, helper.GetConfig("vrf").NDFC.Switches, helper.GetConfig("vrf").NDFC.Switches[2], map[string]interface{}{
 						"vlan":          3001,
 						"loopback_id":   1001,
 						"loopback_ipv4": "10.1.1.1",
 						"loopback_ipv6": "2001:db8::68",
 					})
 
-					helper.VrfAttachmentsMod(&vrfScaledBulk, 10, 10, helper.GetConfig().NDFC.Switches, helper.GetConfig().NDFC.Switches[2], map[string]interface{}{
+					helper.VrfAttachmentsMod(&vrfScaledBulk, 10, 10, helper.GetConfig("vrf").NDFC.Switches, helper.GetConfig("vrf").NDFC.Switches[2], map[string]interface{}{
 						"vlan":          3010,
 						"loopback_id":   1010,
 						"loopback_ipv4": "10.1.1.10",
@@ -249,17 +249,17 @@ func TestAccVRFResourceGlobalDeploy(t *testing.T) {
 	x := &map[string]string{
 		"RscType":  ndfc.ResourceVrfBulk,
 		"RscName":  "vrf_test",
-		"User":     helper.GetConfig().NDFC.User,
-		"Password": helper.GetConfig().NDFC.Password,
-		"Host":     helper.GetConfig().NDFC.URL,
-		"Insecure": helper.GetConfig().NDFC.Insecure,
+		"User":     helper.GetConfig("vrf").NDFC.User,
+		"Password": helper.GetConfig("vrf").NDFC.Password,
+		"Host":     helper.GetConfig("vrf").NDFC.URL,
+		"Insecure": helper.GetConfig("vrf").NDFC.Insecure,
 	}
 	vrfScaledBulk := new(resource_vrf_bulk.NDFCVrfBulkModel)
 	stepCount := new(int)
 	*stepCount = 0
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:                 func() { testAccPreCheck(t) },
+		PreCheck:                 func() { testAccPreCheck(t, "vrf") },
 		ProtoV6ProviderFactories: testAccProtoV6ProviderFactories,
 		Steps: []resource.TestStep{
 			{
@@ -271,8 +271,8 @@ func TestAccVRFResourceGlobalDeploy(t *testing.T) {
 					tName := fmt.Sprintf("%s_%d", t.Name(), *stepCount)
 
 					tf_config := new(string)
-					helper.GenerateVrfBulkObject(&vrfScaledBulk, helper.GetConfig().NDFC.Fabric,
-						5, true, false, false, []string{helper.GetConfig().NDFC.Switches[0], helper.GetConfig().NDFC.Switches[1]})
+					helper.GenerateVrfBulkObject(&vrfScaledBulk, helper.GetConfig("vrf").NDFC.Fabric,
+						5, true, false, false, []string{helper.GetConfig("vrf").NDFC.Switches[0], helper.GetConfig("vrf").NDFC.Switches[1]})
 					helper.GetTFConfigWithSingleResource(tName, *x, []interface{}{vrfScaledBulk}, &tf_config)
 					return *tf_config
 				}(),
@@ -284,7 +284,7 @@ func TestAccVRFResourceGlobalDeploy(t *testing.T) {
 					*stepCount++
 					tName := fmt.Sprintf("%s_%d", t.Name(), *stepCount)
 					tf_config := new(string)
-					helper.VrfAttachmentsMod(&vrfScaledBulk, 1, len(vrfScaledBulk.Vrfs), helper.GetConfig().NDFC.Switches, "", nil)
+					helper.VrfAttachmentsMod(&vrfScaledBulk, 1, len(vrfScaledBulk.Vrfs), helper.GetConfig("vrf").NDFC.Switches, "", nil)
 					helper.GetTFConfigWithSingleResource(tName, *x, []interface{}{vrfScaledBulk}, &tf_config)
 					return *tf_config
 				}(),
@@ -300,17 +300,17 @@ func TestAccVRFResourceVrfLevelDeploy(t *testing.T) {
 	x := &map[string]string{
 		"RscType":  ndfc.ResourceVrfBulk,
 		"RscName":  "vrf_test",
-		"User":     helper.GetConfig().NDFC.User,
-		"Password": helper.GetConfig().NDFC.Password,
-		"Host":     helper.GetConfig().NDFC.URL,
-		"Insecure": helper.GetConfig().NDFC.Insecure,
+		"User":     helper.GetConfig("vrf").NDFC.User,
+		"Password": helper.GetConfig("vrf").NDFC.Password,
+		"Host":     helper.GetConfig("vrf").NDFC.URL,
+		"Insecure": helper.GetConfig("vrf").NDFC.Insecure,
 	}
 	vrfScaledBulk := new(resource_vrf_bulk.NDFCVrfBulkModel)
 	stepCount := new(int)
 	*stepCount = 0
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:                 func() { testAccPreCheck(t) },
+		PreCheck:                 func() { testAccPreCheck(t, "vrf") },
 		ProtoV6ProviderFactories: testAccProtoV6ProviderFactories,
 		Steps: []resource.TestStep{
 			{
@@ -322,8 +322,8 @@ func TestAccVRFResourceVrfLevelDeploy(t *testing.T) {
 					tName := fmt.Sprintf("%s_%d", t.Name(), *stepCount)
 
 					tf_config := new(string)
-					helper.GenerateVrfBulkObject(&vrfScaledBulk, helper.GetConfig().NDFC.Fabric,
-						10, false, true, false, []string{helper.GetConfig().NDFC.Switches[0], helper.GetConfig().NDFC.Switches[1]})
+					helper.GenerateVrfBulkObject(&vrfScaledBulk, helper.GetConfig("vrf").NDFC.Fabric,
+						10, false, true, false, []string{helper.GetConfig("vrf").NDFC.Switches[0], helper.GetConfig("vrf").NDFC.Switches[1]})
 					helper.GetTFConfigWithSingleResource(tName, *x, []interface{}{vrfScaledBulk}, &tf_config)
 					return *tf_config
 				}(),
@@ -335,7 +335,7 @@ func TestAccVRFResourceVrfLevelDeploy(t *testing.T) {
 					*stepCount++
 					tName := fmt.Sprintf("%s_%d", t.Name(), *stepCount)
 					tf_config := new(string)
-					helper.VrfAttachmentsMod(&vrfScaledBulk, 1, len(vrfScaledBulk.Vrfs), helper.GetConfig().NDFC.Switches, "", nil)
+					helper.VrfAttachmentsMod(&vrfScaledBulk, 1, len(vrfScaledBulk.Vrfs), helper.GetConfig("vrf").NDFC.Switches, "", nil)
 					helper.GetTFConfigWithSingleResource(tName, *x, []interface{}{vrfScaledBulk}, &tf_config)
 					return *tf_config
 				}(),
@@ -350,17 +350,17 @@ func TestAccVRFResourceVrfAttachLevelDeploy(t *testing.T) {
 	x := &map[string]string{
 		"RscType":  ndfc.ResourceVrfBulk,
 		"RscName":  "vrf_test",
-		"User":     helper.GetConfig().NDFC.User,
-		"Password": helper.GetConfig().NDFC.Password,
-		"Host":     helper.GetConfig().NDFC.URL,
-		"Insecure": helper.GetConfig().NDFC.Insecure,
+		"User":     helper.GetConfig("vrf").NDFC.User,
+		"Password": helper.GetConfig("vrf").NDFC.Password,
+		"Host":     helper.GetConfig("vrf").NDFC.URL,
+		"Insecure": helper.GetConfig("vrf").NDFC.Insecure,
 	}
 	vrfScaledBulk := new(resource_vrf_bulk.NDFCVrfBulkModel)
 	stepCount := new(int)
 	*stepCount = 0
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:                 func() { testAccPreCheck(t) },
+		PreCheck:                 func() { testAccPreCheck(t, "vrf") },
 		ProtoV6ProviderFactories: testAccProtoV6ProviderFactories,
 		Steps: []resource.TestStep{
 			{
@@ -372,8 +372,8 @@ func TestAccVRFResourceVrfAttachLevelDeploy(t *testing.T) {
 					tName := fmt.Sprintf("%s_%d", t.Name(), *stepCount)
 
 					tf_config := new(string)
-					helper.GenerateVrfBulkObject(&vrfScaledBulk, helper.GetConfig().NDFC.Fabric,
-						5, false, false, true, []string{helper.GetConfig().NDFC.Switches[0], helper.GetConfig().NDFC.Switches[1]})
+					helper.GenerateVrfBulkObject(&vrfScaledBulk, helper.GetConfig("vrf").NDFC.Fabric,
+						5, false, false, true, []string{helper.GetConfig("vrf").NDFC.Switches[0], helper.GetConfig("vrf").NDFC.Switches[1]})
 					helper.GetTFConfigWithSingleResource(tName, *x, []interface{}{vrfScaledBulk}, &tf_config)
 					return *tf_config
 				}(),
@@ -388,17 +388,17 @@ func TestAccVRFResourceMultiResourceWithDeploy(t *testing.T) {
 	x := &map[string]string{
 		"RscType":  ndfc.ResourceVrfBulk,
 		"RscName":  "",
-		"User":     helper.GetConfig().NDFC.User,
-		"Password": helper.GetConfig().NDFC.Password,
-		"Host":     helper.GetConfig().NDFC.URL,
-		"Insecure": helper.GetConfig().NDFC.Insecure,
+		"User":     helper.GetConfig("vrf").NDFC.User,
+		"Password": helper.GetConfig("vrf").NDFC.Password,
+		"Host":     helper.GetConfig("vrf").NDFC.URL,
+		"Insecure": helper.GetConfig("vrf").NDFC.Insecure,
 	}
 	var vrfScaledBulk []*resource_vrf_bulk.NDFCVrfBulkModel
 	stepCount := new(int)
 	*stepCount = 0
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:                 func() { testAccPreCheck(t) },
+		PreCheck:                 func() { testAccPreCheck(t, "vrf") },
 		ProtoV6ProviderFactories: testAccProtoV6ProviderFactories,
 		Steps: []resource.TestStep{
 			//Create VRFs with 2 attachments _Attach
@@ -413,8 +413,8 @@ func TestAccVRFResourceMultiResourceWithDeploy(t *testing.T) {
 					tf_config := new(string)
 					for i := 0; i < 5; i++ {
 						vrfScaledBulk[i] = new(resource_vrf_bulk.NDFCVrfBulkModel)
-						helper.GenerateSingleVrfObject(&(vrfScaledBulk[i]), helper.GetConfig().NDFC.VrfPrefix, helper.GetConfig().NDFC.Fabric,
-							i+1, false, false, true, []string{helper.GetConfig().NDFC.Switches[0], helper.GetConfig().NDFC.Switches[1]})
+						helper.GenerateSingleVrfObject(&(vrfScaledBulk[i]), helper.GetConfig("vrf").NDFC.VrfPrefix, helper.GetConfig("vrf").NDFC.Fabric,
+							i+1, false, false, true, []string{helper.GetConfig("vrf").NDFC.Switches[0], helper.GetConfig("vrf").NDFC.Switches[1]})
 						if i == 0 {
 							(*x)["RscName"] = fmt.Sprintf("vrf_test_%d", i+1)
 						} else {
@@ -452,8 +452,8 @@ func testGenerateVrfMultipleResource(count int, vrfName string, rscName string) 
 	tf_config := new(string)
 	for i := 0; i < count; i++ {
 		vrfScaledBulk[i] = new(resource_vrf_bulk.NDFCVrfBulkModel)
-		helper.GenerateSingleVrfObject(&(vrfScaledBulk[i]), vrfName, helper.GetConfig().NDFC.Fabric,
-			i+1, false, false, true, []string{helper.GetConfig().NDFC.Switches[0], helper.GetConfig().NDFC.Switches[1]})
+		helper.GenerateSingleVrfObject(&(vrfScaledBulk[i]), vrfName, helper.GetConfig("vrf").NDFC.Fabric,
+			i+1, false, false, true, []string{helper.GetConfig("vrf").NDFC.Switches[0], helper.GetConfig("vrf").NDFC.Switches[1]})
 		if (*x)["RscName"] == "" {
 			(*x)["RscName"] = fmt.Sprintf("%s_%d", rscName, i+1)
 		} else {

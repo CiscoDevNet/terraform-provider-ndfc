@@ -2,8 +2,8 @@ package testing
 
 import (
 	"fmt"
-	"math/rand"
 	"terraform-provider-ndfc/internal/provider/resources/resource_interface_common"
+	"terraform-provider-ndfc/internal/provider/types"
 )
 
 func GenerateIntfResource(intfObj **resource_interface_common.NDFCInterfaceCommonModel, ifStart, ifCount int,
@@ -62,8 +62,8 @@ func GenerateIntfResource(intfObj **resource_interface_common.NDFCInterfaceCommo
 			ifTmp.NvPairs.Mtu = "jumbo"
 			ifTmp.NvPairs.Netflow = "false"
 			ifTmp.NvPairs.BpduGuard = "true"
-			ifTmp.NvPairs.AccessVlan = new(int64)
-			*ifTmp.NvPairs.AccessVlan = int64(rand.Intn(4090) + 1)
+			ifTmp.NvPairs.AccessVlan = new(types.Int64Custom)
+			*ifTmp.NvPairs.AccessVlan = types.Int64Custom(1500 + intfNumber)
 			ifTmp.NvPairs.AllowedVlans = "10-2000"
 		} else if ifType == "loopback" {
 			ifTmp.NvPairs.Ipv4Address = fmt.Sprintf("192.168.%d.10", intfNumber%256)
@@ -136,30 +136,30 @@ func ModifyInterface(intfObj **resource_interface_common.NDFCInterfaceCommonMode
 			}
 			if val, ok := values["accessVlan"]; ok {
 				if ifTmp.NvPairs.AccessVlan == nil {
-					ifTmp.NvPairs.AccessVlan = new(int64)
+					ifTmp.NvPairs.AccessVlan = new(types.Int64Custom)
 				}
-				*ifTmp.NvPairs.AccessVlan = val.(int64)
+				*ifTmp.NvPairs.AccessVlan = val.(types.Int64Custom)
 			}
 			if val, ok := values["allowedVlans"]; ok {
 				ifTmp.NvPairs.AllowedVlans = val.(string)
 			}
 			if val, ok := values["nativeVlan"]; ok {
 				if ifTmp.NvPairs.NativeVlan == nil {
-					ifTmp.NvPairs.NativeVlan = new(int64)
+					ifTmp.NvPairs.NativeVlan = new(types.Int64Custom)
 				}
-				*ifTmp.NvPairs.NativeVlan = val.(int64)
+				*ifTmp.NvPairs.NativeVlan = val.(types.Int64Custom)
 			}
 			if val, ok := values["hsrpGroup"]; ok {
 				if ifTmp.NvPairs.HsrpGroup == nil {
-					ifTmp.NvPairs.HsrpGroup = new(int64)
+					ifTmp.NvPairs.HsrpGroup = new(types.Int64Custom)
 				}
-				*ifTmp.NvPairs.HsrpGroup = val.(int64)
+				*ifTmp.NvPairs.HsrpGroup = val.(types.Int64Custom)
 			}
 			if val, ok := values["hsrpPriority"]; ok {
 				if ifTmp.NvPairs.HsrpPriority == nil {
-					ifTmp.NvPairs.HsrpPriority = new(int64)
+					ifTmp.NvPairs.HsrpPriority = new(types.Int64Custom)
 				}
-				*ifTmp.NvPairs.HsrpPriority = val.(int64)
+				*ifTmp.NvPairs.HsrpPriority = val.(types.Int64Custom)
 			}
 			if val, ok := values["preempt"]; ok {
 				ifTmp.NvPairs.Preempt = val.(string)
