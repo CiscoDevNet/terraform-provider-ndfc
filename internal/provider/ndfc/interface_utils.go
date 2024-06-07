@@ -41,7 +41,7 @@ func ifIdToMap(ID string) map[string][]string {
 	// Convert ID to map logic
 	ifMap := make(map[string][]string)
 	// match - SerialNumber[InterfaceName,InterfaceName],...
-	pattern := `(\w+)\[([\w|\,|\/]+)\]`
+	pattern := `(\w+)\[([\w|\,|\/|-]+)\]`
 
 	//str := "ABC123[Eth0,Eth1],DEF456[Vl0,Vl1]"
 
@@ -68,6 +68,10 @@ func (c NDFC) IfTypeSet(inData *resource_interface_common.NDFCInterfaceCommonMod
 		fallthrough
 	case "INTERFACE_VLAN":
 		ifType = "INTERFACE_VLAN"
+	case "portchannel":
+		fallthrough
+	case "INTERFACE_PORT_CHANNEL":
+		ifType = "INTERFACE_PORT_CHANNEL"
 	default:
 		log.Panicf("Interface type not supported: %s", ifType)
 	}

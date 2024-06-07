@@ -57,7 +57,13 @@ func (c NDFC) NewInterfaceObject(ifType string, client *nd.Client, lock *sync.Mu
 		intf.lock = lock
 		intf.NDFCInterface = intf
 		return intf
-	case "default":
+	case "portchannel":
+		intf := new(NDFCPortChannelInterface)
+		intf.client = client
+		intf.lock = lock
+		intf.NDFCInterface = intf
+		return intf
+	default:
 		log.Panicf("Interface type not supported: %s", ifType)
 	}
 	return nil

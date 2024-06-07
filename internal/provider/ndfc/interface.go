@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"log"
+	"strings"
 
 	"terraform-provider-ndfc/internal/provider/datasources/datasource_interfaces"
 	"terraform-provider-ndfc/internal/provider/resources/resource_interface_common"
@@ -23,8 +24,8 @@ func (c NDFC) RscGetInterfaces(ctx context.Context, dg *diag.Diagnostics, in res
 		if inData.Interfaces[i].SerialNumber == "" {
 			intf.SerialNumber = inData.SerialNumber
 		}
-		keyMap[intf.SerialNumber+":"+intf.InterfaceName] = i
-		log.Printf("Keymap: %s-%s", intf.SerialNumber+":"+intf.InterfaceName, i)
+		keyMap[intf.SerialNumber+":"+strings.ToLower(intf.InterfaceName)] = i
+		log.Printf("Keymap: %s-%s", intf.SerialNumber+":"+strings.ToLower(intf.InterfaceName), i)
 	}
 
 	data := resource_interface_common.NDFCInterfaceCommonModel{}
@@ -45,10 +46,10 @@ func (c NDFC) RscGetInterfaces(ctx context.Context, dg *diag.Diagnostics, in res
 		ifList := ifObj.GetInterface(ctx, dg, switchSerial, data.Policy)
 
 		for i := range inList {
-			ifSearchMap[inList[i]] = true
+			ifSearchMap[strings.ToLower(inList[i])] = true
 		}
 		for i := range ifList {
-			if _, ok := ifSearchMap[ifList[i].InterfaceName]; ok {
+			if _, ok := ifSearchMap[strings.ToLower(ifList[i].InterfaceName)]; ok {
 
 				if ifList[i].NvPairs.FreeformConfig == " " {
 					ifList[i].NvPairs.FreeformConfig = ""

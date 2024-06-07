@@ -58,4 +58,8 @@ type NDFCNvPairsValue struct {
 	VrfDhcp2                  string       `json:"vrfDhcp2,omitempty"`
 	VrfDhcp3                  string       `json:"vrfDhcp3,omitempty"`
 	AdvertiseSubnetInUnderlay string       `json:"advSubnetInUnderlay,omitempty"`
+	PortChannelName           string       `json:"PO_ID,omitempty"`
+	CopyPoDescription         string       `json:"COPY_DESC,omitempty"`
+	PortchannelMode           string       `json:"PC_MODE,omitempty"`
+	MemberInterfaces          string       `json:"MEMBER_INTERFACES,omitempty"`
 }
