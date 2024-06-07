@@ -203,6 +203,18 @@ func (v NDFCInterfacesValue) DeepEqual(c NDFCInterfacesValue) int {
 		log.Printf("v.NvPairs.AdvertiseSubnetInUnderlay=%s, c.NvPairs.AdvertiseSubnetInUnderlay=%s", v.NvPairs.AdvertiseSubnetInUnderlay, c.NvPairs.AdvertiseSubnetInUnderlay)
 		return RequiresUpdate
 	}
+	if v.NvPairs.CopyPoDescription != c.NvPairs.CopyPoDescription {
+		log.Printf("v.NvPairs.CopyPoDescription=%s, c.NvPairs.CopyPoDescription=%s", v.NvPairs.CopyPoDescription, c.NvPairs.CopyPoDescription)
+		return RequiresUpdate
+	}
+	if v.NvPairs.PortchannelMode != c.NvPairs.PortchannelMode {
+		log.Printf("v.NvPairs.PortchannelMode=%s, c.NvPairs.PortchannelMode=%s", v.NvPairs.PortchannelMode, c.NvPairs.PortchannelMode)
+		return RequiresUpdate
+	}
+	if v.NvPairs.MemberInterfaces != c.NvPairs.MemberInterfaces {
+		log.Printf("v.NvPairs.MemberInterfaces=%s, c.NvPairs.MemberInterfaces=%s", v.NvPairs.MemberInterfaces, c.NvPairs.MemberInterfaces)
+		return RequiresUpdate
+	}
 
 	if cf {
 		return ControlFlagUpdate
@@ -687,6 +699,39 @@ func (v *NDFCInterfacesValue) CreatePlan(c NDFCInterfacesValue, cf *bool) int {
 		if action == ActionNone || action == RequiresUpdate {
 			action = RequiresUpdate
 		}
+	}
+
+	if v.NvPairs.CopyPoDescription != c.NvPairs.CopyPoDescription {
+		log.Printf("Update: v.NvPairs.CopyPoDescription=%v, c.NvPairs.CopyPoDescription=%v", v.NvPairs.CopyPoDescription, c.NvPairs.CopyPoDescription)
+		if action == ActionNone || action == RequiresUpdate {
+			action = RequiresUpdate
+		}
+	}
+
+	if v.NvPairs.PortchannelMode != "" {
+		if v.NvPairs.PortchannelMode != c.NvPairs.PortchannelMode {
+			log.Printf("Update: v.NvPairs.PortchannelMode=%v, c.NvPairs.PortchannelMode=%v", v.NvPairs.PortchannelMode, c.NvPairs.PortchannelMode)
+			if action == ActionNone || action == RequiresUpdate {
+				action = RequiresUpdate
+			}
+		}
+	} else {
+		//v empty, fill with c
+		log.Printf("Copy from state: v.NvPairs.PortchannelMode=%v, c.NvPairs.PortchannelMode=%v", v.NvPairs.PortchannelMode, c.NvPairs.PortchannelMode)
+		v.NvPairs.PortchannelMode = c.NvPairs.PortchannelMode
+	}
+
+	if v.NvPairs.MemberInterfaces != "" {
+		if v.NvPairs.MemberInterfaces != c.NvPairs.MemberInterfaces {
+			log.Printf("Update: v.NvPairs.MemberInterfaces=%v, c.NvPairs.MemberInterfaces=%v", v.NvPairs.MemberInterfaces, c.NvPairs.MemberInterfaces)
+			if action == ActionNone || action == RequiresUpdate {
+				action = RequiresUpdate
+			}
+		}
+	} else {
+		//v empty, fill with c
+		log.Printf("Copy from state: v.NvPairs.MemberInterfaces=%v, c.NvPairs.MemberInterfaces=%v", v.NvPairs.MemberInterfaces, c.NvPairs.MemberInterfaces)
+		v.NvPairs.MemberInterfaces = c.NvPairs.MemberInterfaces
 	}
 
 	return action

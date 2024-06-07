@@ -335,6 +335,34 @@ resource:
         default_value: false
         description: Advertise subnet in underlay
         example: true
+      - <<: *ifName
+        tf_hide: true
+        tf_name: port_channel_name
+        payload_hide: false
+        model_name: PO_ID
+        ndfc_nested: [nvPairs]
+      - model_name: COPY_DESC
+        ndfc_nested: [nvPairs]
+        tf_name: copy_po_description
+        type: Bool
+        default_value: false
+        description: Netflow is supported only if it is enabled on fabric
+        example: false
+      - model_name: PC_MODE
+        ndfc_nested: [nvPairs]
+        tf_name: portchannel_mode
+        type: String
+        validator: OneOf("on","active","passive")
+        default_value: "on"
+        description: Port-channel mode
+        example: on
+      - model_name: MEMBER_INTERFACES
+        ndfc_nested: [nvPairs]
+        tf_name: member_interfaces
+        type: String
+        description: Member interfaces
+        example: "eth1/1-10"
+
 datasource:
   name: interfaces
   generate_tf_resource: true
