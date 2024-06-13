@@ -24,6 +24,9 @@ func GenerateIntfResource(intfObj **resource_interface_common.NDFCInterfaceCommo
 	case "vlan":
 		intf.Policy = "int_vlan"
 		ifPrefix = "vlan"
+	case "portchannel":
+		intf.Policy = "int_port_channel_trunk_host"
+		ifPrefix = "port-channel"
 	}
 	if globalSerial {
 		intf.SerialNumber = serials[0]
@@ -43,7 +46,7 @@ func GenerateIntfResource(intfObj **resource_interface_common.NDFCInterfaceCommo
 		*intfObj = intf
 		return
 	}
-
+	intfCount := 10
 	for i := 0; i < ifCount; i++ {
 		ifTmp := new(resource_interface_common.NDFCInterfacesValue)
 		key := ""
@@ -75,7 +78,20 @@ func GenerateIntfResource(intfObj **resource_interface_common.NDFCInterfaceCommo
 			ifTmp.NvPairs.Vrf = "default"
 			ifTmp.NvPairs.Ipv4PrefixLength = "24"
 			ifTmp.NvPairs.RoutingTag = ""
+		} else if ifType == "portchannel" {
+			ifTmp.NvPairs.Speed = "Auto"
+			ifTmp.NvPairs.Mtu = "jumbo"
+			ifTmp.NvPairs.Netflow = "false"
+			ifTmp.NvPairs.BpduGuard = "true"
+			ifTmp.NvPairs.NativeVlan = new(types.Int64Custom)
+			*ifTmp.NvPairs.NativeVlan = types.Int64Custom(1500 + intfNumber)
+			ifTmp.NvPairs.AllowedVlans = "10-2000"
+			ifTmp.NvPairs.PortchannelMode = "active"
+			ifTmp.NvPairs.MemberInterfaces = fmt.Sprintf("Ethernet1/%d,Ethernet1/%d", intfCount+1, intfCount+2)
+			ifTmp.NvPairs.CopyPoDescription = "true"
+			intfCount += 2
 		}
+
 		intf.Interfaces[key] = *ifTmp
 
 	}
@@ -95,6 +111,9 @@ func ModifyInterface(intfObj **resource_interface_common.NDFCInterfaceCommonMode
 		ifPrefix = "loopback"
 	case "vlan":
 		ifPrefix = "vlan"
+	case "portchannel":
+		ifPrefix = "port-channel"
+
 	}
 	for i := 0; i < ifCount; i++ {
 		intfNumber := ifStart + i

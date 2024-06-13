@@ -12,7 +12,7 @@ import (
 
 func TestAccInterfaceVlanResourceBasic(t *testing.T) {
 	x := &map[string]string{
-		"RscType":    "ndfc_interface_vlsn",
+		"RscType":    "ndfc_interface_vlan",
 		"RscSubType": "vlan",
 		"RscName":    "test_vlan",
 		"User":       helper.GetConfig("vlan").NDFC.User,
