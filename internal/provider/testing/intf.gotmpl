@@ -67,7 +67,18 @@ resource "ndfc_{{.RscType}}" "{{.RscName}}" {
             {{- if eq $ifEntry.InterfaceType "vlan" }}
             ipv4_prefix_length = "{{$ifEntry.NvPairs.Ipv4PrefixLength}}"
             {{end}}
-            
+            {{- if ne $ifEntry.NvPairs.MemberInterfaces ""}}
+            member_interfaces = "{{$ifEntry.NvPairs.MemberInterfaces}}"
+            {{- end}}
+            {{- if ne $ifEntry.NvPairs.Mac ""}}
+            mac_address = "{{$ifEntry.NvPairs.Mac}}"
+            {{- end}}
+            {{- if ne $ifEntry.NvPairs.PortchannelMode ""}}
+            portchannel_mode = "{{$ifEntry.NvPairs.PortchannelMode}}"
+            {{- end}}  
+            {{- if ne $ifEntry.NvPairs.CopyPoDescription ""}}
+            copy_po_description = "{{$ifEntry.NvPairs.CopyPoDescription}}"
+            {{- end}}
         }
     {{- end}}
     }
