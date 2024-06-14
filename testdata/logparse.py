@@ -25,7 +25,7 @@ def parse_log_file(log_file_path, output_dir):
           # Try to parse the extracted content as JSON
           json_data = json.loads(json_content)
           # Create a filename with sequential numbering
-          output_file_name = f"{output_dir}/ndfc_intf_vlan_{file_name}.json"
+          output_file_name = f"{output_dir}/ndfc_intf_portchan_{file_name}.json"
           with open(output_file_name, 'w') as output_file:
             json.dump(json_data, output_file)
           file_name += 1
@@ -38,7 +38,7 @@ def parse_log_file(log_file_path, output_dir):
 
 # Replace with your actual paths
 log_file_path = "/tmp/terraform-acceptance-tests.log"
-output_dir = "./interface_vlan"
+output_dir = "./interface_portchan"
 os.mkdir(output_dir)
 
 parse_log_file(log_file_path, output_dir)

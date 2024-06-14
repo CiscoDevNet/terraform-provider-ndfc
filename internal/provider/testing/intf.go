@@ -6,6 +6,8 @@ import (
 	"terraform-provider-ndfc/internal/provider/types"
 )
 
+var EthIntf int = 10
+
 func GenerateIntfResource(intfObj **resource_interface_common.NDFCInterfaceCommonModel, ifStart, ifCount int,
 	ifType string, deployNeeded bool, serials []string, globalSerial bool, append bool) {
 	intf := *intfObj
@@ -46,7 +48,7 @@ func GenerateIntfResource(intfObj **resource_interface_common.NDFCInterfaceCommo
 		*intfObj = intf
 		return
 	}
-	intfCount := 10
+
 	for i := 0; i < ifCount; i++ {
 		ifTmp := new(resource_interface_common.NDFCInterfacesValue)
 		key := ""
@@ -87,9 +89,9 @@ func GenerateIntfResource(intfObj **resource_interface_common.NDFCInterfaceCommo
 			*ifTmp.NvPairs.NativeVlan = types.Int64Custom(1500 + intfNumber)
 			ifTmp.NvPairs.AllowedVlans = "10-2000"
 			ifTmp.NvPairs.PortchannelMode = "active"
-			ifTmp.NvPairs.MemberInterfaces = fmt.Sprintf("Ethernet1/%d,Ethernet1/%d", intfCount+1, intfCount+2)
+			ifTmp.NvPairs.MemberInterfaces = fmt.Sprintf("Ethernet1/%d,Ethernet1/%d", EthIntf+1, EthIntf+2)
 			ifTmp.NvPairs.CopyPoDescription = "true"
-			intfCount += 2
+			EthIntf += 2
 		}
 
 		intf.Interfaces[key] = *ifTmp
@@ -207,6 +209,17 @@ func ModifyInterface(intfObj **resource_interface_common.NDFCInterfaceCommonMode
 			if val, ok := values["advertiseSubnetInUnderlay"]; ok {
 				ifTmp.NvPairs.AdvertiseSubnetInUnderlay = val.(string)
 			}
+			if val, ok := values["portchannelMode"]; ok {
+				ifTmp.NvPairs.PortchannelMode = val.(string)
+			}
+			if _, ok := values["memberInterfaces"]; ok {
+				ifTmp.NvPairs.MemberInterfaces = fmt.Sprintf("Ethernet1/%d,Ethernet1/%d", EthIntf+1, EthIntf+2)
+				EthIntf += 2
+			}
+			if val, ok := values["copyPoDescription"]; ok {
+				ifTmp.NvPairs.CopyPoDescription = val.(string)
+			}
+
 			intf.Interfaces[intfName] = ifTmp
 
 		}

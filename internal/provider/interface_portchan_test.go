@@ -38,7 +38,10 @@ func TestAccInterfacePortchannelResourceBasic(t *testing.T) {
 	// Create a new instance of the NDFC client
 	intfRsc := new(resource_interface_common.NDFCInterfaceCommonModel)
 	resource.Test(t, resource.TestCase{
-		PreCheck:                 func() { testAccPreCheck(t, "portchannel") },
+		PreCheck: func() {
+			testAccPreCheck(t, "portchannel")
+			helper.EthIntf = 10
+		},
 		ProtoV6ProviderFactories: testAccProtoV6ProviderFactories,
 		Steps: []resource.TestStep{
 			{
@@ -88,7 +91,10 @@ func TestAccInterfacePortchannelResourceCreateAndAdd(t *testing.T) {
 	intfRsc := new(resource_interface_common.NDFCInterfaceCommonModel)
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:                 func() { testAccPreCheck(t, "portchannel") },
+		PreCheck: func() {
+			testAccPreCheck(t, "portchannel")
+			helper.EthIntf = 10
+		},
 		ProtoV6ProviderFactories: testAccProtoV6ProviderFactories,
 		//CheckDestroy:             testAccCheckVrfBulkResourceDestroy(networkRsc),
 		Steps: []resource.TestStep{
@@ -152,7 +158,10 @@ func TestAccInterfacePortchannelResourceCreateAndReduce(t *testing.T) {
 	intfRsc := new(resource_interface_common.NDFCInterfaceCommonModel)
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:                 func() { testAccPreCheck(t, "portchannel") },
+		PreCheck: func() {
+			testAccPreCheck(t, "portchannel")
+			helper.EthIntf = 10
+		},
 		ProtoV6ProviderFactories: testAccProtoV6ProviderFactories,
 		//CheckDestroy:             testAccCheckVrfBulkResourceDestroy(networkRsc),
 		Steps: []resource.TestStep{
@@ -217,7 +226,10 @@ func TestAccInterfacePortchannelResourceCreateAndModify(t *testing.T) {
 	intfRsc := new(resource_interface_common.NDFCInterfaceCommonModel)
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:                 func() { testAccPreCheck(t, "portchannel") },
+		PreCheck: func() {
+			testAccPreCheck(t, "portchannel")
+			helper.EthIntf = 10
+		},
 		ProtoV6ProviderFactories: testAccProtoV6ProviderFactories,
 		//CheckDestroy:             testAccCheckVrfBulkResourceDestroy(networkRsc),
 		Steps: []resource.TestStep{
@@ -239,8 +251,9 @@ func TestAccInterfacePortchannelResourceCreateAndModify(t *testing.T) {
 					*stepCount++
 					tName := fmt.Sprintf("%s_%d", t.Name(), *stepCount)
 					helper.ModifyInterface(&intfRsc, 200, 5, "portchannel", map[string]interface{}{
-						"admin_state": "down",
-						"vrf":         "default",
+						"portchannelMode":   "passive",
+						"CopyPoDescription": "false",
+						"memberInterfaces":  "yes",
 					})
 					(*x)["RscName"] = "pc_intf_test"
 					helper.GetTFConfigWithSingleResource(tName, *x, []interface{}{intfRsc}, &tf_config)
@@ -284,7 +297,10 @@ func TestAccInterfacePortchannelResourceCombinedUpdate(t *testing.T) {
 	intfRsc := new(resource_interface_common.NDFCInterfaceCommonModel)
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:                 func() { testAccPreCheck(t, "portchannel") },
+		PreCheck: func() {
+			testAccPreCheck(t, "portchannel")
+			helper.EthIntf = 10
+		},
 		ProtoV6ProviderFactories: testAccProtoV6ProviderFactories,
 		//CheckDestroy:             testAccCheckVrfBulkResourceDestroy(networkRsc),
 		Steps: []resource.TestStep{
