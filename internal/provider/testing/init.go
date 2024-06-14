@@ -33,6 +33,7 @@ var testModules = []string{
 	"ethernet",
 	"loopback",
 	"vlan",
+	"portchannel",
 }
 
 func LoadConfigFromYAML(yamlContent string) (*Config, error) {
@@ -77,6 +78,8 @@ func InitConfig(path string, mock string) {
 		case "loopback":
 			fallthrough
 		case "vlan":
+			fallthrough
+		case "portchannel":
 			config[module].NDFC.mockConfigFile = "./testdata/interfaces.json"
 		default:
 			fmt.Println("Mocking not supported for this module")
