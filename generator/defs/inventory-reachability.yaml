@@ -4,6 +4,7 @@ datasource:
   rest_endpoint: /lan-fabric/rest/control/fabrics/%s/inventory/test-reachability
   doc_category: Fabric
   generate_tf_resource: true
+  skip_codec: true
   attributes:
     - &id
       model_name: id
