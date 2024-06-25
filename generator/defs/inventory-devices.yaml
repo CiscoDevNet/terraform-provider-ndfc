@@ -325,6 +325,7 @@ datasource:
   name: inventory_devices
   doc_category: Fabric
   generate_tf_resource: true
+  skip_codec: true
   attributes:
     - <<: *id
     - <<: *fabric_name
