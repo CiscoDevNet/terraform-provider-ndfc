@@ -57,14 +57,7 @@ func (r *interfaceEthernetResource) Create(ctx context.Context, req resource.Cre
 		panic("Client is nil")
 	}
 	// Create API call logic
-	r.client.RscCreateInterfaces(ctx, &resp.Diagnostics, &in)
-	if resp.Diagnostics.HasError() {
-		tflog.Error(ctx, "Create Interfaces Failed")
-		return
-	}
-	// Example data value setting
-	// Save data into Terraform state
-	resp.Diagnostics.Append(resp.State.Set(ctx, in)...)
+	r.client.RscCreateInterfaces(ctx, resp, &in)
 }
 
 func (r *interfaceEthernetResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {

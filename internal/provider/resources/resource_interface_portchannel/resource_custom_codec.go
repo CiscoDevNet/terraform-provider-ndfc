@@ -11,5 +11,9 @@ func (i *InterfacePortchannelModel) GetID() string {
 }
 
 func (i *InterfacePortchannelModel) SetID(id string) {
+	if id == "" {
+		i.Id = types.StringNull()
+		return
+	}
 	i.Id = types.StringValue(id)
 }

@@ -182,6 +182,12 @@ func (v *InterfacesValue) SetValue(jsonData *resource_interface_common.NDFCInter
 		v.NativeVlan = types.Int64Null()
 	}
 
+	if jsonData.DeploymentStatus != "" {
+		v.DeploymentStatus = types.StringValue(jsonData.DeploymentStatus)
+	} else {
+		v.DeploymentStatus = types.StringNull()
+	}
+
 	return err
 }
 
@@ -357,6 +363,7 @@ func (v InterfaceEthernetModel) GetModelData() *resource_interface_common.NDFCIn
 				data1.NvPairs.NativeVlan = nil
 			}
 
+			// deployment_status | String| []| false
 			data.Interfaces[k1] = *data1
 
 		}

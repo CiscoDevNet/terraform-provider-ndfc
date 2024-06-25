@@ -67,5 +67,8 @@ func InterfaceLoopbackInterfacesValueHelperStateCheck(RscName string, c resource
 	} else {
 		ret = append(ret, resource.TestCheckResourceAttr(RscName, attrPath.AtName("route_map_tag").String(), "12345"))
 	}
+	if c.DeploymentStatus != "" {
+		ret = append(ret, resource.TestCheckResourceAttr(RscName, attrPath.AtName("deployment_status").String(), c.DeploymentStatus))
+	}
 	return ret
 }

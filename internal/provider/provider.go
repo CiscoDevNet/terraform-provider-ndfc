@@ -146,5 +146,6 @@ func (p *ndfcProvider) Resources(ctx context.Context) []func() resource.Resource
 		NewInventoryDevicesResource,
 		NewConfigDeployResource,
 		NewInterfacePortChannelResource,
+		NewInterfaceVPCResource,
 	}
 }

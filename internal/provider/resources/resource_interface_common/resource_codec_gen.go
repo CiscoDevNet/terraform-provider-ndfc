@@ -13,11 +13,12 @@ type NDFCInterfaceCommonModel struct {
 }
 
 type NDFCInterfacesValue struct {
-	FilterThisValue bool             `json:"-"`
-	SerialNumber    string           `json:"serialNumber,omitempty"`
-	InterfaceName   string           `json:"ifName,omitempty"`
-	InterfaceType   string           `json:"interfaceType,omitempty"`
-	NvPairs         NDFCNvPairsValue `json:"nvPairs,omitempty"`
+	FilterThisValue  bool             `json:"-"`
+	SerialNumber     string           `json:"serialNumber,omitempty"`
+	InterfaceName    string           `json:"ifName,omitempty"`
+	InterfaceType    string           `json:"interfaceType,omitempty"`
+	DeploymentStatus string           `json:"-"`
+	NvPairs          NDFCNvPairsValue `json:"nvPairs,omitempty"`
 }
 
 type NDFCNvPairsValue struct {
@@ -62,4 +63,17 @@ type NDFCNvPairsValue struct {
 	CopyPoDescription         string       `json:"COPY_DESC,omitempty"`
 	PortchannelMode           string       `json:"PC_MODE,omitempty"`
 	MemberInterfaces          string       `json:"MEMBER_INTERFACES,omitempty"`
+	MirrorConfig              string       `json:"ENABLE_MIRROR_CONFIG,omitempty"`
+	Peer1PoFreeformConfig     string       `json:"PEER1_PO_CONF"`
+	Peer2PoFreeformConfig     string       `json:"PEER2_PO_CONF"`
+	Peer1PoDescription        string       `json:"PEER1_PO_DESC"`
+	Peer2PoDescription        string       `json:"PEER2_PO_DESC"`
+	Peer1AllowedVlans         string       `json:"PEER1_ALLOWED_VLANS,omitempty"`
+	Peer2AllowedVlans         string       `json:"PEER2_ALLOWED_VLANS,omitempty"`
+	Peer1NativeVlan           *Int64Custom `json:"PEER1_NATIVE_VLAN,omitempty"`
+	Peer2NativeVlan           *Int64Custom `json:"PEER2_NATIVE_VLAN,omitempty"`
+	Peer1MemberInterfaces     string       `json:"PEER1_MEMBER_INTERFACES,omitempty"`
+	Peer2MemberInterfaces     string       `json:"PEER2_MEMBER_INTERFACES,omitempty"`
+	Peer1PortChannelId        *int64       `json:"PEER1_PCID,string,omitempty"`
+	Peer2PortChannelId        *Int64Custom `json:"PEER2_PCID,string,omitempty"`
 }

@@ -183,6 +183,12 @@ func (v *InterfacesValue) SetValue(jsonData *resource_interface_common.NDFCInter
 		v.MemberInterfaces = types.StringNull()
 	}
 
+	if jsonData.DeploymentStatus != "" {
+		v.DeploymentStatus = types.StringValue(jsonData.DeploymentStatus)
+	} else {
+		v.DeploymentStatus = types.StringNull()
+	}
+
 	return err
 }
 
@@ -365,6 +371,7 @@ func (v InterfacePortchannelModel) GetModelData() *resource_interface_common.NDF
 				data1.NvPairs.MemberInterfaces = ""
 			}
 
+			// deployment_status | String| []| false
 			data.Interfaces[k1] = *data1
 
 		}

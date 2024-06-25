@@ -55,6 +55,11 @@ func InterfaceVlanResourceSchema(ctx context.Context) schema.Schema {
 							MarkdownDescription: "Advertise subnet in underlay",
 							Default:             booldefault.StaticBool(false),
 						},
+						"deployment_status": schema.StringAttribute{
+							Computed:            true,
+							Description:         "Status of the deployment",
+							MarkdownDescription: "Status of the deployment",
+						},
 						"dhcp_server_addr1": schema.StringAttribute{
 							Optional:            true,
 							Description:         "DHCP server address 1",
@@ -311,6 +316,24 @@ func (t InterfacesType) ValueFromObject(ctx context.Context, in basetypes.Object
 			fmt.Sprintf(`advertise_subnet_in_underlay expected to be basetypes.BoolValue, was: %T`, advertiseSubnetInUnderlayAttribute))
 	}
 
+	deploymentStatusAttribute, ok := attributes["deployment_status"]
+
+	if !ok {
+		diags.AddError(
+			"Attribute Missing",
+			`deployment_status is missing from object`)
+
+		return nil, diags
+	}
+
+	deploymentStatusVal, ok := deploymentStatusAttribute.(basetypes.StringValue)
+
+	if !ok {
+		diags.AddError(
+			"Attribute Wrong Type",
+			fmt.Sprintf(`deployment_status expected to be basetypes.StringValue, was: %T`, deploymentStatusAttribute))
+	}
+
 	dhcpServerAddr1Attribute, ok := attributes["dhcp_server_addr1"]
 
 	if !ok {
@@ -786,6 +809,7 @@ func (t InterfacesType) ValueFromObject(ctx context.Context, in basetypes.Object
 	return InterfacesValue{
 		AdminState:                adminStateVal,
 		AdvertiseSubnetInUnderlay: advertiseSubnetInUnderlayVal,
+		DeploymentStatus:          deploymentStatusVal,
 		DhcpServerAddr1:           dhcpServerAddr1Val,
 		DhcpServerAddr2:           dhcpServerAddr2Val,
 		DhcpServerAddr3:           dhcpServerAddr3Val,
@@ -915,6 +939,24 @@ func NewInterfacesValue(attributeTypes map[string]attr.Type, attributes map[stri
 			fmt.Sprintf(`advertise_subnet_in_underlay expected to be basetypes.BoolValue, was: %T`, advertiseSubnetInUnderlayAttribute))
 	}
 
+	deploymentStatusAttribute, ok := attributes["deployment_status"]
+
+	if !ok {
+		diags.AddError(
+			"Attribute Missing",
+			`deployment_status is missing from object`)
+
+		return NewInterfacesValueUnknown(), diags
+	}
+
+	deploymentStatusVal, ok := deploymentStatusAttribute.(basetypes.StringValue)
+
+	if !ok {
+		diags.AddError(
+			"Attribute Wrong Type",
+			fmt.Sprintf(`deployment_status expected to be basetypes.StringValue, was: %T`, deploymentStatusAttribute))
+	}
+
 	dhcpServerAddr1Attribute, ok := attributes["dhcp_server_addr1"]
 
 	if !ok {
@@ -1390,6 +1432,7 @@ func NewInterfacesValue(attributeTypes map[string]attr.Type, attributes map[stri
 	return InterfacesValue{
 		AdminState:                adminStateVal,
 		AdvertiseSubnetInUnderlay: advertiseSubnetInUnderlayVal,
+		DeploymentStatus:          deploymentStatusVal,
 		DhcpServerAddr1:           dhcpServerAddr1Val,
 		DhcpServerAddr2:           dhcpServerAddr2Val,
 		DhcpServerAddr3:           dhcpServerAddr3Val,
@@ -1490,6 +1533,7 @@ var _ basetypes.ObjectValuable = InterfacesValue{}
 type InterfacesValue struct {
 	AdminState                basetypes.BoolValue   `tfsdk:"admin_state"`
 	AdvertiseSubnetInUnderlay basetypes.BoolValue   `tfsdk:"advertise_subnet_in_underlay"`
+	DeploymentStatus          basetypes.StringValue `tfsdk:"deployment_status"`
 	DhcpServerAddr1           basetypes.StringValue `tfsdk:"dhcp_server_addr1"`
 	DhcpServerAddr2           basetypes.StringValue `tfsdk:"dhcp_server_addr2"`
 	DhcpServerAddr3           basetypes.StringValue `tfsdk:"dhcp_server_addr3"`
@@ -1520,13 +1564,14 @@ type InterfacesValue struct {
 }
 
 func (v InterfacesValue) ToTerraformValue(ctx context.Context) (tftypes.Value, error) {
-	attrTypes := make(map[string]tftypes.Type, 28)
+	attrTypes := make(map[string]tftypes.Type, 29)
 
 	var val tftypes.Value
 	var err error
 
 	attrTypes["admin_state"] = basetypes.BoolType{}.TerraformType(ctx)
 	attrTypes["advertise_subnet_in_underlay"] = basetypes.BoolType{}.TerraformType(ctx)
+	attrTypes["deployment_status"] = basetypes.StringType{}.TerraformType(ctx)
 	attrTypes["dhcp_server_addr1"] = basetypes.StringType{}.TerraformType(ctx)
 	attrTypes["dhcp_server_addr2"] = basetypes.StringType{}.TerraformType(ctx)
 	attrTypes["dhcp_server_addr3"] = basetypes.StringType{}.TerraformType(ctx)
@@ -1558,7 +1603,7 @@ func (v InterfacesValue) ToTerraformValue(ctx context.Context) (tftypes.Value, e
 
 	switch v.state {
 	case attr.ValueStateKnown:
-		vals := make(map[string]tftypes.Value, 28)
+		vals := make(map[string]tftypes.Value, 29)
 
 		val, err = v.AdminState.ToTerraformValue(ctx)
 
@@ -1575,6 +1620,14 @@ func (v InterfacesValue) ToTerraformValue(ctx context.Context) (tftypes.Value, e
 		}
 
 		vals["advertise_subnet_in_underlay"] = val
+
+		val, err = v.DeploymentStatus.ToTerraformValue(ctx)
+
+		if err != nil {
+			return tftypes.NewValue(objectType, tftypes.UnknownValue), err
+		}
+
+		vals["deployment_status"] = val
 
 		val, err = v.DhcpServerAddr1.ToTerraformValue(ctx)
 
@@ -1817,6 +1870,7 @@ func (v InterfacesValue) ToObjectValue(ctx context.Context) (basetypes.ObjectVal
 		map[string]attr.Type{
 			"admin_state":                  basetypes.BoolType{},
 			"advertise_subnet_in_underlay": basetypes.BoolType{},
+			"deployment_status":            basetypes.StringType{},
 			"dhcp_server_addr1":            basetypes.StringType{},
 			"dhcp_server_addr2":            basetypes.StringType{},
 			"dhcp_server_addr3":            basetypes.StringType{},
@@ -1847,6 +1901,7 @@ func (v InterfacesValue) ToObjectValue(ctx context.Context) (basetypes.ObjectVal
 		map[string]attr.Value{
 			"admin_state":                  v.AdminState,
 			"advertise_subnet_in_underlay": v.AdvertiseSubnetInUnderlay,
+			"deployment_status":            v.DeploymentStatus,
 			"dhcp_server_addr1":            v.DhcpServerAddr1,
 			"dhcp_server_addr2":            v.DhcpServerAddr2,
 			"dhcp_server_addr3":            v.DhcpServerAddr3,
@@ -1898,6 +1953,10 @@ func (v InterfacesValue) Equal(o attr.Value) bool {
 	}
 
 	if !v.AdvertiseSubnetInUnderlay.Equal(other.AdvertiseSubnetInUnderlay) {
+		return false
+	}
+
+	if !v.DeploymentStatus.Equal(other.DeploymentStatus) {
 		return false
 	}
 
@@ -2020,6 +2079,7 @@ func (v InterfacesValue) AttributeTypes(ctx context.Context) map[string]attr.Typ
 	return map[string]attr.Type{
 		"admin_state":                  basetypes.BoolType{},
 		"advertise_subnet_in_underlay": basetypes.BoolType{},
+		"deployment_status":            basetypes.StringType{},
 		"dhcp_server_addr1":            basetypes.StringType{},
 		"dhcp_server_addr2":            basetypes.StringType{},
 		"dhcp_server_addr3":            basetypes.StringType{},

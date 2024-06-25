@@ -14,4 +14,5 @@ files:
   - configuration-deploy.yaml
   - inventory-devices.yaml  
   - interface_portchannel.yaml
+  - interface_vpc.yaml
 

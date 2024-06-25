@@ -115,9 +115,6 @@ func (v *NDFCAttachmentsValue) CreatePlan(c NDFCAttachmentsValue, cf *bool) int 
 			log.Printf("Copy from State: c.Vlan=%v", *c.Vlan)
 			v.Vlan = new(Int64Custom)
 			*v.Vlan = *c.Vlan
-			if action == ActionNone || action == RequiresUpdate {
-				action = RequiresUpdate
-			}
 		}
 	}
 	if v.FreeformConfig != "" {

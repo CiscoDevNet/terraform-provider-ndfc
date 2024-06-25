@@ -249,6 +249,12 @@ func (v *InterfacesValue) SetValue(jsonData *resource_interface_common.NDFCInter
 		v.AdvertiseSubnetInUnderlay = types.BoolNull()
 	}
 
+	if jsonData.DeploymentStatus != "" {
+		v.DeploymentStatus = types.StringValue(jsonData.DeploymentStatus)
+	} else {
+		v.DeploymentStatus = types.StringNull()
+	}
+
 	return err
 }
 
@@ -512,6 +518,7 @@ func (v InterfaceVlanModel) GetModelData() *resource_interface_common.NDFCInterf
 				data1.NvPairs.AdvertiseSubnetInUnderlay = ""
 			}
 
+			// deployment_status | String| []| false
 			data.Interfaces[k1] = *data1
 
 		}

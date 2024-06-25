@@ -48,6 +48,11 @@ func InterfaceLoopbackResourceSchema(ctx context.Context) schema.Schema {
 							MarkdownDescription: "Enable or disable the interface",
 							Default:             booldefault.StaticBool(true),
 						},
+						"deployment_status": schema.StringAttribute{
+							Computed:            true,
+							Description:         "Status of the deployment",
+							MarkdownDescription: "Status of the deployment",
+						},
 						"freeform_config": schema.StringAttribute{
 							Optional:            true,
 							Description:         "Additional CLI for the interface",
@@ -179,6 +184,24 @@ func (t InterfacesType) ValueFromObject(ctx context.Context, in basetypes.Object
 			fmt.Sprintf(`admin_state expected to be basetypes.BoolValue, was: %T`, adminStateAttribute))
 	}
 
+	deploymentStatusAttribute, ok := attributes["deployment_status"]
+
+	if !ok {
+		diags.AddError(
+			"Attribute Missing",
+			`deployment_status is missing from object`)
+
+		return nil, diags
+	}
+
+	deploymentStatusVal, ok := deploymentStatusAttribute.(basetypes.StringValue)
+
+	if !ok {
+		diags.AddError(
+			"Attribute Wrong Type",
+			fmt.Sprintf(`deployment_status expected to be basetypes.StringValue, was: %T`, deploymentStatusAttribute))
+	}
+
 	freeformConfigAttribute, ok := attributes["freeform_config"]
 
 	if !ok {
@@ -329,6 +352,7 @@ func (t InterfacesType) ValueFromObject(ctx context.Context, in basetypes.Object
 
 	return InterfacesValue{
 		AdminState:           adminStateVal,
+		DeploymentStatus:     deploymentStatusVal,
 		FreeformConfig:       freeformConfigVal,
 		InterfaceDescription: interfaceDescriptionVal,
 		InterfaceName:        interfaceNameVal,
@@ -422,6 +446,24 @@ func NewInterfacesValue(attributeTypes map[string]attr.Type, attributes map[stri
 			fmt.Sprintf(`admin_state expected to be basetypes.BoolValue, was: %T`, adminStateAttribute))
 	}
 
+	deploymentStatusAttribute, ok := attributes["deployment_status"]
+
+	if !ok {
+		diags.AddError(
+			"Attribute Missing",
+			`deployment_status is missing from object`)
+
+		return NewInterfacesValueUnknown(), diags
+	}
+
+	deploymentStatusVal, ok := deploymentStatusAttribute.(basetypes.StringValue)
+
+	if !ok {
+		diags.AddError(
+			"Attribute Wrong Type",
+			fmt.Sprintf(`deployment_status expected to be basetypes.StringValue, was: %T`, deploymentStatusAttribute))
+	}
+
 	freeformConfigAttribute, ok := attributes["freeform_config"]
 
 	if !ok {
@@ -572,6 +614,7 @@ func NewInterfacesValue(attributeTypes map[string]attr.Type, attributes map[stri
 
 	return InterfacesValue{
 		AdminState:           adminStateVal,
+		DeploymentStatus:     deploymentStatusVal,
 		FreeformConfig:       freeformConfigVal,
 		InterfaceDescription: interfaceDescriptionVal,
 		InterfaceName:        interfaceNameVal,
@@ -653,6 +696,7 @@ var _ basetypes.ObjectValuable = InterfacesValue{}
 
 type InterfacesValue struct {
 	AdminState           basetypes.BoolValue   `tfsdk:"admin_state"`
+	DeploymentStatus     basetypes.StringValue `tfsdk:"deployment_status"`
 	FreeformConfig       basetypes.StringValue `tfsdk:"freeform_config"`
 	InterfaceDescription basetypes.StringValue `tfsdk:"interface_description"`
 	InterfaceName        basetypes.StringValue `tfsdk:"interface_name"`
@@ -665,12 +709,13 @@ type InterfacesValue struct {
 }
 
 func (v InterfacesValue) ToTerraformValue(ctx context.Context) (tftypes.Value, error) {
-	attrTypes := make(map[string]tftypes.Type, 9)
+	attrTypes := make(map[string]tftypes.Type, 10)
 
 	var val tftypes.Value
 	var err error
 
 	attrTypes["admin_state"] = basetypes.BoolType{}.TerraformType(ctx)
+	attrTypes["deployment_status"] = basetypes.StringType{}.TerraformType(ctx)
 	attrTypes["freeform_config"] = basetypes.StringType{}.TerraformType(ctx)
 	attrTypes["interface_description"] = basetypes.StringType{}.TerraformType(ctx)
 	attrTypes["interface_name"] = basetypes.StringType{}.TerraformType(ctx)
@@ -684,7 +729,7 @@ func (v InterfacesValue) ToTerraformValue(ctx context.Context) (tftypes.Value, e
 
 	switch v.state {
 	case attr.ValueStateKnown:
-		vals := make(map[string]tftypes.Value, 9)
+		vals := make(map[string]tftypes.Value, 10)
 
 		val, err = v.AdminState.ToTerraformValue(ctx)
 
@@ -693,6 +738,14 @@ func (v InterfacesValue) ToTerraformValue(ctx context.Context) (tftypes.Value, e
 		}
 
 		vals["admin_state"] = val
+
+		val, err = v.DeploymentStatus.ToTerraformValue(ctx)
+
+		if err != nil {
+			return tftypes.NewValue(objectType, tftypes.UnknownValue), err
+		}
+
+		vals["deployment_status"] = val
 
 		val, err = v.FreeformConfig.ToTerraformValue(ctx)
 
@@ -790,6 +843,7 @@ func (v InterfacesValue) ToObjectValue(ctx context.Context) (basetypes.ObjectVal
 	objVal, diags := types.ObjectValue(
 		map[string]attr.Type{
 			"admin_state":           basetypes.BoolType{},
+			"deployment_status":     basetypes.StringType{},
 			"freeform_config":       basetypes.StringType{},
 			"interface_description": basetypes.StringType{},
 			"interface_name":        basetypes.StringType{},
@@ -801,6 +855,7 @@ func (v InterfacesValue) ToObjectValue(ctx context.Context) (basetypes.ObjectVal
 		},
 		map[string]attr.Value{
 			"admin_state":           v.AdminState,
+			"deployment_status":     v.DeploymentStatus,
 			"freeform_config":       v.FreeformConfig,
 			"interface_description": v.InterfaceDescription,
 			"interface_name":        v.InterfaceName,
@@ -830,6 +885,10 @@ func (v InterfacesValue) Equal(o attr.Value) bool {
 	}
 
 	if !v.AdminState.Equal(other.AdminState) {
+		return false
+	}
+
+	if !v.DeploymentStatus.Equal(other.DeploymentStatus) {
 		return false
 	}
 
@@ -879,6 +938,7 @@ func (v InterfacesValue) Type(ctx context.Context) attr.Type {
 func (v InterfacesValue) AttributeTypes(ctx context.Context) map[string]attr.Type {
 	return map[string]attr.Type{
 		"admin_state":           basetypes.BoolType{},
+		"deployment_status":     basetypes.StringType{},
 		"freeform_config":       basetypes.StringType{},
 		"interface_description": basetypes.StringType{},
 		"interface_name":        basetypes.StringType{},

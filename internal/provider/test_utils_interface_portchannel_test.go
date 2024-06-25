@@ -109,5 +109,8 @@ func InterfacePortchannelInterfacesValueHelperStateCheck(RscName string, c resou
 	if c.NvPairs.MemberInterfaces != "" {
 		ret = append(ret, resource.TestCheckResourceAttr(RscName, attrPath.AtName("member_interfaces").String(), c.NvPairs.MemberInterfaces))
 	}
+	if c.DeploymentStatus != "" {
+		ret = append(ret, resource.TestCheckResourceAttr(RscName, attrPath.AtName("deployment_status").String(), c.DeploymentStatus))
+	}
 	return ret
 }

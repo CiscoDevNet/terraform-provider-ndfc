@@ -147,7 +147,6 @@ resource:
         description: Access VLAN ID
         example: 500
         handle_empty: true
-      
       - model_name: ENABLE_ORPHAN_PORT
         ndfc_nested: [nvPairs]
         tf_name: orphan_port
@@ -207,4 +206,12 @@ resource:
         example: 1
         exclude_test: true
         handle_empty: true
+        validator: Between(1, 4094)
+      - model_name: deployment_status
+        tf_name: deployment_status
+        type: String
+        description: "Status of the deployment"
+        example: "success"
+        computed: true
+        payload_hide: true
      

@@ -11,5 +11,9 @@ func (i *InterfaceEthernetModel) GetID() string {
 }
 
 func (i *InterfaceEthernetModel) SetID(id string) {
+	if id == "" {
+		i.Id = types.StringNull()
+		return
+	}
 	i.Id = types.StringValue(id)
 }

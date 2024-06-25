@@ -215,6 +215,99 @@ func (v NDFCInterfacesValue) DeepEqual(c NDFCInterfacesValue) int {
 		log.Printf("v.NvPairs.MemberInterfaces=%s, c.NvPairs.MemberInterfaces=%s", v.NvPairs.MemberInterfaces, c.NvPairs.MemberInterfaces)
 		return RequiresUpdate
 	}
+	if v.NvPairs.Peer1PoFreeformConfig != c.NvPairs.Peer1PoFreeformConfig {
+		log.Printf("v.NvPairs.Peer1PoFreeformConfig=%s, c.NvPairs.Peer1PoFreeformConfig=%s", v.NvPairs.Peer1PoFreeformConfig, c.NvPairs.Peer1PoFreeformConfig)
+		return RequiresUpdate
+	}
+	if v.NvPairs.Peer2PoFreeformConfig != c.NvPairs.Peer2PoFreeformConfig {
+		log.Printf("v.NvPairs.Peer2PoFreeformConfig=%s, c.NvPairs.Peer2PoFreeformConfig=%s", v.NvPairs.Peer2PoFreeformConfig, c.NvPairs.Peer2PoFreeformConfig)
+		return RequiresUpdate
+	}
+	if v.NvPairs.Peer1PoDescription != c.NvPairs.Peer1PoDescription {
+		log.Printf("v.NvPairs.Peer1PoDescription=%s, c.NvPairs.Peer1PoDescription=%s", v.NvPairs.Peer1PoDescription, c.NvPairs.Peer1PoDescription)
+		return RequiresUpdate
+	}
+	if v.NvPairs.Peer2PoDescription != c.NvPairs.Peer2PoDescription {
+		log.Printf("v.NvPairs.Peer2PoDescription=%s, c.NvPairs.Peer2PoDescription=%s", v.NvPairs.Peer2PoDescription, c.NvPairs.Peer2PoDescription)
+		return RequiresUpdate
+	}
+	if v.NvPairs.Peer1AllowedVlans != c.NvPairs.Peer1AllowedVlans {
+		log.Printf("v.NvPairs.Peer1AllowedVlans=%s, c.NvPairs.Peer1AllowedVlans=%s", v.NvPairs.Peer1AllowedVlans, c.NvPairs.Peer1AllowedVlans)
+		return RequiresUpdate
+	}
+	if v.NvPairs.Peer2AllowedVlans != c.NvPairs.Peer2AllowedVlans {
+		log.Printf("v.NvPairs.Peer2AllowedVlans=%s, c.NvPairs.Peer2AllowedVlans=%s", v.NvPairs.Peer2AllowedVlans, c.NvPairs.Peer2AllowedVlans)
+		return RequiresUpdate
+	}
+
+	if !v.NvPairs.Peer1NativeVlan.IsEmpty() && !c.NvPairs.Peer1NativeVlan.IsEmpty() {
+		if *v.NvPairs.Peer1NativeVlan != *c.NvPairs.Peer1NativeVlan {
+			log.Printf("v.NvPairs.Peer1NativeVlan=%v, c.NvPairs.Peer1NativeVlan=%v", *v.NvPairs.Peer1NativeVlan, *c.NvPairs.Peer1NativeVlan)
+			return RequiresUpdate
+		}
+	} else {
+		if !v.NvPairs.Peer1NativeVlan.IsEmpty() {
+			log.Printf("v.NvPairs.Peer1NativeVlan=%v", *v.NvPairs.Peer1NativeVlan)
+			return RequiresUpdate
+		} else if !c.NvPairs.Peer1NativeVlan.IsEmpty() {
+			log.Printf("c.NvPairs.Peer1NativeVlan=%v", *c.NvPairs.Peer1NativeVlan)
+			return RequiresUpdate
+		}
+	}
+
+	if !v.NvPairs.Peer2NativeVlan.IsEmpty() && !c.NvPairs.Peer2NativeVlan.IsEmpty() {
+		if *v.NvPairs.Peer2NativeVlan != *c.NvPairs.Peer2NativeVlan {
+			log.Printf("v.NvPairs.Peer2NativeVlan=%v, c.NvPairs.Peer2NativeVlan=%v", *v.NvPairs.Peer2NativeVlan, *c.NvPairs.Peer2NativeVlan)
+			return RequiresUpdate
+		}
+	} else {
+		if !v.NvPairs.Peer2NativeVlan.IsEmpty() {
+			log.Printf("v.NvPairs.Peer2NativeVlan=%v", *v.NvPairs.Peer2NativeVlan)
+			return RequiresUpdate
+		} else if !c.NvPairs.Peer2NativeVlan.IsEmpty() {
+			log.Printf("c.NvPairs.Peer2NativeVlan=%v", *c.NvPairs.Peer2NativeVlan)
+			return RequiresUpdate
+		}
+	}
+	if v.NvPairs.Peer1MemberInterfaces != c.NvPairs.Peer1MemberInterfaces {
+		log.Printf("v.NvPairs.Peer1MemberInterfaces=%s, c.NvPairs.Peer1MemberInterfaces=%s", v.NvPairs.Peer1MemberInterfaces, c.NvPairs.Peer1MemberInterfaces)
+		return RequiresUpdate
+	}
+	if v.NvPairs.Peer2MemberInterfaces != c.NvPairs.Peer2MemberInterfaces {
+		log.Printf("v.NvPairs.Peer2MemberInterfaces=%s, c.NvPairs.Peer2MemberInterfaces=%s", v.NvPairs.Peer2MemberInterfaces, c.NvPairs.Peer2MemberInterfaces)
+		return RequiresUpdate
+	}
+
+	if v.NvPairs.Peer1PortChannelId != nil && c.NvPairs.Peer1PortChannelId != nil {
+		if *v.NvPairs.Peer1PortChannelId != *c.NvPairs.Peer1PortChannelId {
+			log.Printf("v.NvPairs.Peer1PortChannelId=%v, c.NvPairs.Peer1PortChannelId=%v", *v.NvPairs.Peer1PortChannelId, *c.NvPairs.Peer1PortChannelId)
+			return RequiresReplace
+		}
+	} else {
+		if v.NvPairs.Peer1PortChannelId != nil {
+			log.Printf("v.NvPairs.Peer1PortChannelId=%v", *v.NvPairs.Peer1PortChannelId)
+			return RequiresReplace
+
+		} else if c.NvPairs.Peer1PortChannelId != nil {
+			log.Printf("c.NvPairs.Peer1PortChannelId=%v", *c.NvPairs.Peer1PortChannelId)
+			return RequiresReplace
+		}
+	}
+
+	if !v.NvPairs.Peer2PortChannelId.IsEmpty() && !c.NvPairs.Peer2PortChannelId.IsEmpty() {
+		if *v.NvPairs.Peer2PortChannelId != *c.NvPairs.Peer2PortChannelId {
+			log.Printf("v.NvPairs.Peer2PortChannelId=%v, c.NvPairs.Peer2PortChannelId=%v", *v.NvPairs.Peer2PortChannelId, *c.NvPairs.Peer2PortChannelId)
+			return RequiresReplace
+		}
+	} else {
+		if !v.NvPairs.Peer2PortChannelId.IsEmpty() {
+			log.Printf("v.NvPairs.Peer2PortChannelId=%v", *v.NvPairs.Peer2PortChannelId)
+			return RequiresReplace
+		} else if !c.NvPairs.Peer2PortChannelId.IsEmpty() {
+			log.Printf("c.NvPairs.Peer2PortChannelId=%v", *c.NvPairs.Peer2PortChannelId)
+			return RequiresReplace
+		}
+	}
 
 	if cf {
 		return ControlFlagUpdate
@@ -402,9 +495,6 @@ func (v *NDFCInterfacesValue) CreatePlan(c NDFCInterfacesValue, cf *bool) int {
 		log.Printf("Copy from State: c.NvPairs.AccessVlan=%v", *c.NvPairs.AccessVlan)
 		v.NvPairs.AccessVlan = new(Int64Custom)
 		*v.NvPairs.AccessVlan = *c.NvPairs.AccessVlan
-		if action == ActionNone || action == RequiresUpdate {
-			action = RequiresUpdate
-		}
 	}
 
 	if v.NvPairs.OrphanPort != c.NvPairs.OrphanPort {
@@ -483,9 +573,6 @@ func (v *NDFCInterfacesValue) CreatePlan(c NDFCInterfacesValue, cf *bool) int {
 		log.Printf("Copy from State: c.NvPairs.NativeVlan=%v", *c.NvPairs.NativeVlan)
 		v.NvPairs.NativeVlan = new(Int64Custom)
 		*v.NvPairs.NativeVlan = *c.NvPairs.NativeVlan
-		if action == ActionNone || action == RequiresUpdate {
-			action = RequiresUpdate
-		}
 	}
 
 	if v.NvPairs.Ipv4PrefixLength != "" {
@@ -544,9 +631,6 @@ func (v *NDFCInterfacesValue) CreatePlan(c NDFCInterfacesValue, cf *bool) int {
 		log.Printf("Copy from State: c.NvPairs.HsrpGroup=%v", *c.NvPairs.HsrpGroup)
 		v.NvPairs.HsrpGroup = new(Int64Custom)
 		*v.NvPairs.HsrpGroup = *c.NvPairs.HsrpGroup
-		if action == ActionNone || action == RequiresUpdate {
-			action = RequiresUpdate
-		}
 	}
 
 	if v.NvPairs.HsrpVip != "" {
@@ -578,9 +662,6 @@ func (v *NDFCInterfacesValue) CreatePlan(c NDFCInterfacesValue, cf *bool) int {
 		log.Printf("Copy from State: c.NvPairs.HsrpPriority=%v", *c.NvPairs.HsrpPriority)
 		v.NvPairs.HsrpPriority = new(Int64Custom)
 		*v.NvPairs.HsrpPriority = *c.NvPairs.HsrpPriority
-		if action == ActionNone || action == RequiresUpdate {
-			action = RequiresUpdate
-		}
 	}
 
 	if v.NvPairs.HsrpVersion != "" {
@@ -732,6 +813,182 @@ func (v *NDFCInterfacesValue) CreatePlan(c NDFCInterfacesValue, cf *bool) int {
 		//v empty, fill with c
 		log.Printf("Copy from state: v.NvPairs.MemberInterfaces=%v, c.NvPairs.MemberInterfaces=%v", v.NvPairs.MemberInterfaces, c.NvPairs.MemberInterfaces)
 		v.NvPairs.MemberInterfaces = c.NvPairs.MemberInterfaces
+	}
+
+	if v.NvPairs.Peer1PoFreeformConfig != "" {
+		if v.NvPairs.Peer1PoFreeformConfig != c.NvPairs.Peer1PoFreeformConfig {
+			log.Printf("Update: v.NvPairs.Peer1PoFreeformConfig=%v, c.NvPairs.Peer1PoFreeformConfig=%v", v.NvPairs.Peer1PoFreeformConfig, c.NvPairs.Peer1PoFreeformConfig)
+			if action == ActionNone || action == RequiresUpdate {
+				action = RequiresUpdate
+			}
+		}
+	} else {
+		//v empty, fill with c
+		log.Printf("Copy from state: v.NvPairs.Peer1PoFreeformConfig=%v, c.NvPairs.Peer1PoFreeformConfig=%v", v.NvPairs.Peer1PoFreeformConfig, c.NvPairs.Peer1PoFreeformConfig)
+		v.NvPairs.Peer1PoFreeformConfig = c.NvPairs.Peer1PoFreeformConfig
+	}
+
+	if v.NvPairs.Peer2PoFreeformConfig != "" {
+		if v.NvPairs.Peer2PoFreeformConfig != c.NvPairs.Peer2PoFreeformConfig {
+			log.Printf("Update: v.NvPairs.Peer2PoFreeformConfig=%v, c.NvPairs.Peer2PoFreeformConfig=%v", v.NvPairs.Peer2PoFreeformConfig, c.NvPairs.Peer2PoFreeformConfig)
+			if action == ActionNone || action == RequiresUpdate {
+				action = RequiresUpdate
+			}
+		}
+	} else {
+		//v empty, fill with c
+		log.Printf("Copy from state: v.NvPairs.Peer2PoFreeformConfig=%v, c.NvPairs.Peer2PoFreeformConfig=%v", v.NvPairs.Peer2PoFreeformConfig, c.NvPairs.Peer2PoFreeformConfig)
+		v.NvPairs.Peer2PoFreeformConfig = c.NvPairs.Peer2PoFreeformConfig
+	}
+
+	if v.NvPairs.Peer1PoDescription != "" {
+		if v.NvPairs.Peer1PoDescription != c.NvPairs.Peer1PoDescription {
+			log.Printf("Update: v.NvPairs.Peer1PoDescription=%v, c.NvPairs.Peer1PoDescription=%v", v.NvPairs.Peer1PoDescription, c.NvPairs.Peer1PoDescription)
+			if action == ActionNone || action == RequiresUpdate {
+				action = RequiresUpdate
+			}
+		}
+	} else {
+		//v empty, fill with c
+		log.Printf("Copy from state: v.NvPairs.Peer1PoDescription=%v, c.NvPairs.Peer1PoDescription=%v", v.NvPairs.Peer1PoDescription, c.NvPairs.Peer1PoDescription)
+		v.NvPairs.Peer1PoDescription = c.NvPairs.Peer1PoDescription
+	}
+
+	if v.NvPairs.Peer2PoDescription != "" {
+		if v.NvPairs.Peer2PoDescription != c.NvPairs.Peer2PoDescription {
+			log.Printf("Update: v.NvPairs.Peer2PoDescription=%v, c.NvPairs.Peer2PoDescription=%v", v.NvPairs.Peer2PoDescription, c.NvPairs.Peer2PoDescription)
+			if action == ActionNone || action == RequiresUpdate {
+				action = RequiresUpdate
+			}
+		}
+	} else {
+		//v empty, fill with c
+		log.Printf("Copy from state: v.NvPairs.Peer2PoDescription=%v, c.NvPairs.Peer2PoDescription=%v", v.NvPairs.Peer2PoDescription, c.NvPairs.Peer2PoDescription)
+		v.NvPairs.Peer2PoDescription = c.NvPairs.Peer2PoDescription
+	}
+
+	if v.NvPairs.Peer1AllowedVlans != "" {
+		if v.NvPairs.Peer1AllowedVlans != c.NvPairs.Peer1AllowedVlans {
+			log.Printf("Update: v.NvPairs.Peer1AllowedVlans=%v, c.NvPairs.Peer1AllowedVlans=%v", v.NvPairs.Peer1AllowedVlans, c.NvPairs.Peer1AllowedVlans)
+			if action == ActionNone || action == RequiresUpdate {
+				action = RequiresUpdate
+			}
+		}
+	} else {
+		//v empty, fill with c
+		log.Printf("Copy from state: v.NvPairs.Peer1AllowedVlans=%v, c.NvPairs.Peer1AllowedVlans=%v", v.NvPairs.Peer1AllowedVlans, c.NvPairs.Peer1AllowedVlans)
+		v.NvPairs.Peer1AllowedVlans = c.NvPairs.Peer1AllowedVlans
+	}
+
+	if v.NvPairs.Peer2AllowedVlans != "" {
+		if v.NvPairs.Peer2AllowedVlans != c.NvPairs.Peer2AllowedVlans {
+			log.Printf("Update: v.NvPairs.Peer2AllowedVlans=%v, c.NvPairs.Peer2AllowedVlans=%v", v.NvPairs.Peer2AllowedVlans, c.NvPairs.Peer2AllowedVlans)
+			if action == ActionNone || action == RequiresUpdate {
+				action = RequiresUpdate
+			}
+		}
+	} else {
+		//v empty, fill with c
+		log.Printf("Copy from state: v.NvPairs.Peer2AllowedVlans=%v, c.NvPairs.Peer2AllowedVlans=%v", v.NvPairs.Peer2AllowedVlans, c.NvPairs.Peer2AllowedVlans)
+		v.NvPairs.Peer2AllowedVlans = c.NvPairs.Peer2AllowedVlans
+	}
+
+	if !v.NvPairs.Peer1NativeVlan.IsEmpty() && !c.NvPairs.Peer1NativeVlan.IsEmpty() {
+		if *v.NvPairs.Peer1NativeVlan != *c.NvPairs.Peer1NativeVlan {
+			log.Printf("Update: v.NvPairs.Peer1NativeVlan=%v, c.NvPairs.Peer1NativeVlan=%v", *v.NvPairs.Peer1NativeVlan, *c.NvPairs.Peer1NativeVlan)
+			if action == ActionNone || action == RequiresUpdate {
+				action = RequiresUpdate
+			}
+		}
+	} else if !v.NvPairs.Peer1NativeVlan.IsEmpty() {
+		log.Printf("Update: v.NvPairs.Peer1NativeVlan=%v", *v.NvPairs.Peer1NativeVlan)
+		if action == ActionNone || action == RequiresUpdate {
+			action = RequiresUpdate
+		}
+	} else if !c.NvPairs.Peer1NativeVlan.IsEmpty() {
+		log.Printf("Copy from State: c.NvPairs.Peer1NativeVlan=%v", *c.NvPairs.Peer1NativeVlan)
+		v.NvPairs.Peer1NativeVlan = new(Int64Custom)
+		*v.NvPairs.Peer1NativeVlan = *c.NvPairs.Peer1NativeVlan
+	}
+
+	if !v.NvPairs.Peer2NativeVlan.IsEmpty() && !c.NvPairs.Peer2NativeVlan.IsEmpty() {
+		if *v.NvPairs.Peer2NativeVlan != *c.NvPairs.Peer2NativeVlan {
+			log.Printf("Update: v.NvPairs.Peer2NativeVlan=%v, c.NvPairs.Peer2NativeVlan=%v", *v.NvPairs.Peer2NativeVlan, *c.NvPairs.Peer2NativeVlan)
+			if action == ActionNone || action == RequiresUpdate {
+				action = RequiresUpdate
+			}
+		}
+	} else if !v.NvPairs.Peer2NativeVlan.IsEmpty() {
+		log.Printf("Update: v.NvPairs.Peer2NativeVlan=%v", *v.NvPairs.Peer2NativeVlan)
+		if action == ActionNone || action == RequiresUpdate {
+			action = RequiresUpdate
+		}
+	} else if !c.NvPairs.Peer2NativeVlan.IsEmpty() {
+		log.Printf("Copy from State: c.NvPairs.Peer2NativeVlan=%v", *c.NvPairs.Peer2NativeVlan)
+		v.NvPairs.Peer2NativeVlan = new(Int64Custom)
+		*v.NvPairs.Peer2NativeVlan = *c.NvPairs.Peer2NativeVlan
+	}
+
+	if v.NvPairs.Peer1MemberInterfaces != "" {
+		if v.NvPairs.Peer1MemberInterfaces != c.NvPairs.Peer1MemberInterfaces {
+			log.Printf("Update: v.NvPairs.Peer1MemberInterfaces=%v, c.NvPairs.Peer1MemberInterfaces=%v", v.NvPairs.Peer1MemberInterfaces, c.NvPairs.Peer1MemberInterfaces)
+			if action == ActionNone || action == RequiresUpdate {
+				action = RequiresUpdate
+			}
+		}
+	} else {
+		//v empty, fill with c
+		log.Printf("Copy from state: v.NvPairs.Peer1MemberInterfaces=%v, c.NvPairs.Peer1MemberInterfaces=%v", v.NvPairs.Peer1MemberInterfaces, c.NvPairs.Peer1MemberInterfaces)
+		v.NvPairs.Peer1MemberInterfaces = c.NvPairs.Peer1MemberInterfaces
+	}
+
+	if v.NvPairs.Peer2MemberInterfaces != "" {
+		if v.NvPairs.Peer2MemberInterfaces != c.NvPairs.Peer2MemberInterfaces {
+			log.Printf("Update: v.NvPairs.Peer2MemberInterfaces=%v, c.NvPairs.Peer2MemberInterfaces=%v", v.NvPairs.Peer2MemberInterfaces, c.NvPairs.Peer2MemberInterfaces)
+			if action == ActionNone || action == RequiresUpdate {
+				action = RequiresUpdate
+			}
+		}
+	} else {
+		//v empty, fill with c
+		log.Printf("Copy from state: v.NvPairs.Peer2MemberInterfaces=%v, c.NvPairs.Peer2MemberInterfaces=%v", v.NvPairs.Peer2MemberInterfaces, c.NvPairs.Peer2MemberInterfaces)
+		v.NvPairs.Peer2MemberInterfaces = c.NvPairs.Peer2MemberInterfaces
+	}
+
+	if v.NvPairs.Peer1PortChannelId != nil && c.NvPairs.Peer1PortChannelId != nil {
+		if *v.NvPairs.Peer1PortChannelId != *c.NvPairs.Peer1PortChannelId {
+			if action == ActionNone || action == RequiresUpdate {
+				action = RequiresReplace
+			}
+			log.Printf("Update: v.NvPairs.Peer1PortChannelId=%v, c.NvPairs.Peer1PortChannelId=%v", *v.NvPairs.Peer1PortChannelId, *c.NvPairs.Peer1PortChannelId)
+		}
+	} else if v.NvPairs.Peer1PortChannelId != nil {
+		log.Printf("Update: v.NvPairs.Peer1PortChannelId=%v, c.NvPairs.Peer1PortChannelId=nil", *v.NvPairs.Peer1PortChannelId)
+		if action == ActionNone || action == RequiresUpdate {
+			action = RequiresReplace
+		}
+	} else if c.NvPairs.Peer1PortChannelId != nil {
+		v.NvPairs.Peer1PortChannelId = new(int64)
+		log.Printf("Copy from state: v.NvPairs.Peer1PortChannelId=nil, c.NvPairs.Peer1PortChannelId=%v", *c.NvPairs.Peer1PortChannelId)
+		*v.NvPairs.Peer1PortChannelId = *c.NvPairs.Peer1PortChannelId
+	}
+
+	if !v.NvPairs.Peer2PortChannelId.IsEmpty() && !c.NvPairs.Peer2PortChannelId.IsEmpty() {
+		if *v.NvPairs.Peer2PortChannelId != *c.NvPairs.Peer2PortChannelId {
+			log.Printf("Update: v.NvPairs.Peer2PortChannelId=%v, c.NvPairs.Peer2PortChannelId=%v", *v.NvPairs.Peer2PortChannelId, *c.NvPairs.Peer2PortChannelId)
+			if action == ActionNone || action == RequiresUpdate {
+				action = RequiresReplace
+			}
+		}
+	} else if !v.NvPairs.Peer2PortChannelId.IsEmpty() {
+		log.Printf("Update: v.NvPairs.Peer2PortChannelId=%v", *v.NvPairs.Peer2PortChannelId)
+		if action == ActionNone || action == RequiresUpdate {
+			action = RequiresReplace
+		}
+	} else if !c.NvPairs.Peer2PortChannelId.IsEmpty() {
+		log.Printf("Copy from State: c.NvPairs.Peer2PortChannelId=%v", *c.NvPairs.Peer2PortChannelId)
+		v.NvPairs.Peer2PortChannelId = new(Int64Custom)
+		*v.NvPairs.Peer2PortChannelId = *c.NvPairs.Peer2PortChannelId
 	}
 
 	return action

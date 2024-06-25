@@ -121,6 +121,13 @@ resource:
         description: Route map tag
         example: my_route_map
         default_value: 12345
+      - model_name: deployment_status
+        tf_name: deployment_status
+        type: String
+        description: "Status of the deployment"
+        example: "success"
+        computed: true
+        payload_hide: true
 
 
       

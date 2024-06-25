@@ -65,7 +65,7 @@ resource:
         description: "Name of the Interface. Example: `Ethernet1/3`"
         example: Ethernet1/13
         mandatory: true
-        validator: RegexMatches(regexp.MustCompile(`^port-channel\d+`), "Must be port-channelX where X is the Channel ID")
+        validator: RegexMatches(regexp.MustCompile(`^port-channel\d+`), "Must be port-channelX (all lowercase) where X is the Channel ID")
         requires_replace: true
       - &ifType
         model_name: interfaceType
@@ -182,6 +182,7 @@ resource:
         example: 1
         exclude_test: true
         handle_empty: true
+        validator: Between(1, 4094)
       - model_name: COPY_DESC
         ndfc_nested: [nvPairs]
         tf_name: copy_po_description
@@ -203,5 +204,12 @@ resource:
         type: String
         description: Member interfaces
         example: "eth1/1-10"
+      - model_name: deployment_status
+        tf_name: deployment_status
+        type: String
+        description: "Status of the deployment"
+        example: "success"
+        computed: true
+        payload_hide: true
       
      

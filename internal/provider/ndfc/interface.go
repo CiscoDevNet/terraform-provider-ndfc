@@ -4,11 +4,14 @@ import (
 	"context"
 	"fmt"
 	"log"
+	"strings"
+	"time"
 
 	"terraform-provider-ndfc/internal/provider/datasources/datasource_interfaces"
 	"terraform-provider-ndfc/internal/provider/resources/resource_interface_common"
 
 	"github.com/hashicorp/terraform-plugin-framework/diag"
+	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-log/tflog"
 )
 
@@ -41,12 +44,27 @@ func (c NDFC) RscGetInterfaces(ctx context.Context, dg *diag.Diagnostics, in res
 
 	for switchSerial, inList := range ifMap {
 		ifSearchMap := make(map[string]bool)
+		// Get interfaces for each switch
 		ifObj := c.NewInterfaceObject(in.GetInterfaceType(), &c.apiClient, c.GetLock(ResourceInterfaces))
 		ifList := ifObj.GetInterface(ctx, dg, switchSerial, data.Policy)
+
+		// use datasource API to get interface deploy getDeployStatus
+		dsIfModel := datasource_interfaces.NDFCInterfacesModel{}
+		dsIfModel.InterfaceTypes = c.NDFCIfType(in.GetInterfaceType())
+		dsIfModel.SerialNumber = switchSerial
+
+		c.DsGetInterfaces(ctx, dg, &dsIfModel)
+		gotDeployStatus := true
+		if dg.HasError() {
+			tflog.Error(ctx, "Error getting deployment status")
+			gotDeployStatus = false
+			return
+		}
 
 		for i := range inList {
 			ifSearchMap[inList[i]] = true
 		}
+
 		for i := range ifList {
 			if _, ok := ifSearchMap[ifList[i].InterfaceName]; ok {
 
@@ -70,6 +88,39 @@ func (c NDFC) RscGetInterfaces(ctx context.Context, dg *diag.Diagnostics, in res
 				log.Printf("Skip entry: %s", ifList[i].InterfaceName)
 			}
 		}
+		//Search in If Details for deploy status
+		if gotDeployStatus {
+			for i := range dsIfModel.Interfaces {
+				found := false
+				ifName := ""
+				if _, ok := ifSearchMap[dsIfModel.Interfaces[i].InterfaceName]; ok {
+
+					found = true
+					ifName = dsIfModel.Interfaces[i].InterfaceName
+				} else if _, ok := ifSearchMap[strings.ToLower(dsIfModel.Interfaces[i].InterfaceName)]; ok {
+					found = true
+					ifName = strings.ToLower(dsIfModel.Interfaces[i].InterfaceName)
+				}
+				if found {
+					key, ok := keyMap[switchSerial+":"+ifName]
+					if !ok {
+						panic(fmt.Sprintf("Key not found: %s", switchSerial+":"+ifName))
+					}
+					intf, ok := data.Interfaces[key]
+					if !ok {
+						panic(fmt.Sprintf("Key not found: %s", key))
+					}
+					intf.DeploymentStatus = dsIfModel.Interfaces[i].DeploymentStatus
+					data.Interfaces[key] = intf
+					if data.Deploy && intf.DeploymentStatus != "In-Sync" {
+						tflog.Warn(ctx, fmt.Sprintf("Interface %s is not yet in deployed state", intf.InterfaceName))
+						dg.AddWarning(fmt.Sprintf("Interface %s is not yet in deployed state", intf.InterfaceName), "")
+					}
+				} else {
+					fmt.Println("Interface not found: ", dsIfModel.Interfaces[i].InterfaceName)
+				}
+			}
+		}
 	}
 	err := in.SetModelData(&data)
 	if err.HasError() {
@@ -77,7 +128,10 @@ func (c NDFC) RscGetInterfaces(ctx context.Context, dg *diag.Diagnostics, in res
 	}
 }
 
-func (c NDFC) RscCreateInterfaces(ctx context.Context, dg *diag.Diagnostics, in resource_interface_common.InterfaceModel) {
+func (c NDFC) RscCreateInterfaces(ctx context.Context, resp *resource.CreateResponse,
+	in resource_interface_common.InterfaceModel) {
+
+	dg := &resp.Diagnostics
 	// Create API call logic
 	tflog.Debug(ctx, fmt.Sprintf("RscCreateInterfaces: Creating interfaces for type %s", in.GetInterfaceType()))
 	inData := in.GetModelData()
@@ -86,21 +140,25 @@ func (c NDFC) RscCreateInterfaces(ctx context.Context, dg *diag.Diagnostics, in 
 	intfObj := c.NewInterfaceObject(in.GetInterfaceType(), &c.apiClient, c.GetLock(ResourceInterfaces))
 	intfObj.CreateInterface(ctx, dg, inData)
 	if dg.HasError() {
+		in.SetID("")
 		tflog.Error(ctx, "Error creating interfaces")
 		return
 	}
-
 	if inData.Deploy {
 		tflog.Info(ctx, "Deploying interfaces")
 		intfObj.DeployInterface(ctx, dg, inData)
 		if dg.HasError() {
 			tflog.Error(ctx, "Error deploying interfaces")
-			return
 		}
 	}
 	ID, _ := c.IfCreateID(ctx, inData)
 	in.SetID(ID)
+	//NDFC Bug. It takes some time for deploy status to be updated. Delay GET by few seconds
+	log.Printf(" LET the deployed data sync - waiting 5 seconds")
+	time.Sleep(5 * time.Second)
 	c.RscGetInterfaces(ctx, dg, in)
+	dg.Append(resp.State.Set(ctx, in)...)
+
 }
 
 func (c NDFC) RscUpdateInterfaces(ctx context.Context, dg *diag.Diagnostics, unique_id string,
@@ -150,6 +208,9 @@ func (c NDFC) RscUpdateInterfaces(ctx context.Context, dg *diag.Diagnostics, uni
 	if actions["deploy"].(bool) || plan.Deploy {
 		tflog.Info(ctx, "Deploy flag is set  - deploy all interfaces in plan")
 		ifObj.DeployInterface(ctx, dg, plan)
+		if dg.HasError() {
+			tflog.Error(ctx, "Error deploying interfaces")
+		}
 		//c.RscDeployInterfaces(ctx, dg, plan)
 	}
 	/*else {

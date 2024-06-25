@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"log"
+	"strings"
 	"sync"
 	"terraform-provider-ndfc/internal/provider/datasources/datasource_interfaces"
 	"terraform-provider-ndfc/internal/provider/ndfc/api"
@@ -63,6 +64,13 @@ func (c NDFC) NewInterfaceObject(ifType string, client *nd.Client, lock *sync.Mu
 		intf.lock = lock
 		intf.NDFCInterface = intf
 		return intf
+	case "vpc":
+		intf := new(NDFCVPCInterface)
+		intf.client = client
+		intf.lock = lock
+		intf.NDFCInterface = intf
+		return intf
+
 	default:
 		log.Panicf("Interface type not supported: %s", ifType)
 	}
@@ -105,7 +113,6 @@ func (i *NDFCInterfaceCommon) GetInterface(ctx context.Context, diags *diag.Diag
 
 func (i *NDFCInterfaceCommon) DeployInterface(ctx context.Context, dg *diag.Diagnostics,
 	in *resource_interface_common.NDFCInterfaceCommonModel) {
-
 	payload := resource_interface_common.NDFCInterfacesDeploy{}
 	for i := range in.Interfaces {
 		ifEntry := resource_interface_common.NDFCInterfaceDeploy{
@@ -155,6 +162,10 @@ func (i *NDFCInterfaceCommon) getInterfaces(ctx context.Context, diags *diag.Dia
 	err = json.Unmarshal((res), &ifList)
 	if err != nil {
 		diags.AddError("Error unmarshalling data", err.Error())
+		return nil
+	}
+	if len(ifList) == 0 {
+		diags.AddWarning("No interfaces found", "")
 		return nil
 	}
 	return ifList[0].Interfaces
@@ -235,7 +246,8 @@ func (i *NDFCInterfaceCommon) DsGetInterfaceDetails(ctx context.Context, diags *
 	inData *datasource_interfaces.NDFCInterfacesModel) {
 
 	ifApi := api.NewInterfaceAPI(i.lock, i.client)
-	ifApi.SwitchSerial = inData.SerialNumber
+	//For vPC interface serial no is of form <peer-1>~<peer-2>
+	ifApi.SwitchSerial = strings.Split(inData.SerialNumber, "~")[0]
 	ifApi.PortMode = inData.PortModes
 	ifApi.Excludes = inData.Excludes
 	ifApi.IfTypes = inData.InterfaceTypes
