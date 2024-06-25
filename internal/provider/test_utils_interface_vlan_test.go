@@ -135,5 +135,8 @@ func InterfaceVlanInterfacesValueHelperStateCheck(RscName string, c resource_int
 	} else {
 		ret = append(ret, resource.TestCheckResourceAttr(RscName, attrPath.AtName("advertise_subnet_in_underlay").String(), "false"))
 	}
+	if c.DeploymentStatus != "" {
+		ret = append(ret, resource.TestCheckResourceAttr(RscName, attrPath.AtName("deployment_status").String(), c.DeploymentStatus))
+	}
 	return ret
 }

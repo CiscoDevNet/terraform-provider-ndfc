@@ -41,7 +41,11 @@ func ifIdToMap(ID string) map[string][]string {
 	// Convert ID to map logic
 	ifMap := make(map[string][]string)
 	// match - SerialNumber[InterfaceName,InterfaceName],...
-	pattern := `(\w+)\[([\w|\,|\/|-]+)\]`
+	// SerialNumber:
+	//	(\w => [a-zA-Z0-9_])
+	//  ~ => catch vpc serial numbets (a~b)
+	// InterfaceName can have - and /
+	pattern := `([\w|~]+)\[([\w|\,|\/|-]+)\]`
 
 	//str := "ABC123[Eth0,Eth1],DEF456[Vl0,Vl1]"
 
@@ -72,6 +76,10 @@ func (c NDFC) IfTypeSet(inData *resource_interface_common.NDFCInterfaceCommonMod
 		fallthrough
 	case "INTERFACE_PORT_CHANNEL":
 		ifType = "INTERFACE_PORT_CHANNEL"
+	case "vpc":
+		fallthrough
+	case "INTERFACE_VPC":
+		ifType = "INTERFACE_VPC"
 	default:
 		log.Panicf("Interface type not supported: %s", ifType)
 	}
@@ -80,6 +88,34 @@ func (c NDFC) IfTypeSet(inData *resource_interface_common.NDFCInterfaceCommonMod
 		intf.InterfaceType = ifType
 		inData.Interfaces[k] = intf
 	}
+}
+
+func (c NDFC) NDFCIfType(ifType string) string {
+	switch ifType {
+	case "ethernet":
+		fallthrough
+	case "INTERFACE_ETHERNET":
+		ifType = "INTERFACE_ETHERNET"
+	case "loopback":
+		fallthrough
+	case "INTERFACE_LOOPBACK":
+		ifType = "INTERFACE_LOOPBACK"
+	case "vlan":
+		fallthrough
+	case "INTERFACE_VLAN":
+		ifType = "INTERFACE_VLAN"
+	case "portchannel":
+		fallthrough
+	case "INTERFACE_PORT_CHANNEL":
+		ifType = "INTERFACE_PORT_CHANNEL"
+	case "vpc":
+		fallthrough
+	case "INTERFACE_VPC":
+		ifType = "INTERFACE_VPC"
+	default:
+		log.Panicf("Interface type not supported: %s", ifType)
+	}
+	return ifType
 }
 
 // inData - to be sent to NDFC

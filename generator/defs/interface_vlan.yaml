@@ -260,3 +260,10 @@ resource:
         default_value: false
         description: Advertise subnet in underlay
         example: true
+      - model_name: deployment_status
+        tf_name: deployment_status
+        type: String
+        description: "Status of the deployment"
+        example: "success"
+        computed: true
+        payload_hide: true

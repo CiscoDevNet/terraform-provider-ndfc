@@ -73,6 +73,11 @@ func InterfaceEthernetResourceSchema(ctx context.Context) schema.Schema {
 							},
 							Default: stringdefault.StaticString("true"),
 						},
+						"deployment_status": schema.StringAttribute{
+							Computed:            true,
+							Description:         "Status of the deployment",
+							MarkdownDescription: "Status of the deployment",
+						},
 						"freeform_config": schema.StringAttribute{
 							Optional:            true,
 							Description:         "Additional CLI for the interface",
@@ -102,6 +107,9 @@ func InterfaceEthernetResourceSchema(ctx context.Context) schema.Schema {
 							Optional:            true,
 							Description:         "Set native VLAN for the interface",
 							MarkdownDescription: "Set native VLAN for the interface",
+							Validators: []validator.Int64{
+								int64validator.Between(1, 4094),
+							},
 						},
 						"netflow": schema.BoolAttribute{
 							Optional:            true,
@@ -297,6 +305,24 @@ func (t InterfacesType) ValueFromObject(ctx context.Context, in basetypes.Object
 			fmt.Sprintf(`bpdu_guard expected to be basetypes.StringValue, was: %T`, bpduGuardAttribute))
 	}
 
+	deploymentStatusAttribute, ok := attributes["deployment_status"]
+
+	if !ok {
+		diags.AddError(
+			"Attribute Missing",
+			`deployment_status is missing from object`)
+
+		return nil, diags
+	}
+
+	deploymentStatusVal, ok := deploymentStatusAttribute.(basetypes.StringValue)
+
+	if !ok {
+		diags.AddError(
+			"Attribute Wrong Type",
+			fmt.Sprintf(`deployment_status expected to be basetypes.StringValue, was: %T`, deploymentStatusAttribute))
+	}
+
 	freeformConfigAttribute, ok := attributes["freeform_config"]
 
 	if !ok {
@@ -540,6 +566,7 @@ func (t InterfacesType) ValueFromObject(ctx context.Context, in basetypes.Object
 		AdminState:           adminStateVal,
 		AllowedVlans:         allowedVlansVal,
 		BpduGuard:            bpduGuardVal,
+		DeploymentStatus:     deploymentStatusVal,
 		FreeformConfig:       freeformConfigVal,
 		InterfaceDescription: interfaceDescriptionVal,
 		InterfaceName:        interfaceNameVal,
@@ -692,6 +719,24 @@ func NewInterfacesValue(attributeTypes map[string]attr.Type, attributes map[stri
 			fmt.Sprintf(`bpdu_guard expected to be basetypes.StringValue, was: %T`, bpduGuardAttribute))
 	}
 
+	deploymentStatusAttribute, ok := attributes["deployment_status"]
+
+	if !ok {
+		diags.AddError(
+			"Attribute Missing",
+			`deployment_status is missing from object`)
+
+		return NewInterfacesValueUnknown(), diags
+	}
+
+	deploymentStatusVal, ok := deploymentStatusAttribute.(basetypes.StringValue)
+
+	if !ok {
+		diags.AddError(
+			"Attribute Wrong Type",
+			fmt.Sprintf(`deployment_status expected to be basetypes.StringValue, was: %T`, deploymentStatusAttribute))
+	}
+
 	freeformConfigAttribute, ok := attributes["freeform_config"]
 
 	if !ok {
@@ -935,6 +980,7 @@ func NewInterfacesValue(attributeTypes map[string]attr.Type, attributes map[stri
 		AdminState:           adminStateVal,
 		AllowedVlans:         allowedVlansVal,
 		BpduGuard:            bpduGuardVal,
+		DeploymentStatus:     deploymentStatusVal,
 		FreeformConfig:       freeformConfigVal,
 		InterfaceDescription: interfaceDescriptionVal,
 		InterfaceName:        interfaceNameVal,
@@ -1024,6 +1070,7 @@ type InterfacesValue struct {
 	AdminState           basetypes.BoolValue   `tfsdk:"admin_state"`
 	AllowedVlans         basetypes.StringValue `tfsdk:"allowed_vlans"`
 	BpduGuard            basetypes.StringValue `tfsdk:"bpdu_guard"`
+	DeploymentStatus     basetypes.StringValue `tfsdk:"deployment_status"`
 	FreeformConfig       basetypes.StringValue `tfsdk:"freeform_config"`
 	InterfaceDescription basetypes.StringValue `tfsdk:"interface_description"`
 	InterfaceName        basetypes.StringValue `tfsdk:"interface_name"`
@@ -1041,7 +1088,7 @@ type InterfacesValue struct {
 }
 
 func (v InterfacesValue) ToTerraformValue(ctx context.Context) (tftypes.Value, error) {
-	attrTypes := make(map[string]tftypes.Type, 17)
+	attrTypes := make(map[string]tftypes.Type, 18)
 
 	var val tftypes.Value
 	var err error
@@ -1050,6 +1097,7 @@ func (v InterfacesValue) ToTerraformValue(ctx context.Context) (tftypes.Value, e
 	attrTypes["admin_state"] = basetypes.BoolType{}.TerraformType(ctx)
 	attrTypes["allowed_vlans"] = basetypes.StringType{}.TerraformType(ctx)
 	attrTypes["bpdu_guard"] = basetypes.StringType{}.TerraformType(ctx)
+	attrTypes["deployment_status"] = basetypes.StringType{}.TerraformType(ctx)
 	attrTypes["freeform_config"] = basetypes.StringType{}.TerraformType(ctx)
 	attrTypes["interface_description"] = basetypes.StringType{}.TerraformType(ctx)
 	attrTypes["interface_name"] = basetypes.StringType{}.TerraformType(ctx)
@@ -1068,7 +1116,7 @@ func (v InterfacesValue) ToTerraformValue(ctx context.Context) (tftypes.Value, e
 
 	switch v.state {
 	case attr.ValueStateKnown:
-		vals := make(map[string]tftypes.Value, 17)
+		vals := make(map[string]tftypes.Value, 18)
 
 		val, err = v.AccessVlan.ToTerraformValue(ctx)
 
@@ -1101,6 +1149,14 @@ func (v InterfacesValue) ToTerraformValue(ctx context.Context) (tftypes.Value, e
 		}
 
 		vals["bpdu_guard"] = val
+
+		val, err = v.DeploymentStatus.ToTerraformValue(ctx)
+
+		if err != nil {
+			return tftypes.NewValue(objectType, tftypes.UnknownValue), err
+		}
+
+		vals["deployment_status"] = val
 
 		val, err = v.FreeformConfig.ToTerraformValue(ctx)
 
@@ -1241,6 +1297,7 @@ func (v InterfacesValue) ToObjectValue(ctx context.Context) (basetypes.ObjectVal
 			"admin_state":           basetypes.BoolType{},
 			"allowed_vlans":         basetypes.StringType{},
 			"bpdu_guard":            basetypes.StringType{},
+			"deployment_status":     basetypes.StringType{},
 			"freeform_config":       basetypes.StringType{},
 			"interface_description": basetypes.StringType{},
 			"interface_name":        basetypes.StringType{},
@@ -1260,6 +1317,7 @@ func (v InterfacesValue) ToObjectValue(ctx context.Context) (basetypes.ObjectVal
 			"admin_state":           v.AdminState,
 			"allowed_vlans":         v.AllowedVlans,
 			"bpdu_guard":            v.BpduGuard,
+			"deployment_status":     v.DeploymentStatus,
 			"freeform_config":       v.FreeformConfig,
 			"interface_description": v.InterfaceDescription,
 			"interface_name":        v.InterfaceName,
@@ -1306,6 +1364,10 @@ func (v InterfacesValue) Equal(o attr.Value) bool {
 	}
 
 	if !v.BpduGuard.Equal(other.BpduGuard) {
+		return false
+	}
+
+	if !v.DeploymentStatus.Equal(other.DeploymentStatus) {
 		return false
 	}
 
@@ -1378,6 +1440,7 @@ func (v InterfacesValue) AttributeTypes(ctx context.Context) map[string]attr.Typ
 		"admin_state":           basetypes.BoolType{},
 		"allowed_vlans":         basetypes.StringType{},
 		"bpdu_guard":            basetypes.StringType{},
+		"deployment_status":     basetypes.StringType{},
 		"freeform_config":       basetypes.StringType{},
 		"interface_description": basetypes.StringType{},
 		"interface_name":        basetypes.StringType{},

@@ -104,5 +104,8 @@ func InterfaceEthernetInterfacesValueHelperStateCheck(RscName string, c resource
 	if c.NvPairs.NativeVlan != nil {
 		ret = append(ret, resource.TestCheckResourceAttr(RscName, attrPath.AtName("native_vlan").String(), strconv.Itoa(int(*c.NvPairs.NativeVlan))))
 	}
+	if c.DeploymentStatus != "" {
+		ret = append(ret, resource.TestCheckResourceAttr(RscName, attrPath.AtName("deployment_status").String(), c.DeploymentStatus))
+	}
 	return ret
 }

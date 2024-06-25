@@ -365,9 +365,6 @@ func (v *NDFCNetworksValue) CreatePlan(c NDFCNetworksValue, cf *bool) int {
 			log.Printf("Copy from State: c.PrimaryNetworkId=%v", *c.PrimaryNetworkId)
 			v.PrimaryNetworkId = new(Int64Custom)
 			*v.PrimaryNetworkId = *c.PrimaryNetworkId
-			if action == ActionNone || action == RequiresUpdate {
-				action = RequiresUpdate
-			}
 		}
 	}
 	if v.NetworkType != "" {
@@ -427,9 +424,6 @@ func (v *NDFCNetworksValue) CreatePlan(c NDFCNetworksValue, cf *bool) int {
 		log.Printf("Copy from State: c.NetworkTemplateConfig.VlanId=%v", *c.NetworkTemplateConfig.VlanId)
 		v.NetworkTemplateConfig.VlanId = new(Int64Custom)
 		*v.NetworkTemplateConfig.VlanId = *c.NetworkTemplateConfig.VlanId
-		if action == ActionNone || action == RequiresUpdate {
-			action = RequiresUpdate
-		}
 	}
 
 	if v.NetworkTemplateConfig.VlanName != "" {
@@ -481,9 +475,6 @@ func (v *NDFCNetworksValue) CreatePlan(c NDFCNetworksValue, cf *bool) int {
 		log.Printf("Copy from State: c.NetworkTemplateConfig.Mtu=%v", *c.NetworkTemplateConfig.Mtu)
 		v.NetworkTemplateConfig.Mtu = new(Int64Custom)
 		*v.NetworkTemplateConfig.Mtu = *c.NetworkTemplateConfig.Mtu
-		if action == ActionNone || action == RequiresUpdate {
-			action = RequiresUpdate
-		}
 	}
 
 	if v.NetworkTemplateConfig.SecondaryGateway1 != "" {
@@ -595,9 +586,6 @@ func (v *NDFCNetworksValue) CreatePlan(c NDFCNetworksValue, cf *bool) int {
 		log.Printf("Copy from State: c.NetworkTemplateConfig.DhcpRelayLoopbackId=%v", *c.NetworkTemplateConfig.DhcpRelayLoopbackId)
 		v.NetworkTemplateConfig.DhcpRelayLoopbackId = new(Int64Custom)
 		*v.NetworkTemplateConfig.DhcpRelayLoopbackId = *c.NetworkTemplateConfig.DhcpRelayLoopbackId
-		if action == ActionNone || action == RequiresUpdate {
-			action = RequiresUpdate
-		}
 	}
 
 	if !v.NetworkTemplateConfig.RoutingTag.IsEmpty() && !c.NetworkTemplateConfig.RoutingTag.IsEmpty() {
@@ -616,9 +604,6 @@ func (v *NDFCNetworksValue) CreatePlan(c NDFCNetworksValue, cf *bool) int {
 		log.Printf("Copy from State: c.NetworkTemplateConfig.RoutingTag=%v", *c.NetworkTemplateConfig.RoutingTag)
 		v.NetworkTemplateConfig.RoutingTag = new(Int64Custom)
 		*v.NetworkTemplateConfig.RoutingTag = *c.NetworkTemplateConfig.RoutingTag
-		if action == ActionNone || action == RequiresUpdate {
-			action = RequiresUpdate
-		}
 	}
 
 	if v.NetworkTemplateConfig.Trm != c.NetworkTemplateConfig.Trm {

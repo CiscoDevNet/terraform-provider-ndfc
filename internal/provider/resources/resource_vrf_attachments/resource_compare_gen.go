@@ -97,9 +97,6 @@ func (v *NDFCAttachListValue) CreatePlan(c NDFCAttachListValue, cf *bool) int {
 			log.Printf("Copy from State: c.Vlan=%v", *c.Vlan)
 			v.Vlan = new(Int64Custom)
 			*v.Vlan = *c.Vlan
-			if action == ActionNone || action == RequiresUpdate {
-				action = RequiresUpdate
-			}
 		}
 	}
 	if v.FreeformConfig != "" {
@@ -138,9 +135,6 @@ func (v *NDFCAttachListValue) CreatePlan(c NDFCAttachListValue, cf *bool) int {
 		log.Printf("Copy from State: c.InstanceValues.LoopbackId=%v", *c.InstanceValues.LoopbackId)
 		v.InstanceValues.LoopbackId = new(Int64Custom)
 		*v.InstanceValues.LoopbackId = *c.InstanceValues.LoopbackId
-		if action == ActionNone || action == RequiresUpdate {
-			action = RequiresUpdate
-		}
 	}
 
 	if v.InstanceValues.LoopbackIpv4 != "" {

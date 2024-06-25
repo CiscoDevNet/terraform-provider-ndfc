@@ -315,9 +315,6 @@ func (v *NDFCVrfsValue) CreatePlan(c NDFCVrfsValue, cf *bool) int {
 		log.Printf("Copy from State: c.VrfTemplateConfig.VlanId=%v", *c.VrfTemplateConfig.VlanId)
 		v.VrfTemplateConfig.VlanId = new(Int64Custom)
 		*v.VrfTemplateConfig.VlanId = *c.VrfTemplateConfig.VlanId
-		if action == ActionNone || action == RequiresUpdate {
-			action = RequiresUpdate
-		}
 	}
 
 	if v.VrfTemplateConfig.VlanName != "" {
@@ -501,9 +498,6 @@ func (v *NDFCVrfsValue) CreatePlan(c NDFCVrfsValue, cf *bool) int {
 		log.Printf("Copy from State: c.VrfTemplateConfig.RpLoopbackId=%v", *c.VrfTemplateConfig.RpLoopbackId)
 		v.VrfTemplateConfig.RpLoopbackId = new(Int64Custom)
 		*v.VrfTemplateConfig.RpLoopbackId = *c.VrfTemplateConfig.RpLoopbackId
-		if action == ActionNone || action == RequiresUpdate {
-			action = RequiresUpdate
-		}
 	}
 
 	if v.VrfTemplateConfig.UnderlayMulticastAddress != "" {

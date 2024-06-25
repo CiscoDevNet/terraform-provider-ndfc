@@ -1,6 +1,6 @@
 ---
 resource: 
-  name: interface_ethernet
+  name: interface_vpc
   generate_tf_resource: true
   parent_package: resource_interface_common
   parent_model: interface_common
@@ -16,10 +16,10 @@ resource:
       model_name: policy
       tf_name: policy
       type: String
-      default_value: int_trunk_host
+      default_value: int_vpc_trunk_host
       tf_requires_replace: true
       description: "Name of the policy. Examples: `int_trunk_host`, `int_access_host`"
-      example: int_access_host
+      example: int_port_channel_trunk_host
     - model_name: deploy
       tf_name: deploy
       type: Bool
@@ -62,9 +62,10 @@ resource:
         model_name: ifName
         tf_name: interface_name
         type: String
-        description: "Name of the Interface. Example: `Ethernet1/3`"
-        example: Ethernet1/13
+        description: "Name of the Interface. Example: `vPC0`"
+        example: vpc0
         mandatory: true
+        validator: RegexMatches(regexp.MustCompile(`^vPC\d+`), "Must be vPC<X> where X is the vPC ID")
         requires_replace: true
       - &ifType
         model_name: interfaceType
@@ -73,33 +74,18 @@ resource:
         type: String
         description: "Type of interface. Examples: `ethernet`, `port-channel`"
         example: ethernet
-        validator: OneOf("ethernet", "port-channel", "loopback", "vlan", "mgmt", "port-channel-sub")
       - <<: *ifName
         tf_hide: true
         payload_hide: false
         model_name: INTF_NAME
         ndfc_nested: [nvPairs]
-      - model_name: CONF
-        ndfc_nested: [nvPairs]
-        tf_name: freeform_config
-        type: String
-        description: Additional CLI for the interface
-        default_value: ""
-        example: delay 200
       - model_name: ADMIN_STATE
         ndfc_nested: [nvPairs]
         tf_name: admin_state
         type: Bool
-        model_type_string: true
         default_value: true
         description: Enable or disable the interface
         example: false
-      - model_name: DESC
-        ndfc_nested: [nvPairs]
-        tf_name: interface_description
-        type: String
-        description: Interface description
-        example: My interface description
       - model_name: BPDUGUARD_ENABLED
         ndfc_nested: [nvPairs]
         tf_name: bpdu_guard
@@ -113,7 +99,6 @@ resource:
         ndfc_nested: [nvPairs]
         tf_name: port_type_fast
         type: Bool
-        model_type_string: true
         default_value: true
         description: Enable spanning-tree edge port behavior
         example: false
@@ -135,39 +120,10 @@ resource:
         default_value: Auto
         description: Interface speed
         example: Auto
-      - model_name: ACCESS_VLAN
-        ndfc_nested: [nvPairs]
-        tf_name: access_vlan
-        type: Int64
-        ndfc_type: string
-        model_type_string: true
-        min_int: 1
-        max_int: 4094
-        validator: Between(1, 4094)
-        description: Access VLAN ID
-        example: 500
-        handle_empty: true
-      - model_name: ENABLE_ORPHAN_PORT
-        ndfc_nested: [nvPairs]
-        tf_name: orphan_port
-        type: Bool
-        model_type_string: true
-        default_value: false
-        description: If enabled, configure the interface as a vPC orphan port to be suspended by the secondary peer in vPC failures
-        example: false
-      - model_name: PTP
-        ndfc_nested: [nvPairs]
-        tf_name: ptp
-        type: Bool
-        model_type_string: true
-        default_value: false
-        description: Enable PTP
-        example: false
       - model_name: ENABLE_NETFLOW
         ndfc_nested: [nvPairs]
         tf_name: netflow
         type: Bool
-        model_type_string: true
         default_value: false
         description: Netflow is supported only if it is enabled on fabric
         example: false
@@ -187,26 +143,133 @@ resource:
         example: SAMPLER1
         exclude_test: true
         default_value: ""
-      - model_name: ALLOWED_VLANS
+      - model_name: COPY_DESC
         ndfc_nested: [nvPairs]
-        tf_name: allowed_vlans
+        tf_name: copy_po_description
+        type: Bool
+        default_value: false
+        description: Netflow is supported only if it is enabled on fabric
+        example: false
+      - model_name: PC_MODE
+        ndfc_nested: [nvPairs]
+        tf_name: portchannel_mode
+        type: String
+        validator: OneOf("on","active","passive")
+        default_value: "on"
+        description: Port-channel mode
+        example: on
+      - model_name: ENABLE_MIRROR_CONFIG
+        ndfc_nested: [nvPairs]
+        tf_name: mirror_config
+        tf_hide: true
+        type: Bool
+        description: Enable mirror configuration
+        example: true
+      - model_name: PEER1_PO_CONF
+        ndfc_nested: [nvPairs]
+        tf_name: peer1_po_freeform_config
+        type: String
+        description: Additional CLI for the interface
+        default_value: ""
+        example: delay 200
+        include_empty: true
+      - model_name: PEER2_PO_CONF
+        ndfc_nested: [nvPairs]
+        tf_name: peer2_po_freeform_config
+        type: String
+        description: Additional CLI for the interface
+        default_value: ""
+        example: delay 200
+        include_empty: true
+      - model_name: PEER1_PO_DESC
+        ndfc_nested: [nvPairs]
+        tf_name: peer1_po_description
+        type: String
+        description: Interface description
+        example: My interface description
+        include_empty: true
+      - model_name: PEER2_PO_DESC
+        ndfc_nested: [nvPairs]
+        tf_name: peer2_po_description
+        type: String
+        description: Interface description
+        example: My interface description
+        include_empty: true
+      - model_name: PEER1_ALLOWED_VLANS
+        ndfc_nested: [nvPairs]
+        tf_name: peer1_allowed_vlans
         type: String
         description: Allowed vlans for the ethernet interface. Allowed values are `none`, `all` or VLAN ranges (1-200,500-2000,3000)
         example: 10-20
         default_value: "none"
-      - model_name: NATIVE_VLAN
+      - model_name: PEER2_ALLOWED_VLANS
         ndfc_nested: [nvPairs]
-        tf_name: native_vlan
+        tf_name: peer2_allowed_vlans
+        type: String
+        description: Allowed vlans for the ethernet interface. Allowed values are `none`, `all` or VLAN ranges (1-200,500-2000,3000)
+        example: 10-20
+        default_value: "none"
+      - model_name: PEER1_NATIVE_VLAN
+        ndfc_nested: [nvPairs]
+        tf_name: peer1_native_vlan
         type: Int64
-        model_type_string: true
         min_int: 1
         max_int: 4094
-        ndfc_type: string
         description: Set native VLAN for the interface
         example: 1
         exclude_test: true
         handle_empty: true
         validator: Between(1, 4094)
+      - model_name: PEER2_NATIVE_VLAN
+        ndfc_nested: [nvPairs]
+        tf_name: peer2_native_vlan
+        type: Int64
+        min_int: 1
+        max_int: 4094
+        description: Set native VLAN for the interface
+        example: 1
+        exclude_test: true
+        handle_empty: true
+        validator: Between(1, 4094)
+      - model_name: PEER1_MEMBER_INTERFACES
+        ndfc_nested: [nvPairs]
+        tf_name: peer1_member_interfaces
+        type: String
+        description: Member interfaces
+        example: "eth1/1-10"
+        mandatory: true
+      - model_name: PEER2_MEMBER_INTERFACES
+        ndfc_nested: [nvPairs]
+        tf_name: peer2_member_interfaces
+        type: String
+        description: Member interfaces
+        example: "eth1/1-10"
+      - model_name: PEER1_PCID
+        ndfc_nested: [nvPairs]
+        tf_name: peer1_port_channel_id
+        type: Int64
+        min_int: 1
+        max_int: 4094
+        ndfc_type: string
+        description: Port channel ID
+        example: 1
+        exclude_test: true
+        mandatory: true
+        requires_replace: true
+      - model_name: PEER2_PCID
+        ndfc_nested: [nvPairs]
+        tf_name: peer2_port_channel_id
+        type: Int64
+        min_int: 1
+        max_int: 4094
+        ndfc_type: string
+        description: Port channel ID
+        example: 1
+        exclude_test: true
+        handle_empty: true
+        optional: true
+        computed: true
+        requires_replace: true
       - model_name: deployment_status
         tf_name: deployment_status
         type: String
@@ -214,4 +277,7 @@ resource:
         example: "success"
         computed: true
         payload_hide: true
+      
+      
+      
      

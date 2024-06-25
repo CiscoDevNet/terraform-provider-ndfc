@@ -11,5 +11,9 @@ func (i *InterfaceVlanModel) GetID() string {
 }
 
 func (i *InterfaceVlanModel) SetID(id string) {
+	if id == "" {
+		i.Id = types.StringNull()
+		return
+	}
 	i.Id = types.StringValue(id)
 }

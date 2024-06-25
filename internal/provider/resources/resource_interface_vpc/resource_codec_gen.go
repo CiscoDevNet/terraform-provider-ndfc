@@ -1,5 +1,5 @@
 // Code generated DO NOT EDIT.
-package resource_interface_portchannel
+package resource_interface_vpc
 
 import (
 	"context"
@@ -14,7 +14,7 @@ import (
 	"terraform-provider-ndfc/internal/provider/resources/resource_interface_common"
 )
 
-func (v *InterfacePortchannelModel) SetModelData(jsonData *resource_interface_common.NDFCInterfaceCommonModel) diag.Diagnostics {
+func (v *InterfaceVpcModel) SetModelData(jsonData *resource_interface_common.NDFCInterfaceCommonModel) diag.Diagnostics {
 	var err diag.Diagnostics
 	err = nil
 
@@ -77,23 +77,11 @@ func (v *InterfacesValue) SetValue(jsonData *resource_interface_common.NDFCInter
 		v.InterfaceName = types.StringNull()
 	}
 
-	if jsonData.NvPairs.FreeformConfig != "" {
-		v.FreeformConfig = types.StringValue(jsonData.NvPairs.FreeformConfig)
-	} else {
-		v.FreeformConfig = types.StringNull()
-	}
-
 	if jsonData.NvPairs.AdminState != "" {
 		x, _ := strconv.ParseBool(jsonData.NvPairs.AdminState)
 		v.AdminState = types.BoolValue(x)
 	} else {
 		v.AdminState = types.BoolNull()
-	}
-
-	if jsonData.NvPairs.InterfaceDescription != "" {
-		v.InterfaceDescription = types.StringValue(jsonData.NvPairs.InterfaceDescription)
-	} else {
-		v.InterfaceDescription = types.StringNull()
 	}
 
 	if jsonData.NvPairs.BpduGuard != "" {
@@ -121,13 +109,6 @@ func (v *InterfacesValue) SetValue(jsonData *resource_interface_common.NDFCInter
 		v.Speed = types.StringNull()
 	}
 
-	if jsonData.NvPairs.OrphanPort != "" {
-		x, _ := strconv.ParseBool(jsonData.NvPairs.OrphanPort)
-		v.OrphanPort = types.BoolValue(x)
-	} else {
-		v.OrphanPort = types.BoolNull()
-	}
-
 	if jsonData.NvPairs.Netflow != "" {
 		x, _ := strconv.ParseBool(jsonData.NvPairs.Netflow)
 		v.Netflow = types.BoolValue(x)
@@ -147,23 +128,6 @@ func (v *InterfacesValue) SetValue(jsonData *resource_interface_common.NDFCInter
 		v.NetflowSampler = types.StringNull()
 	}
 
-	if jsonData.NvPairs.AllowedVlans != "" {
-		v.AllowedVlans = types.StringValue(jsonData.NvPairs.AllowedVlans)
-	} else {
-		v.AllowedVlans = types.StringNull()
-	}
-
-	if jsonData.NvPairs.NativeVlan != nil {
-		if jsonData.NvPairs.NativeVlan.IsEmpty() {
-			v.NativeVlan = types.Int64Null()
-		} else {
-			v.NativeVlan = types.Int64Value(int64(*jsonData.NvPairs.NativeVlan))
-		}
-
-	} else {
-		v.NativeVlan = types.Int64Null()
-	}
-
 	if jsonData.NvPairs.CopyPoDescription != "" {
 		x, _ := strconv.ParseBool(jsonData.NvPairs.CopyPoDescription)
 		v.CopyPoDescription = types.BoolValue(x)
@@ -177,10 +141,92 @@ func (v *InterfacesValue) SetValue(jsonData *resource_interface_common.NDFCInter
 		v.PortchannelMode = types.StringNull()
 	}
 
-	if jsonData.NvPairs.MemberInterfaces != "" {
-		v.MemberInterfaces = types.StringValue(jsonData.NvPairs.MemberInterfaces)
+	if jsonData.NvPairs.Peer1PoFreeformConfig != "" {
+		v.Peer1PoFreeformConfig = types.StringValue(jsonData.NvPairs.Peer1PoFreeformConfig)
 	} else {
-		v.MemberInterfaces = types.StringNull()
+		v.Peer1PoFreeformConfig = types.StringNull()
+	}
+
+	if jsonData.NvPairs.Peer2PoFreeformConfig != "" {
+		v.Peer2PoFreeformConfig = types.StringValue(jsonData.NvPairs.Peer2PoFreeformConfig)
+	} else {
+		v.Peer2PoFreeformConfig = types.StringNull()
+	}
+
+	if jsonData.NvPairs.Peer1PoDescription != "" {
+		v.Peer1PoDescription = types.StringValue(jsonData.NvPairs.Peer1PoDescription)
+	} else {
+		v.Peer1PoDescription = types.StringNull()
+	}
+
+	if jsonData.NvPairs.Peer2PoDescription != "" {
+		v.Peer2PoDescription = types.StringValue(jsonData.NvPairs.Peer2PoDescription)
+	} else {
+		v.Peer2PoDescription = types.StringNull()
+	}
+
+	if jsonData.NvPairs.Peer1AllowedVlans != "" {
+		v.Peer1AllowedVlans = types.StringValue(jsonData.NvPairs.Peer1AllowedVlans)
+	} else {
+		v.Peer1AllowedVlans = types.StringNull()
+	}
+
+	if jsonData.NvPairs.Peer2AllowedVlans != "" {
+		v.Peer2AllowedVlans = types.StringValue(jsonData.NvPairs.Peer2AllowedVlans)
+	} else {
+		v.Peer2AllowedVlans = types.StringNull()
+	}
+
+	if jsonData.NvPairs.Peer1NativeVlan != nil {
+		if jsonData.NvPairs.Peer1NativeVlan.IsEmpty() {
+			v.Peer1NativeVlan = types.Int64Null()
+		} else {
+			v.Peer1NativeVlan = types.Int64Value(int64(*jsonData.NvPairs.Peer1NativeVlan))
+		}
+
+	} else {
+		v.Peer1NativeVlan = types.Int64Null()
+	}
+
+	if jsonData.NvPairs.Peer2NativeVlan != nil {
+		if jsonData.NvPairs.Peer2NativeVlan.IsEmpty() {
+			v.Peer2NativeVlan = types.Int64Null()
+		} else {
+			v.Peer2NativeVlan = types.Int64Value(int64(*jsonData.NvPairs.Peer2NativeVlan))
+		}
+
+	} else {
+		v.Peer2NativeVlan = types.Int64Null()
+	}
+
+	if jsonData.NvPairs.Peer1MemberInterfaces != "" {
+		v.Peer1MemberInterfaces = types.StringValue(jsonData.NvPairs.Peer1MemberInterfaces)
+	} else {
+		v.Peer1MemberInterfaces = types.StringNull()
+	}
+
+	if jsonData.NvPairs.Peer2MemberInterfaces != "" {
+		v.Peer2MemberInterfaces = types.StringValue(jsonData.NvPairs.Peer2MemberInterfaces)
+	} else {
+		v.Peer2MemberInterfaces = types.StringNull()
+	}
+
+	if jsonData.NvPairs.Peer1PortChannelId != nil {
+		v.Peer1PortChannelId = types.Int64Value(*jsonData.NvPairs.Peer1PortChannelId)
+
+	} else {
+		v.Peer1PortChannelId = types.Int64Null()
+	}
+
+	if jsonData.NvPairs.Peer2PortChannelId != nil {
+		if jsonData.NvPairs.Peer2PortChannelId.IsEmpty() {
+			v.Peer2PortChannelId = types.Int64Null()
+		} else {
+			v.Peer2PortChannelId = types.Int64Value(int64(*jsonData.NvPairs.Peer2PortChannelId))
+		}
+
+	} else {
+		v.Peer2PortChannelId = types.Int64Null()
 	}
 
 	if jsonData.DeploymentStatus != "" {
@@ -192,7 +238,7 @@ func (v *InterfacesValue) SetValue(jsonData *resource_interface_common.NDFCInter
 	return err
 }
 
-func (v InterfacePortchannelModel) GetModelData() *resource_interface_common.NDFCInterfaceCommonModel {
+func (v InterfaceVpcModel) GetModelData() *resource_interface_common.NDFCInterfaceCommonModel {
 	var data = new(resource_interface_common.NDFCInterfaceCommonModel)
 
 	//MARSHAL_BODY
@@ -242,28 +288,12 @@ func (v InterfacePortchannelModel) GetModelData() *resource_interface_common.NDF
 
 			// interface_type | String| []| true
 			// interface_name | String| [nvPairs]| true
-			// freeform_config | String| [nvPairs]| false
-			if !ele1.FreeformConfig.IsNull() && !ele1.FreeformConfig.IsUnknown() {
-				//-----inline nested----
-				data1.NvPairs.FreeformConfig = ele1.FreeformConfig.ValueString()
-			} else {
-				data1.NvPairs.FreeformConfig = ""
-			}
-
 			// admin_state | Bool| [nvPairs]| false
 			if !ele1.AdminState.IsNull() && !ele1.AdminState.IsUnknown() {
 				//-----inline nested----
 				data1.NvPairs.AdminState = strconv.FormatBool(ele1.AdminState.ValueBool())
 			} else {
 				data1.NvPairs.AdminState = ""
-			}
-
-			// interface_description | String| [nvPairs]| false
-			if !ele1.InterfaceDescription.IsNull() && !ele1.InterfaceDescription.IsUnknown() {
-				//-----inline nested----
-				data1.NvPairs.InterfaceDescription = ele1.InterfaceDescription.ValueString()
-			} else {
-				data1.NvPairs.InterfaceDescription = ""
 			}
 
 			// bpdu_guard | String| [nvPairs]| false
@@ -298,14 +328,6 @@ func (v InterfacePortchannelModel) GetModelData() *resource_interface_common.NDF
 				data1.NvPairs.Speed = ""
 			}
 
-			// orphan_port | Bool| [nvPairs]| false
-			if !ele1.OrphanPort.IsNull() && !ele1.OrphanPort.IsUnknown() {
-				//-----inline nested----
-				data1.NvPairs.OrphanPort = strconv.FormatBool(ele1.OrphanPort.ValueBool())
-			} else {
-				data1.NvPairs.OrphanPort = ""
-			}
-
 			// netflow | Bool| [nvPairs]| false
 			if !ele1.Netflow.IsNull() && !ele1.Netflow.IsUnknown() {
 				//-----inline nested----
@@ -330,23 +352,6 @@ func (v InterfacePortchannelModel) GetModelData() *resource_interface_common.NDF
 				data1.NvPairs.NetflowSampler = ""
 			}
 
-			// allowed_vlans | String| [nvPairs]| false
-			if !ele1.AllowedVlans.IsNull() && !ele1.AllowedVlans.IsUnknown() {
-				//-----inline nested----
-				data1.NvPairs.AllowedVlans = ele1.AllowedVlans.ValueString()
-			} else {
-				data1.NvPairs.AllowedVlans = ""
-			}
-
-			// native_vlan | Int64| [nvPairs]| false
-			if !ele1.NativeVlan.IsNull() && !ele1.NativeVlan.IsUnknown() {
-				//-----inline nested----
-				data1.NvPairs.NativeVlan = new(Int64Custom)
-				*data1.NvPairs.NativeVlan = Int64Custom(ele1.NativeVlan.ValueInt64())
-			} else {
-				data1.NvPairs.NativeVlan = nil
-			}
-
 			// copy_po_description | Bool| [nvPairs]| false
 			if !ele1.CopyPoDescription.IsNull() && !ele1.CopyPoDescription.IsUnknown() {
 				//-----inline nested----
@@ -363,12 +368,106 @@ func (v InterfacePortchannelModel) GetModelData() *resource_interface_common.NDF
 				data1.NvPairs.PortchannelMode = ""
 			}
 
-			// member_interfaces | String| [nvPairs]| false
-			if !ele1.MemberInterfaces.IsNull() && !ele1.MemberInterfaces.IsUnknown() {
+			// mirror_config | Bool| [nvPairs]| true
+			// peer1_po_freeform_config | String| [nvPairs]| false
+			if !ele1.Peer1PoFreeformConfig.IsNull() && !ele1.Peer1PoFreeformConfig.IsUnknown() {
 				//-----inline nested----
-				data1.NvPairs.MemberInterfaces = ele1.MemberInterfaces.ValueString()
+				data1.NvPairs.Peer1PoFreeformConfig = ele1.Peer1PoFreeformConfig.ValueString()
 			} else {
-				data1.NvPairs.MemberInterfaces = ""
+				data1.NvPairs.Peer1PoFreeformConfig = ""
+			}
+
+			// peer2_po_freeform_config | String| [nvPairs]| false
+			if !ele1.Peer2PoFreeformConfig.IsNull() && !ele1.Peer2PoFreeformConfig.IsUnknown() {
+				//-----inline nested----
+				data1.NvPairs.Peer2PoFreeformConfig = ele1.Peer2PoFreeformConfig.ValueString()
+			} else {
+				data1.NvPairs.Peer2PoFreeformConfig = ""
+			}
+
+			// peer1_po_description | String| [nvPairs]| false
+			if !ele1.Peer1PoDescription.IsNull() && !ele1.Peer1PoDescription.IsUnknown() {
+				//-----inline nested----
+				data1.NvPairs.Peer1PoDescription = ele1.Peer1PoDescription.ValueString()
+			} else {
+				data1.NvPairs.Peer1PoDescription = ""
+			}
+
+			// peer2_po_description | String| [nvPairs]| false
+			if !ele1.Peer2PoDescription.IsNull() && !ele1.Peer2PoDescription.IsUnknown() {
+				//-----inline nested----
+				data1.NvPairs.Peer2PoDescription = ele1.Peer2PoDescription.ValueString()
+			} else {
+				data1.NvPairs.Peer2PoDescription = ""
+			}
+
+			// peer1_allowed_vlans | String| [nvPairs]| false
+			if !ele1.Peer1AllowedVlans.IsNull() && !ele1.Peer1AllowedVlans.IsUnknown() {
+				//-----inline nested----
+				data1.NvPairs.Peer1AllowedVlans = ele1.Peer1AllowedVlans.ValueString()
+			} else {
+				data1.NvPairs.Peer1AllowedVlans = ""
+			}
+
+			// peer2_allowed_vlans | String| [nvPairs]| false
+			if !ele1.Peer2AllowedVlans.IsNull() && !ele1.Peer2AllowedVlans.IsUnknown() {
+				//-----inline nested----
+				data1.NvPairs.Peer2AllowedVlans = ele1.Peer2AllowedVlans.ValueString()
+			} else {
+				data1.NvPairs.Peer2AllowedVlans = ""
+			}
+
+			// peer1_native_vlan | Int64| [nvPairs]| false
+			if !ele1.Peer1NativeVlan.IsNull() && !ele1.Peer1NativeVlan.IsUnknown() {
+				//-----inline nested----
+				data1.NvPairs.Peer1NativeVlan = new(Int64Custom)
+				*data1.NvPairs.Peer1NativeVlan = Int64Custom(ele1.Peer1NativeVlan.ValueInt64())
+			} else {
+				data1.NvPairs.Peer1NativeVlan = nil
+			}
+
+			// peer2_native_vlan | Int64| [nvPairs]| false
+			if !ele1.Peer2NativeVlan.IsNull() && !ele1.Peer2NativeVlan.IsUnknown() {
+				//-----inline nested----
+				data1.NvPairs.Peer2NativeVlan = new(Int64Custom)
+				*data1.NvPairs.Peer2NativeVlan = Int64Custom(ele1.Peer2NativeVlan.ValueInt64())
+			} else {
+				data1.NvPairs.Peer2NativeVlan = nil
+			}
+
+			// peer1_member_interfaces | String| [nvPairs]| false
+			if !ele1.Peer1MemberInterfaces.IsNull() && !ele1.Peer1MemberInterfaces.IsUnknown() {
+				//-----inline nested----
+				data1.NvPairs.Peer1MemberInterfaces = ele1.Peer1MemberInterfaces.ValueString()
+			} else {
+				data1.NvPairs.Peer1MemberInterfaces = ""
+			}
+
+			// peer2_member_interfaces | String| [nvPairs]| false
+			if !ele1.Peer2MemberInterfaces.IsNull() && !ele1.Peer2MemberInterfaces.IsUnknown() {
+				//-----inline nested----
+				data1.NvPairs.Peer2MemberInterfaces = ele1.Peer2MemberInterfaces.ValueString()
+			} else {
+				data1.NvPairs.Peer2MemberInterfaces = ""
+			}
+
+			// peer1_port_channel_id | Int64| [nvPairs]| false
+			if !ele1.Peer1PortChannelId.IsNull() && !ele1.Peer1PortChannelId.IsUnknown() {
+				//-----inline nested----
+				data1.NvPairs.Peer1PortChannelId = new(int64)
+				*data1.NvPairs.Peer1PortChannelId = ele1.Peer1PortChannelId.ValueInt64()
+
+			} else {
+				data1.NvPairs.Peer1PortChannelId = nil
+			}
+
+			// peer2_port_channel_id | Int64| [nvPairs]| false
+			if !ele1.Peer2PortChannelId.IsNull() && !ele1.Peer2PortChannelId.IsUnknown() {
+				//-----inline nested----
+				data1.NvPairs.Peer2PortChannelId = new(Int64Custom)
+				*data1.NvPairs.Peer2PortChannelId = Int64Custom(ele1.Peer2PortChannelId.ValueInt64())
+			} else {
+				data1.NvPairs.Peer2PortChannelId = nil
 			}
 
 			// deployment_status | String| []| false

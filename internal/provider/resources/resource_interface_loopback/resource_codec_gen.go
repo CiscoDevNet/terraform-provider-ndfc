@@ -118,6 +118,12 @@ func (v *InterfacesValue) SetValue(jsonData *resource_interface_common.NDFCInter
 		v.RouteMapTag = types.StringNull()
 	}
 
+	if jsonData.DeploymentStatus != "" {
+		v.DeploymentStatus = types.StringValue(jsonData.DeploymentStatus)
+	} else {
+		v.DeploymentStatus = types.StringNull()
+	}
+
 	return err
 }
 
@@ -227,6 +233,7 @@ func (v InterfaceLoopbackModel) GetModelData() *resource_interface_common.NDFCIn
 				data1.NvPairs.RouteMapTag = ""
 			}
 
+			// deployment_status | String| []| false
 			data.Interfaces[k1] = *data1
 
 		}

@@ -4,37 +4,37 @@ import (
 	"context"
 	"fmt"
 	"terraform-provider-ndfc/internal/provider/ndfc"
-	"terraform-provider-ndfc/internal/provider/resources/resource_interface_ethernet"
+	"terraform-provider-ndfc/internal/provider/resources/resource_interface_vpc"
 
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-log/tflog"
 )
 
-var _ resource.Resource = (*interfaceEthernetResource)(nil)
+var _ resource.Resource = (*interfaceVPCResource)(nil)
 
-func NewInterfaceEthernetResource() resource.Resource {
-	return &interfaceEthernetResource{}
+func NewInterfaceVPCResource() resource.Resource {
+	return &interfaceVPCResource{}
 }
 
-type interfaceEthernetResource struct {
+type interfaceVPCResource struct {
 	client *ndfc.NDFC
 }
 
-func (r *interfaceEthernetResource) Metadata(ctx context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
-	resp.TypeName = req.ProviderTypeName + "_" + ndfc.ResourceEthernetInterface
+func (r *interfaceVPCResource) Metadata(ctx context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
+	resp.TypeName = req.ProviderTypeName + "_" + ndfc.ResourceVPCInterface
 }
 
-func (r *interfaceEthernetResource) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {
-	resp.Schema = resource_interface_ethernet.InterfaceEthernetResourceSchema(ctx)
+func (r *interfaceVPCResource) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {
+	resp.Schema = resource_interface_vpc.InterfaceVpcResourceSchema(ctx)
 }
 
-func (d *interfaceEthernetResource) Configure(ctx context.Context, req resource.ConfigureRequest, resp *resource.ConfigureResponse) {
+func (d *interfaceVPCResource) Configure(ctx context.Context, req resource.ConfigureRequest, resp *resource.ConfigureResponse) {
 	// Prevent panic if the provider has not been configured.
 	if req.ProviderData == nil {
 		return
 	}
-	tflog.Info(ctx, "interfaces Configure")
+	tflog.Info(ctx, "interfaces vpc Configure")
 	client, ok := req.ProviderData.(*ndfc.NDFC)
 	if !ok {
 		resp.Diagnostics.AddError(
@@ -46,8 +46,8 @@ func (d *interfaceEthernetResource) Configure(ctx context.Context, req resource.
 	d.client = client
 }
 
-func (r *interfaceEthernetResource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
-	var in resource_interface_ethernet.InterfaceEthernetModel
+func (r *interfaceVPCResource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
+	var in resource_interface_vpc.InterfaceVpcModel
 	// Read Terraform plan data into the model
 	resp.Diagnostics.Append(req.Plan.Get(ctx, &in)...)
 	if resp.Diagnostics.HasError() {
@@ -60,8 +60,8 @@ func (r *interfaceEthernetResource) Create(ctx context.Context, req resource.Cre
 	r.client.RscCreateInterfaces(ctx, resp, &in)
 }
 
-func (r *interfaceEthernetResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
-	var data resource_interface_ethernet.InterfaceEthernetModel
+func (r *interfaceVPCResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
+	var data resource_interface_vpc.InterfaceVpcModel
 
 	// Read Terraform prior state data into the model
 	resp.Diagnostics.Append(req.State.Get(ctx, &data)...)
@@ -86,11 +86,11 @@ func (r *interfaceEthernetResource) Read(ctx context.Context, req resource.ReadR
 
 }
 
-func (r *interfaceEthernetResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
+func (r *interfaceVPCResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
 
-	var planData resource_interface_ethernet.InterfaceEthernetModel
-	var stateData resource_interface_ethernet.InterfaceEthernetModel
-	var configData resource_interface_ethernet.InterfaceEthernetModel
+	var planData resource_interface_vpc.InterfaceVpcModel
+	var stateData resource_interface_vpc.InterfaceVpcModel
+	var configData resource_interface_vpc.InterfaceVpcModel
 
 	resp.Diagnostics.Append(req.Plan.Get(ctx, &planData)...)
 	resp.Diagnostics.Append(req.State.Get(ctx, &stateData)...)
@@ -117,8 +117,8 @@ func (r *interfaceEthernetResource) Update(ctx context.Context, req resource.Upd
 	resp.Diagnostics.Append(resp.State.Set(ctx, &planData)...)
 }
 
-func (r *interfaceEthernetResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
-	var data resource_interface_ethernet.InterfaceEthernetModel
+func (r *interfaceVPCResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
+	var data resource_interface_vpc.InterfaceVpcModel
 	resp.Diagnostics.Append(req.State.Get(ctx, &data)...)
 
 	if resp.Diagnostics.HasError() {
@@ -137,7 +137,7 @@ func (r *interfaceEthernetResource) Delete(ctx context.Context, req resource.Del
 	}
 	data.Id = types.StringNull()
 	data.Policy = types.StringNull()
-	data.Interfaces = types.MapNull(resource_interface_ethernet.InterfacesValue{}.Type(ctx))
+	data.Interfaces = types.MapNull(resource_interface_vpc.InterfacesValue{}.Type(ctx))
 	resp.Diagnostics.Append(resp.State.Set(ctx, data)...)
 	// Delete API call logic
 }
@@ -145,8 +145,8 @@ func (r *interfaceEthernetResource) Delete(ctx context.Context, req resource.Del
 /* DONOT use the deployment flags at different level at the same time */
 /* use only one at a time */
 /* eg. if global deploy_all_attachments is set, then do not use deploy_attachments or deploy_this_attachment at network/attachment level */
-func (r interfaceEthernetResource) ValidateConfig(ctx context.Context, req resource.ValidateConfigRequest, resp *resource.ValidateConfigResponse) {
-	var data resource_interface_ethernet.InterfaceEthernetModel
+func (r interfaceVPCResource) ValidateConfig(ctx context.Context, req resource.ValidateConfigRequest, resp *resource.ValidateConfigResponse) {
+	var data resource_interface_vpc.InterfaceVpcModel
 
 	resp.Diagnostics.Append(req.Config.Get(ctx, &data)...)
 

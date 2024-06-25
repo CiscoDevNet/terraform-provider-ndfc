@@ -11,5 +11,9 @@ func (i *InterfaceLoopbackModel) GetID() string {
 }
 
 func (i *InterfaceLoopbackModel) SetID(id string) {
+	if id == "" {
+		i.Id = types.StringNull()
+		return
+	}
 	i.Id = types.StringValue(id)
 }
