@@ -89,12 +89,14 @@ resource:
         description: Additional CLI for the interface
         default_value: ""
         example: delay 200
+        include_empty: true
       - model_name: DESC
         ndfc_nested: [nvPairs]
         tf_name: interface_description
         type: String
         description: Interface description
         example: My interface description
+        include_empty: true
       - model_name: INTF_VRF
         ndfc_nested: [nvPairs]
         tf_name: vrf

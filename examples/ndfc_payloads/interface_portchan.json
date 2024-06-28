@@ -1,0 +1,56 @@
+{
+    "policy": "int_port_channel_trunk_host",
+    "interfaceType": "INTERFACE_PORT_CHANNEL",
+    "interfaces": [
+        {
+            "serialNumber": "9FE076D8EJL",
+            "interfaceType": "INTERFACE_PORT_CHANNEL",
+            "fabricName": "test_evpn_vxlan",
+            "ifName": "Port-channel602",
+            "nvPairs": {
+                "MEMBER_INTERFACES": "Ethernet1/37-38",
+                "PC_MODE": "active",
+                "BPDUGUARD_ENABLED": "true",
+                "PORTTYPE_FAST_ENABLED": "true",
+                "MTU": "jumbo",
+                "SPEED": "Auto",
+                "ALLOWED_VLANS": "none",
+                "NATIVE_VLAN": "1001",
+                "DESC": "Port-channel 602 interface",
+                "COPY_DESC": true,
+                "ENABLE_ORPHAN_PORT": false,
+                "CONF": "",
+                "ADMIN_STATE": "true",
+                "ENABLE_NETFLOW": "false",
+                "NETFLOW_MONITOR": "",
+                "NETFLOW_SAMPLER": "",
+                "PO_ID": "Port-channel602"
+            }
+        },
+        {
+            "serialNumber": "9FE076D8EJL",
+            "interfaceType": "INTERFACE_PORT_CHANNEL",
+            "fabricName": "test_evpn_vxlan",
+            "ifName": "Port-channel603",
+            "nvPairs": {
+                "MEMBER_INTERFACES": "Ethernet1/39-40",
+                "PC_MODE": "active",
+                "BPDUGUARD_ENABLED": "true",
+                "PORTTYPE_FAST_ENABLED": "true",
+                "MTU": "jumbo",
+                "SPEED": "Auto",
+                "ALLOWED_VLANS": "none",
+                "NATIVE_VLAN": "1001",
+                "DESC": "Port-channel 603 interface",
+                "COPY_DESC": true,
+                "ENABLE_ORPHAN_PORT": false,
+                "CONF": "",
+                "ADMIN_STATE": "true",
+                "ENABLE_NETFLOW": "false",
+                "NETFLOW_MONITOR": "",
+                "NETFLOW_SAMPLER": "",
+                "PO_ID": "Port-channel603"
+            }
+        }
+    ]
+}

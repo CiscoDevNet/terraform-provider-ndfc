@@ -24,8 +24,8 @@ type NDFCInterfacesValue struct {
 type NDFCNvPairsValue struct {
 	InterfaceName             string       `json:"INTF_NAME,omitempty"`
 	AdminState                string       `json:"ADMIN_STATE,omitempty"`
-	FreeformConfig            string       `json:"CONF,omitempty"`
-	InterfaceDescription      string       `json:"DESC,omitempty"`
+	FreeformConfig            string       `json:"CONF"`
+	InterfaceDescription      string       `json:"DESC"`
 	Vrf                       string       `json:"INTF_VRF,omitempty"`
 	Ipv4Address               string       `json:"IP,omitempty"`
 	Ipv6Address               string       `json:"V6IP,omitempty"`

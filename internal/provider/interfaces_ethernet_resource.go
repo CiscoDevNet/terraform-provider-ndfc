@@ -12,6 +12,7 @@ import (
 )
 
 var _ resource.Resource = (*interfaceEthernetResource)(nil)
+var _ resource.ResourceWithImportState = (*interfaceEthernetResource)(nil)
 
 func NewInterfaceEthernetResource() resource.Resource {
 	return &interfaceEthernetResource{}
@@ -164,5 +165,22 @@ func (r interfaceEthernetResource) ValidateConfig(ctx context.Context, req resou
 	if resp.Diagnostics.HasError() {
 		return
 	}
+
+}
+
+func (r *interfaceEthernetResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
+	var data resource_interface_ethernet.InterfaceEthernetModel
+
+	tflog.Info(ctx, fmt.Sprintf("Import Ethernet Intf Incoming ID %s", req.ID))
+	if req.ID == "" {
+		resp.Diagnostics.AddError("ID cannot be empty for import", "Id is mandatory - State may be corrupted")
+		return
+	}
+	data.Id = types.StringValue(req.ID)
+	r.client.RscImportInterfaces(ctx, &resp.Diagnostics, &data)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+	resp.Diagnostics.Append(resp.State.Set(ctx, data)...)
 
 }
