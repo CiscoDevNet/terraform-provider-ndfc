@@ -8,15 +8,15 @@
         "fabricName": "test_evpn_vxlan",
         "ifName": "vlan1000",
         "nvPairs": {
-          "INTF_VRF": "default", *
-          "IP": "100.1.1.1", *
+          "INTF_VRF": "default", 
+          "IP": "100.1.1.1", 
           "PREFIX": "24",
-          "MTU": "", *
+          "MTU": "", 
           "ROUTING_TAG": "",
           "DISABLE_IP_REDIRECTS": "true",
-          "DESC": "Vlan interface 1000", *
-          "CONF": "", *
-          "ADMIN_STATE": "true", *
+          "DESC": "Vlan interface 1000", 
+          "CONF": "", 
+          "ADMIN_STATE": "true", 
           "ENABLE_HSRP": "",
           "HSRP_VIP": "",
           "HSRP_GROUP": "",
@@ -31,10 +31,10 @@
           "dhcpServerAddr3": "",
           "vrfDhcp3": "",
           "advSubnetInUnderlay": "false",
-          "ENABLE_NETFLOW": "false", *
-          "NETFLOW_MONITOR": "", *
-          "NETFLOW_SAMPLER": "", *
-          "INTF_NAME": "vlan1000" *
+          "ENABLE_NETFLOW": "false",
+          "NETFLOW_MONITOR": "", 
+          "NETFLOW_SAMPLER": "", 
+          "INTF_NAME": "vlan1000" 
         }
       }
     ],

@@ -12,6 +12,7 @@ import (
 )
 
 var _ resource.Resource = (*interfaceVlanResource)(nil)
+var _ resource.ResourceWithImportState = (*interfaceVlanResource)(nil)
 
 func NewInterfaceVlanResource() resource.Resource {
 	return &interfaceVlanResource{}
@@ -164,5 +165,23 @@ func (r interfaceVlanResource) ValidateConfig(ctx context.Context, req resource.
 	if resp.Diagnostics.HasError() {
 		return
 	}
+
+}
+
+func (r *interfaceVlanResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
+
+	var data resource_interface_vlan.InterfaceVlanModel
+
+	tflog.Info(ctx, fmt.Sprintf("Import SVI Intf Incoming ID %s", req.ID))
+	if req.ID == "" {
+		resp.Diagnostics.AddError("ID cannot be empty for import", "Id is mandatory")
+		return
+	}
+	data.Id = types.StringValue(req.ID)
+	r.client.RscImportInterfaces(ctx, &resp.Diagnostics, &data)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+	resp.Diagnostics.Append(resp.State.Set(ctx, data)...)
 
 }

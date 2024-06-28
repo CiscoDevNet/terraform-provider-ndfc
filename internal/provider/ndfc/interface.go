@@ -26,6 +26,18 @@ func (c NDFC) RscGetInterfaces(ctx context.Context, dg *diag.Diagnostics, in res
 		if inData.Interfaces[i].SerialNumber == "" {
 			intf.SerialNumber = inData.SerialNumber
 		}
+		if intf.InterfaceName == "" {
+			dg.AddWarning("State is corrupted", fmt.Sprintf("InterfaceName is empty for entry %s", i))
+			tflog.Error(ctx, fmt.Sprintf("InterfaceName is empty for entry %s", i))
+			continue
+		}
+
+		if intf.SerialNumber == "" {
+			dg.AddWarning("State is corrupted", fmt.Sprintf("SerialNumber is empty for entry %s", i))
+			tflog.Error(ctx, fmt.Sprintf("SerialNumber is empty for entry %s", i))
+			continue
+		}
+
 		keyMap[intf.SerialNumber+":"+intf.InterfaceName] = i
 		log.Printf("Keymap: %s-%s", intf.SerialNumber+":"+intf.InterfaceName, i)
 	}
@@ -73,7 +85,8 @@ func (c NDFC) RscGetInterfaces(ctx context.Context, dg *diag.Diagnostics, in res
 				}
 				key, ok := keyMap[ifList[i].SerialNumber+":"+ifList[i].InterfaceName]
 				if !ok {
-					panic(fmt.Sprintf("Key not found: %s", ifList[i].SerialNumber+":"+ifList[i].InterfaceName))
+					tflog.Error(ctx, fmt.Sprintf("Key not found: %s", ifList[i].SerialNumber+":"+ifList[i].InterfaceName))
+					continue
 				}
 
 				log.Printf("Found entry: key %s entry %s:%s", key, ifList[i].SerialNumber, ifList[i].InterfaceName)
@@ -104,11 +117,12 @@ func (c NDFC) RscGetInterfaces(ctx context.Context, dg *diag.Diagnostics, in res
 				if found {
 					key, ok := keyMap[switchSerial+":"+ifName]
 					if !ok {
-						panic(fmt.Sprintf("Key not found: %s", switchSerial+":"+ifName))
+						tflog.Error(ctx, fmt.Sprintf("key not found for entry: %s", switchSerial+":"+ifName))
+						continue
 					}
 					intf, ok := data.Interfaces[key]
 					if !ok {
-						panic(fmt.Sprintf("Key not found: %s", key))
+						tflog.Error(ctx, fmt.Sprintf("Read Error: Not found in read data %s", key))
 					}
 					intf.DeploymentStatus = dsIfModel.Interfaces[i].DeploymentStatus
 					data.Interfaces[key] = intf
@@ -117,7 +131,7 @@ func (c NDFC) RscGetInterfaces(ctx context.Context, dg *diag.Diagnostics, in res
 						dg.AddWarning(fmt.Sprintf("Interface %s is not yet in deployed state", intf.InterfaceName), "")
 					}
 				} else {
-					fmt.Println("Interface not found: ", dsIfModel.Interfaces[i].InterfaceName)
+					log.Println("Interface not found: ", dsIfModel.Interfaces[i].InterfaceName)
 				}
 			}
 		}
@@ -262,4 +276,134 @@ func (c NDFC) DsGetInterfaces(ctx context.Context, dg *diag.Diagnostics, in *dat
 	ifObj := c.NewInterfaceObject("datasource", &c.apiClient, c.GetLock(ResourceInterfaces))
 	ifObj.(*NDFCInterfaceCommon).DsGetInterfaceDetails(ctx, dg, in)
 
+}
+
+func (c NDFC) RscImportInterfaces(ctx context.Context, dg *diag.Diagnostics, in resource_interface_common.InterfaceModel) {
+	// Import API call logic
+	tflog.Debug(ctx, "RscImportInterfaces: Importing interfaces")
+	// Format 1 => policy:serial1[if1,if2],Serial2[if1,if2] => Selected interfaces
+	// Format 2 => policy:serial => all interfaces in switch with serial
+	ID := in.GetID()
+	IdSplit := strings.Split(ID, ":")
+	if len(IdSplit) != 2 {
+		dg.AddError("Invalid ID", "Policy:Serial or policy:serial[ifName1, ifName2] format is expected from the ID")
+		return
+	}
+	deployFlag := true
+
+	IfData := IdSplit[1]
+	data := resource_interface_common.NDFCInterfaceCommonModel{}
+	data.Interfaces = make(map[string]resource_interface_common.NDFCInterfacesValue)
+	data.Policy = IdSplit[0]
+	log.Printf("Policy %s, IfData %s", data.Policy, IfData)
+
+	ifMap := ifIdToMap(IfData)
+
+	if len(ifMap) == 0 {
+		//policy:serial format
+		tflog.Debug(ctx, fmt.Sprintf("Importing all interfaces for switch: %s", IfData))
+		ifMap[IfData] = []string{}
+	}
+	switchCount := 0
+	for switchSerial, inputIfList := range ifMap {
+		switchCount++
+		ifSearchMap := make(map[string]bool)
+		// Get interfaces for each switch
+		ifObj := c.NewInterfaceObject(in.GetInterfaceType(), &c.apiClient, c.GetLock(ResourceInterfaces))
+		ndfcIfList := ifObj.GetInterface(ctx, dg, switchSerial, data.Policy)
+		// use datasource API to get interface deploy getDeployStatus
+		dsIfModel := datasource_interfaces.NDFCInterfacesModel{}
+		dsIfModel.InterfaceTypes = c.NDFCIfType(in.GetInterfaceType())
+		dsIfModel.SerialNumber = switchSerial
+
+		c.DsGetInterfaces(ctx, dg, &dsIfModel)
+		gotDeployStatus := true
+		if dg.HasError() {
+			tflog.Error(ctx, "Error getting deployment status")
+			gotDeployStatus = false
+			//return
+		}
+
+		for i := range inputIfList {
+			ifSearchMap[inputIfList[i]] = true
+		}
+
+		for i := range ndfcIfList {
+			addIf := false
+			if len(inputIfList) == 0 {
+				addIf = true
+			} else if _, ok := ifSearchMap[ndfcIfList[i].InterfaceName]; ok {
+				addIf = true
+			} else if IsFirstLetterLC(ndfcIfList[i].InterfaceName) {
+				// NDFC returns ifName in lowercase for loopback, port-channel, vpc etc
+				if _, ok := ifSearchMap[ToTitleCase(ndfcIfList[i].InterfaceName)]; ok {
+					addIf = true
+				}
+			}
+			if addIf {
+
+				if ndfcIfList[i].NvPairs.FreeformConfig == " " {
+					ndfcIfList[i].NvPairs.FreeformConfig = ""
+				}
+				key := getIFImportMapKey(switchSerial, ndfcIfList[i].InterfaceName, false)
+				log.Printf("Import Entry entry: %s", key)
+				// Serial at resource level and per entry level are mutually exclusive
+				// Set entry level to empty if resource level is set
+				data.Interfaces[key] = ndfcIfList[i]
+
+			} else {
+				log.Printf("Skip entry: %s:%s as entry is not found in input intf list", ndfcIfList[i].SerialNumber, ndfcIfList[i].InterfaceName)
+			}
+		}
+		//Search in If Details for deploy status
+		if gotDeployStatus {
+			for i := range dsIfModel.Interfaces {
+				ifName := dsIfModel.Interfaces[i].InterfaceName
+				changeCase := false
+			searchAgain:
+				searchKey := getIFImportMapKey(switchSerial, ifName, changeCase)
+				if ifEntry, ok := data.Interfaces[searchKey]; ok {
+					ifEntry.DeploymentStatus = dsIfModel.Interfaces[i].DeploymentStatus
+					data.Interfaces[searchKey] = ifEntry
+					if ifEntry.DeploymentStatus != "In-Sync" {
+						log.Printf("Interface %s DeploymentStatus |%s|", ifName, ifEntry.DeploymentStatus)
+						// set to deploy to false as the interface is not in deployed state
+						deployFlag = false
+					}
+				} else if !changeCase {
+					changeCase = true
+					// NDFC typically change ifName to lower case, so need to convert to upper and check
+					log.Printf("Interface %s not found: changing case", ifName)
+					goto searchAgain
+				} else {
+					log.Printf("Entry %s:%s doesn't exist - skipping: ", switchSerial, ifName)
+				}
+			}
+		}
+	}
+	data.Deploy = deployFlag
+
+	ID, _ = c.IfCreateID(ctx, &data)
+	in.SetID(ID)
+	err := in.SetModelData(&data)
+	if err.HasError() {
+		dg.Append(err.Errors()...)
+	}
+}
+
+/* TF import has a bug where map keys starting with numbers are NOK
+ * So, we are using a different key for map entries
+ */
+func getIFImportMapKey(serial, ifName string, changeCase bool) string {
+
+	if changeCase {
+		if IsFirstLetterLC(ifName) {
+			ifName = ToTitleCase(ifName)
+		} else {
+			ifName = strings.ToLower(ifName)
+		}
+	}
+	//change / to _ in ifName
+	s := strings.Replace(ifName, "/", "_", -1)
+	return s + "_" + serial
 }

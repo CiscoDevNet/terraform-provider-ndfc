@@ -12,6 +12,7 @@ import (
 )
 
 var _ resource.Resource = (*interfaceVPCResource)(nil)
+var _ resource.ResourceWithImportState = (*interfaceVPCResource)(nil)
 
 func NewInterfaceVPCResource() resource.Resource {
 	return &interfaceVPCResource{}
@@ -164,5 +165,21 @@ func (r interfaceVPCResource) ValidateConfig(ctx context.Context, req resource.V
 	if resp.Diagnostics.HasError() {
 		return
 	}
+
+}
+
+func (r *interfaceVPCResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
+	var data resource_interface_vpc.InterfaceVpcModel
+	tflog.Info(ctx, fmt.Sprintf("Import vPC Intf Incoming ID %s", req.ID))
+	if req.ID == "" {
+		resp.Diagnostics.AddError("ID cannot be empty for import", "Id is mandatory")
+		return
+	}
+	data.Id = types.StringValue(req.ID)
+	r.client.RscImportInterfaces(ctx, &resp.Diagnostics, &data)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+	resp.Diagnostics.Append(resp.State.Set(ctx, data)...)
 
 }

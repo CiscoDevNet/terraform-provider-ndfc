@@ -12,6 +12,7 @@ import (
 )
 
 var _ resource.Resource = (*interfaceLoopbackResource)(nil)
+var _ resource.ResourceWithImportState = (*interfaceLoopbackResource)(nil)
 
 func NewInterfaceLoopbackResource() resource.Resource {
 	return &interfaceLoopbackResource{}
@@ -164,5 +165,23 @@ func (r interfaceLoopbackResource) ValidateConfig(ctx context.Context, req resou
 	if resp.Diagnostics.HasError() {
 		return
 	}
+
+}
+
+func (r *interfaceLoopbackResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
+
+	var data resource_interface_loopback.InterfaceLoopbackModel
+
+	tflog.Info(ctx, fmt.Sprintf("Import Loopback Intf Incoming ID %s", req.ID))
+	if req.ID == "" {
+		resp.Diagnostics.AddError("ID cannot be empty for import", "Id is mandatory")
+		return
+	}
+	data.Id = types.StringValue(req.ID)
+	r.client.RscImportInterfaces(ctx, &resp.Diagnostics, &data)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+	resp.Diagnostics.Append(resp.State.Set(ctx, data)...)
 
 }

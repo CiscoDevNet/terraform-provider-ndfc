@@ -8,6 +8,7 @@ import (
 	"strings"
 	"terraform-provider-ndfc/internal/provider/resources/resource_interface_common"
 	"terraform-provider-ndfc/internal/provider/types"
+	"unicode"
 
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-log/tflog"
@@ -121,9 +122,6 @@ func (c NDFC) NDFCIfType(ifType string) string {
 // inData - to be sent to NDFC
 func (c NDFC) IfPreProcess(inData *resource_interface_common.NDFCInterfaceCommonModel) {
 	for k, intf := range inData.Interfaces {
-		if intf.NvPairs.FreeformConfig == "" {
-			intf.NvPairs.FreeformConfig = " "
-		}
 		if intf.SerialNumber == "" {
 			intf.SerialNumber = inData.SerialNumber
 		}
@@ -135,9 +133,6 @@ func (c NDFC) IfPreProcess(inData *resource_interface_common.NDFCInterfaceCommon
 // inData - data received from NDFC
 func (c NDFC) IfPostProcess(inData *resource_interface_common.NDFCInterfaceCommonModel) {
 	for k, intf := range inData.Interfaces {
-		if intf.NvPairs.FreeformConfig == " " {
-			intf.NvPairs.FreeformConfig = ""
-		}
 		inData.Interfaces[k] = intf
 	}
 }
@@ -222,4 +217,26 @@ func (c NDFC) ifDiff(ctx context.Context, dg *diag.Diagnostics,
 	}
 	action["del"] = deleteIntf
 	return action
+}
+
+/*
+ * Just convert first letter to upper case
+ * strings.Title() is deprecated and equivalent text/case api looks complex for
+ * this simple use case
+ */
+func ToTitleCase(s string) string {
+	if len(s) == 0 {
+		return s
+	}
+	// next two lines - typecasting gimmics to convert first letter
+	p := ([]rune(s))
+	p[0] = rune(strings.ToUpper(string(p[0]))[0])
+	return string(p)
+}
+
+func IsFirstLetterLC(s string) bool {
+	if len(s) == 0 {
+		return false
+	}
+	return unicode.IsLower(rune(s[0]))
 }

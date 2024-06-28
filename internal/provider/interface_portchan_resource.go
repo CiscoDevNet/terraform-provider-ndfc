@@ -12,6 +12,7 @@ import (
 )
 
 var _ resource.Resource = (*interfacePortChannelResource)(nil)
+var _ resource.ResourceWithImportState = (*interfacePortChannelResource)(nil)
 
 func NewInterfacePortChannelResource() resource.Resource {
 	return &interfacePortChannelResource{}
@@ -165,4 +166,19 @@ func (r interfacePortChannelResource) ValidateConfig(ctx context.Context, req re
 		return
 	}
 
+}
+
+func (r *interfacePortChannelResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
+	var data resource_interface_portchannel.InterfacePortchannelModel
+	tflog.Info(ctx, fmt.Sprintf("Import port-channel Intf Incoming ID %s", req.ID))
+	if req.ID == "" {
+		resp.Diagnostics.AddError("ID cannot be empty for import", "Id is mandatory")
+		return
+	}
+	data.Id = types.StringValue(req.ID)
+	r.client.RscImportInterfaces(ctx, &resp.Diagnostics, &data)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+	resp.Diagnostics.Append(resp.State.Set(ctx, data)...)
 }
