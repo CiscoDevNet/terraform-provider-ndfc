@@ -13,6 +13,7 @@ import (
 )
 
 var _ resource.Resource = (*networkBulkResource)(nil)
+var _ resource.ResourceWithImportState = (*networkBulkResource)(nil)
 
 func NewNetworksResource() resource.Resource {
 	return &networkBulkResource{}
@@ -278,4 +279,16 @@ func (r networkBulkResource) ValidateConfig(ctx context.Context, req resource.Va
 
 	}
 
+}
+
+func (r *networkBulkResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
+	unique_id := req.ID
+	tflog.Info(ctx, fmt.Sprintf("Incoming ID %s", unique_id))
+	dd := r.client.RscImportNetworks(ctx, &resp.Diagnostics, unique_id)
+	if dd == nil {
+		tflog.Error(ctx, "Read Network Failed")
+		resp.Diagnostics.AddWarning("Read Failure", "No configuration found in NDFC")
+	}
+	// Save updated data into Terraform state
+	resp.Diagnostics.Append(resp.State.Set(ctx, dd)...)
 }
