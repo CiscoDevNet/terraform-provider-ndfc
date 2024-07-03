@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"log"
+	"regexp"
 	"strings"
 	"terraform-provider-ndfc/internal/provider/datasources/datasource_networks"
 	"terraform-provider-ndfc/internal/provider/ndfc/api"
@@ -207,6 +208,93 @@ func (c *NDFC) RscGetNetworks(ctx context.Context, dg *diag.Diagnostics, ID stri
 		dg.AddError("Network Attachments read failed", err.Error())
 	}
 
+	vModel := new(resource_networks.NetworksModel)
+	vModel.Id = types.StringValue(ID)
+	d := vModel.SetModelData(ndNets)
+	if d != nil {
+		dg.Append(d.Errors()...)
+	}
+	return vModel
+}
+
+// Import is similar to GET with minor changes. Not combining to keep it simple
+func (c *NDFC) RscImportNetworks(ctx context.Context, dg *diag.Diagnostics, ID string) *resource_networks.NetworksModel {
+	// Read API call logic
+	var filterMap map[string]bool
+	tflog.Debug(ctx, fmt.Sprintf("RscImportNetworks entry fabirc %s", ID))
+
+	filterMap = make(map[string]bool)
+	fabricName, networks := c.CreateFilterMap(ID, &filterMap)
+
+	log.Printf("FilterMap: %v networks %v", filterMap, networks)
+
+	if fabricName == "" {
+		dg.AddError("ID format error", "ID is incorrect")
+		return nil
+	}
+
+	re := regexp.MustCompile(`^[\w-]+\/\[(?:[\w-]+\,?)+\]$`)
+	if !re.Match([]byte(ID)) {
+		dg.AddError("ID format error", "use fabricName/[net1,net2...] format")
+		return nil
+	}
+
+	ndNets, err := c.networksGet(ctx, fabricName)
+	if err != nil {
+		dg.AddError("Network Get Failed", err.Error())
+		return nil
+	}
+
+	if len(ndNets.Networks) == 0 {
+		dg.AddError("No Networks found", "No Networks found in NDFC")
+		return nil
+	}
+	netCount := 0
+	if len(filterMap) > 0 {
+		log.Printf("Filtering is configured")
+		//Set value filter - skip the nws that are not in ID
+		for i, entry := range ndNets.Networks {
+			if _, found := (filterMap)[entry.NetworkName]; !found {
+				log.Printf("Filtering out Network %s", entry.NetworkName)
+				entry.FilterThisValue = true
+				ndNets.Networks[i] = entry
+			} else {
+				netCount++
+			}
+		}
+	}
+	if netCount == 0 {
+		dg.AddError("No Networks found", "No Networks found in NDFC")
+		return nil
+	}
+	//Get Attachments
+	err = c.RscGetNetworkAttachments(ctx, ndNets)
+	if err == nil {
+		tflog.Debug(ctx, "Network Attachments read success")
+		for i, nwEntry := range ndNets.Networks {
+			if nwEntry.FilterThisValue {
+				continue
+			}
+			for j, attachEntry := range nwEntry.Attachments {
+				if attachEntry.FilterThisValue {
+					continue
+				}
+				log.Printf("Attachment %s added to Network %s", j, i)
+
+				if attachEntry.AttachState == "DEPLOYED" {
+					log.Printf("Attachment %s deployed", j)
+					attachEntry.DeployThisAttachment = true
+				}
+				//put modified entry back
+				nwEntry.Attachments[j] = attachEntry
+			}
+			//put modified entry back
+			ndNets.Networks[i] = nwEntry
+		}
+	} else {
+		tflog.Error(ctx, "Network Attachments read failed", map[string]interface{}{"Err": err})
+		dg.AddError("Network Attachments read failed", err.Error())
+	}
 	vModel := new(resource_networks.NetworksModel)
 	vModel.Id = types.StringValue(ID)
 	d := vModel.SetModelData(ndNets)
