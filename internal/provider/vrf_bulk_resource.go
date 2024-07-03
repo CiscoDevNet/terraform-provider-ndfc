@@ -13,6 +13,7 @@ import (
 )
 
 var _ resource.Resource = (*vrfBulkResource)(nil)
+var _ resource.ResourceWithImportState = (*vrfBulkResource)(nil)
 
 func NewVrfBulkResource() resource.Resource {
 	return &vrfBulkResource{}
@@ -272,4 +273,17 @@ func (r vrfBulkResource) ValidateConfig(ctx context.Context, req resource.Valida
 			}
 		}
 	}
+}
+
+func (r *vrfBulkResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
+	//
+	unique_id := req.ID
+	tflog.Info(ctx, fmt.Sprintf("Incoming ID %s", unique_id))
+	dd := r.client.RscImportBulkVrf(ctx, &resp.Diagnostics, unique_id)
+	if dd == nil {
+		tflog.Error(ctx, "Read Bulk VRF Failed")
+		resp.Diagnostics.AddWarning("Read Failure", "No configuration found in NDFC")
+	}
+	// Save updated data into Terraform state
+	resp.Diagnostics.Append(resp.State.Set(ctx, dd)...)
 }

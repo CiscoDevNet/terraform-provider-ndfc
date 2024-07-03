@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"log"
+	"regexp"
 	"strings"
 	"terraform-provider-ndfc/internal/provider/datasources/datasource_vrf_bulk"
 	"terraform-provider-ndfc/internal/provider/ndfc/api"
@@ -161,6 +162,99 @@ func (c NDFC) RscGetBulkVrf(ctx context.Context, dg *diag.Diagnostics, ID string
 	} else {
 		dg.AddError("VRF Attachments read failed", err.Error())
 	}
+	vModel := new(resource_vrf_bulk.VrfBulkModel)
+	vModel.Id = types.StringValue(ID)
+	d := vModel.SetModelData(&ndVrfs)
+	if d != nil {
+		dg.Append(d.Errors()...)
+	}
+	return vModel
+}
+
+func (c NDFC) RscImportBulkVrf(ctx context.Context, dg *diag.Diagnostics, ID string) *resource_vrf_bulk.VrfBulkModel {
+	var filterMap map[string]bool
+	tflog.Debug(ctx, fmt.Sprintf("RscImportBulkVrf entry fabric %s", ID))
+	re := regexp.MustCompile(`^[\w-]+\/\[(?:[\w-]+\,?)+\]$`)
+	if !re.Match([]byte(ID)) {
+		dg.AddError("ID format error", "use fabricName/[vrf1,vrf2...] format")
+		return nil
+	}
+	filterMap = make(map[string]bool)
+	fabricName, vrfs := c.CreateFilterMap(ID, &filterMap)
+	log.Printf("FilterMap: %v vrfs %v", filterMap, vrfs)
+	if fabricName == "" {
+		dg.AddError("ID format error", "ID is incorrect")
+		return nil
+	}
+	vrfObj := api.NewVrfAPI(fabricName, c.GetLock(ResourceVrfBulk), &c.apiClient)
+	res, err := vrfObj.Get()
+	if err != nil {
+		dg.AddError("VRF Get Failed", err.Error())
+		return nil
+	}
+	tflog.Debug(ctx, fmt.Sprintf("RscImportBulkVrf: result %s", string(res)))
+	ndVrfs := resource_vrf_bulk.NDFCVrfBulkModel{}
+
+	vrfPayloads := resource_vrf_bulk.NDFCBulkVrfPayload{}
+	err = json.Unmarshal(res, &vrfPayloads.Vrfs)
+	if err != nil {
+		dg.AddError("resource_vrf_bulk: unmarshal failed ", err.Error())
+		return nil
+	} else {
+		tflog.Debug(ctx, "resource_vrf_bulk: Unmarshal OK")
+	}
+	ndVrfs.FillVrfsFromPayload(&vrfPayloads)
+	inCount := 0
+	if len(filterMap) > 0 {
+		log.Printf("Filtering is configured")
+		//Set value filter - skip the vrfs that are not in ID
+		for i, vrfEntry := range ndVrfs.Vrfs {
+			if _, found := (filterMap)[vrfEntry.VrfName]; !found {
+				log.Printf("Filtering out VRF %s", vrfEntry.VrfName)
+				vrfEntry.FilterThisValue = true
+				ndVrfs.Vrfs[i] = vrfEntry
+			} else {
+				inCount++
+			}
+		}
+	}
+
+	if inCount == 0 {
+		dg.AddError("VRFs not found", "No VRFs found")
+		return nil
+	}
+
+	if len(ndVrfs.Vrfs) == 0 {
+		dg.AddError("VRFs not found", "No VRFs found")
+		return nil
+	}
+	//Get Attachments
+	err = c.RscGetVrfAttachments(ctx, dg, &ndVrfs)
+	if err == nil {
+		for i, vrfEntry := range ndVrfs.Vrfs {
+			if vrfEntry.FilterThisValue {
+				continue
+			}
+			for j, attachEntry := range vrfEntry.AttachList {
+				if attachEntry.FilterThisValue {
+					continue
+				}
+				log.Printf("Attachment %s added to VRF %s", j, i)
+				if attachEntry.AttachState == "DEPLOYED" {
+					attachEntry.DeployThisAttachment = true
+				}
+				log.Printf("[DEBUG] Set Attachment level deploy flag %s/%s:%v", i, j, attachEntry.DeployThisAttachment)
+				//put modified entry back
+
+				vrfEntry.AttachList[j] = attachEntry
+			}
+			//put modified entry back
+			ndVrfs.Vrfs[i] = vrfEntry
+		}
+	} else {
+		dg.AddError("VRF Attachments read failed", err.Error())
+	}
+
 	vModel := new(resource_vrf_bulk.VrfBulkModel)
 	vModel.Id = types.StringValue(ID)
 	d := vModel.SetModelData(&ndVrfs)
