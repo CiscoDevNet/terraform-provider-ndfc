@@ -1,0 +1,64 @@
+---
+resource:
+  name: template
+  doc_category: Fabric
+  generate_tf_resource: true
+  attributes:
+    - model_name: instanceClassId
+      tf_name: instance_id
+      type: Int64
+      description: "Unique identifier for the template"
+      example: 1
+      computed: true
+    - model_name: templatename
+      tf_name: template_name
+      type: String
+      mandatory: true
+      description: "Name of the template"
+      example: "template1"
+    - model_name: description
+      tf_name: description
+      type: String
+      description: "Description of the template"
+      example: "This is a template"
+    - model_name: tags
+      tf_name: tags
+      type: List:String
+      description: "Tags for the template"
+      example: "[key1, value1]"
+    - model_name: supportedPlatforms
+      tf_name: supported_platforms
+      type: String
+      default_value: "All"
+      description: "Supported platforms for the template"
+      example: "All"
+    - model_name: fileName
+      tf_name: file_name
+      type: String
+      computed: true
+      description: "Name of the file"
+      example: "file1"
+    - model_name: templateType
+      tf_name: template_type
+      type: String
+      default_value: "POLICY"
+      description: "Type of the template"
+      example: "CLI"
+      validator: OneOf("CLI", "POLICY", "POAP", "SHOW", "PROFILE", "FABRIC", "ABSTRACT", "REPORT")
+    - model_name: newContent
+      tf_name: template_content
+      type: String
+      mandatory: true
+      description: "Content for the template"
+    - model_name: contentType
+      tf_name: content_type
+      type: String
+      default_value: "TEMPLATE_CLI"
+      description: "Type of the template content"
+      example: "CLI"
+    - model_name: templateSubType
+      tf_name: template_sub_type
+      type: String
+      mandatory: true
+      description: "Sub type of the template"
+      example: "CONFIG"

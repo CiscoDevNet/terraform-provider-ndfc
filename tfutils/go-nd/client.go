@@ -4,6 +4,7 @@ package nd
 import (
 	"bytes"
 	"crypto/tls"
+	"encoding/json"
 	"fmt"
 	"io"
 	"log"
@@ -145,6 +146,18 @@ func (client Client) NewReq(method, uri string, body io.Reader, mods ...func(*Re
 	return req
 }
 
+func (client Client) NewRawReq(method, uri string, body io.Reader, mods ...func(*Req)) Req {
+	httpReq, _ := http.NewRequest(method, client.Url+uri, body)
+	req := Req{
+		HttpReq:    httpReq,
+		LogPayload: false,
+	}
+	for _, mod := range mods {
+		mod(&req)
+	}
+	return req
+}
+
 func (client Client) NewReqWithQueryString(method, uri string, queryString []string, mods ...func(*Req)) Req {
 	httpReq, err := http.NewRequest(method, client.Url+uri, nil)
 	if err != nil {
@@ -186,9 +199,9 @@ func (client *Client) Do(req Req) (Res, error) {
 
 		req.HttpReq.Body = io.NopCloser(bytes.NewBuffer(body))
 		if req.LogPayload {
-			log.Printf("[DEBUG] HTTP Request: %s, %s, %s", req.HttpReq.Method, req.HttpReq.URL, req.HttpReq.Body)
+			log.Printf("[DEBUG] HTTP Request: %s, %s, |%s|", req.HttpReq.Method, req.HttpReq.URL, req.HttpReq.Body)
 		} else {
-			log.Printf("[DEBUG] HTTP Request: %s, %s", req.HttpReq.Method, req.HttpReq.URL)
+			log.Printf("[DEBUG] HTTP Request: %s, %s, |%s|", req.HttpReq.Method, req.HttpReq.URL, req.HttpReq.Body)
 		}
 
 		httpRes, err := client.HttpClient.Do(req.HttpReq)
@@ -265,7 +278,7 @@ func (client *Client) DoRaw(req Req) ([]byte, error) {
 	for attempts := 0; ; attempts++ {
 		req.HttpReq.Body = io.NopCloser(bytes.NewBuffer(body))
 		if req.LogPayload {
-			log.Printf("[DEBUG] HTTP Request: %s, %s, %s", req.HttpReq.Method, req.HttpReq.URL, req.HttpReq.Body)
+			log.Printf("[DEBUG] HTTP Request: %s, %s, |%s|", req.HttpReq.Method, req.HttpReq.URL, req.HttpReq.Body)
 		} else {
 			log.Printf("[DEBUG] HTTP Request: %s, %s", req.HttpReq.Method, req.HttpReq.URL)
 		}
@@ -372,7 +385,14 @@ func (client *Client) DeleteRaw(path string, data []string, mods ...func(*Req)) 
 // Post makes a POST request and returns a GJSON result.
 // Hint: Use the Body struct to easily create POST body data.
 func (client *Client) Post(path, data string, mods ...func(*Req)) (Res, error) {
-	req := client.NewReq("POST", client.BasePath+path, strings.NewReader(data), mods...)
+	var req Req
+	if !json.Valid([]byte(data)) {
+		log.Printf("POST: data is not valid JSON, creating raw request")
+		req = client.NewRawReq("POST", client.BasePath+path, strings.NewReader(data), mods...)
+	} else {
+		log.Printf("POST: data is valid json")
+		req = client.NewReq("POST", client.BasePath+path, strings.NewReader(data), mods...)
+	}
 	err := client.Authenticate()
 	if err != nil {
 		return Res{}, err

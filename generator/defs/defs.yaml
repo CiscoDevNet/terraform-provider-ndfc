@@ -15,4 +15,6 @@ files:
   - inventory-devices.yaml  
   - interface_portchannel.yaml
   - interface_vpc.yaml
+  - templates.yaml
+
 
