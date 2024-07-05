@@ -106,10 +106,12 @@ func (p *ndfcProvider) Configure(ctx context.Context, req provider.ConfigureRequ
 		return
 	}
 
-	// For creating mutexes
+	// For creating mutexes used to lock API access
+	// General rule, do not access the same sub-system in NDFC in parallel
 	ndfc.NewResource(ndfc.ResourceVrfBulk)
 	ndfc.NewResource(ndfc.ResourceNetworks)
 	ndfc.NewResource(ndfc.ResourceInterfaces)
+	ndfc.NewResource(ndfc.ResourceTemplate)
 
 	// Make the HashiCups client available during DataSource and Resource
 	// type Configure methods.
@@ -147,5 +149,6 @@ func (p *ndfcProvider) Resources(ctx context.Context) []func() resource.Resource
 		NewConfigDeployResource,
 		NewInterfacePortChannelResource,
 		NewInterfaceVPCResource,
+		NewTemplateResource,
 	}
 }
