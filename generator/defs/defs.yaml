@@ -16,5 +16,6 @@ files:
   - interface_portchannel.yaml
   - interface_vpc.yaml
   - templates.yaml
+  - policy.yaml
 
 
