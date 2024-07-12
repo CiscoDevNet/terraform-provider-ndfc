@@ -4,7 +4,9 @@ package resource_template
 
 import (
 	"context"
+	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringdefault"
+	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
@@ -68,7 +70,10 @@ func TemplateResourceSchema(ctx context.Context) schema.Schema {
 				Computed:            true,
 				Description:         "Type of the template",
 				MarkdownDescription: "Type of the template",
-				Default:             stringdefault.StaticString("POLICY"),
+				Validators: []validator.String{
+					stringvalidator.OneOf("CLI", "POLICY", "POAP", "SHOW", "PROFILE", "FABRIC", "ABSTRACT", "REPORT"),
+				},
+				Default: stringdefault.StaticString("POLICY"),
 			},
 		},
 	}
