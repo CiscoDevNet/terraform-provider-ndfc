@@ -1,3 +1,5 @@
+// Code generated;  DO NOT EDIT.
+
 package resource_vrf_bulk
 
 import (

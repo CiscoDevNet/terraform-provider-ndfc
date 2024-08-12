@@ -1866,38 +1866,48 @@ func (v InterfacesValue) String() string {
 func (v InterfacesValue) ToObjectValue(ctx context.Context) (basetypes.ObjectValue, diag.Diagnostics) {
 	var diags diag.Diagnostics
 
+	attributeTypes := map[string]attr.Type{
+		"admin_state":                  basetypes.BoolType{},
+		"advertise_subnet_in_underlay": basetypes.BoolType{},
+		"deployment_status":            basetypes.StringType{},
+		"dhcp_server_addr1":            basetypes.StringType{},
+		"dhcp_server_addr2":            basetypes.StringType{},
+		"dhcp_server_addr3":            basetypes.StringType{},
+		"disable_ip_redirects":         basetypes.BoolType{},
+		"enable_hsrp":                  basetypes.BoolType{},
+		"freeform_config":              basetypes.StringType{},
+		"hsrp_group":                   basetypes.Int64Type{},
+		"hsrp_priority":                basetypes.Int64Type{},
+		"hsrp_version":                 basetypes.StringType{},
+		"hsrp_vip":                     basetypes.StringType{},
+		"interface_description":        basetypes.StringType{},
+		"interface_name":               basetypes.StringType{},
+		"ipv4_address":                 basetypes.StringType{},
+		"ipv4_prefix_length":           basetypes.StringType{},
+		"mac":                          basetypes.StringType{},
+		"mtu":                          basetypes.StringType{},
+		"netflow":                      basetypes.BoolType{},
+		"netflow_monitor":              basetypes.StringType{},
+		"netflow_sampler":              basetypes.StringType{},
+		"preempt":                      basetypes.BoolType{},
+		"routing_tag":                  basetypes.StringType{},
+		"serial_number":                basetypes.StringType{},
+		"vrf":                          basetypes.StringType{},
+		"vrf_dhcp1":                    basetypes.StringType{},
+		"vrf_dhcp2":                    basetypes.StringType{},
+		"vrf_dhcp3":                    basetypes.StringType{},
+	}
+
+	if v.IsNull() {
+		return types.ObjectNull(attributeTypes), diags
+	}
+
+	if v.IsUnknown() {
+		return types.ObjectUnknown(attributeTypes), diags
+	}
+
 	objVal, diags := types.ObjectValue(
-		map[string]attr.Type{
-			"admin_state":                  basetypes.BoolType{},
-			"advertise_subnet_in_underlay": basetypes.BoolType{},
-			"deployment_status":            basetypes.StringType{},
-			"dhcp_server_addr1":            basetypes.StringType{},
-			"dhcp_server_addr2":            basetypes.StringType{},
-			"dhcp_server_addr3":            basetypes.StringType{},
-			"disable_ip_redirects":         basetypes.BoolType{},
-			"enable_hsrp":                  basetypes.BoolType{},
-			"freeform_config":              basetypes.StringType{},
-			"hsrp_group":                   basetypes.Int64Type{},
-			"hsrp_priority":                basetypes.Int64Type{},
-			"hsrp_version":                 basetypes.StringType{},
-			"hsrp_vip":                     basetypes.StringType{},
-			"interface_description":        basetypes.StringType{},
-			"interface_name":               basetypes.StringType{},
-			"ipv4_address":                 basetypes.StringType{},
-			"ipv4_prefix_length":           basetypes.StringType{},
-			"mac":                          basetypes.StringType{},
-			"mtu":                          basetypes.StringType{},
-			"netflow":                      basetypes.BoolType{},
-			"netflow_monitor":              basetypes.StringType{},
-			"netflow_sampler":              basetypes.StringType{},
-			"preempt":                      basetypes.BoolType{},
-			"routing_tag":                  basetypes.StringType{},
-			"serial_number":                basetypes.StringType{},
-			"vrf":                          basetypes.StringType{},
-			"vrf_dhcp1":                    basetypes.StringType{},
-			"vrf_dhcp2":                    basetypes.StringType{},
-			"vrf_dhcp3":                    basetypes.StringType{},
-		},
+		attributeTypes,
 		map[string]attr.Value{
 			"admin_state":                  v.AdminState,
 			"advertise_subnet_in_underlay": v.AdvertiseSubnetInUnderlay,

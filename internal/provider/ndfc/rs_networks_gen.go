@@ -1,4 +1,5 @@
-// Generated code Do not EDIT
+// Code generated;  DO NOT EDIT.
+
 package ndfc
 
 import (

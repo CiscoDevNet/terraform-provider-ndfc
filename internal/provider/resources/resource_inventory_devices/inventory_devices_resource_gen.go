@@ -1701,35 +1701,45 @@ func (v DevicesValue) ToObjectValue(ctx context.Context) (basetypes.ObjectValue,
 		}), diags
 	}
 
-	objVal, diags := types.ObjectValue(
-		map[string]attr.Type{
-			"breakout":                basetypes.StringType{},
-			"config_status":           basetypes.StringType{},
-			"device_index":            basetypes.StringType{},
-			"discovery_auth_protocol": basetypes.StringType{},
-			"discovery_password":      basetypes.StringType{},
-			"discovery_status":        basetypes.StringType{},
-			"discovery_type":          basetypes.StringType{},
-			"discovery_username":      basetypes.StringType{},
-			"gateway":                 basetypes.StringType{},
-			"hostname":                basetypes.StringType{},
-			"image_policy":            basetypes.StringType{},
-			"managable":               basetypes.BoolType{},
-			"mode":                    basetypes.StringType{},
-			"model":                   basetypes.StringType{},
-			"modules_model": basetypes.SetType{
-				ElemType: types.StringType,
-			},
-			"oper_status":   basetypes.StringType{},
-			"port_mode":     basetypes.StringType{},
-			"role":          basetypes.StringType{},
-			"serial_number": basetypes.StringType{},
-			"switch_db_id":  basetypes.StringType{},
-			"uuid":          basetypes.StringType{},
-			"vdc_id":        basetypes.StringType{},
-			"vdc_mac":       basetypes.StringType{},
-			"version":       basetypes.StringType{},
+	attributeTypes := map[string]attr.Type{
+		"breakout":                basetypes.StringType{},
+		"config_status":           basetypes.StringType{},
+		"device_index":            basetypes.StringType{},
+		"discovery_auth_protocol": basetypes.StringType{},
+		"discovery_password":      basetypes.StringType{},
+		"discovery_status":        basetypes.StringType{},
+		"discovery_type":          basetypes.StringType{},
+		"discovery_username":      basetypes.StringType{},
+		"gateway":                 basetypes.StringType{},
+		"hostname":                basetypes.StringType{},
+		"image_policy":            basetypes.StringType{},
+		"managable":               basetypes.BoolType{},
+		"mode":                    basetypes.StringType{},
+		"model":                   basetypes.StringType{},
+		"modules_model": basetypes.SetType{
+			ElemType: types.StringType,
 		},
+		"oper_status":   basetypes.StringType{},
+		"port_mode":     basetypes.StringType{},
+		"role":          basetypes.StringType{},
+		"serial_number": basetypes.StringType{},
+		"switch_db_id":  basetypes.StringType{},
+		"uuid":          basetypes.StringType{},
+		"vdc_id":        basetypes.StringType{},
+		"vdc_mac":       basetypes.StringType{},
+		"version":       basetypes.StringType{},
+	}
+
+	if v.IsNull() {
+		return types.ObjectNull(attributeTypes), diags
+	}
+
+	if v.IsUnknown() {
+		return types.ObjectUnknown(attributeTypes), diags
+	}
+
+	objVal, diags := types.ObjectValue(
+		attributeTypes,
 		map[string]attr.Value{
 			"breakout":                v.Breakout,
 			"config_status":           v.ConfigStatus,

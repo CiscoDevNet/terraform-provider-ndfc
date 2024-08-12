@@ -2584,53 +2584,63 @@ func (v VrfsValue) ToObjectValue(ctx context.Context) (basetypes.ObjectValue, di
 		)
 	}
 
-	objVal, diags := types.ObjectValue(
-		map[string]attr.Type{
-			"advertise_default_route": basetypes.BoolType{},
-			"advertise_host_routes":   basetypes.BoolType{},
-			"attach_list": basetypes.ListType{
-				ElemType: AttachListValue{}.Type(ctx),
-			},
-			"bgp_password":                   basetypes.StringType{},
-			"bgp_password_type":              basetypes.StringType{},
-			"configure_static_default_route": basetypes.BoolType{},
-			"disable_rt_auto":                basetypes.BoolType{},
-			"id":                             basetypes.Int64Type{},
-			"interface_description":          basetypes.StringType{},
-			"ipv6_link_local":                basetypes.BoolType{},
-			"loopback_routing_tag":           basetypes.Int64Type{},
-			"max_bgp_paths":                  basetypes.Int64Type{},
-			"max_ibgp_paths":                 basetypes.Int64Type{},
-			"mtu":                            basetypes.Int64Type{},
-			"mvpn_inter_as":                  basetypes.BoolType{},
-			"netflow":                        basetypes.BoolType{},
-			"netflow_monitor":                basetypes.StringType{},
-			"no_rp":                          basetypes.BoolType{},
-			"overlay_multicast_groups":       basetypes.StringType{},
-			"redistribute_direct_route_map":  basetypes.StringType{},
-			"route_target_export":            basetypes.StringType{},
-			"route_target_export_cloud_evpn": basetypes.StringType{},
-			"route_target_export_evpn":       basetypes.StringType{},
-			"route_target_export_mvpn":       basetypes.StringType{},
-			"route_target_import":            basetypes.StringType{},
-			"route_target_import_cloud_evpn": basetypes.StringType{},
-			"route_target_import_evpn":       basetypes.StringType{},
-			"route_target_import_mvpn":       basetypes.StringType{},
-			"rp_address":                     basetypes.StringType{},
-			"rp_external":                    basetypes.BoolType{},
-			"rp_loopback_id":                 basetypes.Int64Type{},
-			"trm":                            basetypes.BoolType{},
-			"trm_bgw_msite":                  basetypes.BoolType{},
-			"underlay_multicast_address":     basetypes.StringType{},
-			"vlan_id":                        basetypes.Int64Type{},
-			"vlan_name":                      basetypes.StringType{},
-			"vrf_description":                basetypes.StringType{},
-			"vrf_extension_template":         basetypes.StringType{},
-			"vrf_id":                         basetypes.Int64Type{},
-			"vrf_name":                       basetypes.StringType{},
-			"vrf_status":                     basetypes.StringType{},
-			"vrf_template":                   basetypes.StringType{},
+	attributeTypes := map[string]attr.Type{
+		"advertise_default_route": basetypes.BoolType{},
+		"advertise_host_routes":   basetypes.BoolType{},
+		"attach_list": basetypes.ListType{
+			ElemType: AttachListValue{}.Type(ctx),
 		},
+		"bgp_password":                   basetypes.StringType{},
+		"bgp_password_type":              basetypes.StringType{},
+		"configure_static_default_route": basetypes.BoolType{},
+		"disable_rt_auto":                basetypes.BoolType{},
+		"id":                             basetypes.Int64Type{},
+		"interface_description":          basetypes.StringType{},
+		"ipv6_link_local":                basetypes.BoolType{},
+		"loopback_routing_tag":           basetypes.Int64Type{},
+		"max_bgp_paths":                  basetypes.Int64Type{},
+		"max_ibgp_paths":                 basetypes.Int64Type{},
+		"mtu":                            basetypes.Int64Type{},
+		"mvpn_inter_as":                  basetypes.BoolType{},
+		"netflow":                        basetypes.BoolType{},
+		"netflow_monitor":                basetypes.StringType{},
+		"no_rp":                          basetypes.BoolType{},
+		"overlay_multicast_groups":       basetypes.StringType{},
+		"redistribute_direct_route_map":  basetypes.StringType{},
+		"route_target_export":            basetypes.StringType{},
+		"route_target_export_cloud_evpn": basetypes.StringType{},
+		"route_target_export_evpn":       basetypes.StringType{},
+		"route_target_export_mvpn":       basetypes.StringType{},
+		"route_target_import":            basetypes.StringType{},
+		"route_target_import_cloud_evpn": basetypes.StringType{},
+		"route_target_import_evpn":       basetypes.StringType{},
+		"route_target_import_mvpn":       basetypes.StringType{},
+		"rp_address":                     basetypes.StringType{},
+		"rp_external":                    basetypes.BoolType{},
+		"rp_loopback_id":                 basetypes.Int64Type{},
+		"trm":                            basetypes.BoolType{},
+		"trm_bgw_msite":                  basetypes.BoolType{},
+		"underlay_multicast_address":     basetypes.StringType{},
+		"vlan_id":                        basetypes.Int64Type{},
+		"vlan_name":                      basetypes.StringType{},
+		"vrf_description":                basetypes.StringType{},
+		"vrf_extension_template":         basetypes.StringType{},
+		"vrf_id":                         basetypes.Int64Type{},
+		"vrf_name":                       basetypes.StringType{},
+		"vrf_status":                     basetypes.StringType{},
+		"vrf_template":                   basetypes.StringType{},
+	}
+
+	if v.IsNull() {
+		return types.ObjectNull(attributeTypes), diags
+	}
+
+	if v.IsUnknown() {
+		return types.ObjectUnknown(attributeTypes), diags
+	}
+
+	objVal, diags := types.ObjectValue(
+		attributeTypes,
 		map[string]attr.Value{
 			"advertise_default_route":        v.AdvertiseDefaultRoute,
 			"advertise_host_routes":          v.AdvertiseHostRoutes,
@@ -3621,19 +3631,29 @@ func (v AttachListValue) String() string {
 func (v AttachListValue) ToObjectValue(ctx context.Context) (basetypes.ObjectValue, diag.Diagnostics) {
 	var diags diag.Diagnostics
 
+	attributeTypes := map[string]attr.Type{
+		"attach_state":    basetypes.StringType{},
+		"attached":        basetypes.BoolType{},
+		"freeform_config": basetypes.StringType{},
+		"id":              basetypes.Int64Type{},
+		"loopback_id":     basetypes.Int64Type{},
+		"loopback_ipv4":   basetypes.StringType{},
+		"loopback_ipv6":   basetypes.StringType{},
+		"serial_number":   basetypes.StringType{},
+		"switch_name":     basetypes.StringType{},
+		"vlan":            basetypes.Int64Type{},
+	}
+
+	if v.IsNull() {
+		return types.ObjectNull(attributeTypes), diags
+	}
+
+	if v.IsUnknown() {
+		return types.ObjectUnknown(attributeTypes), diags
+	}
+
 	objVal, diags := types.ObjectValue(
-		map[string]attr.Type{
-			"attach_state":    basetypes.StringType{},
-			"attached":        basetypes.BoolType{},
-			"freeform_config": basetypes.StringType{},
-			"id":              basetypes.Int64Type{},
-			"loopback_id":     basetypes.Int64Type{},
-			"loopback_ipv4":   basetypes.StringType{},
-			"loopback_ipv6":   basetypes.StringType{},
-			"serial_number":   basetypes.StringType{},
-			"switch_name":     basetypes.StringType{},
-			"vlan":            basetypes.Int64Type{},
-		},
+		attributeTypes,
 		map[string]attr.Value{
 			"attach_state":    v.AttachState,
 			"attached":        v.Attached,

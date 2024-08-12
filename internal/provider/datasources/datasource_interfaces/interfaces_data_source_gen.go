@@ -1290,28 +1290,38 @@ func (v InterfacesValue) String() string {
 func (v InterfacesValue) ToObjectValue(ctx context.Context) (basetypes.ObjectValue, diag.Diagnostics) {
 	var diags diag.Diagnostics
 
+	attributeTypes := map[string]attr.Type{
+		"admin_status":      basetypes.StringType{},
+		"allowed_vlans":     basetypes.StringType{},
+		"deployment_status": basetypes.StringType{},
+		"description":       basetypes.StringType{},
+		"fabric_name":       basetypes.StringType{},
+		"interface_index":   basetypes.Int64Type{},
+		"interface_name":    basetypes.StringType{},
+		"interface_type":    basetypes.StringType{},
+		"ipv4_address":      basetypes.StringType{},
+		"is_physical":       basetypes.BoolType{},
+		"mode":              basetypes.StringType{},
+		"native_vlan_id":    basetypes.Int64Type{},
+		"oper_status":       basetypes.StringType{},
+		"oper_status_cause": basetypes.StringType{},
+		"policy_name":       basetypes.StringType{},
+		"speed":             basetypes.StringType{},
+		"switch_dbid":       basetypes.Int64Type{},
+		"switch_name":       basetypes.StringType{},
+		"vrf":               basetypes.StringType{},
+	}
+
+	if v.IsNull() {
+		return types.ObjectNull(attributeTypes), diags
+	}
+
+	if v.IsUnknown() {
+		return types.ObjectUnknown(attributeTypes), diags
+	}
+
 	objVal, diags := types.ObjectValue(
-		map[string]attr.Type{
-			"admin_status":      basetypes.StringType{},
-			"allowed_vlans":     basetypes.StringType{},
-			"deployment_status": basetypes.StringType{},
-			"description":       basetypes.StringType{},
-			"fabric_name":       basetypes.StringType{},
-			"interface_index":   basetypes.Int64Type{},
-			"interface_name":    basetypes.StringType{},
-			"interface_type":    basetypes.StringType{},
-			"ipv4_address":      basetypes.StringType{},
-			"is_physical":       basetypes.BoolType{},
-			"mode":              basetypes.StringType{},
-			"native_vlan_id":    basetypes.Int64Type{},
-			"oper_status":       basetypes.StringType{},
-			"oper_status_cause": basetypes.StringType{},
-			"policy_name":       basetypes.StringType{},
-			"speed":             basetypes.StringType{},
-			"switch_dbid":       basetypes.Int64Type{},
-			"switch_name":       basetypes.StringType{},
-			"vrf":               basetypes.StringType{},
-		},
+		attributeTypes,
 		map[string]attr.Value{
 			"admin_status":      v.AdminStatus,
 			"allowed_vlans":     v.AllowedVlans,

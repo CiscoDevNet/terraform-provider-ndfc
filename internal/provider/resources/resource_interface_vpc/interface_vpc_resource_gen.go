@@ -1672,34 +1672,44 @@ func (v InterfacesValue) String() string {
 func (v InterfacesValue) ToObjectValue(ctx context.Context) (basetypes.ObjectValue, diag.Diagnostics) {
 	var diags diag.Diagnostics
 
+	attributeTypes := map[string]attr.Type{
+		"admin_state":              basetypes.BoolType{},
+		"bpdu_guard":               basetypes.StringType{},
+		"copy_po_description":      basetypes.BoolType{},
+		"deployment_status":        basetypes.StringType{},
+		"interface_name":           basetypes.StringType{},
+		"mtu":                      basetypes.StringType{},
+		"netflow":                  basetypes.BoolType{},
+		"netflow_monitor":          basetypes.StringType{},
+		"netflow_sampler":          basetypes.StringType{},
+		"peer1_allowed_vlans":      basetypes.StringType{},
+		"peer1_member_interfaces":  basetypes.StringType{},
+		"peer1_native_vlan":        basetypes.Int64Type{},
+		"peer1_po_description":     basetypes.StringType{},
+		"peer1_po_freeform_config": basetypes.StringType{},
+		"peer1_port_channel_id":    basetypes.Int64Type{},
+		"peer2_allowed_vlans":      basetypes.StringType{},
+		"peer2_member_interfaces":  basetypes.StringType{},
+		"peer2_native_vlan":        basetypes.Int64Type{},
+		"peer2_po_description":     basetypes.StringType{},
+		"peer2_po_freeform_config": basetypes.StringType{},
+		"peer2_port_channel_id":    basetypes.Int64Type{},
+		"port_type_fast":           basetypes.BoolType{},
+		"portchannel_mode":         basetypes.StringType{},
+		"serial_number":            basetypes.StringType{},
+		"speed":                    basetypes.StringType{},
+	}
+
+	if v.IsNull() {
+		return types.ObjectNull(attributeTypes), diags
+	}
+
+	if v.IsUnknown() {
+		return types.ObjectUnknown(attributeTypes), diags
+	}
+
 	objVal, diags := types.ObjectValue(
-		map[string]attr.Type{
-			"admin_state":              basetypes.BoolType{},
-			"bpdu_guard":               basetypes.StringType{},
-			"copy_po_description":      basetypes.BoolType{},
-			"deployment_status":        basetypes.StringType{},
-			"interface_name":           basetypes.StringType{},
-			"mtu":                      basetypes.StringType{},
-			"netflow":                  basetypes.BoolType{},
-			"netflow_monitor":          basetypes.StringType{},
-			"netflow_sampler":          basetypes.StringType{},
-			"peer1_allowed_vlans":      basetypes.StringType{},
-			"peer1_member_interfaces":  basetypes.StringType{},
-			"peer1_native_vlan":        basetypes.Int64Type{},
-			"peer1_po_description":     basetypes.StringType{},
-			"peer1_po_freeform_config": basetypes.StringType{},
-			"peer1_port_channel_id":    basetypes.Int64Type{},
-			"peer2_allowed_vlans":      basetypes.StringType{},
-			"peer2_member_interfaces":  basetypes.StringType{},
-			"peer2_native_vlan":        basetypes.Int64Type{},
-			"peer2_po_description":     basetypes.StringType{},
-			"peer2_po_freeform_config": basetypes.StringType{},
-			"peer2_port_channel_id":    basetypes.Int64Type{},
-			"port_type_fast":           basetypes.BoolType{},
-			"portchannel_mode":         basetypes.StringType{},
-			"serial_number":            basetypes.StringType{},
-			"speed":                    basetypes.StringType{},
-		},
+		attributeTypes,
 		map[string]attr.Value{
 			"admin_state":              v.AdminState,
 			"bpdu_guard":               v.BpduGuard,

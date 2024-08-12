@@ -683,17 +683,27 @@ func (v FabricsValue) String() string {
 func (v FabricsValue) ToObjectValue(ctx context.Context) (basetypes.ObjectValue, diag.Diagnostics) {
 	var diags diag.Diagnostics
 
+	attributeTypes := map[string]attr.Type{
+		"as_number":         basetypes.StringType{},
+		"device_type":       basetypes.StringType{},
+		"fabric_id":         basetypes.StringType{},
+		"fabric_name":       basetypes.StringType{},
+		"fabric_technology": basetypes.StringType{},
+		"fabric_type":       basetypes.StringType{},
+		"provision_mode":    basetypes.StringType{},
+		"site_id":           basetypes.StringType{},
+	}
+
+	if v.IsNull() {
+		return types.ObjectNull(attributeTypes), diags
+	}
+
+	if v.IsUnknown() {
+		return types.ObjectUnknown(attributeTypes), diags
+	}
+
 	objVal, diags := types.ObjectValue(
-		map[string]attr.Type{
-			"as_number":         basetypes.StringType{},
-			"device_type":       basetypes.StringType{},
-			"fabric_id":         basetypes.StringType{},
-			"fabric_name":       basetypes.StringType{},
-			"fabric_technology": basetypes.StringType{},
-			"fabric_type":       basetypes.StringType{},
-			"provision_mode":    basetypes.StringType{},
-			"site_id":           basetypes.StringType{},
-		},
+		attributeTypes,
 		map[string]attr.Value{
 			"as_number":         v.AsNumber,
 			"device_type":       v.DeviceType,

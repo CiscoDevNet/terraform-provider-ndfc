@@ -840,19 +840,29 @@ func (v InterfacesValue) String() string {
 func (v InterfacesValue) ToObjectValue(ctx context.Context) (basetypes.ObjectValue, diag.Diagnostics) {
 	var diags diag.Diagnostics
 
+	attributeTypes := map[string]attr.Type{
+		"admin_state":           basetypes.BoolType{},
+		"deployment_status":     basetypes.StringType{},
+		"freeform_config":       basetypes.StringType{},
+		"interface_description": basetypes.StringType{},
+		"interface_name":        basetypes.StringType{},
+		"ipv4_address":          basetypes.StringType{},
+		"ipv6_address":          basetypes.StringType{},
+		"route_map_tag":         basetypes.StringType{},
+		"serial_number":         basetypes.StringType{},
+		"vrf":                   basetypes.StringType{},
+	}
+
+	if v.IsNull() {
+		return types.ObjectNull(attributeTypes), diags
+	}
+
+	if v.IsUnknown() {
+		return types.ObjectUnknown(attributeTypes), diags
+	}
+
 	objVal, diags := types.ObjectValue(
-		map[string]attr.Type{
-			"admin_state":           basetypes.BoolType{},
-			"deployment_status":     basetypes.StringType{},
-			"freeform_config":       basetypes.StringType{},
-			"interface_description": basetypes.StringType{},
-			"interface_name":        basetypes.StringType{},
-			"ipv4_address":          basetypes.StringType{},
-			"ipv6_address":          basetypes.StringType{},
-			"route_map_tag":         basetypes.StringType{},
-			"serial_number":         basetypes.StringType{},
-			"vrf":                   basetypes.StringType{},
-		},
+		attributeTypes,
 		map[string]attr.Value{
 			"admin_state":           v.AdminState,
 			"deployment_status":     v.DeploymentStatus,

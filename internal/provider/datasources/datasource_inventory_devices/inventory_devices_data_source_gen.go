@@ -1124,25 +1124,35 @@ func (v DevicesValue) String() string {
 func (v DevicesValue) ToObjectValue(ctx context.Context) (basetypes.ObjectValue, diag.Diagnostics) {
 	var diags diag.Diagnostics
 
+	attributeTypes := map[string]attr.Type{
+		"config_status":    basetypes.StringType{},
+		"device_index":     basetypes.StringType{},
+		"discovery_status": basetypes.StringType{},
+		"hostname":         basetypes.StringType{},
+		"ip_address":       basetypes.StringType{},
+		"managable":        basetypes.BoolType{},
+		"mode":             basetypes.StringType{},
+		"model":            basetypes.StringType{},
+		"oper_status":      basetypes.StringType{},
+		"role":             basetypes.StringType{},
+		"serial_number":    basetypes.StringType{},
+		"switch_db_id":     basetypes.StringType{},
+		"uuid":             basetypes.StringType{},
+		"vdc_id":           basetypes.StringType{},
+		"vdc_mac":          basetypes.StringType{},
+		"version":          basetypes.StringType{},
+	}
+
+	if v.IsNull() {
+		return types.ObjectNull(attributeTypes), diags
+	}
+
+	if v.IsUnknown() {
+		return types.ObjectUnknown(attributeTypes), diags
+	}
+
 	objVal, diags := types.ObjectValue(
-		map[string]attr.Type{
-			"config_status":    basetypes.StringType{},
-			"device_index":     basetypes.StringType{},
-			"discovery_status": basetypes.StringType{},
-			"hostname":         basetypes.StringType{},
-			"ip_address":       basetypes.StringType{},
-			"managable":        basetypes.BoolType{},
-			"mode":             basetypes.StringType{},
-			"model":            basetypes.StringType{},
-			"oper_status":      basetypes.StringType{},
-			"role":             basetypes.StringType{},
-			"serial_number":    basetypes.StringType{},
-			"switch_db_id":     basetypes.StringType{},
-			"uuid":             basetypes.StringType{},
-			"vdc_id":           basetypes.StringType{},
-			"vdc_mac":          basetypes.StringType{},
-			"version":          basetypes.StringType{},
-		},
+		attributeTypes,
 		map[string]attr.Value{
 			"config_status":    v.ConfigStatus,
 			"device_index":     v.DeviceIndex,

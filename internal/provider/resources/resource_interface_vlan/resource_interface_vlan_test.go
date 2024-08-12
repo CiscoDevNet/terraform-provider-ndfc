@@ -1,3 +1,5 @@
+// Code generated;  DO NOT EDIT.
+
 package resource_interface_vlan
 
 import (
