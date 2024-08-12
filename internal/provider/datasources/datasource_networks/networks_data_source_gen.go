@@ -2220,47 +2220,57 @@ func (v NetworksValue) ToObjectValue(ctx context.Context) (basetypes.ObjectValue
 		)
 	}
 
-	objVal, diags := types.ObjectValue(
-		map[string]attr.Type{
-			"arp_suppression": basetypes.BoolType{},
-			"attachments": basetypes.ListType{
-				ElemType: AttachmentsValue{}.Type(ctx),
-			},
-			"dhcp_relay_loopback_id": basetypes.Int64Type{},
-			"dhcp_relay_servers": basetypes.ListType{
-				ElemType: DhcpRelayServersValue{}.Type(ctx),
-			},
-			"display_name":               basetypes.StringType{},
-			"gateway_ipv4_address":       basetypes.StringType{},
-			"gateway_ipv6_address":       basetypes.StringType{},
-			"igmp_version":               basetypes.StringType{},
-			"ingress_replication":        basetypes.BoolType{},
-			"interface_description":      basetypes.StringType{},
-			"l3_gatway_border":           basetypes.BoolType{},
-			"layer2_only":                basetypes.BoolType{},
-			"mtu":                        basetypes.Int64Type{},
-			"multicast_group":            basetypes.StringType{},
-			"netflow":                    basetypes.BoolType{},
-			"network_extension_template": basetypes.StringType{},
-			"network_id":                 basetypes.Int64Type{},
-			"network_name":               basetypes.StringType{},
-			"network_status":             basetypes.StringType{},
-			"network_template":           basetypes.StringType{},
-			"network_type":               basetypes.StringType{},
-			"primary_network_id":         basetypes.Int64Type{},
-			"route_target_both":          basetypes.BoolType{},
-			"routing_tag":                basetypes.Int64Type{},
-			"secondary_gateway_1":        basetypes.StringType{},
-			"secondary_gateway_2":        basetypes.StringType{},
-			"secondary_gateway_3":        basetypes.StringType{},
-			"secondary_gateway_4":        basetypes.StringType{},
-			"svi_netflow_monitor":        basetypes.StringType{},
-			"trm":                        basetypes.BoolType{},
-			"vlan_id":                    basetypes.Int64Type{},
-			"vlan_name":                  basetypes.StringType{},
-			"vlan_netflow_monitor":       basetypes.StringType{},
-			"vrf_name":                   basetypes.StringType{},
+	attributeTypes := map[string]attr.Type{
+		"arp_suppression": basetypes.BoolType{},
+		"attachments": basetypes.ListType{
+			ElemType: AttachmentsValue{}.Type(ctx),
 		},
+		"dhcp_relay_loopback_id": basetypes.Int64Type{},
+		"dhcp_relay_servers": basetypes.ListType{
+			ElemType: DhcpRelayServersValue{}.Type(ctx),
+		},
+		"display_name":               basetypes.StringType{},
+		"gateway_ipv4_address":       basetypes.StringType{},
+		"gateway_ipv6_address":       basetypes.StringType{},
+		"igmp_version":               basetypes.StringType{},
+		"ingress_replication":        basetypes.BoolType{},
+		"interface_description":      basetypes.StringType{},
+		"l3_gatway_border":           basetypes.BoolType{},
+		"layer2_only":                basetypes.BoolType{},
+		"mtu":                        basetypes.Int64Type{},
+		"multicast_group":            basetypes.StringType{},
+		"netflow":                    basetypes.BoolType{},
+		"network_extension_template": basetypes.StringType{},
+		"network_id":                 basetypes.Int64Type{},
+		"network_name":               basetypes.StringType{},
+		"network_status":             basetypes.StringType{},
+		"network_template":           basetypes.StringType{},
+		"network_type":               basetypes.StringType{},
+		"primary_network_id":         basetypes.Int64Type{},
+		"route_target_both":          basetypes.BoolType{},
+		"routing_tag":                basetypes.Int64Type{},
+		"secondary_gateway_1":        basetypes.StringType{},
+		"secondary_gateway_2":        basetypes.StringType{},
+		"secondary_gateway_3":        basetypes.StringType{},
+		"secondary_gateway_4":        basetypes.StringType{},
+		"svi_netflow_monitor":        basetypes.StringType{},
+		"trm":                        basetypes.BoolType{},
+		"vlan_id":                    basetypes.Int64Type{},
+		"vlan_name":                  basetypes.StringType{},
+		"vlan_netflow_monitor":       basetypes.StringType{},
+		"vrf_name":                   basetypes.StringType{},
+	}
+
+	if v.IsNull() {
+		return types.ObjectNull(attributeTypes), diags
+	}
+
+	if v.IsUnknown() {
+		return types.ObjectUnknown(attributeTypes), diags
+	}
+
+	objVal, diags := types.ObjectValue(
+		attributeTypes,
 		map[string]attr.Value{
 			"arp_suppression":            v.ArpSuppression,
 			"attachments":                attachments,
@@ -3255,23 +3265,33 @@ func (v AttachmentsValue) ToObjectValue(ctx context.Context) (basetypes.ObjectVa
 		}), diags
 	}
 
-	objVal, diags := types.ObjectValue(
-		map[string]attr.Type{
-			"attach_state":    basetypes.StringType{},
-			"attached":        basetypes.BoolType{},
-			"display_name":    basetypes.StringType{},
-			"freeform_config": basetypes.StringType{},
-			"instance_values": basetypes.StringType{},
-			"serial_number":   basetypes.StringType{},
-			"switch_name":     basetypes.StringType{},
-			"switch_ports": basetypes.SetType{
-				ElemType: types.StringType,
-			},
-			"tor_ports": basetypes.SetType{
-				ElemType: types.StringType,
-			},
-			"vlan": basetypes.Int64Type{},
+	attributeTypes := map[string]attr.Type{
+		"attach_state":    basetypes.StringType{},
+		"attached":        basetypes.BoolType{},
+		"display_name":    basetypes.StringType{},
+		"freeform_config": basetypes.StringType{},
+		"instance_values": basetypes.StringType{},
+		"serial_number":   basetypes.StringType{},
+		"switch_name":     basetypes.StringType{},
+		"switch_ports": basetypes.SetType{
+			ElemType: types.StringType,
 		},
+		"tor_ports": basetypes.SetType{
+			ElemType: types.StringType,
+		},
+		"vlan": basetypes.Int64Type{},
+	}
+
+	if v.IsNull() {
+		return types.ObjectNull(attributeTypes), diags
+	}
+
+	if v.IsUnknown() {
+		return types.ObjectUnknown(attributeTypes), diags
+	}
+
+	objVal, diags := types.ObjectValue(
+		attributeTypes,
 		map[string]attr.Value{
 			"attach_state":    v.AttachState,
 			"attached":        v.Attached,
@@ -3688,11 +3708,21 @@ func (v DhcpRelayServersValue) String() string {
 func (v DhcpRelayServersValue) ToObjectValue(ctx context.Context) (basetypes.ObjectValue, diag.Diagnostics) {
 	var diags diag.Diagnostics
 
+	attributeTypes := map[string]attr.Type{
+		"address": basetypes.StringType{},
+		"vrf":     basetypes.StringType{},
+	}
+
+	if v.IsNull() {
+		return types.ObjectNull(attributeTypes), diags
+	}
+
+	if v.IsUnknown() {
+		return types.ObjectUnknown(attributeTypes), diags
+	}
+
 	objVal, diags := types.ObjectValue(
-		map[string]attr.Type{
-			"address": basetypes.StringType{},
-			"vrf":     basetypes.StringType{},
-		},
+		attributeTypes,
 		map[string]attr.Value{
 			"address": v.Address,
 			"vrf":     v.Vrf,
