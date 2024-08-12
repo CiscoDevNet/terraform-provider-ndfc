@@ -1350,28 +1350,38 @@ func (v InterfacesValue) String() string {
 func (v InterfacesValue) ToObjectValue(ctx context.Context) (basetypes.ObjectValue, diag.Diagnostics) {
 	var diags diag.Diagnostics
 
+	attributeTypes := map[string]attr.Type{
+		"admin_state":           basetypes.BoolType{},
+		"allowed_vlans":         basetypes.StringType{},
+		"bpdu_guard":            basetypes.StringType{},
+		"copy_po_description":   basetypes.BoolType{},
+		"deployment_status":     basetypes.StringType{},
+		"freeform_config":       basetypes.StringType{},
+		"interface_description": basetypes.StringType{},
+		"interface_name":        basetypes.StringType{},
+		"member_interfaces":     basetypes.StringType{},
+		"mtu":                   basetypes.StringType{},
+		"native_vlan":           basetypes.Int64Type{},
+		"netflow":               basetypes.BoolType{},
+		"netflow_monitor":       basetypes.StringType{},
+		"netflow_sampler":       basetypes.StringType{},
+		"orphan_port":           basetypes.BoolType{},
+		"port_type_fast":        basetypes.BoolType{},
+		"portchannel_mode":      basetypes.StringType{},
+		"serial_number":         basetypes.StringType{},
+		"speed":                 basetypes.StringType{},
+	}
+
+	if v.IsNull() {
+		return types.ObjectNull(attributeTypes), diags
+	}
+
+	if v.IsUnknown() {
+		return types.ObjectUnknown(attributeTypes), diags
+	}
+
 	objVal, diags := types.ObjectValue(
-		map[string]attr.Type{
-			"admin_state":           basetypes.BoolType{},
-			"allowed_vlans":         basetypes.StringType{},
-			"bpdu_guard":            basetypes.StringType{},
-			"copy_po_description":   basetypes.BoolType{},
-			"deployment_status":     basetypes.StringType{},
-			"freeform_config":       basetypes.StringType{},
-			"interface_description": basetypes.StringType{},
-			"interface_name":        basetypes.StringType{},
-			"member_interfaces":     basetypes.StringType{},
-			"mtu":                   basetypes.StringType{},
-			"native_vlan":           basetypes.Int64Type{},
-			"netflow":               basetypes.BoolType{},
-			"netflow_monitor":       basetypes.StringType{},
-			"netflow_sampler":       basetypes.StringType{},
-			"orphan_port":           basetypes.BoolType{},
-			"port_type_fast":        basetypes.BoolType{},
-			"portchannel_mode":      basetypes.StringType{},
-			"serial_number":         basetypes.StringType{},
-			"speed":                 basetypes.StringType{},
-		},
+		attributeTypes,
 		map[string]attr.Value{
 			"admin_state":           v.AdminState,
 			"allowed_vlans":         v.AllowedVlans,

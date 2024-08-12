@@ -1114,24 +1114,34 @@ func (v ReachabilityDetailsValue) String() string {
 func (v ReachabilityDetailsValue) ToObjectValue(ctx context.Context) (basetypes.ObjectValue, diag.Diagnostics) {
 	var diags diag.Diagnostics
 
+	attributeTypes := map[string]attr.Type{
+		"authenticated": basetypes.BoolType{},
+		"device_index":  basetypes.StringType{},
+		"hostname":      basetypes.StringType{},
+		"ip_address":    basetypes.StringType{},
+		"known":         basetypes.BoolType{},
+		"last_changed":  basetypes.StringType{},
+		"model":         basetypes.StringType{},
+		"reachable":     basetypes.BoolType{},
+		"selectable":    basetypes.BoolType{},
+		"serial_number": basetypes.StringType{},
+		"status_reason": basetypes.StringType{},
+		"valid":         basetypes.BoolType{},
+		"vdc_id":        basetypes.StringType{},
+		"vdc_mac":       basetypes.StringType{},
+		"version":       basetypes.StringType{},
+	}
+
+	if v.IsNull() {
+		return types.ObjectNull(attributeTypes), diags
+	}
+
+	if v.IsUnknown() {
+		return types.ObjectUnknown(attributeTypes), diags
+	}
+
 	objVal, diags := types.ObjectValue(
-		map[string]attr.Type{
-			"authenticated": basetypes.BoolType{},
-			"device_index":  basetypes.StringType{},
-			"hostname":      basetypes.StringType{},
-			"ip_address":    basetypes.StringType{},
-			"known":         basetypes.BoolType{},
-			"last_changed":  basetypes.StringType{},
-			"model":         basetypes.StringType{},
-			"reachable":     basetypes.BoolType{},
-			"selectable":    basetypes.BoolType{},
-			"serial_number": basetypes.StringType{},
-			"status_reason": basetypes.StringType{},
-			"valid":         basetypes.BoolType{},
-			"vdc_id":        basetypes.StringType{},
-			"vdc_mac":       basetypes.StringType{},
-			"version":       basetypes.StringType{},
-		},
+		attributeTypes,
 		map[string]attr.Value{
 			"authenticated": v.Authenticated,
 			"device_index":  v.DeviceIndex,

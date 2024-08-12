@@ -1,4 +1,5 @@
-// Code generated DO NOT EDIT.
+// Code generated;  DO NOT EDIT.
+
 package resource_interface_vpc
 
 import (
