@@ -30,6 +30,7 @@ type NDFCInterfaceCommon struct {
 	NDFCInterface
 	client *nd.Client
 	lock   *sync.Mutex
+	ifType string
 }
 
 func (c NDFC) NewInterfaceObject(ifType string, client *nd.Client, lock *sync.Mutex) NDFCInterface {
@@ -39,36 +40,42 @@ func (c NDFC) NewInterfaceObject(ifType string, client *nd.Client, lock *sync.Mu
 		intf.client = client
 		intf.lock = lock
 		intf.NDFCInterface = intf
+		intf.ifType = ifType
 		return intf
 	case "loopback":
 		intf := new(NDFCLoopbackInterface)
 		intf.client = client
 		intf.lock = lock
 		intf.NDFCInterface = intf
+		intf.ifType = ifType
 		return intf
 	case "datasource":
 		intf := new(NDFCInterfaceCommon)
 		intf.client = client
 		intf.lock = lock
 		intf.NDFCInterface = intf
+		intf.ifType = ifType
 		return intf
 	case "vlan":
 		intf := new(NDFCVlanInterface)
 		intf.client = client
 		intf.lock = lock
 		intf.NDFCInterface = intf
+		intf.ifType = ifType
 		return intf
 	case "portchannel":
 		intf := new(NDFCPortChannelInterface)
 		intf.client = client
 		intf.lock = lock
 		intf.NDFCInterface = intf
+		intf.ifType = ifType
 		return intf
 	case "vpc":
 		intf := new(NDFCVPCInterface)
 		intf.client = client
 		intf.lock = lock
 		intf.NDFCInterface = intf
+		intf.ifType = ifType
 		return intf
 
 	default:

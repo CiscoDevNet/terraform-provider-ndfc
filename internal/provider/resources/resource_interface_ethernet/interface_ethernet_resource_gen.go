@@ -37,6 +37,9 @@ func InterfaceEthernetResourceSchema(ctx context.Context) schema.Schema {
 				Computed:            true,
 				Description:         "Unique identifier for the interface",
 				MarkdownDescription: "Unique identifier for the interface",
+				PlanModifiers: []planmodifier.String{
+					stringplanmodifier.UseStateForUnknown(),
+				},
 			},
 			"interfaces": schema.MapNestedAttribute{
 				NestedObject: schema.NestedAttributeObject{
@@ -73,10 +76,19 @@ func InterfaceEthernetResourceSchema(ctx context.Context) schema.Schema {
 							},
 							Default: stringdefault.StaticString("true"),
 						},
+						"custom_policy_parameters": schema.MapAttribute{
+							ElementType:         types.StringType,
+							Optional:            true,
+							Description:         "Custom policy parameters",
+							MarkdownDescription: "Custom policy parameters",
+						},
 						"deployment_status": schema.StringAttribute{
 							Computed:            true,
 							Description:         "Status of the deployment",
 							MarkdownDescription: "Status of the deployment",
+							PlanModifiers: []planmodifier.String{
+								stringplanmodifier.UseStateForUnknown(),
+							},
 						},
 						"freeform_config": schema.StringAttribute{
 							Optional:            true,
@@ -185,6 +197,16 @@ func InterfaceEthernetResourceSchema(ctx context.Context) schema.Schema {
 				},
 				Default: stringdefault.StaticString("int_trunk_host"),
 			},
+			"policy_type": schema.StringAttribute{
+				Optional:            true,
+				Computed:            true,
+				Description:         "Specifies if the policy is user defined or the default ones available in system",
+				MarkdownDescription: "Specifies if the policy is user defined or the default ones available in system",
+				Validators: []validator.String{
+					stringvalidator.OneOf("system", "user-defined"),
+				},
+				Default: stringdefault.StaticString("system"),
+			},
 			"serial_number": schema.StringAttribute{
 				Optional:            true,
 				Description:         "Serial number of switch to configure",
@@ -205,6 +227,7 @@ type InterfaceEthernetModel struct {
 	Id           types.String `tfsdk:"id"`
 	Interfaces   types.Map    `tfsdk:"interfaces"`
 	Policy       types.String `tfsdk:"policy"`
+	PolicyType   types.String `tfsdk:"policy_type"`
 	SerialNumber types.String `tfsdk:"serial_number"`
 }
 
@@ -303,6 +326,24 @@ func (t InterfacesType) ValueFromObject(ctx context.Context, in basetypes.Object
 		diags.AddError(
 			"Attribute Wrong Type",
 			fmt.Sprintf(`bpdu_guard expected to be basetypes.StringValue, was: %T`, bpduGuardAttribute))
+	}
+
+	customPolicyParametersAttribute, ok := attributes["custom_policy_parameters"]
+
+	if !ok {
+		diags.AddError(
+			"Attribute Missing",
+			`custom_policy_parameters is missing from object`)
+
+		return nil, diags
+	}
+
+	customPolicyParametersVal, ok := customPolicyParametersAttribute.(basetypes.MapValue)
+
+	if !ok {
+		diags.AddError(
+			"Attribute Wrong Type",
+			fmt.Sprintf(`custom_policy_parameters expected to be basetypes.MapValue, was: %T`, customPolicyParametersAttribute))
 	}
 
 	deploymentStatusAttribute, ok := attributes["deployment_status"]
@@ -562,25 +603,26 @@ func (t InterfacesType) ValueFromObject(ctx context.Context, in basetypes.Object
 	}
 
 	return InterfacesValue{
-		AccessVlan:           accessVlanVal,
-		AdminState:           adminStateVal,
-		AllowedVlans:         allowedVlansVal,
-		BpduGuard:            bpduGuardVal,
-		DeploymentStatus:     deploymentStatusVal,
-		FreeformConfig:       freeformConfigVal,
-		InterfaceDescription: interfaceDescriptionVal,
-		InterfaceName:        interfaceNameVal,
-		Mtu:                  mtuVal,
-		NativeVlan:           nativeVlanVal,
-		Netflow:              netflowVal,
-		NetflowMonitor:       netflowMonitorVal,
-		NetflowSampler:       netflowSamplerVal,
-		OrphanPort:           orphanPortVal,
-		PortTypeFast:         portTypeFastVal,
-		Ptp:                  ptpVal,
-		SerialNumber:         serialNumberVal,
-		Speed:                speedVal,
-		state:                attr.ValueStateKnown,
+		AccessVlan:             accessVlanVal,
+		AdminState:             adminStateVal,
+		AllowedVlans:           allowedVlansVal,
+		BpduGuard:              bpduGuardVal,
+		CustomPolicyParameters: customPolicyParametersVal,
+		DeploymentStatus:       deploymentStatusVal,
+		FreeformConfig:         freeformConfigVal,
+		InterfaceDescription:   interfaceDescriptionVal,
+		InterfaceName:          interfaceNameVal,
+		Mtu:                    mtuVal,
+		NativeVlan:             nativeVlanVal,
+		Netflow:                netflowVal,
+		NetflowMonitor:         netflowMonitorVal,
+		NetflowSampler:         netflowSamplerVal,
+		OrphanPort:             orphanPortVal,
+		PortTypeFast:           portTypeFastVal,
+		Ptp:                    ptpVal,
+		SerialNumber:           serialNumberVal,
+		Speed:                  speedVal,
+		state:                  attr.ValueStateKnown,
 	}, diags
 }
 
@@ -719,6 +761,24 @@ func NewInterfacesValue(attributeTypes map[string]attr.Type, attributes map[stri
 			fmt.Sprintf(`bpdu_guard expected to be basetypes.StringValue, was: %T`, bpduGuardAttribute))
 	}
 
+	customPolicyParametersAttribute, ok := attributes["custom_policy_parameters"]
+
+	if !ok {
+		diags.AddError(
+			"Attribute Missing",
+			`custom_policy_parameters is missing from object`)
+
+		return NewInterfacesValueUnknown(), diags
+	}
+
+	customPolicyParametersVal, ok := customPolicyParametersAttribute.(basetypes.MapValue)
+
+	if !ok {
+		diags.AddError(
+			"Attribute Wrong Type",
+			fmt.Sprintf(`custom_policy_parameters expected to be basetypes.MapValue, was: %T`, customPolicyParametersAttribute))
+	}
+
 	deploymentStatusAttribute, ok := attributes["deployment_status"]
 
 	if !ok {
@@ -976,25 +1036,26 @@ func NewInterfacesValue(attributeTypes map[string]attr.Type, attributes map[stri
 	}
 
 	return InterfacesValue{
-		AccessVlan:           accessVlanVal,
-		AdminState:           adminStateVal,
-		AllowedVlans:         allowedVlansVal,
-		BpduGuard:            bpduGuardVal,
-		DeploymentStatus:     deploymentStatusVal,
-		FreeformConfig:       freeformConfigVal,
-		InterfaceDescription: interfaceDescriptionVal,
-		InterfaceName:        interfaceNameVal,
-		Mtu:                  mtuVal,
-		NativeVlan:           nativeVlanVal,
-		Netflow:              netflowVal,
-		NetflowMonitor:       netflowMonitorVal,
-		NetflowSampler:       netflowSamplerVal,
-		OrphanPort:           orphanPortVal,
-		PortTypeFast:         portTypeFastVal,
-		Ptp:                  ptpVal,
-		SerialNumber:         serialNumberVal,
-		Speed:                speedVal,
-		state:                attr.ValueStateKnown,
+		AccessVlan:             accessVlanVal,
+		AdminState:             adminStateVal,
+		AllowedVlans:           allowedVlansVal,
+		BpduGuard:              bpduGuardVal,
+		CustomPolicyParameters: customPolicyParametersVal,
+		DeploymentStatus:       deploymentStatusVal,
+		FreeformConfig:         freeformConfigVal,
+		InterfaceDescription:   interfaceDescriptionVal,
+		InterfaceName:          interfaceNameVal,
+		Mtu:                    mtuVal,
+		NativeVlan:             nativeVlanVal,
+		Netflow:                netflowVal,
+		NetflowMonitor:         netflowMonitorVal,
+		NetflowSampler:         netflowSamplerVal,
+		OrphanPort:             orphanPortVal,
+		PortTypeFast:           portTypeFastVal,
+		Ptp:                    ptpVal,
+		SerialNumber:           serialNumberVal,
+		Speed:                  speedVal,
+		state:                  attr.ValueStateKnown,
 	}, diags
 }
 
@@ -1066,29 +1127,30 @@ func (t InterfacesType) ValueType(ctx context.Context) attr.Value {
 var _ basetypes.ObjectValuable = InterfacesValue{}
 
 type InterfacesValue struct {
-	AccessVlan           basetypes.Int64Value  `tfsdk:"access_vlan"`
-	AdminState           basetypes.BoolValue   `tfsdk:"admin_state"`
-	AllowedVlans         basetypes.StringValue `tfsdk:"allowed_vlans"`
-	BpduGuard            basetypes.StringValue `tfsdk:"bpdu_guard"`
-	DeploymentStatus     basetypes.StringValue `tfsdk:"deployment_status"`
-	FreeformConfig       basetypes.StringValue `tfsdk:"freeform_config"`
-	InterfaceDescription basetypes.StringValue `tfsdk:"interface_description"`
-	InterfaceName        basetypes.StringValue `tfsdk:"interface_name"`
-	Mtu                  basetypes.StringValue `tfsdk:"mtu"`
-	NativeVlan           basetypes.Int64Value  `tfsdk:"native_vlan"`
-	Netflow              basetypes.BoolValue   `tfsdk:"netflow"`
-	NetflowMonitor       basetypes.StringValue `tfsdk:"netflow_monitor"`
-	NetflowSampler       basetypes.StringValue `tfsdk:"netflow_sampler"`
-	OrphanPort           basetypes.BoolValue   `tfsdk:"orphan_port"`
-	PortTypeFast         basetypes.BoolValue   `tfsdk:"port_type_fast"`
-	Ptp                  basetypes.BoolValue   `tfsdk:"ptp"`
-	SerialNumber         basetypes.StringValue `tfsdk:"serial_number"`
-	Speed                basetypes.StringValue `tfsdk:"speed"`
-	state                attr.ValueState
+	AccessVlan             basetypes.Int64Value  `tfsdk:"access_vlan"`
+	AdminState             basetypes.BoolValue   `tfsdk:"admin_state"`
+	AllowedVlans           basetypes.StringValue `tfsdk:"allowed_vlans"`
+	BpduGuard              basetypes.StringValue `tfsdk:"bpdu_guard"`
+	CustomPolicyParameters basetypes.MapValue    `tfsdk:"custom_policy_parameters"`
+	DeploymentStatus       basetypes.StringValue `tfsdk:"deployment_status"`
+	FreeformConfig         basetypes.StringValue `tfsdk:"freeform_config"`
+	InterfaceDescription   basetypes.StringValue `tfsdk:"interface_description"`
+	InterfaceName          basetypes.StringValue `tfsdk:"interface_name"`
+	Mtu                    basetypes.StringValue `tfsdk:"mtu"`
+	NativeVlan             basetypes.Int64Value  `tfsdk:"native_vlan"`
+	Netflow                basetypes.BoolValue   `tfsdk:"netflow"`
+	NetflowMonitor         basetypes.StringValue `tfsdk:"netflow_monitor"`
+	NetflowSampler         basetypes.StringValue `tfsdk:"netflow_sampler"`
+	OrphanPort             basetypes.BoolValue   `tfsdk:"orphan_port"`
+	PortTypeFast           basetypes.BoolValue   `tfsdk:"port_type_fast"`
+	Ptp                    basetypes.BoolValue   `tfsdk:"ptp"`
+	SerialNumber           basetypes.StringValue `tfsdk:"serial_number"`
+	Speed                  basetypes.StringValue `tfsdk:"speed"`
+	state                  attr.ValueState
 }
 
 func (v InterfacesValue) ToTerraformValue(ctx context.Context) (tftypes.Value, error) {
-	attrTypes := make(map[string]tftypes.Type, 18)
+	attrTypes := make(map[string]tftypes.Type, 19)
 
 	var val tftypes.Value
 	var err error
@@ -1097,6 +1159,9 @@ func (v InterfacesValue) ToTerraformValue(ctx context.Context) (tftypes.Value, e
 	attrTypes["admin_state"] = basetypes.BoolType{}.TerraformType(ctx)
 	attrTypes["allowed_vlans"] = basetypes.StringType{}.TerraformType(ctx)
 	attrTypes["bpdu_guard"] = basetypes.StringType{}.TerraformType(ctx)
+	attrTypes["custom_policy_parameters"] = basetypes.MapType{
+		ElemType: types.StringType,
+	}.TerraformType(ctx)
 	attrTypes["deployment_status"] = basetypes.StringType{}.TerraformType(ctx)
 	attrTypes["freeform_config"] = basetypes.StringType{}.TerraformType(ctx)
 	attrTypes["interface_description"] = basetypes.StringType{}.TerraformType(ctx)
@@ -1116,7 +1181,7 @@ func (v InterfacesValue) ToTerraformValue(ctx context.Context) (tftypes.Value, e
 
 	switch v.state {
 	case attr.ValueStateKnown:
-		vals := make(map[string]tftypes.Value, 18)
+		vals := make(map[string]tftypes.Value, 19)
 
 		val, err = v.AccessVlan.ToTerraformValue(ctx)
 
@@ -1149,6 +1214,14 @@ func (v InterfacesValue) ToTerraformValue(ctx context.Context) (tftypes.Value, e
 		}
 
 		vals["bpdu_guard"] = val
+
+		val, err = v.CustomPolicyParameters.ToTerraformValue(ctx)
+
+		if err != nil {
+			return tftypes.NewValue(objectType, tftypes.UnknownValue), err
+		}
+
+		vals["custom_policy_parameters"] = val
 
 		val, err = v.DeploymentStatus.ToTerraformValue(ctx)
 
@@ -1291,11 +1364,44 @@ func (v InterfacesValue) String() string {
 func (v InterfacesValue) ToObjectValue(ctx context.Context) (basetypes.ObjectValue, diag.Diagnostics) {
 	var diags diag.Diagnostics
 
+	customPolicyParametersVal, d := types.MapValue(types.StringType, v.CustomPolicyParameters.Elements())
+
+	diags.Append(d...)
+
+	if d.HasError() {
+		return types.ObjectUnknown(map[string]attr.Type{
+			"access_vlan":   basetypes.Int64Type{},
+			"admin_state":   basetypes.BoolType{},
+			"allowed_vlans": basetypes.StringType{},
+			"bpdu_guard":    basetypes.StringType{},
+			"custom_policy_parameters": basetypes.MapType{
+				ElemType: types.StringType,
+			},
+			"deployment_status":     basetypes.StringType{},
+			"freeform_config":       basetypes.StringType{},
+			"interface_description": basetypes.StringType{},
+			"interface_name":        basetypes.StringType{},
+			"mtu":                   basetypes.StringType{},
+			"native_vlan":           basetypes.Int64Type{},
+			"netflow":               basetypes.BoolType{},
+			"netflow_monitor":       basetypes.StringType{},
+			"netflow_sampler":       basetypes.StringType{},
+			"orphan_port":           basetypes.BoolType{},
+			"port_type_fast":        basetypes.BoolType{},
+			"ptp":                   basetypes.BoolType{},
+			"serial_number":         basetypes.StringType{},
+			"speed":                 basetypes.StringType{},
+		}), diags
+	}
+
 	attributeTypes := map[string]attr.Type{
-		"access_vlan":           basetypes.Int64Type{},
-		"admin_state":           basetypes.BoolType{},
-		"allowed_vlans":         basetypes.StringType{},
-		"bpdu_guard":            basetypes.StringType{},
+		"access_vlan":   basetypes.Int64Type{},
+		"admin_state":   basetypes.BoolType{},
+		"allowed_vlans": basetypes.StringType{},
+		"bpdu_guard":    basetypes.StringType{},
+		"custom_policy_parameters": basetypes.MapType{
+			ElemType: types.StringType,
+		},
 		"deployment_status":     basetypes.StringType{},
 		"freeform_config":       basetypes.StringType{},
 		"interface_description": basetypes.StringType{},
@@ -1323,24 +1429,25 @@ func (v InterfacesValue) ToObjectValue(ctx context.Context) (basetypes.ObjectVal
 	objVal, diags := types.ObjectValue(
 		attributeTypes,
 		map[string]attr.Value{
-			"access_vlan":           v.AccessVlan,
-			"admin_state":           v.AdminState,
-			"allowed_vlans":         v.AllowedVlans,
-			"bpdu_guard":            v.BpduGuard,
-			"deployment_status":     v.DeploymentStatus,
-			"freeform_config":       v.FreeformConfig,
-			"interface_description": v.InterfaceDescription,
-			"interface_name":        v.InterfaceName,
-			"mtu":                   v.Mtu,
-			"native_vlan":           v.NativeVlan,
-			"netflow":               v.Netflow,
-			"netflow_monitor":       v.NetflowMonitor,
-			"netflow_sampler":       v.NetflowSampler,
-			"orphan_port":           v.OrphanPort,
-			"port_type_fast":        v.PortTypeFast,
-			"ptp":                   v.Ptp,
-			"serial_number":         v.SerialNumber,
-			"speed":                 v.Speed,
+			"access_vlan":              v.AccessVlan,
+			"admin_state":              v.AdminState,
+			"allowed_vlans":            v.AllowedVlans,
+			"bpdu_guard":               v.BpduGuard,
+			"custom_policy_parameters": customPolicyParametersVal,
+			"deployment_status":        v.DeploymentStatus,
+			"freeform_config":          v.FreeformConfig,
+			"interface_description":    v.InterfaceDescription,
+			"interface_name":           v.InterfaceName,
+			"mtu":                      v.Mtu,
+			"native_vlan":              v.NativeVlan,
+			"netflow":                  v.Netflow,
+			"netflow_monitor":          v.NetflowMonitor,
+			"netflow_sampler":          v.NetflowSampler,
+			"orphan_port":              v.OrphanPort,
+			"port_type_fast":           v.PortTypeFast,
+			"ptp":                      v.Ptp,
+			"serial_number":            v.SerialNumber,
+			"speed":                    v.Speed,
 		})
 
 	return objVal, diags
@@ -1374,6 +1481,10 @@ func (v InterfacesValue) Equal(o attr.Value) bool {
 	}
 
 	if !v.BpduGuard.Equal(other.BpduGuard) {
+		return false
+	}
+
+	if !v.CustomPolicyParameters.Equal(other.CustomPolicyParameters) {
 		return false
 	}
 
@@ -1446,10 +1557,13 @@ func (v InterfacesValue) Type(ctx context.Context) attr.Type {
 
 func (v InterfacesValue) AttributeTypes(ctx context.Context) map[string]attr.Type {
 	return map[string]attr.Type{
-		"access_vlan":           basetypes.Int64Type{},
-		"admin_state":           basetypes.BoolType{},
-		"allowed_vlans":         basetypes.StringType{},
-		"bpdu_guard":            basetypes.StringType{},
+		"access_vlan":   basetypes.Int64Type{},
+		"admin_state":   basetypes.BoolType{},
+		"allowed_vlans": basetypes.StringType{},
+		"bpdu_guard":    basetypes.StringType{},
+		"custom_policy_parameters": basetypes.MapType{
+			ElemType: types.StringType,
+		},
 		"deployment_status":     basetypes.StringType{},
 		"freeform_config":       basetypes.StringType{},
 		"interface_description": basetypes.StringType{},
