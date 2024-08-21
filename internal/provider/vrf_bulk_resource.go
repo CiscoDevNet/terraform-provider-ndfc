@@ -190,85 +190,87 @@ func (r vrfBulkResource) ValidateConfig(ctx context.Context, req resource.Valida
 		tflog.Debug(ctx, "DeployAllAttachments is set")
 		globalDeploy = data.DeployAllAttachments.ValueBool()
 	}
-
-	elements1 := make(map[string]resource_vrf_bulk.VrfsValue)
-	dg := data.Vrfs.ElementsAs(ctx, &elements1, false)
-	if dg.HasError() {
-		resp.Diagnostics.AddError("Vrfs", "Error in reading Vrfs")
-		return
-	}
-	seen := make(map[string]bool)
-	for vrf, v := range elements1 {
-		vrfDeploy := false
-		if got, ok := seen[vrf]; ok && got {
-			tflog.Error(ctx, fmt.Sprintf("Duplicate VRF %s", vrf))
-			resp.Diagnostics.AddError("Vrfs", fmt.Sprintf("Duplicate entry for VRF %s", vrf))
-			return
-		}
-		seen[vrf] = true
-		if !v.DeployAttachments.IsNull() && !v.DeployAttachments.IsUnknown() {
-			tflog.Debug(ctx, fmt.Sprintf("DeployAttachments is set for vrf %s", vrf))
-			vrfDeploy = v.DeployAttachments.ValueBool()
-			if globalDeploy && vrfDeploy {
-				tflog.Error(ctx, "Conflicting Deployment Flags - Global & vrf level")
-				resp.Diagnostics.AddAttributeError(
-					path.Root("deploy_all_attachments"),
-					"Conflicting Deployment Flags",
-					"Use only one deployment flag at a time",
-				)
-				resp.Diagnostics.AddAttributeError(
-					path.Root("vrfs").AtMapKey(vrf).AtName("deploy_attachments"),
-					"Conflicting Deployment Flags",
-					"Use only one deployment flag at a time",
-				)
-				return
-			}
-		}
-
-		elements2 := make(map[string]resource_vrf_bulk.AttachListValue)
-		dg := v.AttachList.ElementsAs(ctx, &elements2, false)
+	if !data.Vrfs.IsNull() && !data.Vrfs.IsUnknown() {
+		elements1 := make(map[string]resource_vrf_bulk.VrfsValue, len(data.Vrfs.Elements()))
+		dg := data.Vrfs.ElementsAs(ctx, &elements1, false)
 		if dg.HasError() {
-			resp.Diagnostics.AddError("AttachList", "Error in reading AttachList")
+			resp.Diagnostics.AddError("Error in reading Input TF", fmt.Sprintf("%v", dg.Errors()))
 			return
 		}
 		seen := make(map[string]bool)
-		for serial, s := range elements2 {
-			if got, ok := seen[serial]; ok && got {
-				tflog.Error(ctx, fmt.Sprintf("Duplicate Serial %s", serial))
-				resp.Diagnostics.AddError("AttachList", fmt.Sprintf("Duplicate entry for Attachment %s/%s", vrf, serial))
+		for vrf, v := range elements1 {
+			vrfDeploy := false
+			if got, ok := seen[vrf]; ok && got {
+				tflog.Error(ctx, fmt.Sprintf("Duplicate VRF %s", vrf))
+				resp.Diagnostics.AddError("Vrfs", fmt.Sprintf("Duplicate entry for VRF %s", vrf))
 				return
 			}
-			seen[serial] = true
-			if !s.DeployThisAttachment.IsNull() && !s.DeployThisAttachment.IsUnknown() {
-				attachDeploy := s.DeployThisAttachment.ValueBool()
-				tflog.Debug(ctx, fmt.Sprintf("DeployThisAttachment is set for %s/%s", vrf, serial))
-				if globalDeploy && attachDeploy {
-					tflog.Error(ctx, "Conflicting Deployment Flags - Global & attachment level")
+			seen[vrf] = true
+			if !v.DeployAttachments.IsNull() && !v.DeployAttachments.IsUnknown() {
+				tflog.Debug(ctx, fmt.Sprintf("DeployAttachments is set for vrf %s", vrf))
+				vrfDeploy = v.DeployAttachments.ValueBool()
+				if globalDeploy && vrfDeploy {
+					tflog.Error(ctx, "Conflicting Deployment Flags - Global & vrf level")
 					resp.Diagnostics.AddAttributeError(
 						path.Root("deploy_all_attachments"),
 						"Conflicting Deployment Flags",
 						"Use only one deployment flag at a time",
 					)
 					resp.Diagnostics.AddAttributeError(
-						path.Root("vrfs").AtMapKey(vrf).AtName("attach_list").AtMapKey(serial).AtName("deploy_this_attachment"),
+						path.Root("vrfs").AtMapKey(vrf).AtName("deploy_attachments"),
 						"Conflicting Deployment Flags",
 						"Use only one deployment flag at a time",
 					)
 					return
 				}
-				if vrfDeploy && attachDeploy {
-					tflog.Error(ctx, "Conflicting Deployment Flags - vrf & attachment level")
-					resp.Diagnostics.AddAttributeError(
-						path.Root("vrfs").AtMapKey(vrf).AtName("deploy_attachments"),
-						"Conflicting Deployment Flags",
-						"Use only one deployment flag at a time",
-					)
-					resp.Diagnostics.AddAttributeError(
-						path.Root("vrfs").AtMapKey(vrf).AtName("attach_list").AtMapKey(serial).AtName("deploy_this_attachment"),
-						"Conflicting Deployment Flags",
-						"Use only one deployment flag at a time",
-					)
+			}
+			if !v.AttachList.IsNull() && !v.AttachList.IsUnknown() {
+				elements2 := make(map[string]resource_vrf_bulk.AttachListValue, len(v.AttachList.Elements()))
+				dg := v.AttachList.ElementsAs(ctx, &elements2, false)
+				if dg.HasError() {
+					resp.Diagnostics.AddError("Error in reading AttachList Input", fmt.Sprintf("%v", dg.Errors()))
 					return
+				}
+				seen := make(map[string]bool)
+				for serial, s := range elements2 {
+					if got, ok := seen[serial]; ok && got {
+						tflog.Error(ctx, fmt.Sprintf("Duplicate Serial %s", serial))
+						resp.Diagnostics.AddError("AttachList", fmt.Sprintf("Duplicate entry for Attachment %s/%s", vrf, serial))
+						return
+					}
+					seen[serial] = true
+					if !s.DeployThisAttachment.IsNull() && !s.DeployThisAttachment.IsUnknown() {
+						attachDeploy := s.DeployThisAttachment.ValueBool()
+						tflog.Debug(ctx, fmt.Sprintf("DeployThisAttachment is set for %s/%s", vrf, serial))
+						if globalDeploy && attachDeploy {
+							tflog.Error(ctx, "Conflicting Deployment Flags - Global & attachment level")
+							resp.Diagnostics.AddAttributeError(
+								path.Root("deploy_all_attachments"),
+								"Conflicting Deployment Flags",
+								"Use only one deployment flag at a time",
+							)
+							resp.Diagnostics.AddAttributeError(
+								path.Root("vrfs").AtMapKey(vrf).AtName("attach_list").AtMapKey(serial).AtName("deploy_this_attachment"),
+								"Conflicting Deployment Flags",
+								"Use only one deployment flag at a time",
+							)
+							return
+						}
+						if vrfDeploy && attachDeploy {
+							tflog.Error(ctx, "Conflicting Deployment Flags - vrf & attachment level")
+							resp.Diagnostics.AddAttributeError(
+								path.Root("vrfs").AtMapKey(vrf).AtName("deploy_attachments"),
+								"Conflicting Deployment Flags",
+								"Use only one deployment flag at a time",
+							)
+							resp.Diagnostics.AddAttributeError(
+								path.Root("vrfs").AtMapKey(vrf).AtName("attach_list").AtMapKey(serial).AtName("deploy_this_attachment"),
+								"Conflicting Deployment Flags",
+								"Use only one deployment flag at a time",
+							)
+							return
+						}
+					}
 				}
 			}
 		}

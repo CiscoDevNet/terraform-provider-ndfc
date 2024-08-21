@@ -207,78 +207,80 @@ func (r networkBulkResource) ValidateConfig(ctx context.Context, req resource.Va
 		globalDeploy = data.DeployAllAttachments.ValueBool()
 	}
 
-	elements1 := make(map[string]resource_networks.NetworksValue)
-	dg := data.Networks.ElementsAs(ctx, &elements1, false)
-	if dg.HasError() {
-		resp.Diagnostics.AddError("Networks", "Error in reading Networks")
-		return
-	}
-
-	for network, v := range elements1 {
-		networkDeploy := false
-		if !v.DeployAttachments.IsNull() && !v.DeployAttachments.IsUnknown() {
-			tflog.Debug(ctx, fmt.Sprintf("DeployAttachments is set for network %s", network))
-			networkDeploy = v.DeployAttachments.ValueBool()
-			if globalDeploy && networkDeploy {
-				tflog.Error(ctx, "Conflicting Deployment Flags - Global & network level")
-				resp.Diagnostics.AddAttributeError(
-					path.Root("deploy_all_attachments"),
-					"Conflicting Deployment Flags",
-					"Use only one deployment flag at a time",
-				)
-				resp.Diagnostics.AddAttributeError(
-					path.Root("networks").AtMapKey(network).AtName("deploy_attachments"),
-					"Conflicting Deployment Flags",
-					"Use only one deployment flag at a time",
-				)
-				return
-			}
-		}
-
-		elements2 := make(map[string]resource_networks.AttachmentsValue)
-		dg := v.Attachments.ElementsAs(ctx, &elements2, false)
+	if !data.Networks.IsNull() && !data.Networks.IsUnknown() {
+		elements1 := make(map[string]resource_networks.NetworksValue, len(data.Networks.Elements()))
+		dg := data.Networks.ElementsAs(ctx, &elements1, false)
 		if dg.HasError() {
-			resp.Diagnostics.AddError("AttachList", "Error in reading AttachList")
+			resp.Diagnostics.AddError("Error in Networks input", fmt.Sprintf("%v", dg.Errors()))
 			return
 		}
-		for serial, s := range elements2 {
-			if !s.DeployThisAttachment.IsNull() && !s.DeployThisAttachment.IsUnknown() {
-				attachDeploy := s.DeployThisAttachment.ValueBool()
-				tflog.Debug(ctx, fmt.Sprintf("DeployThisAttachment is set for %s/%s", network, serial))
-				if globalDeploy && attachDeploy {
-					tflog.Error(ctx, "Conflicting Deployment Flags - Global & attachment level")
+
+		for network, v := range elements1 {
+			networkDeploy := false
+			if !v.DeployAttachments.IsNull() && !v.DeployAttachments.IsUnknown() {
+				tflog.Debug(ctx, fmt.Sprintf("DeployAttachments is set for network %s", network))
+				networkDeploy = v.DeployAttachments.ValueBool()
+				if globalDeploy && networkDeploy {
+					tflog.Error(ctx, "Conflicting Deployment Flags - Global & network level")
 					resp.Diagnostics.AddAttributeError(
 						path.Root("deploy_all_attachments"),
 						"Conflicting Deployment Flags",
 						"Use only one deployment flag at a time",
 					)
 					resp.Diagnostics.AddAttributeError(
-						path.Root("networks").AtMapKey(network).AtName("attachments").AtMapKey(serial).AtName("deploy_this_attachment"),
-						"Conflicting Deployment Flags",
-						"Use only one deployment flag at a time",
-					)
-					return
-				}
-				if networkDeploy && attachDeploy {
-					tflog.Error(ctx, "Conflicting Deployment Flags - network & attachment level")
-					resp.Diagnostics.AddAttributeError(
 						path.Root("networks").AtMapKey(network).AtName("deploy_attachments"),
 						"Conflicting Deployment Flags",
 						"Use only one deployment flag at a time",
 					)
-					resp.Diagnostics.AddAttributeError(
-						path.Root("networks").AtMapKey(network).AtName("attach_list").AtMapKey(serial).AtName("deploy_this_attachment"),
-						"Conflicting Deployment Flags",
-						"Use only one deployment flag at a time",
-					)
 					return
 				}
-				//resp.Diagnostics.AddWarning("Attachments", fmt.Sprintf("VRF %s must have attachment %s configured", v.VrfName.ValueString(), serial))
+			}
+
+			if !v.Attachments.IsNull() && !v.Attachments.IsUnknown() {
+				elements2 := make(map[string]resource_networks.AttachmentsValue)
+				dg := v.Attachments.ElementsAs(ctx, &elements2, false)
+				if dg.HasError() {
+					resp.Diagnostics.AddError("Error in AttachList input", fmt.Sprintf("%v", dg.Errors()))
+					return
+				}
+				for serial, s := range elements2 {
+					if !s.DeployThisAttachment.IsNull() && !s.DeployThisAttachment.IsUnknown() {
+						attachDeploy := s.DeployThisAttachment.ValueBool()
+						tflog.Debug(ctx, fmt.Sprintf("DeployThisAttachment is set for %s/%s", network, serial))
+						if globalDeploy && attachDeploy {
+							tflog.Error(ctx, "Conflicting Deployment Flags - Global & attachment level")
+							resp.Diagnostics.AddAttributeError(
+								path.Root("deploy_all_attachments"),
+								"Conflicting Deployment Flags",
+								"Use only one deployment flag at a time",
+							)
+							resp.Diagnostics.AddAttributeError(
+								path.Root("networks").AtMapKey(network).AtName("attachments").AtMapKey(serial).AtName("deploy_this_attachment"),
+								"Conflicting Deployment Flags",
+								"Use only one deployment flag at a time",
+							)
+							return
+						}
+						if networkDeploy && attachDeploy {
+							tflog.Error(ctx, "Conflicting Deployment Flags - network & attachment level")
+							resp.Diagnostics.AddAttributeError(
+								path.Root("networks").AtMapKey(network).AtName("deploy_attachments"),
+								"Conflicting Deployment Flags",
+								"Use only one deployment flag at a time",
+							)
+							resp.Diagnostics.AddAttributeError(
+								path.Root("networks").AtMapKey(network).AtName("attach_list").AtMapKey(serial).AtName("deploy_this_attachment"),
+								"Conflicting Deployment Flags",
+								"Use only one deployment flag at a time",
+							)
+							return
+						}
+						//resp.Diagnostics.AddWarning("Attachments", fmt.Sprintf("VRF %s must have attachment %s configured", v.VrfName.ValueString(), serial))
+					}
+				}
 			}
 		}
-
 	}
-
 }
 
 func (r *networkBulkResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
