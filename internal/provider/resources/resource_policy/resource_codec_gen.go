@@ -100,11 +100,7 @@ func (v *PolicyModel) SetModelData(jsonData *NDFCPolicyModel) diag.Diagnostics {
 
 	if len(jsonData.PolicyParameters) == 0 {
 		log.Printf("v.PolicyParameters is empty")
-		v.PolicyParameters, err = types.MapValue(types.StringType, map[string]attr.Value{})
-		if err != nil {
-			log.Printf("Error in converting map[string]string to  Map %v", err)
-			return err
-		}
+		v.PolicyParameters = types.MapNull(types.StringType)
 	} else {
 		mapData := make(map[string]attr.Value)
 		for key, item := range jsonData.PolicyParameters {

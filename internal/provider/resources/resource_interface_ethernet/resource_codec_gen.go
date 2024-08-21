@@ -25,6 +25,12 @@ func (v *InterfaceEthernetModel) SetModelData(jsonData *resource_interface_commo
 		v.Policy = types.StringNull()
 	}
 
+	if jsonData.PolicyType != "" {
+		v.PolicyType = types.StringValue(jsonData.PolicyType)
+	} else {
+		v.PolicyType = types.StringNull()
+	}
+
 	v.Deploy = types.BoolValue(jsonData.Deploy)
 	if jsonData.SerialNumber != "" {
 		v.SerialNumber = types.StringValue(jsonData.SerialNumber)
@@ -189,6 +195,21 @@ func (v *InterfacesValue) SetValue(jsonData *resource_interface_common.NDFCInter
 		v.DeploymentStatus = types.StringNull()
 	}
 
+	if len(jsonData.CustomPolicyParameters) == 0 {
+		log.Printf("v.CustomPolicyParameters is empty")
+		v.CustomPolicyParameters = types.MapNull(types.StringType)
+	} else {
+		mapData := make(map[string]attr.Value)
+		for key, item := range jsonData.CustomPolicyParameters {
+			mapData[key] = types.StringValue(item)
+		}
+		v.CustomPolicyParameters, err = types.MapValue(types.StringType, mapData)
+		if err != nil {
+			log.Printf("Error in converting map[string]string to  Map")
+			return err
+		}
+	}
+
 	return err
 }
 
@@ -201,6 +222,12 @@ func (v InterfaceEthernetModel) GetModelData() *resource_interface_common.NDFCIn
 		data.Policy = v.Policy.ValueString()
 	} else {
 		data.Policy = ""
+	}
+
+	if !v.PolicyType.IsNull() && !v.PolicyType.IsUnknown() {
+		data.PolicyType = v.PolicyType.ValueString()
+	} else {
+		data.PolicyType = ""
 	}
 
 	if !v.Deploy.IsNull() && !v.Deploy.IsUnknown() {
@@ -365,10 +392,80 @@ func (v InterfaceEthernetModel) GetModelData() *resource_interface_common.NDFCIn
 			}
 
 			// deployment_status | String| []| false
+			// custom_policy_parameters | Map:String| []| false
+			if !ele1.CustomPolicyParameters.IsNull() && !ele1.CustomPolicyParameters.IsUnknown() {
+
+				mapStringData := make(map[string]string, len(ele1.CustomPolicyParameters.Elements()))
+				dg := ele1.CustomPolicyParameters.ElementsAs(context.Background(), &mapStringData, false)
+				if dg.HasError() {
+					panic(dg.Errors())
+				}
+				data1.CustomPolicyParameters = make(map[string]string, len(mapStringData))
+				for k, v := range mapStringData {
+					data1.CustomPolicyParameters[k] = v
+				}
+			}
+
 			data.Interfaces[k1] = *data1
 
 		}
 	}
 
 	return data
+}
+
+func (v *InterfaceEthernetModel) SetDefaultValues() {
+
+	if v.Policy.IsNull() || v.Policy.IsUnknown() {
+		v.Policy = types.StringValue("int_trunk_host")
+	}
+
+	if v.PolicyType.IsNull() || v.PolicyType.IsUnknown() {
+		v.PolicyType = types.StringValue("system")
+	}
+
+	if v.Deploy.IsNull() || v.Deploy.IsUnknown() {
+		v.Deploy = types.BoolValue(false)
+	}
+
+}
+
+func (v *InterfacesValue) SetDefaultValues() {
+
+	if v.AdminState.IsNull() || v.AdminState.IsUnknown() {
+		v.AdminState = types.BoolValue(true)
+	}
+
+	if v.BpduGuard.IsNull() || v.BpduGuard.IsUnknown() {
+		v.BpduGuard = types.StringValue("true")
+	}
+
+	if v.PortTypeFast.IsNull() || v.PortTypeFast.IsUnknown() {
+		v.PortTypeFast = types.BoolValue(true)
+	}
+
+	if v.Mtu.IsNull() || v.Mtu.IsUnknown() {
+		v.Mtu = types.StringValue("jumbo")
+	}
+
+	if v.Speed.IsNull() || v.Speed.IsUnknown() {
+		v.Speed = types.StringValue("Auto")
+	}
+
+	if v.OrphanPort.IsNull() || v.OrphanPort.IsUnknown() {
+		v.OrphanPort = types.BoolValue(false)
+	}
+
+	if v.Ptp.IsNull() || v.Ptp.IsUnknown() {
+		v.Ptp = types.BoolValue(false)
+	}
+
+	if v.Netflow.IsNull() || v.Netflow.IsUnknown() {
+		v.Netflow = types.BoolValue(false)
+	}
+
+	if v.AllowedVlans.IsNull() || v.AllowedVlans.IsUnknown() {
+		v.AllowedVlans = types.StringValue("none")
+	}
+
 }

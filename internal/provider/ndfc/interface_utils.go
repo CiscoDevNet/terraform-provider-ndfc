@@ -240,3 +240,43 @@ func IsFirstLetterLC(s string) bool {
 	}
 	return unicode.IsLower(rune(s[0]))
 }
+
+func (c NDFC) IntfRscModified(ctx context.Context, dg *diag.Diagnostics, plan *resource_interface_common.NDFCInterfaceCommonModel,
+	state *resource_interface_common.NDFCInterfaceCommonModel) map[string]bool {
+
+	ret := make(map[string]bool)
+	for k, intf := range plan.Interfaces {
+		// Check in state
+		if stateIntf, ok := state.Interfaces[k]; !ok {
+			// New interface, create it
+			tflog.Debug(ctx, fmt.Sprintf("IntfRscModified: New Interface in plan: %s:%s", intf.SerialNumber, intf.InterfaceName))
+			ret[k] = true
+		} else {
+			stateIntf.FilterThisValue = true
+			tflog.Debug(ctx, fmt.Sprintf("Existing Interface in plan: %s:%s", intf.SerialNumber, intf.InterfaceName))
+			action := intf.DeepEqual(stateIntf)
+			tflog.Debug(ctx, fmt.Sprintf("CreatePlan: Action: %v", action))
+			if action != types.ValuesDeeplyEqual {
+				tflog.Debug(ctx, fmt.Sprintf("Interface requires update: %s:%s", intf.SerialNumber, intf.InterfaceName))
+				ret[k] = true
+			} else {
+				tflog.Debug(ctx, fmt.Sprintf("Interface does not require update: %s:%s", intf.SerialNumber, intf.InterfaceName))
+				ret[k] = false
+			}
+			state.Interfaces[k] = stateIntf
+		}
+
+	}
+	// check for deleted entries
+	for k, intf := range state.Interfaces {
+		if intf.FilterThisValue {
+			continue
+		}
+		if _, ok := plan.Interfaces[k]; !ok {
+			// Interface deleted
+			tflog.Debug(ctx, fmt.Sprintf("Interface deleted: %s:%s", intf.SerialNumber, intf.InterfaceName))
+			ret[k] = true
+		}
+	}
+	return ret
+}
