@@ -3,6 +3,7 @@ package provider
 import (
 	"context"
 	"fmt"
+	"log"
 	"terraform-provider-ndfc/internal/provider/ndfc"
 	"terraform-provider-ndfc/internal/provider/resources/resource_interface_ethernet"
 
@@ -12,6 +13,8 @@ import (
 )
 
 var _ resource.Resource = (*interfaceEthernetResource)(nil)
+
+var _ resource.ResourceWithModifyPlan = (*interfaceEthernetResource)(nil)
 var _ resource.ResourceWithImportState = (*interfaceEthernetResource)(nil)
 
 func NewInterfaceEthernetResource() resource.Resource {
@@ -183,4 +186,145 @@ func (r *interfaceEthernetResource) ImportState(ctx context.Context, req resourc
 	}
 	resp.Diagnostics.Append(resp.State.Set(ctx, data)...)
 
+}
+
+/* ModifyPlan is a very tricky override
+ * This is implemented to avoid default values being taken from schema attributes, for custom policy cases
+ * The plan data modifications is final and TF does not add anything to it
+ * The plan written here MUST match with the infra after the operation
+ * Note: The incoming config is not filled with default values. TF doesn't fill if ModifyPlan is implemented
+ * So it is our responsibility to set default values for "system" policy cases
+ * Even computed variables, once set here cannot change after the op.
+ * Mark computed with unknown if there is modification in the resource or it is expected to change
+ * Using state and plan to determine if the resource is being created or updated
+ */
+func (r interfaceEthernetResource) ModifyPlan(ctx context.Context, req resource.ModifyPlanRequest, resp *resource.ModifyPlanResponse) {
+	tflog.Info(ctx, "interface_ethernet.ModfyPlan: ")
+	var configData resource_interface_ethernet.InterfaceEthernetModel
+	var stateData resource_interface_ethernet.InterfaceEthernetModel
+
+	if req.Plan.Raw.IsNull() {
+		tflog.Info(ctx, "interface_ethernet.ModfyPlan: Plan is empty - Destroy case")
+		return
+	}
+
+	resp.Diagnostics.Append(req.Config.Get(ctx, &configData)...)
+	if resp.Diagnostics.HasError() {
+		tflog.Error(ctx, "interface_ethernet.ModfyPlan: config Get Failed")
+		return
+	}
+
+	state_present := false
+	if !req.State.Raw.IsNull() {
+		state_present = true
+		log.Printf("[DEBUG] interface_ethernet.ModfyPlan: being called for update")
+		resp.Diagnostics.Append(req.State.Get(ctx, &stateData)...)
+		if resp.Diagnostics.HasError() {
+			tflog.Error(ctx, "interface_ethernet.ModfyPlan: state Get Failed")
+			return
+		}
+	}
+
+	elementState := make(map[string]resource_interface_ethernet.InterfacesValue, len(stateData.Interfaces.Elements()))
+	if state_present {
+		// Check if the state is empty, then it is a create case
+		if !stateData.Interfaces.IsNull() && !stateData.Interfaces.IsUnknown() {
+			diag := stateData.Interfaces.ElementsAs(context.Background(), &elementState, false)
+			if diag != nil {
+				tflog.Error(ctx, "interface_ethernet.ModfyPlan:  ElementsAs Failed")
+				resp.Diagnostics.Append(diag...)
+				return
+			}
+		}
+	}
+	// Set default values at the Model level
+	configData.SetDefaultValues()
+	elements1 := make(map[string]resource_interface_ethernet.InterfacesValue, len(configData.Interfaces.Elements()))
+	dg := configData.Interfaces.ElementsAs(context.Background(), &elements1, false)
+	if dg != nil {
+		tflog.Error(ctx, "interface_ethernet.ModfyPlan:  ElementsAs Failed")
+		resp.Diagnostics.Append(dg...)
+		return
+	}
+	log.Printf("[DEBUG] interface_ethernet.ModfyPlan:  - Number of entries %d", len(configData.Interfaces.Elements()))
+	for k, v := range elements1 {
+		if configData.PolicyType.ValueString() == "system" {
+			log.Printf("[DEBUG] interface_ethernet.ModfyPlan:  - System Policy")
+			// CustomPolicyParameters is expected to be empty for system template
+			v.CustomPolicyParameters = types.MapNull(types.StringType)
+			// Set default values at intf level
+			v.SetDefaultValues()
+		} else {
+			log.Printf("[DEBUG] interface_ethernet.ModfyPlan:  - Custom Policy")
+		}
+		if state_present {
+			if ifEntry, ok := elementState[k]; ok {
+				if ifEntry.DeploymentStatus.IsNull() || ifEntry.DeploymentStatus.IsUnknown() {
+					log.Printf("[DEBUG] interface_ethernet.ModfyPlan:  - DeploymentStatus in state is empty")
+					v.DeploymentStatus = types.StringUnknown()
+				} else {
+					log.Printf("[DEBUG] interface_ethernet.ModfyPlan:  - DeploymentStatus in state %s", elementState[k].DeploymentStatus.ValueString())
+					v.DeploymentStatus = ifEntry.DeploymentStatus
+				}
+			}
+
+		} else {
+			v.DeploymentStatus = types.StringUnknown()
+		}
+		elements1[k] = v
+		log.Printf("[DEBUG] interface_ethernet.ModfyPlan:  - Setting plan %s=%s", k, v.InterfaceName.ValueString())
+	}
+	if state_present {
+		// Write interfaces back to configData before comparing so that defaults are factored in
+		configData.Interfaces, dg = types.MapValueFrom(ctx, resource_interface_ethernet.InterfacesValue{}.Type(context.Background()), elements1)
+		if dg != nil {
+			tflog.Error(ctx, "interface_ethernet.ModfyPlan:  MapValueFrom Failed")
+			resp.Diagnostics.Append(dg...)
+			return
+		}
+		cfgDataModel := configData.GetModelData()
+		stateDataModel := stateData.GetModelData()
+		rscModified := false
+		// Look for modifications - if so computed attributes have to be set to unknown
+		// If not, when they are set from NDFC TF would complain that they are modified
+		updates := r.client.IntfRscModified(ctx, &resp.Diagnostics, cfgDataModel, stateDataModel)
+		for kk := range updates {
+			if updates[kk] {
+				log.Printf("[DEBUG] %s is modified - Setting computed value to unknown", kk)
+				if intf, ok := elements1[kk]; ok {
+					intf.DeploymentStatus = types.StringUnknown()
+					elements1[kk] = intf
+					rscModified = true
+				} else {
+					rscModified = true
+				}
+			}
+		}
+		// Set Id to unknown if resource is modified
+		// Otherwise set it to state value if state value is present
+		// If nothing is present, set it to unknown
+		if rscModified {
+			log.Printf("[DEBUG] interface_ethernet.ModfyPlan:  - Resource is modified")
+			configData.Id = types.StringUnknown()
+		} else if state_present && !stateData.Id.IsNull() && !stateData.Id.IsUnknown() {
+			configData.Id = stateData.Id
+		}
+	} else {
+		configData.Id = types.StringUnknown()
+	}
+	// A second time write of interfaces back to configData is needed as computed attributes may be set to unknown
+	configData.Interfaces, dg = types.MapValueFrom(ctx, resource_interface_ethernet.InterfacesValue{}.Type(context.Background()), elements1)
+	if dg != nil {
+		tflog.Error(ctx, "interface_ethernet.ModfyPlan:  MapValueFrom Failed")
+		resp.Diagnostics.Append(dg...)
+		return
+	}
+	dd := resp.Plan.Set(ctx, &configData)
+	if dd.HasError() {
+		tflog.Error(ctx, "interface_ethernet.ModfyPlan:  Set Failed")
+		log.Printf("[DEBUG] interface_ethernet.ModfyPlan:  - Set failed %v", dd.Errors())
+		resp.Diagnostics.Append(dd...)
+		return
+	}
+	log.Printf("[DEBUG] interface_ethernet.ModfyPlan:  - Plan Set Dg: %v", resp.Diagnostics)
 }

@@ -4,6 +4,7 @@ resource:
   generate_tf_resource: true
   parent_package: resource_interface_common
   parent_model: interface_common
+  modify_plan: true
   attributes:
     - model_name: id
       tf_name: id
@@ -12,6 +13,7 @@ resource:
       example: 1
       computed: true
       id: true
+      use_state: true
     - &policy
       model_name: policy
       tf_name: policy
@@ -20,6 +22,13 @@ resource:
       tf_requires_replace: true
       description: "Name of the policy. Examples: `int_trunk_host`, `int_access_host`"
       example: int_access_host
+    - model_name: policy_type
+      tf_name: policy_type
+      type: String
+      default_value: "system"
+      validator: OneOf("system", "user-defined")
+      description: "Specifies if the policy is user defined or the default ones available in system"
+      payload_hide: true
     - model_name: deploy
       tf_name: deploy
       type: Bool
@@ -214,4 +223,11 @@ resource:
         example: "success"
         computed: true
         payload_hide: true
+        use_state: true
+      - model_name: customTemplateKV
+        tf_name: custom_policy_parameters
+        type: "Map:String"
+        payload_hide: true
+        description: Custom policy parameters
+        example: "policy parameters"
      

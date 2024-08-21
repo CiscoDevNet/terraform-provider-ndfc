@@ -8,18 +8,20 @@ import (
 
 type NDFCInterfaceCommonModel struct {
 	Policy       string                         `json:"policy,omitempty"`
+	PolicyType   string                         `json:"-"`
 	Deploy       bool                           `json:"-"`
 	SerialNumber string                         `json:"-"`
 	Interfaces   map[string]NDFCInterfacesValue `json:"interfaces,omitempty"`
 }
 
 type NDFCInterfacesValue struct {
-	FilterThisValue  bool             `json:"-"`
-	SerialNumber     string           `json:"serialNumber,omitempty"`
-	InterfaceName    string           `json:"ifName,omitempty"`
-	InterfaceType    string           `json:"interfaceType,omitempty"`
-	DeploymentStatus string           `json:"-"`
-	NvPairs          NDFCNvPairsValue `json:"nvPairs,omitempty"`
+	FilterThisValue        bool              `json:"-"`
+	SerialNumber           string            `json:"serialNumber,omitempty"`
+	InterfaceName          string            `json:"ifName,omitempty"`
+	InterfaceType          string            `json:"interfaceType,omitempty"`
+	DeploymentStatus       string            `json:"-"`
+	CustomPolicyParameters map[string]string `json:"-"`
+	NvPairs                NDFCNvPairsValue  `json:"nvPairs,omitempty"`
 }
 
 type NDFCNvPairsValue struct {

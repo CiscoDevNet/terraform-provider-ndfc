@@ -50,6 +50,7 @@ func (c NDFC) RscGetInterfaces(ctx context.Context, dg *diag.Diagnostics, in res
 	//ifType := in.GetInterfaceType()
 
 	data.Policy = inData.Policy
+	data.PolicyType = inData.PolicyType
 	data.SerialNumber = inData.SerialNumber
 	data.Deploy = inData.Deploy
 	ifMap := ifIdToMap(ID)
@@ -59,6 +60,7 @@ func (c NDFC) RscGetInterfaces(ctx context.Context, dg *diag.Diagnostics, in res
 		// Get interfaces for each switch
 		ifObj := c.NewInterfaceObject(in.GetInterfaceType(), &c.apiClient, c.GetLock(ResourceInterfaces))
 		ifList := ifObj.GetInterface(ctx, dg, switchSerial, data.Policy)
+		//c.processCustomIfPolicy(ctx, dg, &ifList, data.PolicyType)
 
 		// use datasource API to get interface deploy getDeployStatus
 		dsIfModel := datasource_interfaces.NDFCInterfacesModel{}
@@ -95,6 +97,7 @@ func (c NDFC) RscGetInterfaces(ctx context.Context, dg *diag.Diagnostics, in res
 				if inData.SerialNumber != "" {
 					ifList[i].SerialNumber = ""
 				}
+				c.processCustomIfPolicy(ctx, dg, &ifList[i], data.PolicyType, inData.Interfaces[key].CustomPolicyParameters)
 				data.Interfaces[key] = ifList[i]
 				log.Printf("Add entry %s:%v", key, ifList[i])
 			} else {
@@ -124,7 +127,12 @@ func (c NDFC) RscGetInterfaces(ctx context.Context, dg *diag.Diagnostics, in res
 					if !ok {
 						tflog.Error(ctx, fmt.Sprintf("Read Error: Not found in read data %s", key))
 					}
-					intf.DeploymentStatus = dsIfModel.Interfaces[i].DeploymentStatus
+					// After a deployment, the status string is "Success" for some time - consider it as "In-Sync"
+					if dsIfModel.Interfaces[i].DeploymentStatus == "In-Sync" || dsIfModel.Interfaces[i].DeploymentStatus == "Success" {
+						intf.DeploymentStatus = "In-Sync"
+					} else {
+						intf.DeploymentStatus = dsIfModel.Interfaces[i].DeploymentStatus
+					}
 					data.Interfaces[key] = intf
 					if data.Deploy && intf.DeploymentStatus != "In-Sync" {
 						tflog.Warn(ctx, fmt.Sprintf("Interface %s is not yet in deployed state", intf.InterfaceName))
@@ -406,4 +414,28 @@ func getIFImportMapKey(serial, ifName string, changeCase bool) string {
 	//change / to _ in ifName
 	s := strings.Replace(ifName, "/", "_", -1)
 	return s + "_" + serial
+}
+
+func (c NDFC) processCustomIfPolicy(ctx context.Context, diags *diag.Diagnostics,
+	payload *resource_interface_common.NDFCInterfacesValue, pType string, custParams map[string]string) error {
+	log.Printf("[DEBUG] Processing custom policy")
+
+	if pType == "user-defined" {
+		// Reset NvPairs as this is a custom template
+		log.Printf("[DEBUG] Resetting NvPairs for user-defined policy")
+		(*payload).NvPairs = resource_interface_common.NDFCNvPairsValue{}
+		// Filter the custom values
+		for k, _ := range payload.CustomPolicyParameters {
+			if _, ok := (custParams)[k]; !ok {
+				log.Printf("[DEBUG] Removing custom parameter %s", k)
+				delete(payload.CustomPolicyParameters, k)
+			}
+		}
+	} else {
+		// Reset the custom template parameters
+		log.Printf("[DEBUG] Resetting custom parameters for system policy")
+		clear((*payload).CustomPolicyParameters)
+	}
+
+	return nil
 }

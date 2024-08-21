@@ -18,6 +18,11 @@ func InterfaceEthernetModelHelperStateCheck(RscName string, c resource_interface
 	} else {
 		ret = append(ret, resource.TestCheckResourceAttr(RscName, attrPath.AtName("policy").String(), "int_trunk_host"))
 	}
+	if c.PolicyType != "" {
+		ret = append(ret, resource.TestCheckResourceAttr(RscName, attrPath.AtName("policy_type").String(), c.PolicyType))
+	} else {
+		ret = append(ret, resource.TestCheckResourceAttr(RscName, attrPath.AtName("policy_type").String(), "system"))
+	}
 	if c.Deploy {
 		ret = append(ret, resource.TestCheckResourceAttr(RscName, attrPath.AtName("deploy").String(), "true"))
 	} else {

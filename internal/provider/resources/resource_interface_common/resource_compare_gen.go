@@ -993,5 +993,21 @@ func (v *NDFCInterfacesValue) CreatePlan(c NDFCInterfacesValue, cf *bool) int {
 		*v.NvPairs.Peer2PortChannelId = *c.NvPairs.Peer2PortChannelId
 	}
 
+	if len(v.CustomPolicyParameters) != len(c.CustomPolicyParameters) {
+		log.Printf("Update: len(v.CustomPolicyParameters)=%d, len(c.CustomPolicyParameters)=%d", len(v.CustomPolicyParameters), len(c.CustomPolicyParameters))
+		return RequiresUpdate
+	}
+	for kk, vv := range v.CustomPolicyParameters {
+		cc, ok := c.CustomPolicyParameters[kk]
+		if !ok {
+			log.Printf("Update: v.CustomPolicyParameters[%s]=%s, c.CustomPolicyParameters[%s]=nil", kk, vv, kk)
+			return RequiresUpdate
+		}
+		if vv != cc {
+			log.Printf("Update: v.CustomPolicyParameters[%s]=%s, c.CustomPolicyParameters[%s]=%s", kk, vv, kk, cc)
+			return RequiresUpdate
+		}
+	}
+
 	return action
 }
