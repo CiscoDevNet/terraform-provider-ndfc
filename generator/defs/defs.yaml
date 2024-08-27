@@ -17,5 +17,6 @@ files:
   - interface_vpc.yaml
   - templates.yaml
   - policy.yaml
+  - test.yaml
 
 

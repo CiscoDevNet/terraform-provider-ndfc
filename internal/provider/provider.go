@@ -152,5 +152,6 @@ func (p *ndfcProvider) Resources(ctx context.Context) []func() resource.Resource
 		NewInterfaceVPCResource,
 		NewTemplateResource,
 		NewPolicyResource,
+		NewTestRscResource,
 	}
 }
