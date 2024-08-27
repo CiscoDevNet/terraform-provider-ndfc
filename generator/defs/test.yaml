@@ -1,0 +1,37 @@
+resource: 
+  name: test_rsc
+  generate_tf_resource: true
+  inherited_model: true
+  attributes:
+    - model_name: id
+      tf_name: id
+      type: String
+      description: "Unique identifier for the interface"
+      example: 1
+      computed: true
+      id: true
+    - model_name: policy
+      tf_name: policy
+      type: String
+      mandatory: true
+      validator: OneOf("int_trunk_host", "int_access_host")
+      description: "Name of the policy. Examples: `int_trunk_host`, `int_access_host`"
+      example: int_access_host
+    - model_name: parameter_map
+      tf_name: parameter_map
+      type: Map
+      mandatory: true
+      description: "interfaces to configure"
+      attributes:
+        - model_name: serialNumber
+          tf_name: serial_number
+          type: String
+          mandatory: true
+          description: Serial number of switch to configure
+          example: 9DBYO6WQJ46
+        - model_name: custom_attributes
+          tf_name: custom_attributes_nested_map
+          type: "Map:String"
+          description: "Custom attributes"
+          example: "{'key1':'value1','key2':'value2'}"
+       
