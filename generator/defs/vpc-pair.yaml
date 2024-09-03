@@ -1,0 +1,254 @@
+---
+resource:
+  name: vpc_pair
+  rest_endpoint: /lan-fabric/rest/vpcpair
+  doc_category: Fabric
+  generate_tf_resource: true
+  attributes:
+    - model_name: id
+      tf_name: id
+      description: The Terraform Unique Identifier for the vPC pair resource
+      type: String
+      id: true
+      computed: true
+      payload_hide: true
+    - model_name: serialNumbers
+      tf_name: serial_numbers
+      description: Serial numbers of the switches in the vPC pair. Must contain exactly two serial numbers.
+      type: List:String
+      payload_hide: true
+      ndfc_type: set
+      example: ["FGE20360RRZ", "FGE20360RRK"]
+      mandatory: true
+      validator: SizeBetween(2, 2)
+      tf_requires_replace: true
+    - &peer_one_id
+      model_name: peerOneId
+      tf_name: peer_one_id
+      tf_hide: true
+      description: Serial number of the first vPC peer
+      type: String
+      example: FGE20360RRZ
+    - &peer_two_id
+      model_name: peerTwoId
+      tf_name: peer_two_id
+      tf_hide: true
+      description: Serial number of the second vPC peer
+      type: String
+      example: FGE20360RRK
+    - &use_virtual_peer_link
+      model_name: useVirtualPeerlink
+      tf_name: use_virtual_peerlink
+      ndfc_type: bool
+      type: Bool
+      description: Set to true to use virtual peer link
+      example: true
+      mandatory: true
+    - &template_name
+      model_name: templateName
+      tf_name: template_name
+      type: String
+      description: Template to be applied to this VPC switch pair
+      example: "vpc_template"
+      mandatory: false
+    - &domain_id
+      model_name: DOMAIN_ID
+      ndfc_nested: [nvPairs]
+      tf_name: domain_id
+      type: Int64
+      description: vPC Domain ID
+      example: 101
+      min_int: 1
+      max_int: 1000
+      handle_empty: true
+    - &peer1_keep_alive_local_ip
+      model_name: PEER1_KEEP_ALIVE_LOCAL_IP
+      ndfc_nested: [nvPairs]
+      tf_name: peer1_keep_alive_local_ip
+      type: String
+      description: IP address of a L3 interface in non-default VRF on Peer 1
+      example: 10.10.10.1
+    - &peer2_keep_alive_local_ip
+      model_name: PEER2_KEEP_ALIVE_LOCAL_IP
+      ndfc_nested: [nvPairs]
+      tf_name: peer2_keep_alive_local_ip
+      type: String
+      description: IP address of a L3 interface in non-default VRF on Peer 2
+      example: 10.10.10.2
+    - &keep_alive_vrf
+      model_name: KEEP_ALIVE_VRF
+      ndfc_nested: [nvPairs]
+      tf_name: keep_alive_vrf
+      type: String
+      description: Name of VRF used for keep-alive, enter 'default' for default VRF
+      example: management
+    - &keep_alive_hold_timeout
+      model_name: KEEP_ALIVE_HOLD_TIMEOUT
+      ndfc_nested: [nvPairs]
+      tf_name: keep_alive_hold_timeout
+      type: Int64
+      description: Hold timeout to ignore stale peer alive messages, default is 3 if not specified, Mandatory
+      example: 3
+    - &is_vpc_plus
+      model_name: isVpcPlus
+      ndfc_nested: [nvPairs]
+      tf_name: is_vpc_plus
+      type: Bool
+      description: Set to true to enable VPC plus
+      example: true
+    - &fabricpath_switch_id
+      model_name: fabricPath_switch_id
+      ndfc_nested: [nvPairs]
+      tf_name: fabricpath_switch_id
+      type: String
+      description: Fabric path switch ID
+      example: FGE20360RRQ
+    - &peer1_source_loopback
+      model_name: PEER1_SOURCE_LOOPBACK
+      ndfc_nested: [nvPairs]
+      tf_name: peer1_source_loopback
+      type: String
+      description: Source loopback IP address for Peer 1
+      example: 11.10.10.1
+    - &peer2_source_loopback
+      model_name: PEER2_SOURCE_LOOPBACK
+      ndfc_nested: [nvPairs]
+      tf_name: peer2_source_loopback
+      type: String
+      description: Source loopback IP address for Peer 2
+      example: 11.10.10.2
+    - &peer1_primary_ip
+      model_name: PEER1_PRIMARY_IP
+      ndfc_nested: [nvPairs]
+      tf_name: peer1_primary_ip
+      type: String
+      description: Primary IP address for Peer 1
+      example: 12.10.10.1
+    - &peer2_primary_ip
+      model_name: PEER2_PRIMARY_IP
+      ndfc_nested: [nvPairs]
+      tf_name: peer2_primary_ip
+      type: String
+      description: Primary IP address for Peer 2
+      example: 12.10.10.2
+    - &loopback_secondary_ip
+      model_name: LOOPBACK_SECONDARY_IP
+      ndfc_nested: [nvPairs]
+      tf_name: loopback_secondary_ip
+      type: String
+      description: Secondary loopback IP address
+      example: 13.10.10.1
+    - &peer1_domain_conf
+      model_name: PEER1_DOMAIN_CONF
+      ndfc_nested: [nvPairs]
+      tf_name: peer1_domain_conf
+      type: String
+      description: Additional CLI for Peer-1 vPC Domain
+      example: 1
+    - &clear_policy
+      model_name: clear_policy
+      ndfc_nested: [nvPairs]
+      tf_name: clear_policy
+      type: Bool
+      description: Set to true to clear policy
+      example: true
+    - &fabric_name
+      model_name: FABRIC_NAME
+      ndfc_nested: [nvPairs]
+      tf_name: fabric_name
+      type: String
+      tf_requires_replace: true
+      description: Fabric name to which the vPC pair belongs
+      example: VXLAN_FABRIC
+    - &peer1_pcid
+      model_name: PEER1_PCID
+      ndfc_nested: [nvPairs]
+      tf_name: peer1_pcid
+      type: String
+      description: Peer 1 PCID
+      example: 1
+    - &peer2_pcid
+      model_name: PEER2_PCID
+      ndfc_nested: [nvPairs]
+      tf_name: peer2_pcid
+      type: String
+      description: Peer 2 PCID
+      example: 2
+    - &peer1_member_interfaces
+      model_name: PEER1_MEMBER_INTERFACES
+      ndfc_nested: [nvPairs]
+      tf_name: peer1_member_interfaces
+      type: String
+      description: List of member interfaces for Peer 1
+      example: "[Ethernet1/1, Ethernet1/2]"
+    - &peer2_member_interfaces
+      model_name: PEER2_MEMBER_INTERFACES
+      ndfc_nested: [nvPairs]
+      tf_name: peer2_member_interfaces
+      type: String
+      description: List of member interfaces for Peer 2
+      example: "[Ethernet1/1, Ethernet1/2]"
+    - &pc_mode
+      model_name: PC_MODE
+      ndfc_nested: [nvPairs]
+      tf_name: pc_mode
+      type: String
+      description: Port-channel mode
+      example: active
+    - &peer1_po_desc
+      model_name: PEER1_PO_DESC
+      ndfc_nested: [nvPairs]
+      tf_name: peer1_po_desc
+      type: String
+      description: Port-channel description for Peer 1
+      example: "vPC Peer 1"
+    - &peer2_po_desc
+      model_name: PEER2_PO_DESC
+      ndfc_nested: [nvPairs]
+      tf_name: peer2_po_desc
+      type: String
+      description: Port-channel description for Peer 2
+      example: "vPC Peer 2"
+    - &admin_state
+      model_name: ADMIN_STATE
+      ndfc_nested: [nvPairs]
+      tf_name: admin_state
+      type: Bool
+      description: Admin state of the vPC pair
+      example: true
+    - &allowed_vlans
+      model_name: ALLOWED_VLANS
+      ndfc_nested: [nvPairs]
+      tf_name: allowed_vlans
+      Default: "all"
+      type: String
+      description: Allowed VLANs for the vPC pair
+      example: "1-4094"
+    - &peer1_po_conf
+      model_name: PEER1_PO_CONF
+      ndfc_nested: [nvPairs]
+      tf_name: peer1_po_conf
+      type: String
+      description: Additional CLI for Peer-1 Port-channel
+      example: ""
+    - &peer2_po_conf
+      model_name: PEER2_PO_CONF
+      ndfc_nested: [nvPairs]
+      tf_name: peer2_po_conf
+      type: String
+      description: Additional CLI for Peer-2 Port-channel
+      example: ""
+    - &is_vteps
+      model_name: isVTEPS
+      ndfc_nested: [nvPairs]
+      tf_name: is_vteps
+      type: Bool
+      description: Set to true to enable VTEPs
+      example: true
+    - &nve_interface
+      model_name: NVE_INTERFACE
+      ndfc_nested: [nvPairs]
+      tf_name: nve_interface
+      type: String
+      description: NVE interface
+      example: "nve1"

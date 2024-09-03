@@ -12,10 +12,11 @@ files:
   - interface_vlan.yaml
   - inventory-reachability.yaml
   - configuration-deploy.yaml
-  - inventory-devices.yaml  
+  - inventory-devices.yaml
   - interface_portchannel.yaml
   - interface_vpc.yaml
   - templates.yaml
   - policy.yaml
+  - vpc-pair.yaml
 
 
