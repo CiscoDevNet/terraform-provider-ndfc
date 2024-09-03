@@ -63,10 +63,11 @@ resource:
         - model_name: lanAttachList
           tf_name: attach_list
           type: MapNested
-          description: List of switches attached to the VRF
+          description: Terraform map of switches attached to the VRF. Map key is the switch serial number
           bulk: true
           optional: true
           filtered: true
+          example: FDO245206N5
           attributes:
             - *filterThis
             - model_name: id
@@ -147,6 +148,7 @@ resource:
               default_value: false
               ndfc_type: bool
               description: Deploy this attachment
+              example: true
             - model_name: loopbackId
               tf_name: loopback_id
               type: Int64

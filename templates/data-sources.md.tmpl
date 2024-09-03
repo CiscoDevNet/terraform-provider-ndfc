@@ -1,0 +1,20 @@
+---
+layout: ""
+page_title: "Provider: NDFC"
+description: |-
+  The NDFC provider provides resources to interact with Cisco NDFC controller.
+---
+
+# Datasource {{.Name}}
+
+{{.Description}}
+
+
+## Example Usage
+{{$file := .Name}}
+{{$filepath := printf "examples/data-source/%s.tf" $file}}
+{{if .HasExample}}
+{{tffile $filepath}}
+{{end}} 
+
+{{ .SchemaMarkdown | trimspace }}
