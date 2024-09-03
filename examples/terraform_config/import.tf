@@ -26,6 +26,10 @@ import {
   to = ndfc_interface_vlan.test_evpn_vxlan_vlan_imported_1
 }
 
+import {
+   id = "9D0ZV7JBFNM:9N14Y8PVD2Y"
+   to = ndfc_vpc_pair.test_vpc_pair
+}
 resource "ndfc_interface_ethernet" "test_evpn_vxlan_eth_imported" {
 }
 
@@ -38,5 +42,8 @@ resource "ndfc_interface_vlan" "test_evpn_vxlan_vlan_imported_1" {
 resource "ndfc_interface_portchannel" "test_evpn_vxlan_pc_imported_1" {
 }
 resource "ndfc_interface_vpc" "test_evpn_vxlan_vpc_imported_1" {
+}
+
+resource "ndfc_vpc_pair" "test_vpc_pair" {
 }
 
