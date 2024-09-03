@@ -15,7 +15,7 @@ resource:
       model_name: fabric
       tf_name: fabric_name
       reference: true
-      description: The name of the fabric
+      description: The name of the fabric where VRFs are to be created
       type: String
       example: CML
       mandatory: true
@@ -26,16 +26,17 @@ resource:
       type: Bool
       default_value: false
       payload_hide: true
-      description: Deploy all attachments in this resource
+      description: Deploy all attachments in this resource. Set only one deploy field, i.e resource level (this one) or the one in vrf level or the one in attachment level
       ndfc_type: bool
       example: true
     - model_name: vrfs
       tf_name: vrfs
-      description: List of vrfs
+      description: Terraform Map of multiple vrf entries. The key to this map is the vrf name
       type: Map
       bulk: true
       mandatory: true
       filtered: true
+      example: "VRF1"
       attributes:
       - model_name: id
         tf_name: id
@@ -67,14 +68,14 @@ resource:
         model_name: vrfTemplate
         tf_name: vrf_template
         type: String
-        description: The name of the VRF template
+        description: The name of the VRF template to be used
         default_value: Default_VRF_Universal
         example: Default_VRF_Universal
       - &vrfExtensionTemplate
         model_name: vrfExtensionTemplate  
         tf_name: vrf_extension_template
         type: String
-        description: The name of the VRF extension template
+        description: The name of the VRF extension template to be used
         default_value: Default_VRF_Extension_Universal
         example: Default_VRF_Extension_Universal
       - &vrfId
@@ -85,7 +86,7 @@ resource:
         computed: true
         min_int: 1
         max_int: 16777214
-        description: VNI ID of VRF
+        description: VNI ID of the VRF. If left empty, NDFC will generate a unique VNI ID
         example: 50000
         requires_replace: true
         use_state: true
@@ -99,7 +100,7 @@ resource:
         use_state: true
         min_int: 2
         max_int: 4094
-        description: VLAN ID
+        description: Field from Template - VLAN ID 
         example: 1500
         handle_empty: true
       - &vrfVlanName
@@ -108,21 +109,21 @@ resource:
         tf_name: vlan_name
         type: String
         string_patterns: ['^[^\?,\\,\s]{1,128}$']
-        description: VLAN name
+        description: Field from system Template - VLAN name
         example: VLAN1500
       - &vrfIntfDescription
         model_name: vrfIntfDescription
         ndfc_nested: [vrfTemplateConfig]
         tf_name: interface_description
         type: String
-        description: Interface description
+        description: Field from Template - Interface description
         example: My int description
       - &vrfDescription 
         model_name: vrfDescription
         ndfc_nested: [vrfTemplateConfig]
         tf_name: vrf_description
         type: String
-        description: VRF description
+        description: Field from  Template - VRF description
         example: My vrf description
       - &mtu
         model_name: mtu
@@ -133,7 +134,7 @@ resource:
         min_int: 68
         max_int: 9216
         default_value: 9216
-        description: Interface MTU
+        description:  Field from Template - Interface MTU
         example: 9200
       - &vrfStatus
         model_name: vrfStatus
@@ -152,7 +153,7 @@ resource:
         min_int: 0
         max_int: 4294967295
         default_value: 12345
-        description: Loopback routing tag
+        description: Field from Template - Loopback routing tag
         example: 11111
       - &vrfRouteMap
         model_name: vrfRouteMap
@@ -160,7 +161,7 @@ resource:
         tf_name: redistribute_direct_route_map
         type: String
         default_value: FABRIC-RMAP-REDIST-SUBNET
-        description: Redistribute direct route map
+        description:  Field from Template - Redistribute direct route map
         example: FABRIC-RMAP-REDIST
       - &maxBgpPaths
         model_name: maxBgpPaths
@@ -171,7 +172,7 @@ resource:
         min_int: 1
         max_int: 64
         default_value: 1
-        description: Maximum BGP paths
+        description: Field from Template - Maximum BGP paths
         example: 2
       - &maxIbgpPaths
         model_name: maxIbgpPaths
@@ -182,7 +183,7 @@ resource:
         min_int: 1
         max_int: 64
         default_value: 2
-        description: Maximum iBGP paths
+        description:  Field from Template - Maximum iBGP paths
         example: 3
       - &ipv6LinkLocalFlag
         model_name: ipv6LinkLocalFlag
@@ -190,7 +191,7 @@ resource:
         tf_name: ipv6_link_local
         type: Bool
         default_value: true
-        description: Enables IPv6 link-local Option under VRF SVI
+        description:  Field from Template - Enables IPv6 link-local Option under VRF SVI
         example: false
       - &trmEnabled
         model_name: trmEnabled
@@ -198,7 +199,7 @@ resource:
         tf_name: trm
         type: Bool
         default_value: false
-        description: Enable Tenant Routed Multicast
+        description:  Field from Template - Enable Tenant Routed Multicast
         example: true
       - &isRPAbsent
         model_name: isRPAbsent
@@ -206,7 +207,7 @@ resource:
         tf_name: no_rp
         type: Bool
         default_value: false
-        description: There is no RP as only SSM is used
+        description:  Field from Template - There is no RP as only SSM is used
         example: false
       - &isRPExternal
         model_name: isRPExternal
@@ -214,14 +215,14 @@ resource:
         tf_name: rp_external
         type: Bool
         default_value: false
-        description: Is RP external to the fabric
+        description:  Field from Template - Is RP external to the fabric
         example: true
       - &rpAddress
         model_name: rpAddress
         ndfc_nested: [vrfTemplateConfig]
         tf_name: rp_address
         type: String
-        description: IPv4 address
+        description:  Field from Template - IPv4 address of RP
         example: 1.2.3.4
       - &loopbackNumber
         model_name: loopbackNumber
@@ -231,21 +232,21 @@ resource:
         handle_empty: true
         min_int: 0
         max_int: 1023
-        description: RP loopback ID
+        description:  Field from Template - RP loopback ID
         example: 100
       - &L3VniMcastGroup
         model_name: L3VniMcastGroup
         ndfc_nested: [vrfTemplateConfig]
         tf_name: underlay_multicast_address
         type: String
-        description: IPv4 Multicast Address. Applicable only when TRM is enabled.
+        description:  Field from Template - IPv4 Multicast Address. Applicable only when TRM is enabled.
         example: 233.1.1.1
       - &multicastGroup
         model_name: multicastGroup
         ndfc_nested: [vrfTemplateConfig]
         tf_name: overlay_multicast_groups
         type: String
-        description: Overlay multicast groups
+        description:  Field from Template - Overlay multicast groups
         example: 234.0.0.0/8
       - &mvpnInterAs
         model_name: mvpnInterAs
@@ -253,7 +254,7 @@ resource:
         tf_name: mvpn_inter_as
         type: Bool
         default_value: false
-        description: Use the inter-as keyword for the MVPN address family routes to cross the BGP autonomous system (AS) boundaries, applicable when TRM is enabled. IOS XE Specific
+        description:  Field from Template - Use the inter-as keyword for the MVPN address family routes to cross the BGP autonomous system (AS) boundaries, applicable when TRM is enabled. IOS XE Specific
         example: false
       - &trmBGWMSiteEnabled
         model_name: trmBGWMSiteEnabled
@@ -261,7 +262,7 @@ resource:
         tf_name: trm_bgw_msite
         type: Bool
         default_value: false
-        description: Enable TRM on Border Gateway Multisite
+        description:  Field from Template - Enable TRM on Border Gateway Multisite
         example: true
       - &advertiseHostRouteFlag
         model_name: advertiseHostRouteFlag
@@ -269,7 +270,7 @@ resource:
         tf_name: advertise_host_routes
         type: Bool
         default_value: false
-        description: Flag to Control Advertisement of /32 and /128 Routes to Edge Routers
+        description:  Field from Template - Flag to Control Advertisement of /32 and /128 Routes to Edge Routers
         example: true
       - &advertiseDefaultRouteFlag
         model_name: advertiseDefaultRouteFlag
@@ -277,7 +278,7 @@ resource:
         tf_name: advertise_default_route
         type: Bool
         default_value: true
-        description: Flag to Control Advertisement of Default Route Internally
+        description:  Field from Template - Flag to Control Advertisement of Default Route Internally
         example: false
       - &configureStaticDefaultRouteFlag
         model_name: configureStaticDefaultRouteFlag
@@ -285,7 +286,7 @@ resource:
         tf_name: configure_static_default_route
         type: Bool
         default_value: true
-        description: Flag to Control Static Default Route Configuration
+        description:  Field from Template - Flag to Control Static Default Route Configuration
         example: false
       - &bgpPassword
         model_name: bgpPassword
@@ -293,7 +294,7 @@ resource:
         tf_name: bgp_password
         type: String
         string_patterns: ['^[a-fA-F0-9]+$']
-        description: VRF Lite BGP neighbor password (Hex String)
+        description:  Field from Template - VRF Lite BGP neighbor password (Hex String)
         example: 1234567890ABCDEF
       - &bgpPasswordKeyType
         model_name: bgpPasswordKeyType
@@ -301,7 +302,7 @@ resource:
         tf_name: bgp_password_type
         type: String
         enum_values: ["3", "7"]
-        description: "VRF Lite BGP Key Encryption Type: 3 - 3DES, 7 - Cisco"
+        description: "Field from Template - VRF Lite BGP Key Encryption Type: 3 - 3DES, 7 - Cisco"
         example: 7
       - &ENABLE_NETFLOW
         model_name: ENABLE_NETFLOW
@@ -309,14 +310,14 @@ resource:
         tf_name: netflow
         type: Bool
         default_value: false
-        description: For netflow on VRF-LITE Sub-interface. Supported only if netflow is enabled on fabric. For NX-OS only
+        description:  Field from Template - For netflow on VRF-LITE Sub-interface. Supported only if netflow is enabled on fabric. For NX-OS only
         example: false
       - &NETFLOW_MONITOR
         model_name: NETFLOW_MONITOR
         ndfc_nested: [vrfTemplateConfig]
         tf_name: netflow_monitor
         type: String
-        description: Netflow monitor. For NX-OS only
+        description:  Field from Template - Netflow monitor. For NX-OS only
         example: MON1
       - &disableRtAuto
         model_name: disableRtAuto
@@ -324,42 +325,42 @@ resource:
         tf_name: disable_rt_auto
         type: Bool
         default_value: false
-        description: Applicable to IPv4, IPv6 VPN/EVPN/MVPN
+        description:  Field from Template - Applicable to IPv4, IPv6 VPN/EVPN/MVPN
         example: true
       - &routeTargetImport
         model_name: routeTargetImport
         ndfc_nested: [vrfTemplateConfig]
         tf_name: route_target_import
         type: String
-        description: For VPN Routes Import, One or a Comma Separated List
+        description:  Field from Template - For VPN Routes Import, One or a Comma Separated List
         example: "1:1"
       - &routeTargetExport
         model_name: routeTargetExport
         ndfc_nested: [vrfTemplateConfig]
         tf_name: route_target_export
         type: String
-        description: For VPN Routes Export, One or a Comma Separated List
+        description:  Field from Template - For VPN Routes Export, One or a Comma Separated List
         example: "1:1"
       - &routeTargetImportEvpn
         model_name: routeTargetImportEvpn
         ndfc_nested: [vrfTemplateConfig]
         tf_name: route_target_import_evpn
         type: String
-        description: For EVPN Routes Import, One or a Comma Separated List
+        description:  Field from Template - For EVPN Routes Import, One or a Comma Separated List
         example: "1:1"
       - &routeTargetExportEvpn
         model_name: routeTargetExportEvpn
         ndfc_nested: [vrfTemplateConfig]
         tf_name: route_target_export_evpn
         type: String
-        description: For EVPN Routes Export, One or a Comma Separated List
+        description:  Field from Template - For EVPN Routes Export, One or a Comma Separated List
         example: "1:1"
       - &routeTargetImportMvpn
         model_name: routeTargetImportMvpn
         ndfc_nested: [vrfTemplateConfig]
         tf_name: route_target_import_mvpn
         type: String
-        description: For MVPN Routes Import, One or a Comma Separated List
+        description:  Field from Template - For MVPN Routes Import, One or a Comma Separated List
         example: "1:1"
         exclude_test: true
       - &routeTargetExportMvpn
@@ -367,7 +368,7 @@ resource:
         ndfc_nested: [vrfTemplateConfig]
         tf_name: route_target_export_mvpn
         type: String
-        description: For MVPN Routes Export, One or a Comma Separated List
+        description:  Field from Template - For MVPN Routes Export, One or a Comma Separated List
         example: "1:1"
         exclude_test: true
       - &cloudRouteTargetImportEvpn
@@ -375,14 +376,14 @@ resource:
         ndfc_nested: [vrfTemplateConfig]
         tf_name: route_target_import_cloud_evpn
         type: String
-        description: For Cloud EVPN Routes Import, One or a Comma Separated List
+        description:  Field from Template - For Cloud EVPN Routes Import, One or a Comma Separated List
         example: "1:1"
       - &cloudRouteTargetExportEvpn
         model_name: cloudRouteTargetExportEvpn
         ndfc_nested: [vrfTemplateConfig]
         tf_name: route_target_export_cloud_evpn
         type: String
-        description: For Cloud EVPN Routes Export, One or a Comma Separated List
+        description:  Field from Template - For Cloud EVPN Routes Export, One or a Comma Separated List
         example: "1:1"
       - model_name: deploy_attachments
         tf_name: deploy_attachments

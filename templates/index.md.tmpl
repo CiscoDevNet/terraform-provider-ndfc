@@ -1,0 +1,26 @@
+
+---
+layout: ""
+page_title: "Provider: NDFC"
+description: |-
+  The NDFC provider provides resources to interact with Cisco NDFC controller.
+---
+
+# NDFC Provider
+
+The NDFC provider provides resources to interact with Cisco NDFC Controller. There are resources and datasources available to manage the following:
+* VRF
+* Network
+* Inventory
+* Interfaces
+* Policy
+* Templates
+
+
+It communicates with NDFC via REST
+
+## Example Usage
+
+{{tffile "examples/provider/provider.tf"}}
+
+{{ .SchemaMarkdown | trimspace }}
