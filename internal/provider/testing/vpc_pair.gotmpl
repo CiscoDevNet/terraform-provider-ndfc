@@ -1,0 +1,12 @@
+{{define "NDFC_VPCPAIR_RSC"}}
+resource "ndfc_{{.RscType}}" "{{.RscName}}" {
+    {{ with .VpcPair }}
+        serial_numbers =  [
+        {{- range .SerialNumbers }}
+            "{{.}}",
+        {{- end}}
+        ]
+        use_virtual_peerlink  = {{deref_bool .UseVirtualPeerlink}}
+    {{end}}
+}
+{{end}}

@@ -8,6 +8,7 @@ import (
 	"strings"
 	"terraform-provider-ndfc/internal/provider/resources/resource_interface_common"
 	"terraform-provider-ndfc/internal/provider/resources/resource_networks"
+	"terraform-provider-ndfc/internal/provider/resources/resource_vpc_pair"
 	"terraform-provider-ndfc/internal/provider/resources/resource_vrf_bulk"
 	"terraform-provider-ndfc/internal/provider/types"
 	"text/template"
@@ -33,6 +34,12 @@ func GetTFConfigWithSingleResource(tt string, cfg map[string]string, rscs []inte
 				return 0
 			}
 			return int64(*a)
+		},
+		"deref_bool": func(a *bool) bool {
+			if a == nil {
+				return false
+			}
+			return *a
 		},
 	}
 
@@ -102,6 +109,17 @@ func GetTFConfigWithSingleResource(tt string, cfg map[string]string, rscs []inte
 			args["RscName"] = rsNames[i]
 			args["RscType"] = "interface_" + cfg["RscSubType"]
 			err = t.ExecuteTemplate(&output, "NDFC_INT_RSC", args)
+			if err != nil {
+				panic(err)
+			}
+		}
+
+		vpcRsc, ok := rsc.(*resource_vpc_pair.NDFCVpcPairModel)
+		if ok {
+			args["VpcPair"] = vpcRsc
+			args["RscName"] = rsNames[i]
+			args["RscType"] = "vpc_pair"
+			err = t.ExecuteTemplate(&output, "NDFC_VPCPAIR_RSC", args)
 			if err != nil {
 				panic(err)
 			}

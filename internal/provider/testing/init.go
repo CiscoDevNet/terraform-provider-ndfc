@@ -34,6 +34,7 @@ var testModules = []string{
 	"loopback",
 	"vlan",
 	"portchannel",
+	"vpc_pair",
 }
 
 func LoadConfigFromYAML(yamlContent string) (*Config, error) {

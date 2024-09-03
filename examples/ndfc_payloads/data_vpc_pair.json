@@ -1,0 +1,48 @@
+
+    {
+        "useVirtualPeerlink": false,
+        "id": 62,
+        "peerOneId": "9N14Y8PVD2Y",
+        "peerTwoId": "9D0ZV7JBFNM",
+        "peerOneName": "leaf2",
+        "peerTwoName": "leaf1",
+        "peerOneSwitchDetails": {
+            "lanId": 0,
+            "ethSwitchId": 83570,
+            "logicalName": "leaf2",
+            "ipAddress": "192.168.10.53",
+            "vdcName": null,
+            "vdcId": 0,
+            "serialNumber": "9N14Y8PVD2Y",
+            "nxosVersion": null,
+            "fabricName": "Vxlan_vPC_Pair_Ak",
+            "recommendationReason": null,
+            "blockSelection": false,
+            "uuid": null,
+            "platformType": null,
+            "useVirtualPeerlink": false,
+            "currentPeer": false,
+            "recommended": false
+        },
+        "peerTwoSwitchDetails": {
+            "lanId": 0,
+            "ethSwitchId": 79190,
+            "logicalName": "leaf1",
+            "ipAddress": "192.168.10.52",
+            "vdcName": null,
+            "vdcId": 0,
+            "serialNumber": "9D0ZV7JBFNM",
+            "nxosVersion": null,
+            "fabricName": "Vxlan_vPC_Pair_Ak",
+            "recommendationReason": null,
+            "blockSelection": false,
+            "uuid": null,
+            "platformType": null,
+            "useVirtualPeerlink": false,
+            "currentPeer": false,
+            "recommended": false
+        },
+        "templateName": null,
+        "nvPairs": null
+    }
+
