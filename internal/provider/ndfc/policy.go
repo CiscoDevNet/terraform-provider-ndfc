@@ -164,20 +164,48 @@ func (c *NDFC) RscUpdatePolicy(ctx context.Context, dg *diag.Diagnostics, model 
 }
 
 func (c *NDFC) RscDeletePolicy(ctx context.Context, dg *diag.Diagnostics, model *resource_policy.PolicyModel) {
+
 	policyID := model.PolicyId.ValueString()
-	tflog.Debug(ctx, fmt.Sprintf("RscDeletePolicy: Deleting policy ID %s Deploy %v", policyID, model.Deploy.ValueBool()))
+	tflog.Debug(ctx, fmt.Sprintf("RscDeletePolicy: Deleting policy ID %s", policyID))
 
-	papi := api.NewPolicyAPI(c.GetLock(ResourcePolicy), &c.apiClient)
-	papi.PolicyID = policyID
-
-	res, err := papi.Delete()
-	if err != nil {
-		tflog.Error(ctx, "Failed to delete policy")
-		dg.AddError("Failed to delete policy", fmt.Sprintf("Error %v: %v", err, res.String()))
+	if model.IsPolicyGroup.ValueBool() {
+		tflog.Error(ctx, "Policy group is not supported")
+		dg.AddError("Policy group is not supported", "Policy group is not supported")
 		return
 	}
+	ID := model.Id.ValueInt64()
 
-	log.Printf("[TRACE] Policy deleted with ID: %v: |%v|", policyID, res)
+	policyApi := api.NewPolicyAPI(c.GetLock(ResourcePolicy), &c.apiClient)
+	policyApi.PolicyID = policyID
+	policyData := model.GetModelData()
+	policyData.Deleted = new(bool)
+	*policyData.Deleted = true
+	policyData.PolicyId = policyID
+	policyData.Id = &ID
+	data, err := json.Marshal(policyData)
+	if err != nil {
+		tflog.Error(ctx, "Failed to marshal policy data")
+		dg.AddError("Failed to marshal policy data", fmt.Sprintf("Error %v", err))
+		return
+	}
+	log.Printf("[DEBUG] Deleting policy with ID: %v: Marking delete with PUT Data |%s|", policyID, string(data))
+	res, err := policyApi.Put(data)
+	if err != nil {
+		tflog.Error(ctx, "Failed to mark delete policy")
+		dg.AddError("Failed to mark delete policy", fmt.Sprintf("Error %v: %v", err, res.String()))
+		return
+	}
+	c.RscDeployPolicy(ctx, dg, policyID)
+	if dg.HasError() {
+		// cannot rollback to old config as the old data is overwritten in NDFC
+		// throw error so that user can correct the config and re-apply
+		tflog.Error(ctx, "Failed to deploy policy")
+		return
+	}
+	log.Printf("[TRACE] Policy deleted with ID: %v", policyID)
+	newModel := c.rscGetPolicy(ctx, dg, policyID)
+	model.SetModelData(newModel)
+	model.Deploy = types.BoolValue(policyData.Deploy)
 	dg.AddWarning("Policy deleted", "Do global or switch level deploy for policy delete to take effect")
 
 }
