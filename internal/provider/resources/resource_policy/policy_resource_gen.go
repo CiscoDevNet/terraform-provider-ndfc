@@ -83,7 +83,7 @@ func PolicyResourceSchema(ctx context.Context) schema.Schema {
 			},
 			"policy_parameters": schema.MapAttribute{
 				ElementType:         types.StringType,
-				Required:            true,
+				Optional:            true,
 				Description:         "List of name value pairs",
 				MarkdownDescription: "List of name value pairs",
 			},

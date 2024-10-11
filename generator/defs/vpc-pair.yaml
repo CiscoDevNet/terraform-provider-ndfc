@@ -18,7 +18,7 @@ resource:
       type: List:String
       payload_hide: true
       ndfc_type: set
-      example: ["FGE20360RRZ", "FGE20360RRK"]
+      example: '["FGE20360RRZ", "FGE20360RRK"]'
       mandatory: true
       validator: SizeBetween(2, 2)
       tf_requires_replace: true
