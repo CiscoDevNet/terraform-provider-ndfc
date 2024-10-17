@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"log"
+	"strings"
 
 	"terraform-provider-ndfc/internal/provider/ndfc/api"
 	"terraform-provider-ndfc/internal/provider/resources/resource_policy"
@@ -63,6 +64,7 @@ func (c *NDFC) RscCreatePolicy(ctx context.Context, dg *diag.Diagnostics, model 
 	}
 	model.SetModelData(newModel)
 	model.Deploy = types.BoolValue(inData.Deploy)
+	model.FabricName = types.StringValue(inData.FabricName)
 }
 
 func getPolicyIdFromResponse(res *gjson.Result) string {
@@ -71,6 +73,8 @@ func getPolicyIdFromResponse(res *gjson.Result) string {
 
 func (c *NDFC) RscReadPolicy(ctx context.Context, dg *diag.Diagnostics, model *resource_policy.PolicyModel) {
 
+	FabricName := model.FabricName.ValueString()
+	Deploy := model.Deploy.ValueBool()
 	if model.IsPolicyGroup.ValueBool() {
 		tflog.Error(ctx, "Policy group is not supported")
 		dg.AddError("Policy group is not supported", "Policy group is not supported")
@@ -84,8 +88,10 @@ func (c *NDFC) RscReadPolicy(ctx context.Context, dg *diag.Diagnostics, model *r
 		dg.AddError("Failed to get policy", "Failed to get policy")
 		return
 	}
-
+	data.Deploy = Deploy
+	data.FabricName = FabricName
 	model.SetModelData(data)
+
 }
 func (c *NDFC) rscGetPolicy(ctx context.Context, dg *diag.Diagnostics, pID string) *resource_policy.NDFCPolicyModel {
 
@@ -96,7 +102,6 @@ func (c *NDFC) rscGetPolicy(ctx context.Context, dg *diag.Diagnostics, pID strin
 	res, err := policyApi.Get()
 	if err != nil {
 		tflog.Error(ctx, "Failed to get policy")
-		dg.AddError("Failed to get policy", fmt.Sprintf("Error %v: %v", err, string(res)))
 		return nil
 	}
 	log.Printf("[TRACE] Policy data: %v", string(res))
@@ -161,11 +166,14 @@ func (c *NDFC) RscUpdatePolicy(ctx context.Context, dg *diag.Diagnostics, model 
 
 	model.SetModelData(newModel)
 	model.Deploy = types.BoolValue(policyData.Deploy)
+	model.FabricName = types.StringValue(policyData.FabricName)
 }
 
 func (c *NDFC) RscDeletePolicy(ctx context.Context, dg *diag.Diagnostics, model *resource_policy.PolicyModel) {
 
 	policyID := model.PolicyId.ValueString()
+	FabricName := model.FabricName.ValueString()
+	tflog.Debug(ctx, fmt.Sprintf("Before Deploying configuration for Fabric: %s", FabricName))
 	tflog.Debug(ctx, fmt.Sprintf("RscDeletePolicy: Deleting policy ID %s", policyID))
 
 	if model.IsPolicyGroup.ValueBool() {
@@ -195,18 +203,21 @@ func (c *NDFC) RscDeletePolicy(ctx context.Context, dg *diag.Diagnostics, model 
 		dg.AddError("Failed to mark delete policy", fmt.Sprintf("Error %v: %v", err, res.String()))
 		return
 	}
+	// Incase of delete, policyID is made as FabricName:SerialNumber for switch deploy
+	// This avoids additional parameters to be passed to delete and also policyID is not used in delete
+	policyID = FabricName + ":" + model.GetModelData().DeviceSerialNumber
 	c.RscDeployPolicy(ctx, dg, policyID)
 	if dg.HasError() {
-		// cannot rollback to old config as the old data is overwritten in NDFC
-		// throw error so that user can correct the config and re-apply
-		tflog.Error(ctx, "Failed to deploy policy")
+		tflog.Error(ctx, "Failed to switch deploy")
 		return
 	}
+
 	log.Printf("[TRACE] Policy deleted with ID: %v", policyID)
 	newModel := c.rscGetPolicy(ctx, dg, policyID)
-	model.SetModelData(newModel)
-	model.Deploy = types.BoolValue(policyData.Deploy)
-	dg.AddWarning("Policy deleted", "Do global or switch level deploy for policy delete to take effect")
+	if newModel != nil {
+		dg.AddError("Failed to delete policy", fmt.Sprintf("Policy ID %s still exists", policyID))
+		return
+	}
 
 }
 
@@ -223,29 +234,44 @@ func (c *NDFC) RscImportPolicy(ctx context.Context, dg *diag.Diagnostics, ID str
 
 func (c *NDFC) RscDeployPolicy(ctx context.Context, dg *diag.Diagnostics, policyID string) {
 	tflog.Debug(ctx, fmt.Sprintf("RscDeployPolicy: Deploying policy ID %s", policyID))
-	policyApi := api.NewPolicyAPI(c.GetLock(ResourcePolicy), &c.apiClient)
-	policyApi.Deploy = true
-	postData, err := json.Marshal([]string{policyID})
-	if err != nil {
-		tflog.Error(ctx, "Failed to marshal policy data")
-		dg.AddError("Failed to marshal policy data", fmt.Sprintf("Error %v", err))
-		return
-	}
-	log.Printf("[DEBUG] Deploying policy with ID: %v: POST Data |%s|", policyID, string(postData))
-	res, err := policyApi.Post(postData)
-	if err != nil {
-		tflog.Error(ctx, "Failed to deploy policy")
-		dg.AddError("Failed to deploy policy", fmt.Sprintf("Error %v: %v", err, res.String()))
-		return
-	}
-	log.Printf("[TRACE] Policy deployment ID: %v Response: |%v|", policyID, res)
 
-	if res.Get("0.failedPTIList").Exists() {
-		// "failedPTIList" is present in the response
-		// Add your code here
-		log.Printf("[ERROR] Policy deployment failed for policy ID: %v - %v", policyID, res.Get("0.failedPTIList").String())
-		dg.AddError("Failed to deploy policy", fmt.Sprintf("Error %v: %v", err, res.String()))
+	// For delete, policyID is in FabricName:SerialNumber format
+	// Extract FabricName and SerialNumber
+	parts := strings.Split(policyID, ":")
+	if len(parts) == 2 {
+		FabricName := parts[0]
+		serialNumber := parts[1]
+		switchSerialNumber := []string{serialNumber}
+
+		tflog.Debug(ctx, fmt.Sprintf("Deploying configuration for Fabric: %s, Serial Numbers: %s", FabricName, serialNumber))
+		c.DeployConfiguration(ctx, dg, FabricName, switchSerialNumber)
 		return
+
+	} else {
+		policyApi := api.NewPolicyAPI(c.GetLock(ResourcePolicy), &c.apiClient)
+		policyApi.Deploy = true
+		postData, err := json.Marshal([]string{policyID})
+		if err != nil {
+			tflog.Error(ctx, "Failed to marshal policy data")
+			dg.AddError("Failed to marshal policy data", fmt.Sprintf("Error %v", err))
+			return
+		}
+		log.Printf("[DEBUG] Deploying policy with ID: %v: POST Data |%s|", policyID, string(postData))
+		res, err := policyApi.Post(postData)
+		if err != nil {
+			tflog.Error(ctx, "Failed to deploy policy")
+			dg.AddError("Failed to deploy policy", fmt.Sprintf("Error %v: %v", err, res.String()))
+			return
+		}
+		log.Printf("[TRACE] Policy deployment ID: %v Response: |%v|", policyID, res)
+
+		if res.Get("0.failedPTIList").Exists() {
+			// "failedPTIList" is present in the response
+			// Add your code here
+			log.Printf("[ERROR] Policy deployment failed for policy ID: %v - %v", policyID, res.Get("0.failedPTIList").String())
+			dg.AddError("Failed to deploy policy", fmt.Sprintf("Error %v: %v", err, res.String()))
+			return
+		}
 	}
 }
 
