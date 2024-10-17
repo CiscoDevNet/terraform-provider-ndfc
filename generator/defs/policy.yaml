@@ -16,6 +16,13 @@ resource:
       description: "Policy ID"
       computed: true
       use_state: true
+    - model_name: fabricName
+      tf_name: fabric_name
+      type: String
+      description: "Name of the fabric"
+      mandatory: true
+      payload_hide: true
+      tf_requires_replace: true
     - model_name: policyGroup
       tf_name: is_policy_group
       type: Bool
