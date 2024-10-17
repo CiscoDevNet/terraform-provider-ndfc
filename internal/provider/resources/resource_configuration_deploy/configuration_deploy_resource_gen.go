@@ -4,6 +4,7 @@ package resource_configuration_deploy
 
 import (
 	"context"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/booldefault"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/types"
@@ -14,6 +15,13 @@ import (
 func ConfigurationDeployResourceSchema(ctx context.Context) schema.Schema {
 	return schema.Schema{
 		Attributes: map[string]schema.Attribute{
+			"config_save": schema.BoolAttribute{
+				Optional:            true,
+				Computed:            true,
+				Description:         "Save the configuration",
+				MarkdownDescription: "Save the configuration",
+				Default:             booldefault.StaticBool(false),
+			},
 			"fabric_name": schema.StringAttribute{
 				Required:            true,
 				Description:         "The name of the fabric",
@@ -32,15 +40,16 @@ func ConfigurationDeployResourceSchema(ctx context.Context) schema.Schema {
 			},
 			"serial_numbers": schema.SetAttribute{
 				ElementType:         types.StringType,
-				Required:            true,
-				Description:         "The serial numbers of the fabric to be deployed",
-				MarkdownDescription: "The serial numbers of the fabric to be deployed",
+				Optional:            true,
+				Description:         "Value 'ALL' if all switches in the fabric are to be deployed, or a list of serial numbers of the switches to be deployed",
+				MarkdownDescription: "Value 'ALL' if all switches in the fabric are to be deployed, or a list of serial numbers of the switches to be deployed",
 			},
 		},
 	}
 }
 
 type ConfigurationDeployModel struct {
+	ConfigSave    types.Bool   `tfsdk:"config_save"`
 	FabricName    types.String `tfsdk:"fabric_name"`
 	Id            types.String `tfsdk:"id"`
 	SerialNumbers types.Set    `tfsdk:"serial_numbers"`
