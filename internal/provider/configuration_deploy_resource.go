@@ -3,11 +3,13 @@ package provider
 import (
 	"context"
 	"fmt"
+	"strings"
 	"terraform-provider-ndfc/internal/provider/ndfc"
 	"terraform-provider-ndfc/internal/provider/resources/resource_configuration_deploy"
 
+	"github.com/hashicorp/terraform-plugin-framework/diag"
+	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
-	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-log/tflog"
 )
 
@@ -23,12 +25,6 @@ type ConfigDeployResource struct {
 	client *ndfc.NDFC
 }
 
-type ConfigDeployResourceModel struct {
-	Id            types.String `tfsdk:"id"`
-	FabricName    types.String `tfsdk:"fabric_name"`
-	SerialNumbers types.Set    `tfsdk:"serial_numbers"`
-}
-
 func (r *ConfigDeployResource) Metadata(ctx context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
 	tflog.Debug(ctx, fmt.Sprintf("Start of %s Metadata", loggingConfigDeploy))
 	resp.TypeName = req.ProviderTypeName + "_configuration_deploy"
@@ -39,6 +35,35 @@ func (r *ConfigDeployResource) Schema(ctx context.Context, req resource.SchemaRe
 	tflog.Debug(ctx, fmt.Sprintf("Start of %s Schema", loggingConfigDeploy))
 	resp.Schema = resource_configuration_deploy.ConfigurationDeployResourceSchema(ctx)
 	tflog.Debug(ctx, fmt.Sprintf("End of %s Schema", loggingConfigDeploy))
+}
+
+func (r *ConfigDeployResource) ValidateConfig(ctx context.Context, req resource.ValidateConfigRequest, resp *resource.ValidateConfigResponse) {
+	var data resource_configuration_deploy.ConfigurationDeployModel
+	var serialNumbers []string
+
+	tflog.Debug(ctx, "ValidateConfig called")
+
+	resp.Diagnostics.Append(req.Config.Get(ctx, &data)...)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+	if !data.ConfigSave.ValueBool() && data.SerialNumbers.IsNull() {
+		resp.Diagnostics.AddAttributeError(path.Root("config_save"), "config_save and serial_numbers", "At least one of the fields 'config_save=true' or 'serial_numbers' must be set")
+		return
+	}
+	data.SerialNumbers.ElementsAs(ctx, &serialNumbers, false)
+	if len(serialNumbers) > 0 {
+		for _, serialNumber := range serialNumbers {
+			if strings.ToUpper(serialNumber) == "ALL" && len(serialNumbers) > 1 {
+				resp.Diagnostics.AddError("Invalid Configuration", "Serial numbers can have values 'ALL' or a list of Serial numbers")
+				return
+			}
+			if serialNumber == "" {
+				resp.Diagnostics.AddError("Invalid Configuration", "Serial number cannot be empty")
+				return
+			}
+		}
+	}
 }
 
 func (r *ConfigDeployResource) Configure(ctx context.Context, req resource.ConfigureRequest, resp *resource.ConfigureResponse) {
@@ -64,7 +89,7 @@ func (r *ConfigDeployResource) Configure(ctx context.Context, req resource.Confi
 
 func (r *ConfigDeployResource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
 	tflog.Debug(ctx, fmt.Sprintf("Start of %s Create", loggingConfigDeploy))
-	var data ConfigDeployResourceModel
+	var data resource_configuration_deploy.ConfigurationDeployModel
 
 	resp.Diagnostics.Append(req.Plan.Get(ctx, &data)...)
 
@@ -72,9 +97,7 @@ func (r *ConfigDeployResource) Create(ctx context.Context, req resource.CreateRe
 		return
 	}
 
-	var serialNumbers []string
-	data.SerialNumbers.ElementsAs(ctx, &serialNumbers, false)
-	r.client.DeployConfiguration(ctx, &resp.Diagnostics, data.FabricName.ValueString(), serialNumbers)
+	r.Deploy(ctx, &resp.Diagnostics, &data)
 
 	data.Id = data.FabricName
 
@@ -89,7 +112,8 @@ func (r *ConfigDeployResource) Read(ctx context.Context, req resource.ReadReques
 
 func (r *ConfigDeployResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
 	tflog.Debug(ctx, fmt.Sprintf("Start of %s Update", loggingConfigDeploy))
-	var data ConfigDeployResourceModel
+
+	var data resource_configuration_deploy.ConfigurationDeployModel
 
 	resp.Diagnostics.Append(req.Plan.Get(ctx, &data)...)
 
@@ -97,14 +121,41 @@ func (r *ConfigDeployResource) Update(ctx context.Context, req resource.UpdateRe
 		return
 	}
 
-	var serialNumbers []string
-	data.SerialNumbers.ElementsAs(ctx, &serialNumbers, false)
-	r.client.DeployConfiguration(ctx, &resp.Diagnostics, data.FabricName.ValueString(), serialNumbers)
+	r.Deploy(ctx, &resp.Diagnostics, &data)
+	data.Id = data.FabricName
 
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 	tflog.Debug(ctx, fmt.Sprintf("End of %s Update", loggingConfigDeploy))
 }
 
+func (r *ConfigDeployResource) Deploy(ctx context.Context, dg *diag.Diagnostics, data *resource_configuration_deploy.ConfigurationDeployModel) {
+
+	var serialNumbers []string
+	*dg = data.SerialNumbers.ElementsAs(ctx, &serialNumbers, false)
+	if dg.HasError() {
+		return
+	}
+
+	tflog.Debug(ctx, fmt.Sprintf("Serial Numbers: %v", serialNumbers))
+	if data.ConfigSave.ValueBool() {
+		// Config save in fabric
+		r.client.SaveConfiguration(ctx, dg, data.FabricName.ValueString())
+		if dg.HasError() {
+			return
+		}
+	}
+	if len(serialNumbers) != 0 {
+		FirstIndex := strings.ToUpper(serialNumbers[0])
+		if FirstIndex == "ALL" {
+			// Deploy configuration for all serial numbers
+			r.client.DeployConfiguration(ctx, dg, data.FabricName.ValueString(), nil)
+		} else {
+			// Deploy configuration for specific serial numbers
+			r.client.DeployConfiguration(ctx, dg, data.FabricName.ValueString(), serialNumbers)
+		}
+	}
+
+}
 func (r *ConfigDeployResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
 	tflog.Debug(ctx, fmt.Sprintf("Start of %s Delete", loggingConfigDeploy))
 	tflog.Debug(ctx, fmt.Sprintf("End of %s Delete", loggingConfigDeploy))

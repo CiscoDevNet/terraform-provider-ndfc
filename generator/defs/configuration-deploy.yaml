@@ -26,10 +26,17 @@ resource:
       tf_requires_replace: true
       ndfc_type: string
     - &serial_numbers
-      model_name: serial_numbers
+      model_name: serialNumbers
       tf_name: serial_numbers
-      description: The serial numbers of the fabric to be deployed
+      description: Value 'ALL' if all switches in the fabric are to be deployed, or a list of serial numbers of the switches to be deployed
       type: List:String
-      example: "[ \"FGE20360RRZ\", \"FGE20360RRY\" ]"
-      mandatory: true
+      example: "[ \"FGE20360RRZ\", \"FGE20360RRY\" ] or [\"ALL\"] or [\"\"]"
       ndfc_type: set
+    - &config_save
+      model_name: configSave
+      tf_name: config_save
+      type: Bool
+      description: Save the configuration
+      default_value: false
+      ndfc_type: bool
+      payload_hide: true
