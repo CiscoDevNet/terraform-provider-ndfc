@@ -113,7 +113,6 @@ func (r *vpcPairResource) Update(ctx context.Context, req resource.UpdateRequest
 		return
 	}
 
-
 	// Create API call logic
 	r.client.RscUpdateVpcPair(ctx, &resp.Diagnostics, &planData)
 	if resp.Diagnostics.HasError() {
@@ -162,4 +161,12 @@ func (r *vpcPairResource) ImportState(ctx context.Context, req resource.ImportSt
 	}
 	resp.Diagnostics.Append(resp.State.Set(ctx, data)...)
 
+}
+func (r vpcPairResource) ValidateConfig(ctx context.Context, req resource.ValidateConfigRequest, resp *resource.ValidateConfigResponse) {
+	var data resource_vpc_pair.VpcPairModel
+	tflog.Debug(ctx, "ValidateConfig called")
+	resp.Diagnostics.Append(req.Config.Get(ctx, &data)...)
+	if resp.Diagnostics.HasError() {
+		return
+	}
 }
