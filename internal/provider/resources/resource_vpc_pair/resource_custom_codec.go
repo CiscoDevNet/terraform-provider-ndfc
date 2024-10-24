@@ -5,21 +5,10 @@ import (
 )
 
 type NDFCVpcPairRecommendations struct {
-	LanId                int     `json:"lanId"`
-	EthSwitchId          int     `json:"ethSwitchId"`
-	LogicalName          string  `json:"logicalName"`
-	IpAddress            string  `json:"ipAddress"`
-	VdcName              *string `json:"vdcName"` // Use a pointer to handle null values
-	VdcId                int     `json:"vdcId"`
 	SerialNumber         string  `json:"serialNumber"`
-	NxosVersion          string  `json:"nxosVersion"`
-	FabricName           *string `json:"fabricName"` // Use a pointer to handle null values
 	RecommendationReason string  `json:"recommendationReason"`
-	BlockSelection       bool    `json:"blockSelection"`
-	Uuid                 *string `json:"uuid"`         // Use a pointer to handle null values
-	PlatformType         *string `json:"platformType"` // Use a pointer to handle null values
+    LogicalName 		 string  `json:"logicalName"`
 	UseVirtualPeerlink   bool    `json:"useVirtualPeerlink"`
-	CurrentPeer          bool    `json:"currentPeer"`
 	Recommended          bool    `json:"recommended"`
 }
 

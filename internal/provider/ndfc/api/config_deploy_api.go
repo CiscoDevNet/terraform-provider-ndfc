@@ -12,22 +12,32 @@ type ConfigDeploymentAPI struct {
 	mutex         *sync.Mutex
 	SerialNumbers []string
 	Deploy        bool
+	Preview       bool
 	FabricName    string
 }
 
 // For additional functions
 
-const UrlGlobalConfigDeploy = "/lan-fabric/rest/control/fabrics/%s/config-deploy"
-const UrlSwitchConfigDeploy = "/lan-fabric/rest/control/fabrics/%s/config-deploy/%s"
+const UrlGlobalConfigDeploy = "/lan-fabric/rest/control/fabrics/%s/config-deploy?forceShowRun=false"
+const UrlSwitchConfigDeploy = "/lan-fabric/rest/control/fabrics/%s/config-deploy/%s?forceShowRun=false"
 const UrlSaveConfig = "/lan-fabric/rest/control/fabrics/%s/config-save"
 const UrlGetFabricErrors = "/lan-fabric/rest/control/fabrics/%s/errors"
+const UrlGetGlobalConfigPreview = "/lan-fabric/rest/control/fabrics/%s/config-preview/%s"
+const UrlGetConfigPreview = "/lan-fabric/rest/control/fabrics/%s/config-preview"
 
 func (c *ConfigDeploymentAPI) GetLock() *sync.Mutex {
 	return c.mutex
 }
 
 func (c *ConfigDeploymentAPI) GetUrl() string {
-	return fmt.Sprintf(UrlGetFabricErrors, c.FabricName)
+	if c.Preview {
+		if len(c.SerialNumbers) > 0 {
+			return fmt.Sprintf(UrlGetGlobalConfigPreview, c.FabricName, strings.Join(c.SerialNumbers, ","))
+		}
+		return fmt.Sprintf(UrlGetConfigPreview, c.FabricName)
+	} else {
+		return fmt.Sprintf(UrlGetFabricErrors, c.FabricName)
+	}
 }
 
 func (c *ConfigDeploymentAPI) PostUrl() string {
