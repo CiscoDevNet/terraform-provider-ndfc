@@ -283,7 +283,7 @@ func NetworksDataSourceSchema(ctx context.Context) schema.Schema {
 							MarkdownDescription: "Vlan Netflow Monitor. Provide monitor name defined in fabric setting for Layer 3 Record. For NX-OS only",
 						},
 						"vrf_name": schema.StringAttribute{
-							Required:            true,
+							Optional:            true,
 							Description:         "The name of the vrf",
 							MarkdownDescription: "The name of the vrf",
 						},

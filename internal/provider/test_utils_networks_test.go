@@ -61,6 +61,8 @@ func NetworksValueHelperStateCheck(RscName string, c resource_networks.NDFCNetwo
 	}
 	if c.VrfName != "" {
 		ret = append(ret, resource.TestCheckResourceAttr(RscName, attrPath.AtName("vrf_name").String(), c.VrfName))
+	} else {
+		ret = append(ret, resource.TestCheckResourceAttr(RscName, attrPath.AtName("vrf_name").String(), "NA"))
 	}
 	if c.PrimaryNetworkId != nil {
 		ret = append(ret, resource.TestCheckResourceAttr(RscName, attrPath.AtName("primary_network_id").String(), strconv.Itoa(int(*c.PrimaryNetworkId))))

@@ -217,6 +217,19 @@ func (r networkBulkResource) ValidateConfig(ctx context.Context, req resource.Va
 
 		for network, v := range elements1 {
 			networkDeploy := false
+			if v.Layer2Only.ValueBool() {
+				if !v.VrfName.IsNull() {
+					tflog.Error(ctx, fmt.Sprintf("VRF Name is not required for network %s", network))
+					resp.Diagnostics.AddError("VRF Name is not required", fmt.Sprintf("In network %s, vrf_name is not mandatory since layer2_only is true", network))
+					return
+				}
+			} else {
+				if v.VrfName.IsNull() {
+					tflog.Error(ctx, fmt.Sprintf("VRF Name is required for network %s", network))
+					resp.Diagnostics.AddError("VRF Name is required", fmt.Sprintf("In network %s, vrf_name is mandatory since layer2_only is false", network))
+					return
+				}
+			}
 			if !v.DeployAttachments.IsNull() && !v.DeployAttachments.IsUnknown() {
 				tflog.Debug(ctx, fmt.Sprintf("DeployAttachments is set for network %s", network))
 				networkDeploy = v.DeployAttachments.ValueBool()

@@ -3,6 +3,7 @@ package ndfc
 import (
 	"context"
 	"fmt"
+	"strings"
 	"terraform-provider-ndfc/internal/provider/resources/resource_networks"
 
 	"github.com/hashicorp/terraform-plugin-framework/diag"
@@ -15,7 +16,11 @@ func (c NDFC) CheckNetworkVrfConfig(ctx context.Context, dg *diag.Diagnostics, n
 	// Get VRFs referenced in Network resource
 	vrf := make(map[string][]string)
 	for _, network := range nw.Networks {
-		vrf[network.VrfName] = make([]string, 0)
+		if strings.ToLower(network.NetworkTemplateConfig.Layer2Only) == "false" {
+			vrf[network.VrfName] = make([]string, 0)
+		} else {
+			tflog.Debug(ctx, fmt.Sprintf("CheckNetworkVrfConfig: Skipping VRF check for network %s", network.NetworkName))
+		}
 	}
 
 	// Step 1 - Check if VRFs to update are present in NDFC
@@ -54,7 +59,11 @@ func (c NDFC) CheckNetworkVrfConfig(ctx context.Context, dg *diag.Diagnostics, n
 	}
 	// Check if network attachments are also attached in corresponding VRF
 	for nwName, network := range nw.Networks {
-		vrfEntry := ndfcVRFs.Vrfs[network.VrfName]
+		vrfEntry, ok := ndfcVRFs.Vrfs[network.VrfName]
+		if !ok {
+			tflog.Info(ctx, fmt.Sprintf("CheckNetworkVrfConfig: VRF %s not found", network.VrfName))
+			continue
+		}
 		for serial := range network.Attachments {
 			if _, ok := vrfEntry.AttachList[serial]; !ok {
 				//path := path.
