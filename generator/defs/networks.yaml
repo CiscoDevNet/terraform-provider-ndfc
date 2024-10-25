@@ -99,7 +99,7 @@ resource:
         model_name: vrf
         tf_name: vrf_name
         type: String
-        mandatory: true
+        default_value: NA
         description: The name of the vrf
         example: VRF1
       - &primaryNetworkId
