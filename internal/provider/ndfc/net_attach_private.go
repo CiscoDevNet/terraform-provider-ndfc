@@ -231,11 +231,14 @@ func (c NDFC) checkNwAttachmentsAction(ctx context.Context, plan *resource_netwo
 					tflog.Debug(ctx, fmt.Sprintf("compareAttachments: Attachment %s/%s in plan needs un-deploy",
 						plan.NetworkName, serial))
 					controlFlag |= UnDeploy
-				} else if !stateAttachment.DeployThisAttachment && planAttach.DeployThisAttachment {
+				}  else if planAttach.DeployThisAttachment {
 					//deploy needed
 					tflog.Debug(ctx, fmt.Sprintf("compareAttachments: Attachment %s/%s in plan needs deploy",
 						plan.NetworkName, serial))
 					controlFlag |= Deploy
+				} else {
+					tflog.Debug(ctx, fmt.Sprintf("compareAttachments: Attachment %s/%s is changed but not to be deployed",
+						plan.NetworkName, serial))
 				}
 
 				// Look inside port lists to see if something has changed
