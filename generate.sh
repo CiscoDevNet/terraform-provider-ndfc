@@ -1,4 +1,12 @@
 #!/bin/bash
+# Copyright (c) 2024 Cisco Systems, Inc. and its affiliates
+#
+# This Source Code Form is subject to the terms of the Mozilla Public
+# License, v. 2.0. If a copy of the MPL was not distributed with this
+# file, You can obtain one at https://mozilla.org/MPL/2.0/.
+#
+# SPDX-License-Identifier: MPL-2.0
+
 set -e
 export PATH=$PATH:$GOPATH/bin
 OUTDIR=${1:-"./internal/provider"}
@@ -16,6 +24,12 @@ then
     echo "Compile and install generator"
     exit 1
 fi
+if [[ ! -f $GOPATH/bin/addlicense ]]
+then
+    echo "Compile and install addlicense tool"
+    exit 1
+fi
+
 mkdir -p ./out
 rm -rf ./out/*
 # Stage 1: Generate spec Json used for TF plugin generator framework
@@ -46,6 +60,14 @@ done
 #Generated in the same output folder of Stage 2
 echo "Stage 3 - Generating additional codec code"
 $GOPATH/bin/generator code -in generator/defs -template generator/templates -out $OUTDIR $REPLACE
+
+# Add license headers to all generated files
+$GOPATH/bin/addlicense -c "Cisco Systems, Inc. and its affiliates" -l "mpl" -s  internal/provider/resources/**/*_gen.go
+$GOPATH/bin/addlicense -c "Cisco Systems, Inc. and its affiliates" -l "mpl" -s  internal/provider/provider/**/*_gen.go
+$GOPATH/bin/addlicense -c "Cisco Systems, Inc. and its affiliates" -l "mpl" -s  internal/provider/datasources/**/*_gen.go
+$GOPATH/bin/addlicense -c "Cisco Systems, Inc. and its affiliates" -l "mpl" -s  internal/provider/types/
+$GOPATH/bin/addlicense -c "Cisco Systems, Inc. and its affiliates" -l "mpl" -s  internal/provider/*_test.go
+
 rm -rf ./out
 
 
