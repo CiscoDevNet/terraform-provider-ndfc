@@ -13,11 +13,16 @@ import (
 )
 
 type NDFCVpcPairRecommendations struct {
-	SerialNumber         string  `json:"serialNumber"`
-	RecommendationReason string  `json:"recommendationReason"`
-    LogicalName 		 string  `json:"logicalName"`
-	UseVirtualPeerlink   bool    `json:"useVirtualPeerlink"`
-	Recommended          bool    `json:"recommended"`
+	SerialNumber         string `json:"serialNumber"`
+	RecommendationReason string `json:"recommendationReason"`
+	LogicalName          string `json:"logicalName"`
+	UseVirtualPeerlink   bool   `json:"useVirtualPeerlink"`
+	Recommended          bool   `json:"recommended"`
+}
+
+type NDFCSwitchesByFabric struct {
+	SerialNumber string `json:"serialNumber"`
+	PeerSerialNumber string `json:"peerSerialNumber"`
 }
 
 type CustomNDFCVpcPairModel NDFCVpcPairModel
@@ -31,6 +36,7 @@ func (m *NDFCVpcPairModel) UnmarshalJSON(data []byte) error {
 	m.UseVirtualPeerlink = customModel.UseVirtualPeerlink
 	m.PeerOneId = customModel.PeerOneId
 	m.PeerTwoId = customModel.PeerTwoId
+	m.PeerOneSwitchDetails.FabricName = customModel.PeerOneSwitchDetails.FabricName
 	return nil
 }
 func (m *NDFCVpcPairModel) MarshalJSON() ([]byte, error) {

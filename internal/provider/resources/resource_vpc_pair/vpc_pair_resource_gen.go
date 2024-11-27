@@ -5,8 +5,6 @@ package resource_vpc_pair
 import (
 	"context"
 	"github.com/hashicorp/terraform-plugin-framework-validators/setvalidator"
-	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
-	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 
@@ -20,14 +18,6 @@ func VpcPairResourceSchema(ctx context.Context) schema.Schema {
 				Required:            true,
 				Description:         "Deploy vPC pair",
 				MarkdownDescription: "Deploy vPC pair",
-			},
-			"fabric_name": schema.StringAttribute{
-				Required:            true,
-				Description:         "Fabric name to which the vPC pair belongs",
-				MarkdownDescription: "Fabric name to which the vPC pair belongs",
-				PlanModifiers: []planmodifier.String{
-					stringplanmodifier.RequiresReplace(),
-				},
 			},
 			"id": schema.StringAttribute{
 				Computed:            true,
@@ -54,7 +44,6 @@ func VpcPairResourceSchema(ctx context.Context) schema.Schema {
 
 type VpcPairModel struct {
 	Deploy             types.Bool   `tfsdk:"deploy"`
-	FabricName         types.String `tfsdk:"fabric_name"`
 	Id                 types.String `tfsdk:"id"`
 	SerialNumbers      types.Set    `tfsdk:"serial_numbers"`
 	UseVirtualPeerlink types.Bool   `tfsdk:"use_virtual_peerlink"`

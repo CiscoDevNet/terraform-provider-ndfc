@@ -18,6 +18,7 @@ import (
 	"terraform-provider-ndfc/internal/provider/resources/resource_vpc_pair"
 	"time"
 
+	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/types"
@@ -37,16 +38,13 @@ func (c *NDFC) RscReadVpcPair(ctx context.Context, resp *resource.ReadResponse, 
 	}
 
 	// Fill NDFC output data to terraform model
-	ndfcVpcPairModel := tf.GetModelData()
-	vpcPairModel.Deploy = ndfcVpcPairModel.Deploy
-	vpcPairModel.NvPairs.FabricName = ndfcVpcPairModel.NvPairs.FabricName
+	vpcPairModel.Deploy = tf.GetModelData().Deploy
 	rscCreateModelId(tf, vpcPairModel)
-	log.Printf("[TRACE] Vpc pair model: FabricName %v, SerialNumbers %v, Id %v", tf.FabricName, tf.SerialNumbers, tf.Id)
+	log.Printf("[TRACE] Vpc pair model: SerialNumbers %v, Id %v", tf.SerialNumbers, tf.Id)
 
 }
 func (c *NDFC) RscDeleteVpcPair(ctx context.Context, dg *diag.Diagnostics, tf *resource_vpc_pair.VpcPairModel) {
 	api := api.NewVpcPairAPI(c.GetLock(ResourceVpcPair), &c.apiClient)
-
 	tflog.Debug(ctx, "RscDeleteVpcPair: Checking if vPC Pair is present")
 	// Check if vPC Pair is already deleted
 	vpcPairModel := c.rscGetVpcPair(ctx, tf)
@@ -54,15 +52,15 @@ func (c *NDFC) RscDeleteVpcPair(ctx context.Context, dg *diag.Diagnostics, tf *r
 		tflog.Error(ctx, "RscDeleteVpcPair: Vpc pair not present, might be already deleted")
 		return
 	}
-
+	fabricName := vpcPairModel.PeerOneSwitchDetails.FabricName
 	// Delete the vPC Pair if it is present
 	api.VpcPairID = vpcPairModel.PeerOneId
 	tflog.Debug(ctx, fmt.Sprint("RscDeleteVpcPair: Deleting vPC Pair with id: ", vpcPairModel.PeerOneId))
 
 	res, err := api.Delete()
 	if err != nil {
-		tflog.Error(ctx, "Failed to create vPC Pair")
-		dg.AddError("Failed to create vPC Pair", fmt.Sprintf("Error %v: %v", err, res.String()))
+		tflog.Error(ctx, "Failed to destroy vPC Pair")
+		dg.AddError("Failed to destroy vPC Pair", fmt.Sprintf("Error %v: %v", err, res.String()))
 		return
 	}
 
@@ -73,8 +71,7 @@ func (c *NDFC) RscDeleteVpcPair(ctx context.Context, dg *diag.Diagnostics, tf *r
 		dg.AddError("Failed to delete vPC Pair", fmt.Sprintf("Error %v: %v", err, res.String()))
 		return
 	}
-
-	c.RscDeployVpcPair(ctx, dg, tf)
+	c.RscDeployVpcPair(ctx, dg, tf, fabricName)
 	if dg.HasError() {
 		return
 	}
@@ -82,7 +79,6 @@ func (c *NDFC) RscDeleteVpcPair(ctx context.Context, dg *diag.Diagnostics, tf *r
 }
 
 func (c *NDFC) RscCreateVpcPair(ctx context.Context, dg *diag.Diagnostics, tf *resource_vpc_pair.VpcPairModel) {
-
 	err := c.rscCheckVpcPairRecommendations(ctx, tf)
 	if err != nil {
 		dg.AddError("vPC Pair creation failed", fmt.Sprintf("Error %v", err))
@@ -92,7 +88,6 @@ func (c *NDFC) RscCreateVpcPair(ctx context.Context, dg *diag.Diagnostics, tf *r
 	api := api.NewVpcPairAPI(c.GetLock(ResourceVpcPair), &c.apiClient)
 	nfdcVpcPairModel := tf.GetModelData()
 	deploy := nfdcVpcPairModel.Deploy
-	FabricName := nfdcVpcPairModel.NvPairs.FabricName
 
 	// Convert NDFC model to the json data
 	payload, err := json.Marshal(nfdcVpcPairModel)
@@ -103,8 +98,8 @@ func (c *NDFC) RscCreateVpcPair(ctx context.Context, dg *diag.Diagnostics, tf *r
 	}
 
 	// Check if the vPC Pair is already present
-	vpcPairModel := c.rscGetVpcPair(ctx, tf)
-	if vpcPairModel == nil {
+	nfdcVpcPairModel = c.rscGetVpcPair(ctx, tf)
+	if nfdcVpcPairModel == nil {
 		log.Printf("Vpc pair not present, creating new vPC Pair")
 		res, err := api.Post(payload)
 		if err != nil {
@@ -113,29 +108,29 @@ func (c *NDFC) RscCreateVpcPair(ctx context.Context, dg *diag.Diagnostics, tf *r
 			return
 		}
 		// Check if the vPC Pair is present after creation
-		vpcPairModel = c.rscGetVpcPair(ctx, tf)
-		if vpcPairModel == nil {
+		nfdcVpcPairModel = c.rscGetVpcPair(ctx, tf)
+		if nfdcVpcPairModel == nil {
 			dg.AddError("Failed to create vPC Pair", "vPC Pair data empty in NDFC")
 			return
 		}
 	} else {
-		err := fmt.Errorf("vPC Pair already exists with serial numbers %s %s", vpcPairModel.PeerOneId, vpcPairModel.PeerTwoId)
+		err := fmt.Errorf("vPC Pair already exists with serial numbers %s %s", nfdcVpcPairModel.PeerOneId, nfdcVpcPairModel.PeerTwoId)
 		tflog.Error(ctx, "RscCreateVpcPair: Existing Vpc Pair present, destroy to proceed new one")
 		dg.AddError("Failed to create vPC Pair", fmt.Sprintf("Error %v", err))
 		return
 	}
-
+	fabricName := nfdcVpcPairModel.PeerOneSwitchDetails.FabricName
+	log.Printf("fabric name %v", fabricName)
 	if deploy {
-		c.RscDeployVpcPair(ctx, dg, tf)
+		c.RscDeployVpcPair(ctx, dg, tf, fabricName)
 		if dg.HasError() {
 			return
 		}
 	}
 
-	vpcPairModel.Deploy = deploy
-	vpcPairModel.NvPairs.FabricName = FabricName
-	rscCreateModelId(tf, vpcPairModel)
-	log.Printf("[TRACE] Vpc pair model: FabricName %v, SerialNumbers %v, Id %v", tf.FabricName, tf.SerialNumbers, tf.Id)
+	nfdcVpcPairModel.Deploy = deploy
+	rscCreateModelId(tf, nfdcVpcPairModel)
+	log.Printf("[TRACE] Vpc pair model: SerialNumbers %v, Id %v", tf.SerialNumbers, tf.Id)
 }
 
 func (c *NDFC) RscUpdateVpcPair(ctx context.Context, dg *diag.Diagnostics, tf *resource_vpc_pair.VpcPairModel) {
@@ -149,7 +144,6 @@ func (c *NDFC) RscUpdateVpcPair(ctx context.Context, dg *diag.Diagnostics, tf *r
 	// Store the Deploy status and set it back, as it is not passed to NDFC
 	nfdcVpcPairModel := tf.GetModelData()
 	deploy := nfdcVpcPairModel.Deploy
-	FabricName := nfdcVpcPairModel.NvPairs.FabricName
 
 	// Convert NDFC model to the json data
 	payload, err := json.Marshal(nfdcVpcPairModel)
@@ -168,23 +162,22 @@ func (c *NDFC) RscUpdateVpcPair(ctx context.Context, dg *diag.Diagnostics, tf *r
 		return
 	}
 	// Check if the vPC Pair is present after update
-	vpcPairModel := c.rscGetVpcPair(ctx, tf)
-	if vpcPairModel == nil {
+	nfdcVpcPairModel = c.rscGetVpcPair(ctx, tf)
+	if nfdcVpcPairModel == nil {
 		dg.AddError("Failed to create vPC Pair", "vPC Pair data empty in NDFC")
 		return
 	}
-
+	fabricName := nfdcVpcPairModel.PeerOneSwitchDetails.FabricName
 	if deploy {
-		c.RscDeployVpcPair(ctx, dg, tf)
+		c.RscDeployVpcPair(ctx, dg, tf, fabricName)
 		if dg.HasError() {
 			return
 		}
 	}
 
-	vpcPairModel.Deploy = deploy
-	vpcPairModel.NvPairs.FabricName = FabricName
-	rscCreateModelId(tf, vpcPairModel)
-	log.Printf("[TRACE] Vpc pair model: FabricName %v, SerialNumbers %v, Id %v", tf.FabricName, tf.SerialNumbers, tf.Id)
+	nfdcVpcPairModel.Deploy = deploy
+	rscCreateModelId(tf, nfdcVpcPairModel)
+	log.Printf("[TRACE] Vpc pair model: SerialNumbers %v, Id %v", tf.SerialNumbers, tf.Id)
 }
 
 func (c *NDFC) rscGetVpcPair(ctx context.Context,
@@ -248,11 +241,12 @@ func (c *NDFC) rscCheckVpcPairRecommendations(ctx context.Context,
 	recmdList := []resource_vpc_pair.NDFCVpcPairRecommendations{}
 
 	api.VpcPairID = nfdcVpcPairModel.SerialNumbers[0]
-	api.CheckRecommendations = true
+	api.CheckStatus = make(map[string]bool)
+	api.CheckStatus["recommendations"] = true
 	api.VirtualPeerLink = *nfdcVpcPairModel.UseVirtualPeerlink
 
 	payload, err := api.Get()
-	api.CheckRecommendations = false
+	api.CheckStatus["recommendations"] = false
 	if err != nil {
 		tflog.Error(ctx, "RscVpcPairRecommendations: Failed to get recommendations")
 		err = fmt.Errorf("failed to get recommendations")
@@ -288,29 +282,23 @@ func (c *NDFC) RscImportVpcPairs(ctx context.Context,
 	dg *diag.Diagnostics,
 	tf *resource_vpc_pair.VpcPairModel) {
 	// Get the vPC Pair data
-	api := api.NewVpcPairAPI(c.GetLock(ResourceVpcPair), &c.apiClient)
+	var err diag.Diagnostics
 	id := tf.Id.ValueString()
 	idSplit := strings.Split(id, ":")
 	if len(idSplit) != 2 {
 		dg.AddError("Import state failed", "ID should be in the format of serial number:serial number")
 		return
 	}
-	api.VpcPairID = idSplit[0]
-	payload, err := api.Get()
+	tf.SerialNumbers, err = types.SetValue(types.StringType, []attr.Value{types.StringValue(idSplit[0]), types.StringValue(idSplit[1])})
 	if err != nil {
-		dg.AddError("Import state failed", "Failed to get vPC Pair data")
-		return
-	} else if string(payload) == "[]" || payload == nil {
-		dg.AddError("Import state failed", "vPC Pair data not present in NDFC")
+		dg.AddError("Import state failed", "Failed to set serial numbers")
 		return
 	}
-	modellist := []resource_vpc_pair.NDFCVpcPairModel{}
-	err = json.Unmarshal(payload, &modellist)
-	if err != nil {
-		dg.AddError("Import state failed", "Failed to unmarshal vPC Pair data")
+	vpcPairModel := c.rscGetVpcPair(ctx, tf)
+	if vpcPairModel == nil {
+		dg.AddError("Unable to get vpcPair", "vPC Pair data empty in NDFC")
 		return
 	}
-	vpcPairModel := &modellist[0]
 	rscCreateModelId(tf, vpcPairModel)
 }
 
@@ -318,11 +306,10 @@ func (c *NDFC) RscImportVpcPairs(ctx context.Context,
 	    vPC pair does not have a module level deployment,
 		so switch deploy is required
 */
-func (c *NDFC) RscDeployVpcPair(ctx context.Context, dg *diag.Diagnostics, tf *resource_vpc_pair.VpcPairModel) {
+func (c *NDFC) RscDeployVpcPair(ctx context.Context, dg *diag.Diagnostics, tf *resource_vpc_pair.VpcPairModel, fabricName string) {
 
 	ndfcVpcPairModel := tf.GetModelData()
 	serialNumbers := ndfcVpcPairModel.SerialNumbers
-	fabricName := ndfcVpcPairModel.NvPairs.FabricName
 	c.SaveConfiguration(ctx, dg, fabricName)
 	if dg.HasError() {
 		return

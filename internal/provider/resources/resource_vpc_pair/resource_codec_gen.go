@@ -20,16 +20,16 @@ import (
 )
 
 type NDFCVpcPairModel struct {
-	SerialNumbers      []string         `json:"-"`
-	PeerOneId          string           `json:"peerOneId,omitempty"`
-	PeerTwoId          string           `json:"peerTwoId,omitempty"`
-	UseVirtualPeerlink *bool            `json:"useVirtualPeerlink,omitempty"`
-	Deploy             bool             `json:"-"`
-	NvPairs            NDFCNvPairsValue `json:"nvPairs,omitempty"`
+	SerialNumbers        []string                      `json:"-"`
+	PeerOneId            string                        `json:"peerOneId,omitempty"`
+	PeerTwoId            string                        `json:"peerTwoId,omitempty"`
+	UseVirtualPeerlink   *bool                         `json:"useVirtualPeerlink,omitempty"`
+	Deploy               bool                          `json:"-"`
+	PeerOneSwitchDetails NDFCPeerOneSwitchDetailsValue `json:"peerOneSwitchDetails,omitempty"`
 }
 
-type NDFCNvPairsValue struct {
-	FabricName string `json:"FABRIC_NAME,omitempty"`
+type NDFCPeerOneSwitchDetailsValue struct {
+	FabricName string `json:"fabricName,omitempty"`
 }
 
 func (v *VpcPairModel) SetModelData(jsonData *NDFCVpcPairModel) diag.Diagnostics {
@@ -62,12 +62,6 @@ func (v *VpcPairModel) SetModelData(jsonData *NDFCVpcPairModel) diag.Diagnostics
 		v.UseVirtualPeerlink = types.BoolNull()
 	}
 
-	if jsonData.NvPairs.FabricName != "" {
-		v.FabricName = types.StringValue(jsonData.NvPairs.FabricName)
-	} else {
-		v.FabricName = types.StringNull()
-	}
-
 	v.Deploy = types.BoolValue(jsonData.Deploy)
 
 	return err
@@ -93,12 +87,6 @@ func (v VpcPairModel) GetModelData() *NDFCVpcPairModel {
 		*data.UseVirtualPeerlink = v.UseVirtualPeerlink.ValueBool()
 	} else {
 		data.UseVirtualPeerlink = nil
-	}
-
-	if !v.FabricName.IsNull() && !v.FabricName.IsUnknown() {
-		data.NvPairs.FabricName = v.FabricName.ValueString()
-	} else {
-		data.NvPairs.FabricName = ""
 	}
 
 	if !v.Deploy.IsNull() && !v.Deploy.IsUnknown() {
