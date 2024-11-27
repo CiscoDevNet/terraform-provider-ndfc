@@ -28,7 +28,7 @@ func (c *NDFC) RscGetNetworkAttachments(ctx context.Context, nw *resource_networ
 		tflog.Error(ctx, "RscGetNetworkAttachments: Error getting network attachments", map[string]interface{}{"Err": err})
 		return err
 	}
-
+    c.createVpcPairMap(ctx,nw.FabricName)
 	nw.FillAttachmentsFromPayload(nwAttachPayload)
 
 	for netName, nwEntry := range nw.Networks {
@@ -86,7 +86,7 @@ func (c *NDFC) RscUpdateNetAttachments(ctx context.Context, dg *diag.Diagnostics
 	if updateNwAttach != nil && len(updateNwAttach.NetworkAttachments) == 0 {
 		tflog.Info(ctx, "RscUpdateNetAttachments: No attachments to update")
 	} else {
-
+		log.Printf("Network Attachments: %v", updateNwAttach.NetworkAttachments)
 		data, err := json.Marshal(updateNwAttach.NetworkAttachments)
 		if err != nil {
 			tflog.Error(ctx, "RscUpdateNetAttachments: Error marshalling attachments", map[string]interface{}{"Err": err})

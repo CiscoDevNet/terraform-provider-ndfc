@@ -18,6 +18,7 @@ import (
 	"terraform-provider-ndfc/internal/provider/ndfc/api"
 	rna "terraform-provider-ndfc/internal/provider/resources/resource_network_attachments"
 	"terraform-provider-ndfc/internal/provider/resources/resource_networks"
+	"terraform-provider-ndfc/internal/provider/resources/resource_vpc_pair"
 	"terraform-provider-ndfc/internal/provider/types"
 	. "terraform-provider-ndfc/internal/provider/types"
 
@@ -177,7 +178,7 @@ on the attachment:
 Attachment level values are set in UpdateAction field, which is used to filter out the entries.
 */
 func (c NDFC) checkNwAttachmentsAction(ctx context.Context, plan *resource_networks.NDFCNetworksValue,
-	state *resource_networks.NDFCNetworksValue) uint16 {
+	state *resource_networks.NDFCNetworksValue, vpcPairMap map[string]string) uint16 {
 
 	actionFlag := NoChange
 
@@ -190,7 +191,6 @@ func (c NDFC) checkNwAttachmentsAction(ctx context.Context, plan *resource_netwo
 	} else {
 		tflog.Debug(ctx, fmt.Sprintf("compareAttachments: Net %s, deployment flag unchanged", plan.NetworkName))
 	}
-
 	for serial, planAttach := range plan.Attachments {
 		tflog.Debug(ctx, fmt.Sprintf("compareAttachments: Attachment %s/%s in plan", plan.NetworkName, serial))
 		planAttach.SerialNumber = serial
@@ -239,7 +239,7 @@ func (c NDFC) checkNwAttachmentsAction(ctx context.Context, plan *resource_netwo
 					tflog.Debug(ctx, fmt.Sprintf("compareAttachments: Attachment %s/%s in plan needs un-deploy",
 						plan.NetworkName, serial))
 					controlFlag |= UnDeploy
-				}  else if planAttach.DeployThisAttachment {
+				} else if planAttach.DeployThisAttachment {
 					//deploy needed
 					tflog.Debug(ctx, fmt.Sprintf("compareAttachments: Attachment %s/%s in plan needs deploy",
 						plan.NetworkName, serial))
@@ -276,6 +276,14 @@ func (c NDFC) checkNwAttachmentsAction(ctx context.Context, plan *resource_netwo
 		planAttach.UpdateAction |= controlFlag
 		plan.Attachments[serial] = planAttach
 		actionFlag |= controlFlag
+		if controlFlag&Update > 0 {
+			if peerSerial := vpcPairMap[serial]; peerSerial != "" {
+				tflog.Debug(ctx, fmt.Sprintf("compareAttachments: vPC peer found attachment %s", peerSerial))
+				peerAttachments := plan.Attachments[peerSerial]
+				peerAttachments.UpdateAction |= controlFlag
+				plan.Attachments[peerSerial] = peerAttachments
+			}
+		}
 	}
 	tflog.Debug(ctx, fmt.Sprintf("compareAttachments: Actions %b", actionFlag))
 	return actionFlag
@@ -310,6 +318,7 @@ func (c NDFC) networkAttachmentsGetDiff(ctx context.Context, dg *diag.Diagnostic
 		naDeploy.GlobalUndeploy = false
 	}
 
+	vpcPairMap := c.createVpcPairMap(ctx, vPlan.FabricName)
 	for nw, planNw := range vPlan.Networks {
 		planNw.NetworkName = nw
 		planNw.FabricName = vPlan.FabricName
@@ -317,7 +326,7 @@ func (c NDFC) networkAttachmentsGetDiff(ctx context.Context, dg *diag.Diagnostic
 		if stateNw, ok := vState.Networks[nw]; ok {
 			tflog.Debug(ctx, fmt.Sprintf("Existing Network %s in plan", nw))
 			// Check if there is a change
-			action := c.checkNwAttachmentsAction(ctx, &planNw, &stateNw)
+			action := c.checkNwAttachmentsAction(ctx, &planNw, &stateNw, vpcPairMap)
 			vPlan.Networks[nw] = planNw
 			vState.Networks[nw] = stateNw
 
@@ -422,4 +431,30 @@ func processPortListOrder(portList *types.CSVString, order []string) {
 			}
 		}
 	}
+}
+
+func (c NDFC) createVpcPairMap(ctx context.Context, FabricName string) map[string]string {
+
+	api := api.NewVpcPairAPI(c.GetLock(ResourceVpcPair), &c.apiClient)
+	api.CheckStatus = make(map[string]bool)
+	api.CheckStatus["switchesByFabric"] = true
+	api.FabricName = FabricName
+	payload, err := api.Get()
+	if err != nil || string(payload) == "[]" || payload == nil {
+		tflog.Debug(ctx, "createVpcPairMap: Failed to get switchesByFabric")
+		return nil
+	}
+	switchList := []resource_vpc_pair.NDFCSwitchesByFabric{}
+	err = json.Unmarshal(payload, &switchList)
+	if err != nil {
+		tflog.Error(ctx, "createVpcPairMap: Failed to unmarshal vPC Pair data")
+		return nil
+	}
+	log.Printf("SwitchList %v", switchList)
+	var vpcPairMap = make(map[string]string)
+	for _, entry := range switchList {
+		vpcPairMap[entry.SerialNumber] = entry.PeerSerialNumber
+	}
+	log.Printf("vpcPairMap %v", vpcPairMap)
+	return vpcPairMap
 }

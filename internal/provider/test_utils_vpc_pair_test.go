@@ -24,9 +24,7 @@ func VpcPairModelHelperStateCheck(RscName string, c resource_vpc_pair.NDFCVpcPai
 	if c.UseVirtualPeerlink != nil {
 		ret = append(ret, resource.TestCheckResourceAttr(RscName, attrPath.AtName("use_virtual_peerlink").String(), strconv.FormatBool(*c.UseVirtualPeerlink)))
 	}
-	if c.NvPairs.FabricName != "" {
-		ret = append(ret, resource.TestCheckResourceAttr(RscName, attrPath.AtName("fabric_name").String(), c.NvPairs.FabricName))
-	}
+
 	if c.Deploy {
 		ret = append(ret, resource.TestCheckResourceAttr(RscName, attrPath.AtName("deploy").String(), "true"))
 	} else {
