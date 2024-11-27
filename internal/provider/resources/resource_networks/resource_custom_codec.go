@@ -188,7 +188,7 @@ func (v NDFCNetworksValue) GetAttachmentValues(filters uint16, attach string) []
 			update(&attachEntry, serial)
 			attachmentValues = append(attachmentValues, attachEntry)
 		}
-
+		log.Printf("Loop GetAttachmentValues: %s %s %s %s", v.NetworkName, v.FabricName, serial, attachEntry.Deployment)
 	}
 	return attachmentValues
 }
