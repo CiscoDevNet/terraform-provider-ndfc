@@ -4,6 +4,13 @@ resource:
   generate_tf_resource: true
   parent_package: resource_interface_common
   parent_model: interface_common
+  description: "Resource to configure Switch Virtual Interface (SVI) on a switch"
+  import_id:
+    - "int_vlan:FDO245206N5[Vlan1000,Vlan1001],9990IQNFEZ6[Vlan1000,Vlan1001]"
+    - "int_vlan:FDO245206N5"
+  import_desc: 
+    - "if_policy:serial_number[comma seperated list of interfaces]"
+    - "if_policy:serial_number"
   attributes:
     - model_name: id
       tf_name: id
@@ -47,6 +54,7 @@ resource:
       description: "interfaces to configure"
       parent_package: resource_interface_common
       parent_model: interfaces
+      example: "Vlan1000"
       attributes:
       - model_name: filterThisValue
         tf_name: filter_this_value
@@ -57,13 +65,12 @@ resource:
         tf_name: serial_number
         type: String
         description: Serial number of switch to configure
-        example: 9DBYO6WQJ46
       - &ifName
         model_name: ifName
         tf_name: interface_name
         type: String
-        description: "Name of the Interface. Example: `Ethernet1/3`"
-        example: vlan1000
+        description: "Name of the Interface. Example: `Vlan1000`"
+        example: Vlan1000
         mandatory: true
         requires_replace: true
       - &ifType
@@ -71,9 +78,9 @@ resource:
         tf_name: interface_type
         tf_hide: true
         type: String
-        description: "Type of interface. Examples: `ethernet`, `port-channel`"
+        description: "Type of interface. Must be one of the following: `ethernet`, `port-channel`, `loopback`, `vlan`"
         example: ethernet
-        validator: OneOf("ethernet", "port-channel", "loopback", "vlan", "mgmt", "port-channel-sub")
+        validator: OneOf("ethernet", "port-channel", "loopback", "vlan", "vPC")
       - <<: *ifName
         tf_hide: true
         payload_hide: false
@@ -85,7 +92,6 @@ resource:
         type: String
         description: Additional CLI for the interface
         default_value: ""
-        example: delay 200
       - model_name: ADMIN_STATE
         ndfc_nested: [nvPairs]
         tf_name: admin_state
@@ -103,9 +109,8 @@ resource:
         ndfc_nested: [nvPairs]
         tf_name: mtu
         type: String
-        enum_values: [default,jumbo]
-        description: MTU for the interface
-        example: default
+        description: MTU for the interface - range 68-9216
+        example: 1518
       - model_name: ENABLE_NETFLOW
         ndfc_nested: [nvPairs]
         tf_name: netflow
@@ -134,14 +139,14 @@ resource:
         tf_name: vrf
         type: String
         description: VRF name
-        example: my_vrf
+        example: default
         default_value: default
       - model_name: IP
         ndfc_nested: [nvPairs]
         tf_name: ipv4_address
         type: String
         description: IPv4 address
-        example:
+        example: "10.1.1.1"
       - model_name: PREFIX
         ndfc_nested: [nvPairs]
         tf_name: ipv4_prefix_length
@@ -153,7 +158,7 @@ resource:
         tf_name: routing_tag
         type: String
         description: Routing tag
-        example: my_routing_tag
+        example: 123
       - model_name: DISABLE_IP_REDIRECTS
         ndfc_nested: [nvPairs]
         tf_name: disable_ip_redirects
@@ -167,7 +172,7 @@ resource:
         type: Bool
         default_value: false
         description: Enable HSRP
-        example: true
+        example: false
       - model_name: HSRP_GROUP
         ndfc_nested: [nvPairs]
         tf_name: hsrp_group
@@ -176,7 +181,6 @@ resource:
         max_int: 255
         validator: Between(0, 255)
         description: HSRP group number
-        example: 1
         handle_empty: true
       - model_name: HSRP_VIP
         ndfc_nested: [nvPairs]
@@ -192,7 +196,6 @@ resource:
         min_int: 1
         max_int: 255
         description: HSRP priority
-        example: 100
         handle_empty: true
         validator: Between(1, 255)
       - model_name: HSRP_VERSION
@@ -203,7 +206,6 @@ resource:
         enum_values: ["1", "2"]
         default_value: "2"
         description: HSRP version
-        example: 2
       - model_name: PREEMPT
         ndfc_nested: [nvPairs]
         tf_name: preempt
@@ -216,43 +218,43 @@ resource:
         tf_name: mac
         type: String
         description: MAC address
-        example: 00:00:00:00:00:00
+        example: 00:0a:00:00:00:98
       - model_name: dhcpServerAddr1
         ndfc_nested: [nvPairs]
         tf_name: dhcp_server_addr1
         type: String
         description: DHCP server address 1
-        example:
+        example: 20.10.1.2
       - model_name: dhcpServerAddr2
         ndfc_nested: [nvPairs]
         tf_name: dhcp_server_addr2
         type: String
         description: DHCP server address 2
-        example:
+        example: 29.1.2.1
       - model_name: dhcpServerAddr3
         ndfc_nested: [nvPairs]
         tf_name: dhcp_server_addr3
         type: String
         description: DHCP server address 3
-        example:
+        example: 31.2.3.1
       - model_name: vrfDhcp1
         ndfc_nested: [nvPairs]
         tf_name: vrf_dhcp1
         type: String
         description: VRF for DHCP server 1
-        example:
+        example: mobile_net
       - model_name: vrfDhcp2
         ndfc_nested: [nvPairs]
         tf_name: vrf_dhcp2
         type: String
         description: VRF for DHCP server 2
-        example:
+        example: triple_play
       - model_name: vrfDhcp3
         ndfc_nested: [nvPairs]
         tf_name: vrf_dhcp3
         type: String
         description: VRF for DHCP server 3
-        example:
+        example: iptv
       - model_name: advSubnetInUnderlay
         ndfc_nested: [nvPairs]
         tf_name: advertise_subnet_in_underlay

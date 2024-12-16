@@ -12,6 +12,7 @@ package ndfc
 
 import (
 	"context"
+	"log"
 
 	"fmt"
 
@@ -32,6 +33,7 @@ func (c NDFC) RscDeployNetworkAttachments(ctx context.Context, dg *diag.Diagnost
 		d = NewVrfNetworkDeployment(&c, va.FabricName, ResourceNetworks)
 		c.fillNetDeploymentDBFromModel(ctx, dg, va, d, &detach_present)
 	} else if payload, ok := attachment.(*rna.NDFCNetworkAttachments); ok {
+		log.Printf("RscDeployNetworkAttachments: deploy from payload; payload=%v", *payload)
 		d = NewVrfNetworkDeployment(&c, payload.FabricName, ResourceNetworks)
 		c.fillNetDeploymentDBFromPayload(ctx, dg, payload, d, &detach_present)
 	}

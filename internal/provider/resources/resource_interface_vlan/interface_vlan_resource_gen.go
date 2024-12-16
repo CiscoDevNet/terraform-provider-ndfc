@@ -132,8 +132,8 @@ func InterfaceVlanResourceSchema(ctx context.Context) schema.Schema {
 						},
 						"interface_name": schema.StringAttribute{
 							Required:            true,
-							Description:         "Name of the Interface. Example: `Ethernet1/3`",
-							MarkdownDescription: "Name of the Interface. Example: `Ethernet1/3`",
+							Description:         "Name of the Interface. Example: `Vlan1000`",
+							MarkdownDescription: "Name of the Interface. Example: `Vlan1000`",
 						},
 						"ipv4_address": schema.StringAttribute{
 							Optional:            true,
@@ -152,8 +152,8 @@ func InterfaceVlanResourceSchema(ctx context.Context) schema.Schema {
 						},
 						"mtu": schema.StringAttribute{
 							Optional:            true,
-							Description:         "MTU for the interface",
-							MarkdownDescription: "MTU for the interface",
+							Description:         "MTU for the interface - range 68-9216",
+							MarkdownDescription: "MTU for the interface - range 68-9216",
 						},
 						"netflow": schema.BoolAttribute{
 							Optional:            true,
@@ -244,6 +244,8 @@ func InterfaceVlanResourceSchema(ctx context.Context) schema.Schema {
 				},
 			},
 		},
+		Description:         "Resource to configure Switch Virtual Interface (SVI) on a switch",
+		MarkdownDescription: "Resource to configure Switch Virtual Interface (SVI) on a switch",
 	}
 }
 

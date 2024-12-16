@@ -5,6 +5,7 @@ datasource:
   doc_category: Fabric
   generate_tf_resource: true
   skip_codec: true
+  description: "Data Source to test reachability of devices in the inventory"
   attributes:
     - &id
       model_name: id

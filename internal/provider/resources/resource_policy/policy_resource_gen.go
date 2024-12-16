@@ -124,6 +124,8 @@ func PolicyResourceSchema(ctx context.Context) schema.Schema {
 				},
 			},
 		},
+		Description:         "Resource to configure policies on a switch",
+		MarkdownDescription: "Resource to configure policies on a switch",
 	}
 }
 

@@ -301,12 +301,19 @@ func (d *NDFCVrfNetworkDeployment) CheckState(ctx context.Context, dg *diag.Diag
 				rsc.SetCurrentState(NDFCStatePending)
 				//d.RetryList[ndVrfs.VrfAttachments[i].AttachList[j].SwitchSerialNo] = append(d.RetryList[ndVrfs.VrfAttachments[i].AttachList[j].SwitchSerialNo], ndVrfs.VrfAttachments[i].VrfName)
 			case NDFCStateOutOfSync:
-				retry++
-				tflog.Info(ctx, fmt.Sprintf("StateChecker:%s: %s is out-of-sync",
-					d.RsType, dep.Key))
-				rsc.SetCurrentState(NDFCStateOutOfSync)
-				//d.RetryList[ndVrfs.VrfAttachments[i].AttachList[j].SwitchSerialNo] = append(d.RetryList[ndVrfs.VrfAttachments[i].AttachList[j].SwitchSerialNo], ndVrfs.VrfAttachments[i].VrfName)
-				//return EventRetry
+				if rsc.LastState == NDFCStateOutOfSync && rsc.OOSyncCnt > 3 {
+					tflog.Error(ctx, fmt.Sprintf("StateChecker:%s: %s is out-of-sync for too long retry",
+						d.RsType, dep.Key))
+					retry++
+					rsc.SetCurrentState(NDFCStateOutOfSync)
+					rsc.OOSyncCnt = 0
+				} else {
+					rsc.OOSyncCnt++
+					tflog.Info(ctx, fmt.Sprintf("StateChecker:%s: %s is out-of-sync for %d Waiting",
+						d.RsType, dep.Key, rsc.OOSyncCnt))
+					inPro++
+					rsc.SetCurrentState(NDFCStateInPro)
+				}
 			}
 		} else {
 			rsc.SetCurrentState(rsc.State.ExpectedState)
@@ -316,6 +323,7 @@ func (d *NDFCVrfNetworkDeployment) CheckState(ctx context.Context, dg *diag.Diag
 			tflog.Info(ctx, fmt.Sprintf("StateChecker:%s: %s has reached expected state %s:%s",
 				d.RsType, dep.Key, dep.Status, rsc.State.ExpectedState))
 		}
+		rsc.LastState = dep.Status
 	}
 
 	for _, v := range deployRscList {

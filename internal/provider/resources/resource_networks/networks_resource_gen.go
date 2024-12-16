@@ -27,8 +27,8 @@ func NetworksResourceSchema(ctx context.Context) schema.Schema {
 			"deploy_all_attachments": schema.BoolAttribute{
 				Optional:            true,
 				Computed:            true,
-				Description:         "Deploy all attachments in this resource",
-				MarkdownDescription: "Deploy all attachments in this resource",
+				Description:         "If set to `true`, do a deployment of all attachments in this resource. This parameter cannot be `true` if either  `deploy_attachments` inside any `network` or `deploy_this_attachment` in any `attachments` is set to `true`",
+				MarkdownDescription: "If set to `true`, do a deployment of all attachments in this resource. This parameter cannot be `true` if either  `deploy_attachments` inside any `network` or `deploy_this_attachment` in any `attachments` is set to `true`",
 				Default:             booldefault.StaticBool(false),
 			},
 			"fabric_name": schema.StringAttribute{
@@ -68,8 +68,8 @@ func NetworksResourceSchema(ctx context.Context) schema.Schema {
 									"deploy_this_attachment": schema.BoolAttribute{
 										Optional:            true,
 										Computed:            true,
-										Description:         "Deploy this attachment",
-										MarkdownDescription: "Deploy this attachment",
+										Description:         "If set to `true`, deploys this attachment. This cannot be set to `true` if `deploy_all_attachments` at resource level is set to `true` or `deploy_attachments` in the corresponding `network` is set to `true`",
+										MarkdownDescription: "If set to `true`, deploys this attachment. This cannot be set to `true` if `deploy_all_attachments` at resource level is set to `true` or `deploy_attachments` in the corresponding `network` is set to `true`",
 										Default:             booldefault.StaticBool(false),
 									},
 									"display_name": schema.StringAttribute{
@@ -131,8 +131,8 @@ func NetworksResourceSchema(ctx context.Context) schema.Schema {
 						"deploy_attachments": schema.BoolAttribute{
 							Optional:            true,
 							Computed:            true,
-							Description:         "Deploy all attachments in this network",
-							MarkdownDescription: "Deploy all attachments in this network",
+							Description:         "If set to `true`, deploys all attachments in the network. This parameter cannot be `true` if `deploy_all_attachments` at resource level is set to `true` or `deploy_this_attachment` in any `attachments` is set to `true`",
+							MarkdownDescription: "If set to `true`, deploys all attachments in the network. This parameter cannot be `true` if `deploy_all_attachments` at resource level is set to `true` or `deploy_this_attachment` in any `attachments` is set to `true`",
 							Default:             booldefault.StaticBool(false),
 						},
 						"dhcp_relay_loopback_id": schema.Int64Attribute{
@@ -358,6 +358,8 @@ func NetworksResourceSchema(ctx context.Context) schema.Schema {
 				MarkdownDescription: "List of networks",
 			},
 		},
+		Description:         "This resource can be used to manage networks on a fabric. Single resource handles multiple networks.",
+		MarkdownDescription: "This resource can be used to manage networks on a fabric. Single resource handles multiple networks.",
 	}
 }
 

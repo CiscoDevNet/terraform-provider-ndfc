@@ -44,8 +44,8 @@ func InterfaceLoopbackResourceSchema(ctx context.Context) schema.Schema {
 						"admin_state": schema.BoolAttribute{
 							Optional:            true,
 							Computed:            true,
-							Description:         "Enable or disable the interface",
-							MarkdownDescription: "Enable or disable the interface",
+							Description:         "Administratively enable or disable the interface",
+							MarkdownDescription: "Administratively enable or disable the interface",
 							Default:             booldefault.StaticBool(true),
 						},
 						"deployment_status": schema.StringAttribute{
@@ -55,8 +55,8 @@ func InterfaceLoopbackResourceSchema(ctx context.Context) schema.Schema {
 						},
 						"freeform_config": schema.StringAttribute{
 							Optional:            true,
-							Description:         "Additional CLI for the interface",
-							MarkdownDescription: "Additional CLI for the interface",
+							Description:         "Additional CLI commands to be executed for the interface",
+							MarkdownDescription: "Additional CLI commands to be executed for the interface",
 						},
 						"interface_description": schema.StringAttribute{
 							Optional:            true,
@@ -90,8 +90,8 @@ func InterfaceLoopbackResourceSchema(ctx context.Context) schema.Schema {
 						},
 						"serial_number": schema.StringAttribute{
 							Optional:            true,
-							Description:         "Serial number of switch to configure",
-							MarkdownDescription: "Serial number of switch to configure",
+							Description:         "Serial number of switch to configure. This field cannot be specified if `serial_number` outside `interfaces` block is specified",
+							MarkdownDescription: "Serial number of switch to configure. This field cannot be specified if `serial_number` outside `interfaces` block is specified",
 						},
 						"vrf": schema.StringAttribute{
 							Optional:            true,
@@ -114,14 +114,14 @@ func InterfaceLoopbackResourceSchema(ctx context.Context) schema.Schema {
 			"policy": schema.StringAttribute{
 				Optional:            true,
 				Computed:            true,
-				Description:         "Name of the policy. Examples: `int_trunk_host`, `int_access_host`",
-				MarkdownDescription: "Name of the policy. Examples: `int_trunk_host`, `int_access_host`",
+				Description:         "Name of the policy. Supported policies:: `int_loopback`, `int_multisite_loopback`",
+				MarkdownDescription: "Name of the policy. Supported policies:: `int_loopback`, `int_multisite_loopback`",
 				Default:             stringdefault.StaticString("int_loopback"),
 			},
 			"serial_number": schema.StringAttribute{
 				Optional:            true,
-				Description:         "Serial number of switch to configure",
-				MarkdownDescription: "Serial number of switch to configure",
+				Description:         "Serial number of switch to configure. This field cannot be specified if `serial_number` inside `interfaces` block is specified`",
+				MarkdownDescription: "Serial number of switch to configure. This field cannot be specified if `serial_number` inside `interfaces` block is specified`",
 				PlanModifiers: []planmodifier.String{
 					stringplanmodifier.RequiresReplace(),
 				},
@@ -130,6 +130,8 @@ func InterfaceLoopbackResourceSchema(ctx context.Context) schema.Schema {
 				},
 			},
 		},
+		Description:         "Resource to configure loopback interfaces on a switch",
+		MarkdownDescription: "Resource to configure loopback interfaces on a switch",
 	}
 }
 

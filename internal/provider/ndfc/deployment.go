@@ -173,6 +173,23 @@ func (n *NDFCDeployment) CheckState(ctx context.Context, dg *diag.Diagnostics, r
 					"state":    v.GetCurrentState(),
 				})
 				n.MoveList(DeployInpro, DeployHanging, v)
+			} else if v.GetCurrentState() == NDFCStateOutOfSync {
+				tflog.Warn(ctx, "CheckState: Resource out of sync. Moving to pending list for retry", map[string]interface{}{
+					"resource": v.GetKey(),
+					"state":    v.GetCurrentState(),
+				})
+				// Retry if there is continuoue out-of-sync
+				n.retryFlag = true
+				n.MoveList(DeployInpro, DeployPending, v)
+
+			} else if v.GetCurrentState() != NDFCStateInPro {
+				tflog.Debug(ctx, "CheckState: Resource in unexpected state. Moving to pending list for retry", map[string]interface{}{
+					"resource": v.GetKey(),
+					"state":    v.GetCurrentState(),
+				})
+				n.retryFlag = true
+				n.MoveList(DeployInpro, DeployPending, v)
+
 			}
 		}
 	}

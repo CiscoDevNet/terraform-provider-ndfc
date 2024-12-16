@@ -21,7 +21,7 @@ For detailed working of the `tfgenerator` tool, check the documentation in https
 ### Steps to generate schema and supporting code for resources and data sources
 
 * Create the yaml definition file for the resource under generator/defs folder
-See https://github.com/mdmohan/tfgenerator/blob/main/generator/Field-help.md for detailed help on the fields in yaml file.
+See  [fields.md](fields.md) for detailed help on the fields in yaml file.
 * Add the new yaml file to the list in generator/defs/defs.yaml. The tool only processes the files in this list.       
 * Run `go generate` 
 ** Note: Before Running `go generate` Please make sure that `tfgenerator` is on `master` branch and up to date **
