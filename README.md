@@ -5,11 +5,12 @@
 - [Terraform](https://www.terraform.io/downloads.html) >= 1.0
 - [Go](https://golang.org/doc/install) >= 1.19
 
+
 ## Building The Provider
 
 1. Clone the repository
 2. Enter the repository directory
-3. Build the provider using the Go `install` command:
+3. Build the provider using the Go Install command:
 
 ```shell
 go install
@@ -47,3 +48,8 @@ npm install -g @mockoon/cli
 2. Copy your mockoon environment data json file to `/terraform-provide-ndfc/mockoon_data.json`
 3. Create unit test functions with prefix `TestUT_` and use `ut_client` as NDFC client variable.
 4. Run `./run_unit_test.sh` to run the unit test cases.
+
+## Provider plugin Documentation
+[Provider](docs/index.md)   
+[Resources](docs/resources)    
+[Datasources](docs/data-sources)     

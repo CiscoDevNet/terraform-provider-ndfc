@@ -4,6 +4,9 @@ resource:
   rest_endpoint: /lan-fabric/rest/control/fabrics/%s/inventory/switchesByFabric
   doc_category: Fabric
   generate_tf_resource: true
+  description: "Inventory is the resource to Add/Remove and configure switches in a fabric"
+  import_id: 
+    - "fabric_cml"
   attributes:
     - &id
       model_name: id
@@ -326,6 +329,7 @@ datasource:
   doc_category: Fabric
   generate_tf_resource: true
   skip_codec: true
+  description: "Inventory datasource lists the details of switches managed by a fabric"
   attributes:
     - <<: *id
     - <<: *fabric_name

@@ -30,7 +30,7 @@ resource:
       tf_name: serial_numbers
       description: Value 'ALL' if all switches in the fabric are to be deployed, or a list of serial numbers of the switches to be deployed
       type: List:String
-      example: "[ \"FGE20360RRZ\", \"FGE20360RRY\" ] or [\"ALL\"] or [\"\"]"
+      example: "[ \"FGE20360RRZ\", \"FGE20360RRY\" ]"
       ndfc_type: set
     - &config_save
       model_name: configSave
@@ -40,3 +40,4 @@ resource:
       default_value: false
       ndfc_type: bool
       payload_hide: true
+      example: true

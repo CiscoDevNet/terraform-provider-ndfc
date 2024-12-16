@@ -136,8 +136,8 @@ resource "ndfc_networks" "test_evpn_vxlan_deployment_nw1" {
       ]
       dhcp_relay_loopback_id = 999
       //tag                    = 1234
-      l3_gatway_border       = true
-      igmp_version           = 3
+      l3_gatway_border = true
+      igmp_version     = 3
       attachments = {
         "9FE076D8EJL" : {
           switch_ports           = ["Ethernet1/1", "Ethernet1/2"]
@@ -148,15 +148,15 @@ resource "ndfc_networks" "test_evpn_vxlan_deployment_nw1" {
           deploy_this_attachment = true
         },
         "9QBCTIN0FMY" : {
-          switch_ports           = ["Ethernet1/2","Ethernet1/1"]
+          switch_ports           = ["Ethernet1/2", "Ethernet1/1"]
           deploy_this_attachment = true
         }
       }
     },
-     "Murali_nw_02" : {
-      vrf_name              = local.network_vrfs[1]
-      vlan_id = 3
-       attachments = {
+    "Murali_nw_02" : {
+      vrf_name = local.network_vrfs[1]
+      vlan_id  = 3
+      attachments = {
         "9FE076D8EJL" : {
           switch_ports           = ["Ethernet1/3", "Ethernet1/4", "Ethernet1/5"]
           deploy_this_attachment = true
@@ -170,7 +170,7 @@ resource "ndfc_networks" "test_evpn_vxlan_deployment_nw1" {
           deploy_this_attachment = true
         }
       }
-     }
+    }
   }
 }
 

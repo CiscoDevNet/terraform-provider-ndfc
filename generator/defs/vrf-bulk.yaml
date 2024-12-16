@@ -4,6 +4,9 @@ resource:
   rest_endpoint: /lan-fabric/rest/top-down/v2/fabrics/%v/vrfs/
   doc_category: Fabric
   generate_tf_resource: true
+  import_id: ["fabric_cml/[vrf1,vrf2,vrf3,vrf4]"]
+  import_desc: ["fabric_name/[comma separated list of vrfs to be imported]"]
+  description: Resource for NDFC vrf management. This resource allows you to manage multiple VRFs in a fabric.
   attributes:
     - model_name: id
       tf_name: id
@@ -26,7 +29,7 @@ resource:
       type: Bool
       default_value: false
       payload_hide: true
-      description: Deploy all attachments in this resource
+      description: If set to `true`, does a deployment of all attachments in this resource after any operation. This parameter cannot be set to `true` if  `deploy_attachments` in the vrf is set or `deploy_this_attachment` in the  `attach-list` is set
       ndfc_type: bool
       example: true
     - model_name: vrfs
@@ -36,6 +39,7 @@ resource:
       bulk: true
       mandatory: true
       filtered: true
+      example: "VRF1"
       attributes:
       - model_name: id
         tf_name: id
@@ -232,7 +236,7 @@ resource:
         min_int: 0
         max_int: 1023
         description: RP loopback ID
-        example: 100
+        example: 500
       - &L3VniMcastGroup
         model_name: L3VniMcastGroup
         ndfc_nested: [vrfTemplateConfig]
@@ -360,7 +364,6 @@ resource:
         tf_name: route_target_import_mvpn
         type: String
         description: For MVPN Routes Import, One or a Comma Separated List
-        example: "1:1"
         exclude_test: true
       - &routeTargetExportMvpn
         model_name: routeTargetExportMvpn
@@ -368,7 +371,6 @@ resource:
         tf_name: route_target_export_mvpn
         type: String
         description: For MVPN Routes Export, One or a Comma Separated List
-        example: "1:1"
         exclude_test: true
       - &cloudRouteTargetImportEvpn
         model_name: cloudRouteTargetImportEvpn
@@ -389,9 +391,9 @@ resource:
         type: Bool
         default_value: false
         payload_hide: true
-        description: Deploy all attachments in this VRF
+        description: If set to `true`, does a deployment of all attachments in this `vrf`. This parameter cannot be set to `true` if  `deploy_all_attachments` in the resource is set or `deploy_this_attachment` in the  `attach-list` is set
         ndfc_type: bool
-        example: true
+        example: false
       - model_name: lanAttachList
         augment_from: vrf_attachments.attachments.lanAttachList
         

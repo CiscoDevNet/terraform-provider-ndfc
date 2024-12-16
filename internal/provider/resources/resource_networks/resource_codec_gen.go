@@ -1,4 +1,4 @@
-// Copyright (c) 2024 Cisco Systems, Inc. and its affiliates
+// Copyright (c) 2025 Cisco Systems, Inc. and its affiliates
 //
 // This Source Code Form is subject to the terms of the Mozilla Public
 // License, v. 2.0. If a copy of the MPL was not distributed with this
@@ -74,7 +74,7 @@ type NDFCNetworkTemplateConfigValue struct {
 	SviNetflowMonitor    string                     `json:"SVI_NETFLOW_MONITOR,omitempty"`
 	VlanNetflowMonitor   string                     `json:"VLAN_NETFLOW_MONITOR,omitempty"`
 	L3GatwayBorder       string                     `json:"enableL3OnBorder,omitempty"`
-	IgmpVersion          string                     `json:"igmpVerion,omitempty"`
+	IgmpVersion          string                     `json:"igmpVersion,omitempty"`
 }
 
 type NDFCDhcpRelayServersValues []NDFCDhcpRelayServersValue
