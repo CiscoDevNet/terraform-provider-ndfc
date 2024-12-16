@@ -128,6 +128,8 @@ func InventoryDevicesDataSourceSchema(ctx context.Context) schema.Schema {
 				MarkdownDescription: "The Terraform Unique Identifier for the Inventory Devices resource",
 			},
 		},
+		Description:         "Inventory datasource lists the details of switches managed by a fabric",
+		MarkdownDescription: "Inventory datasource lists the details of switches managed by a fabric",
 	}
 }
 

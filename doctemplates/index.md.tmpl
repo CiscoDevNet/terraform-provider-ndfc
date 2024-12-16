@@ -1,0 +1,29 @@
+---
+page_title: "ndfc Provider"
+subcategory: ""
+description: |-
+  
+---
+
+# ndfc Provider
+
+{{.Description}}
+NDFC terraform provider is used to manage Cisco Nexus Dashboard Fabric Controller (NDFC)    
+It supports various resources to provision NDFC     
+Refer the docs in resources and datasources folder to see more details on the supported resources       
+
+## ndfc Provider Example
+
+```hcl
+provider "ndfc" {
+  # Configuration options
+  username = "***"
+  password = "***"
+  host     = "https://testnd.cisco.com"
+  insecure = true
+}
+```
+username/password can also be supplied as environment variables `NDFC_USERNAME` and `NDFC_PASSWORD`
+## Argument Reference
+
+{{.SchemaMarkdown}}

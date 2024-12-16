@@ -76,6 +76,8 @@ func TemplateResourceSchema(ctx context.Context) schema.Schema {
 				Default: stringdefault.StaticString("POLICY"),
 			},
 		},
+		Description:         "Resource to configure templates",
+		MarkdownDescription: "Resource to configure templates",
 	}
 }
 

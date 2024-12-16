@@ -27,8 +27,8 @@ import {
 }
 
 import {
-   id = "9D0ZV7JBFNM:9N14Y8PVD2Y"
-   to = ndfc_vpc_pair.test_vpc_pair
+  id = "9D0ZV7JBFNM:9N14Y8PVD2Y"
+  to = ndfc_vpc_pair.test_vpc_pair
 }
 resource "ndfc_interface_ethernet" "test_evpn_vxlan_eth_imported" {
 }

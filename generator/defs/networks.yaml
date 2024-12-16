@@ -4,6 +4,9 @@ resource:
   rest_endpoint: /lan-fabric/rest/top-down/v2/fabrics/%v/networks/
   doc_category: Fabric
   generate_tf_resource: true
+  import_id: ["fabric_vxlan/[net1, net2, net3]"]
+  import_desc: ["fabric_name/[comma separated list of networks]"]
+  description: This resource can be used to manage networks on a fabric. Single resource handles multiple networks.
   attributes:
     - model_name: id
       tf_name: id
@@ -26,7 +29,7 @@ resource:
       type: Bool
       default_value: false
       payload_hide: true
-      description: Deploy all attachments in this resource
+      description: If set to `true`, do a deployment of all attachments in this resource. This parameter cannot be `true` if either  `deploy_attachments` inside any `network` or `deploy_this_attachment` in any `attachments` is set to `true`
       ndfc_type: bool
       example: true
     - model_name: networks
@@ -39,6 +42,7 @@ resource:
       ndfc_type: List
       map_key: network_name
       gen_backend: true
+      example: NET1
       attributes:
       - model_name: filterThisValue
         tf_name: filter_this_value
@@ -119,6 +123,7 @@ resource:
         enum_values: ["Normal", "Primary", "Community", "Isolated"]
         description: Network Type
         default_value: Normal
+        example: Normal
       - &nwStatus
         model_name: networkStatus
         tf_name: network_status
@@ -138,7 +143,7 @@ resource:
         tf_name: gateway_ipv6_address
         type: String
         description: Gateway IPv6 addresses, for example `2001:db8::1/64,2001:db9::1/64`
-        example: "2001:db8::1/64,2001:db9::1/64"
+        example: "2001:db8::1/64"
       - &vlanId
         model_name: vlanId
         ndfc_nested: [networkTemplateConfig]
@@ -149,7 +154,7 @@ resource:
         min_int: 2
         max_int: 4094
         description: VLAN ID
-        example: 1500
+        example: 1600
         handle_empty: true
         use_state: true
       - &vlanName
@@ -198,21 +203,21 @@ resource:
         tf_name: secondary_gateway_2
         type: String
         description: IPv4 Secondary GW2
-        example: 192.168.2.1/24
+        example: 192.168.3.1/24
       - &secondaryGW3
         model_name: secondaryGW3
         ndfc_nested: [networkTemplateConfig]
         tf_name: secondary_gateway_3
         type: String
         description: IPv4 Secondary GW3
-        example: 192.168.2.1/24
+        example: 192.168.4.1/24
       - &secondaryGW4
         model_name: secondaryGW4
         ndfc_nested: [networkTemplateConfig]
         tf_name: secondary_gateway_4
         type: String
         description: IPv4 Secondary GW4
-        example: 192.168.2.1/24
+        example: 192.168.5.1/24
       - &suppressArp
         model_name: suppressArp
         ndfc_nested: [networkTemplateConfig]
@@ -320,21 +325,22 @@ resource:
         description: Enable L3 Gateway on Border
         example: true
       - &igmpVerion
-        model_name: igmpVerion
+        model_name: igmpVersion
         ndfc_nested: [networkTemplateConfig]
         tf_name: igmp_version
         type: String
         description: IGMP version
         optional: true
         computed: true
+        example: 3
       - model_name: deploy_attachments
         tf_name: deploy_attachments
         type: Bool
         default_value: false
         payload_hide: true
-        description: Deploy all attachments in this network
+        description: If set to `true`, deploys all attachments in the network. This parameter cannot be `true` if `deploy_all_attachments` at resource level is set to `true` or `deploy_this_attachment` in any `attachments` is set to `true`
         ndfc_type: bool
-        example: true
+        example: false
       - model_name: lanAttachList
         augment_from: network_attachments.networkAttachments.lanAttachList
 datasource:
@@ -424,7 +430,7 @@ datasource:
               min_int: 2
               max_int: 4094
               description: VLAN ID
-              example: 1500
+              example: 1600
               handle_empty: true
             - &attach_state
               model_name: lanAttachState

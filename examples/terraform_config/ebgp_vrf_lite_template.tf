@@ -1,12 +1,12 @@
 
 resource "ndfc_template" "ebgp_vrf_lite_template" {
-  template_name = "tf_ebgp_vrf_lite_template"
-  description = "tf_ebgp_vrf_lite_template"
-  template_type = "POLICY"
+  template_name     = "tf_ebgp_vrf_lite_template"
+  description       = "tf_ebgp_vrf_lite_template"
+  template_type     = "POLICY"
   template_sub_type = "DEVICE"
-  content_type = "TEMPLATE_CLI"
-  tags = ["tf_test_ebgp_vrf_lite_template", "my_template_tag_4", "tag4"]
-  template_content = <<EOF
+  content_type      = "TEMPLATE_CLI"
+  tags              = ["tf_test_ebgp_vrf_lite_template", "my_template_tag_4", "tag4"]
+  template_content  = <<EOF
 ##template variables
 #    Copyright (c) 2020 by Cisco Systems, Inc.
 #    All rights reserved.

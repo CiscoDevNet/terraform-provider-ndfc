@@ -273,6 +273,8 @@ func InventoryDevicesResourceSchema(ctx context.Context) schema.Schema {
 				MarkdownDescription: "The username to use for the devices",
 			},
 		},
+		Description:         "Inventory is the resource to Add/Remove and configure switches in a fabric",
+		MarkdownDescription: "Inventory is the resource to Add/Remove and configure switches in a fabric",
 	}
 }
 

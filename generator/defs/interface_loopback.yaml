@@ -3,6 +3,13 @@ resource:
   generate_tf_resource: true
   parent_package: resource_interface_common
   parent_model: interface_common
+  description: "Resource to configure loopback interfaces on a switch"
+  import_id:
+    - "int_loopback:FDO245206N5[Loopback1,Loopback2],9990IQNFEZ6[Loopback0,Loopback1]"
+    - "int_loopback:FDO245206N5"
+  import_desc: 
+    - "if_policy:serial_number[comma seperated list of interfaces]"
+    - "if_policy:serial_number"
   attributes:
     - model_name: id
       tf_name: id
@@ -15,8 +22,8 @@ resource:
       tf_name: policy
       type: String
       default_value: int_loopback
-      description: "Name of the policy. Examples: `int_trunk_host`, `int_access_host`"
-      example: int_access_host
+      description: "Name of the policy. Supported policies:: `int_loopback`, `int_multisite_loopback`"
+      example: int_loopback
     - model_name: deploy
       tf_name: deploy
       type: Bool
@@ -28,7 +35,7 @@ resource:
     - model_name: serial_number
       tf_name: serial_number
       type: String
-      description: Serial number of switch to configure
+      description: Serial number of switch to configure. This field cannot be specified if `serial_number` inside `interfaces` block is specified`
       example: 9DBYO6WQJ46
       payload_hide: true
       tf_requires_replace: true
@@ -42,6 +49,7 @@ resource:
       description: "interfaces to configure"
       parent_package: resource_interface_common
       parent_model: interfaces
+      example: "Loopback100"
       attributes:
       - model_name: filterThisValue
         tf_name: filter_this_value
@@ -51,14 +59,13 @@ resource:
       - model_name: serialNumber
         tf_name: serial_number
         type: String
-        description: Serial number of switch to configure
-        example: 9DBYO6WQJ46
+        description: Serial number of switch to configure. This field cannot be specified if `serial_number` outside `interfaces` block is specified
       - &ifName
         model_name: ifName
         tf_name: interface_name
         type: String
         description: "Name of the Interface. Example: `loopback1`"
-        example: loopback1
+        example: loopback100
         validator: RegexMatches(regexp.MustCompile(`^loopback\d+`), "Must be loopbackX where X is the loopbackID")
         mandatory: true
       - &ifType
@@ -80,46 +87,45 @@ resource:
         type: Bool
         model_type_string: true
         default_value: true
-        description: Enable or disable the interface
+        description: Administratively enable or disable the interface
         example: false
       - model_name: CONF
         ndfc_nested: [nvPairs]
         tf_name: freeform_config
         type: String
-        description: Additional CLI for the interface
+        description: Additional CLI commands to be executed for the interface
         default_value: ""
-        example: delay 200
       - model_name: DESC
         ndfc_nested: [nvPairs]
         tf_name: interface_description
         type: String
         description: Interface description
-        example: My interface description
+        example: This is a loopback interface used for XYZ
       - model_name: INTF_VRF
         ndfc_nested: [nvPairs]
         tf_name: vrf
         type: String
         description: VRF name
-        example: my_vrf
+        example: default
         default_value: default
       - model_name: IP
         ndfc_nested: [nvPairs]
         tf_name: ipv4_address
         type: String
         description: IPv4 address
-        example:
+        example: 192.168.20.1
       - model_name: V6IP
         ndfc_nested: [nvPairs]
         tf_name: ipv6_address
         type: String
         description: IPv6 address
-        example:
+        example: 2002:db8::1
       - model_name: ROUTE_MAP_TAG
         ndfc_nested: [nvPairs]
         tf_name: route_map_tag
         type: String
         description: Route map tag
-        example: my_route_map
+        example: 100
         default_value: 12345
       - model_name: deployment_status
         tf_name: deployment_status

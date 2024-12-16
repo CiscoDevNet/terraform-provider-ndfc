@@ -4,6 +4,13 @@ resource:
   generate_tf_resource: true
   parent_package: resource_interface_common
   parent_model: interface_common
+  description: "Resource to configure vPC interfaces on a switch"
+  import_id:
+    - "int_vpc_trunk_host:FDO245206N5[vPC1,vPC2],9990IQNFEZ6[vPC0,vPC1]"
+    - "int_vpc_trunk_host:FDO245206N5"
+  import_desc: 
+    - "if_policy:serial_number[comma seperated list of interfaces]"
+    - "if_policy:serial_number"
   attributes:
     - model_name: id
       tf_name: id
@@ -18,8 +25,15 @@ resource:
       type: String
       default_value: int_vpc_trunk_host
       tf_requires_replace: true
-      description: "Name of the policy. Examples: `int_trunk_host`, `int_access_host`"
-      example: int_port_channel_trunk_host
+      description: | 
+        "Name of the policy. 
+          Supported policies: 
+            * `int_vpc_access_host`
+            * `int_vpc_dot1q_tunnel`
+            * `int_vpc_pvlan_host`
+            * `int_vpc_trunk_host`"
+
+      example: int_vpc_trunk_host
     - model_name: deploy
       tf_name: deploy
       type: Bool
@@ -33,7 +47,7 @@ resource:
       tf_name: serial_number
       type: String
       description: Serial number of switch to configure
-      example: 9DBYO6WQJ46
+      example: "9TQYTJSZ1VJ~9Q34PHYLDB5"
       payload_hide: true
       tf_requires_replace: true
       validator: ConflictsWith(path.Expressions {path.MatchRoot("interfaces").AtAnyMapKey().AtName("serial_number")}...)
@@ -47,6 +61,7 @@ resource:
       description: "interfaces to configure"
       parent_package: resource_interface_common
       parent_model: interfaces
+      example: "vPC1"
       attributes:
       - model_name: filterThisValue
         tf_name: filter_this_value
@@ -56,14 +71,13 @@ resource:
       - model_name: serialNumber
         tf_name: serial_number
         type: String
-        description: Serial number of switch to configure
-        example: 9DBYO6WQJ46
+        description: Serial number of switch to configure. This field cannot be specified if `serial_number` is specified at resource level
       - &ifName
         model_name: ifName
         tf_name: interface_name
         type: String
         description: "Name of the Interface. Example: `vPC0`"
-        example: vpc0
+        example: vPC1
         mandatory: true
         validator: RegexMatches(regexp.MustCompile(`^vPC\d+`), "Must be vPC<X> where X is the vPC ID")
         requires_replace: true
@@ -236,14 +250,14 @@ resource:
         tf_name: peer1_member_interfaces
         type: String
         description: Member interfaces
-        example: "eth1/1-10"
+        example: "eth1/15"
         mandatory: true
       - model_name: PEER2_MEMBER_INTERFACES
         ndfc_nested: [nvPairs]
         tf_name: peer2_member_interfaces
         type: String
         description: Member interfaces
-        example: "eth1/1-10"
+        example: "eth1/15"
       - model_name: PEER1_PCID
         ndfc_nested: [nvPairs]
         tf_name: peer1_port_channel_id
@@ -252,7 +266,7 @@ resource:
         max_int: 4094
         ndfc_type: string
         description: Port channel ID
-        example: 1
+        example: 120
         exclude_test: true
         mandatory: true
         requires_replace: true
@@ -264,7 +278,7 @@ resource:
         max_int: 4094
         ndfc_type: string
         description: Port channel ID
-        example: 1
+        example: 120
         exclude_test: true
         handle_empty: true
         optional: true

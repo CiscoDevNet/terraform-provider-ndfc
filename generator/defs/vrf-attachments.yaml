@@ -67,6 +67,7 @@ resource:
           bulk: true
           optional: true
           filtered: true
+          example: "FDO245206N5"
           attributes:
             - *filterThis
             - model_name: id
@@ -138,7 +139,6 @@ resource:
               tf_name: freeform_config
               type: String
               description: This field covers any configuration not included in overlay templates which is needed as part of this VRF attachment
-              example: "interface Vlan2000\\r\\n  delay 200"
               exclude_test: true
             - model_name: deployThisAttachment
               type: Bool
@@ -146,7 +146,8 @@ resource:
               payload_hide: true
               default_value: false
               ndfc_type: bool
-              description: Deploy this attachment
+              description: If set to `true`, does a deployment of the attachment. This parameter cannot be set to `true` if  `deploy_all_attachments` in the resource is set or `deploy_attachment` in the corresponding `vrf` is set
+              example: false
             - model_name: loopbackId
               tf_name: loopback_id
               type: Int64

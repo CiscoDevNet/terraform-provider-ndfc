@@ -196,8 +196,8 @@ func InterfaceVpcResourceSchema(ctx context.Context) schema.Schema {
 						},
 						"serial_number": schema.StringAttribute{
 							Optional:            true,
-							Description:         "Serial number of switch to configure",
-							MarkdownDescription: "Serial number of switch to configure",
+							Description:         "Serial number of switch to configure. This field cannot be specified if `serial_number` is specified at resource level",
+							MarkdownDescription: "Serial number of switch to configure. This field cannot be specified if `serial_number` is specified at resource level",
 						},
 						"speed": schema.StringAttribute{
 							Optional:            true,
@@ -223,8 +223,8 @@ func InterfaceVpcResourceSchema(ctx context.Context) schema.Schema {
 			"policy": schema.StringAttribute{
 				Optional:            true,
 				Computed:            true,
-				Description:         "Name of the policy. Examples: `int_trunk_host`, `int_access_host`",
-				MarkdownDescription: "Name of the policy. Examples: `int_trunk_host`, `int_access_host`",
+				Description:         "\"Name of the policy. \n  Supported policies: \n    * `int_vpc_access_host`\n    * `int_vpc_dot1q_tunnel`\n    * `int_vpc_pvlan_host`\n    * `int_vpc_trunk_host`\"\n",
+				MarkdownDescription: "\"Name of the policy. \n  Supported policies: \n    * `int_vpc_access_host`\n    * `int_vpc_dot1q_tunnel`\n    * `int_vpc_pvlan_host`\n    * `int_vpc_trunk_host`\"\n",
 				PlanModifiers: []planmodifier.String{
 					stringplanmodifier.RequiresReplace(),
 				},
@@ -242,6 +242,8 @@ func InterfaceVpcResourceSchema(ctx context.Context) schema.Schema {
 				},
 			},
 		},
+		Description:         "Resource to configure vPC interfaces on a switch",
+		MarkdownDescription: "Resource to configure vPC interfaces on a switch",
 	}
 }
 

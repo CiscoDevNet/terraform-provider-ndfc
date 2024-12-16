@@ -14,13 +14,13 @@ provider "ndfc" {
 }
 
 resource "ndfc_template" "test_policy_template_1" {
-  template_name = "tf_test_policy_template_1"
-  description = "tf_test_policy_template_1"
-  template_type = "POLICY"
+  template_name     = "tf_test_policy_template_1"
+  description       = "tf_test_policy_template_1"
+  template_type     = "POLICY"
   template_sub_type = "INTERFACE_ETHERNET"
-  content_type = "TEMPLATE_CLI"
-  tags = ["tf_test_policy_template_1", "my_template_tag_1", "tag3"]
-  template_content = <<EOF
+  content_type      = "TEMPLATE_CLI"
+  tags              = ["tf_test_policy_template_1", "my_template_tag_1", "tag3"]
+  template_content  = <<EOF
 ##template variables
 
 #    Copyright (c) 2018 by Cisco Systems, Inc.
@@ -41,13 +41,13 @@ EOF
 }
 
 resource "ndfc_template" "test_policy_ext_vrf_lite_svi" {
-  template_name = "tf_test_policy_ext_vrf_lite_svi"
-  description = "tf_test_policy_ext_vrf_lite_svi created from TF"
-  template_type = "POLICY"
+  template_name     = "tf_test_policy_ext_vrf_lite_svi"
+  description       = "tf_test_policy_ext_vrf_lite_svi created from TF"
+  template_type     = "POLICY"
   template_sub_type = "DEVICE"
-  content_type = "PYTHON"
-  tags = ["tf_test_policy_ext_vrf_lite_svi", "my_template_tag_2", "tag2"]
-  template_content = <<EOF
+  content_type      = "PYTHON"
+  tags              = ["tf_test_policy_ext_vrf_lite_svi", "my_template_tag_2", "tag2"]
+  template_content  = <<EOF
 ##template variables
 
 #    Copyright (c) 2021 by Cisco Systems, Inc.

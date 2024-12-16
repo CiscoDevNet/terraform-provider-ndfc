@@ -92,8 +92,8 @@ func InterfaceEthernetResourceSchema(ctx context.Context) schema.Schema {
 						},
 						"freeform_config": schema.StringAttribute{
 							Optional:            true,
-							Description:         "Additional CLI for the interface",
-							MarkdownDescription: "Additional CLI for the interface",
+							Description:         "Additional CLI config (if any) for the interface configuration",
+							MarkdownDescription: "Additional CLI config (if any) for the interface configuration",
 						},
 						"interface_description": schema.StringAttribute{
 							Optional:            true,
@@ -102,8 +102,8 @@ func InterfaceEthernetResourceSchema(ctx context.Context) schema.Schema {
 						},
 						"interface_name": schema.StringAttribute{
 							Required:            true,
-							Description:         "Name of the Interface. Example: `Ethernet1/3`",
-							MarkdownDescription: "Name of the Interface. Example: `Ethernet1/3`",
+							Description:         "Name of the Interface. Example: `Ethernet1/10`",
+							MarkdownDescription: "Name of the Interface. Example: `Ethernet1/10`",
 						},
 						"mtu": schema.StringAttribute{
 							Optional:            true,
@@ -163,14 +163,14 @@ func InterfaceEthernetResourceSchema(ctx context.Context) schema.Schema {
 						},
 						"serial_number": schema.StringAttribute{
 							Optional:            true,
-							Description:         "Serial number of switch to configure",
-							MarkdownDescription: "Serial number of switch to configure",
+							Description:         "Serial number of switch to configure. This field cannot be specified if `serial_number` is specified in the common block",
+							MarkdownDescription: "Serial number of switch to configure. This field cannot be specified if `serial_number` is specified in the common block",
 						},
 						"speed": schema.StringAttribute{
 							Optional:            true,
 							Computed:            true,
-							Description:         "Interface speed",
-							MarkdownDescription: "Interface speed",
+							Description:         "\"Interface speed. Should be one of the following:\n  * `Auto`\n  * `10Mb`\n  * `100Mb`\n  * `1Gb`\n  * `2.5Gb`\n  * `5Gb`\n  * `10Gb`\n  * `25Gb`\n  * `40Gb`\n  * `50Gb`\n  * `100Gb`\n  * `200Gb`\n  * `400Gb`\"\n",
+							MarkdownDescription: "\"Interface speed. Should be one of the following:\n  * `Auto`\n  * `10Mb`\n  * `100Mb`\n  * `1Gb`\n  * `2.5Gb`\n  * `5Gb`\n  * `10Gb`\n  * `25Gb`\n  * `40Gb`\n  * `50Gb`\n  * `100Gb`\n  * `200Gb`\n  * `400Gb`\"\n",
 							Validators: []validator.String{
 								stringvalidator.OneOf("Auto", "10Mb", "100Mb", "1Gb", "2.5Gb", "5Gb", "10Gb", "25Gb", "40Gb", "50Gb", "100Gb", "200Gb", "400Gb"),
 							},
@@ -190,8 +190,8 @@ func InterfaceEthernetResourceSchema(ctx context.Context) schema.Schema {
 			"policy": schema.StringAttribute{
 				Optional:            true,
 				Computed:            true,
-				Description:         "Name of the policy. Examples: `int_trunk_host`, `int_access_host`",
-				MarkdownDescription: "Name of the policy. Examples: `int_trunk_host`, `int_access_host`",
+				Description:         "\"Policy to be used for the interface. \n  Supported policies: \n  * `int_trunk_host`\n  * `int_access_host`\n  * `int_dot1q_tunnel_host`\n  * `int_monitor_ethernet`\n  * `int_pvlan_host`\n  * `int_routed_host`\n  * `int_shared_trunk_host`\n  * `int_trunk_classic`\"\n",
+				MarkdownDescription: "\"Policy to be used for the interface. \n  Supported policies: \n  * `int_trunk_host`\n  * `int_access_host`\n  * `int_dot1q_tunnel_host`\n  * `int_monitor_ethernet`\n  * `int_pvlan_host`\n  * `int_routed_host`\n  * `int_shared_trunk_host`\n  * `int_trunk_classic`\"\n",
 				PlanModifiers: []planmodifier.String{
 					stringplanmodifier.RequiresReplace(),
 				},
@@ -209,8 +209,8 @@ func InterfaceEthernetResourceSchema(ctx context.Context) schema.Schema {
 			},
 			"serial_number": schema.StringAttribute{
 				Optional:            true,
-				Description:         "Serial number of switch to configure",
-				MarkdownDescription: "Serial number of switch to configure",
+				Description:         "Serial number of switch to configure. This field cannot be specified if `serial_number` inside `interfaces` block is specified`",
+				MarkdownDescription: "Serial number of switch to configure. This field cannot be specified if `serial_number` inside `interfaces` block is specified`",
 				PlanModifiers: []planmodifier.String{
 					stringplanmodifier.RequiresReplace(),
 				},
@@ -219,6 +219,8 @@ func InterfaceEthernetResourceSchema(ctx context.Context) schema.Schema {
 				},
 			},
 		},
+		Description:         "This resource allows you to configure and manage ethernet interfaces on a switch",
+		MarkdownDescription: "This resource allows you to configure and manage ethernet interfaces on a switch",
 	}
 }
 

@@ -5,6 +5,13 @@ resource:
   parent_package: resource_interface_common
   parent_model: interface_common
   modify_plan: true
+  description: "This resource allows you to configure and manage ethernet interfaces on a switch"
+  import_id:
+    - "int_trunk_host:FDO245206N5[Ethernet1/1,Ethernet1/2],9990IQNFEZ6[Ethernet1/3,Ethernet1/2]"
+    - "int_access_host:FDO245206N5"
+  import_desc: 
+    - "if_policy:serial_number[comma seperated list of interfaces]"
+    - "if_policy:serial_number"
   attributes:
     - model_name: id
       tf_name: id
@@ -20,7 +27,17 @@ resource:
       type: String
       default_value: int_trunk_host
       tf_requires_replace: true
-      description: "Name of the policy. Examples: `int_trunk_host`, `int_access_host`"
+      description: |
+          "Policy to be used for the interface. 
+            Supported policies: 
+            * `int_trunk_host`
+            * `int_access_host`
+            * `int_dot1q_tunnel_host`
+            * `int_monitor_ethernet`
+            * `int_pvlan_host`
+            * `int_routed_host`
+            * `int_shared_trunk_host`
+            * `int_trunk_classic`"
       example: int_access_host
     - model_name: policy_type
       tf_name: policy_type
@@ -29,6 +46,7 @@ resource:
       validator: OneOf("system", "user-defined")
       description: "Specifies if the policy is user defined or the default ones available in system"
       payload_hide: true
+      example: system
     - model_name: deploy
       tf_name: deploy
       type: Bool
@@ -41,7 +59,7 @@ resource:
       model_name: serial_number
       tf_name: serial_number
       type: String
-      description: Serial number of switch to configure
+      description: Serial number of switch to configure. This field cannot be specified if `serial_number` inside `interfaces` block is specified`
       example: 9DBYO6WQJ46
       payload_hide: true
       tf_requires_replace: true
@@ -56,6 +74,7 @@ resource:
       description: "interfaces to configure"
       parent_package: resource_interface_common
       parent_model: interfaces
+      example: "Ethernet1/10"
       attributes:
       - model_name: filterThisValue
         tf_name: filter_this_value
@@ -65,14 +84,13 @@ resource:
       - model_name: serialNumber
         tf_name: serial_number
         type: String
-        description: Serial number of switch to configure
-        example: 9DBYO6WQJ46
+        description: Serial number of switch to configure. This field cannot be specified if `serial_number` is specified in the common block
       - &ifName
         model_name: ifName
         tf_name: interface_name
         type: String
-        description: "Name of the Interface. Example: `Ethernet1/3`"
-        example: Ethernet1/13
+        description: "Name of the Interface. Example: `Ethernet1/10`"
+        example: Ethernet1/10
         mandatory: true
         requires_replace: true
       - &ifType
@@ -92,7 +110,7 @@ resource:
         ndfc_nested: [nvPairs]
         tf_name: freeform_config
         type: String
-        description: Additional CLI for the interface
+        description: Additional CLI config (if any) for the interface configuration
         default_value: ""
         example: delay 200
       - model_name: ADMIN_STATE
@@ -142,7 +160,21 @@ resource:
         validator: OneOf("Auto","10Mb","100Mb","1Gb","2.5Gb","5Gb","10Gb","25Gb","40Gb","50Gb","100Gb","200Gb","400Gb")
         enum_values: [Auto,10Mb,100Mb,1Gb,2.5Gb,5Gb,10Gb,25Gb,40Gb,50Gb,100Gb,200Gb,400Gb]
         default_value: Auto
-        description: Interface speed
+        description: |
+          "Interface speed. Should be one of the following:
+            * `Auto`
+            * `10Mb`
+            * `100Mb`
+            * `1Gb`
+            * `2.5Gb`
+            * `5Gb`
+            * `10Gb`
+            * `25Gb`
+            * `40Gb`
+            * `50Gb`
+            * `100Gb`
+            * `200Gb`
+            * `400Gb`"
         example: Auto
       - model_name: ACCESS_VLAN
         ndfc_nested: [nvPairs]
@@ -229,5 +261,4 @@ resource:
         type: "Map:String"
         payload_hide: true
         description: Custom policy parameters
-        example: "policy parameters"
      

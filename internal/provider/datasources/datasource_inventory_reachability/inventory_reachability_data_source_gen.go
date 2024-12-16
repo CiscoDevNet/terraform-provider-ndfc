@@ -159,6 +159,8 @@ func InventoryReachabilityDataSourceSchema(ctx context.Context) schema.Schema {
 				MarkdownDescription: "The username to use for the devices",
 			},
 		},
+		Description:         "Data Source to test reachability of devices in the inventory",
+		MarkdownDescription: "Data Source to test reachability of devices in the inventory",
 	}
 }
 
