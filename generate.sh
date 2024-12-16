@@ -71,6 +71,20 @@ $GOPATH/bin/addlicense -c "Cisco Systems, Inc. and its affiliates" -l "mpl" -s  
 $GOPATH/bin/addlicense -c "Cisco Systems, Inc. and its affiliates" -l "mpl" -s  internal/provider/types/
 $GOPATH/bin/addlicense -c "Cisco Systems, Inc. and its affiliates" -l "mpl" -s  internal/provider/*_test.go
 
+$GOPATH/bin/addlicense -c "Cisco Systems, Inc. and its affiliates" -l "mpl" -s  internal/provider/ndfc/*_gen.go
+$GOPATH/bin/addlicense -c "Cisco Systems, Inc. and its affiliates" -l "mpl" -s  internal/provider/resources/**/*_test.go
+$GOPATH/bin/addlicense -c "Cisco Systems, Inc. and its affiliates" -l "mpl" -s  internal/provider/datasources/**/*_test.go
+
+terraform fmt -recursive examples/
+
+if [[ -f $GOPATH/bin/tfplugindocs ]]
+then
+    $GOPATH/bin/tfplugindocs generate --website-source-dir doctemplates
+else
+    echo "Install tfplugindocs"
+    exit 1
+fi
+
 rm -rf ./out
 
 

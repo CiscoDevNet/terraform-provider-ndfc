@@ -4,6 +4,13 @@ resource:
   generate_tf_resource: true
   parent_package: resource_interface_common
   parent_model: interface_common
+  description: "Resource to configure port-channel interfaces on a switch"
+  import_id:
+    - "int_port_channel_trunk_host:FDO245206N5[Port-channel1,Port-channel2],9990IQNFEZ6[Port-channel0,Port-channel1]"
+    - "int_port_channel_trunk_host:FDO245206N5"
+  import_desc: 
+    - "if_policy:serial_number[comma seperated list of interfaces]"
+    - "if_policy:serial_number"
   attributes:
     - model_name: id
       tf_name: id
@@ -18,7 +25,15 @@ resource:
       type: String
       default_value: int_port_channel_trunk_host
       tf_requires_replace: true
-      description: "Name of the policy. Examples: `int_trunk_host`, `int_access_host`"
+      description: | 
+        "Name of the policy. 
+          Supported policies: 
+            * `int_port_channel_trunk_host`
+            * `int_port_channel_access_host`
+            * `int_port_channel_dot1q_tunnel_host`
+            * `int_port_channel_pvlan_host`
+            * `int_l3_port_channel`
+            * `int_monitor_port_channel`"
       example: int_port_channel_trunk_host
     - model_name: deploy
       tf_name: deploy
@@ -32,7 +47,7 @@ resource:
       model_name: serial_number
       tf_name: serial_number
       type: String
-      description: Serial number of switch to configure
+      description: Serial number of switch to configure. This field cannot be specified if `serial_number` inside `interfaces` block is specified`
       example: 9DBYO6WQJ46
       payload_hide: true
       tf_requires_replace: true
@@ -47,6 +62,7 @@ resource:
       description: "interfaces to configure"
       parent_package: resource_interface_common
       parent_model: interfaces
+      example: "Port-channel100"
       attributes:
       - model_name: filterThisValue
         tf_name: filter_this_value
@@ -56,14 +72,13 @@ resource:
       - model_name: serialNumber
         tf_name: serial_number
         type: String
-        description: Serial number of switch to configure
-        example: 9DBYO6WQJ46
+        description: Serial number of switch to configure. This field cannot be specified if `serial_number` is already mentioned outside
       - &ifName
         model_name: ifName
         tf_name: interface_name
         type: String
-        description: "Name of the Interface. Example: `Ethernet1/3`"
-        example: Ethernet1/13
+        description: "Name of the Interface. Example: `port-channel1`"
+        example: port-channel100
         mandatory: true
         validator: RegexMatches(regexp.MustCompile(`^port-channel\d+`), "Must be port-channelX (all lowercase) where X is the Channel ID")
         requires_replace: true
@@ -86,7 +101,6 @@ resource:
         type: String
         description: Additional CLI for the interface
         default_value: ""
-        example: delay 200
       - model_name: ADMIN_STATE
         ndfc_nested: [nvPairs]
         tf_name: admin_state
@@ -196,14 +210,14 @@ resource:
         type: String
         validator: OneOf("on","active","passive")
         default_value: "on"
-        description: Port-channel mode
+        description: Port-channel mode. Allowed values are `on`, `active`, `passive`
         example: on
       - model_name: MEMBER_INTERFACES
         ndfc_nested: [nvPairs]
         tf_name: member_interfaces
         type: String
-        description: Member interfaces
-        example: "eth1/1-10"
+        description: Member interfaces of the port channel. Allowed formats are "eth1/1-10" or "eth1/1,eth1/2,eth1/3"
+        example: "eth1/5-6"
       - model_name: deployment_status
         tf_name: deployment_status
         type: String

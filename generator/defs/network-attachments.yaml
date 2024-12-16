@@ -31,6 +31,7 @@ resource:
           filtered: true
           map_key: serial_number
           gen_backend: false
+          example: "FDO245206N5"
           attributes:
             - &filterThis
               model_name: filterThisValue
@@ -83,7 +84,6 @@ resource:
               computed: true
               optional: true
               description: The name of the switch
-              example: switch1
             - &VlanId
               model_name: vlan
               tf_name: vlan
@@ -95,7 +95,7 @@ resource:
               min_int: 2
               max_int: 4094
               description: VLAN ID
-              example: 1500
+              example: 1600
               handle_empty: true
             - &deployment
               model_name: deployment
@@ -124,7 +124,6 @@ resource:
               tf_name: freeform_config
               type: String
               description: This field covers any configuration not included in overlay templates which is needed as part of this VRF attachment
-              example: "interface Vlan2000\\r\\n  delay 200"
               exclude_test: true
             - model_name: deployThisAttachment
               type: Bool
@@ -132,7 +131,8 @@ resource:
               payload_hide: true
               default_value: false
               ndfc_type: bool
-              description: Deploy this attachment
+              description: If set to `true`, deploys this attachment. This cannot be set to `true` if `deploy_all_attachments` at resource level is set to `true` or `deploy_attachments` in the corresponding `network` is set to `true`
+              example: false
             - model_name: switchPorts
               tf_name: switch_ports
               type: List:String
@@ -140,14 +140,13 @@ resource:
               ndfc_type: csv
               optional: true
               computed: true
-              example: "[Ethernet1/1, Ethernet1/2]"
+              example: "[\"Ethernet1/1\", \"Ethernet1/2\"]"
             - model_name: detachSwitchPorts
               tf_name: detach_switch_ports
               type: List:String
               description: List of switch ports to detach
               ndfc_type: csv
               tf_hide: true
-              example: "[Ethernet1/1, Ethernet1/2]"
             - model_name: portNames
               tf_name: port_names
               type: String
@@ -161,14 +160,12 @@ resource:
               optional: true
               computed: true
               ndfc_type: csv
-              example: "[Ethernet1/1, Ethernet1/2]"
             - model_name: instanceValues
               tf_name: instance_values
               type: String
               optional: true
               computed: true
               description: Instance values
-              example: "isActive=false"
             - model_name: update_action
               tf_name: update_action
               type: BitMask

@@ -27,8 +27,8 @@ func VrfBulkResourceSchema(ctx context.Context) schema.Schema {
 			"deploy_all_attachments": schema.BoolAttribute{
 				Optional:            true,
 				Computed:            true,
-				Description:         "Deploy all attachments in this resource",
-				MarkdownDescription: "Deploy all attachments in this resource",
+				Description:         "If set to `true`, does a deployment of all attachments in this resource after any operation. This parameter cannot be set to `true` if  `deploy_attachments` in the vrf is set or `deploy_this_attachment` in the  `attach-list` is set",
+				MarkdownDescription: "If set to `true`, does a deployment of all attachments in this resource after any operation. This parameter cannot be set to `true` if  `deploy_attachments` in the vrf is set or `deploy_this_attachment` in the  `attach-list` is set",
 				Default:             booldefault.StaticBool(false),
 			},
 			"fabric_name": schema.StringAttribute{
@@ -77,8 +77,8 @@ func VrfBulkResourceSchema(ctx context.Context) schema.Schema {
 									"deploy_this_attachment": schema.BoolAttribute{
 										Optional:            true,
 										Computed:            true,
-										Description:         "Deploy this attachment",
-										MarkdownDescription: "Deploy this attachment",
+										Description:         "If set to `true`, does a deployment of the attachment. This parameter cannot be set to `true` if  `deploy_all_attachments` in the resource is set or `deploy_attachment` in the corresponding `vrf` is set",
+										MarkdownDescription: "If set to `true`, does a deployment of the attachment. This parameter cannot be set to `true` if  `deploy_all_attachments` in the resource is set or `deploy_attachment` in the corresponding `vrf` is set",
 										Default:             booldefault.StaticBool(false),
 									},
 									"freeform_config": schema.StringAttribute{
@@ -146,8 +146,8 @@ func VrfBulkResourceSchema(ctx context.Context) schema.Schema {
 						"deploy_attachments": schema.BoolAttribute{
 							Optional:            true,
 							Computed:            true,
-							Description:         "Deploy all attachments in this VRF",
-							MarkdownDescription: "Deploy all attachments in this VRF",
+							Description:         "If set to `true`, does a deployment of all attachments in this `vrf`. This parameter cannot be set to `true` if  `deploy_all_attachments` in the resource is set or `deploy_this_attachment` in the  `attach-list` is set",
+							MarkdownDescription: "If set to `true`, does a deployment of all attachments in this `vrf`. This parameter cannot be set to `true` if  `deploy_all_attachments` in the resource is set or `deploy_this_attachment` in the  `attach-list` is set",
 							Default:             booldefault.StaticBool(false),
 						},
 						"disable_rt_auto": schema.BoolAttribute{
@@ -370,6 +370,8 @@ func VrfBulkResourceSchema(ctx context.Context) schema.Schema {
 				MarkdownDescription: "List of vrfs",
 			},
 		},
+		Description:         "Resource for NDFC vrf management. This resource allows you to manage multiple VRFs in a fabric.",
+		MarkdownDescription: "Resource for NDFC vrf management. This resource allows you to manage multiple VRFs in a fabric.",
 	}
 }
 

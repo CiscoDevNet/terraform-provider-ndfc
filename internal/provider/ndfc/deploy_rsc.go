@@ -29,6 +29,8 @@ type NDFCDeployRsc struct {
 	checkTick    int
 	failCnt      int
 	checkCount   int
+	LastState    string
+	OOSyncCnt    int
 }
 
 func (n NDFCDeployRsc) GetKey() string {

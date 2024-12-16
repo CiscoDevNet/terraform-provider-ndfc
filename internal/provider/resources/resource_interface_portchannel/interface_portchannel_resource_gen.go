@@ -90,16 +90,16 @@ func InterfacePortchannelResourceSchema(ctx context.Context) schema.Schema {
 						},
 						"interface_name": schema.StringAttribute{
 							Required:            true,
-							Description:         "Name of the Interface. Example: `Ethernet1/3`",
-							MarkdownDescription: "Name of the Interface. Example: `Ethernet1/3`",
+							Description:         "Name of the Interface. Example: `port-channel1`",
+							MarkdownDescription: "Name of the Interface. Example: `port-channel1`",
 							Validators: []validator.String{
 								stringvalidator.RegexMatches(regexp.MustCompile(`^port-channel\d+`), "Must be port-channelX (all lowercase) where X is the Channel ID"),
 							},
 						},
 						"member_interfaces": schema.StringAttribute{
 							Optional:            true,
-							Description:         "Member interfaces",
-							MarkdownDescription: "Member interfaces",
+							Description:         "Member interfaces of the port channel. Allowed formats are \"eth1/1-10\" or \"eth1/1,eth1/2,eth1/3\"",
+							MarkdownDescription: "Member interfaces of the port channel. Allowed formats are \"eth1/1-10\" or \"eth1/1,eth1/2,eth1/3\"",
 						},
 						"mtu": schema.StringAttribute{
 							Optional:            true,
@@ -153,8 +153,8 @@ func InterfacePortchannelResourceSchema(ctx context.Context) schema.Schema {
 						"portchannel_mode": schema.StringAttribute{
 							Optional:            true,
 							Computed:            true,
-							Description:         "Port-channel mode",
-							MarkdownDescription: "Port-channel mode",
+							Description:         "Port-channel mode. Allowed values are `on`, `active`, `passive`",
+							MarkdownDescription: "Port-channel mode. Allowed values are `on`, `active`, `passive`",
 							Validators: []validator.String{
 								stringvalidator.OneOf("on", "active", "passive"),
 							},
@@ -162,8 +162,8 @@ func InterfacePortchannelResourceSchema(ctx context.Context) schema.Schema {
 						},
 						"serial_number": schema.StringAttribute{
 							Optional:            true,
-							Description:         "Serial number of switch to configure",
-							MarkdownDescription: "Serial number of switch to configure",
+							Description:         "Serial number of switch to configure. This field cannot be specified if `serial_number` is already mentioned outside",
+							MarkdownDescription: "Serial number of switch to configure. This field cannot be specified if `serial_number` is already mentioned outside",
 						},
 						"speed": schema.StringAttribute{
 							Optional:            true,
@@ -189,8 +189,8 @@ func InterfacePortchannelResourceSchema(ctx context.Context) schema.Schema {
 			"policy": schema.StringAttribute{
 				Optional:            true,
 				Computed:            true,
-				Description:         "Name of the policy. Examples: `int_trunk_host`, `int_access_host`",
-				MarkdownDescription: "Name of the policy. Examples: `int_trunk_host`, `int_access_host`",
+				Description:         "\"Name of the policy. \n  Supported policies: \n    * `int_port_channel_trunk_host`\n    * `int_port_channel_access_host`\n    * `int_port_channel_dot1q_tunnel_host`\n    * `int_port_channel_pvlan_host`\n    * `int_l3_port_channel`\n    * `int_monitor_port_channel`\"\n",
+				MarkdownDescription: "\"Name of the policy. \n  Supported policies: \n    * `int_port_channel_trunk_host`\n    * `int_port_channel_access_host`\n    * `int_port_channel_dot1q_tunnel_host`\n    * `int_port_channel_pvlan_host`\n    * `int_l3_port_channel`\n    * `int_monitor_port_channel`\"\n",
 				PlanModifiers: []planmodifier.String{
 					stringplanmodifier.RequiresReplace(),
 				},
@@ -198,8 +198,8 @@ func InterfacePortchannelResourceSchema(ctx context.Context) schema.Schema {
 			},
 			"serial_number": schema.StringAttribute{
 				Optional:            true,
-				Description:         "Serial number of switch to configure",
-				MarkdownDescription: "Serial number of switch to configure",
+				Description:         "Serial number of switch to configure. This field cannot be specified if `serial_number` inside `interfaces` block is specified`",
+				MarkdownDescription: "Serial number of switch to configure. This field cannot be specified if `serial_number` inside `interfaces` block is specified`",
 				PlanModifiers: []planmodifier.String{
 					stringplanmodifier.RequiresReplace(),
 				},
@@ -208,6 +208,8 @@ func InterfacePortchannelResourceSchema(ctx context.Context) schema.Schema {
 				},
 			},
 		},
+		Description:         "Resource to configure port-channel interfaces on a switch",
+		MarkdownDescription: "Resource to configure port-channel interfaces on a switch",
 	}
 }
 

@@ -39,6 +39,8 @@ func VpcPairResourceSchema(ctx context.Context) schema.Schema {
 				MarkdownDescription: "Set to true to use virtual peer link",
 			},
 		},
+		Description:         "Resource to configure vPC pair on a switch. Note only VXLAN EVPN fabric is supported",
+		MarkdownDescription: "Resource to configure vPC pair on a switch. Note only VXLAN EVPN fabric is supported",
 	}
 }
 

@@ -14,6 +14,6 @@ provider "ndfc" {
 }
 
 resource "ndfc_vpc_pair" "test_vpc_pair" {
-  serial_numbers = ["9HGCZABXAUY", "9N14Y8PVD2Y"]
-  use_virtual_peerlink  = false
+  serial_numbers       = ["9HGCZABXAUY", "9N14Y8PVD2Y"]
+  use_virtual_peerlink = false
 }

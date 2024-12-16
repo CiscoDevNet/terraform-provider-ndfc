@@ -178,7 +178,7 @@ on the attachment:
 Attachment level values are set in UpdateAction field, which is used to filter out the entries.
 */
 func (c NDFC) checkNwAttachmentsAction(ctx context.Context, plan *resource_networks.NDFCNetworksValue,
-	state *resource_networks.NDFCNetworksValue, vpcPairMap map[string]string) uint16 {
+	state *resource_networks.NDFCNetworksValue, vpcPairMap map[string]string, globalDeploy bool) uint16 {
 
 	actionFlag := NoChange
 
@@ -245,8 +245,15 @@ func (c NDFC) checkNwAttachmentsAction(ctx context.Context, plan *resource_netwo
 						plan.NetworkName, serial))
 					controlFlag |= Deploy
 				} else {
-					tflog.Debug(ctx, fmt.Sprintf("compareAttachments: Attachment %s/%s is changed but not to be deployed",
-						plan.NetworkName, serial))
+					if plan.DeployAttachments || globalDeploy {
+						//deploy needed
+						tflog.Debug(ctx, fmt.Sprintf("compareAttachments: Attachment %s/%s in plan needs deploy due to global/network deploy enabled",
+							plan.NetworkName, serial))
+						controlFlag |= Deploy
+					} else {
+						tflog.Debug(ctx, fmt.Sprintf("compareAttachments: Attachment %s/%s is changed but not to be deployed",
+							plan.NetworkName, serial))
+					}
 				}
 
 				// Look inside port lists to see if something has changed
@@ -326,7 +333,7 @@ func (c NDFC) networkAttachmentsGetDiff(ctx context.Context, dg *diag.Diagnostic
 		if stateNw, ok := vState.Networks[nw]; ok {
 			tflog.Debug(ctx, fmt.Sprintf("Existing Network %s in plan", nw))
 			// Check if there is a change
-			action := c.checkNwAttachmentsAction(ctx, &planNw, &stateNw, vpcPairMap)
+			action := c.checkNwAttachmentsAction(ctx, &planNw, &stateNw, vpcPairMap, vPlan.DeployAllAttachments)
 			vPlan.Networks[nw] = planNw
 			vState.Networks[nw] = stateNw
 

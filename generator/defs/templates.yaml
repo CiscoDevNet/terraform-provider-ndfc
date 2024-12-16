@@ -3,6 +3,11 @@ resource:
   name: template
   doc_category: Fabric
   generate_tf_resource: true
+  description: "Resource to configure templates"
+  import_id:
+    - "MSD_Fabric_File_Extn"
+  import_desc:
+    - "Template Name"
   attributes:
     - model_name: instanceClassId
       tf_name: instance_id

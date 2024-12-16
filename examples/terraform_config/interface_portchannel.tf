@@ -27,7 +27,7 @@ resource "ndfc_interface_portchannel" "test_evpn_vxlan_pc_intf1" {
       allowed_vlans         = "100-300"
       native_vlan           = 99
       speed                 = "Auto"
-      portchannel_mode     = "active"
+      portchannel_mode      = "active"
       member_interfaces     = "Ethernet1/25,Ethernet1/26"
     },
 
@@ -39,7 +39,7 @@ resource "ndfc_interface_portchannel" "test_evpn_vxlan_pc_intf1" {
       allowed_vlans         = "101-299"
       native_vlan           = 199
       speed                 = "Auto"
-      portchannel_mode     = "passive"
+      portchannel_mode      = "passive"
       member_interfaces     = "Ethernet1/31,Ethernet1/32"
     },
     "intf3" : {
@@ -50,7 +50,7 @@ resource "ndfc_interface_portchannel" "test_evpn_vxlan_pc_intf1" {
       allowed_vlans         = "101-299"
       native_vlan           = 199
       speed                 = "Auto"
-      portchannel_mode     = "passive"
+      portchannel_mode      = "passive"
       member_interfaces     = "Ethernet1/21,Ethernet1/22,Ethernet1/23-24"
     },
   }
