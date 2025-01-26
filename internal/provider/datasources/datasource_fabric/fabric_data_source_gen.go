@@ -73,6 +73,8 @@ func FabricDataSourceSchema(ctx context.Context) schema.Schema {
 				MarkdownDescription: "List of Fabrics",
 			},
 		},
+		Description:         "Basic data source attribute for all fabric types",
+		MarkdownDescription: "Basic data source attribute for all fabric types",
 	}
 }
 

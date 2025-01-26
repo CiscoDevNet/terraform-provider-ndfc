@@ -18,7 +18,7 @@ import (
 const urlVpcPair = "/lan-fabric/rest/vpcpair"
 const urlVpcPairGet = urlVpcPair + "?serialNumber=%s"
 const urlVpcPairRecmd = urlVpcPair + "/recommendation?serialNumber=%s&useVirtualPeerlink=%t"
-const urlswitchesByFabric = "/lan-fabric/rest/control/fabrics/%s/inventory/switchesByFabric"
+
 
 type VpcPairAPI struct {
 	NDFCAPICommon
@@ -37,7 +37,7 @@ func (c *VpcPairAPI) GetUrl() string {
 	if c.CheckStatus["recommendations"] {
 		return fmt.Sprintf(urlVpcPairRecmd, c.VpcPairID, c.VirtualPeerLink)
 	} else if c.CheckStatus["switchesByFabric"] {
-		return fmt.Sprintf(urlswitchesByFabric, c.FabricName)
+		return fmt.Sprintf(UrlSwitchesByFabric, c.FabricName)
 	} else {
 		return fmt.Sprintf(urlVpcPairGet, c.VpcPairID)
 	}

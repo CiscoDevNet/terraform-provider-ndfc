@@ -32,11 +32,11 @@ func (c NDFC) SaveConfiguration(ctx context.Context, diags *diag.Diagnostics, fa
 	_, err := saveApi.Post([]byte{})
 	if err != nil {
 		diags.AddError("Config Save failed", err.Error())
-		saveApi.Preview = false
-		time.Sleep(3 * time.Second)
-		res, _ := saveApi.Get()
+		//saveApi.Preview = false
+		//time.Sleep(3 * time.Second)
+		//res, _ := saveApi.Get()
 		// TODO determine which error should be returned
-		diags.AddError("Deploy Errors:", string(res))
+		///diags.AddError("Deploy Errors:", string(res))
 	}
 }
 
