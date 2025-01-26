@@ -44,7 +44,7 @@ resource:
       payload_hide: true
       tf_requires_replace: true
       validator: ConflictsWith(path.Expressions {path.MatchRoot("interfaces").AtAnyMapKey().AtName("serial_number")}...)
-    - &interfaces 
+    - &interfaces
       model_name: interfaces
       tf_name: interfaces
       bulk: true

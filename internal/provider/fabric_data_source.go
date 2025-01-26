@@ -29,7 +29,7 @@ type fabricDataSource struct {
 }
 
 func (d *fabricDataSource) Metadata(ctx context.Context, req datasource.MetadataRequest, resp *datasource.MetadataResponse) {
-	resp.TypeName = req.ProviderTypeName + "_fabric"
+	resp.TypeName = req.ProviderTypeName + "_" + ndfc.DataSourceFabric
 }
 
 func (d *fabricDataSource) Schema(ctx context.Context, req datasource.SchemaRequest, resp *datasource.SchemaResponse) {

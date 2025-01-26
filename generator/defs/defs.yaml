@@ -8,7 +8,6 @@ files:
   - interface_common.yaml
   - interface_eth.yaml
   - interface_loopback.yaml
-  - fabric.yaml
   - interface_vlan.yaml
   - inventory-reachability.yaml
   - configuration-deploy.yaml
@@ -18,5 +17,11 @@ files:
   - templates.yaml
   - policy.yaml
   - vpc-pair.yaml
+  - fabric_common.yaml
+  - fabric_lan_classic.yaml
+  - fabric_ipfm.yaml
+  - fabric_vxlan_evpn.yaml
+  - fabric_vxlan_msd.yaml
+  - fabric_isn.yaml
 
 

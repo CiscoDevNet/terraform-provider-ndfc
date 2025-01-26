@@ -1,0 +1,1136 @@
+---
+resource:
+  name: vxlan_evpn_fabric
+  doc_category: Fabric
+  generate_tf_resource: true
+  parent_package: resource_fabric_common
+  parent_model: fabric_common
+  description: Resource to configure and manage a VXLAN EVPN Fabric
+  attributes:
+    - model_name: id
+      tf_name: id
+      description: Terraform unique Id for the fabric resource
+      type: String
+      id: true
+      computed: true
+      payload_hide: true
+    - model_name: FABRIC_NAME
+      tf_name: fabric_name
+      description: 'Fabric name to be created, updated or deleted'
+      type: String
+      example: TF_FABRIC_VXLAN_EVPN
+      mandatory: true
+      tf_requires_replace: true
+    - model_name: AAA_REMOTE_IP_ENABLED
+      tf_name: aaa_remote_ip_enabled
+      description: 'Enable only, when IP Authorization is enabled in the AAA Server'
+      default_value: false
+      type: Bool
+      example: false
+    - model_name: AAA_SERVER_CONF
+      tf_name: aaa_server_conf
+      description: AAA Configurations
+      type: String
+    - model_name: ADVERTISE_PIP_BGP
+      tf_name: advertise_pip_bgp
+      description: For Primary VTEP IP Advertisement As Next-Hop Of Prefix Routes
+      default_value: false
+      type: Bool
+      example: false
+    - model_name: ADVERTISE_PIP_ON_BORDER
+      tf_name: advertise_pip_on_border
+      description: >-
+        Enable advertise-pip on vPC borders and border gateways only. Applicable
+        only when vPC advertise-pip is not enabled
+      default_value: true
+      type: Bool
+      example: true
+    - model_name: ANYCAST_BGW_ADVERTISE_PIP
+      tf_name: anycast_bgw_advertise_pip
+      description: >-
+        To advertise Anycast Border Gateway PIP as VTEP. Effective on MSD fabric
+        Recalculate Config
+      default_value: false
+      type: Bool
+      example: false
+    - model_name: ANYCAST_GW_MAC
+      tf_name: anycast_gw_mac
+      description: Shared MAC address for all leafs (xxxx.xxxx.xxxx)
+      default_value: 2020.0000.00aa
+      type: String
+      example: 2020.0000.00aa
+    - model_name: ANYCAST_LB_ID
+      tf_name: anycast_lb_id
+      description: Used for vPC Peering in VXLANv6 Fabrics
+      type: Int64
+      handle_empty: true
+    - model_name: ANYCAST_RP_IP_RANGE
+      tf_name: anycast_rp_ip_range
+      description: Anycast or Phantom RP IP Address Range
+      default_value: 10.254.254.0/24
+      type: String
+      example: 10.254.254.0/24
+    - model_name: AUTO_SYMMETRIC_DEFAULT_VRF
+      tf_name: auto_symmetric_default_vrf
+      description: >-
+        Whether to auto generate Default VRF interface and BGP peering
+        configuration on managed neighbor devices. If set, auto created VRF Lite
+        IFC links will have Auto Deploy Default VRF for Peer enabled.
+      default_value: false
+      type: Bool
+      example: false
+    - model_name: AUTO_SYMMETRIC_VRF_LITE
+      tf_name: auto_symmetric_vrf_lite
+      description: >-
+        Whether to auto generate VRF LITE sub-interface and BGP peering
+        configuration on managed neighbor devices. If set, auto created VRF Lite
+        IFC links will have Auto Deploy for Peer enabled.
+      default_value: false
+      type: Bool
+      example: false
+    - model_name: AUTO_UNIQUE_VRF_LITE_IP_PREFIX
+      tf_name: auto_unique_vrf_lite_ip_prefix
+      description: >-
+        When enabled, IP prefix allocated to the VRF LITE IFC is not reused on
+        VRF extension over VRF LITE IFC. Instead, unique IP Subnet is allocated
+        for each VRF extension over VRF LITE IFC.
+      default_value: false
+      type: Bool
+      example: false
+    - model_name: AUTO_VRFLITE_IFC_DEFAULT_VRF
+      tf_name: auto_vrflite_ifc_default_vrf
+      description: >-
+        Whether to auto generate Default VRF interface and BGP peering
+        configuration on VRF LITE IFC auto deployment. If set, auto created VRF
+        Lite IFC links will have Auto Deploy Default VRF enabled.
+      default_value: false
+      type: Bool
+      example: false
+    - model_name: BANNER
+      tf_name: banner
+      description: >-
+        Message of the Day (motd) banner. Delimiter char (very first char is
+        delimiter char) followed by message ending with delimiter)
+      type: String
+    - model_name: BFD_AUTH_ENABLE
+      tf_name: bfd_auth_enable
+      description: Valid for P2P Interfaces only
+      default_value: false
+      type: Bool
+      example: false
+    - model_name: BFD_AUTH_KEY
+      tf_name: bfd_auth_key
+      description: Encrypted SHA1 secret value
+      type: String
+    - model_name: BFD_AUTH_KEY_ID
+      tf_name: bfd_auth_key_id
+      description: No description available
+      type: Int64
+      handle_empty: true
+    - model_name: BFD_ENABLE
+      tf_name: bfd_enable
+      description: Valid for IPv4 Underlay only
+      default_value: false
+      type: Bool
+      example: false
+    - model_name: BFD_IBGP_ENABLE
+      tf_name: bfd_ibgp_enable
+      description: No description available
+      default_value: false
+      type: Bool
+      example: false
+    - model_name: BFD_ISIS_ENABLE
+      tf_name: bfd_isis_enable
+      description: No description available
+      default_value: false
+      type: Bool
+      example: false
+    - model_name: BFD_OSPF_ENABLE
+      tf_name: bfd_ospf_enable
+      description: No description available
+      default_value: false
+      type: Bool
+      example: false
+    - model_name: BFD_PIM_ENABLE
+      tf_name: bfd_pim_enable
+      description: No description available
+      default_value: false
+      type: Bool
+      example: false
+    - model_name: BGP_AS
+      tf_name: bgp_as
+      description: >-
+        1-4294967295 | 1-65535.0-65535 It is a good practice to have a unique
+        ASN for each Fabric.
+      type: String
+      example: 65000
+      mandatory: true
+    - model_name: BGP_AUTH_ENABLE
+      tf_name: bgp_auth_enable
+      description: No description available
+      default_value: false
+      type: Bool
+      example: false
+    - model_name: BGP_AUTH_KEY
+      tf_name: bgp_auth_key
+      description: Encrypted BGP Authentication Key based on type
+      type: String
+    - model_name: BGP_AUTH_KEY_TYPE
+      tf_name: bgp_auth_key_type
+      description: 'BGP Key Encryption Type: 3 - 3DES, 7 - Cisco'
+      default_value: 3
+      type: Int64
+      handle_empty: true
+      validator: 'OneOf(3, 7)'
+      example: 3
+    - model_name: BGP_LB_ID
+      tf_name: bgp_lb_id
+      description: No description available
+      default_value: 0
+      type: Int64
+      handle_empty: true
+      example: 0
+    - model_name: BOOTSTRAP_CONF
+      tf_name: bootstrap_conf
+      description: Additional CLIs required during device bootup/login e.g. AAA/Radius
+      type: String
+    - model_name: BOOTSTRAP_ENABLE
+      tf_name: bootstrap_enable
+      description: Automatic IP Assignment For POAP
+      default_value: false
+      type: Bool
+      example: false
+    - model_name: BOOTSTRAP_MULTISUBNET
+      tf_name: bootstrap_multisubnet
+      description: '''lines with # prefix are ignored here'''
+      default_value: >-
+        #Scope_Start_IP, Scope_End_IP, Scope_Default_Gateway,
+        Scope_Subnet_Prefix
+      type: String
+      example: >-
+        #Scope_Start_IP, Scope_End_IP, Scope_Default_Gateway,
+        Scope_Subnet_Prefix
+    - model_name: BROWNFIELD_NETWORK_NAME_FORMAT
+      tf_name: brownfield_network_name_format
+      description: Generated network name should be < 64 characters
+      default_value: Auto_Net_VNI$$VNI$$_VLAN$$VLAN_ID$$
+      type: String
+      example: Auto_Net_VNI$$VNI$$_VLAN$$VLAN_ID$$
+    - model_name: BROWNFIELD_SKIP_OVERLAY_NETWORK_ATTACHMENTS
+      tf_name: brownfield_skip_overlay_network_attachments
+      description: >-
+        Enable to skip overlay network interface attachments for Brownfield and
+        Host Port Resync cases
+      default_value: false
+      type: Bool
+      example: false
+    - model_name: CDP_ENABLE
+      tf_name: cdp_enable
+      description: Enable CDP on management interface
+      default_value: false
+      type: Bool
+      example: false
+    - model_name: COPP_POLICY
+      tf_name: copp_policy
+      description: >-
+        Fabric Wide CoPP Policy. Customized CoPP policy should be provided when
+        manual is selected
+      default_value: strict
+      type: String
+      validator: 'OneOf("dense", "lenient", "moderate", "strict", "manual")'
+      example: strict
+    - model_name: DCI_SUBNET_RANGE
+      tf_name: dci_subnet_range
+      description: Address range to assign P2P Interfabric Connections
+      default_value: 10.33.0.0/16
+      type: String
+      example: 10.33.0.0/16
+    - model_name: DCI_SUBNET_TARGET_MASK
+      tf_name: dci_subnet_target_mask
+      description: No description available
+      default_value: 30
+      type: Int64
+      handle_empty: true
+      example: 30
+    - model_name: DEAFULT_QUEUING_POLICY_CLOUDSCALE
+      tf_name: default_queuing_policy_cloudscale
+      description: >-
+        Queuing Policy for all 92xx, -EX, -FX, -FX2, -FX3, -GX series switches
+        in the fabric
+      default_value: queuing_policy_default_8q_cloudscale
+      type: String
+      validator: >-
+        OneOf("queuing_policy_default_4q_cloudscale",
+        "queuing_policy_default_8q_cloudscale")
+      example: queuing_policy_default_8q_cloudscale
+    - model_name: DEAFULT_QUEUING_POLICY_OTHER
+      tf_name: default_queuing_policy_other
+      description: Queuing Policy for all other switches in the fabric
+      default_value: queuing_policy_default_other
+      type: String
+      validator: OneOf("queuing_policy_default_other")
+      example: queuing_policy_default_other
+    - model_name: DEAFULT_QUEUING_POLICY_R_SERIES
+      tf_name: default_queuing_policy_r_series
+      description: Queuing Policy for all R-Series switches in the fabric
+      default_value: queuing_policy_default_r_series
+      type: String
+      validator: OneOf("queuing_policy_default_r_series")
+      example: queuing_policy_default_r_series
+    - model_name: DEFAULT_VRF_REDIS_BGP_RMAP
+      tf_name: default_vrf_redis_bgp_rmap
+      description: >-
+        Route Map used to redistribute BGP routes to IGP in default vrf in auto
+        created VRF Lite IFC links
+      type: String
+    - model_name: DHCP_ENABLE
+      tf_name: dhcp_enable
+      description: Automatic IP Assignment For POAP From Local DHCP Server
+      default_value: false
+      type: Bool
+      example: false
+    - model_name: DHCP_END
+      tf_name: dhcp_end
+      description: End Address For Switch POAP
+      type: String
+    - model_name: DHCP_IPV6_ENABLE
+      tf_name: dhcp_ipv6_enable
+      description: No description available
+      type: String
+      validator: 'OneOf("DHCPv4", "DHCPv6")'
+    - model_name: DHCP_START
+      tf_name: dhcp_start
+      description: Start Address For Switch POAP
+      type: String
+    - model_name: DNS_SERVER_IP_LIST
+      tf_name: dns_server_ip_list
+      description: Comma separated list of IP Addresses(v4/v6)
+      type: String
+    - model_name: DNS_SERVER_VRF
+      tf_name: dns_server_vrf
+      description: >-
+        One VRF for all DNS servers or a comma separated list of VRFs, one per
+        DNS server
+      type: String
+    - model_name: ENABLE_AAA
+      tf_name: enable_aaa
+      description: Include AAA configs from Manageability tab during device bootup
+      default_value: false
+      type: Bool
+      example: false
+    - model_name: ENABLE_DEFAULT_QUEUING_POLICY
+      tf_name: enable_default_queuing_policy
+      description: No description available
+      default_value: false
+      type: Bool
+      example: false
+    - model_name: ENABLE_FABRIC_VPC_DOMAIN_ID
+      tf_name: enable_fabric_vpc_domain_id
+      description: (Not Recommended)
+      default_value: false
+      type: Bool
+      example: false
+    - model_name: ENABLE_MACSEC
+      tf_name: enable_macsec
+      description: Enable MACsec in the fabric
+      default_value: false
+      type: Bool
+      example: false
+    - model_name: ENABLE_NETFLOW
+      tf_name: enable_netflow
+      description: Enable Netflow on VTEPs
+      default_value: false
+      type: Bool
+      example: false
+    - model_name: ENABLE_NGOAM
+      tf_name: enable_ngoam
+      description: >-
+        Enable the Next Generation (NG) OAM feature for all switches in the
+        fabric to aid in trouble-shooting VXLAN EVPN fabrics
+      default_value: true
+      type: Bool
+      example: true
+    - model_name: ENABLE_NXAPI
+      tf_name: enable_nxapi
+      description: Enable HTTPS NX-API
+      default_value: true
+      type: Bool
+      example: true
+    - model_name: ENABLE_NXAPI_HTTP
+      tf_name: enable_nxapi_http
+      description: No description available
+      default_value: true
+      type: Bool
+      example: true
+    - model_name: ENABLE_PBR
+      tf_name: enable_pbr
+      description: >-
+        When ESR option is ePBR, enable ePBR will enable pbr, sla sender and
+        epbr features on the switch
+      default_value: false
+      type: Bool
+      example: false
+    - model_name: ENABLE_PVLAN
+      tf_name: enable_pvlan
+      description: Enable PVLAN on switches except spines and super spines
+      default_value: false
+      type: Bool
+      example: false
+    - model_name: ENABLE_TENANT_DHCP
+      tf_name: enable_tenant_dhcp
+      description: No description available
+      default_value: true
+      type: Bool
+      example: true
+    - model_name: ENABLE_TRM
+      tf_name: enable_trm
+      description: For Overlay Multicast Support In VXLAN Fabrics
+      default_value: false
+      type: Bool
+      example: false
+    - model_name: ENABLE_VPC_PEER_LINK_NATIVE_VLAN
+      tf_name: enable_vpc_peer_link_native_vlan
+      description: No description available
+      default_value: false
+      type: Bool
+      example: false
+    - model_name: EXTRA_CONF_INTRA_LINKS
+      tf_name: extra_conf_intra_links
+      description: Additional CLIs For All Intra-Fabric Links
+      type: String
+    - model_name: EXTRA_CONF_LEAF
+      tf_name: extra_conf_leaf
+      description: >-
+        Additional CLIs For All Leafs As Captured From Show Running
+        Configuration
+      type: String
+    - model_name: EXTRA_CONF_SPINE
+      tf_name: extra_conf_spine
+      description: >-
+        Additional CLIs For All Spines As Captured From Show Running
+        Configuration
+      type: String
+    - model_name: EXTRA_CONF_TOR
+      tf_name: extra_conf_tor
+      description: Additional CLIs For All ToRs As Captured From Show Running Configuration
+      type: String
+    - model_name: FABRIC_INTERFACE_TYPE
+      tf_name: fabric_interface_type
+      description: Numbered(Point-to-Point) or Unnumbered
+      default_value: p2p
+      type: String
+      validator: 'OneOf("p2p", "unnumbered")'
+      example: p2p
+    - model_name: FABRIC_MTU
+      tf_name: fabric_mtu
+      description: Must be an even number
+      default_value: 9216
+      type: Int64
+      handle_empty: true
+      example: 9216
+    - model_name: FABRIC_VPC_DOMAIN_ID
+      tf_name: fabric_vpc_domain_id
+      description: vPC Domain Id to be used on all vPC pairs
+      type: Int64
+      handle_empty: true
+    - model_name: FABRIC_VPC_QOS
+      tf_name: fabric_vpc_qos
+      description: >-
+        Qos on spines for guaranteed delivery of vPC Fabric Peering
+        communication
+      default_value: false
+      type: Bool
+      example: false
+    - model_name: FABRIC_VPC_QOS_POLICY_NAME
+      tf_name: fabric_vpc_qos_policy_name
+      description: Qos Policy name should be same on all spines
+      default_value: spine_qos_for_fabric_vpc_peering
+      type: String
+      example: spine_qos_for_fabric_vpc_peering
+    - model_name: FEATURE_PTP
+      tf_name: feature_ptp
+      description: No description available
+      default_value: false
+      type: Bool
+      example: false
+    - model_name: GRFIELD_DEBUG_FLAG
+      tf_name: grfield_debug_flag
+      description: >-
+        Enable to clean switch configuration without reload when
+        PreserveConfig=no
+      default_value: Disable
+      type: String
+      validator: 'OneOf("Enable", "Disable")'
+      example: Disable
+    - model_name: HD_TIME
+      tf_name: hd_time
+      description: NVE Source Inteface HoldDown Time in seconds
+      default_value: 180
+      type: Int64
+      handle_empty: true
+      example: 180
+    - model_name: HOST_INTF_ADMIN_STATE
+      tf_name: host_intf_admin_state
+      description: No description available
+      default_value: true
+      type: Bool
+      example: true
+    - model_name: IBGP_PEER_TEMPLATE
+      tf_name: ibgp_peer_template
+      description: >-
+        Speficies the iBGP Peer-Template config used for RR and spines with
+        border role.
+      type: String
+    - model_name: IBGP_PEER_TEMPLATE_LEAF
+      tf_name: ibgp_peer_template_leaf
+      description: >-
+        Specifies the config used for leaf, border or border gateway. If this
+        field is empty, the peer template defined in iBGP Peer-Template Config
+        is used on all BGP enabled devices (RRs,leafs, border or border gateway
+        roles.
+      type: String
+    - model_name: INBAND_DHCP_SERVERS
+      tf_name: inband_dhcp_servers
+      description: Comma separated list of IPv4 Addresses (Max 3)
+      type: String
+    - model_name: INBAND_MGMT
+      tf_name: inband_mgmt
+      description: Manage switches with only Inband connectivity
+      default_value: false
+      type: Bool
+      example: false
+    - model_name: ISIS_AUTH_ENABLE
+      tf_name: isis_auth_enable
+      description: No description available
+      default_value: false
+      type: Bool
+      example: false
+    - model_name: ISIS_AUTH_KEY
+      tf_name: isis_auth_key
+      description: Cisco Type 7 Encrypted
+      type: String
+    - model_name: ISIS_AUTH_KEYCHAIN_KEY_ID
+      tf_name: isis_auth_keychain_key_id
+      description: No description available
+      type: Int64
+      handle_empty: true
+    - model_name: ISIS_AUTH_KEYCHAIN_NAME
+      tf_name: isis_auth_keychain_name
+      description: No description available
+      type: String
+    - model_name: ISIS_LEVEL
+      tf_name: isis_level
+      description: 'Supported IS types: level-1, level-2'
+      default_value: level-2
+      type: String
+      validator: 'OneOf("level-1", "level-2")'
+      example: level-2
+    - model_name: ISIS_OVERLOAD_ELAPSE_TIME
+      tf_name: isis_overload_elapse_time
+      description: Clear the overload bit after an elapsed time in seconds
+      type: Int64
+      handle_empty: true
+    - model_name: ISIS_OVERLOAD_ENABLE
+      tf_name: isis_overload_enable
+      description: 'When enabled, set the overload bit for an elapsed time after a reload'
+      type: Bool
+    - model_name: ISIS_P2P_ENABLE
+      tf_name: isis_p2p_enable
+      description: >-
+        This will enable network point-to-point on fabric interfaces which are
+        numbered
+      type: Bool
+    - model_name: L2_HOST_INTF_MTU
+      tf_name: l2_host_intf_mtu
+      description: Must be an even number
+      default_value: 9216
+      type: Int64
+      handle_empty: true
+      example: 9216
+    - model_name: L2_SEGMENT_ID_RANGE
+      tf_name: l2_segment_id_range
+      description: Overlay Network Identifier Range
+      default_value: 30000-49000
+      type: String
+      example: 30000-49000
+    - model_name: L3VNI_MCAST_GROUP
+      tf_name: l3vni_mcast_group
+      description: Default Underlay Multicast group IP assigned for every overlay VRF.
+      type: String
+    - model_name: L3_PARTITION_ID_RANGE
+      tf_name: l3_partition_id_range
+      description: Overlay VRF Identifier Range
+      default_value: 50000-59000
+      type: String
+      example: 50000-59000
+    - model_name: LINK_STATE_ROUTING
+      tf_name: link_state_routing
+      description: Used for Spine-Leaf Connectivity
+      default_value: ospf
+      type: String
+      validator: 'OneOf("ospf", "is-is")'
+      example: ospf
+    - model_name: LINK_STATE_ROUTING_TAG
+      tf_name: link_state_routing_tag
+      description: Underlay Routing Process Tag
+      default_value: UNDERLAY
+      type: String
+      example: UNDERLAY
+    - model_name: LOOPBACK0_IPV6_RANGE
+      tf_name: loopback0_ipv6_range
+      description: Typically Loopback0 IPv6 Address Range
+      type: String
+    - model_name: LOOPBACK0_IP_RANGE
+      tf_name: loopback0_ip_range
+      description: Typically Loopback0 IP Address Range
+      default_value: 10.2.0.0/22
+      type: String
+      example: 10.2.0.0/22
+    - model_name: LOOPBACK1_IPV6_RANGE
+      tf_name: loopback1_ipv6_range
+      description: Typically Loopback1 and Anycast Loopback IPv6 Address Range
+      type: String
+    - model_name: LOOPBACK1_IP_RANGE
+      tf_name: loopback1_ip_range
+      description: Typically Loopback1 IP Address Range
+      default_value: 10.3.0.0/22
+      type: String
+      example: 10.3.0.0/22
+    - model_name: MACSEC_ALGORITHM
+      tf_name: macsec_algorithm
+      description: AES_128_CMAC or AES_256_CMAC
+      type: String
+    - model_name: MACSEC_CIPHER_SUITE
+      tf_name: macsec_cipher_suite
+      description: Configure Cipher Suite
+      type: String
+    - model_name: MACSEC_FALLBACK_ALGORITHM
+      tf_name: macsec_fallback_algorithm
+      description: AES_128_CMAC or AES_256_CMAC
+      type: String
+    - model_name: MACSEC_FALLBACK_KEY_STRING
+      tf_name: macsec_fallback_key_string
+      description: Cisco Type 7 Encrypted Octet String
+      type: String
+    - model_name: MACSEC_KEY_STRING
+      tf_name: macsec_key_string
+      description: Cisco Type 7 Encrypted Octet String
+      type: String
+    - model_name: MACSEC_REPORT_TIMER
+      tf_name: macsec_report_timer
+      description: MACsec Operational Status periodic report timer in minutes
+      type: Int64
+      handle_empty: true
+    - model_name: MGMT_GW
+      tf_name: mgmt_gw
+      description: Default Gateway For Management VRF On The Switch
+      type: String
+    - model_name: MGMT_PREFIX
+      tf_name: mgmt_prefix
+      description: No description available
+      type: Int64
+      handle_empty: true
+    - model_name: MGMT_V6PREFIX
+      tf_name: mgmt_v6prefix
+      description: No description available
+      type: Int64
+      handle_empty: true
+    - model_name: MPLS_HANDOFF
+      tf_name: mpls_handoff
+      description: No description available
+      default_value: false
+      type: Bool
+      example: false
+    - model_name: MPLS_LB_ID
+      tf_name: mpls_lb_id
+      description: Used for VXLAN to MPLS SR/LDP Handoff
+      type: Int64
+      handle_empty: true
+    - model_name: MPLS_LOOPBACK_IP_RANGE
+      tf_name: mpls_loopback_ip_range
+      description: Used for VXLAN to MPLS SR/LDP Handoff
+      type: String
+    - model_name: MST_INSTANCE_RANGE
+      tf_name: mst_instance_range
+      description: 'MST instance range, Example: 0-3,5,7-9, Default is 0'
+      type: String
+    - model_name: MULTICAST_GROUP_SUBNET
+      tf_name: multicast_group_subnet
+      description: >-
+        Multicast pool prefix between 8 to 30. A multicast group IP from this
+        pool is used for BUM traffic for each overlay network.
+      default_value: 239.1.1.0/25
+      type: String
+      example: 239.1.1.0/25
+    - model_name: NETFLOW_EXPORTER_LIST
+      tf_name: netflow_exporter_list
+      description: One or Multiple Netflow Exporters
+      type: String
+      ndfc_type: jsonencode
+      example: >-
+        {"NETFLOW_EXPORTER_LIST":[{"EXPORTER_NAME":"Test2","IP":"10.1.1.1","VRF":"","SRC_IF_NAME":"eth1/1","UDP_PORT":"800"}]}
+    - model_name: NETFLOW_MONITOR_LIST
+      tf_name: netflow_monitor_list
+      description: One or Multiple Netflow Monitors
+      type: String
+      ndfc_type: jsonencode
+      example: >-
+        {"NETFLOW_MONITOR_LIST":[{"MONITOR_NAME":"Test","RECORD_NAME":"Test1","EXPORTER1":"Test2","EXPORTER2":""}]}
+    - model_name: NETFLOW_RECORD_LIST
+      tf_name: netflow_record_list
+      description: One or Multiple Netflow Records
+      type: String
+      ndfc_type: jsonencode
+      example: >-
+        {"NETFLOW_RECORD_LIST":[{"RECORD_NAME":"Test1","RECORD_TEMPLATE":"netflow_ipv4_record","LAYER2_RECORD":"false"}]}
+    - model_name: NETWORK_VLAN_RANGE
+      tf_name: network_vlan_range
+      description: Per Switch Overlay Network VLAN Range
+      default_value: 2300-2999
+      type: String
+      example: 2300-2999
+    - model_name: NTP_SERVER_IP_LIST
+      tf_name: ntp_server_ip_list
+      description: Comma separated list of IP Addresses(v4/v6)
+      type: String
+    - model_name: NTP_SERVER_VRF
+      tf_name: ntp_server_vrf
+      description: >-
+        One VRF for all NTP servers or a comma separated list of VRFs, one per
+        NTP server
+      type: String
+    - model_name: NVE_LB_ID
+      tf_name: nve_lb_id
+      description: No description available
+      default_value: 1
+      type: Int64
+      handle_empty: true
+      example: 1
+    - model_name: NXAPI_HTTPS_PORT
+      tf_name: nxapi_https_port
+      description: No description available
+      default_value: 443
+      type: Int64
+      handle_empty: true
+      example: 443
+    - model_name: NXAPI_HTTP_PORT
+      tf_name: nxapi_http_port
+      description: No description available
+      default_value: 80
+      type: Int64
+      handle_empty: true
+      example: 80
+    - model_name: OBJECT_TRACKING_NUMBER_RANGE
+      tf_name: object_tracking_number_range
+      description: Per switch tracked object ID Range
+      default_value: 100-299
+      type: String
+      example: 100-299
+    - model_name: OSPF_AREA_ID
+      tf_name: ospf_area_id
+      description: OSPF Area Id in IP address format
+      default_value: 0.0.0.0
+      type: String
+      example: 0.0.0.0
+    - model_name: OSPF_AUTH_ENABLE
+      tf_name: ospf_auth_enable
+      description: No description available
+      default_value: false
+      type: Bool
+      example: false
+    - model_name: OSPF_AUTH_KEY
+      tf_name: ospf_auth_key
+      description: 3DES Encrypted
+      type: String
+    - model_name: OSPF_AUTH_KEY_ID
+      tf_name: ospf_auth_key_id
+      description: No description available
+      type: Int64
+      handle_empty: true
+    - model_name: OVERLAY_MODE
+      tf_name: overlay_mode
+      description: VRF/Network configuration using config-profile or CLI
+      default_value: cli
+      type: String
+      example: cli
+    - model_name: PER_VRF_LOOPBACK_AUTO_PROVISION
+      tf_name: per_vrf_loopback_auto_provision
+      description: Auto provision a loopback on a VTEP on VRF attachment
+      default_value: false
+      type: Bool
+      example: false
+    - model_name: PER_VRF_LOOPBACK_IP_RANGE
+      tf_name: per_vrf_loopback_ip_range
+      description: >-
+        Prefix pool to assign IP addresses to loopbacks on VTEPs on a per VRF
+        basis
+      type: String
+    - model_name: PHANTOM_RP_LB_ID1
+      tf_name: phantom_rp_lb_id1
+      description: Used for Bidir-PIM Phantom RP
+      type: Int64
+      handle_empty: true
+    - model_name: PHANTOM_RP_LB_ID2
+      tf_name: phantom_rp_lb_id2
+      description: Used for Fallback Bidir-PIM Phantom RP
+      type: Int64
+      handle_empty: true
+    - model_name: PHANTOM_RP_LB_ID3
+      tf_name: phantom_rp_lb_id3
+      description: Used for second Fallback Bidir-PIM Phantom RP
+      type: Int64
+      handle_empty: true
+    - model_name: PHANTOM_RP_LB_ID4
+      tf_name: phantom_rp_lb_id4
+      description: Used for third Fallback Bidir-PIM Phantom RP
+      type: Int64
+      handle_empty: true
+    - model_name: PIM_HELLO_AUTH_ENABLE
+      tf_name: pim_hello_auth_enable
+      description: Valid for IPv4 Underlay only
+      default_value: false
+      type: Bool
+      example: false
+    - model_name: PIM_HELLO_AUTH_KEY
+      tf_name: pim_hello_auth_key
+      description: 3DES Encrypted
+      type: String
+    - model_name: PM_ENABLE
+      tf_name: pm_enable
+      description: No description available
+      default_value: false
+      type: Bool
+      example: false
+    - model_name: POWER_REDUNDANCY_MODE
+      tf_name: power_redundancy_mode
+      description: Default Power Supply Mode For The Fabric
+      default_value: ps-redundant
+      type: String
+      validator: 'OneOf("ps-redundant", "combined", "insrc-redundant")'
+      example: ps-redundant
+    - model_name: PTP_DOMAIN_ID
+      tf_name: ptp_domain_id
+      description: Multiple Independent PTP Clocking Subdomains on a Single Network
+      type: Int64
+      handle_empty: true
+    - model_name: PTP_LB_ID
+      tf_name: ptp_lb_id
+      description: No description available
+      type: Int64
+      handle_empty: true
+    - model_name: REPLICATION_MODE
+      tf_name: replication_mode
+      description: Replication Mode for BUM Traffic
+      default_value: Multicast
+      type: String
+      validator: 'OneOf("Multicast", "Ingress")'
+      example: Multicast
+    - model_name: ROUTER_ID_RANGE
+      tf_name: router_id_range
+      description: No description available
+      type: String
+    - model_name: ROUTE_MAP_SEQUENCE_NUMBER_RANGE
+      tf_name: route_map_sequence_number_range
+      description: No description available
+      default_value: 1-65534
+      type: String
+      example: 1-65534
+    - model_name: RP_COUNT
+      tf_name: rp_count
+      description: Number of spines acting as Rendezvous-Point (RP)
+      default_value: 2
+      type: Int64
+      validator: 'OneOf(2, 4)'
+      handle_empty: true
+      example: 2
+    - model_name: RP_LB_ID
+      tf_name: rp_lb_id
+      description: No description available
+      default_value: 254
+      type: Int64
+      handle_empty: true
+      example: 254
+    - model_name: RP_MODE
+      tf_name: rp_mode
+      description: Multicast RP Mode
+      default_value: asm
+      type: String
+      validator: 'OneOf("asm", "bidir")'
+      example: asm
+    - model_name: RR_COUNT
+      tf_name: rr_count
+      description: Number of spines acting as Route-Reflectors
+      default_value: 2
+      type: Int64
+      handle_empty: true
+      validator: 'OneOf(2, 4)'
+      example: 2
+    - model_name: SEED_SWITCH_CORE_INTERFACES
+      tf_name: seed_switch_core_interfaces
+      description: 'Core-facing Interface list on Seed Switch (e.g. e1/1-30,e1/32)'
+      type: String
+    - model_name: SERVICE_NETWORK_VLAN_RANGE
+      tf_name: service_network_vlan_range
+      description: Per Switch Overlay Service Network VLAN Range
+      default_value: 3000-3199
+      type: String
+      example: 3000-3199
+    - model_name: SITE_ID
+      tf_name: site_id
+      computed: true
+      optional: true
+      description: For EVPN Multi-Site Support . Defaults to Fabric ASN
+      type: String
+    - model_name: SLA_ID_RANGE
+      tf_name: sla_id_range
+      description: Per switch SLA ID Range
+      default_value: 10000-19999
+      type: String
+      example: 10000-19999
+    - model_name: SNMP_SERVER_HOST_TRAP
+      tf_name: snmp_server_host_trap
+      description: Configure NDFC as a receiver for SNMP traps
+      default_value: true
+      type: Bool
+      example: true
+    - model_name: SPINE_SWITCH_CORE_INTERFACES
+      tf_name: spine_switch_core_interfaces
+      description: 'Core-facing Interface list on all Spines (e.g. e1/1-30,e1/32)'
+      type: String
+    - model_name: STATIC_UNDERLAY_IP_ALLOC
+      tf_name: static_underlay_ip_alloc
+      description: Checking this will disable Dynamic Underlay IP Address Allocations
+      default_value: false
+      type: Bool
+      example: false
+    - model_name: STP_BRIDGE_PRIORITY
+      tf_name: stp_bridge_priority
+      description: Bridge priority for the spanning tree in increments of 4096
+      type: Int64
+      handle_empty: true
+    - model_name: STP_ROOT_OPTION
+      tf_name: stp_root_option
+      description: >-
+        Which protocol to use for configuring root bridge? rpvst+: Rapid
+        Per-VLAN Spanning Tree, mst: Multiple Spanning Tree, unmanaged
+        (default): STP Root not managed by NDFC
+      default_value: unmanaged
+      type: String
+      validator: 'OneOf("rpvst+", "mst", "unmanaged")'
+      example: unmanaged
+    - model_name: STP_VLAN_RANGE
+      tf_name: stp_vlan_range
+      description: 'Vlan range, Example: 1,3-5,7,9-11, Default is 1-3967'
+      type: String
+    - model_name: STRICT_CC_MODE
+      tf_name: strict_cc_mode
+      description: >-
+        Enable bi-directional compliance checks to flag additional configs in
+        the running config that are not in the intent/expected config
+      default_value: false
+      type: Bool
+      example: false
+    - model_name: SUBINTERFACE_RANGE
+      tf_name: subinterface_range
+      description: Per Border Dot1q Range For VRF Lite Connectivity
+      default_value: 2-511
+      type: String
+      example: 2-511
+    - model_name: SUBNET_RANGE
+      tf_name: subnet_range
+      description: Address range to assign Numbered and Peer Link SVI IPs
+      default_value: 10.4.0.0/16
+      type: String
+      example: 10.4.0.0/16
+    - model_name: SUBNET_TARGET_MASK
+      tf_name: subnet_target_mask
+      description: Mask for Underlay Subnet IP Range
+      default_value: 30
+      type: Int64
+      handle_empty: true
+      validator: 'OneOf(30, 31)'
+      example: 30
+    - model_name: SYSLOG_SERVER_IP_LIST
+      tf_name: syslog_server_ip_list
+      description: Comma separated list of IP Addresses(v4/v6)
+      type: String
+    - model_name: SYSLOG_SERVER_VRF
+      tf_name: syslog_server_vrf
+      description: >-
+        One VRF for all Syslog servers or a comma separated list of VRFs, one
+        per Syslog server
+      type: String
+    - model_name: SYSLOG_SEV
+      tf_name: syslog_sev
+      description: 'Comma separated list of Syslog severity values, one per Syslog server'
+      type: String
+    - model_name: TCAM_ALLOCATION
+      tf_name: tcam_allocation
+      description: >-
+        TCAM commands are automatically generated for VxLAN and vPC Fabric
+        Peering when Enabled
+      default_value: true
+      type: Bool
+      example: true
+    - model_name: UNDERLAY_IS_V6
+      tf_name: underlay_is_v6
+      description: 'If not enabled, IPv4 underlay is used'
+      default_value: false
+      type: Bool
+      example: false
+    - model_name: UNNUM_BOOTSTRAP_LB_ID
+      tf_name: unnum_bootstrap_lb_id
+      description: No description available
+      type: Int64
+      handle_empty: true
+    - model_name: UNNUM_DHCP_END
+      tf_name: unnum_dhcp_end
+      description: Must be a subset of IGP/BGP Loopback Prefix Pool
+      type: String
+    - model_name: UNNUM_DHCP_START
+      tf_name: unnum_dhcp_start
+      description: Must be a subset of IGP/BGP Loopback Prefix Pool
+      type: String
+    - model_name: USE_LINK_LOCAL
+      tf_name: use_link_local
+      description: 'If not enabled, Spine-Leaf interfaces will use global IPv6 addresses'
+      default_value: true
+      type: Bool
+      example: true
+    - model_name: V6_SUBNET_RANGE
+      tf_name: v6_subnet_range
+      description: IPv6 Address range to assign Numbered and Peer Link SVI IPs
+      type: String
+    - model_name: V6_SUBNET_TARGET_MASK
+      tf_name: v6_subnet_target_mask
+      description: Mask for Underlay Subnet IPv6 Range
+      default_value: 126
+      type: Int64
+      handle_empty: true
+      validator: 'OneOf(126, 127)'
+      example: 126
+    - model_name: VPC_AUTO_RECOVERY_TIME
+      tf_name: vpc_auto_recovery_time
+      description: No description available
+      default_value: 360
+      type: Int64
+      handle_empty: true
+      example: 360
+    - model_name: VPC_DELAY_RESTORE
+      tf_name: vpc_delay_restore
+      description: No description available
+      default_value: 150
+      type: Int64
+      handle_empty: true
+      example: 150
+    - model_name: VPC_DOMAIN_ID_RANGE
+      tf_name: vpc_domain_id_range
+      description: vPC Domain id range to use for new pairings
+      default_value: 1-1000
+      type: String
+      example: 1-1000
+    - model_name: VPC_ENABLE_IPv6_ND_SYNC
+      tf_name: vpc_enable_ipv6_nd_sync
+      description: Enable IPv6 ND synchronization between vPC peers
+      default_value: true
+      type: Bool
+      example: true
+    - model_name: VPC_PEER_KEEP_ALIVE_OPTION
+      tf_name: vpc_peer_keep_alive_option
+      description: Use vPC Peer Keep Alive with Loopback or Management
+      default_value: management
+      type: String
+      validator: 'OneOf("loopback", "management")'
+      example: management
+    - model_name: VPC_PEER_LINK_PO
+      tf_name: vpc_peer_link_po
+      description: No description available
+      default_value: 500
+      type: Int64
+      handle_empty: true
+      example: 500
+    - model_name: VPC_PEER_LINK_VLAN
+      tf_name: vpc_peer_link_vlan
+      description: VLAN range for vPC Peer Link SVI
+      default_value: 3600
+      type: Int64
+      handle_empty: true
+      example: 3600
+    - model_name: VRF_LITE_AUTOCONFIG
+      tf_name: vrf_lite_autoconfig
+      description: >-
+        VRF Lite Inter-Fabric Connection Deployment Options. If
+        Back2Back&ToExternal is selected, VRF Lite IFCs are auto created between
+        border devices of two Easy Fabrics, and between border devices in Easy
+        Fabric and edge routers in External Fabric. The IP address is taken from
+        the VRF Lite Subnet IP Range pool.
+      default_value: Manual
+      type: String
+      validator: 'OneOf("Manual", "Back2Back&ToExternal")'
+      example: Manual
+    - model_name: VRF_VLAN_RANGE
+      tf_name: vrf_vlan_range
+      description: Per Switch Overlay VRF VLAN Range
+      default_value: 2000-2299
+      type: String
+      example: 2000-2299
+    - model_name: default_network
+      tf_name: default_network
+      description: Default Overlay Network Template For Leafs
+      default_value: Default_Network_Universal
+      type: String
+      validator: 'OneOf("Default_Network_Universal", "Service_Network_Universal")'
+      example: Default_Network_Universal
+    - model_name: default_pvlan_sec_network
+      tf_name: default_pvlan_sec_network
+      description: Default PVLAN Secondary Network Template
+      type: String
+    - model_name: default_vrf
+      tf_name: default_vrf
+      description: Default Overlay VRF Template For Leafs
+      default_value: Default_VRF_Universal
+      type: String
+      example: Default_VRF_Universal
+    - model_name: enableRealTimeBackup
+      tf_name: enable_realtime_backup
+      description: Backup hourly only if there is any config deployment since last backup
+      type: Bool
+    - model_name: enableScheduledBackup
+      tf_name: enable_scheduled_backup
+      description: Backup at the specified time
+      type: Bool
+    - model_name: network_extension_template
+      tf_name: network_extension_template
+      description: Default Overlay Network Template For Borders
+      default_value: Default_Network_Extension_Universal
+      type: String
+      example: Default_Network_Extension_Universal
+    - model_name: scheduledTime
+      tf_name: scheduled_time
+      description: 'Time (UTC) in 24hr format. (00:00 to 23:59)'
+      type: String
+    - model_name: vrf_extension_template
+      tf_name: vrf_extension_template
+      description: Default Overlay VRF Template For Borders
+      default_value: Default_VRF_Extension_Universal
+      type: String
+      example: Default_VRF_Extension_Universal
+    - model_name: deploy
+      tf_name: deploy
+      description: >-
+        This flag does configuration save and deploy,
+        this is only applicable in update case not valid for fabric creation.
+      type: Bool
+      mandatory: true
+      ndfc_type: bool
+      example: false
+      payload_hide: true
+    - model_name: deployment_status
+      tf_name: deployment_status
+      description: >-
+        This fields shows the actual status of the deployment. It can be one of the following:
+        Deployment pending
+        Deployment successful
+      type: String
+      computed : true
+      payload_hide: true
