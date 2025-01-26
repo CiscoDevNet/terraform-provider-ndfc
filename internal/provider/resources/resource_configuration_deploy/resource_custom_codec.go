@@ -14,7 +14,6 @@ type SwitchStatus struct {
 	SwitchId string `json:"switchId"`
 	Status   string `json:"status"`
 }
-type CustomSwitchStatus SwitchStatus
 
 func (m *SwitchStatusDB) UnmarshalJSON(data []byte) error {
 	customModel := make([]SwitchStatus, 0)

@@ -237,9 +237,13 @@ func (client *Client) Do(req Req) (Res, error) {
 				continue
 			}
 		}
-		res = Res(gjson.ParseBytes(bodyBytes))
+		if !json.Valid(bodyBytes) {
+			res =  Res(gjson.Parse(`{"error": "` + string(bodyBytes) + `"}`))
+		} else {
+			res = Res(gjson.ParseBytes(bodyBytes))
+		}
 		if req.LogPayload {
-			log.Printf("[DEBUG] HTTP Response: %s", res.Raw)
+			log.Printf("[DEBUG] HTTP Response: %s", res)
 		}
 
 		if httpRes.StatusCode >= 200 && httpRes.StatusCode <= 299 {
@@ -298,7 +302,7 @@ func (client *Client) DoRaw(req Req) ([]byte, error) {
 				log.Printf("[DEBUG] Exit from Do method")
 				return nil, err
 			} else {
-				log.Printf("[ERROR] HTTP Connection failed: %s, retries: %v", err, attempts)
+				log.Printf("[ERROR] HTTP Connection failed: %q, retries: %v", err, attempts)
 				continue
 			}
 		}

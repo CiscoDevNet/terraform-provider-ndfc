@@ -92,7 +92,7 @@ func (c *NDFC) RscCreateVpcPair(ctx context.Context, dg *diag.Diagnostics, tf *r
 	// Convert NDFC model to the json data
 	payload, err := json.Marshal(nfdcVpcPairModel)
 	if err != nil {
-		tflog.Error(ctx, "RscCreateOrUpdate: RscCreateOrUpdate: Failed to marshal vPC Pair data")
+		tflog.Error(ctx, "RscCreateVpcPair: Failed to marshal vPC Pair data")
 		dg.AddError("Failed to marshal vPC Pair data", fmt.Sprintf("Error %v", err))
 		return
 	}
@@ -103,7 +103,7 @@ func (c *NDFC) RscCreateVpcPair(ctx context.Context, dg *diag.Diagnostics, tf *r
 		log.Printf("Vpc pair not present, creating new vPC Pair")
 		res, err := api.Post(payload)
 		if err != nil {
-			tflog.Error(ctx, "RscCreateOrUpdate: Failed to create vPC Pair")
+			tflog.Error(ctx, "RscCreateVpcPair: Failed to create vPC Pair")
 			dg.AddError("Failed to create vPC Pair", fmt.Sprintf("Error %v: %v", err, res.String()))
 			return
 		}
