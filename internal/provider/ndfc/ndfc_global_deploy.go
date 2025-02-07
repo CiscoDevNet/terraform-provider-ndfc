@@ -12,6 +12,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"log"
 	"terraform-provider-ndfc/internal/provider/ndfc/api"
 	"terraform-provider-ndfc/internal/provider/resources/resource_configuration_deploy"
 	"time"
@@ -85,29 +86,43 @@ func (c NDFC) CheckDeployStatus(ctx context.Context, diags *diag.Diagnostics, fa
 	if err != nil {
 		diags.AddError("Deploy failed", err.Error())
 	}
-	tempList := serialNumbers
+	ooList := make([]string, 0)
+
 	if len(serialNumbers) > 0 {
 		tflog.Debug(ctx, fmt.Sprintf("Switches out of sync: %v", serialNumbers))
 		tflog.Debug(ctx, fmt.Sprintf("Switches in sync: %v", response.SerialNumMap))
-		for index, serialNumber := range serialNumbers {
+		for _, serialNumber := range serialNumbers {
 			if response.SerialNumMap[serialNumber].Status == inSync {
 				// Delete serial number from outOfSync
-				tempList = append(serialNumbers[:index], serialNumbers[index+1:]...)
+				log.Printf("Switch %s is in sync - remove from list", serialNumber)
 			} else if response.SerialNumMap[serialNumber].Status == failed {
 				diags.AddError("Deploy failed", fmt.Sprintf("Deploy failed for serial number %s", serialNumber))
+				tflog.Error(ctx, fmt.Sprintf("Deploy failed for serial number %s", serialNumber))
+				return nil
+
+			} else if response.SerialNumMap[serialNumber].Status == outOfSync {
+				log.Printf("Switch %s is out of sync", serialNumber)
+				// Add serial number from outOfSync
+				ooList = append(ooList, serialNumber)
 			}
 		}
 	} else {
 		for serialNumber, entry := range response.SerialNumMap {
 			if entry.Status == outOfSync {
 				// Add serial number from outOfSync
-				tempList = append(tempList, serialNumber)
+				log.Printf("Switch %s is out of sync", serialNumber)
+				ooList = append(ooList, serialNumber)
 			} else if entry.Status == failed {
+				tflog.Error(ctx, fmt.Sprintf("Deploy failed for serial number %s", serialNumber))
 				diags.AddError("Deploy failed", fmt.Sprintf("Deploy failed for serial number %s", serialNumber))
 				return nil
 			}
 		}
 	}
-	tflog.Debug(ctx, fmt.Sprintf("Switches out of sync: %v", tempList))
-	return tempList
+	if len(ooList) == 0 {
+		tflog.Debug(ctx, "All switches are in sync")
+		return nil
+	}
+	tflog.Debug(ctx, fmt.Sprintf("List of Switches that are out of sync: {%v}", ooList))
+	return ooList
 }
