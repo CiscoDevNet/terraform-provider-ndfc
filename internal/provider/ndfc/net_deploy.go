@@ -68,18 +68,18 @@ func (c NDFC) fillNetDeploymentDBFromModel(ctx context.Context, dg *diag.Diagnos
 	tflog.Debug(ctx, "fillDeploymentDBFromModel entry")
 
 	if va.DeployAllAttachments {
-		tflog.Info(ctx, "RscDeployNetworkAttachments: Deploying all attachments")
+		tflog.Info(ctx, "fillNetDeploymentDBFromModel: Deploying all attachments")
 		deployAll = true
 	}
 	for nwName, nwEntry := range va.Networks {
 		for serial, attachEntry := range nwEntry.Attachments {
 			if attachEntry.Deployment == "false" {
-				tflog.Info(ctx, fmt.Sprintf("RscDeployNetworkAttachments: Deploying Attachment %s/%s due to detach", nwName, serial))
+				tflog.Info(ctx, fmt.Sprintf("fillNetDeploymentDBFromModel: Deploying Attachment %s/%s due to detach", nwName, serial))
 				*detach_present = true
 			}
 			if attachEntry.Deployment == "false" || deployAll ||
 				nwEntry.DeployAttachments || attachEntry.DeployThisAttachment {
-				tflog.Info(ctx, fmt.Sprintf("RscDeployNetworkAttachments: Deploying Attachment %s/%s", nwName, serial))
+				tflog.Info(ctx, fmt.Sprintf("fillNetDeploymentDBFromModel: Deploying Attachment %s/%s", nwName, serial))
 				d.updateDeploymentDB(serial, nwName, attachEntry.Deployment)
 			}
 		}
@@ -95,7 +95,7 @@ func (c NDFC) fillNetDeploymentDBFromPayload(ctx context.Context, dg *diag.Diagn
 			if attachEntry.Deployment == "false" {
 				*detach_present = true
 			}
-			tflog.Info(ctx, fmt.Sprintf("RscDeployVrfAttachments: Deploying Attachment %s/%s", nwEntry.NetworkName, attachEntry.SerialNumber))
+			tflog.Info(ctx, fmt.Sprintf("fillNetDeploymentDBFromPayload: Deploying Attachment %s/%s", nwEntry.NetworkName, attachEntry.SerialNumber))
 			deployment.updateDeploymentDB(attachEntry.SerialNumber, nwEntry.NetworkName, attachEntry.Deployment)
 		}
 	}
