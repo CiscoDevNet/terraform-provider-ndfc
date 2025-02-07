@@ -445,6 +445,78 @@ func TestAccNetworksResourceAttachmentDeployAttachments(t *testing.T) {
 			},
 		}})
 }
+
+func TestAccNetworksResourceRscUpdateAndGlobalDeploy(t *testing.T) {
+	x := &map[string]string{
+		"RscType":  ndfc.ResourceNetworks,
+		"RscName":  "network_test",
+		"User":     helper.GetConfig("network").NDFC.User,
+		"Password": helper.GetConfig("network").NDFC.Password,
+		"Host":     helper.GetConfig("network").NDFC.URL,
+		"Insecure": helper.GetConfig("network").NDFC.Insecure,
+	}
+
+	tf_config := new(string)
+	*tf_config = `provider "ndfc" {
+		host     = "https://"
+		username = "admin"
+		password = "admin!@#"
+		domain   = "example.com"
+		insecure = true
+		}
+		resource ndfc_vrf_bulk "net_test" {
+			fabric_name = "dummy"
+		}`
+
+	stepCount := new(int)
+	*stepCount = 0
+	// Create a new instance of the NDFC client
+
+	networkRsc := new(resource_networks.NDFCNetworksModel)
+	vrfRsc := new(resource_vrf_bulk.NDFCVrfBulkModel)
+	resource.Test(t, resource.TestCase{
+		PreCheck:                 func() { testAccPreCheck(t, "network") },
+		ProtoV6ProviderFactories: testAccProtoV6ProviderFactories,
+		Steps: []resource.TestStep{
+			{
+				//Deploy Attachments
+				Config: func() string {
+					*stepCount++
+					tName := fmt.Sprintf("%s_%d", t.Name(), *stepCount)
+					helper.GenerateSingleVrfObject(&vrfRsc, helper.GetConfig("network").NDFC.VrfPrefix, helper.GetConfig("network").NDFC.Fabric, 1, false, false, true, helper.GetConfig("network").NDFC.Switches)
+					helper.GenerateNetworksObject(&networkRsc, helper.GetConfig("network").NDFC.Fabric,
+						10, true, false, false, helper.GetConfig("network").NDFC.VrfPrefix+"1", helper.GetConfig("network").NDFC.Switches)
+					(*x)["RscName"] = "vrf_test,network_test"
+					helper.GetTFConfigWithSingleResource(tName, *x, []interface{}{vrfRsc, networkRsc}, &tf_config)
+					return *tf_config
+				}(),
+				// Network Deploy also deploys VRF, so expect some change in plan
+				Check: resource.ComposeTestCheckFunc(NetworksModelHelperStateCheck("ndfc_networks.network_test", *networkRsc, path.Empty())...),
+			},
+			{
+				// Modify and Deploy
+				Config: func() string {
+					*stepCount++
+					tName := fmt.Sprintf("%s_%d", t.Name(), *stepCount)
+					helper.ModifyNetworksObject(&networkRsc, 1, map[string]interface{}{
+						"vlan_id": 1220})
+					helper.ModifyNetworksObject(&networkRsc, 2, map[string]interface{}{
+						"vlan_id": 1221})
+					helper.ModifyNetworksObject(&networkRsc, 3, map[string]interface{}{
+						"vlan_id": 1222})
+					helper.ModifyNetworksObject(&networkRsc, 4, map[string]interface{}{
+						"vlan_id": 1223})
+					helper.ModifyNetworksObject(&networkRsc, 1, map[string]interface{}{
+						"multicast_group": "224.30.1.2"})
+
+					helper.GetTFConfigWithSingleResource(tName, *x, []interface{}{vrfRsc, networkRsc}, &tf_config)
+					return *tf_config
+				}(),
+				Check: resource.ComposeTestCheckFunc(NetworksModelHelperStateCheck("ndfc_networks.network_test", *networkRsc, path.Empty())...),
+			},
+		}})
+}
+
 /*
 func TestAccNetwotksResourceGlobalDeployWithChanges(t *testing.T) {
 	resource.Test(t, resource.TestCase{
@@ -483,7 +555,7 @@ func TestAccNetwotksResourceGlobalDeployWithChanges(t *testing.T) {
 						}
 					}
 				}
-		
+
 				resource "ndfc_networks" "test_resource_networks_1" {
 				    depends_on = [ndfc_vrf_bulk.test_resource_vrf_bulk_1]
 					fabric_name            = "CML"
