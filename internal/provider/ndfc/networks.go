@@ -326,7 +326,7 @@ func (c *NDFC) RscUpdateNetworks(ctx context.Context, dg *diag.Diagnostics, ID s
 	planNw := netActions["plan"].(*resource_networks.NDFCNetworksModel)
 	stateNw := netActions["state"].(*resource_networks.NDFCNetworksModel)
 
-	netAttachActions := c.networkAttachmentsGetDiff(ctx, dg, planNw, stateNw)
+	netAttachActions := c.networkAttachmentsGetDiff(ctx, dg, planNw, stateNw, putNw)
 
 	//******** validations begin *****************************************************
 
@@ -444,6 +444,22 @@ func (c *NDFC) RscUpdateNetworks(ctx context.Context, dg *diag.Diagnostics, ID s
 	tflog.Info(ctx, fmt.Sprintf("New ID after update %s", newID))
 
 	depMap := make(map[string][]string)
+
+	if planNw.DeployAllAttachments {
+		depMap["global"] = append(depMap["global"], "all")
+	}
+	for i, entry := range planNw.Networks {
+		if entry.DeployAttachments {
+			depMap[i] = append(depMap[i], i)
+		}
+		for j, attachEntry := range entry.Attachments {
+			if attachEntry.DeployThisAttachment {
+				depMap[i] = append(depMap[i], j)
+			}
+		}
+	}
+	log.Printf("Deploy Map %v", depMap)
+
 	//4. Read the updated data from NDFC
 	*plan = *(c.RscGetNetworks(ctx, dg, newID, &depMap))
 }
