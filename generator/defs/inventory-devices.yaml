@@ -32,7 +32,7 @@ resource:
       validator: OneOf("md5", "sha", "md5_des", "md5_aes", "sha_des", "sha_aes")
       description: The authentication protocol to use for the devices
       default_value: md5
-      example: sha
+      example: md5
       ndfc_type: string
     - &username
       model_name: username
@@ -56,13 +56,12 @@ resource:
       tf_name: seed_ip
       type: String
       description: The seed IP address to use for the discovery devices
-      example: 10.0.0.1
     - &max_hops
       model_name: maxHops
       tf_name: max_hops
       type: Int64
       description: The maximum number of hops to use during the discovery of devices
-      example: 10
+      example: 0
       ndfc_type: int
     - &set_as_individual_device_write_credential
       model_name: discoveryCredForLan
@@ -71,7 +70,7 @@ resource:
       description: Set and use discovery credentials for LAN devices
       default_value: false
       ndfc_type: bool
-      example: true
+      example: false
     - &preserve_config
       model_name: preserveConfig
       tf_name: preserve_config
@@ -79,7 +78,7 @@ resource:
       description: Preserve the configuration of the devices
       default_value: false
       ndfc_type: bool
-      example: true
+      example: false
     - &save
       model_name: save
       tf_name: save
@@ -102,7 +101,7 @@ resource:
       type: Int64
       default_value: 300
       description: The number of retries to use validate fabric status before execution of requests
-      example: 500
+      example: 300
       ndfc_type: int
     - &retry_wait_timeout
       model_name: retryWaitTimeout
@@ -120,7 +119,8 @@ resource:
       bulk: true
       mandatory: true
       ndfc_type: map
-      validator: SizeAtLeast(1) 
+      validator: SizeAtLeast(1)
+      example: "10.1.1.1"
       attributes:
       - &role
         model_name: role
@@ -138,14 +138,13 @@ resource:
         default_value: "discover"
         validator: OneOf("bootstrap", "discover", "pre_provision", "rma")
         description:  The discovery type of the device
-        example: pre_provision
+        example: discover
         ndfc_type: string
       - &discovery_username
         model_name: discovery_username
         tf_name: discovery_username
         type: String
         description:  The discovery username to use for the device
-        example: username
         optional: true
         ndfc_type: string
       - &discovery_password
@@ -153,7 +152,6 @@ resource:
         tf_name: discovery_password
         type: String
         description:  The discovery password to use for the device
-        example: password
         optional: true
         sensitive: true
         ndfc_type: string
@@ -163,7 +161,7 @@ resource:
         type: String
         validator: OneOf("md5", "sha", "md5_des", "md5_aes", "sha_des", "sha_aes")
         description: The discovery authentication protocol to use for the device
-        example: sha
+        example: md5
         optional: true
         ndfc_type: string
       - &serial_number
@@ -171,7 +169,6 @@ resource:
         tf_name: serial_number
         type: String
         description:  The serial number of the device
-        example: FGE20360RRZ
         optional: true
         computed: true
         ndfc_type: string
@@ -180,7 +177,6 @@ resource:
         tf_name: model
         type: String
         description: The model of the device
-        example: N9K-9000v
         optional: true
         computed: true
         ndfc_type: string
@@ -189,7 +185,6 @@ resource:
         tf_name: version
         type: String
         description: The software version of the device
-        example: 9.2(1)
         optional: true
         computed: true
         ndfc_type: string
@@ -198,7 +193,6 @@ resource:
         tf_name: hostname
         type: String
         description: The hostname of the device
-        example: s1-leaf-101
         optional: true
         computed: true
         ndfc_type: string
@@ -207,7 +201,6 @@ resource:
         tf_name: image_policy
         type: String
         description: The image policy to use for the device
-        example: TODO_CHOOSE_EXAMPLE
         optional: true
         ndfc_type: string
       - &gateway
@@ -215,7 +208,6 @@ resource:
         tf_name: gateway
         type: String
         description: The gateway to use for the device
-        example: 10.61.124.1/24
         optional: true
         ndfc_type: string
       - &modules_model
@@ -223,7 +215,6 @@ resource:
         tf_name: modules_model
         description: The switch modules model information.
         type: List:String
-        example: "[ \"N9K-X9736C-EX\", \"N9K-X9732C-FX\" ]"
         optional: true
         computed: true
         ndfc_type: set
@@ -232,7 +223,6 @@ resource:
         tf_name: breakout
         type: String
         description: The breakout command provided to teh device
-        example: "interface breakout module 1 port 1,11,19 map 10g-4x; interface breakout module 1 port 7 map 25g-4x"
         optional: true
         ndfc_type: string
       - &port_mode
@@ -240,7 +230,6 @@ resource:
         tf_name: port_mode
         type: String
         description: The port mode of the breakout interface
-        example: "hardware profile portmode 48x25G + 2x100G + 4x40G"
         optional: true
         ndfc_type: string
       - &uuid
@@ -248,7 +237,6 @@ resource:
         tf_name: uuid
         type: String
         description: The NDFC UUID of the device
-        example: "DCNM-UUID-2581280"
         computed: true
         ndfc_type: string
       - &switch_db_id
@@ -256,7 +244,6 @@ resource:
         tf_name: switch_db_id
         type: String
         description: The NDFC switch DB ID of the device
-        example: "2702780"
         computed: true
         ndfc_type: string
       - &device_index
@@ -264,7 +251,6 @@ resource:
         tf_name: device_index
         type: String
         description: The NDFC device index
-        example: s1-leaf-101(FGE20360RRZ)
         computed: true
         ndfc_type: string
       - &vdc_id
@@ -272,7 +258,6 @@ resource:
         tf_name: vdc_id
         type: String
         description: The VDC ID of the device
-        example: "0"
         computed: true
         ndfc_type: string
       - &vdc_mac
@@ -280,7 +265,6 @@ resource:
         tf_name: vdc_mac
         type: String
         description: The VDC MAC of the device
-        example: ""
         computed: true
         ndfc_type: string
       - &mode
@@ -288,7 +272,6 @@ resource:
         tf_name: mode
         type: String
         description: The mode of the device
-        example: "Normal"
         computed: true
         ndfc_type: string
       - &config_status
@@ -296,7 +279,6 @@ resource:
         tf_name: config_status
         type: String
         description: The configuration status of the device
-        example: "NA"
         computed: true
         ndfc_type: string
       - &oper_status
@@ -304,7 +286,6 @@ resource:
         tf_name: oper_status
         type: String
         description: The operational status of the device
-        example: "Minor"
         computed: true
         ndfc_type: string
       - &discovery_status
@@ -312,7 +293,6 @@ resource:
         tf_name: discovery_status
         type: String
         description: The operational status of the device
-        example: "ok"
         computed: true
         ndfc_type: string
       - &managable
@@ -320,7 +300,6 @@ resource:
         tf_name: managable
         type: Bool
         description: The managable status of the device
-        example: true
         computed: true
         ndfc_type: bool
       

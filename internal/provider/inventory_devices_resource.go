@@ -12,6 +12,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"log"
 	"net/url"
 	"os"
 	"reflect"
@@ -1128,7 +1129,7 @@ func deploy(ctx context.Context, client *ndfc.NDFC, diags *diag.Diagnostics, dat
 }
 
 func validateFabric(ctx context.Context, client *ndfc.NDFC, diags *diag.Diagnostics, data *InventoryDevicesModel, state string) {
-	tflog.Debug(ctx, fmt.Sprintf("Start of %s validateFabric", loggingInventoryDevices))
+	tflog.Debug(ctx, fmt.Sprintf("Start of %s validateFabric - state %s", loggingInventoryDevices, state))
 	// Hardcoded delay to prevent validation before devices are ready
 	time.Sleep(30 * time.Second)
 
@@ -1136,8 +1137,10 @@ func validateFabric(ctx context.Context, client *ndfc.NDFC, diags *diag.Diagnost
 	data.Devices.ElementsAs(ctx, &configDevices, false)
 
 	attempt := int64(1)
+	preserveConfig := data.PreserveConfig.ValueBool()
 	var allNormal bool
 	for attempt <= data.Retries.ValueInt64() {
+		log.Printf("Attempt %d of %d", attempt, data.Retries.ValueInt64())
 		getInventoryData(ctx, client, diags, data)
 		if diags.HasError() {
 			return
@@ -1155,17 +1158,25 @@ func validateFabric(ctx context.Context, client *ndfc.NDFC, diags *diag.Diagnost
 			discoverType := device.DiscoveryType.ValueString()
 			discoveryStatus := device.DiscoveryStatus.ValueString()
 
+			log.Printf("Device %s: Input State:  %s Mode: %s, Manageable: %t, ConfigStatus: %s, DiscoveryType: %s, DiscoveryStatus: %s", ipAddress, state, mode, manageable, configStatus, discoverType, discoveryStatus)
+
 			if state == "managed" && !manageable && discoverType != "pre_provision" {
 				allNormal = false
 				break
+			} else if state == "discovered" && manageable && discoveryStatus == "ok" && mode == "Migration" && discoverType == "discover" && preserveConfig {
+				log.Printf("Device %s, Brownfield - Proceed to save & deploy ; mode %s, preserveConfig %v", ipAddress, mode, preserveConfig)
+				break
 			} else if state == "discovered" && (!manageable || discoveryStatus != "ok" || (mode != "Normal" && mode != "Maintenance")) && discoverType != "pre_provision" {
+				log.Printf("Device %s not in expected state, rediscovering", ipAddress)
 				if manageable {
+					log.Printf("Device %s is manageable, rediscovering", ipAddress)
 					rediscoverDevices(ctx, client, diags, data, []string{device.SwitchDbId.ValueString()})
 				}
 				allNormal = false
 				break
 			} else if state == "configured" && !manageable && configStatus != "In-Sync" && discoverType != "pre_provision" {
 				allNormal = false
+				log.Printf("Device %s not in expected state, breaking out for retry", ipAddress)
 				break
 			} else if state == "serial" {
 				if configDevice, ok := configDevices[ipAddress]; ok && configDevice.SerialNumber.ValueString() != device.SerialNumber.ValueString() {

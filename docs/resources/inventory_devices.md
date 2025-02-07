@@ -15,17 +15,24 @@ Inventory is the resource to Add/Remove and configure switches in a fabric
 ```terraform
 resource "ndfc_inventory_devices" "test_resource_inventory_devices_1" {
   fabric_name                               = "CML"
-  auth_protocol                             = "sha"
+  auth_protocol                             = "md5"
   username                                  = "admin"
   password                                  = "admin_password"
-  seed_ip                                   = "10.0.0.1"
-  max_hops                                  = 10
-  set_as_individual_device_write_credential = true
-  preserve_config                           = true
+  max_hops                                  = 0
+  set_as_individual_device_write_credential = false
+  preserve_config                           = false
   save                                      = true
   deploy                                    = true
-  retries                                   = 500
+  retries                                   = 300
   retry_wait_timeout                        = 20
+  devices = {
+    "10.1.1.1" = {
+      role                    = "spine"
+      discovery_type          = "discover"
+      discovery_auth_protocol = "md5"
+    }
+  }
+
 }
 ```
 
