@@ -18,13 +18,26 @@ type FabricModel interface {
 	GetModelData() *NDFCFabricCommonModel
 	SetModelData(*NDFCFabricCommonModel) diag.Diagnostics
 }
-
 type NdfcFabricPayload struct {
 	FabricName        string                `json:"fabricName,omitempty"`
 	FabricType        string                `json:"templateName,omitempty"`
 	NdfcFabricNvPairs NDFCFabricCommonModel `json:"nvPairs,omitempty"`
 }
+type NdfcFabricNamePayload struct {
+	FabricName string `json:"fabricName,omitempty"`
+}
+type CustomNdfcFabricNamePayload NdfcFabricNamePayload
 type CustomNdfcFabricPayload NdfcFabricPayload
+
+func (m *NdfcFabricNamePayload) UnmarshalJSON(data []byte) error {
+	var customModel CustomNdfcFabricNamePayload
+	err := json.Unmarshal(data, &customModel)
+	if err != nil {
+		return err
+	}
+	m.FabricName = customModel.FabricName
+	return nil
+}
 func (m *NdfcFabricPayload) UnmarshalJSON(data []byte) error {
 	var customModel CustomNdfcFabricPayload
 	err := json.Unmarshal(data, &customModel)

@@ -22,7 +22,6 @@ import (
 type NDFCPolicyModel struct {
 	Id                 *int64            `json:"id,omitempty"`
 	PolicyId           string            `json:"policyId,omitempty"`
-	FabricName         string            `json:"-"`
 	IsPolicyGroup      bool              `json:"-"`
 	Deploy             bool              `json:"-"`
 	Status             string            `json:"status,omitempty"`
@@ -53,12 +52,6 @@ func (v *PolicyModel) SetModelData(jsonData *NDFCPolicyModel) diag.Diagnostics {
 		v.PolicyId = types.StringValue(jsonData.PolicyId)
 	} else {
 		v.PolicyId = types.StringNull()
-	}
-
-	if jsonData.FabricName != "" {
-		v.FabricName = types.StringValue(jsonData.FabricName)
-	} else {
-		v.FabricName = types.StringNull()
 	}
 
 	v.IsPolicyGroup = types.BoolValue(jsonData.IsPolicyGroup)
@@ -149,12 +142,6 @@ func (v PolicyModel) GetModelData() *NDFCPolicyModel {
 	var data = new(NDFCPolicyModel)
 
 	//MARSHAL_BODY
-
-	if !v.FabricName.IsNull() && !v.FabricName.IsUnknown() {
-		data.FabricName = v.FabricName.ValueString()
-	} else {
-		data.FabricName = ""
-	}
 
 	if !v.IsPolicyGroup.IsNull() && !v.IsPolicyGroup.IsUnknown() {
 		data.IsPolicyGroup = v.IsPolicyGroup.ValueBool()
