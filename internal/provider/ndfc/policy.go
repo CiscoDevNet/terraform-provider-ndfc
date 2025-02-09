@@ -72,7 +72,6 @@ func (c *NDFC) RscCreatePolicy(ctx context.Context, dg *diag.Diagnostics, model 
 	}
 	model.SetModelData(newModel)
 	model.Deploy = types.BoolValue(inData.Deploy)
-	model.FabricName = types.StringValue(inData.FabricName)
 }
 
 func getPolicyIdFromResponse(res *gjson.Result) string {
@@ -81,7 +80,6 @@ func getPolicyIdFromResponse(res *gjson.Result) string {
 
 func (c *NDFC) RscReadPolicy(ctx context.Context, dg *diag.Diagnostics, model *resource_policy.PolicyModel) {
 
-	FabricName := model.FabricName.ValueString()
 	Deploy := model.Deploy.ValueBool()
 	if model.IsPolicyGroup.ValueBool() {
 		tflog.Error(ctx, "Policy group is not supported")
@@ -97,7 +95,6 @@ func (c *NDFC) RscReadPolicy(ctx context.Context, dg *diag.Diagnostics, model *r
 		return
 	}
 	data.Deploy = Deploy
-	data.FabricName = FabricName
 	model.SetModelData(data)
 
 }
@@ -174,14 +171,14 @@ func (c *NDFC) RscUpdatePolicy(ctx context.Context, dg *diag.Diagnostics, model 
 
 	model.SetModelData(newModel)
 	model.Deploy = types.BoolValue(policyData.Deploy)
-	model.FabricName = types.StringValue(policyData.FabricName)
 }
 
 func (c *NDFC) RscDeletePolicy(ctx context.Context, dg *diag.Diagnostics, model *resource_policy.PolicyModel) {
 
 	policyID := model.PolicyId.ValueString()
-	FabricName := model.FabricName.ValueString()
-	tflog.Debug(ctx, fmt.Sprintf("Before Deploying configuration for Fabric: %s", FabricName))
+	serialNumber := model.GetModelData().DeviceSerialNumber
+	fabricName := c.GetFabricName(ctx, serialNumber)
+	tflog.Debug(ctx, fmt.Sprintf("Before Deploying configuration for Fabric: %s", fabricName))
 	tflog.Debug(ctx, fmt.Sprintf("RscDeletePolicy: Deleting policy ID %s", policyID))
 
 	if model.IsPolicyGroup.ValueBool() {
@@ -213,7 +210,7 @@ func (c *NDFC) RscDeletePolicy(ctx context.Context, dg *diag.Diagnostics, model 
 	}
 	// Incase of delete, policyID is made as FabricName:SerialNumber for switch deploy
 	// This avoids additional parameters to be passed to delete and also policyID is not used in delete
-	policyID = FabricName + ":" + model.GetModelData().DeviceSerialNumber
+	policyID = fabricName + ":" + serialNumber
 	c.RscDeployPolicy(ctx, dg, policyID)
 	if dg.HasError() {
 		tflog.Error(ctx, "Failed to switch deploy")
@@ -250,7 +247,6 @@ func (c *NDFC) RscDeployPolicy(ctx context.Context, dg *diag.Diagnostics, policy
 		FabricName := parts[0]
 		serialNumber := parts[1]
 		switchSerialNumber := []string{serialNumber}
-
 		tflog.Debug(ctx, fmt.Sprintf("Deploying configuration for Fabric: %s, Serial Numbers: %s", FabricName, serialNumber))
 		c.DeployConfiguration(ctx, dg, FabricName, switchSerialNumber)
 		return

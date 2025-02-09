@@ -1,6 +1,5 @@
 
 resource "ndfc_policy" "test_resource_policy_1" {
-  fabric_name          = "CML"
   is_policy_group      = false
   deploy               = true
   entity_name          = "Switch"

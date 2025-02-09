@@ -19,14 +19,13 @@ const urlVpcPair = "/lan-fabric/rest/vpcpair"
 const urlVpcPairGet = urlVpcPair + "?serialNumber=%s"
 const urlVpcPairRecmd = urlVpcPair + "/recommendation?serialNumber=%s&useVirtualPeerlink=%t"
 
-
 type VpcPairAPI struct {
 	NDFCAPICommon
-	mutex           *sync.Mutex
-	CheckStatus     map[string]bool
-	FabricName      string
-	VirtualPeerLink bool
-	VpcPairID       string
+	mutex              *sync.Mutex
+	GetRecommendations bool
+	FabricName         string
+	VirtualPeerLink    bool
+	VpcPairID          string
 }
 
 func (c *VpcPairAPI) GetLock() *sync.Mutex {
@@ -34,10 +33,8 @@ func (c *VpcPairAPI) GetLock() *sync.Mutex {
 }
 
 func (c *VpcPairAPI) GetUrl() string {
-	if c.CheckStatus["recommendations"] {
+	if c.GetRecommendations {
 		return fmt.Sprintf(urlVpcPairRecmd, c.VpcPairID, c.VirtualPeerLink)
-	} else if c.CheckStatus["switchesByFabric"] {
-		return fmt.Sprintf(UrlSwitchesByFabric, c.FabricName)
 	} else {
 		return fmt.Sprintf(urlVpcPairGet, c.VpcPairID)
 	}

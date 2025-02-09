@@ -148,7 +148,7 @@ func (c *NDFC) RscUpdateVpcPair(ctx context.Context, dg *diag.Diagnostics, tf *r
 	// Convert NDFC model to the json data
 	payload, err := json.Marshal(nfdcVpcPairModel)
 	if err != nil {
-		tflog.Error(ctx, "RscCreateOrUpdate: RscCreateOrUpdate: Failed to marshal vPC Pair data")
+		tflog.Error(ctx, "RscUpdateVpcPair: Failed to marshal vPC Pair data")
 		dg.AddError("Failed to marshal vPC Pair data", fmt.Sprintf("Error %v", err))
 		return
 	}
@@ -157,14 +157,15 @@ func (c *NDFC) RscUpdateVpcPair(ctx context.Context, dg *diag.Diagnostics, tf *r
 	api := api.NewVpcPairAPI(c.GetLock(ResourceVpcPair), &c.apiClient)
 	res, err := api.Put(payload)
 	if err != nil {
-		tflog.Error(ctx, "RscCreateOrUpdate: Failed to update vPC Pair")
+		tflog.Error(ctx, "RscUpdateVpcPair: Failed to update vPC Pair")
 		dg.AddError("Failed to update vPC Pair", fmt.Sprintf("Error %v: %v", err, res.String()))
 		return
 	}
 	// Check if the vPC Pair is present after update
 	nfdcVpcPairModel = c.rscGetVpcPair(ctx, tf)
 	if nfdcVpcPairModel == nil {
-		dg.AddError("Failed to create vPC Pair", "vPC Pair data empty in NDFC")
+		tflog.Error(ctx, "RscUpdateVpcPair: Failed to get vPC Pair after update")
+		dg.AddError("Failed to update vPC Pair", "vPC Pair data empty in NDFC")
 		return
 	}
 	fabricName := nfdcVpcPairModel.PeerOneSwitchDetails.FabricName
@@ -241,23 +242,22 @@ func (c *NDFC) rscCheckVpcPairRecommendations(ctx context.Context,
 	recmdList := []resource_vpc_pair.NDFCVpcPairRecommendations{}
 
 	api.VpcPairID = nfdcVpcPairModel.SerialNumbers[0]
-	api.CheckStatus = make(map[string]bool)
-	api.CheckStatus["recommendations"] = true
+	api.GetRecommendations = true
 	api.VirtualPeerLink = *nfdcVpcPairModel.UseVirtualPeerlink
-
 	payload, err := api.Get()
-	api.CheckStatus["recommendations"] = false
 	if err != nil {
 		tflog.Error(ctx, "RscVpcPairRecommendations: Failed to get recommendations")
 		err = fmt.Errorf("failed to get recommendations")
 		return err
 	}
-
+	tflog.Debug(ctx, fmt.Sprintf("Recommendations payload: %s", payload))
+	api.GetRecommendations = false
 	err = json.Unmarshal(payload, &recmdList)
 	if err != nil {
 		tflog.Error(ctx, "RscVpcPairRecommendations: Failed to unmarshal recommendations data")
 		return err
 	}
+	tflog.Debug(ctx, fmt.Sprintf("Recommendations: %v", recmdList))
 	for _, rec := range recmdList {
 		log.Printf("SerialNumber %v, Recmd %v, RecReason %v", rec.SerialNumber, rec.Recommended, rec.RecommendationReason)
 		if rec.SerialNumber == nfdcVpcPairModel.SerialNumbers[1] {
@@ -266,6 +266,7 @@ func (c *NDFC) rscCheckVpcPairRecommendations(ctx context.Context,
 				return nil
 			} else {
 				if rec.RecommendationReason == "Switches are not connected" {
+					tflog.Debug(ctx, "NDFC Recommendation not met, but it is a transient error")
 					// This is a transient error, it will be really known when config apply is done.
 					return nil
 				} else {
@@ -290,6 +291,7 @@ func (c *NDFC) RscImportVpcPairs(ctx context.Context,
 		return
 	}
 	tf.SerialNumbers, err = types.SetValue(types.StringType, []attr.Value{types.StringValue(idSplit[0]), types.StringValue(idSplit[1])})
+	tflog.Debug(ctx, fmt.Sprintf("SerialNumbers %v", tf.SerialNumbers))
 	if err != nil {
 		dg.AddError("Import state failed", "Failed to set serial numbers")
 		return
@@ -299,6 +301,7 @@ func (c *NDFC) RscImportVpcPairs(ctx context.Context,
 		dg.AddError("Unable to get vpcPair", "vPC Pair data empty in NDFC")
 		return
 	}
+	tflog.Debug(ctx, fmt.Sprintf("vPC Pair model: %v", vpcPairModel))
 	rscCreateModelId(tf, vpcPairModel)
 }
 
@@ -310,6 +313,8 @@ func (c *NDFC) RscDeployVpcPair(ctx context.Context, dg *diag.Diagnostics, tf *r
 
 	ndfcVpcPairModel := tf.GetModelData()
 	serialNumbers := ndfcVpcPairModel.SerialNumbers
+	tflog.Debug(ctx, fmt.Sprintf("RscDeployVpcPair: Deploying vPC Pair with serial numbers: %v", serialNumbers))
+	tflog.Debug(ctx, "Performing config save and deploy for vPC Pair")
 	c.SaveConfiguration(ctx, dg, fabricName)
 	if dg.HasError() {
 		return
