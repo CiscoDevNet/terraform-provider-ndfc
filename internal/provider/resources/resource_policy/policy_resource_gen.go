@@ -58,14 +58,6 @@ func PolicyResourceSchema(ctx context.Context) schema.Schema {
 				Description:         "Type of the entity",
 				MarkdownDescription: "Type of the entity",
 			},
-			"fabric_name": schema.StringAttribute{
-				Required:            true,
-				Description:         "Name of the fabric",
-				MarkdownDescription: "Name of the fabric",
-				PlanModifiers: []planmodifier.String{
-					stringplanmodifier.RequiresReplace(),
-				},
-			},
 			"id": schema.Int64Attribute{
 				Computed:            true,
 				Description:         "ID of the policy",
@@ -137,7 +129,6 @@ type PolicyModel struct {
 	DeviceSerialNumber types.String `tfsdk:"device_serial_number"`
 	EntityName         types.String `tfsdk:"entity_name"`
 	EntityType         types.String `tfsdk:"entity_type"`
-	FabricName         types.String `tfsdk:"fabric_name"`
 	Id                 types.Int64  `tfsdk:"id"`
 	IsPolicyGroup      types.Bool   `tfsdk:"is_policy_group"`
 	PolicyId           types.String `tfsdk:"policy_id"`

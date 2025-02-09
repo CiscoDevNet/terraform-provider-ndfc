@@ -27,9 +27,6 @@ func PolicyModelHelperStateCheck(RscName string, c resource_policy.NDFCPolicyMod
 	if c.PolicyId != "" {
 		ret = append(ret, resource.TestCheckResourceAttr(RscName, attrPath.AtName("policy_id").String(), c.PolicyId))
 	}
-	if c.FabricName != "" {
-		ret = append(ret, resource.TestCheckResourceAttr(RscName, attrPath.AtName("fabric_name").String(), c.FabricName))
-	}
 	if c.IsPolicyGroup {
 		ret = append(ret, resource.TestCheckResourceAttr(RscName, attrPath.AtName("is_policy_group").String(), "true"))
 	} else {

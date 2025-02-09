@@ -467,13 +467,9 @@ func processPortListOrder(portList *types.CSVString, order []string) {
 	}
 }
 
-func (c NDFC) createVpcPairMap(ctx context.Context, FabricName string) map[string]string {
+func (c NDFC) createVpcPairMap(ctx context.Context, fabricName string) map[string]string {
 
-	api := api.NewVpcPairAPI(c.GetLock(ResourceVpcPair), &c.apiClient)
-	api.CheckStatus = make(map[string]bool)
-	api.CheckStatus["switchesByFabric"] = true
-	api.FabricName = FabricName
-	payload, err := api.Get()
+	payload, err := c.GetSwitchesInFabric(ctx, fabricName)
 	if err != nil || string(payload) == "[]" || payload == nil {
 		tflog.Debug(ctx, "createVpcPairMap: Failed to get switchesByFabric")
 		return nil

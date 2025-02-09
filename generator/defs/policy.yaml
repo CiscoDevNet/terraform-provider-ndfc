@@ -6,7 +6,7 @@ resource:
   description: "Resource to configure policies on a switch"
   import_id:
     - "POLICY-26910"
-  import_desc: 
+  import_desc:
     - "Policy-ID"
   attributes:
     - model_name: id
@@ -21,14 +21,6 @@ resource:
       description: "Policy ID"
       computed: true
       use_state: true
-    - model_name: fabricName
-      tf_name: fabric_name
-      type: String
-      description: "Name of the fabric"
-      mandatory: true
-      payload_hide: true
-      tf_requires_replace: true
-      example: "CML"
     - model_name: policyGroup
       tf_name: is_policy_group
       type: Bool
