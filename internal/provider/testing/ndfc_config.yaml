@@ -4,7 +4,7 @@ ndfc:
   user: admin
   pwd: "admin!@#"
   insecure: true
-  fabric: test_evpn_vxlan
+  fabric: CML
   switches:
     - "9FE076D8EJL"
     - "9TQYTJSZ1VJ"

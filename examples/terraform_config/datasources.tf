@@ -18,7 +18,7 @@ data "ndfc_networks" "test_evpn_vxlan_deployment_nw1" {
 }
 
 
-data "ndfc_vrf_bulk" "test_evpn_vxlan_deployment_vrf1" {
+data "ndfc_vrfs" "test_evpn_vxlan_deployment_vrf1" {
   fabric_name = "test_evpn_vxlan"
 }
 

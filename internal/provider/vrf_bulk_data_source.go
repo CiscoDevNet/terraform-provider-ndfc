@@ -30,7 +30,7 @@ type vrfBulkDataSource struct {
 }
 
 func (d *vrfBulkDataSource) Metadata(ctx context.Context, req datasource.MetadataRequest, resp *datasource.MetadataResponse) {
-	resp.TypeName = "ndfc_vrf_bulk"
+	resp.TypeName = req.ProviderTypeName + "_" + ndfc.ResourceVrfBulk
 	tflog.Info(ctx, "DS Metadata called", map[string]interface{}{"ProTyNam": req.ProviderTypeName})
 }
 

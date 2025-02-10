@@ -1,6 +1,7 @@
 ---
 resource:
   name: vrf_bulk
+  actual_name: vrfs
   rest_endpoint: /lan-fabric/rest/top-down/v2/fabrics/%v/vrfs/
   doc_category: Fabric
   generate_tf_resource: true

@@ -13,7 +13,7 @@ provider "ndfc" {
   insecure = {{.Insecure}}
 }
 
-resource "ndfc_vrf_bulk" "vrf_test" {
+resource "ndfc_vrfs" "vrf_test" {
     fabric = {{.FabricName}}
     deploy_all_attachments = {{.DeployAllAttachments}}
     vrfs = {
@@ -43,5 +43,4 @@ resource "ndfc_vrf_bulk" "vrf_test" {
         }
     {{end}}
     }
-  {{end}}
 }
