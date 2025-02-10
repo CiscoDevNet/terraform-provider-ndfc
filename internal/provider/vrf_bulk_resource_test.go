@@ -44,7 +44,7 @@ func TestAccVRFResourceCRUD(t *testing.T) {
 		domain   = "example.com"
 		insecure = true
 		}
-		resource ndfc_vrf_bulk "vrf_test" {
+		resource ndfc_vrfs "vrf_test" {
 			fabric_name = "dummy"
 		}`
 
@@ -68,7 +68,7 @@ func TestAccVRFResourceCRUD(t *testing.T) {
 					helper.GetTFConfigWithSingleResource(tName, *x, []interface{}{vrfScaledBulk}, &tf_config)
 					return *tf_config
 				}(),
-				Check: resource.ComposeTestCheckFunc(VrfBulkModelHelperStateCheck("ndfc_vrf_bulk.vrf_test", *vrfScaledBulk, path.Empty())...),
+				Check: resource.ComposeTestCheckFunc(VrfBulkModelHelperStateCheck("ndfc_vrfs.vrf_test", *vrfScaledBulk, path.Empty())...),
 			},
 			{
 				//Add 10 more VRFs
@@ -81,7 +81,7 @@ func TestAccVRFResourceCRUD(t *testing.T) {
 					helper.GetTFConfigWithSingleResource(tName, *x, []interface{}{vrfScaledBulk}, &tf_config)
 					return *tf_config
 				}(),
-				Check: resource.ComposeTestCheckFunc(VrfBulkModelHelperStateCheck("ndfc_vrf_bulk.vrf_test", *vrfScaledBulk, path.Empty())...),
+				Check: resource.ComposeTestCheckFunc(VrfBulkModelHelperStateCheck("ndfc_vrfs.vrf_test", *vrfScaledBulk, path.Empty())...),
 			},
 			{
 				Config: func() string {
@@ -93,7 +93,7 @@ func TestAccVRFResourceCRUD(t *testing.T) {
 					helper.GetTFConfigWithSingleResource(tName, *x, []interface{}{vrfScaledBulk}, &tf_config)
 					return *tf_config
 				}(),
-				Check: resource.ComposeTestCheckFunc(VrfBulkModelHelperStateCheck("ndfc_vrf_bulk.vrf_test", *vrfScaledBulk, path.Empty())...),
+				Check: resource.ComposeTestCheckFunc(VrfBulkModelHelperStateCheck("ndfc_vrfs.vrf_test", *vrfScaledBulk, path.Empty())...),
 			},
 			{
 
@@ -135,7 +135,7 @@ func TestAccVRFResourceCRUD(t *testing.T) {
 					helper.GetTFConfigWithSingleResource(tName, *x, []interface{}{vrfScaledBulk}, &tf_config)
 					return *tf_config
 				}(),
-				Check: resource.ComposeTestCheckFunc(VrfBulkModelHelperStateCheck("ndfc_vrf_bulk.vrf_test", *vrfScaledBulk, path.Empty())...),
+				Check: resource.ComposeTestCheckFunc(VrfBulkModelHelperStateCheck("ndfc_vrfs.vrf_test", *vrfScaledBulk, path.Empty())...),
 			},
 		}})
 }
@@ -171,7 +171,7 @@ func TestAccVRFResourceAttachmentCRUD(t *testing.T) {
 					helper.GetTFConfigWithSingleResource(tName, *x, []interface{}{vrfScaledBulk}, &tf_config)
 					return *tf_config
 				}(),
-				Check: resource.ComposeTestCheckFunc(VrfBulkModelHelperStateCheck("ndfc_vrf_bulk.vrf_test", *vrfScaledBulk, path.Empty())...),
+				Check: resource.ComposeTestCheckFunc(VrfBulkModelHelperStateCheck("ndfc_vrfs.vrf_test", *vrfScaledBulk, path.Empty())...),
 			},
 			{ // Remove both attachments _detach
 				Config: func() string {
@@ -182,7 +182,7 @@ func TestAccVRFResourceAttachmentCRUD(t *testing.T) {
 					helper.GetTFConfigWithSingleResource(tName, *x, []interface{}{vrfScaledBulk}, &tf_config)
 					return *tf_config
 				}(),
-				Check: resource.ComposeTestCheckFunc(VrfBulkModelHelperStateCheck("ndfc_vrf_bulk.vrf_test", *vrfScaledBulk, path.Empty())...),
+				Check: resource.ComposeTestCheckFunc(VrfBulkModelHelperStateCheck("ndfc_vrfs.vrf_test", *vrfScaledBulk, path.Empty())...),
 			},
 			{
 				// Add 2 attachments to all VRFs
@@ -194,7 +194,7 @@ func TestAccVRFResourceAttachmentCRUD(t *testing.T) {
 					helper.GetTFConfigWithSingleResource(tName, *x, []interface{}{vrfScaledBulk}, &tf_config)
 					return *tf_config
 				}(),
-				Check: resource.ComposeTestCheckFunc(VrfBulkModelHelperStateCheck("ndfc_vrf_bulk.vrf_test", *vrfScaledBulk, path.Empty())...),
+				Check: resource.ComposeTestCheckFunc(VrfBulkModelHelperStateCheck("ndfc_vrfs.vrf_test", *vrfScaledBulk, path.Empty())...),
 			},
 			{
 				// Add 3rd attachment half of them
@@ -206,7 +206,7 @@ func TestAccVRFResourceAttachmentCRUD(t *testing.T) {
 					helper.GetTFConfigWithSingleResource(tName, *x, []interface{}{vrfScaledBulk}, &tf_config)
 					return *tf_config
 				}(),
-				Check: resource.ComposeTestCheckFunc(VrfBulkModelHelperStateCheck("ndfc_vrf_bulk.vrf_test", *vrfScaledBulk, path.Empty())...),
+				Check: resource.ComposeTestCheckFunc(VrfBulkModelHelperStateCheck("ndfc_vrfs.vrf_test", *vrfScaledBulk, path.Empty())...),
 			},
 			{
 				// Add 3rd attachment remaining  half
@@ -221,7 +221,7 @@ func TestAccVRFResourceAttachmentCRUD(t *testing.T) {
 					helper.GetTFConfigWithSingleResource(tName, *x, []interface{}{vrfScaledBulk}, &tf_config)
 					return *tf_config
 				}(),
-				Check: resource.ComposeTestCheckFunc(VrfBulkModelHelperStateCheck("ndfc_vrf_bulk.vrf_test", *vrfScaledBulk, path.Empty())...),
+				Check: resource.ComposeTestCheckFunc(VrfBulkModelHelperStateCheck("ndfc_vrfs.vrf_test", *vrfScaledBulk, path.Empty())...),
 			},
 			{
 				//Modify params
@@ -246,7 +246,7 @@ func TestAccVRFResourceAttachmentCRUD(t *testing.T) {
 					helper.GetTFConfigWithSingleResource(tName, *x, []interface{}{vrfScaledBulk}, &tf_config)
 					return *tf_config
 				}(),
-				Check: resource.ComposeTestCheckFunc(VrfBulkModelHelperStateCheck("ndfc_vrf_bulk.vrf_test", *vrfScaledBulk, path.Empty())...),
+				Check: resource.ComposeTestCheckFunc(VrfBulkModelHelperStateCheck("ndfc_vrfs.vrf_test", *vrfScaledBulk, path.Empty())...),
 			},
 		}})
 }
@@ -284,7 +284,7 @@ func TestAccVRFResourceGlobalDeploy(t *testing.T) {
 					helper.GetTFConfigWithSingleResource(tName, *x, []interface{}{vrfScaledBulk}, &tf_config)
 					return *tf_config
 				}(),
-				Check: resource.ComposeTestCheckFunc(VrfBulkModelHelperStateCheck("ndfc_vrf_bulk.vrf_test", *vrfScaledBulk, path.Empty())...),
+				Check: resource.ComposeTestCheckFunc(VrfBulkModelHelperStateCheck("ndfc_vrfs.vrf_test", *vrfScaledBulk, path.Empty())...),
 			},
 			{
 				// Add 3rd Attachment
@@ -296,7 +296,7 @@ func TestAccVRFResourceGlobalDeploy(t *testing.T) {
 					helper.GetTFConfigWithSingleResource(tName, *x, []interface{}{vrfScaledBulk}, &tf_config)
 					return *tf_config
 				}(),
-				Check: resource.ComposeTestCheckFunc(VrfBulkModelHelperStateCheck("ndfc_vrf_bulk.vrf_test", *vrfScaledBulk, path.Empty())...),
+				Check: resource.ComposeTestCheckFunc(VrfBulkModelHelperStateCheck("ndfc_vrfs.vrf_test", *vrfScaledBulk, path.Empty())...),
 			},
 		},
 	})
@@ -335,7 +335,7 @@ func TestAccVRFResourceVrfLevelDeploy(t *testing.T) {
 					helper.GetTFConfigWithSingleResource(tName, *x, []interface{}{vrfScaledBulk}, &tf_config)
 					return *tf_config
 				}(),
-				Check: resource.ComposeTestCheckFunc(VrfBulkModelHelperStateCheck("ndfc_vrf_bulk.vrf_test", *vrfScaledBulk, path.Empty())...),
+				Check: resource.ComposeTestCheckFunc(VrfBulkModelHelperStateCheck("ndfc_vrfs.vrf_test", *vrfScaledBulk, path.Empty())...),
 			},
 			{
 				// Add 3rd Attachment
@@ -347,7 +347,7 @@ func TestAccVRFResourceVrfLevelDeploy(t *testing.T) {
 					helper.GetTFConfigWithSingleResource(tName, *x, []interface{}{vrfScaledBulk}, &tf_config)
 					return *tf_config
 				}(),
-				Check: resource.ComposeTestCheckFunc(VrfBulkModelHelperStateCheck("ndfc_vrf_bulk.vrf_test", *vrfScaledBulk, path.Empty())...),
+				Check: resource.ComposeTestCheckFunc(VrfBulkModelHelperStateCheck("ndfc_vrfs.vrf_test", *vrfScaledBulk, path.Empty())...),
 			},
 		},
 	})
@@ -385,7 +385,7 @@ func TestAccVRFResourceVrfAttachLevelDeploy(t *testing.T) {
 					helper.GetTFConfigWithSingleResource(tName, *x, []interface{}{vrfScaledBulk}, &tf_config)
 					return *tf_config
 				}(),
-				Check: resource.ComposeTestCheckFunc(VrfBulkModelHelperStateCheck("ndfc_vrf_bulk.vrf_test", *vrfScaledBulk, path.Empty())...),
+				Check: resource.ComposeTestCheckFunc(VrfBulkModelHelperStateCheck("ndfc_vrfs.vrf_test", *vrfScaledBulk, path.Empty())...),
 			},
 		},
 	})
@@ -435,7 +435,7 @@ func TestAccVRFResourceMultiResourceWithDeploy(t *testing.T) {
 				Check: func() resource.TestCheckFunc {
 					var checks []resource.TestCheckFunc
 					for i := 0; i < len(vrfScaledBulk); i++ {
-						checks = append(checks, VrfBulkModelHelperStateCheck(fmt.Sprintf("ndfc_vrf_bulk.vrf_test_%d", i+1), *vrfScaledBulk[i], path.Empty())...)
+						checks = append(checks, VrfBulkModelHelperStateCheck(fmt.Sprintf("ndfc_vrfs.vrf_test_%d", i+1), *vrfScaledBulk[i], path.Empty())...)
 					}
 					return resource.ComposeTestCheckFunc(checks...)
 				}(),

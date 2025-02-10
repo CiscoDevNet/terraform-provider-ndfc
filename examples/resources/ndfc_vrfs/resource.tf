@@ -1,5 +1,5 @@
 
-resource "ndfc_vrf_bulk" "test_resource_vrf_bulk_1" {
+resource "ndfc_vrfs" "test_resource_vrfs_1" {
   fabric_name            = "CML"
   deploy_all_attachments = true
   vrfs = {

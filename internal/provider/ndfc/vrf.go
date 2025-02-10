@@ -24,7 +24,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-log/tflog"
 )
 
-const ResourceVrfBulk = "vrf_bulk"
+const ResourceVrfBulk = "vrfs"
 
 func (c NDFC) DSGetBulkVrf(ctx context.Context, dg *diag.Diagnostics, fabricName string) *datasource_vrf_bulk.VrfBulkModel {
 	log.Printf("DSGetBulkVrf entry fabirc %s", fabricName)
@@ -46,6 +46,10 @@ func (c NDFC) DSGetBulkVrf(ctx context.Context, dg *diag.Diagnostics, fabricName
 	}
 	if len(ndVrfs.Vrfs) > 0 {
 		ndVrfs.FabricName = fabricName
+	} else {
+		ndVrfs.FabricName = ""
+		dg.AddWarning("No VRFs found", fmt.Sprintf("No VRFs configured in fabric %s", fabricName))
+		return nil
 	}
 
 	err = c.DsGetVrfAttachments(ctx, dg, &ndVrfs)

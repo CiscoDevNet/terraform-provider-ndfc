@@ -92,7 +92,7 @@ func GetTFConfigWithSingleResource(tt string, cfg map[string]string, rscs []inte
 		if ok {
 			args["Vrf"] = vrfBulk
 			args["RscName"] = rsNames[i]
-			args["RscType"] = "vrf_bulk"
+			args["RscType"] = "vrfs"
 			vrfRscName = rsNames[i]
 			err = t.ExecuteTemplate(&output, "NDFC_VRF_RESOURCE", args)
 			if err != nil {
@@ -172,6 +172,12 @@ func GetVRFTFConfigWithMultipleResource(tt string, cfg map[string]string, vrfBul
 		"deref": func(a *int64) int64 {
 			if a == nil {
 				return 0
+			}
+			return *a
+		},
+		"deref_bool": func(a *bool) bool {
+			if a == nil {
+				return false
 			}
 			return *a
 		},

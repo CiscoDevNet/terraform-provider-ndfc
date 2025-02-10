@@ -14,7 +14,7 @@ provider "ndfc" {
   insecure = true
 }
 
-resource "ndfc_vrf_bulk" "vrf_test_1" {
+resource "ndfc_vrfs" "vrf_test_1" {
 
   fabric_name            = "test_evpn_vxlan"
   deploy_all_attachments = false
@@ -39,7 +39,7 @@ resource "ndfc_vrf_bulk" "vrf_test_1" {
 
 }
 
-resource "ndfc_vrf_bulk" "vrf_test_2" {
+resource "ndfc_vrfs" "vrf_test_2" {
 
   fabric_name            = "test_evpn_vxlan"
   deploy_all_attachments = false
@@ -64,7 +64,7 @@ resource "ndfc_vrf_bulk" "vrf_test_2" {
 
 }
 
-resource "ndfc_vrf_bulk" "vrf_test_3" {
+resource "ndfc_vrfs" "vrf_test_3" {
 
   fabric_name            = "test_evpn_vxlan"
   deploy_all_attachments = false
@@ -89,7 +89,7 @@ resource "ndfc_vrf_bulk" "vrf_test_3" {
 
 }
 
-resource "ndfc_vrf_bulk" "vrf_test_4" {
+resource "ndfc_vrfs" "vrf_test_4" {
 
   fabric_name            = "test_evpn_vxlan"
   deploy_all_attachments = false
@@ -114,7 +114,7 @@ resource "ndfc_vrf_bulk" "vrf_test_4" {
 
 }
 
-resource "ndfc_vrf_bulk" "vrf_test_5" {
+resource "ndfc_vrfs" "vrf_test_5" {
 
   fabric_name            = "test_evpn_vxlan"
   deploy_all_attachments = false
@@ -139,7 +139,7 @@ resource "ndfc_vrf_bulk" "vrf_test_5" {
 
 }
 
-resource "ndfc_vrf_bulk" "vrf_test_6" {
+resource "ndfc_vrfs" "vrf_test_6" {
 
   fabric_name            = "test_evpn_vxlan"
   deploy_all_attachments = false
@@ -164,7 +164,7 @@ resource "ndfc_vrf_bulk" "vrf_test_6" {
 
 }
 
-resource "ndfc_vrf_bulk" "vrf_test_7" {
+resource "ndfc_vrfs" "vrf_test_7" {
 
   fabric_name            = "test_evpn_vxlan"
   deploy_all_attachments = false
@@ -189,7 +189,7 @@ resource "ndfc_vrf_bulk" "vrf_test_7" {
 
 }
 
-resource "ndfc_vrf_bulk" "vrf_test_8" {
+resource "ndfc_vrfs" "vrf_test_8" {
 
   fabric_name            = "test_evpn_vxlan"
   deploy_all_attachments = false
@@ -214,7 +214,7 @@ resource "ndfc_vrf_bulk" "vrf_test_8" {
 
 }
 
-resource "ndfc_vrf_bulk" "vrf_test_9" {
+resource "ndfc_vrfs" "vrf_test_9" {
 
   fabric_name            = "test_evpn_vxlan"
   deploy_all_attachments = false
@@ -239,7 +239,7 @@ resource "ndfc_vrf_bulk" "vrf_test_9" {
 
 }
 
-resource "ndfc_vrf_bulk" "vrf_test_10" {
+resource "ndfc_vrfs" "vrf_test_10" {
 
   fabric_name            = "test_evpn_vxlan"
   deploy_all_attachments = false
@@ -264,7 +264,7 @@ resource "ndfc_vrf_bulk" "vrf_test_10" {
 
 }
 
-resource "ndfc_vrf_bulk" "vrf_test_11" {
+resource "ndfc_vrfs" "vrf_test_11" {
 
   fabric_name            = "test_evpn_vxlan"
   deploy_all_attachments = false
@@ -289,7 +289,7 @@ resource "ndfc_vrf_bulk" "vrf_test_11" {
 
 }
 
-resource "ndfc_vrf_bulk" "vrf_test_12" {
+resource "ndfc_vrfs" "vrf_test_12" {
 
   fabric_name            = "test_evpn_vxlan"
   deploy_all_attachments = false
@@ -314,7 +314,7 @@ resource "ndfc_vrf_bulk" "vrf_test_12" {
 
 }
 
-resource "ndfc_vrf_bulk" "vrf_test_13" {
+resource "ndfc_vrfs" "vrf_test_13" {
 
   fabric_name            = "test_evpn_vxlan"
   deploy_all_attachments = false
@@ -339,7 +339,7 @@ resource "ndfc_vrf_bulk" "vrf_test_13" {
 
 }
 
-resource "ndfc_vrf_bulk" "vrf_test_14" {
+resource "ndfc_vrfs" "vrf_test_14" {
 
   fabric_name            = "test_evpn_vxlan"
   deploy_all_attachments = false
@@ -364,7 +364,7 @@ resource "ndfc_vrf_bulk" "vrf_test_14" {
 
 }
 
-resource "ndfc_vrf_bulk" "vrf_test_15" {
+resource "ndfc_vrfs" "vrf_test_15" {
 
   fabric_name            = "test_evpn_vxlan"
   deploy_all_attachments = false
@@ -389,7 +389,7 @@ resource "ndfc_vrf_bulk" "vrf_test_15" {
 
 }
 
-resource "ndfc_vrf_bulk" "vrf_test_16" {
+resource "ndfc_vrfs" "vrf_test_16" {
 
   fabric_name            = "test_evpn_vxlan"
   deploy_all_attachments = false
@@ -414,7 +414,7 @@ resource "ndfc_vrf_bulk" "vrf_test_16" {
 
 }
 
-resource "ndfc_vrf_bulk" "vrf_test_17" {
+resource "ndfc_vrfs" "vrf_test_17" {
 
   fabric_name            = "test_evpn_vxlan"
   deploy_all_attachments = false
@@ -439,7 +439,7 @@ resource "ndfc_vrf_bulk" "vrf_test_17" {
 
 }
 
-resource "ndfc_vrf_bulk" "vrf_test_18" {
+resource "ndfc_vrfs" "vrf_test_18" {
 
   fabric_name            = "test_evpn_vxlan"
   deploy_all_attachments = false
@@ -464,7 +464,7 @@ resource "ndfc_vrf_bulk" "vrf_test_18" {
 
 }
 
-resource "ndfc_vrf_bulk" "vrf_test_19" {
+resource "ndfc_vrfs" "vrf_test_19" {
 
   fabric_name            = "test_evpn_vxlan"
   deploy_all_attachments = false
@@ -489,7 +489,7 @@ resource "ndfc_vrf_bulk" "vrf_test_19" {
 
 }
 
-resource "ndfc_vrf_bulk" "vrf_test_20" {
+resource "ndfc_vrfs" "vrf_test_20" {
 
   fabric_name            = "test_evpn_vxlan"
   deploy_all_attachments = false
