@@ -1138,6 +1138,7 @@ func validateFabric(ctx context.Context, client *ndfc.NDFC, diags *diag.Diagnost
 
 	attempt := int64(1)
 	preserveConfig := data.PreserveConfig.ValueBool()
+	trustWait := 0
 	var allNormal bool
 	for attempt <= data.Retries.ValueInt64() {
 		log.Printf("Attempt %d of %d", attempt, data.Retries.ValueInt64())
@@ -1165,6 +1166,18 @@ func validateFabric(ctx context.Context, client *ndfc.NDFC, diags *diag.Diagnost
 				break
 			} else if state == "discovered" && manageable && discoveryStatus == "ok" && mode == "Migration" && discoverType == "discover" && preserveConfig {
 				log.Printf("Device %s, Brownfield - Proceed to save & deploy ; mode %s, preserveConfig %v", ipAddress, mode, preserveConfig)
+				trustWait++
+				// Can't trust NDFC APIs indicating the device is ready to save and deploy, so wait a few more rounds
+				if trustWait < 5 {
+					log.Printf("Device %s is reachable, Waiting to ensure that the state is stable - retry  %d", ipAddress, trustWait)
+					if manageable {
+						log.Printf("Device %s is manageable, rediscovering", ipAddress)
+						rediscoverDevices(ctx, client, diags, data, []string{device.SwitchDbId.ValueString()})
+						continue
+					}
+					log.Printf("Device %s not manageable, Continue the wait", ipAddress)
+					continue
+				}
 				break
 			} else if state == "discovered" && (!manageable || discoveryStatus != "ok" || (mode != "Normal" && mode != "Maintenance")) && discoverType != "pre_provision" {
 				log.Printf("Device %s not in expected state, rediscovering", ipAddress)
