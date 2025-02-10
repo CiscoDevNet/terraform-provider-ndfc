@@ -14,7 +14,7 @@ provider "ndfc" {
   insecure = true
 }
 
-resource "ndfc_vrf_bulk" "vrf_test" {
+resource "ndfc_vrfs" "vrf_test" {
 
   fabric_name            = "test_evpn_vxlan"
   deploy_all_attachments = false
