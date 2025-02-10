@@ -63,6 +63,7 @@ type Client struct {
 	BackoffDelayFactor float64
 	// Authentication mutex
 	AuthenticationMutex *sync.Mutex
+	AuthTimeStamp       time.Time
 }
 
 // NewClient creates a new Nexus Dashboard HTTP client.
@@ -238,7 +239,7 @@ func (client *Client) Do(req Req) (Res, error) {
 			}
 		}
 		if !json.Valid(bodyBytes) {
-			res =  Res(gjson.Parse(`{"error": "` + string(bodyBytes) + `"}`))
+			res = Res(gjson.Parse(`{"error": "` + string(bodyBytes) + `"}`))
 		} else {
 			res = Res(gjson.ParseBytes(bodyBytes))
 		}
@@ -449,6 +450,7 @@ func (client *Client) Login() error {
 		return fmt.Errorf("Authentication failed")
 	}
 	client.Token = token
+	client.AuthTimeStamp = time.Now()
 	log.Printf("[DEBUG] Authentication successful")
 	return nil
 }
@@ -458,10 +460,13 @@ func (client *Client) Authenticate() error {
 	var err error
 	log.Printf("Attempting authentication...")
 	client.AuthenticationMutex.Lock()
-	if client.Token == "" {
-		log.Printf("No token available, attempting login...")
+	if client.Token == "" || time.Since(client.AuthTimeStamp) > 10*time.Minute {
+		log.Printf("No token available or it has expired, attempting login...")
 		err = client.Login()
+	} else {
+		log.Printf("Token is still valid, skipping login")
 	}
+	log.Printf("Authentication complete")
 	client.AuthenticationMutex.Unlock()
 	return err
 }
