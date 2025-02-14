@@ -1,6 +1,6 @@
 ---
 resource:
-  name: vxlan_evpn_fabric
+  name: fabric_vxlan_evpn
   doc_category: Fabric
   generate_tf_resource: true
   parent_package: resource_fabric_common
@@ -798,6 +798,12 @@ resource:
     - model_name: PM_ENABLE
       tf_name: pm_enable
       description: No description available
+      default_value: false
+      type: Bool
+      example: false
+    - model_name: ENABLE_RT_INTF_STATS
+      tf_name: enable_rt_intf_stats
+      description: Valid for NX-OS only
       default_value: false
       type: Bool
       example: false

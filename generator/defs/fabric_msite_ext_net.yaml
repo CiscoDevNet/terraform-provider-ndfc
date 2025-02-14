@@ -1,10 +1,10 @@
 resource:
-  name: fabric_lan_classic
+  name: fabric_msite_ext_net
   doc_category: Fabric
   generate_tf_resource: true
   parent_package: resource_fabric_common
   parent_model: fabric_common
-  description: Resource to configure and manage a LAN Classic Fabric
+  description: Resource to configure an Multi-Site Network Fabric
   attributes:
     - model_name: id
       tf_name: id
@@ -17,7 +17,7 @@ resource:
       tf_name: fabric_name
       description: 'Fabric name to be created, updated or deleted (Max Size 64).'
       type: String
-      example: TF_FABRIC_LAN_CLASSIC
+      example: TF_FABRIC_ISN
       mandatory: true
       tf_requires_replace: true
     - model_name: AAA_REMOTE_IP_ENABLED
@@ -30,8 +30,19 @@ resource:
       tf_name: aaa_server_conf
       description: AAA Configurations
       type: String
+    - model_name: BGP_AS
+      tf_name: bgp_as
+      description: >-
+        1-4294967295 | 1-65535.0-65535 It is a good practice to have a unique
+        ASN for each Fabric.
+      type: String
+      mandatory: true
     - model_name: BOOTSTRAP_CONF
       tf_name: bootstrap_conf
+      description: Additional CLIs required during device bootup/login e.g. AAA/Radius
+      type: String
+    - model_name: BOOTSTRAP_CONF_XE
+      tf_name: bootstrap_conf_xe
       description: Additional CLIs required during device bootup/login e.g. AAA/Radius
       type: String
     - model_name: BOOTSTRAP_ENABLE
@@ -73,6 +84,10 @@ resource:
       tf_name: dhcp_start
       description: Start Address For Switch POAP
       type: String
+    - model_name: DOMAIN_NAME
+      tf_name: domain_name
+      description: Domain name for DHCP server PnP block
+      type: String
     - model_name: ENABLE_AAA
       tf_name: enable_aaa
       description: Include AAA configs from Advanced tab during device bootup
@@ -95,9 +110,17 @@ resource:
       default_value: false
       type: Bool
       example: false
+    - model_name: ENABLE_RT_INTF_STATS
+      tf_name: enable_rt_intf_stats
+      description: Valid for NX-OS only
+      default_value: false
+      type: Bool
+      example: false
     - model_name: FABRIC_FREEFORM
       tf_name: fabric_freeform
-      description: Additional supported CLIs for all same OS (e.g. all NxOS etc) switches
+      description: >-
+        Additional supported CLIs for all same OS (e.g. all NxOS or IOS-XE, etc)
+        switches
       type: String
     - model_name: FEATURE_PTP
       tf_name: feature_ptp
@@ -117,6 +140,11 @@ resource:
       default_value: false
       type: Bool
       example: false
+    - model_name: INTF_STAT_LOAD_INTERVAL
+      tf_name: intf_stat_load_interval
+      description: Time in seconds
+      type: Int64
+      handle_empty: true
     - model_name: IS_READ_ONLY
       tf_name: is_read_only
       description: 'If enabled, fabric is only monitored. No configuration will be deployed'
@@ -200,6 +228,10 @@ resource:
       default_value: false
       type: Bool
       example: false
+    - model_name: PNP_ENABLE
+      tf_name: pnp_enable
+      description: Enable Plug n Play (Automatic IP Assignment) for Cat9K switches
+      type: Bool
     - model_name: POWER_REDUNDANCY_MODE
       tf_name: power_redundancy_mode
       description: Default Power Supply Mode For Bootstrapped NX-OS Switches
@@ -232,15 +264,11 @@ resource:
     - model_name: enableRealTimeBackup
       tf_name: enable_realtime_backup
       description: Backup hourly only if there is any config deployment since last backup
-      default_value: false
       type: Bool
-      example: false
     - model_name: enableScheduledBackup
       tf_name: enable_scheduled_backup
       description: Backup at the specified time
-      default_value: false
       type: Bool
-      example: false
     - model_name: scheduledTime
       tf_name: scheduled_time
       description: 'Time (UTC) in 24hr format. (00:00 to 23:59)'
@@ -256,8 +284,8 @@ resource:
     - model_name: deployment_status
       tf_name: deployment_status
       description: >-
-        This fields shows the  status of the deployment. It can be one of the
-        following: Deployment pending Deployment successful
+        This fields shows the actual status of the deployment. It can be one of
+        the following: Deployment pending Deployment successful
       type: String
       computed: true
       payload_hide: true

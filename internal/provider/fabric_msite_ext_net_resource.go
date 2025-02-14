@@ -12,33 +12,33 @@ import (
 	"context"
 	"fmt"
 	"terraform-provider-ndfc/internal/provider/ndfc"
-	"terraform-provider-ndfc/internal/provider/resources/resource_fabric_ipfm"
+	"terraform-provider-ndfc/internal/provider/resources/resource_fabric_msite_ext_net"
 
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-log/tflog"
 )
 
-var _ resource.Resource = (*fabricIpfmResource)(nil)
-var _ resource.ResourceWithImportState = (*fabricIpfmResource)(nil)
+var _ resource.Resource = (*fabricIntersiteNetworkResource)(nil)
+var _ resource.ResourceWithImportState = (*fabricIntersiteNetworkResource)(nil)
 
-func NewFabricIpfmResource() resource.Resource {
-	return &fabricIpfmResource{}
+func NewFabricIntersiteNetworkResource() resource.Resource {
+	return &fabricIntersiteNetworkResource{}
 }
 
-type fabricIpfmResource struct {
+type fabricIntersiteNetworkResource struct {
 	client *ndfc.NDFC
 }
 
-func (r *fabricIpfmResource) Metadata(ctx context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
-	resp.TypeName = req.ProviderTypeName + "_" + ndfc.ResourceIpfmFabric
+func (r *fabricIntersiteNetworkResource) Metadata(ctx context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
+	resp.TypeName = req.ProviderTypeName + "_" + ndfc.ResourceIsnFabric
 }
 
-func (r *fabricIpfmResource) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {
-	resp.Schema = resource_fabric_ipfm.FabricIpfmResourceSchema(ctx)
+func (r *fabricIntersiteNetworkResource) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {
+	resp.Schema = resource_fabric_msite_ext_net.FabricMsiteExtNetResourceSchema(ctx)
 }
 
-func (d *fabricIpfmResource) Configure(ctx context.Context, req resource.ConfigureRequest, resp *resource.ConfigureResponse) {
+func (d *fabricIntersiteNetworkResource) Configure(ctx context.Context, req resource.ConfigureRequest, resp *resource.ConfigureResponse) {
 	// Prevent panic if the provider has not been configured.
 	if req.ProviderData == nil {
 		return
@@ -55,8 +55,8 @@ func (d *fabricIpfmResource) Configure(ctx context.Context, req resource.Configu
 	d.client = client
 }
 
-func (r *fabricIpfmResource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
-	var data resource_fabric_ipfm.FabricIpfmModel
+func (r *fabricIntersiteNetworkResource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
+	var data resource_fabric_msite_ext_net.FabricMsiteExtNetModel
 
 	// Read Terraform plan data into the model
 	resp.Diagnostics.Append(req.Plan.Get(ctx, &data)...)
@@ -68,7 +68,7 @@ func (r *fabricIpfmResource) Create(ctx context.Context, req resource.CreateRequ
 	}
 	// Create API call logic
 	deploy := data.Deploy.ValueBool()
-	r.client.RscCreateFabric(ctx, &resp.Diagnostics, &data, ndfc.ResourceIpfmFabricType)
+	r.client.RscCreateFabric(ctx, &resp.Diagnostics, &data, ndfc.ResourceIsnFabricType)
 	data.Deploy = types.BoolValue(deploy)
 	data.Id = types.String(data.FabricName)
 	tflog.Debug(ctx, "data.Id = "+data.Id.ValueString())
@@ -90,8 +90,8 @@ func (r *fabricIpfmResource) Create(ctx context.Context, req resource.CreateRequ
 	resp.Diagnostics.Append(resp.State.Set(ctx, data)...)
 }
 
-func (r *fabricIpfmResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
-	var data resource_fabric_ipfm.FabricIpfmModel
+func (r *fabricIntersiteNetworkResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
+	var data resource_fabric_msite_ext_net.FabricMsiteExtNetModel
 
 	// Read Terraform prior state data into the model
 	resp.Diagnostics.Append(req.State.Get(ctx, &data)...)
@@ -108,7 +108,7 @@ func (r *fabricIpfmResource) Read(ctx context.Context, req resource.ReadRequest,
 	unique_id := data.Id.ValueString()
 	tflog.Info(ctx, fmt.Sprintf("Incoming ID %s", unique_id))
 	deploy := data.Deploy.ValueBool()
-	r.client.RscReadFabric(ctx, &resp.Diagnostics, &data, ndfc.ResourceIpfmFabricType)
+	r.client.RscReadFabric(ctx, &resp.Diagnostics, &data, ndfc.ResourceIsnFabricType)
 	data.Deploy = types.BoolValue(deploy)
 	data.Id = types.String(data.FabricName)
 	if resp.Diagnostics.HasError() {
@@ -119,10 +119,10 @@ func (r *fabricIpfmResource) Read(ctx context.Context, req resource.ReadRequest,
 
 }
 
-func (r *fabricIpfmResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
+func (r *fabricIntersiteNetworkResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
 
-	var planData resource_fabric_ipfm.FabricIpfmModel
-	var stateData resource_fabric_ipfm.FabricIpfmModel
+	var planData resource_fabric_msite_ext_net.FabricMsiteExtNetModel
+	var stateData resource_fabric_msite_ext_net.FabricMsiteExtNetModel
 
 	resp.Diagnostics.Append(req.Plan.Get(ctx, &planData)...)
 	resp.Diagnostics.Append(req.State.Get(ctx, &stateData)...)
@@ -130,17 +130,14 @@ func (r *fabricIpfmResource) Update(ctx context.Context, req resource.UpdateRequ
 	if resp.Diagnostics.HasError() {
 		return
 	}
+	if stateData.BgpAs.ValueString() != planData.BgpAs.ValueString() {
+		resp.Diagnostics.AddError("bgp_as cannot be updated", "bgp_as is immutable")
+	}
 	// Create API call logic
 	deploy := planData.Deploy.ValueBool()
-	r.client.RscUpdateFabric(ctx, &resp.Diagnostics, &planData, ndfc.ResourceIpfmFabricType)
+	r.client.RscUpdateFabric(ctx, &resp.Diagnostics, &planData, ndfc.ResourceIsnFabricType)
 	planData.Deploy = types.BoolValue(deploy)
 	planData.Id = types.String(planData.FabricName)
-	if resp.Diagnostics.HasError() {
-		tflog.Error(ctx, "Update Fabric Failed")
-		return
-	}
-	unique_id := planData.Id.ValueString()
-	tflog.Info(ctx, fmt.Sprintf("Update Fabric Success %s", unique_id))
 	if deploy {
 		if resp.Diagnostics.HasError() || resp.Diagnostics.WarningsCount() > 0 {
 			planData.DeploymentStatus = types.StringValue("Deployment pending")
@@ -150,11 +147,18 @@ func (r *fabricIpfmResource) Update(ctx context.Context, req resource.UpdateRequ
 	} else {
 		planData.DeploymentStatus = types.StringValue("Deployment pending")
 	}
+	if resp.Diagnostics.HasError() {
+		tflog.Error(ctx, "Update Fabric Failed")
+		return
+	}
+	unique_id := planData.Id.ValueString()
+	tflog.Info(ctx, fmt.Sprintf("Update Fabric Success %s", unique_id))
+
 	resp.Diagnostics.Append(resp.State.Set(ctx, &planData)...)
 }
 
-func (r *fabricIpfmResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
-	var data resource_fabric_ipfm.FabricIpfmModel
+func (r *fabricIntersiteNetworkResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
+	var data resource_fabric_msite_ext_net.FabricMsiteExtNetModel
 	resp.Diagnostics.Append(req.State.Get(ctx, &data)...)
 
 	if resp.Diagnostics.HasError() {
@@ -166,7 +170,7 @@ func (r *fabricIpfmResource) Delete(ctx context.Context, req resource.DeleteRequ
 		resp.State.RemoveResource(ctx)
 		return
 	}
-	r.client.RscDeleteFabric(ctx, &resp.Diagnostics, &data, ndfc.ResourceIpfmFabricType)
+	r.client.RscDeleteFabric(ctx, &resp.Diagnostics, &data, ndfc.ResourceIsnFabricType)
 	if resp.Diagnostics.HasError() {
 		tflog.Error(ctx, "Delete Fabric Failed")
 		return
@@ -175,15 +179,15 @@ func (r *fabricIpfmResource) Delete(ctx context.Context, req resource.DeleteRequ
 	resp.Diagnostics.Append(resp.State.Set(ctx, data)...)
 }
 
-func (r *fabricIpfmResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
-	var data resource_fabric_ipfm.FabricIpfmModel
+func (r *fabricIntersiteNetworkResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
+	var data resource_fabric_msite_ext_net.FabricMsiteExtNetModel
 	tflog.Info(ctx, fmt.Sprintf("Import Fabric Incoming ID %s", req.ID))
 	if req.ID == "" {
 		resp.Diagnostics.AddError("ID cannot be empty for import", "Id is mandatory")
 		return
 	}
 	data.FabricName = types.StringValue(req.ID)
-	r.client.RscImportFabric(ctx, &resp.Diagnostics, &data, ndfc.ResourceIpfmFabricType)
+	r.client.RscImportFabric(ctx, &resp.Diagnostics, &data, ndfc.ResourceIsnFabricType)
 	if resp.Diagnostics.HasError() {
 		return
 	}
