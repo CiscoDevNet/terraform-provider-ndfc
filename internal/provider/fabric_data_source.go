@@ -66,8 +66,7 @@ func (d *fabricDataSource) Read(ctx context.Context, req datasource.ReadRequest,
 	if resp.Diagnostics.HasError() {
 		return
 	}
-	var fb *datasource_fabric.FabricModel
-	fb = d.client.DSGetFabricBulk(ctx, &resp.Diagnostics)
+	fb := d.client.DSGetFabricBulk(ctx, &resp.Diagnostics)
 	// Save data into Terraform state
 	resp.Diagnostics.Append(resp.State.Set(ctx, fb)...)
 }

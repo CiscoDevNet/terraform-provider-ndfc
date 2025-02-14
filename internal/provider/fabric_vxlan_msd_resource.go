@@ -12,13 +12,12 @@ import (
 	"context"
 	"fmt"
 	"terraform-provider-ndfc/internal/provider/ndfc"
-	"terraform-provider-ndfc/internal/provider/resources/resource_vxlan_msd_fabric"
+	"terraform-provider-ndfc/internal/provider/resources/resource_fabric_vxlan_msd"
 
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-log/tflog"
 )
-
 
 var _ resource.Resource = (*fabricVxlanMsdResource)(nil)
 var _ resource.ResourceWithImportState = (*fabricVxlanMsdResource)(nil)
@@ -36,7 +35,7 @@ func (r *fabricVxlanMsdResource) Metadata(ctx context.Context, req resource.Meta
 }
 
 func (r *fabricVxlanMsdResource) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {
-	resp.Schema = resource_vxlan_msd_fabric.VxlanMsdFabricResourceSchema(ctx)
+	resp.Schema = resource_fabric_vxlan_msd.FabricVxlanMsdResourceSchema(ctx)
 }
 
 func (d *fabricVxlanMsdResource) Configure(ctx context.Context, req resource.ConfigureRequest, resp *resource.ConfigureResponse) {
@@ -57,7 +56,7 @@ func (d *fabricVxlanMsdResource) Configure(ctx context.Context, req resource.Con
 }
 
 func (r *fabricVxlanMsdResource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
-	var data resource_vxlan_msd_fabric.VxlanMsdFabricModel
+	var data resource_fabric_vxlan_msd.FabricVxlanMsdModel
 
 	// Read Terraform plan data into the model
 	resp.Diagnostics.Append(req.Plan.Get(ctx, &data)...)
@@ -92,7 +91,7 @@ func (r *fabricVxlanMsdResource) Create(ctx context.Context, req resource.Create
 }
 
 func (r *fabricVxlanMsdResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
-	var data resource_vxlan_msd_fabric.VxlanMsdFabricModel
+	var data resource_fabric_vxlan_msd.FabricVxlanMsdModel
 
 	// Read Terraform prior state data into the model
 	resp.Diagnostics.Append(req.State.Get(ctx, &data)...)
@@ -122,8 +121,8 @@ func (r *fabricVxlanMsdResource) Read(ctx context.Context, req resource.ReadRequ
 
 func (r *fabricVxlanMsdResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
 
-	var planData resource_vxlan_msd_fabric.VxlanMsdFabricModel
-	var stateData resource_vxlan_msd_fabric.VxlanMsdFabricModel
+	var planData resource_fabric_vxlan_msd.FabricVxlanMsdModel
+	var stateData resource_fabric_vxlan_msd.FabricVxlanMsdModel
 
 	resp.Diagnostics.Append(req.Plan.Get(ctx, &planData)...)
 	resp.Diagnostics.Append(req.State.Get(ctx, &stateData)...)
@@ -156,7 +155,7 @@ func (r *fabricVxlanMsdResource) Update(ctx context.Context, req resource.Update
 }
 
 func (r *fabricVxlanMsdResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
-	var data resource_vxlan_msd_fabric.VxlanMsdFabricModel
+	var data resource_fabric_vxlan_msd.FabricVxlanMsdModel
 	resp.Diagnostics.Append(req.State.Get(ctx, &data)...)
 
 	if resp.Diagnostics.HasError() {
@@ -178,7 +177,7 @@ func (r *fabricVxlanMsdResource) Delete(ctx context.Context, req resource.Delete
 }
 
 func (r *fabricVxlanMsdResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
-	var data resource_vxlan_msd_fabric.VxlanMsdFabricModel
+	var data resource_fabric_vxlan_msd.FabricVxlanMsdModel
 	tflog.Info(ctx, fmt.Sprintf("Import Fabric Incoming ID %s", req.ID))
 	if req.ID == "" {
 		resp.Diagnostics.AddError("ID cannot be empty for import", "Id is mandatory")
