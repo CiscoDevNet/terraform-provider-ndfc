@@ -17,7 +17,7 @@ resource:
       tf_name: fabric_name
       description: 'Fabric name to be created, updated or deleted (Max Size 64).'
       type: String
-      example: TF_FABRIC_ISN
+      example: TF_FABRIC_MSITE_EXT_NET
       mandatory: true
       tf_requires_replace: true
     - model_name: AAA_REMOTE_IP_ENABLED
@@ -37,6 +37,7 @@ resource:
         ASN for each Fabric.
       type: String
       mandatory: true
+      example: 65000
     - model_name: BOOTSTRAP_CONF
       tf_name: bootstrap_conf
       description: Additional CLIs required during device bootup/login e.g. AAA/Radius
