@@ -12,7 +12,7 @@ import (
 	"context"
 	"fmt"
 	"terraform-provider-ndfc/internal/provider/ndfc"
-	"terraform-provider-ndfc/internal/provider/resources/resource_lan_classic_fabric"
+	"terraform-provider-ndfc/internal/provider/resources/resource_fabric_lan_classic"
 
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/types"
@@ -35,7 +35,7 @@ func (r *fabricLanClassicResource) Metadata(ctx context.Context, req resource.Me
 }
 
 func (r *fabricLanClassicResource) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {
-	resp.Schema = resource_lan_classic_fabric.LanClassicFabricResourceSchema(ctx)
+	resp.Schema = resource_fabric_lan_classic.FabricLanClassicResourceSchema(ctx)
 }
 
 func (d *fabricLanClassicResource) Configure(ctx context.Context, req resource.ConfigureRequest, resp *resource.ConfigureResponse) {
@@ -56,7 +56,7 @@ func (d *fabricLanClassicResource) Configure(ctx context.Context, req resource.C
 }
 
 func (r *fabricLanClassicResource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
-	var data resource_lan_classic_fabric.LanClassicFabricModel
+	var data resource_fabric_lan_classic.FabricLanClassicModel
 
 	// Read Terraform plan data into the model
 	resp.Diagnostics.Append(req.Plan.Get(ctx, &data)...)
@@ -91,7 +91,7 @@ func (r *fabricLanClassicResource) Create(ctx context.Context, req resource.Crea
 }
 
 func (r *fabricLanClassicResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
-	var data resource_lan_classic_fabric.LanClassicFabricModel
+	var data resource_fabric_lan_classic.FabricLanClassicModel
 
 	// Read Terraform prior state data into the model
 	resp.Diagnostics.Append(req.State.Get(ctx, &data)...)
@@ -121,8 +121,8 @@ func (r *fabricLanClassicResource) Read(ctx context.Context, req resource.ReadRe
 
 func (r *fabricLanClassicResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
 
-	var planData resource_lan_classic_fabric.LanClassicFabricModel
-	var stateData resource_lan_classic_fabric.LanClassicFabricModel
+	var planData resource_fabric_lan_classic.FabricLanClassicModel
+	var stateData resource_fabric_lan_classic.FabricLanClassicModel
 
 	resp.Diagnostics.Append(req.Plan.Get(ctx, &planData)...)
 	resp.Diagnostics.Append(req.State.Get(ctx, &stateData)...)
@@ -155,7 +155,7 @@ func (r *fabricLanClassicResource) Update(ctx context.Context, req resource.Upda
 }
 
 func (r *fabricLanClassicResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
-	var data resource_lan_classic_fabric.LanClassicFabricModel
+	var data resource_fabric_lan_classic.FabricLanClassicModel
 	resp.Diagnostics.Append(req.State.Get(ctx, &data)...)
 
 	if resp.Diagnostics.HasError() {
@@ -177,7 +177,7 @@ func (r *fabricLanClassicResource) Delete(ctx context.Context, req resource.Dele
 }
 
 func (r *fabricLanClassicResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
-	var data resource_lan_classic_fabric.LanClassicFabricModel
+	var data resource_fabric_lan_classic.FabricLanClassicModel
 	tflog.Info(ctx, fmt.Sprintf("Import Fabric Incoming ID %s", req.ID))
 	if req.ID == "" {
 		resp.Diagnostics.AddError("ID cannot be empty for import", "Id is mandatory")

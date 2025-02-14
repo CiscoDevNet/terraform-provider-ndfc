@@ -1,5 +1,5 @@
 resource:
-  name: lan_classic_fabric
+  name: fabric_lan_classic
   doc_category: Fabric
   generate_tf_resource: true
   parent_package: resource_fabric_common

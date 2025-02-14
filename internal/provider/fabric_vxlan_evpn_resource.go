@@ -12,7 +12,7 @@ import (
 	"context"
 	"fmt"
 	"terraform-provider-ndfc/internal/provider/ndfc"
-	"terraform-provider-ndfc/internal/provider/resources/resource_vxlan_evpn_fabric"
+	"terraform-provider-ndfc/internal/provider/resources/resource_fabric_vxlan_evpn"
 
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/types"
@@ -35,7 +35,7 @@ func (r *fabricVxlanEvpnResource) Metadata(ctx context.Context, req resource.Met
 }
 
 func (r *fabricVxlanEvpnResource) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {
-	resp.Schema = resource_vxlan_evpn_fabric.VxlanEvpnFabricResourceSchema(ctx)
+	resp.Schema = resource_fabric_vxlan_evpn.FabricVxlanEvpnResourceSchema(ctx)
 }
 
 func (d *fabricVxlanEvpnResource) Configure(ctx context.Context, req resource.ConfigureRequest, resp *resource.ConfigureResponse) {
@@ -56,7 +56,7 @@ func (d *fabricVxlanEvpnResource) Configure(ctx context.Context, req resource.Co
 }
 
 func (r *fabricVxlanEvpnResource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
-	var data resource_vxlan_evpn_fabric.VxlanEvpnFabricModel
+	var data resource_fabric_vxlan_evpn.FabricVxlanEvpnModel
 
 	// Read Terraform plan data into the model
 	resp.Diagnostics.Append(req.Plan.Get(ctx, &data)...)
@@ -91,7 +91,7 @@ func (r *fabricVxlanEvpnResource) Create(ctx context.Context, req resource.Creat
 }
 
 func (r *fabricVxlanEvpnResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
-	var data resource_vxlan_evpn_fabric.VxlanEvpnFabricModel
+	var data resource_fabric_vxlan_evpn.FabricVxlanEvpnModel
 
 	// Read Terraform prior state data into the model
 	resp.Diagnostics.Append(req.State.Get(ctx, &data)...)
@@ -121,8 +121,8 @@ func (r *fabricVxlanEvpnResource) Read(ctx context.Context, req resource.ReadReq
 
 func (r *fabricVxlanEvpnResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
 
-	var planData resource_vxlan_evpn_fabric.VxlanEvpnFabricModel
-	var stateData resource_vxlan_evpn_fabric.VxlanEvpnFabricModel
+	var planData resource_fabric_vxlan_evpn.FabricVxlanEvpnModel
+	var stateData resource_fabric_vxlan_evpn.FabricVxlanEvpnModel
 
 	resp.Diagnostics.Append(req.Plan.Get(ctx, &planData)...)
 	resp.Diagnostics.Append(req.State.Get(ctx, &stateData)...)
@@ -130,8 +130,8 @@ func (r *fabricVxlanEvpnResource) Update(ctx context.Context, req resource.Updat
 	if resp.Diagnostics.HasError() {
 		return
 	}
-	if !stateData.BgpAs.IsNull() && !planData.BgpAs.IsNull() && stateData.BgpAs.ValueString() != planData.BgpAs.ValueString() {
-		resp.Diagnostics.AddError("BgpAs cannot be updated", "BgpAs is immutable")
+	if stateData.BgpAs.ValueString() != planData.BgpAs.ValueString() {
+		resp.Diagnostics.AddError("bgp_as cannot be updated", "bgp_as is immutable")
 	}
 	// Create API call logic
 	deploy := planData.Deploy.ValueBool()
@@ -158,7 +158,7 @@ func (r *fabricVxlanEvpnResource) Update(ctx context.Context, req resource.Updat
 }
 
 func (r *fabricVxlanEvpnResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
-	var data resource_vxlan_evpn_fabric.VxlanEvpnFabricModel
+	var data resource_fabric_vxlan_evpn.FabricVxlanEvpnModel
 	resp.Diagnostics.Append(req.State.Get(ctx, &data)...)
 
 	if resp.Diagnostics.HasError() {
@@ -180,7 +180,7 @@ func (r *fabricVxlanEvpnResource) Delete(ctx context.Context, req resource.Delet
 }
 
 func (r *fabricVxlanEvpnResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
-	var data resource_vxlan_evpn_fabric.VxlanEvpnFabricModel
+	var data resource_fabric_vxlan_evpn.FabricVxlanEvpnModel
 	tflog.Info(ctx, fmt.Sprintf("Import Fabric Incoming ID %s", req.ID))
 	if req.ID == "" {
 		resp.Diagnostics.AddError("ID cannot be empty for import", "Id is mandatory")

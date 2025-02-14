@@ -1,5 +1,5 @@
 resource:
-  name: ip_fabric_media
+  name: fabric_ipfm
   doc_category: Fabric
   generate_tf_resource: true
   parent_package: resource_fabric_common

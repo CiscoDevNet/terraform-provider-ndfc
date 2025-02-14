@@ -567,6 +567,11 @@ func FabricVxlanEvpnModelHelperStateCheck(RscName string, c resource_fabric_comm
 	} else {
 		ret = append(ret, resource.TestCheckResourceAttr(RscName, attrPath.AtName("pm_enable").String(), "false"))
 	}
+	if c.EnableRtIntfStats != "" {
+		ret = append(ret, resource.TestCheckResourceAttr(RscName, attrPath.AtName("enable_rt_intf_stats").String(), c.EnableRtIntfStats))
+	} else {
+		ret = append(ret, resource.TestCheckResourceAttr(RscName, attrPath.AtName("enable_rt_intf_stats").String(), "false"))
+	}
 	if c.PowerRedundancyMode != "" {
 		ret = append(ret, resource.TestCheckResourceAttr(RscName, attrPath.AtName("power_redundancy_mode").String(), c.PowerRedundancyMode))
 	} else {

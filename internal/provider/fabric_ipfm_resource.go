@@ -12,33 +12,33 @@ import (
 	"context"
 	"fmt"
 	"terraform-provider-ndfc/internal/provider/ndfc"
-	"terraform-provider-ndfc/internal/provider/resources/resource_ip_fabric_media"
+	"terraform-provider-ndfc/internal/provider/resources/resource_fabric_ipfm"
 
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-log/tflog"
 )
 
-var _ resource.Resource = (*fabricIpFabricMediaResource)(nil)
-var _ resource.ResourceWithImportState = (*fabricIpFabricMediaResource)(nil)
+var _ resource.Resource = (*fabricIpfmResource)(nil)
+var _ resource.ResourceWithImportState = (*fabricIpfmResource)(nil)
 
 func NewFabricIpfmResource() resource.Resource {
-	return &fabricIpFabricMediaResource{}
+	return &fabricIpfmResource{}
 }
 
-type fabricIpFabricMediaResource struct {
+type fabricIpfmResource struct {
 	client *ndfc.NDFC
 }
 
-func (r *fabricIpFabricMediaResource) Metadata(ctx context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
+func (r *fabricIpfmResource) Metadata(ctx context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
 	resp.TypeName = req.ProviderTypeName + "_" + ndfc.ResourceIpfmFabric
 }
 
-func (r *fabricIpFabricMediaResource) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {
-	resp.Schema = resource_ip_fabric_media.IpFabricMediaResourceSchema(ctx)
+func (r *fabricIpfmResource) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {
+	resp.Schema = resource_fabric_ipfm.FabricIpfmResourceSchema(ctx)
 }
 
-func (d *fabricIpFabricMediaResource) Configure(ctx context.Context, req resource.ConfigureRequest, resp *resource.ConfigureResponse) {
+func (d *fabricIpfmResource) Configure(ctx context.Context, req resource.ConfigureRequest, resp *resource.ConfigureResponse) {
 	// Prevent panic if the provider has not been configured.
 	if req.ProviderData == nil {
 		return
@@ -55,8 +55,8 @@ func (d *fabricIpFabricMediaResource) Configure(ctx context.Context, req resourc
 	d.client = client
 }
 
-func (r *fabricIpFabricMediaResource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
-	var data resource_ip_fabric_media.IpFabricMediaModel
+func (r *fabricIpfmResource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
+	var data resource_fabric_ipfm.FabricIpfmModel
 
 	// Read Terraform plan data into the model
 	resp.Diagnostics.Append(req.Plan.Get(ctx, &data)...)
@@ -90,8 +90,8 @@ func (r *fabricIpFabricMediaResource) Create(ctx context.Context, req resource.C
 	resp.Diagnostics.Append(resp.State.Set(ctx, data)...)
 }
 
-func (r *fabricIpFabricMediaResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
-	var data resource_ip_fabric_media.IpFabricMediaModel
+func (r *fabricIpfmResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
+	var data resource_fabric_ipfm.FabricIpfmModel
 
 	// Read Terraform prior state data into the model
 	resp.Diagnostics.Append(req.State.Get(ctx, &data)...)
@@ -119,10 +119,10 @@ func (r *fabricIpFabricMediaResource) Read(ctx context.Context, req resource.Rea
 
 }
 
-func (r *fabricIpFabricMediaResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
+func (r *fabricIpfmResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
 
-	var planData resource_ip_fabric_media.IpFabricMediaModel
-	var stateData resource_ip_fabric_media.IpFabricMediaModel
+	var planData resource_fabric_ipfm.FabricIpfmModel
+	var stateData resource_fabric_ipfm.FabricIpfmModel
 
 	resp.Diagnostics.Append(req.Plan.Get(ctx, &planData)...)
 	resp.Diagnostics.Append(req.State.Get(ctx, &stateData)...)
@@ -153,8 +153,8 @@ func (r *fabricIpFabricMediaResource) Update(ctx context.Context, req resource.U
 	resp.Diagnostics.Append(resp.State.Set(ctx, &planData)...)
 }
 
-func (r *fabricIpFabricMediaResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
-	var data resource_ip_fabric_media.IpFabricMediaModel
+func (r *fabricIpfmResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
+	var data resource_fabric_ipfm.FabricIpfmModel
 	resp.Diagnostics.Append(req.State.Get(ctx, &data)...)
 
 	if resp.Diagnostics.HasError() {
@@ -175,8 +175,8 @@ func (r *fabricIpFabricMediaResource) Delete(ctx context.Context, req resource.D
 	resp.Diagnostics.Append(resp.State.Set(ctx, data)...)
 }
 
-func (r *fabricIpFabricMediaResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
-	var data resource_ip_fabric_media.IpFabricMediaModel
+func (r *fabricIpfmResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
+	var data resource_fabric_ipfm.FabricIpfmModel
 	tflog.Info(ctx, fmt.Sprintf("Import Fabric Incoming ID %s", req.ID))
 	if req.ID == "" {
 		resp.Diagnostics.AddError("ID cannot be empty for import", "Id is mandatory")
