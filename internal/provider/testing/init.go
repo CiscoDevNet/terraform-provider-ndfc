@@ -29,6 +29,7 @@ type NDFCConfig struct {
 	Switches          []string `yaml:"switches"`
 	VrfPrefix         string   `yaml:"vrf_prefix"`
 	NetPrefix         string   `yaml:"net_prefix"`
+	VpcPair           []string `yaml:"vpc_pair"`
 	mockPort          int
 	mockServerStarted bool
 	mockConfigFile    string

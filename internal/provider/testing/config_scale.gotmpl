@@ -87,7 +87,7 @@ resource "ndfc_{{.RscType}}" "{{.RscName}}" {
 
 {{define "NDFC_NETWORK_RESOURCE"}}
 resource "ndfc_{{.RscType}}" "{{.RscName}}" {
-depends_on = [resource.ndfc_vrf_bulk.{{.VrfRscName}}]
+depends_on = [resource.ndfc_vrfs.{{.VrfRscName}}]
 {{with .Network}}
     fabric_name = "{{.FabricName}}"
     deploy_all_attachments = {{.DeployAllAttachments}}

@@ -102,6 +102,8 @@ func InterfaceVlanInterfacesValueHelperStateCheck(RscName string, c resource_int
 	}
 	if c.NvPairs.HsrpGroup != nil {
 		ret = append(ret, resource.TestCheckResourceAttr(RscName, attrPath.AtName("hsrp_group").String(), strconv.Itoa(int(*c.NvPairs.HsrpGroup))))
+	} else {
+		ret = append(ret, resource.TestCheckResourceAttr(RscName, attrPath.AtName("hsrp_group").String(), "1"))
 	}
 	if c.NvPairs.HsrpVip != "" {
 		ret = append(ret, resource.TestCheckResourceAttr(RscName, attrPath.AtName("hsrp_vip").String(), c.NvPairs.HsrpVip))

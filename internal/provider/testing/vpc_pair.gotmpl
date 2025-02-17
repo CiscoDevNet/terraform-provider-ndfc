@@ -7,6 +7,7 @@ resource "ndfc_{{.RscType}}" "{{.RscName}}" {
         {{- end}}
         ]
         use_virtual_peerlink  = {{deref_bool .UseVirtualPeerlink}}
+        deploy = {{.Deploy}}
     {{end}}
 }
 {{end}}

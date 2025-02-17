@@ -51,7 +51,7 @@ func TestAccNetworksResourceCRUD(t *testing.T) {
 		domain   = "example.com"
 		insecure = true
 		}
-		resource ndfc_vrf_bulk "net_test" {
+		resource ndfc_vrfs "net_test" {
 			fabric_name = "dummy"
 		}`
 
@@ -263,10 +263,10 @@ func TestAccNetworksResourceAttachmentCRUD(t *testing.T) {
 					*stepCount++
 					tName := fmt.Sprintf("%s_%d", t.Name(), *stepCount)
 					helper.NetAttachmentsMod(&networkRsc, 1, 1, helper.GetConfig("network").NDFC.Switches, helper.GetConfig("network").NDFC.Switches[2], map[string]interface{}{
-						"switch_ports": types.CSVString{"Ethernet1/1", "Ethernet1/2"},
+						"switch_ports": types.CSVString{"Ethernet1/10", "Ethernet1/12"},
 					})
 					helper.NetAttachmentsMod(&networkRsc, 10, 10, helper.GetConfig("network").NDFC.Switches, helper.GetConfig("network").NDFC.Switches[2], map[string]interface{}{
-						"switch_ports": types.CSVString{"Ethernet1/1", "Ethernet1/2"},
+						"switch_ports": types.CSVString{"Ethernet1/10", "Ethernet1/12"},
 					})
 					helper.GetTFConfigWithSingleResource(tName, *x, []interface{}{vrfRsc, networkRsc}, &tf_config)
 					return *tf_config
@@ -280,10 +280,10 @@ func TestAccNetworksResourceAttachmentCRUD(t *testing.T) {
 					*stepCount++
 					tName := fmt.Sprintf("%s_%d", t.Name(), *stepCount)
 					helper.NetAttachmentsMod(&networkRsc, 1, 1, helper.GetConfig("network").NDFC.Switches, helper.GetConfig("network").NDFC.Switches[2], map[string]interface{}{
-						"switch_ports": types.CSVString{"Ethernet1/2"},
+						"switch_ports": types.CSVString{"Ethernet1/12"},
 					})
 					helper.NetAttachmentsMod(&networkRsc, 10, 10, helper.GetConfig("network").NDFC.Switches, helper.GetConfig("network").NDFC.Switches[2], map[string]interface{}{
-						"switch_ports": types.CSVString{"Ethernet1/2", "Ethernet1/3"},
+						"switch_ports": types.CSVString{"Ethernet1/12", "Ethernet1/13"},
 					})
 					helper.GetTFConfigWithSingleResource(tName, *x, []interface{}{vrfRsc, networkRsc}, &tf_config)
 					return *tf_config
@@ -311,7 +311,7 @@ func TestAccNetworksResourceGlobalDeploy(t *testing.T) {
 		domain   = "example.com"
 		insecure = true
 		}
-		resource ndfc_vrf_bulk "net_test" {
+		resource ndfc_vrfs "net_test" {
 			fabric_name = "dummy"
 		}`
 
@@ -362,7 +362,7 @@ func TestAccNetworksResourceAttachmentDeployNetLevel(t *testing.T) {
 		domain   = "example.com"
 		insecure = true
 		}
-		resource ndfc_vrf_bulk "net_test" {
+		resource ndfc_vrfs "net_test" {
 			fabric_name = "dummy"
 		}`
 
@@ -413,7 +413,7 @@ func TestAccNetworksResourceAttachmentDeployAttachments(t *testing.T) {
 		domain   = "example.com"
 		insecure = true
 		}
-		resource ndfc_vrf_bulk "net_test" {
+		resource ndfc_vrfs "net_test" {
 			fabric_name = "dummy"
 		}`
 
@@ -464,7 +464,7 @@ func TestAccNetworksResourceRscUpdateAndGlobalDeploy(t *testing.T) {
 		domain   = "example.com"
 		insecure = true
 		}
-		resource ndfc_vrf_bulk "net_test" {
+		resource ndfc_vrfs "net_test" {
 			fabric_name = "dummy"
 		}`
 
@@ -540,7 +540,7 @@ func TestAccNetwotksResourceGlobalDeployWithChanges(t *testing.T) {
 					insecure = true
 				}
 
-				resource "ndfc_vrf_bulk" "test_resource_vrf_bulk_1" {
+				resource "ndfc_vrfs" "test_resource_vrf_bulk_1" {
 					fabric_name = "CML"
 					deploy_all_attachments = true
 					vrfs = {
@@ -557,7 +557,7 @@ func TestAccNetwotksResourceGlobalDeployWithChanges(t *testing.T) {
 				}
 
 				resource "ndfc_networks" "test_resource_networks_1" {
-				    depends_on = [ndfc_vrf_bulk.test_resource_vrf_bulk_1]
+				    depends_on = [ndfc_vrfs.test_resource_vrf_bulk_1]
 					fabric_name            = "CML"
 					deploy_all_attachments = true
 					networks = {
