@@ -11,6 +11,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/booldefault"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/int64default"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringdefault"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
@@ -96,11 +97,13 @@ func InterfaceVlanResourceSchema(ctx context.Context) schema.Schema {
 						},
 						"hsrp_group": schema.Int64Attribute{
 							Optional:            true,
+							Computed:            true,
 							Description:         "HSRP group number",
 							MarkdownDescription: "HSRP group number",
 							Validators: []validator.Int64{
 								int64validator.Between(0, 255),
 							},
+							Default: int64default.StaticInt64(1),
 						},
 						"hsrp_priority": schema.Int64Attribute{
 							Optional:            true,

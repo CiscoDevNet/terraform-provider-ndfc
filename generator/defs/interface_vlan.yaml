@@ -182,6 +182,7 @@ resource:
         validator: Between(0, 255)
         description: HSRP group number
         handle_empty: true
+        default_value: 1
       - model_name: HSRP_VIP
         ndfc_nested: [nvPairs]
         tf_name: hsrp_vip
