@@ -9,5 +9,8 @@ ndfc:
     - "9FE076D8EJL"
     - "9TQYTJSZ1VJ"
     - "9QBCTIN0FMY"
-  vrf_prefix: "vrf_acc_test_"
-  net_prefix: "net_acc_test_"
+  vrf_prefix: "vrf_a_test_"
+  net_prefix: "net_a_test_"
+  vpc_pair: 
+    - "9TQYTJSZ1VJ"
+    - "9Q34PHYLDB5"
