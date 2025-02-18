@@ -444,7 +444,7 @@ func (c NDFC) RscUpdateBulkVrf(ctx context.Context,
 		dg.AddError("VRF Read Failed", err.Error())
 		return
 	}
-	for vrf, _ := range putVrfs.Vrfs {
+	for vrf := range putVrfs.Vrfs {
 		_, ok := ndfcVRFs.Vrfs[vrf]
 		if !ok {
 			errString := fmt.Sprintf("VRF %s to update is missing in NDFC", vrf)
@@ -459,7 +459,7 @@ func (c NDFC) RscUpdateBulkVrf(ctx context.Context,
 		updateVA.VrfAttachments = make(resource_vrf_attachments.NDFCVrfAttachmentsValues, 0)
 	*/
 	// Step 2 - VRFs to delete are available
-	for vrf, _ := range delVrfs.Vrfs {
+	for vrf := range delVrfs.Vrfs {
 		_, ok := ndfcVRFs.Vrfs[vrf]
 		if !ok {
 			// is this error a big deal? VRFs to be deleted missing - so ignore??
@@ -469,7 +469,7 @@ func (c NDFC) RscUpdateBulkVrf(ctx context.Context,
 	}
 	// Step 3 - Check if VRFs to be created (create-delete) are not present in NDFC
 
-	for vrf, _ := range newVrfs.Vrfs {
+	for vrf := range newVrfs.Vrfs {
 		_, ok := ndfcVRFs.Vrfs[vrf]
 		if ok {
 			//VRF present in NDFC

@@ -411,13 +411,13 @@ func (r *InventoryDevicesResource) Delete(ctx context.Context, req resource.Dele
 
 func (r *InventoryDevicesResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
 	tflog.Debug(ctx, fmt.Sprintf("Start of %s ImportState", loggingInventoryDevices))
-	auth_protocol := os.Getenv("NDFC_INVENTORY_AUTH_PROTOCOL")
-	if auth_protocol == "" {
-		auth_protocol = defaultAuthProtocol
-	} else if _, ok := snmpAuthenticationProtocol[auth_protocol]; !ok {
-		resp.Diagnostics.AddError("Invalid input", fmt.Sprintf("Invalid value for auth_protocol: %s, please set the NDFC_INVENTORY_AUTH_PROTOCOL environment variable to one of %v", auth_protocol, reflect.ValueOf(snmpAuthenticationProtocol).MapKeys()))
+	authProtocol := os.Getenv("NDFC_INVENTORY_AUTH_PROTOCOL")
+	if authProtocol == "" {
+		authProtocol = defaultAuthProtocol
+	} else if _, ok := snmpAuthenticationProtocol[authProtocol]; !ok {
+		resp.Diagnostics.AddError("Invalid input", fmt.Sprintf("Invalid value for auth_protocol: %s, please set the NDFC_INVENTORY_AUTH_PROTOCOL environment variable to one of %v", authProtocol, reflect.ValueOf(snmpAuthenticationProtocol).MapKeys()))
 	}
-	resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("auth_protocol"), auth_protocol)...)
+	resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("auth_protocol"), authProtocol)...)
 
 	username := os.Getenv("NDFC_INVENTORY_USERNAME")
 	if username == "" {
