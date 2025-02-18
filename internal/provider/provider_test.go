@@ -43,6 +43,7 @@ func TestMain(m *testing.M) {
 }
 
 func testAccPreCheck(t *testing.T, module string) {
+	t.Logf("Starting testAccPreCheck for %s", module)
 	if !helper.IsMocked() {
 		return
 	}
