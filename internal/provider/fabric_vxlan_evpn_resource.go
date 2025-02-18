@@ -105,8 +105,8 @@ func (r *fabricVxlanEvpnResource) Read(ctx context.Context, req resource.ReadReq
 		resp.State.RemoveResource(ctx)
 		return
 	}
-	unique_id := data.Id.ValueString()
-	tflog.Info(ctx, fmt.Sprintf("Incoming ID %s", unique_id))
+	uniqueId := data.Id.ValueString()
+	tflog.Info(ctx, fmt.Sprintf("Incoming ID %s", uniqueId))
 	deploy := data.Deploy.ValueBool()
 	r.client.RscReadFabric(ctx, &resp.Diagnostics, &data, ndfc.ResourceVxlanEvpnType)
 	data.Deploy = types.BoolValue(deploy)
@@ -151,8 +151,8 @@ func (r *fabricVxlanEvpnResource) Update(ctx context.Context, req resource.Updat
 		tflog.Error(ctx, "Update Fabric Failed")
 		return
 	}
-	unique_id := planData.Id.ValueString()
-	tflog.Info(ctx, fmt.Sprintf("Update Fabric Success %s", unique_id))
+	uniqueId := planData.Id.ValueString()
+	tflog.Info(ctx, fmt.Sprintf("Update Fabric Success %s", uniqueId))
 
 	resp.Diagnostics.Append(resp.State.Set(ctx, &planData)...)
 }
