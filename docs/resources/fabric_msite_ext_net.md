@@ -14,8 +14,9 @@ Resource to configure an Multi-Site Network Fabric
 
 ```terraform
 resource "ndfc_fabric_msite_ext_net" "test_resource_fabric_msite_ext_net_1" {
-  fabric_name           = "TF_FABRIC_ISN"
+  fabric_name           = "TF_FABRIC_MSITE_EXT_NET"
   aaa_remote_ip_enabled = false
+  bgp_as                = "65000"
   bootstrap_multisubnet = "#Scope_Start_IP, Scope_End_IP, Scope_Default_Gateway, Scope_Subnet_Prefix"
   cdp_enable            = false
   dhcp_enable           = false

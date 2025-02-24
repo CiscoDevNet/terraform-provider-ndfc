@@ -195,3 +195,11 @@ func (r *fabricVxlanEvpnResource) ImportState(ctx context.Context, req resource.
 	resp.Diagnostics.Append(resp.State.Set(ctx, data)...)
 
 }
+func (r *fabricVxlanEvpnResource) ValidateConfig(ctx context.Context, req resource.ValidateConfigRequest, resp *resource.ValidateConfigResponse) {
+	var data resource_fabric_vxlan_evpn.FabricVxlanEvpnModel
+	resp.Diagnostics.Append(req.Config.Get(ctx, &data)...)
+
+	if data.EnableTrm.ValueBool() && data.L3vniMcastGroup.ValueString() == "" {
+		resp.Diagnostics.AddError("l3vni_mcast_group is required for TRM", "l3vni_mcast_group is mandatory when enable_trm is true")
+	}
+}
