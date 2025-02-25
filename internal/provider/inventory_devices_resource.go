@@ -1034,21 +1034,24 @@ func deployAndSave(ctx context.Context, client *ndfc.NDFC, diags *diag.Diagnosti
 		if diags.HasError() {
 			return
 		}
-
 		if data.Save.ValueBool() {
-			save(ctx, client, diags, data)
+			tflog.Debug(ctx, fmt.Sprintf("Start of %s save", loggingInventoryDevices))
+			validateFabric(ctx, client, diags, data, "discovered")
 			if diags.HasError() {
 				return
 			}
 		}
-
-		if data.Deploy.ValueBool() {
-			deploy(ctx, client, diags, data)
-			if diags.HasError() {
-				return
+		serialNumbers := []string{}
+		for _, device := range devices {
+			if device.ConfigStatus.ValueString() != "In-Sync" && device.DiscoveryType.ValueString() != "pre_provision" && device.Mode.ValueString() == "Normal" {
+				serialNumbers = append(serialNumbers, device.SerialNumber.ValueString())
 			}
 		}
+		sort.Strings(serialNumbers)
+		client.RecalculateAndDeploy(ctx, diags, data.FabricName.ValueString(), data.Save.ValueBool(), data.Deploy.ValueBool(), serialNumbers)
+		validateFabric(ctx, client, diags, data, "configured")
 	}
+	
 	tflog.Debug(ctx, fmt.Sprintf("End of %s deployAndSave", loggingInventoryDevices))
 }
 
@@ -1077,7 +1080,7 @@ func rediscoverDevices(ctx context.Context, client *ndfc.NDFC, diags *diag.Diagn
 	}
 	tflog.Debug(ctx, fmt.Sprintf("End of %s rediscoverDevices", loggingInventoryDevices))
 }
-
+/*
 func save(ctx context.Context, client *ndfc.NDFC, diags *diag.Diagnostics, data *InventoryDevicesModel) {
 	tflog.Debug(ctx, fmt.Sprintf("Start of %s save", loggingInventoryDevices))
 	validateFabric(ctx, client, diags, data, "discovered")
@@ -1127,7 +1130,7 @@ func deploy(ctx context.Context, client *ndfc.NDFC, diags *diag.Diagnostics, dat
 	}
 	tflog.Debug(ctx, fmt.Sprintf("End of %s deploy", loggingInventoryDevices))
 }
-
+*/
 func validateFabric(ctx context.Context, client *ndfc.NDFC, diags *diag.Diagnostics, data *InventoryDevicesModel, state string) {
 	tflog.Debug(ctx, fmt.Sprintf("Start of %s validateFabric - state %s", loggingInventoryDevices, state))
 	// Hardcoded delay to prevent validation before devices are ready

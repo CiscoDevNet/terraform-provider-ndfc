@@ -57,6 +57,12 @@ func (c *NetAttachAPI) SetDeleteList(qp []string) {
 
 }
 
+func (c *NetAttachAPI) RscName() string {
+	return "networks"
+}
+
+
+
 func NewNetAttachAPI(fabricName string, lock *sync.Mutex, client *nd.Client) *NetAttachAPI {
 	api := new(NetAttachAPI)
 	api.fabricName = fabricName

@@ -50,10 +50,10 @@ resource "ndfc_networks" "test_resource_networks_1" {
       igmp_version               = "3"
       deploy_attachments         = false
       attachments = {
-        "FDO245206N5" = {
+        "SWITCH_SERIAL_NO" = {
           vlan                   = 1600
           deploy_this_attachment = false
-          switch_ports           = ["Ethernet1/1", "Ethernet1/2"]
+          switch_ports           = ["Ethernet1/10", "Ethernet1/12"]
         }
       }
 

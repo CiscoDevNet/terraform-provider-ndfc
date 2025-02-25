@@ -87,7 +87,7 @@ func (r *policyResource) Read(ctx context.Context, req resource.ReadRequest, res
 		tflog.Error(ctx, "Read Policy Failed")
 		resp.Diagnostics.AddWarning("Read Failure", "No configuration found in NDFC")
 		//resp.Diagnostics.AddError("Read Failure", "No data received from NDFC")
-
+		resp.Diagnostics.Append(resp.State.Set(ctx, nil)...)
 	}
 	// Save updated data into Terraform state
 	resp.Diagnostics.Append(resp.State.Set(ctx, data)...)

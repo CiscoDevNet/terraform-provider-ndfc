@@ -10,6 +10,7 @@ package api
 
 import (
 	"log"
+	"strings"
 	"sync"
 	"terraform-provider-ndfc/tfutils/go-nd"
 
@@ -24,12 +25,18 @@ type NDFCAPI interface {
 	PutUrl() string
 	DeleteUrl() string
 	GetDeleteQP() []string
+	RscName() string
 }
 
 type NDFCAPICommon struct {
 	NDFCAPI
-	client *nd.Client
+	LockedForDeploy bool
+	client          *nd.Client
 }
+
+var fnGlobalDeployTryLock func(string) bool
+var fnRscAcquireLock func(string)
+var fnRscReleaseLock func(string)
 
 /*
 	func (c NDFCAPICommon) GetLock() *sync.Mutex {
@@ -76,6 +83,17 @@ func (c NDFCAPICommon) Get() ([]byte, error) {
 }
 
 func (c NDFCAPICommon) Post(payload []byte) (gjson.Result, error) {
+
+	url := c.NDFCAPI.PostUrl()
+	if strings.Contains(url, "deploy") {
+		panic("Deploy URL detected in Post call. Use DeployPost method for deployments")
+		//log.Fatal("Deploy URL in Post. Call DeployPost instead")
+	}
+	// Acquire deploy read lock if not already locked
+	// This blocks if a deployment in in progress
+	// This is for all Create/Update Post operations
+	fnRscAcquireLock(c.NDFCAPI.RscName())
+	defer fnRscReleaseLock(c.NDFCAPI.RscName())
 	log.Printf("Post URL: %s\n", c.NDFCAPI.PostUrl())
 	lock := c.NDFCAPI.GetLock()
 	lock.Lock()
@@ -85,11 +103,13 @@ func (c NDFCAPICommon) Post(payload []byte) (gjson.Result, error) {
 	if err != nil {
 		return res, err
 	}
-
 	return res, nil
 }
 
 func (c NDFCAPICommon) Put(payload []byte) (gjson.Result, error) {
+	// Acquire deploy r lock
+	fnRscAcquireLock(c.NDFCAPI.RscName())
+	defer fnRscReleaseLock(c.NDFCAPI.RscName())
 
 	lock := c.NDFCAPI.GetLock()
 	lock.Lock()
@@ -102,6 +122,9 @@ func (c NDFCAPICommon) Put(payload []byte) (gjson.Result, error) {
 }
 
 func (c NDFCAPICommon) Delete() (gjson.Result, error) {
+	fnRscAcquireLock(c.NDFCAPI.RscName())
+	defer fnRscReleaseLock(c.NDFCAPI.RscName())
+
 	c.NDFCAPI.GetLock().Lock()
 	defer c.NDFCAPI.GetLock().Unlock()
 	res, err := c.client.DeleteRaw(c.NDFCAPI.DeleteUrl(), c.NDFCAPI.GetDeleteQP())
@@ -112,6 +135,9 @@ func (c NDFCAPICommon) Delete() (gjson.Result, error) {
 }
 
 func (c NDFCAPICommon) DeleteWithPayload(payload []byte) (gjson.Result, error) {
+	fnRscAcquireLock(c.NDFCAPI.RscName())
+	defer fnRscReleaseLock(c.NDFCAPI.RscName())
+
 	c.NDFCAPI.GetLock().Lock()
 	defer c.NDFCAPI.GetLock().Unlock()
 	res, err := c.client.Delete(c.NDFCAPI.DeleteUrl(), string(payload))
@@ -119,4 +145,36 @@ func (c NDFCAPICommon) DeleteWithPayload(payload []byte) (gjson.Result, error) {
 		return res, err
 	}
 	return res, nil
+}
+
+func (c *NDFCAPICommon) SetDeployLocked() {
+	c.LockedForDeploy = true
+}
+
+func (c NDFCAPICommon) DeployPost(payload []byte) (gjson.Result, error) {
+	// Global write lock must be acquired before deploy lock
+	// Check
+	if fnGlobalDeployTryLock(c.NDFCAPI.RscName()) {
+		//Try lock successful - means lock is available
+		panic("Deploy write Lock not taken by caller. GlobalDeployLock must be taken before calling DeployPost")
+	} else {
+		log.Printf("Deploy write lock is already acquired for %s", c.NDFCAPI.RscName())
+	}
+
+	log.Printf("Deploy Post URL: %s\n", c.NDFCAPI.PostUrl())
+	lock := c.NDFCAPI.GetLock()
+	lock.Lock()
+	defer lock.Unlock()
+	log.Printf("Deploy Post URL acquired lock: %s\n", c.NDFCAPI.PostUrl())
+	res, err := c.client.Post(c.NDFCAPI.PostUrl(), string(payload))
+	if err != nil {
+		return res, err
+	}
+	return res, nil
+}
+
+func SetLockFns(tryFn func(string) bool, locks []func(string)) {
+	fnGlobalDeployTryLock = tryFn
+	fnRscAcquireLock = locks[0]
+	fnRscReleaseLock = locks[1]
 }

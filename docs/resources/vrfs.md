@@ -31,12 +31,8 @@ resource "ndfc_vrfs" "test_resource_vrfs_1" {
       max_bgp_paths                  = 2
       max_ibgp_paths                 = 3
       ipv6_link_local                = false
-      trm                            = true
       no_rp                          = false
       rp_external                    = true
-      rp_address                     = "1.2.3.4"
-      rp_loopback_id                 = 500
-      underlay_multicast_address     = "233.1.1.1"
       overlay_multicast_groups       = "234.0.0.0/8"
       mvpn_inter_as                  = false
       trm_bgw_msite                  = true
@@ -56,7 +52,7 @@ resource "ndfc_vrfs" "test_resource_vrfs_1" {
       route_target_export_cloud_evpn = "1:1"
       deploy_attachments             = false
       attach_list = {
-        "FDO245206N5" = {
+        "SWITCH_SERIAL_NO" = {
           vlan                   = 1500
           deploy_this_attachment = false
           loopback_id            = 101

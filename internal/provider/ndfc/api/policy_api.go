@@ -58,6 +58,11 @@ func (c *PolicyAPI) GetDeleteQP() []string {
 	return nil
 }
 
+func (c *PolicyAPI) RscName() string {
+	return "policy"
+}
+
+
 func NewPolicyAPI(lock *sync.Mutex, c *nd.Client) *PolicyAPI {
 	papi := new(PolicyAPI)
 	papi.mutex = lock

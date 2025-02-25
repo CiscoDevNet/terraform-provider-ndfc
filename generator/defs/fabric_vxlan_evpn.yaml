@@ -461,7 +461,7 @@ resource:
       default_value: Disable
       type: String
       validator: 'OneOf("Enable", "Disable")'
-      example: Disable
+      example: Enable
     - model_name: HD_TIME
       tf_name: hd_time
       description: NVE Source Inteface HoldDown Time in seconds

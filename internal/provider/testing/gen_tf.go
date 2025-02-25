@@ -23,6 +23,53 @@ import (
 	"time"
 )
 
+const tfHeader = `
+terraform {
+	required_providers {
+		ndfc = {
+		source = "registry.terraform.io/cisco/ndfc"
+		}
+	}
+}`
+
+const tfProviderConfig = `
+provider "ndfc" {
+	username = "{{.User}}"
+	password = "{{.Password}}"
+	host     = "{{.Host}}"
+	insecure = {{.Insecure}}
+}
+`
+
+const tfDependenciesDot = `
+digraph G {
+  rankdir = "RL";
+  node [shape = rect, fontname = "sans-serif"];
+  "ndfc_configuration_deploy.test_resource_configuration_deploy_1" [label="ndfc_configuration_deploy.test_resource_configuration_deploy_1"];
+  "ndfc_interface_ethernet.test_resource_interface_ethernet_1" [label="ndfc_interface_ethernet.test_resource_interface_ethernet_1"];
+  "ndfc_interface_loopback.test_resource_interface_loopback_1" [label="ndfc_interface_loopback.test_resource_interface_loopback_1"];
+  "ndfc_interface_portchannel.test_resource_interface_portchannel_1" [label="ndfc_interface_portchannel.test_resource_interface_portchannel_1"];
+  "ndfc_interface_vlan.test_resource_interface_vlan_1" [label="ndfc_interface_vlan.test_resource_interface_vlan_1"];
+  "ndfc_interface_vpc.test_resource_interface_vpc_1" [label="ndfc_interface_vpc.test_resource_interface_vpc_1"];
+  "ndfc_inventory_devices.test_resource_inventory_devices_1" [label="ndfc_inventory_devices.test_resource_inventory_devices_1"];
+  "ndfc_networks.test_resource_networks_1" [label="ndfc_networks.test_resource_networks_1"];
+  "ndfc_policy.test_resource_policy_1" [label="ndfc_policy.test_resource_policy_1"];
+  "ndfc_vpc_pair.test_resource_vpc_pair_1" [label="ndfc_vpc_pair.test_resource_vpc_pair_1"];
+  "ndfc_vrfs.test_resource_vrf_bulk_1" [label="ndfc_vrfs.test_resource_vrf_bulk_1"];
+  "ndfc_vxlan_evpn_fabric.test_resource_fabric_vxlan_evpn_1" [label="ndfc_vxlan_evpn_fabric.test_resource_fabric_vxlan_evpn_1"];
+  "ndfc_interface_ethernet.test_resource_interface_ethernet_1" -> "ndfc_vpc_pair.test_resource_vpc_pair_1";
+  "ndfc_interface_loopback.test_resource_interface_loopback_1" -> "ndfc_vpc_pair.test_resource_vpc_pair_1";
+  "ndfc_interface_portchannel.test_resource_interface_portchannel_1" -> "ndfc_interface_ethernet.test_resource_interface_ethernet_1";
+  "ndfc_interface_vlan.test_resource_interface_vlan_1" -> "ndfc_vpc_pair.test_resource_vpc_pair_1";
+  "ndfc_interface_vpc.test_resource_interface_vpc_1" -> "ndfc_inventory_devices.test_resource_inventory_devices_1";
+   "ndfc_interface_vpc.test_resource_interface_vpc_1" -> "ndfc_vpc_pair.test_resource_vpc_pair_1"
+  "ndfc_inventory_devices.test_resource_inventory_devices_1" -> "ndfc_fabric_vxlan_evpn.test_resource_fabric_vxlan_evpn_1";
+  "ndfc_networks.test_resource_networks_1" -> "ndfc_vrfs.test_resource_vrfs_1";
+  "ndfc_policy.test_resource_policy_1" -> "ndfc_networks.test_resource_networks_1";
+  "ndfc_vpc_pair.test_resource_vpc_pair_1" -> "ndfc_inventory_devices.test_resource_inventory_devices_1";
+  "ndfc_vrfs.test_resource_vrfs_1" -> "ndfc_vpc_pair.test_resource_vpc_pair_1";
+}`
+
 func GetTFConfigWithSingleResource(tt string, cfg map[string]string, rscs []interface{}, out **string) {
 	x := new(string)
 	args := map[string]interface{}{
@@ -239,4 +286,118 @@ func GetVRFTFConfigWithMultipleResource(tt string, cfg map[string]string, vrfBul
 	fp.Write(output.Bytes())
 	fp.Close()
 	*out = x
+}
+
+func GetProviderHeader() string {
+
+	return tfHeader
+
+}
+
+func GetProviderConfig(attr map[string]interface{}) string {
+	tmpl, err := template.New("test").Parse(tfProviderConfig)
+	if err != nil {
+		panic(err)
+	}
+	var tpl bytes.Buffer
+	err = tmpl.Execute(&tpl, attr)
+	if err != nil {
+		panic(err)
+	}
+	return tpl.String()
+}
+
+func GetTFIntegrated(ts string, rsList []string, attrs map[string]interface{}) string {
+
+	switches := attrs["switches"].([]string)
+	vpcPair := attrs["vpc_pair"].([]string)
+	fabricName := attrs["fabric"].(string)
+
+	inventorySwitches := attrs["inventory_devices"].([]string)
+	inventoryRoles := attrs["inventory_roles"].([]string)
+
+	user := attrs["user"].(string)
+	password := attrs["password"].(string)
+
+	// Read resource.tf from each item in rsList
+	//rscTfList := make([]TerraformConfig, len(rsList))
+
+	tfConfig := new(bytes.Buffer)
+	deps, err := parseGraphWiz(tfDependenciesDot)
+	if err != nil {
+		panic(err)
+	}
+	exampleFolder := os.Getenv("GOPATH") + "/src/terraform-provider-ndfc/examples/resources"
+	for _, rs := range rsList {
+		tt := TerraformConfig{}
+		rsTFContent, err := os.ReadFile(fmt.Sprintf("%s/%s/resource.tf", exampleFolder, rs))
+		if err != nil {
+			panic(err)
+		}
+		tt.AddContent(rsTFContent)
+		tt.updateDependency(deps)
+		switch rs {
+		case "ndfc_fabric_vxlan_evpn":
+			tt.ModifyAttributeValue("fabric_name", fabricName)
+
+		case "ndfc_vrfs":
+			tt.ModifyAttributeValue("fabric_name", fabricName)
+			tt.ModifyMapKey("attach_list", "SWITCH_SERIAL_NO", switches[0])
+
+		case "ndfc_networks":
+			tt.ModifyAttributeValue("fabric_name", fabricName)
+			tt.ModifyMapKey("attachments", "SWITCH_SERIAL_NO", switches[0])
+
+		case "ndfc_policy":
+			tt.ModifyAttributeValue("device_serial_number", switches[0])
+
+		case "ndfc_interface_ethernet":
+			fallthrough
+		case "ndfc_interface_loopback":
+			fallthrough
+		case "ndfc_interface_portchannel":
+			fallthrough
+		case "ndfc_interface_vlan":
+			tt.ModifyAttributeValue("serial_number", switches[0])
+
+		case "ndfc_interface_vpc":
+			tt.ModifyAttributeValue("serial_number", vpcPair[0]+"~"+vpcPair[1])
+
+		case "ndfc_vpc_pair":
+			tt.ModifyAttributeValue("serial_numbers", vpcPair)
+
+		case "ndfc_inventory_devices":
+			tt.ModifyAttributeValue("fabric_name", fabricName)
+			tt.ModifyAttributeValue("username", user)
+			tt.ModifyAttributeValue("password", password)
+			for i, sw := range inventorySwitches {
+				if i == 0 {
+					tt.AddEntryToMap("devices", sw, map[string]string{"role": inventoryRoles[i]}, true)
+				} else {
+					tt.AddEntryToMap("devices", sw, map[string]string{"role": inventoryRoles[i]}, false)
+				}
+			}
+		}
+		tt.File.WriteTo(tfConfig)
+		//tfConfig.Write(tt.File.Bytes())
+		tfConfig.Write([]byte("\n\n"))
+	}
+	//log.Printf("Final TF Config: %s", tfConfig.String())
+
+	if tmpDir == "" {
+		ct := time.Now()
+		tmpDir = fmt.Sprintf("/tmp/tftest_%s", ct.Format("2006_01_02_15-04-05"))
+		err := os.MkdirAll(tmpDir, 0755)
+		if err != nil {
+			panic(err)
+		}
+	}
+
+	fp, err := os.Create(fmt.Sprintf("/%s/%s.tf", tmpDir, ts))
+	if err != nil {
+		panic(err)
+	}
+	fp.Write(tfConfig.Bytes())
+	fp.Close()
+	return tfConfig.String()
 }

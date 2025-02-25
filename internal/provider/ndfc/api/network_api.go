@@ -64,6 +64,10 @@ func (c *NetworkAPI) DeleteUrl() string {
 	return fmt.Sprintf(UrlNetworkDeleteBulk, c.fabricName)
 }
 
+func (c NetworkAPI) RscName() string {
+	return "networks"
+}
+
 /*
  * Response format
  *	{

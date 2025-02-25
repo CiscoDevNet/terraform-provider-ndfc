@@ -140,26 +140,17 @@ func (r *ConfigDeployResource) Deploy(ctx context.Context, dg *diag.Diagnostics,
 
 	var serialNumbers []string
 	*dg = data.SerialNumbers.ElementsAs(ctx, &serialNumbers, false)
-	if dg.HasError() {
-		return
-	}
 
 	tflog.Debug(ctx, fmt.Sprintf("Serial Numbers: %v", serialNumbers))
-	if data.ConfigSave.ValueBool() {
-		// Config save in fabric
-		r.client.SaveConfiguration(ctx, dg, data.FabricName.ValueString())
-		if dg.HasError() {
-			return
-		}
-	}
+
 	if len(serialNumbers) != 0 {
 		FirstIndex := strings.ToUpper(serialNumbers[0])
 		if FirstIndex == "ALL" {
 			// Deploy configuration for all serial numbers
-			r.client.DeployConfiguration(ctx, dg, data.FabricName.ValueString(), nil)
+			r.client.RecalculateAndDeploy(ctx, dg, data.FabricName.ValueString(), data.ConfigSave.ValueBool(), true, nil)
 		} else {
 			// Deploy configuration for specific serial numbers
-			r.client.DeployConfiguration(ctx, dg, data.FabricName.ValueString(), serialNumbers)
+			r.client.RecalculateAndDeploy(ctx, dg, data.FabricName.ValueString(), data.ConfigSave.ValueBool(), true, serialNumbers)
 		}
 	}
 

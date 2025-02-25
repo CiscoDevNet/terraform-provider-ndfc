@@ -67,7 +67,7 @@ resource:
           bulk: true
           optional: true
           filtered: true
-          example: "FDO245206N5"
+          example: "SWITCH_SERIAL_NO"
           attributes:
             - *filterThis
             - model_name: id

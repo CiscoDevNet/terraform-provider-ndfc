@@ -65,6 +65,10 @@ func (c *FabricAPI) GetDeleteQP() []string {
 	return nil
 }
 
+func (c *FabricAPI) RscName() string {
+	return "fabric"
+}
+
 func NewFabricAPI(lock *sync.Mutex, c *nd.Client) *FabricAPI {
 	papi := new(FabricAPI)
 	papi.mutex = lock

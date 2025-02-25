@@ -20,16 +20,48 @@ type Config struct {
 	NDFC NDFCConfig `yaml:"ndfc"`
 }
 
+type InventoryDevice struct {
+	Device string `yaml:"device"`
+	Role   string `yaml:"role"`
+}
+
+type InventoryDevices []InventoryDevice
+type IntegratedConfig struct {
+	Fabric    string           `yaml:"fabric"`
+	Switches  []string         `yaml:"switches"`
+	VpcPair   []string         `yaml:"vpc_pair"`
+	User      string           `yaml:"user"`
+	Password  string           `yaml:"pwd"`
+	Inventory InventoryDevices `yaml:"inventory_devices"`
+}
+
+func (i InventoryDevices) GetDevices() []string {
+	var devices []string
+	for _, d := range i {
+		devices = append(devices, d.Device)
+	}
+	return devices
+}
+
+func (i InventoryDevices) GetRoles() []string {
+	var roles []string
+	for _, d := range i {
+		roles = append(roles, d.Role)
+	}
+	return roles
+}
+
 type NDFCConfig struct {
-	URL               string   `yaml:"url"`
-	User              string   `yaml:"user"`
-	Password          string   `yaml:"pwd"`
-	Insecure          string   `yaml:"insecure"`
-	Fabric            string   `yaml:"fabric"`
-	Switches          []string `yaml:"switches"`
-	VrfPrefix         string   `yaml:"vrf_prefix"`
-	NetPrefix         string   `yaml:"net_prefix"`
-	VpcPair           []string `yaml:"vpc_pair"`
+	URL               string           `yaml:"url"`
+	User              string           `yaml:"user"`
+	Password          string           `yaml:"pwd"`
+	Insecure          string           `yaml:"insecure"`
+	Fabric            string           `yaml:"fabric"`
+	Switches          []string         `yaml:"switches"`
+	VrfPrefix         string           `yaml:"vrf_prefix"`
+	NetPrefix         string           `yaml:"net_prefix"`
+	VpcPair           []string         `yaml:"vpc_pair"`
+	Integration       IntegratedConfig `yaml:"integration_test"`
 	mockPort          int
 	mockServerStarted bool
 	mockConfigFile    string
