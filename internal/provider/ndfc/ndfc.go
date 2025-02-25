@@ -10,7 +10,9 @@ package ndfc
 
 import (
 	"log"
+	"os"
 	"sync"
+	"terraform-provider-ndfc/internal/provider/ndfc/api"
 	"terraform-provider-ndfc/tfutils/go-nd"
 	"time"
 )
@@ -24,6 +26,7 @@ type NDFC struct {
 	FailureRetry          int
 	rscMutex              map[string]*sync.Mutex
 	WaitForDeployComplete bool
+	deployMutex           *sync.RWMutex
 }
 
 var instance *NDFC
@@ -37,6 +40,8 @@ func NewNDFCClient(host string, user string, pass string, domain string, insecur
 	ndfc.FailureRetry = 3
 	ndfc.MaxParallelDeploy = 0
 	ndfc.WaitForDeployComplete = true
+	ndfc.deployMutex = new(sync.RWMutex)
+	api.SetLockFns(GlobalDeployTrylock, []func(string){AcquireResourceLock, ReleaseResourceLock})
 	var err error
 	ndfc.apiClient, err = nd.NewClient(host, ndfc.url, user, pass, domain, insecure, nd.MaxRetries(500), nd.RequestTimeout(time.Duration(timeout)))
 	if err != nil {
@@ -69,4 +74,43 @@ func (c NDFC) GetLock(rscName string) *sync.Mutex {
 
 func GetLock(rscName string) *sync.Mutex {
 	return instance.GetLock(rscName)
+}
+
+/*
+	When global switch level deployment or resource level deplotment is started, if other resources are being configured
+	at the same time, NDFC moves to out-of-sync state sometimes
+	To avoid this, all resource create/update must stop until deployment is complete
+	To achieve this, a readers-writer lock is used
+	All resources before Create/Update operaton must acquire a read lock
+	Global/Resource level Deployment operation must acquire a write lock
+	This ensures that other resources can run in parallel while write lock(depoyment not happening) is available
+	Deployment (writer lock) waits for all resource create/update (readers lock) to exit before starting deployment
+	Once deployment is complete, it releases the write lock
+*/
+func GlobalDeployLock(who string) {
+	log.Printf("**********Waiting for GlobalDeployLock Lock for %s deployment by pid %d***************", who, os.Getpid())
+	instance.deployMutex.Lock()
+	log.Printf("**********GlobalDeployLock Locked for %s deployment by pid %d***************", who, os.Getpid())
+}
+
+func GlobalDeployTrylock(who string) bool {
+	log.Printf("**********Checking  GlobalDeployLock  for %s deployment by pid %d***************", who, os.Getpid())
+	return instance.deployMutex.TryLock()
+}
+
+
+func GlobalDeployUnlock(who string) {
+	instance.deployMutex.Unlock()
+	log.Printf("++++++++++GlobalDeployUnlock unlocked after %s deployment complete pid %d+++++++++++++++", who, os.Getpid())
+}
+
+func AcquireResourceLock(rscName string) {
+	log.Printf("***************Waiting for AcquireResourceLock for %s by pid %d***********", rscName, os.Getpid())
+	instance.deployMutex.RLock()
+	log.Printf("***************AcquireResourceLock for %s***********pid %d", rscName, os.Getpid())
+}
+
+func ReleaseResourceLock(rscName string) {
+	instance.deployMutex.RUnlock()
+	log.Printf("+++++++++++++++ReleaseResourceLock for %s+++++++++++pid %d", rscName, os.Getpid())
 }

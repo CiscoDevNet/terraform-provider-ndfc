@@ -76,6 +76,11 @@ func (c *ConfigDeploymentAPI) SetDeleteList(qp []string) {
 	panic("Not supported")
 }
 
+func (c *ConfigDeploymentAPI) RscName() string {
+	return "config-deploy"
+}
+
+
 func NewConfigDeploymentAPI(lock *sync.Mutex, client *nd.Client) *ConfigDeploymentAPI {
 	api := new(ConfigDeploymentAPI)
 	api.mutex = lock

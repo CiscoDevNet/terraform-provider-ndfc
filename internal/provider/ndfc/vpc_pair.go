@@ -315,11 +315,9 @@ func (c *NDFC) RscDeployVpcPair(ctx context.Context, dg *diag.Diagnostics, tf *r
 	serialNumbers := ndfcVpcPairModel.SerialNumbers
 	tflog.Debug(ctx, fmt.Sprintf("RscDeployVpcPair: Deploying vPC Pair with serial numbers: %v", serialNumbers))
 	tflog.Debug(ctx, "Performing config save and deploy for vPC Pair")
-	c.SaveConfiguration(ctx, dg, fabricName)
-	if dg.HasError() {
-		return
-	}
-	c.DeployConfiguration(ctx, dg, fabricName, serialNumbers)
+
+	c.RecalculateAndDeploy(ctx, dg, fabricName, true, true, serialNumbers)
+
 	if dg.HasError() {
 		return
 	}

@@ -460,7 +460,7 @@ func (client *Client) Authenticate() error {
 	var err error
 	log.Printf("Attempting authentication...")
 	client.AuthenticationMutex.Lock()
-	if client.Token == "" || time.Since(client.AuthTimeStamp) > 10*time.Minute {
+	if client.Token == "" || time.Since(client.AuthTimeStamp) > (10*time.Minute) {
 		log.Printf("No token available or it has expired, attempting login...")
 		err = client.Login()
 	} else {

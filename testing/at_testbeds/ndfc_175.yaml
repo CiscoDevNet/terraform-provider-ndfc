@@ -1,0 +1,52 @@
+---
+ndfc: 
+  url: "https://172.25.74.175"
+  user: admin
+  pwd: "admin!@#"
+  insecure: true
+  fabric: CML
+  switches:
+    - "93B24AWRN9C"
+    - "9DE9YXNUG33"
+    - "9CRLK31YRID"
+  vrf_prefix: "vrf_a_test_"
+  net_prefix: "net_a_test_"
+  vpc_pair: 
+    - "9CRLK31YRID"
+    - "9Q2JIW99WZV"
+  integration_test:
+    fabric: at_test_vxlan
+    user: admin
+    pwd: "admin!@#"
+    resources:
+      - "ndfc_fabric_vxlan_evpn"
+      - "ndfc_inventory_devices"
+      - "ndfc_vrfs"
+      - "ndfc_networks"
+      - "ndfc_vpc_pairs"
+      - "ndfc_interface_ethernet"
+      - "ndfc_interface_portchannel"
+      - "ndfc_interface_vlan"
+      - "ndfc_interface_vpc"
+      - "ndfc_interface_loopback"
+    switches:
+      - "9SSXXLEGO3J"
+      - "9XAE2OCJD8B"
+      - "9B18T9Z8VLS"
+    inventory_devices:
+      - device : "192.168.10.241"
+        role: "leaf"
+      - device : "192.168.10.242"
+        role: "leaf"
+      - device : "192.168.10.243"
+        role: "leaf"
+      - device : "192.168.10.244"
+        role: "leaf"
+      - device : "192.168.10.240"
+        role: "spine"
+      - device : "192.168.10.245"
+        role: "spine"
+
+    vpc_pair:
+      - "9KQAM6STEBY"
+      - "9B18T9Z8VLS"

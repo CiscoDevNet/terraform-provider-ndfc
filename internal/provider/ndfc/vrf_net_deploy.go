@@ -103,10 +103,11 @@ func (d *NDFCVrfNetworkDeployment) Deploy(ctx context.Context, dg *diag.Diagnost
 		for serial, _ := range d.RscByAttachments {
 			deployment_ok := false
 			depAPI := api.NewDeploymentAPI("", d.GetLock(), &d.ctrlr.apiClient, d.RsType)
+			//depAPI.SetDeployLocked()
 			deploy_post_payload := d.deployPayloadBulk(serial)
 			tflog.Info(ctx, fmt.Sprintf("Deploy:%s Deploying Attachments %s", d.RsType, deploy_post_payload))
 			for i := 0; i < 3; i++ {
-				res, err := depAPI.Post([]byte(deploy_post_payload))
+				res, err := depAPI.DeployPost([]byte(deploy_post_payload))
 				if err != nil {
 					tflog.Error(ctx, fmt.Sprintf("Deploy: Error in bulk deployment %s", err.Error()))
 					continue
@@ -134,7 +135,8 @@ func (d *NDFCVrfNetworkDeployment) Deploy(ctx context.Context, dg *diag.Diagnost
 				deploy_post_payload := d.deployPayload(depRsc)
 				tflog.Info(ctx, fmt.Sprintf("Deploy: %s: Deploying Attachments %s", d.RsType, deploy_post_payload))
 				depAPI := api.NewDeploymentAPI("", d.GetLock(), &d.ctrlr.apiClient, d.RsType)
-				res, err := depAPI.Post([]byte(deploy_post_payload))
+				//depAPI.SetDeployLocked()
+				res, err := depAPI.DeployPost([]byte(deploy_post_payload))
 				if err != nil {
 					//dg.AddError("Error in deploying attachments", err.Error())
 					tflog.Error(ctx, fmt.Sprintf("Deploy: %s: Error in deploying attachments %s", d.RsType, err.Error()))

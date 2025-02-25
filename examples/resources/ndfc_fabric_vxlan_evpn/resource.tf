@@ -51,7 +51,7 @@ resource "ndfc_fabric_vxlan_evpn" "test_resource_fabric_vxlan_evpn_1" {
   fabric_vpc_qos                              = false
   fabric_vpc_qos_policy_name                  = "spine_qos_for_fabric_vpc_peering"
   feature_ptp                                 = false
-  grfield_debug_flag                          = "Disable"
+  grfield_debug_flag                          = "Enable"
   hd_time                                     = 180
   host_intf_admin_state                       = true
   inband_mgmt                                 = false

@@ -55,6 +55,10 @@ func (c *DeploymentAPI) SetDeleteList(qp []string) {
 	panic("Not supported")
 }
 
+func (c *DeploymentAPI) RscName() string {
+	return "vrf-network-deploy"
+}
+
 func NewDeploymentAPI(fabricName string, lock *sync.Mutex, client *nd.Client, rsType string) *DeploymentAPI {
 	api := new(DeploymentAPI)
 	api.fabricName = fabricName
