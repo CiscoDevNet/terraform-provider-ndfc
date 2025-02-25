@@ -175,7 +175,7 @@ func (c NDFC) RscGetFabricApiDetails(ctx context.Context, dg *diag.Diagnostics, 
 }
 func (c *NDFC) RscDeployFabric(ctx context.Context, dg *diag.Diagnostics, fabricName string, deploy bool) {
 	if deploy {
-        payload, err := c.GetSwitchesInFabric(ctx, fabricName)
+		payload, err := c.GetSwitchesInFabric(ctx, fabricName)
 		tflog.Debug(ctx, fmt.Sprintf("RscDeployFabric: payload %s", string(payload)))
 		if len(payload) == 0 || string(payload) == "[]" {
 			if err == nil {
@@ -185,11 +185,10 @@ func (c *NDFC) RscDeployFabric(ctx context.Context, dg *diag.Diagnostics, fabric
 			dg.AddWarning("Fabric not deployed", fmt.Sprintf("Reason: %q", err.Error()))
 			return
 		}
-		c.SaveConfiguration(ctx, dg, fabricName)
+		c.RecalculateAndDeploy(ctx, dg, fabricName, true, deploy, nil)
 		if dg.HasError() {
 			return
 		}
-		c.DeployConfiguration(ctx, dg, fabricName, nil)
 	}
 }
 func (c *NDFC) GetSwitchesInFabric(ctx context.Context, fabricName string) ([]byte, error) {
@@ -198,7 +197,7 @@ func (c *NDFC) GetSwitchesInFabric(ctx context.Context, fabricName string) ([]by
 	fabricApi.GetSwitchesInFabric = true
 	return fabricApi.Get()
 }
-func (c *NDFC) GetFabricName(ctx context.Context, serialNumber string) (string) {
+func (c *NDFC) GetFabricName(ctx context.Context, serialNumber string) string {
 	fabricApi := api.NewFabricAPI(c.GetLock(ResourceFabrics), &c.apiClient)
 	fabricApi.Serialnumber = serialNumber
 	payload, err := fabricApi.Get()

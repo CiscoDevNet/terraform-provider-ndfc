@@ -110,6 +110,16 @@ func (c *NDFC) rscGetPolicy(ctx context.Context, dg *diag.Diagnostics, pID strin
 		return nil
 	}
 	log.Printf("[TRACE] Policy data: %v", string(res))
+	if !json.Valid(res) {
+		tflog.Error(ctx, fmt.Sprintf("Invalid JSON response %v", string(res)))
+		if strings.Contains(string(res), "does not exist") {
+			// Policy does not exist
+			tflog.Error(ctx, fmt.Sprintf("Policy %s does not exist", pID))
+			return nil
+		}
+		dg.AddError("Invalid response", fmt.Sprintf("Invalid JSON response %v", string(res)))
+		return nil
+	}
 	err = json.Unmarshal(res, &model)
 	if err != nil {
 		tflog.Error(ctx, "Failed to unmarshal policy data")
@@ -247,13 +257,16 @@ func (c *NDFC) RscDeployPolicy(ctx context.Context, dg *diag.Diagnostics, policy
 		FabricName := parts[0]
 		serialNumber := parts[1]
 		switchSerialNumber := []string{serialNumber}
-		tflog.Debug(ctx, fmt.Sprintf("Deploying configuration for Fabric: %s, Serial Numbers: %s", FabricName, serialNumber))
-		c.DeployConfiguration(ctx, dg, FabricName, switchSerialNumber)
+		tflog.Debug(ctx, fmt.Sprintf("RscDeployPolicy: Deploying configuration for Fabric: %s, Serial Numbers: %s", FabricName, serialNumber))
+		c.RecalculateAndDeploy(ctx, dg, FabricName, true, true, switchSerialNumber)
 		return
 
 	} else {
+		GlobalDeployLock("policy")
+		defer GlobalDeployUnlock("policy")
 		policyApi := api.NewPolicyAPI(c.GetLock(ResourcePolicy), &c.apiClient)
 		policyApi.Deploy = true
+		//policyApi.SetDeployLocked()
 		postData, err := json.Marshal([]string{policyID})
 		if err != nil {
 			tflog.Error(ctx, "Failed to marshal policy data")
@@ -261,7 +274,7 @@ func (c *NDFC) RscDeployPolicy(ctx context.Context, dg *diag.Diagnostics, policy
 			return
 		}
 		log.Printf("[DEBUG] Deploying policy with ID: %v: POST Data |%s|", policyID, string(postData))
-		res, err := policyApi.Post(postData)
+		res, err := policyApi.DeployPost(postData)
 		if err != nil {
 			tflog.Error(ctx, "Failed to deploy policy")
 			dg.AddError("Failed to deploy policy", fmt.Sprintf("Error %v: %v", err, res.String()))

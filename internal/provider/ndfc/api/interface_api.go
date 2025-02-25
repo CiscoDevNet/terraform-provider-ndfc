@@ -102,6 +102,11 @@ func (c *InterfaceAPI) SetAPI(function int) {
 	c.APIFunction = function
 }
 
+func (c *InterfaceAPI) RscName() string {
+	return "interface"
+}
+
+
 func NewInterfaceAPI(lock *sync.Mutex, client *nd.Client) *InterfaceAPI {
 	api := new(InterfaceAPI)
 	api.mutex = lock

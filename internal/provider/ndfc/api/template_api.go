@@ -69,6 +69,11 @@ func (c *TemplateAPI) SetTemplateName(name string) {
 	c.TemplateName = name
 }
 
+func (c *TemplateAPI) RscName() string {
+	return "template"
+}
+
+
 func NewTemplateAPI(lock *sync.Mutex, client *nd.Client) *TemplateAPI {
 	tApi := new(TemplateAPI)
 	tApi.mutex = lock

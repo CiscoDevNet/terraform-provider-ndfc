@@ -96,6 +96,8 @@ func (c NDFC) fillDeploymentDBFromPayload(ctx context.Context, dg *diag.Diagnost
 
 func (c NDFC) DeployBulk(ctx context.Context, dg *diag.Diagnostics, deployment *NDFCVrfNetworkDeployment) error {
 	tflog.Debug(ctx, "DeployBulk: Entering")
+	GlobalDeployLock("vrf_network")
+	defer GlobalDeployUnlock("vrf")
 	deployment.Deploy(ctx, dg, nil, true)
 	return nil
 }

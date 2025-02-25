@@ -274,10 +274,12 @@ func (n *NDFCDeployment) CheckState(ctx context.Context, dg *diag.Diagnostics, r
 func (n *NDFCDeployment) DeployFSM(ctx context.Context, dg *diag.Diagnostics) {
 	log.Printf("DeployFSM")
 	log.Printf("============================Starting Deployment===================================")
-	tflog.Debug(ctx, fmt.Sprintf("vrfAttachmentsDeploy: Starting FSM %v", n.DeployMap))
+	tflog.Debug(ctx, fmt.Sprintf("DeployFSM: Starting FSM %v", n.DeployMap))
+	GlobalDeployLock("vrf_network")
+	defer GlobalDeployUnlock("vrf_network")
 	deployFsm := NewDeployFSM(ctx, dg, n)
 	deployFsm.Run(ctx)
-	tflog.Debug(ctx, fmt.Sprintf("vrfAttachmentsDeploy: Finishing FSM %v", n.DeployMap))
+	tflog.Debug(ctx, fmt.Sprintf("DeployFSM: Finishing FSM %v", n.DeployMap))
 
 }
 

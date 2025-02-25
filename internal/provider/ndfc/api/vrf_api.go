@@ -68,6 +68,10 @@ func (c *VrfAPI) GetDeleteQP() []string {
 	return []string{"vrf-names=" + strings.Join(c.DelList, ",")}
 }
 
+func (c *VrfAPI) RscName() string {
+	return "vrf"
+}
+
 /*
 	func (c *VrfAPI) GetSingleVRF(fabricName, vrfName string) ([]byte, error) {
 		log.Printf("GetSingleVRF - VrfAPI")

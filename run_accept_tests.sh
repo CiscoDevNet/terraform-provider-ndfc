@@ -10,16 +10,17 @@
 set -ex
 echo "export ACC_TEST_CFG to use a different test environment configuration file; default testing/ndfc_config.yaml"
 PATTERN=${1:-TestAcc}
-CFG=${ACC_TEST_CFG:-ndfc_config.yaml}
+CFG=${TESTBED:-175}
+TIMEOUT=${TEST_TIMEOUT:-5h}
 echo $PATTERN
 # Set the necessary environment variables
 export TF_ACC=1
 export TF_LOG=DEBUG
 export TF_ACC_LOG=DEBUG
 export TF_ACC_LOG_PATH=/tmp/terraform-acceptance-tests.log
-export NDFC_TEST_CONFIG_FILE=$(pwd)/internal/provider/testing/${CFG}
+export NDFC_TEST_CONFIG_FILE=$(pwd)/testing/at_testbeds/ndfc_${CFG}.yaml
 
 # Run the Terraform acceptance tests
 rm -rf "$TF_ACC_LOG_PATH"
-GOFLAGS="-count=1" go test -timeout 6h -v -run ^${PATTERN} ./... 
+GOFLAGS="-count=1" go test -timeout ${TIMEOUT} -v -run ^${PATTERN} ./... 
 

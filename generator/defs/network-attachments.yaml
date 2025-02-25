@@ -31,7 +31,7 @@ resource:
           filtered: true
           map_key: serial_number
           gen_backend: false
-          example: "FDO245206N5"
+          example: "SWITCH_SERIAL_NO"
           attributes:
             - &filterThis
               model_name: filterThisValue
@@ -140,7 +140,7 @@ resource:
               ndfc_type: csv
               optional: true
               computed: true
-              example: "[\"Ethernet1/1\", \"Ethernet1/2\"]"
+              example: "[\"Ethernet1/10\", \"Ethernet1/12\"]"
             - model_name: detachSwitchPorts
               tf_name: detach_switch_ports
               type: List:String
@@ -151,7 +151,6 @@ resource:
               tf_name: port_names
               type: String
               description: Combined port list in response of ndfc
-              example: "[Ethernet1/1, Ethernet1/2]"
               tf_hide: true
             - model_name: torPorts
               tf_name: tor_ports

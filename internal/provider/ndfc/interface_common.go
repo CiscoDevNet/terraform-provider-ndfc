@@ -128,6 +128,7 @@ func (i *NDFCInterfaceCommon) GetInterface(ctx context.Context, diags *diag.Diag
 
 func (i *NDFCInterfaceCommon) DeployInterface(ctx context.Context, dg *diag.Diagnostics,
 	in *resource_interface_common.NDFCInterfaceCommonModel) {
+	log.Printf("Deploying interfaces on : %v", in.SerialNumber)
 	payload := resource_interface_common.NDFCInterfacesDeploy{}
 	for i := range in.Interfaces {
 		ifEntry := resource_interface_common.NDFCInterfaceDeploy{
@@ -145,6 +146,8 @@ func (i *NDFCInterfaceCommon) GetPayload(ctx context.Context, diags *diag.Diagno
 }
 
 func (i *NDFCInterfaceCommon) deployInterface(ctx context.Context, dg *diag.Diagnostics, payload resource_interface_common.NDFCInterfacesDeploy) {
+	GlobalDeployLock("interface")
+	defer GlobalDeployUnlock("interface")
 	data, err := json.Marshal(payload)
 	if err != nil {
 		dg.AddError("Error marshalling data", err.Error())
@@ -152,7 +155,8 @@ func (i *NDFCInterfaceCommon) deployInterface(ctx context.Context, dg *diag.Diag
 	}
 	ifApi := api.NewInterfaceAPI(i.lock, i.client)
 	ifApi.SetAPI(api.PostInterfaceDeploy)
-	res, err := ifApi.Post(data)
+	//ifApi.SetDeployLocked()
+	res, err := ifApi.DeployPost(data)
 	//res, err := i.client.Post(UrlInterfaceDeploy, string(data))
 	if err != nil {
 		dg.AddError("Error deploying interface:", fmt.Sprintf("%s:%s", err.Error(), res))

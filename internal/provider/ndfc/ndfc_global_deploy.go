@@ -25,26 +25,48 @@ const ResourceConfigDeploy = "config_deploy"
 const inSync = "In-Sync"
 const outOfSync = "Out-of-Sync"
 const failed = "Failed"
+const deployRetry = 5
+const deployRetryInterval = 10
 
-func (c NDFC) SaveConfiguration(ctx context.Context, diags *diag.Diagnostics, fabricName string) {
+func (c NDFC) RecalculateAndDeploy(ctx context.Context, diags *diag.Diagnostics, fabricName string,
+	saveConfig bool, deployConfig bool, serialNumbers []string) {
+	// Take deploy Write Lock - wait until all resources have unlocked their reads
+	GlobalDeployLock("config_deploy")
+	defer GlobalDeployUnlock("config_deploy")
+	if saveConfig {
+		c.saveConfiguration(ctx, diags, fabricName)
+		if diags.HasError() {
+			return
+		}
+		time.Sleep(10 * time.Second)
+	}
+	if deployConfig {
+		c.deployConfiguration(ctx, diags, fabricName, serialNumbers)
+		if diags.HasError() {
+			return
+		}
+	}
+}
+func (c NDFC) saveConfiguration(ctx context.Context, diags *diag.Diagnostics, fabricName string) {
 	saveApi := api.NewConfigDeploymentAPI(c.GetLock(ResourceConfigDeploy), &c.apiClient)
 	saveApi.FabricName = fabricName
 	saveApi.Deploy = false
-	_, err := saveApi.Post([]byte{})
+	//saveApi.SetDeployLocked()
+	_, err := saveApi.DeployPost([]byte{})
 	if err != nil {
 		diags.AddError("Config Save failed", err.Error())
 		return
 	}
 }
 
-func (c NDFC) DeployConfiguration(ctx context.Context, diags *diag.Diagnostics, fabricName string, serialNumbers []string) {
+func (c NDFC) deployConfiguration(ctx context.Context, diags *diag.Diagnostics, fabricName string, serialNumbers []string) {
 	var err error
 	deployApi := api.NewConfigDeploymentAPI(c.GetLock(ResourceConfigDeploy), &c.apiClient)
 	deployApi.FabricName = fabricName
 	deployApi.Deploy = true
 
-	for retry := 0; retry < 3; retry++ {
-		serialNumbers = c.CheckDeployStatus(ctx, diags, fabricName, serialNumbers)
+	for range deployRetry {
+		serialNumbers = c.checkDeployStatus(ctx, diags, fabricName, serialNumbers)
 		if diags.HasError() {
 			return
 		}
@@ -53,10 +75,11 @@ func (c NDFC) DeployConfiguration(ctx context.Context, diags *diag.Diagnostics, 
 		} else {
 			deployApi.SerialNumbers = serialNumbers
 		}
-		_, err = deployApi.Post([]byte{})
+		//deployApi.SetDeployLocked()
+		_, err = deployApi.DeployPost([]byte{})
 		if err != nil {
 			diags.AddError("Deploy failed", err.Error())
-			time.Sleep(3 * time.Second)
+			time.Sleep(deployRetryInterval * time.Second)
 			deployApi.Preview = false
 			res, _ := deployApi.Get()
 			// TODO determine which error should be returned
@@ -67,7 +90,7 @@ func (c NDFC) DeployConfiguration(ctx context.Context, diags *diag.Diagnostics, 
 	diags.AddError("Deploy failed", "Switches are still out of sync")
 }
 
-func (c NDFC) CheckDeployStatus(ctx context.Context, diags *diag.Diagnostics, fabricName string, serialNumbers []string) []string {
+func (c NDFC) checkDeployStatus(ctx context.Context, diags *diag.Diagnostics, fabricName string, serialNumbers []string) []string {
 	previewApi := api.NewConfigDeploymentAPI(c.GetLock(ResourceConfigDeploy), &c.apiClient)
 	previewApi.FabricName = fabricName
 	previewApi.Preview = true

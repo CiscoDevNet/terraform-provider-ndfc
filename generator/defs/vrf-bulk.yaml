@@ -204,7 +204,6 @@ resource:
         type: Bool
         default_value: false
         description: Enable Tenant Routed Multicast
-        example: true
       - &isRPAbsent
         model_name: isRPAbsent
         ndfc_nested: [vrfTemplateConfig]
@@ -227,7 +226,6 @@ resource:
         tf_name: rp_address
         type: String
         description: IPv4 address
-        example: 1.2.3.4
       - &loopbackNumber
         model_name: loopbackNumber
         ndfc_nested: [vrfTemplateConfig]
@@ -237,14 +235,12 @@ resource:
         min_int: 0
         max_int: 1023
         description: RP loopback ID
-        example: 500
       - &L3VniMcastGroup
         model_name: L3VniMcastGroup
         ndfc_nested: [vrfTemplateConfig]
         tf_name: underlay_multicast_address
         type: String
         description: IPv4 Multicast Address. Applicable only when TRM is enabled.
-        example: 233.1.1.1
       - &multicastGroup
         model_name: multicastGroup
         ndfc_nested: [vrfTemplateConfig]

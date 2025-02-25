@@ -57,6 +57,11 @@ func (c *VpcPairAPI) GetDeleteQP() []string {
 	return nil
 }
 
+func (c *VpcPairAPI) RscName() string {
+	return "vpc-pair"
+}
+
+
 func NewVpcPairAPI(lock *sync.Mutex, c *nd.Client) *VpcPairAPI {
 	papi := new(VpcPairAPI)
 	papi.mutex = lock
