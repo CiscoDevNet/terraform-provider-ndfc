@@ -67,7 +67,7 @@ func (c NDFCAPICommon) Get() ([]byte, error) {
 	lock := c.NDFCAPI.GetLock()
 	lock.Lock()
 	url := c.NDFCAPI.GetUrl()
-	log.Printf("Get URL: %s %v\n", url, c.client)
+	log.Printf("Get URL: %s \n", url)
 	if c.client == nil {
 		log.Printf("************Client is nil********************")
 	}
