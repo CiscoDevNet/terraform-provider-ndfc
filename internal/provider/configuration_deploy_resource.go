@@ -140,7 +140,9 @@ func (r *ConfigDeployResource) Deploy(ctx context.Context, dg *diag.Diagnostics,
 
 	var serialNumbers []string
 	*dg = data.SerialNumbers.ElementsAs(ctx, &serialNumbers, false)
-
+	if dg.HasError() {
+		return
+	}
 	tflog.Debug(ctx, fmt.Sprintf("Serial Numbers: %v", serialNumbers))
 
 	if len(serialNumbers) != 0 {
