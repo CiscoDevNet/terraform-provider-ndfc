@@ -11,6 +11,7 @@ resource "ndfc_fabric_vxlan_evpn" "test_resource_fabric_vxlan_evpn_1" {
   auto_symmetric_vrf_lite                     = false
   auto_unique_vrf_lite_ip_prefix              = false
   auto_vrflite_ifc_default_vrf                = false
+  l3vni_mcast_group                           = "239.1.1.1"
   bfd_auth_enable                             = false
   bfd_enable                                  = true
   bfd_ibgp_enable                             = false
@@ -44,7 +45,7 @@ resource "ndfc_fabric_vxlan_evpn" "test_resource_fabric_vxlan_evpn_1" {
   enable_pbr                                  = false
   enable_pvlan                                = false
   enable_tenant_dhcp                          = true
-  enable_trm                                  = false
+  enable_trm                                  = true 
   enable_vpc_peer_link_native_vlan            = false
   fabric_interface_type                       = "p2p"
   fabric_mtu                                  = 9122
