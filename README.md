@@ -37,7 +37,14 @@ See generator/generate.md
 ./run_accept_tests.sh // Run everything
 ./run_accept_tests.sh TestAcc<Pattern of tests> // Run Specific tests 
 ```
-
+* AT runs on actual NDFC environment     
+* The testbed settings are stored in `testing/at_testbeds/`    
+* By default it uses ndfc-175     
+* Use `TESTBED` environment variable to change the testbed
+* A file  `testing/at_testbeds/ndfc_$(TESTBED).yaml must be present
+** Remember to set fabric names, switch serials etc to match the NDFC in use
+  
+AT run result mandatory for PR approval
 
 ## Steps to run unit test with mockoon server
 
