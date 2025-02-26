@@ -45,7 +45,7 @@ resource "ndfc_fabric_vxlan_evpn" "test_resource_fabric_vxlan_evpn_1" {
   enable_pbr                                  = false
   enable_pvlan                                = false
   enable_tenant_dhcp                          = true
-  enable_trm                                  = true 
+  enable_trm                                  = true
   enable_vpc_peer_link_native_vlan            = false
   fabric_interface_type                       = "p2p"
   fabric_mtu                                  = 9122
