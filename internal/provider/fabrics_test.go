@@ -15,7 +15,7 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 )
-
+// Contains acceptance tests for all fabric types except ipfm.
 func TestAccFabricVxlanEvpnResource(t *testing.T) {
 	cfg := map[string]string{
 		"FabricType": "fabric_vxlan_evpn",
@@ -39,11 +39,18 @@ func TestAccFabricVxlanEvpnResource(t *testing.T) {
 				}(),
 				//Check:       resource.ComposeTestCheckFunc(FabricVxlanEvpnModelHelperStateCheck("ndfc_fabric_vxlan_evpn.test_resource_fabric_vxlan_evpn_1", FabricRsc, path.Empty())...),
 				ExpectError: regexp.MustCompile("bgp_as cannot be updated"),
-			}, { // modify fields like CDP_ENABLE, BFD_ENABLE and MTU with different values and deploy true
+
+			}, { // modify fields like CDP_ENABLE, BFD_ENABLE, enable_trm with correct configs and MTU with different values and deploy true
 				Config: func() string {
 					return helper.GenerateFabricConfig(cfg, helper.Modified_file)
 				}(),
 				//Check: resource.ComposeTestCheckFunc(FabricVxlanEvpnModelHelperStateCheck("ndfc_fabric_vxlan_evpn.test_resource_fabric_vxlan_evpn_1", FabricRsc, path.Empty())...),
+			}, { // modify fields like CDP_ENABLE, BFD_ENABLE, enable_trm with correct configs and MTU with different values and deploy true
+				Config: func() string {
+					return helper.GenerateFabricConfig(cfg, helper.Enable_trm_config_file)
+				}(),
+				//Check: resource.ComposeTestCheckFunc(FabricVxlanEvpnModelHelperStateCheck("ndfc_fabric_vxlan_evpn.test_resource_fabric_vxlan_evpn_1", FabricRsc, path.Empty())...),
+				ExpectError: regexp.MustCompile("l3vni_mcast_group is required for TRM"),
 			},
 		},
 	})

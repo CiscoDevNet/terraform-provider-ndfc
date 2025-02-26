@@ -1,22 +1,23 @@
+
 resource "ndfc_fabric_vxlan_evpn" "test_resource_fabric_vxlan_evpn_1" {
   fabric_name                                 = "TF_FABRIC_VXLAN_EVPN"
   aaa_remote_ip_enabled                       = false
   advertise_pip_bgp                           = false
   advertise_pip_on_border                     = true
   anycast_bgw_advertise_pip                   = false
-  anycast_gw_mac                              = "2020.0000.00bb"
+  anycast_gw_mac                              = "2020.0000.00aa"
   anycast_rp_ip_range                         = "10.254.254.0/24"
   auto_symmetric_default_vrf                  = false
   auto_symmetric_vrf_lite                     = false
   auto_unique_vrf_lite_ip_prefix              = false
   auto_vrflite_ifc_default_vrf                = false
   bfd_auth_enable                             = false
-  bfd_enable                                  = true
+  bfd_enable                                  = false
   bfd_ibgp_enable                             = false
   bfd_isis_enable                             = false
   bfd_ospf_enable                             = false
   bfd_pim_enable                              = false
-  bgp_as                                      = "60000"
+  bgp_as                                      = "65000"
   bgp_auth_enable                             = false
   bgp_auth_key_type                           = 3
   bgp_lb_id                                   = 0
@@ -24,7 +25,7 @@ resource "ndfc_fabric_vxlan_evpn" "test_resource_fabric_vxlan_evpn_1" {
   bootstrap_multisubnet                       = "#Scope_Start_IP, Scope_End_IP, Scope_Default_Gateway, Scope_Subnet_Prefix"
   brownfield_network_name_format              = "Auto_Net_VNI$$VNI$$_VLAN$$VLAN_ID$$"
   brownfield_skip_overlay_network_attachments = false
-  cdp_enable                                  = true 
+  cdp_enable                                  = false
   copp_policy                                 = "strict"
   dci_subnet_range                            = "10.33.0.0/16"
   dci_subnet_target_mask                      = 30
@@ -38,15 +39,15 @@ resource "ndfc_fabric_vxlan_evpn" "test_resource_fabric_vxlan_evpn_1" {
   enable_macsec                               = false
   enable_netflow                              = false
   enable_ngoam                                = true
-  enable_nxapi                                = false
+  enable_nxapi                                = true
   enable_nxapi_http                           = true
   enable_pbr                                  = false
   enable_pvlan                                = false
-  enable_tenant_dhcp                          = false 
-  enable_trm                                  = false 
+  enable_tenant_dhcp                          = true
+  enable_trm                                  = true
   enable_vpc_peer_link_native_vlan            = false
   fabric_interface_type                       = "p2p"
-  fabric_mtu                                  = 9211
+  fabric_mtu                                  = 9216
   fabric_vpc_qos                              = false
   fabric_vpc_qos_policy_name                  = "spine_qos_for_fabric_vpc_peering"
   feature_ptp                                 = false
@@ -56,7 +57,7 @@ resource "ndfc_fabric_vxlan_evpn" "test_resource_fabric_vxlan_evpn_1" {
   inband_mgmt                                 = false
   isis_auth_enable                            = false
   isis_level                                  = "level-2"
-  l2_host_intf_mtu                            = 9213
+  l2_host_intf_mtu                            = 9216
   l2_segment_id_range                         = "30000-49000"
   l3_partition_id_range                       = "50000-59000"
   link_state_routing                          = "ospf"
@@ -113,5 +114,5 @@ resource "ndfc_fabric_vxlan_evpn" "test_resource_fabric_vxlan_evpn_1" {
   default_vrf                                 = "Default_VRF_Universal"
   network_extension_template                  = "Default_Network_Extension_Universal"
   vrf_extension_template                      = "Default_VRF_Extension_Universal"
-  deploy                                      = true
+  deploy                                      = false
 }

@@ -17,6 +17,7 @@ const (
 	Base_file = iota
 	Modified_file
 	Bgp_as_change_file
+	Enable_trm_config_file
 )
 
 func GenerateFabricConfig(cfg map[string]string, fileType int) string {
@@ -38,13 +39,16 @@ func GenerateFabricConfig(cfg map[string]string, fileType int) string {
 	`
 	var filePath string
 	folder := os.Getenv("GOPATH") + "/src/terraform-provider-ndfc/testdata/" + cfg["FabricType"]
-	if fileType == Base_file {
+	switch fileType {
+	case Base_file:
 		filePath = folder + "/resource.tf"
-	} else if fileType == Modified_file {
+	case Modified_file:
 		filePath = folder + "/resource_modified.tf"
-	} else if fileType == Bgp_as_change_file {
+	case Bgp_as_change_file:
 		filePath = folder + "/resource_bgp_as_change.tf"
-	} else {
+	case Enable_trm_config_file:
+		filePath = folder + "/resource_enable_trm.tf"
+	default:
 		log.Fatalf("Invalid file type: %d", fileType)
 	}
 	rscFile, err := os.ReadFile(filePath)
