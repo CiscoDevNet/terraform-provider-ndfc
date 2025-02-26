@@ -57,6 +57,5 @@ func GenerateFabricConfig(cfg map[string]string, fileType int) string {
 	}
 
 	tf_config += string(rscFile)
-	log.Printf("TF Config: %s", tf_config)
 	return tf_config
 }
