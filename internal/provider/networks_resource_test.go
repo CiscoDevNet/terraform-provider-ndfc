@@ -338,7 +338,7 @@ func TestAccNetworksResourceGlobalDeploy(t *testing.T) {
 					return *tf_config
 				}(),
 				// Network Deploy also deploys VRF, so expect some change in plan
-				ExpectNonEmptyPlan: true,
+				ExpectNonEmptyPlan: false,
 				Check:              resource.ComposeTestCheckFunc(NetworksModelHelperStateCheck("ndfc_networks.network_test", *networkRsc, path.Empty())...),
 			},
 		}})
@@ -381,7 +381,7 @@ func TestAccNetworksResourceAttachmentDeployNetLevel(t *testing.T) {
 				Config: func() string {
 					*stepCount++
 					tName := fmt.Sprintf("%s_%d", t.Name(), *stepCount)
-					helper.GenerateSingleVrfObject(&vrfRsc, helper.GetConfig("network").NDFC.VrfPrefix, helper.GetConfig("network").NDFC.Fabric, 1, false, false, false, helper.GetConfig("network").NDFC.Switches)
+					helper.GenerateSingleVrfObject(&vrfRsc, helper.GetConfig("network").NDFC.VrfPrefix, helper.GetConfig("network").NDFC.Fabric, 1, false, false, true, helper.GetConfig("network").NDFC.Switches)
 					helper.GenerateNetworksObject(&networkRsc, helper.GetConfig("network").NDFC.Fabric,
 						10, false, true, false, helper.GetConfig("network").NDFC.VrfPrefix+"1", helper.GetConfig("network").NDFC.Switches)
 					(*x)["RscName"] = "vrf_test,network_test"
@@ -389,7 +389,7 @@ func TestAccNetworksResourceAttachmentDeployNetLevel(t *testing.T) {
 					return *tf_config
 				}(),
 				// Network Deploy also deploys VRF, so expect some change in plan
-				ExpectNonEmptyPlan: true,
+				ExpectNonEmptyPlan: false,
 				Check:              resource.ComposeTestCheckFunc(NetworksModelHelperStateCheck("ndfc_networks.network_test", *networkRsc, path.Empty())...),
 			},
 		}})
@@ -432,7 +432,7 @@ func TestAccNetworksResourceAttachmentDeployAttachments(t *testing.T) {
 				Config: func() string {
 					*stepCount++
 					tName := fmt.Sprintf("%s_%d", t.Name(), *stepCount)
-					helper.GenerateSingleVrfObject(&vrfRsc, helper.GetConfig("network").NDFC.VrfPrefix, helper.GetConfig("network").NDFC.Fabric, 1, false, false, false, helper.GetConfig("network").NDFC.Switches)
+					helper.GenerateSingleVrfObject(&vrfRsc, helper.GetConfig("network").NDFC.VrfPrefix, helper.GetConfig("network").NDFC.Fabric, 1, false, false, true, helper.GetConfig("network").NDFC.Switches)
 					helper.GenerateNetworksObject(&networkRsc, helper.GetConfig("network").NDFC.Fabric,
 						10, false, false, true, helper.GetConfig("network").NDFC.VrfPrefix+"1", helper.GetConfig("network").NDFC.Switches)
 					(*x)["RscName"] = "vrf_test,network_test"
@@ -440,7 +440,7 @@ func TestAccNetworksResourceAttachmentDeployAttachments(t *testing.T) {
 					return *tf_config
 				}(),
 				// Network Deploy also deploys VRF, so expect some change in plan
-				ExpectNonEmptyPlan: true,
+				ExpectNonEmptyPlan: false,
 				Check:              resource.ComposeTestCheckFunc(NetworksModelHelperStateCheck("ndfc_networks.network_test", *networkRsc, path.Empty())...),
 			},
 		}})
