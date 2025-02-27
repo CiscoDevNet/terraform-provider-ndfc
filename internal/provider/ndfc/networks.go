@@ -177,21 +177,32 @@ func (c *NDFC) RscGetNetworks(ctx context.Context, dg *diag.Diagnostics, ID stri
 			vrfLevelDep := false
 
 			if vl, vlOk := (*depMap)[i]; vlOk {
-				//first element is vrf name if vrf level deploy is set
+				//first element is network name if network level deploy is set
 				if vl[0] == i {
 					nwEntry.DeployAttachments = (nwEntry.NetworkStatus == "DEPLOYED")
 					log.Printf("Setting Network level dep flag for %s to %v", i, nwEntry.DeployAttachments)
 					vrfLevelDep = true
 				}
 			}
+
 			for j, attachEntry := range nwEntry.Attachments {
 				if attachEntry.FilterThisValue {
 					continue
 				}
+				attachLevelDep := false
+				deps := (*depMap)[i]
+				if len(deps) > 0 {
+					for _, dep := range deps {
+						if dep == j {
+							attachLevelDep = true
+							log.Printf("Setting Attachment level dep flag is set for  %s/%s", i, j)
+						}
+					}
+				}
 				log.Printf("Attachment %s added to Network %s", j, i)
 				if !globalDep && !vrfLevelDep {
-					if attachEntry.AttachState == "DEPLOYED" {
-						log.Printf("Attachment %s deployed", j)
+					if attachEntry.AttachState == "DEPLOYED" && attachLevelDep {
+						log.Printf("Network Attachment %s/%s deployed flag set to true", i, j)
 						attachEntry.DeployThisAttachment = true
 					}
 				}
