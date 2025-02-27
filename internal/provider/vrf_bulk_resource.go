@@ -94,6 +94,7 @@ func (r *vrfBulkResource) Read(ctx context.Context, req resource.ReadRequest, re
 	// unique_id = fabric_name/[vrf1,vrf2,vrf3...]
 	dataVrf := data.GetModelData()
 	deployMap := make(map[string][]string)
+
 	if dataVrf.DeployAllAttachments {
 		log.Printf("[DEBUG] DeployAllAttachments flag set")
 		deployMap["global"] = append(deployMap["global"], "all")

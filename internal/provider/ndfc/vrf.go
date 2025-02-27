@@ -130,7 +130,7 @@ func (c NDFC) RscGetBulkVrf(ctx context.Context, dg *diag.Diagnostics, ID string
 
 	if _, ok := (*depMap)["global"]; ok {
 		//This cannot be validated - as we don't know if all deployments were ok
-		log.Printf("[DEBUG]: Setting DeployAllAttachments flag")
+		log.Printf("Setting Global DeployAllAttachments flag")
 		ndVrfs.DeployAllAttachments = true
 	}
 
@@ -142,7 +142,6 @@ func (c NDFC) RscGetBulkVrf(ctx context.Context, dg *diag.Diagnostics, ID string
 				continue
 			}
 			vrfLevelDep := false
-
 			if !ndVrfs.DeployAllAttachments {
 				if vl, vlOk := (*depMap)[i]; vlOk {
 					//first element is vrf name if vrf level deploy is set
@@ -153,13 +152,25 @@ func (c NDFC) RscGetBulkVrf(ctx context.Context, dg *diag.Diagnostics, ID string
 					}
 				}
 			}
+			log.Printf("Deploy list  %s/%v status ", i, (*depMap)[i])
 			for j, attachEntry := range vrfEntry.AttachList {
 				if attachEntry.FilterThisValue {
 					continue
 				}
+				attachLevelDep := false
+				deps := (*depMap)[i]
+
+				if len(deps) > 0 {
+					for _, dep := range deps {
+						if dep == j {
+							attachLevelDep = true
+							log.Printf("Attachment level dep flag is set for  %s/%s", i, j)
+						}
+					}
+				}
 				log.Printf("Attachment %s added to VRF %s", j, i)
 				if !ndVrfs.DeployAllAttachments && !vrfLevelDep {
-					if attachEntry.AttachState == "DEPLOYED" {
+					if attachEntry.AttachState == "DEPLOYED" && attachLevelDep {
 						attachEntry.DeployThisAttachment = true
 					}
 					log.Printf("[DEBUG] Set Attachment level deploy flag %s/%s:%v", i, j, attachEntry.DeployThisAttachment)
@@ -312,8 +323,6 @@ func (c NDFC) RscCreateBulkVrf(ctx context.Context, dg *diag.Diagnostics, vrfBul
 	ID := c.VrfBulkCreateID(vrf)
 	//create
 
-	depMap := make(map[string][]string)
-
 	retVrfs, err := c.VrfBulkIsPresent(ctx, ID)
 
 	if err != nil {
@@ -333,7 +342,7 @@ func (c NDFC) RscCreateBulkVrf(ctx context.Context, dg *diag.Diagnostics, vrfBul
 	}
 
 	//Part 1: Create VRFs
-	ndfcVrfBulkPayload := vrf.FillVrfPayloadFromModel(&depMap)
+	ndfcVrfBulkPayload := vrf.FillVrfPayloadFromModel(nil)
 	//ndfcVrfBulkPayload.Vrfs = vrf.GetVrfValues()
 
 	err = c.vrfCreateBulk(ctx, vrf.FabricName, ndfcVrfBulkPayload)
@@ -345,10 +354,6 @@ func (c NDFC) RscCreateBulkVrf(ctx context.Context, dg *diag.Diagnostics, vrfBul
 	tflog.Info(ctx, fmt.Sprintf("Create Bulk VRF success ID %s", ID))
 	//Part 2: Create Attachments if any
 
-	if vrf.DeployAllAttachments {
-		log.Printf("[DEBUG] DeployAllAttachments flag set")
-		depMap["global"] = append(depMap["global"], "all")
-	}
 	// fill the attachment entries
 	va := vrf.FillAttachPayloadFromModel(false)
 
@@ -363,7 +368,7 @@ func (c NDFC) RscCreateBulkVrf(ctx context.Context, dg *diag.Diagnostics, vrfBul
 		//Check and deploy
 		c.RscDeployVrfAttachments(ctx, dg, vrf)
 	}
-	outVrf := c.RscGetBulkVrf(ctx, dg, ID, &depMap)
+	outVrf := c.RscGetBulkVrf(ctx, dg, ID, &va.DepMap)
 	if outVrf == nil {
 		tflog.Error(ctx, "Failed to verify: Reading from NDFC after create failed")
 		dg.AddError("Failed to verify", "Reading from NDFC after create failed")
@@ -537,6 +542,12 @@ func (c NDFC) RscUpdateBulkVrf(ctx context.Context,
 		return
 	}
 	newID := c.VrfBulkCreateID(plan)
+	depMap := FillDeployMap(plan)
+
+	*(vrfBulkPlan) = *(c.RscGetBulkVrf(ctx, dg, newID, &depMap))
+}
+
+func FillDeployMap(plan *resource_vrf_bulk.NDFCVrfBulkModel) map[string][]string {
 	depMap := make(map[string][]string)
 	if plan.DeployAllAttachments {
 		depMap["global"] = append(depMap["global"], "all")
@@ -548,11 +559,13 @@ func (c NDFC) RscUpdateBulkVrf(ctx context.Context,
 		}
 		for j := range plan.Vrfs[i].AttachList {
 			if plan.Vrfs[i].AttachList[j].DeployThisAttachment {
-				depMap[plan.Vrfs[i].VrfName] = append(depMap[plan.Vrfs[i].VrfName], plan.Vrfs[i].AttachList[j].SerialNumber)
+				//depKey := fmt.Sprintf("%s/%s", plan.Vrfs[i].VrfName, plan.Vrfs[i].AttachList[j].SerialNumber)
+				depKey := plan.Vrfs[i].VrfName
+				depMap[depKey] = append(depMap[depKey], plan.Vrfs[i].AttachList[j].SerialNumber)
 			}
 		}
 	}
-	*(vrfBulkPlan) = *(c.RscGetBulkVrf(ctx, dg, newID, &depMap))
+	return depMap
 }
 
 func (c NDFC) VrfBulkIsPresent(ctx context.Context, ID string) ([]string, error) {
