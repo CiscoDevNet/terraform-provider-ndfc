@@ -18,6 +18,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
+	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-log/tflog"
 )
 
@@ -100,13 +101,10 @@ func (r *ConfigDeployResource) Create(ctx context.Context, req resource.CreateRe
 	var data resource_configuration_deploy.ConfigurationDeployModel
 
 	resp.Diagnostics.Append(req.Plan.Get(ctx, &data)...)
-
 	if resp.Diagnostics.HasError() {
 		return
 	}
-
 	r.Deploy(ctx, &resp.Diagnostics, &data)
-
 	data.Id = data.FabricName
 
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
@@ -114,8 +112,16 @@ func (r *ConfigDeployResource) Create(ctx context.Context, req resource.CreateRe
 }
 
 func (r *ConfigDeployResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
+	var data resource_configuration_deploy.ConfigurationDeployModel
+	resp.Diagnostics.Append(req.State.Get(ctx, &data)...)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+	//  False returned on purpose, so that terraform detects a change in plan and triggers update for this resource during next apply
+	data.TriggerDeployOnUpdate = types.BoolValue(false)
 	tflog.Debug(ctx, fmt.Sprintf("Start of %s Read", loggingConfigDeploy))
-	tflog.Debug(ctx, fmt.Sprintf("End of %s Read", loggingConfigDeploy))
+	tflog.Debug(ctx, fmt.Sprintf("End of %s Read data.TriggerDeployOnUpdate %v   ", loggingConfigDeploy, data.TriggerDeployOnUpdate.ValueBool()))
+	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 }
 
 func (r *ConfigDeployResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
@@ -128,7 +134,6 @@ func (r *ConfigDeployResource) Update(ctx context.Context, req resource.UpdateRe
 	if resp.Diagnostics.HasError() {
 		return
 	}
-
 	r.Deploy(ctx, &resp.Diagnostics, &data)
 	data.Id = data.FabricName
 
