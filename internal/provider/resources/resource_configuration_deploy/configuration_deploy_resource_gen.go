@@ -22,6 +22,11 @@ func ConfigurationDeployResourceSchema(ctx context.Context) schema.Schema {
 				MarkdownDescription: "Save the configuration",
 				Default:             booldefault.StaticBool(false),
 			},
+			"deploy": schema.BoolAttribute{
+				Required:            true,
+				Description:         "This is a boolean value. If set to false, no deployment is done, it basically no operation in NDFC. If set to true, the switches are deployed and the flag will be toggled back to false after the deployment is completed, when terraform refresh is performed. Terraform plan will always show in-place update for this field when set to true.",
+				MarkdownDescription: "This is a boolean value. If set to false, no deployment is done, it basically no operation in NDFC. If set to true, the switches are deployed and the flag will be toggled back to false after the deployment is completed, when terraform refresh is performed. Terraform plan will always show in-place update for this field when set to true.",
+			},
 			"fabric_name": schema.StringAttribute{
 				Required:            true,
 				Description:         "The name of the fabric",
@@ -50,6 +55,7 @@ func ConfigurationDeployResourceSchema(ctx context.Context) schema.Schema {
 
 type ConfigurationDeployModel struct {
 	ConfigSave    types.Bool   `tfsdk:"config_save"`
+	Deploy        types.Bool   `tfsdk:"deploy"`
 	FabricName    types.String `tfsdk:"fabric_name"`
 	Id            types.String `tfsdk:"id"`
 	SerialNumbers types.Set    `tfsdk:"serial_numbers"`

@@ -25,6 +25,7 @@ resource "ndfc_configuration_deploy" "test_resource_configuration_deploy_1" {
 
 ### Required
 
+- `deploy` (Boolean) This is a boolean value. If set to false, no deployment is done, it basically no operation in NDFC. If set to true, the switches are deployed and the flag will be toggled back to false after the deployment is completed, when terraform refresh is performed. Terraform plan will always show in-place update for this field when set to true.
 - `fabric_name` (String) The name of the fabric
 
 ### Optional
