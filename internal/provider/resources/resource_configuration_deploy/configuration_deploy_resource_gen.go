@@ -44,13 +44,21 @@ func ConfigurationDeployResourceSchema(ctx context.Context) schema.Schema {
 				Description:         "Value 'ALL' if all switches in the fabric are to be deployed, or a list of serial numbers of the switches to be deployed",
 				MarkdownDescription: "Value 'ALL' if all switches in the fabric are to be deployed, or a list of serial numbers of the switches to be deployed",
 			},
+			"trigger_deploy_on_update": schema.BoolAttribute{
+				Optional:            true,
+				Computed:            true,
+				Description:         "Default set to false, config deploy will be only triggered on create of resource. If set to true in resource update, the configurations are deployed to the switches and the flag will be toggled back to false after the deployment is completed, when terraform refresh is performed. Terraform plan will always show in-place update for this field when set to true.",
+				MarkdownDescription: "Default set to false, config deploy will be only triggered on create of resource. If set to true in resource update, the configurations are deployed to the switches and the flag will be toggled back to false after the deployment is completed, when terraform refresh is performed. Terraform plan will always show in-place update for this field when set to true.",
+				Default:             booldefault.StaticBool(false),
+			},
 		},
 	}
 }
 
 type ConfigurationDeployModel struct {
-	ConfigSave    types.Bool   `tfsdk:"config_save"`
-	FabricName    types.String `tfsdk:"fabric_name"`
-	Id            types.String `tfsdk:"id"`
-	SerialNumbers types.Set    `tfsdk:"serial_numbers"`
+	ConfigSave            types.Bool   `tfsdk:"config_save"`
+	FabricName            types.String `tfsdk:"fabric_name"`
+	Id                    types.String `tfsdk:"id"`
+	SerialNumbers         types.Set    `tfsdk:"serial_numbers"`
+	TriggerDeployOnUpdate types.Bool   `tfsdk:"trigger_deploy_on_update"`
 }
