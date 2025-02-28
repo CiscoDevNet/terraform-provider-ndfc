@@ -70,6 +70,40 @@ digraph G {
   "ndfc_vrfs.test_resource_vrfs_1" -> "ndfc_vpc_pair.test_resource_vpc_pair_1";
 }`
 
+const tgDependenciesGlobalDeploy = `
+digraph G {
+  rankdir = "RL";
+  node [shape = rect, fontname = "sans-serif"];
+  "ndfc_configuration_deploy.test_resource_configuration_deploy_1" [label="ndfc_configuration_deploy.test_resource_configuration_deploy_1"];
+  "ndfc_fabric_vxlan_evpn.test_resource_fabric_vxlan_evpn_1" [label="ndfc_fabric_vxlan_evpn.test_resource_fabric_vxlan_evpn_1"];
+  "ndfc_interface_ethernet.test_resource_interface_ethernet_1" [label="ndfc_interface_ethernet.test_resource_interface_ethernet_1"];
+  "ndfc_interface_loopback.test_resource_interface_loopback_1" [label="ndfc_interface_loopback.test_resource_interface_loopback_1"];
+  "ndfc_interface_portchannel.test_resource_interface_portchannel_1" [label="ndfc_interface_portchannel.test_resource_interface_portchannel_1"];
+  "ndfc_interface_vlan.test_resource_interface_vlan_1" [label="ndfc_interface_vlan.test_resource_interface_vlan_1"];
+  "ndfc_interface_vpc.test_resource_interface_vpc_1" [label="ndfc_interface_vpc.test_resource_interface_vpc_1"];
+  "ndfc_inventory_devices.test_resource_inventory_devices_1" [label="ndfc_inventory_devices.test_resource_inventory_devices_1"];
+  "ndfc_networks.test_resource_networks_1" [label="ndfc_networks.test_resource_networks_1"];
+  "ndfc_policy.test_resource_policy_1" [label="ndfc_policy.test_resource_policy_1"];
+  "ndfc_vpc_pair.test_resource_vpc_pair_1" [label="ndfc_vpc_pair.test_resource_vpc_pair_1"];
+  "ndfc_vrfs.test_resource_vrfs_1" [label="ndfc_vrfs.test_resource_vrfs_1"];
+  "ndfc_configuration_deploy.test_resource_configuration_deploy_1" -> "ndfc_interface_loopback.test_resource_interface_loopback_1";
+  "ndfc_configuration_deploy.test_resource_configuration_deploy_1" -> "ndfc_interface_portchannel.test_resource_interface_portchannel_1";
+  "ndfc_configuration_deploy.test_resource_configuration_deploy_1" -> "ndfc_interface_vlan.test_resource_interface_vlan_1";
+  "ndfc_configuration_deploy.test_resource_configuration_deploy_1" -> "ndfc_interface_vpc.test_resource_interface_vpc_1";
+  "ndfc_configuration_deploy.test_resource_configuration_deploy_1" -> "ndfc_networks.test_resource_networks_1";
+  "ndfc_configuration_deploy.test_resource_configuration_deploy_1" -> "ndfc_policy.test_resource_policy_1";
+  "ndfc_interface_ethernet.test_resource_interface_ethernet_1" -> "ndfc_vpc_pair.test_resource_vpc_pair_1";
+  "ndfc_interface_loopback.test_resource_interface_loopback_1" -> "ndfc_vpc_pair.test_resource_vpc_pair_1";
+  "ndfc_interface_portchannel.test_resource_interface_portchannel_1" -> "ndfc_interface_ethernet.test_resource_interface_ethernet_1";
+  "ndfc_interface_vlan.test_resource_interface_vlan_1" -> "ndfc_vpc_pair.test_resource_vpc_pair_1";
+  "ndfc_interface_vpc.test_resource_interface_vpc_1" -> "ndfc_vpc_pair.test_resource_vpc_pair_1";
+  "ndfc_inventory_devices.test_resource_inventory_devices_1" -> "ndfc_fabric_vxlan_evpn.test_resource_fabric_vxlan_evpn_1";
+  "ndfc_networks.test_resource_networks_1" -> "ndfc_vrfs.test_resource_vrfs_1";
+  "ndfc_policy.test_resource_policy_1" -> "ndfc_inventory_devices.test_resource_inventory_devices_1";
+  "ndfc_vpc_pair.test_resource_vpc_pair_1" -> "ndfc_inventory_devices.test_resource_inventory_devices_1";
+  "ndfc_vrfs.test_resource_vrfs_1" -> "ndfc_vpc_pair.test_resource_vpc_pair_1";
+}`
+
 func GetTFConfigWithSingleResource(tt string, cfg map[string]string, rscs []interface{}, out **string) {
 	x := new(string)
 	args := map[string]interface{}{
@@ -307,7 +341,7 @@ func GetProviderConfig(attr map[string]interface{}) string {
 	return tpl.String()
 }
 
-func GetTFIntegrated(ts string, rsList []string, attrs map[string]interface{}) string {
+func GetTFIntegrated(ts string, rsList []string, attrs map[string]interface{}, rsDeploy bool) string {
 
 	switches := attrs["switches"].([]string)
 	vpcPair := attrs["vpc_pair"].([]string)
@@ -321,9 +355,15 @@ func GetTFIntegrated(ts string, rsList []string, attrs map[string]interface{}) s
 
 	// Read resource.tf from each item in rsList
 	//rscTfList := make([]TerraformConfig, len(rsList))
-
+	var deps map[string][]string
+	var err error
 	tfConfig := new(bytes.Buffer)
-	deps, err := parseGraphWiz(tfDependenciesDot)
+	// rsDeploy=> True indicates resource level deploy needs to be set; otherwise global deploy is enabled
+	if rsDeploy {
+		deps, err = parseGraphWiz(tfDependenciesDot)
+	} else {
+		deps, err = parseGraphWiz(tgDependenciesGlobalDeploy)
+	}
 	if err != nil {
 		panic(err)
 	}
@@ -342,14 +382,26 @@ func GetTFIntegrated(ts string, rsList []string, attrs map[string]interface{}) s
 
 		case "ndfc_vrfs":
 			tt.ModifyAttributeValue("fabric_name", fabricName)
+			if !rsDeploy {
+				tt.ModifyAttributeValue("deploy_all_attachments", false)
+				tt.ModifyMapValue("attach_list", "deploy_this_attachment", false)
+			}
 			tt.ModifyMapKey("attach_list", "SWITCH_SERIAL_NO", switches[0])
 
 		case "ndfc_networks":
 			tt.ModifyAttributeValue("fabric_name", fabricName)
+
+			if !rsDeploy {
+				tt.ModifyAttributeValue("deploy_all_attachments", false)
+				tt.ModifyMapValue("attachments", "deploy_this_attachment", false)
+			}
 			tt.ModifyMapKey("attachments", "SWITCH_SERIAL_NO", switches[0])
 
 		case "ndfc_policy":
 			tt.ModifyAttributeValue("device_serial_number", switches[0])
+			if !rsDeploy {
+				tt.ModifyAttributeValue("deploy", false)
+			}
 
 		case "ndfc_interface_ethernet":
 			fallthrough
@@ -359,12 +411,21 @@ func GetTFIntegrated(ts string, rsList []string, attrs map[string]interface{}) s
 			fallthrough
 		case "ndfc_interface_vlan":
 			tt.ModifyAttributeValue("serial_number", switches[0])
+			if !rsDeploy {
+				tt.ModifyAttributeValue("deploy", false)
+			}
 
 		case "ndfc_interface_vpc":
 			tt.ModifyAttributeValue("serial_number", vpcPair[0]+"~"+vpcPair[1])
+			if !rsDeploy {
+				tt.ModifyAttributeValue("deploy", false)
+			}
 
 		case "ndfc_vpc_pair":
 			tt.ModifyAttributeValue("serial_numbers", vpcPair)
+			if !rsDeploy {
+				tt.ModifyAttributeValue("deploy", false)
+			}
 
 		case "ndfc_inventory_devices":
 			tt.ModifyAttributeValue("fabric_name", fabricName)
@@ -377,12 +438,18 @@ func GetTFIntegrated(ts string, rsList []string, attrs map[string]interface{}) s
 					tt.AddEntryToMap("devices", sw, map[string]string{"role": inventoryRoles[i]}, false)
 				}
 			}
+			if !rsDeploy {
+				tt.ModifyAttributeValue("deploy", false)
+			}
+		case "ndfc_configuration_deploy":
+			tt.ModifyAttributeValue("fabric_name", fabricName)
+			tt.ModifyAttributeValue("serial_numbers", []string{"ALL"})
 		}
 		tt.File.WriteTo(tfConfig)
 		//tfConfig.Write(tt.File.Bytes())
 		tfConfig.Write([]byte("\n\n"))
 	}
-	//log.Printf("Final TF Config: %s", tfConfig.String())
+	log.Printf("Final TF Config: %s", tfConfig.String())
 
 	if tmpDir == "" {
 		ct := time.Now()

@@ -44,34 +44,48 @@ func (tc *TerraformConfig) AddContent(fc []byte) {
 
 }
 
-func (tc *TerraformConfig) ModifyMapValue(mapName string, key string, value string) {
+func (tc *TerraformConfig) ModifyMapValue(mapName string, key string, value interface{}) {
 	// Locate the resource block
 	body := tc.File.Body()
 	blocks := body.Blocks()
 
 	for _, block := range blocks {
 		if block.Labels()[0] == tc.RscType && block.Labels()[1] == tc.RscName {
-			// Locate the  attribute
-			attr := block.Body().GetAttribute(mapName)
-			if attr != nil {
-				// Get the current map
-				mapTokens := attr.Expr().BuildTokens(nil)
+			// for deeper maps, GetAttribute approach won't work
+			// scan entire body
+			mapTokens := block.BuildTokens(nil)
+			for i, token := range mapTokens {
+				if token.Type == hclsyntax.TokenIdent && string(token.Bytes) == key {
+					log.Printf("Token found: %s - %v", token.Type, string(token.Bytes))
 
-				// Modify the "Environment" map entry
-				for i, token := range mapTokens {
-					log.Printf("Token type: %s - %v", token.Type, string(token.Bytes))
-
-					if string(token.Bytes) == key {
-						// Change the value of "Environment" to "production"
-						mapTokens[i+3].Bytes = []byte(value)
-						break
+					for j := i; j < len(mapTokens); j++ {
+						if mapTokens[j].Type == hclsyntax.TokenStringLit {
+							log.Printf("Replacing value: %s", string(mapTokens[j].Bytes))
+							if v, ok := value.(bool); ok {
+								mapTokens[j].Bytes = hclwrite.TokensForValue(cty.BoolVal(v)).Bytes()
+							} else if v, ok := value.(string); ok {
+								mapTokens[j].Bytes = []byte(v)
+							} else {
+								log.Fatalf("Unsupported type for new value: %T", value)
+							}
+							break
+						}
 					}
 				}
-				// Set the modified map back to the "tags" attribute
-				block.Body().SetAttributeRaw(mapName, mapTokens)
 			}
+			tc.File.Body().Clear()
+			tc.File.Body().AppendUnstructuredTokens(mapTokens)
+			break
 		}
 	}
+	tempFile := new(bytes.Buffer)
+	tc.File.WriteTo(tempFile)
+	var dg hcl.Diagnostics
+	tc.File, dg = hclwrite.ParseConfig(tempFile.Bytes(), "unknown", hcl.Pos{Line: 1, Column: 1})
+	if dg.HasErrors() {
+		log.Fatalf("Failed to parse HCL: %v", dg)
+	}
+
 }
 
 func (tc *TerraformConfig) ModifyMapKey(mapName string, key string, newKey string) {
@@ -122,6 +136,13 @@ func (tc *TerraformConfig) ModifyMapKey(mapName string, key string, newKey strin
 				tc.File.Body().AppendUnstructuredTokens(mapTokens)
 			}
 		}
+	}
+	tempFile := new(bytes.Buffer)
+	tc.File.WriteTo(tempFile)
+	var dg hcl.Diagnostics
+	tc.File, dg = hclwrite.ParseConfig(tempFile.Bytes(), "unknown", hcl.Pos{Line: 1, Column: 1})
+	if dg.HasErrors() {
+		log.Fatalf("Failed to parse HCL: %v", dg)
 	}
 }
 
