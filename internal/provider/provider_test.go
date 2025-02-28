@@ -122,7 +122,60 @@ func TestAccProviderIntegrationTest(t *testing.T) {
 				Config: func() string {
 					cfg := helper.GetProviderHeader()
 					cfg = cfg + "\n\n" + helper.GetProviderConfig(providerAttrs)
-					cfg = cfg + "\n\n" + helper.GetTFIntegrated(t.Name(), rsList, attrs)
+					cfg = cfg + "\n\n" + helper.GetTFIntegrated(t.Name(), rsList, attrs, true)
+					return cfg
+				}(),
+			},
+		},
+	})
+}
+
+func TestAccProviderIntegrationTestGlobalDeploy(t *testing.T) {
+	rsList := []string{
+		"ndfc_fabric_vxlan_evpn",
+		"ndfc_vpc_pair",
+		"ndfc_interface_ethernet",
+		"ndfc_interface_loopback",
+		"ndfc_interface_portchannel",
+		"ndfc_interface_vlan",
+		"ndfc_interface_vpc",
+		"ndfc_networks",
+		"ndfc_vrfs",
+		"ndfc_policy",
+		"ndfc_inventory_devices",
+		"ndfc_configuration_deploy",
+	}
+
+	if helper.GetConfig("global").NDFC.Integration.Fabric == "" {
+		t.Skip("Skipping TestAccProviderIntegrationTest, as configuration is not set in config file")
+	}
+
+	attrs := map[string]interface{}{
+		"fabric":            helper.GetConfig("global").NDFC.Integration.Fabric,
+		"user":              helper.GetConfig("global").NDFC.Integration.User,
+		"password":          helper.GetConfig("global").NDFC.Integration.Password,
+		"vpc_pair":          helper.GetConfig("global").NDFC.Integration.VpcPair,
+		"inventory_devices": helper.GetConfig("global").NDFC.Integration.Inventory.GetDevices(),
+		"inventory_roles":   helper.GetConfig("global").NDFC.Integration.Inventory.GetRoles(),
+		"switches":          helper.GetConfig("global").NDFC.Integration.Switches,
+	}
+
+	providerAttrs := map[string]interface{}{
+		"Host":     helper.GetConfig("global").NDFC.URL,
+		"User":     helper.GetConfig("global").NDFC.User,
+		"Password": helper.GetConfig("global").NDFC.Password,
+		"Insecure": helper.GetConfig("global").NDFC.Insecure,
+	}
+
+	resource.Test(t, resource.TestCase{
+		ProtoV6ProviderFactories: testAccProtoV6ProviderFactories,
+		PreCheck:                 func() { testAccPreCheck(t, "provider") },
+		Steps: []resource.TestStep{
+			{
+				Config: func() string {
+					cfg := helper.GetProviderHeader()
+					cfg = cfg + "\n\n" + helper.GetProviderConfig(providerAttrs)
+					cfg = cfg + "\n\n" + helper.GetTFIntegrated(t.Name(), rsList, attrs, false)
 					return cfg
 				}(),
 			},
