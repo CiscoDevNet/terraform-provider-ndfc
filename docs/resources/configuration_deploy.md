@@ -14,9 +14,10 @@ description: |-
 
 ```terraform
 resource "ndfc_configuration_deploy" "test_resource_configuration_deploy_1" {
-  fabric_name    = "CML"
-  serial_numbers = ["FGE20360RRZ", "FGE20360RRY"]
-  config_save    = true
+  fabric_name              = "CML"
+  serial_numbers           = ["ALL"]
+  config_save              = true
+  trigger_deploy_on_update = false
 }
 ```
 
@@ -31,6 +32,7 @@ resource "ndfc_configuration_deploy" "test_resource_configuration_deploy_1" {
 
 - `config_save` (Boolean) Save the configuration
 - `serial_numbers` (Set of String) Value 'ALL' if all switches in the fabric are to be deployed, or a list of serial numbers of the switches to be deployed
+- `trigger_deploy_on_update` (Boolean) Default set to false, config deploy will be only triggered on create of resource. If set to true in resource update, the configurations are deployed to the switches and the flag will be toggled back to false after the deployment is completed, when terraform refresh is performed. Terraform plan will always show in-place update for this field when set to true.
 
 ### Read-Only
 

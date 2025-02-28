@@ -438,9 +438,7 @@ func GetTFIntegrated(ts string, rsList []string, attrs map[string]interface{}, r
 					tt.AddEntryToMap("devices", sw, map[string]string{"role": inventoryRoles[i]}, false)
 				}
 			}
-			if !rsDeploy {
-				tt.ModifyAttributeValue("deploy", false)
-			}
+			tt.ModifyAttributeValue("deploy", true)
 		case "ndfc_configuration_deploy":
 			tt.ModifyAttributeValue("fabric_name", fabricName)
 			tt.ModifyAttributeValue("serial_numbers", []string{"ALL"})
