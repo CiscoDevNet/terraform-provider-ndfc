@@ -41,3 +41,15 @@ resource:
       ndfc_type: bool
       payload_hide: true
       example: true
+    - &deploy
+      model_name: deploy
+      tf_name: deploy
+      type: Bool
+      description: >-
+            This is a boolean value.
+            If set to false, no deployment is done, it basically no operation in NDFC.
+            If set to true, the switches are deployed and the flag will be toggled back to false after the deployment is completed,
+            when terraform refresh is performed. Terraform plan will always show in-place update for this field when set to true.
+      ndfc_type: bool
+      payload_hide: true
+      mandatory: true
