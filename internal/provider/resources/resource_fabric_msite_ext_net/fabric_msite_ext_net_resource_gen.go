@@ -136,13 +136,6 @@ func FabricMsiteExtNetResourceSchema(ctx context.Context) schema.Schema {
 				Description:         "Backup hourly only if there is any config deployment since last backup",
 				MarkdownDescription: "Backup hourly only if there is any config deployment since last backup",
 			},
-			"enable_rt_intf_stats": schema.BoolAttribute{
-				Optional:            true,
-				Computed:            true,
-				Description:         "Valid for NX-OS only",
-				MarkdownDescription: "Valid for NX-OS only",
-				Default:             booldefault.StaticBool(false),
-			},
 			"enable_scheduled_backup": schema.BoolAttribute{
 				Optional:            true,
 				Description:         "Backup at the specified time",
@@ -341,7 +334,6 @@ type FabricMsiteExtNetModel struct {
 	EnableNxapi           types.Bool   `tfsdk:"enable_nxapi"`
 	EnableNxapiHttp       types.Bool   `tfsdk:"enable_nxapi_http"`
 	EnableRealtimeBackup  types.Bool   `tfsdk:"enable_realtime_backup"`
-	EnableRtIntfStats     types.Bool   `tfsdk:"enable_rt_intf_stats"`
 	EnableScheduledBackup types.Bool   `tfsdk:"enable_scheduled_backup"`
 	FabricFreeform        types.String `tfsdk:"fabric_freeform"`
 	FabricName            types.String `tfsdk:"fabric_name"`

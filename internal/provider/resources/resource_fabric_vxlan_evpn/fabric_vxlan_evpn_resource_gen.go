@@ -432,13 +432,6 @@ func FabricVxlanEvpnResourceSchema(ctx context.Context) schema.Schema {
 				Description:         "Backup hourly only if there is any config deployment since last backup",
 				MarkdownDescription: "Backup hourly only if there is any config deployment since last backup",
 			},
-			"enable_rt_intf_stats": schema.BoolAttribute{
-				Optional:            true,
-				Computed:            true,
-				Description:         "Valid for NX-OS only",
-				MarkdownDescription: "Valid for NX-OS only",
-				Default:             booldefault.StaticBool(false),
-			},
 			"enable_scheduled_backup": schema.BoolAttribute{
 				Optional:            true,
 				Description:         "Backup at the specified time",
@@ -1313,7 +1306,6 @@ type FabricVxlanEvpnModel struct {
 	EnablePbr                               types.Bool   `tfsdk:"enable_pbr"`
 	EnablePvlan                             types.Bool   `tfsdk:"enable_pvlan"`
 	EnableRealtimeBackup                    types.Bool   `tfsdk:"enable_realtime_backup"`
-	EnableRtIntfStats                       types.Bool   `tfsdk:"enable_rt_intf_stats"`
 	EnableScheduledBackup                   types.Bool   `tfsdk:"enable_scheduled_backup"`
 	EnableTenantDhcp                        types.Bool   `tfsdk:"enable_tenant_dhcp"`
 	EnableTrm                               types.Bool   `tfsdk:"enable_trm"`

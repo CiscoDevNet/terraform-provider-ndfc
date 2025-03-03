@@ -94,7 +94,6 @@ resource "ndfc_fabric_vxlan_evpn" "test_resource_fabric_vxlan_evpn_1" {
   per_vrf_loopback_auto_provision             = false
   pim_hello_auth_enable                       = false
   pm_enable                                   = false
-  enable_rt_intf_stats                        = false
   power_redundancy_mode                       = "ps-redundant"
   replication_mode                            = "Multicast"
   route_map_sequence_number_range             = "1-65534"
@@ -201,7 +200,6 @@ resource "ndfc_fabric_vxlan_evpn" "test_resource_fabric_vxlan_evpn_1" {
 - `enable_pbr` (Boolean) When ESR option is ePBR, enable ePBR will enable pbr, sla sender and epbr features on the switch
 - `enable_pvlan` (Boolean) Enable PVLAN on switches except spines and super spines
 - `enable_realtime_backup` (Boolean) Backup hourly only if there is any config deployment since last backup
-- `enable_rt_intf_stats` (Boolean) Valid for NX-OS only
 - `enable_scheduled_backup` (Boolean) Backup at the specified time
 - `enable_tenant_dhcp` (Boolean) No description available
 - `enable_trm` (Boolean) For Overlay Multicast Support In VXLAN Fabrics

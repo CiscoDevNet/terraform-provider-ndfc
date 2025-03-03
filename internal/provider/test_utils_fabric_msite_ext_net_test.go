@@ -89,11 +89,6 @@ func FabricMsiteExtNetModelHelperStateCheck(RscName string, c resource_fabric_co
 	} else {
 		ret = append(ret, resource.TestCheckResourceAttr(RscName, attrPath.AtName("enable_nxapi_http").String(), "false"))
 	}
-	if c.EnableRtIntfStats != "" {
-		ret = append(ret, resource.TestCheckResourceAttr(RscName, attrPath.AtName("enable_rt_intf_stats").String(), c.EnableRtIntfStats))
-	} else {
-		ret = append(ret, resource.TestCheckResourceAttr(RscName, attrPath.AtName("enable_rt_intf_stats").String(), "false"))
-	}
 	if c.FabricFreeform != "" {
 		ret = append(ret, resource.TestCheckResourceAttr(RscName, attrPath.AtName("fabric_freeform").String(), c.FabricFreeform))
 	}

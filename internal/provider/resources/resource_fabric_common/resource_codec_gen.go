@@ -80,7 +80,6 @@ type NDFCFabricCommonModel struct {
 	EnableNetflow                           string       `json:"ENABLE_NETFLOW,omitempty"`
 	EnableNxapi                             string       `json:"ENABLE_NXAPI,omitempty"`
 	EnableNxapiHttp                         string       `json:"ENABLE_NXAPI_HTTP,omitempty"`
-	EnableRtIntfStats                       string       `json:"ENABLE_RT_INTF_STATS,omitempty"`
 	FabricFreeform                          string       `json:"FABRIC_FREEFORM,omitempty"`
 	InbandEnable                            string       `json:"INBAND_ENABLE,omitempty"`
 	InbandMgmt                              string       `json:"INBAND_MGMT,omitempty"`

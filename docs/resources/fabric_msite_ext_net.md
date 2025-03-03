@@ -23,7 +23,6 @@ resource "ndfc_fabric_msite_ext_net" "test_resource_fabric_msite_ext_net_1" {
   enable_netflow        = false
   enable_nxapi          = false
   enable_nxapi_http     = false
-  enable_rt_intf_stats  = false
   feature_ptp           = false
   inband_mgmt           = false
   is_read_only          = true
@@ -70,7 +69,6 @@ resource "ndfc_fabric_msite_ext_net" "test_resource_fabric_msite_ext_net_1" {
 - `enable_nxapi` (Boolean) Enable HTTPS NX-API
 - `enable_nxapi_http` (Boolean) No description available
 - `enable_realtime_backup` (Boolean) Backup hourly only if there is any config deployment since last backup
-- `enable_rt_intf_stats` (Boolean) Valid for NX-OS only
 - `enable_scheduled_backup` (Boolean) Backup at the specified time
 - `fabric_freeform` (String) Additional supported CLIs for all same OS (e.g. all NxOS or IOS-XE, etc) switches
 - `feature_ptp` (Boolean) No description available

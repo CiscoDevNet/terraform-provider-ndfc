@@ -9,7 +9,6 @@ resource "ndfc_fabric_msite_ext_net" "test_resource_fabric_msite_ext_net_1" {
   enable_nxapi          = false
   enable_nxapi_http     = false
   bgp_as                = 65000
-  enable_rt_intf_stats  = false
   feature_ptp           = false
   inband_mgmt           = false
   is_read_only          = true
