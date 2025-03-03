@@ -563,6 +563,13 @@ resource:
       default_value: 50000-59000
       type: String
       example: 50000-59000
+#    - model_name: ESR_OPTION
+#      tf_name: esr_option
+#      # This present in old 12.1.3b not in 12.2.2
+#      default_value: PBR
+#      validator: 'OneOf("PBR", "ePBR")'
+#      description: Policy-Based Routing (PBR) or Enhanced PBR (ePBR)
+#      type: String
     - model_name: LINK_STATE_ROUTING
       tf_name: link_state_routing
       description: Used for Spine-Leaf Connectivity
@@ -801,12 +808,12 @@ resource:
       default_value: false
       type: Bool
       example: false
-    - model_name: ENABLE_RT_INTF_STATS
-      tf_name: enable_rt_intf_stats
-      description: Valid for NX-OS only
-      default_value: false
-      type: Bool
-      example: false
+#    - model_name: ENABLE_RT_INTF_STATS
+#      tf_name: enable_rt_intf_stats
+#      # This present in old 12.2.2 not in 12.1.3b
+#     description: Valid for NX-OS only
+#     default_value: false
+#     type: Bool
     - model_name: POWER_REDUNDANCY_MODE
       tf_name: power_redundancy_mode
       description: Default Power Supply Mode For The Fabric

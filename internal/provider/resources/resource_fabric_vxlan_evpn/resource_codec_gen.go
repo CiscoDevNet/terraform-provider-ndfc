@@ -952,13 +952,6 @@ func (v *FabricVxlanEvpnModel) SetModelData(jsonData *resource_fabric_common.NDF
 		v.PmEnable = types.BoolNull()
 	}
 
-	if jsonData.EnableRtIntfStats != "" {
-		x, _ := strconv.ParseBool(jsonData.EnableRtIntfStats)
-		v.EnableRtIntfStats = types.BoolValue(x)
-	} else {
-		v.EnableRtIntfStats = types.BoolNull()
-	}
-
 	if jsonData.PowerRedundancyMode != "" {
 		v.PowerRedundancyMode = types.StringValue(jsonData.PowerRedundancyMode)
 	} else {
@@ -2160,12 +2153,6 @@ func (v FabricVxlanEvpnModel) GetModelData() *resource_fabric_common.NDFCFabricC
 		data.PmEnable = strconv.FormatBool(v.PmEnable.ValueBool())
 	} else {
 		data.PmEnable = ""
-	}
-
-	if !v.EnableRtIntfStats.IsNull() && !v.EnableRtIntfStats.IsUnknown() {
-		data.EnableRtIntfStats = strconv.FormatBool(v.EnableRtIntfStats.ValueBool())
-	} else {
-		data.EnableRtIntfStats = ""
 	}
 
 	if !v.PowerRedundancyMode.IsNull() && !v.PowerRedundancyMode.IsUnknown() {

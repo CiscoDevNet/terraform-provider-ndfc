@@ -79,7 +79,6 @@ resource "ndfc_fabric_vxlan_evpn" "test_resource_fabric_vxlan_evpn_1" {
   per_vrf_loopback_auto_provision             = false
   pim_hello_auth_enable                       = false
   pm_enable                                   = false
-  enable_rt_intf_stats                        = false
   power_redundancy_mode                       = "ps-redundant"
   replication_mode                            = "Multicast"
   route_map_sequence_number_range             = "1-65534"

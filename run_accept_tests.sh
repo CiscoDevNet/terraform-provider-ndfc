@@ -17,7 +17,7 @@ echo $PATTERN
 export TF_ACC=1
 export TF_LOG=DEBUG
 export TF_ACC_LOG=DEBUG
-export TF_ACC_LOG_PATH=/tmp/terraform-acceptance-tests.log
+export TF_ACC_LOG_PATH=/tmp/terraform-acceptance-tests_$(date '+%Y-%m-%d-%H-%M-%S').log
 export NDFC_TEST_CONFIG_FILE=$(pwd)/testing/at_testbeds/ndfc_${CFG}.yaml
 
 # Run the Terraform acceptance tests

@@ -80,6 +80,12 @@ resource:
     description: Enable groups with receivers sending (*,G) joins
     default_value: false
     type: Bool
+#  - model_name: ESR_OPTION
+#    tf_name: esr_option
+#    default_value: PBR
+#    validator: 'OneOf("PBR", "ePBR")'
+#    description: Policy-Based Routing (PBR) or Enhanced PBR (ePBR)
+#    type: String
   - model_name: ENABLE_NBM_PASSIVE
     tf_name: enable_nbm_passive
     description: Enable NBM mode to pim-passive for default VRF
@@ -323,11 +329,11 @@ resource:
     description: No description available
     default_value: false
     type: Bool
-  - model_name: ENABLE_RT_INTF_STATS
-    tf_name: enable_rt_intf_stats
-    description: Valid for NX-OS only
-    default_value: false
-    type: Bool
+#  - model_name: ENABLE_RT_INTF_STATS
+#    tf_name: enable_rt_intf_stats
+#    description: Valid for NX-OS only
+#    default_value: false
+#    type: Bool
   - model_name: FABRIC_FREEFORM
     tf_name: fabric_freeform
     description: Additional supported CLIs for all same OS (e.g. all NxOS or IOS-XE,
