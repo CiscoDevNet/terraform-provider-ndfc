@@ -140,13 +140,6 @@ func (v *FabricMsiteExtNetModel) SetModelData(jsonData *resource_fabric_common.N
 		v.EnableNxapiHttp = types.BoolNull()
 	}
 
-	if jsonData.EnableRtIntfStats != "" {
-		x, _ := strconv.ParseBool(jsonData.EnableRtIntfStats)
-		v.EnableRtIntfStats = types.BoolValue(x)
-	} else {
-		v.EnableRtIntfStats = types.BoolNull()
-	}
-
 	if jsonData.FabricFreeform != "" {
 		v.FabricFreeform = types.StringValue(jsonData.FabricFreeform)
 	} else {
@@ -478,12 +471,6 @@ func (v FabricMsiteExtNetModel) GetModelData() *resource_fabric_common.NDFCFabri
 		data.EnableNxapiHttp = strconv.FormatBool(v.EnableNxapiHttp.ValueBool())
 	} else {
 		data.EnableNxapiHttp = ""
-	}
-
-	if !v.EnableRtIntfStats.IsNull() && !v.EnableRtIntfStats.IsUnknown() {
-		data.EnableRtIntfStats = strconv.FormatBool(v.EnableRtIntfStats.ValueBool())
-	} else {
-		data.EnableRtIntfStats = ""
 	}
 
 	if !v.FabricFreeform.IsNull() && !v.FabricFreeform.IsUnknown() {

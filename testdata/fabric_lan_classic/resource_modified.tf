@@ -18,7 +18,7 @@ resource "ndfc_fabric_lan_classic" "test_resource_fabric_lan_classic_1" {
   netflow_sampler_list    = jsonencode({ "NETFLOW_SAMPLER_LIST" : [{ "SAMPLER_NAME" : "Test1", "NUM_SAMPLES" : 12, "SAMPLING_RATE" : 10 }] })
   nxapi_https_port        = 443
   nxapi_http_port         = 80
-  pm_enable               = true 
+  pm_enable               = false
   power_redundancy_mode   = "ps-redundant"
   snmp_server_host_trap   = true
   subinterface_range      = "2-511"

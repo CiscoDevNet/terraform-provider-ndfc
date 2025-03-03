@@ -111,12 +111,12 @@ resource:
       default_value: false
       type: Bool
       example: false
-    - model_name: ENABLE_RT_INTF_STATS
-      tf_name: enable_rt_intf_stats
-      description: Valid for NX-OS only
-      default_value: false
-      type: Bool
-      example: false
+#    - model_name: ENABLE_RT_INTF_STATS
+#      tf_name: enable_rt_intf_stats
+#      description: Valid for NX-OS only
+#      # This present in old 12.2.2 not in 12.1.3b
+#      default_value: false
+#      type: Bool
     - model_name: FABRIC_FREEFORM
       tf_name: fabric_freeform
       description: >-
