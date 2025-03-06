@@ -533,12 +533,6 @@ func TestAccNetwotksResourceGlobalDeployWithChanges(t *testing.T) {
 					}
 				}
 
-				provider "ndfc" {
-					username = "admin"
-					password = "admin!@#"
-					host     = "https://10.78.210.161"
-					insecure = true
-				}
 
 				resource "ndfc_vrfs" "test_resource_vrf_bulk_1" {
 					fabric_name = "CML"
