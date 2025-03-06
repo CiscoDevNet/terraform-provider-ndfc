@@ -454,8 +454,8 @@ func testGenerateVrfMultipleResource(count int, vrfName string, rscName string) 
 		"RscType":  ndfc.ResourceVrfBulk,
 		"RscName":  "vrf_test",
 		"User":     "admin",
-		"Password": "admin!@#",
-		"Host":     "https://10.78.210.161",
+		"Password": "password",
+		"Host":     "ndfc.com",
 		"Insecure": "true",
 	}
 	vrfScaledBulk := make([]*resource_vrf_bulk.NDFCVrfBulkModel, count)
