@@ -1,0 +1,41 @@
+---
+ndfc: 
+  url: "https://ndfc-161"
+  user: admin
+  pwd: "password"
+  insecure: true
+  fabric: CML
+  switches:
+    - "9FE076D8EJL"
+    - "9TQYTJSZ1VJ"
+    - "9QBCTIN0FMY"
+  #VRFs/Networks created during the tests will have below prefix
+  vrf_prefix: "vrf_a_test_"
+  net_prefix: "net_a_test_"
+  #Serial number of the switches that will be used in the vPC pair
+  vpc_pair: 
+    - "9TQYTJSZ1VJ"
+    - "9Q34PHYLDB5"
+  # Configuration for the integration test
+  integration_test:
+    fabric: at_test_vxlan
+    # credentials to manage the switches (incorrect will lead to discovery failure)
+    user: admin
+    pwd: "password"
+    switches:
+      - "9FTY3OTO227"
+      - "9H6LWDOJEL5"
+      - "9XS8G428UBB"
+      - "9UP5BEPM31C"
+    inventory_devices:
+      - device : "192.168.20.225"
+        role: "spine"
+      - device : "192.168.20.95"
+        role: "leaf"
+      - device : "192.168.20.96"
+        role: "leaf"
+      - device : "192.168.20.97"
+        role: "leaf"
+    vpc_pair:
+      - "9H6LWDOJEL5"
+      - "9UP5BEPM31C"
