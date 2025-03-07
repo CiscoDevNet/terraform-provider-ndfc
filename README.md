@@ -6,7 +6,7 @@
 - [Go](https://golang.org/doc/install) >= 1.19
 
 
-## Building The Provider
+## Installing The Provider
 
 1. Clone the repository
 2. Enter the repository directory
@@ -19,16 +19,10 @@ The provider should be available in `$GOPATH/bin`
 
 ## Using the provider
 
-The provider is not yet available in hashicorp terraform registry. So `terrform init` will not work
-
+For using the locally compiled provider:
 Refer https://developer.hashicorp.com/terraform/cli/config/config-file   
 Section: Development Overrides for Provider Developers    
 To add dev overrides to use a the plugin under development    
-
-
-## Developing the Provider
-
-See generator/generate.md
 
 
 ## Acceptance Tests
@@ -36,27 +30,91 @@ See generator/generate.md
 ```shell
 ./run_accept_tests.sh // Run everything
 ./run_accept_tests.sh TestAcc<Pattern of tests> // Run Specific tests 
+or
+make testacc // Run everything
 ```
 * AT runs on actual NDFC environment     
-* The testbed settings are stored in `testing/at_testbeds/`    
-* By default it uses ndfc-175     
-* Use `TESTBED` environment variable to change the testbed
-* A file  `testing/at_testbeds/ndfc_$(TESTBED).yaml must be present
-** Remember to set fabric names, switch serials etc to match the NDFC in use
-  
-AT run result mandatory for PR approval
-
-## Steps to run unit test with mockoon server
-
-1. Install mockoon-cli server
-```
-npm install -g @mockoon/cli
-```
-2. Copy your mockoon environment data json file to `/terraform-provide-ndfc/mockoon_data.json`
-3. Create unit test functions with prefix `TestUT_` and use `ut_client` as NDFC client variable.
-4. Run `./run_unit_test.sh` to run the unit test cases.
+* The testbed settings are expected in a yaml file as seen in [`testing/testbed.yaml`](testing/testbed.yaml)
+* export `TESTBED_FILE` environment variable to indicate the testbed config to be used for AT
+* The provider settings can be overrided by following environment variables 
+  `NDFC_HOST`, `NDFC_USER`, `NDFC_PASSWORD`, `NDFC_DOMAIN`
+** The fabric names, switch serials etc in the config must match the NDFC being used 
 
 ## Provider plugin Documentation
 [Provider](docs/index.md)   
 [Resources](docs/resources)    
 [Datasources](docs/data-sources)     
+
+## Sample Workflow
+
+Following is a sample integrated config that creates a new fabric and adds a switch into it.     
+Save this to a `config.tf` file, modify the paramters according to the NDFC in use       
+
+```
+terraform {
+  required_providers {
+    ndfc = {
+      source = "registry.terraform.io/cisco/ndfc"
+    }
+  }
+}
+
+provider "ndfc" {
+  username = "admin"
+  password = "test"
+  host     = "https://my-ndfc"
+  insecure = true
+}
+
+resource "ndfc_fabric_vxlan_evpn" "my_fabric_1" {
+  fabric_name                                 = "my_fabric_name"
+  bgp_as                                      = "65000"
+  deploy                                      = false
+}
+resource "ndfc_inventory_devices" "test_resource_inventory_devices_1" {
+  fabric_name                               = "my_fabric_name"
+  auth_protocol                             = "md5"
+  username                                  = "admin"
+  password                                  = "admin_password"
+  max_hops                                  = 0
+  set_as_individual_device_write_credential = false
+  preserve_config                           = false
+  save                                      = true
+  deploy                                    = false
+  retries                                   = 300
+  retry_wait_timeout                        = 20
+  devices = {
+    "10.1.1.1" = {
+      role                    = "spine"
+      discovery_type          = "discover"
+      discovery_auth_protocol = "md5"
+    }
+  }
+}
+
+# resource to do a final recalculate and deploy
+resource "ndfc_configuration_deploy" "test_resource_configuration_deploy_1" {
+  fabric_name              = "my_fabric_name"
+  serial_numbers           = ["ALL"]
+  config_save              = true
+  trigger_deploy_on_update = false
+  # Adding depends on ensures that features are configured in the right order in NDFC
+  depends_on = [
+    ndfc_inventory_devices.test_resource_inventory_devices_1, 
+    ndfc_fabric_vxlan_evpn.my_fabric_1
+  ]
+}
+```
+
+### Execute following to configure NDFC
+
+```shell
+terraform plan
+terraform apply
+```
+
+### Execute following to cleanup
+
+```shell
+terraform destroy
+```

@@ -8,19 +8,24 @@
 # SPDX-License-Identifier: MPL-2.0
 
 set -ex
-echo "export ACC_TEST_CFG to use a different test environment configuration file; default testing/ndfc_config.yaml"
+echo "export TESTBED_FILE to use a different test environment configuration file; default testing/testbed.yaml"
 PATTERN=${1:-TestAcc}
-CFG=${TESTBED:-175}
+CWD=$(pwd)
 TIMEOUT=${TEST_TIMEOUT:-5h}
+TEST_CFG=${TESTBED_FILE:-$(pwd)/testing/testbed.yaml}
 echo $PATTERN
 # Set the necessary environment variables
 export TF_ACC=1
 export TF_LOG=DEBUG
 export TF_ACC_LOG=DEBUG
 export TF_ACC_LOG_PATH=/tmp/terraform-acceptance-tests_$(date '+%Y-%m-%d-%H-%M-%S').log
-export NDFC_TEST_CONFIG_FILE=$(pwd)/testing/at_testbeds/ndfc_${CFG}.yaml
+export NDFC_TEST_CONFIG_FILE=${TEST_CFG}
 
 # Run the Terraform acceptance tests
 rm -rf "$TF_ACC_LOG_PATH"
-GOFLAGS="-count=1" go test -timeout ${TIMEOUT} -v -run ^${PATTERN} ./... 
+# install test summary tool
+go get gotest.tools/gotestsum
+go install gotest.tools/gotestsum
+#GOFLAGS="-count=1" go test -timeout ${TIMEOUT} -v -run ^${PATTERN} ./... 
+GOFLAGS="-count=1" $GOBIN/gotestsum --format testname  --format-hide-empty-pkg  --debug -- -v -timeout ${TIMEOUT} -run ^${PATTERN} ./internal/provider
 

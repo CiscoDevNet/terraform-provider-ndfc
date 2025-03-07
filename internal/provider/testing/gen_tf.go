@@ -215,22 +215,9 @@ func GetTFConfigWithSingleResource(tt string, cfg map[string]string, rscs []inte
 		}
 
 	}
-	log.Println(output.String())
+	//log.Println(output.String())
 	*x = output.String()
-	if tmpDir == "" {
-		ct := time.Now()
-		tmpDir = fmt.Sprintf("/tmp/tftest_%s", ct.Format("2006_01_02_15-04-05"))
-		err = os.MkdirAll(tmpDir, 0755)
-		if err != nil {
-			panic(err)
-		}
-	}
-	fp, err := os.Create(fmt.Sprintf("/%s/%s.tf", tmpDir, tt))
-	if err != nil {
-		panic(err)
-	}
-	fp.Write(output.Bytes())
-	fp.Close()
+	WriteConfigToFile(tt, &output)
 	*out = x
 }
 
@@ -302,23 +289,8 @@ func GetVRFTFConfigWithMultipleResource(tt string, cfg map[string]string, vrfBul
 			panic(err)
 		}
 	}
-
-	log.Println(output.String())
 	*x = output.String()
-	if tmpDir == "" {
-		ct := time.Now()
-		tmpDir = fmt.Sprintf("/tmp/tftest_%s", ct.Format("2006_01_02_15-04-05"))
-		err = os.MkdirAll(tmpDir, 0755)
-		if err != nil {
-			panic(err)
-		}
-	}
-	fp, err := os.Create(fmt.Sprintf("/%s/%s.tf", tmpDir, tt))
-	if err != nil {
-		panic(err)
-	}
-	fp.Write(output.Bytes())
-	fp.Close()
+	WriteConfigToFile(tt, &output)
 	*out = x
 }
 
@@ -447,8 +419,11 @@ func GetTFIntegrated(ts string, rsList []string, attrs map[string]interface{}, r
 		//tfConfig.Write(tt.File.Bytes())
 		tfConfig.Write([]byte("\n\n"))
 	}
-	log.Printf("Final TF Config: %s", tfConfig.String())
+	WriteConfigToFile(ts, tfConfig)
+	return tfConfig.String()
+}
 
+func WriteConfigToFile(ts string, tfConfig *bytes.Buffer) {
 	if tmpDir == "" {
 		ct := time.Now()
 		tmpDir = fmt.Sprintf("/tmp/tftest_%s", ct.Format("2006_01_02_15-04-05"))
@@ -457,12 +432,10 @@ func GetTFIntegrated(ts string, rsList []string, attrs map[string]interface{}, r
 			panic(err)
 		}
 	}
-
 	fp, err := os.Create(fmt.Sprintf("/%s/%s.tf", tmpDir, ts))
 	if err != nil {
 		panic(err)
 	}
 	fp.Write(tfConfig.Bytes())
 	fp.Close()
-	return tfConfig.String()
 }
