@@ -9,6 +9,7 @@
 package testing
 
 import (
+	"bytes"
 	"log"
 	"os"
 )
@@ -20,7 +21,7 @@ const (
 	Enable_trm_config_file
 )
 
-func GenerateFabricConfig(cfg map[string]string, fileType int) string {
+func GenerateFabricConfig(tt string, cfg map[string]string, fileType int) string {
 
 	var tf_config = `
 		terraform {
@@ -38,7 +39,7 @@ func GenerateFabricConfig(cfg map[string]string, fileType int) string {
 		}
 	`
 	var filePath string
-	folder := os.Getenv("GOPATH") + "/src/terraform-provider-ndfc/testdata/" + cfg["FabricType"]
+	folder := os.Getenv("GOPATH") + "/src/terraform-provider-ndfc/testing/data/" + cfg["FabricType"]
 	switch fileType {
 	case Base_file:
 		filePath = folder + "/resource.tf"
@@ -57,5 +58,8 @@ func GenerateFabricConfig(cfg map[string]string, fileType int) string {
 	}
 
 	tf_config += string(rscFile)
+	out := new(bytes.Buffer)
+	out.Write(rscFile)
+	WriteConfigToFile(tt, out)
 	return tf_config
 }
