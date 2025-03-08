@@ -38,6 +38,7 @@ const (
 
 func (c *NDFC) RscReadFabric(ctx context.Context, dg *diag.Diagnostics, tf resource_fabric_common.FabricModel, fabricType string) {
 	tflog.Info(ctx, "Read Fabric")
+	var nvPairsModel resource_fabric_common.NdfcFabricPayload
 	ndfcFabricModel := tf.GetModelData()
 	fabricApi, _ := c.RscGetFabricApiDetails(ctx, dg, ndfcFabricModel, fabricType)
 	if dg.HasError() {
@@ -51,15 +52,17 @@ func (c *NDFC) RscReadFabric(ctx context.Context, dg *diag.Diagnostics, tf resou
 		}
 		tflog.Error(ctx, "RscReadFabric: Failed to get fabric")
 		dg.AddError("Failed to get fabric", fmt.Sprintf("Error: %q", err.Error()))
+		tf.SetModelData(&nvPairsModel.NdfcFabricNvPairs)
 		return
 	}
-	var nvPairsModel resource_fabric_common.NdfcFabricPayload
+	tflog.Debug(ctx, fmt.Sprintf("RscReadFabric: payload %s", string(payload)))
 	err = json.Unmarshal(payload, &nvPairsModel)
 	if err != nil {
 		tflog.Error(ctx, "RscReadFabric: Failed to unmarshal Fabric data")
 		dg.AddError("Failed to unmarshal fabric data", fmt.Sprintf("Error: %q", err.Error()))
 		return
 	}
+	tflog.Debug(ctx, fmt.Sprintf("RscReadFabric: nvPairsModel %v", nvPairsModel))
 	tf.SetModelData(&nvPairsModel.NdfcFabricNvPairs)
 }
 

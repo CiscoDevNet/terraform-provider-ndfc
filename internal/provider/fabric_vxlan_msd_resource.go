@@ -14,6 +14,7 @@ import (
 	"terraform-provider-ndfc/internal/provider/ndfc"
 	"terraform-provider-ndfc/internal/provider/resources/resource_fabric_vxlan_msd"
 
+	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-log/tflog"
@@ -108,15 +109,24 @@ func (r *fabricVxlanMsdResource) Read(ctx context.Context, req resource.ReadRequ
 	unique_id := data.Id.ValueString()
 	tflog.Info(ctx, fmt.Sprintf("Incoming ID %s", unique_id))
 	deploy := data.Deploy.ValueBool()
+
 	r.client.RscReadFabric(ctx, &resp.Diagnostics, &data, ndfc.ResourceVxlanMsdType)
 	data.Deploy = types.BoolValue(deploy)
 	data.Id = types.String(data.FabricName)
-	if resp.Diagnostics.HasError() {
-		return
+	tflog.Debug(ctx, "data.FabricName = "+data.FabricName.ValueString())
+	if data.FabricName.IsNull() || data.FabricName.IsUnknown() {
+		// make diags error empty because fabric is not present in NDFC,
+		// it needs to be recreated.
+		resp.Diagnostics = diag.Diagnostics{}
+		// This will clear the state for current fabric, making it eligible for creation
+		resp.State.RemoveResource(ctx)
+	} else {
+		if resp.Diagnostics.HasError() {
+			return
+		}
+		// Save updated data into Terraform state
+		resp.Diagnostics.Append(resp.State.Set(ctx, data)...)
 	}
-	// Save updated data into Terraform state
-	resp.Diagnostics.Append(resp.State.Set(ctx, data)...)
-
 }
 
 func (r *fabricVxlanMsdResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {

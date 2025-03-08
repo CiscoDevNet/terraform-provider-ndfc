@@ -14,6 +14,7 @@ import (
 	"terraform-provider-ndfc/internal/provider/ndfc"
 	"terraform-provider-ndfc/internal/provider/resources/resource_fabric_msite_ext_net"
 
+	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-log/tflog"
@@ -111,12 +112,20 @@ func (r *fabricIntersiteNetworkResource) Read(ctx context.Context, req resource.
 	r.client.RscReadFabric(ctx, &resp.Diagnostics, &data, ndfc.ResourceIsnFabricType)
 	data.Deploy = types.BoolValue(deploy)
 	data.Id = types.String(data.FabricName)
-	if resp.Diagnostics.HasError() {
-		return
+	tflog.Debug(ctx, "data.FabricName = "+data.FabricName.ValueString())
+	if data.FabricName.IsNull() || data.FabricName.IsUnknown() {
+		// make diags error empty because fabric is not present in NDFC,
+		// it needs to be recreated.
+		resp.Diagnostics = diag.Diagnostics{}
+		// This will clear the state for current fabric, making it eligible for creation
+		resp.State.RemoveResource(ctx)
+	} else {
+		if resp.Diagnostics.HasError() {
+			return
+		}
+		// Save updated data into Terraform state
+		resp.Diagnostics.Append(resp.State.Set(ctx, data)...)
 	}
-	// Save updated data into Terraform state
-	resp.Diagnostics.Append(resp.State.Set(ctx, data)...)
-
 }
 
 func (r *fabricIntersiteNetworkResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
