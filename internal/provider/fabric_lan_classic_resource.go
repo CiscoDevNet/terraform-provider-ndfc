@@ -14,6 +14,7 @@ import (
 	"terraform-provider-ndfc/internal/provider/ndfc"
 	"terraform-provider-ndfc/internal/provider/resources/resource_fabric_lan_classic"
 
+	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-log/tflog"
@@ -110,12 +111,20 @@ func (r *fabricLanClassicResource) Read(ctx context.Context, req resource.ReadRe
 	r.client.RscReadFabric(ctx, &resp.Diagnostics, &data, ndfc.ResourceLanClassicType)
 	data.Deploy = types.BoolValue(deploy)
 	data.Id = types.String(data.FabricName)
-	if resp.Diagnostics.HasError() {
-		return
+	tflog.Debug(ctx, "data.FabricName = "+data.FabricName.ValueString())
+	if data.FabricName.IsNull() || data.FabricName.IsUnknown() {
+		// make diags error empty because fabric is not present in NDFC,
+		// it needs to be recreated.
+		resp.Diagnostics = diag.Diagnostics{}
+		// This will clear the state for current fabric, making it eligible for creation
+		resp.State.RemoveResource(ctx)
+	} else {
+		if resp.Diagnostics.HasError() {
+			return
+		}
+		// Save updated data into Terraform state
+		resp.Diagnostics.Append(resp.State.Set(ctx, data)...)
 	}
-	// Save updated data into Terraform state
-	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
-
 }
 
 func (r *fabricLanClassicResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
