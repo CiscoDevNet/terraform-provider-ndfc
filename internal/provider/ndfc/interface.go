@@ -95,8 +95,20 @@ func (c NDFC) RscGetInterfaces(ctx context.Context, dg *diag.Diagnostics, in res
 				}
 				key, ok := keyMap[ifList[i].SerialNumber+":"+ifList[i].InterfaceName]
 				if !ok {
-					tflog.Error(ctx, fmt.Sprintf("Key not found: %s", ifList[i].SerialNumber+":"+ifList[i].InterfaceName))
-					continue
+					if strings.Contains(ifList[i].SerialNumber, "~") {
+						serialNumber := strings.Split(ifList[i].SerialNumber, "~")
+						newSerialNumber := serialNumber[1] + "~" + serialNumber[0]
+						key, ok = keyMap[newSerialNumber+":"+ifList[i].InterfaceName]
+						if !ok {
+							tflog.Error(ctx, fmt.Sprintf("Key not found: %s",
+								ifList[i].SerialNumber+":"+ifList[i].InterfaceName))
+							continue
+						}
+					} else {
+						tflog.Error(ctx, fmt.Sprintf("Key not found: %s",
+							ifList[i].SerialNumber+":"+ifList[i].InterfaceName))
+						continue
+					}
 				}
 
 				log.Printf("Found entry: key %s entry %s:%s", key, ifList[i].SerialNumber, ifList[i].InterfaceName)
