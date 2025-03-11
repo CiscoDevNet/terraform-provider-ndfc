@@ -52,8 +52,8 @@ func (i *NDFCVPCInterface) DeleteInterface(ctx context.Context, dg *diag.Diagnos
 	intfPayload := resource_interface_common.NDFCInterfacesDeploy{}
 
 	//ifDeployPayload := resource_interface_common.NDFCInterfacesDeploy{}
-
-	for _, intf := range inData.Interfaces {
+	interfaces := i.GetInterface(ctx, dg, inData.SerialNumber, inData.Policy)
+	for _, intf := range interfaces {
 		intfPayload = append(intfPayload, resource_interface_common.NDFCInterfaceDeploy{IfName: intf.InterfaceName,
 			SerialNumber: intf.SerialNumber})
 		tflog.Debug(ctx, fmt.Sprintf("NDFCVPCInterface: Deleting interface: %s:%s", intf.SerialNumber, intf.InterfaceName))
