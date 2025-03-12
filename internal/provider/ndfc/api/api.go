@@ -9,6 +9,7 @@
 package api
 
 import (
+	"encoding/json"
 	"log"
 	"strings"
 	"sync"
@@ -67,7 +68,7 @@ func (c NDFCAPICommon) Get() ([]byte, error) {
 	lock := c.NDFCAPI.GetLock()
 	lock.Lock()
 	url := c.NDFCAPI.GetUrl()
-	log.Printf("Get URL: %s %v\n", url, c.client)
+	log.Printf("Get URL: %s\n", url)
 	if c.client == nil {
 		log.Printf("************Client is nil********************")
 	}
@@ -99,7 +100,13 @@ func (c NDFCAPICommon) Post(payload []byte) (gjson.Result, error) {
 	lock.Lock()
 	defer lock.Unlock()
 	log.Printf("Post URL acquired lock: %s\n", c.NDFCAPI.PostUrl())
-	res, err := c.client.Post(c.NDFCAPI.PostUrl(), string(payload))
+	var res nd.Res
+	var err error
+	if !json.Valid(payload) {
+		res, err = c.client.Post(c.NDFCAPI.PostUrl(), string(payload), nd.RemoveContentType)
+	} else {
+		res, err = c.client.Post(c.NDFCAPI.PostUrl(), string(payload))
+	}
 	if err != nil {
 		return res, err
 	}
@@ -127,7 +134,22 @@ func (c NDFCAPICommon) Delete() (gjson.Result, error) {
 
 	c.NDFCAPI.GetLock().Lock()
 	defer c.NDFCAPI.GetLock().Unlock()
-	res, err := c.client.DeleteRaw(c.NDFCAPI.DeleteUrl(), c.NDFCAPI.GetDeleteQP())
+	qp := c.NDFCAPI.GetDeleteQP()
+	var res nd.Res
+	var err error
+	if qp != nil {
+		res, err = c.client.Delete(c.NDFCAPI.DeleteUrl(), "", func(req *nd.Req) {
+			q := req.HttpReq.URL.Query()
+			for _, s := range qp {
+				keys := strings.Split(s, "=")
+				q.Add(keys[0], keys[1])
+
+			}
+			req.HttpReq.URL.RawQuery = q.Encode()
+		})
+	} else {
+		res, err = c.client.Delete(c.NDFCAPI.DeleteUrl(), "")
+	}
 	if err != nil {
 		return res, err
 	}
