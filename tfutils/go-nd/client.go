@@ -64,6 +64,7 @@ type Client struct {
 	// Authentication mutex
 	AuthenticationMutex *sync.Mutex
 	AuthTimeStamp       time.Time
+	AuthTokenTimeout    time.Duration
 }
 
 // NewClient creates a new Nexus Dashboard HTTP client.
@@ -77,6 +78,7 @@ func NewClient(url, basePath, usr, pwd, domain string, insecure bool, mods ...fu
 
 	cookieJar, _ := cookiejar.New(nil)
 	httpClient := http.Client{
+		Timeout:   60 * time.Second,
 		Transport: tr,
 		Jar:       cookieJar,
 	}
@@ -98,10 +100,16 @@ func NewClient(url, basePath, usr, pwd, domain string, insecure bool, mods ...fu
 		BackoffMaxDelay:     DefaultBackoffMaxDelay,
 		BackoffDelayFactor:  DefaultBackoffDelayFactor,
 		AuthenticationMutex: &sync.Mutex{},
+		AuthTokenTimeout:    2 * time.Minute,
 	}
 
 	for _, mod := range mods {
 		mod(&client)
+	}
+	if client.checkAndFillTokenTimeout() {
+		log.Printf("[INFO] Token timeout set to %v", client.AuthTokenTimeout)
+	} else {
+		log.Printf("[ERROR] Token timeout could not be read, using default - %v", client.AuthTokenTimeout)
 	}
 	return client, nil
 }
@@ -155,130 +163,44 @@ func (client Client) NewReq(method, uri string, body io.Reader, mods ...func(*Re
 	return req
 }
 
-func (client Client) NewRawReq(method, uri string, body io.Reader, mods ...func(*Req)) Req {
-	httpReq, _ := http.NewRequest(method, client.Url+uri, body)
-	req := Req{
-		HttpReq:    httpReq,
-		LogPayload: false,
-	}
-	for _, mod := range mods {
-		mod(&req)
-	}
-	return req
-}
-
-func (client Client) NewReqWithQueryString(method, uri string, queryString []string, mods ...func(*Req)) Req {
-	httpReq, err := http.NewRequest(method, client.Url+uri, nil)
-	if err != nil {
-		return Req{
-			HttpReq:    nil,
-			LogPayload: true,
-		}
-	}
-	q := httpReq.URL.Query()
-	for _, s := range queryString {
-		keys := strings.Split(s, "=")
-		q.Add(keys[0], keys[1])
-
-	}
-	httpReq.URL.RawQuery = q.Encode()
-	return Req{
-		HttpReq:    httpReq,
-		LogPayload: true,
-	}
-}
-
 // Do makes a request.
 // Requests for Do are built ouside of the client, e.g.
 //
 //	req := client.NewReq("GET", "/appcenter/cisco/ndfc/api/v1/lan-fabric/rest/control/fabrics", nil)
 //	res, _ := client.Do(req)
 func (client *Client) Do(req Req) (Res, error) {
-	// add token
-	req.HttpReq.Header.Add("Authorization", "Bearer "+client.Token)
-	// retain the request body across multiple attempts
-	var body []byte
-	if req.HttpReq.Body != nil {
-		body, _ = io.ReadAll(req.HttpReq.Body)
-	}
 
 	var res Res
-
-	for attempts := 0; ; attempts++ {
-
-		req.HttpReq.Body = io.NopCloser(bytes.NewBuffer(body))
-		if req.LogPayload {
-			log.Printf("[DEBUG] HTTP Request: %s, %s, |%s|", req.HttpReq.Method, req.HttpReq.URL, req.HttpReq.Body)
-		} else {
-			log.Printf("[DEBUG] HTTP Request: %s, %s, |%s|", req.HttpReq.Method, req.HttpReq.URL, req.HttpReq.Body)
-		}
-
-		httpRes, err := client.HttpClient.Do(req.HttpReq)
-		if err != nil {
-			if ok := client.Backoff(attempts); !ok {
-				log.Printf("[ERROR] HTTP Connection error occured: %+v", err)
-				log.Printf("[DEBUG] Exit from Do method")
-				return Res{}, err
-			} else {
-				log.Printf("[ERROR] HTTP Connection failed: %s, retries: %v", err, attempts)
-				continue
-			}
-		}
-
-		defer httpRes.Body.Close()
-
-		bodyBytes, err := io.ReadAll(httpRes.Body)
-		if err != nil {
-			if ok := client.Backoff(attempts); !ok {
-				log.Printf("[ERROR] Cannot decode response body: %+v", err)
-				log.Printf("[DEBUG] Exit from Do method")
-				return Res{}, err
-			} else {
-				log.Printf("[ERROR] Cannot decode response body: %s, retries: %v", err, attempts)
-				continue
-			}
-		}
-		if !json.Valid(bodyBytes) {
-			res = Res(gjson.Parse(`{"error": "` + string(bodyBytes) + `"}`))
-		} else {
-			res = Res(gjson.ParseBytes(bodyBytes))
-		}
-		if req.LogPayload {
-			log.Printf("[DEBUG] HTTP Response: %s", res)
-		}
-
-		if httpRes.StatusCode >= 200 && httpRes.StatusCode <= 299 {
-			log.Printf("[DEBUG] Exit from Do method")
-			break
-		} else {
-			if ok := client.Backoff(attempts); !ok {
-				log.Printf("[ERROR] HTTP Request failed: StatusCode %v", httpRes.StatusCode)
-				log.Printf("[DEBUG] Exit from Do method")
-				return res, fmt.Errorf("HTTP Request failed: StatusCode %v", httpRes.StatusCode)
-			} else if httpRes.StatusCode == 408 || (httpRes.StatusCode >= 501 && httpRes.StatusCode <= 599) {
-				log.Printf("[ERROR] HTTP Request failed: StatusCode %v, Retries: %v", httpRes.StatusCode, attempts)
-				continue
-			} else if httpRes.StatusCode == 401 && strings.Contains(res.Get("error").String(), "token has expired") {
-				log.Printf("[ERROR] HTTP Request failed: StatusCode %v, Retries: %v", httpRes.StatusCode, attempts)
-				client.Token = ""
-				err := client.Authenticate()
-				if err != nil {
-					log.Printf("[ERROR] Authentication failed: StatusCode %v, Retries: %v", httpRes.StatusCode, attempts)
-					log.Printf("[DEBUG] Exit from Do method")
-					return res, fmt.Errorf("HTTP Request failed: StatusCode %v", httpRes.StatusCode)
-				}
-			} else {
-				log.Printf("[ERROR] HTTP Request failed: StatusCode %v", httpRes.StatusCode)
-				log.Printf("[ERROR] HTTP Request failed: Full Response %v", httpRes)
-				log.Printf("[DEBUG] Exit from Do method")
-				return res, fmt.Errorf("HTTP Request failed: StatusCode %v, Body: %v", httpRes.StatusCode, res)
-			}
-		}
+	defer log.Printf("[DEBUG] Exit from Do method")
+	bodyBytes, err := client.doHttpReq(req)
+	if err != nil {
+		return res, err
 	}
 
+	if !json.Valid(bodyBytes) {
+		res = Res(gjson.Parse(`{"response": "` + string(bodyBytes) + `"}`))
+	} else {
+		res = Res(gjson.ParseBytes(bodyBytes))
+	}
+	if req.LogPayload {
+		log.Printf("[DEBUG] HTTP Response: %s", res)
+	}
 	return res, nil
 }
+
 func (client *Client) DoRaw(req Req) ([]byte, error) {
+	defer log.Printf("[DEBUG] Exit from DoRaw method")
+	bodyBytes, err := client.doHttpReq(req)
+	if err != nil {
+		return bodyBytes, err
+	}
+	if req.LogPayload {
+		log.Printf("[DEBUG] HTTP Response: %s", string(bodyBytes))
+	}
+	return bodyBytes, nil
+}
+
+func (client *Client) doHttpReq(req Req) ([]byte, error) {
 	// add token
 	req.HttpReq.Header.Add("Authorization", "Bearer "+client.Token)
 	// retain the request body across multiple attempts
@@ -287,11 +209,11 @@ func (client *Client) DoRaw(req Req) ([]byte, error) {
 		body, _ = io.ReadAll(req.HttpReq.Body)
 	}
 	var bodyBytes []byte
-
+	defer log.Printf("[DEBUG] Exit from doHttpReq method")
 	for attempts := 0; ; attempts++ {
 		req.HttpReq.Body = io.NopCloser(bytes.NewBuffer(body))
 		if req.LogPayload {
-			log.Printf("[DEBUG] HTTP Request: %s, %s, |%s|", req.HttpReq.Method, req.HttpReq.URL, req.HttpReq.Body)
+			log.Printf("[DEBUG] HTTP Request: %s, |%s|, |%s|", req.HttpReq.Method, req.HttpReq.URL, req.HttpReq.Body)
 		} else {
 			log.Printf("[DEBUG] HTTP Request: %s, %s", req.HttpReq.Method, req.HttpReq.URL)
 		}
@@ -300,7 +222,6 @@ func (client *Client) DoRaw(req Req) ([]byte, error) {
 		if err != nil {
 			if ok := client.Backoff(attempts); !ok {
 				log.Printf("[ERROR] HTTP Connection error occured: %+v", err)
-				log.Printf("[DEBUG] Exit from Do method")
 				return nil, err
 			} else {
 				log.Printf("[ERROR] HTTP Connection failed: %q, retries: %v", err, attempts)
@@ -309,13 +230,10 @@ func (client *Client) DoRaw(req Req) ([]byte, error) {
 		}
 
 		defer httpRes.Body.Close()
-
 		bodyBytes, err = io.ReadAll(httpRes.Body)
-		res := Res(gjson.ParseBytes(bodyBytes))
 		if err != nil {
 			if ok := client.Backoff(attempts); !ok {
 				log.Printf("[ERROR] Cannot decode response body: %+v", err)
-				log.Printf("[DEBUG] Exit from Do method")
 				return nil, err
 			} else {
 				log.Printf("[ERROR] Cannot decode response body: %s, retries: %v", err, attempts)
@@ -324,28 +242,24 @@ func (client *Client) DoRaw(req Req) ([]byte, error) {
 		}
 
 		if httpRes.StatusCode >= 200 && httpRes.StatusCode <= 299 {
-			log.Printf("[DEBUG] Exit from Do method")
 			break
 		} else {
 			if ok := client.Backoff(attempts); !ok {
 				log.Printf("[ERROR] HTTP Request failed: StatusCode %v", httpRes.StatusCode)
-				log.Printf("[DEBUG] Exit from Do method")
 				return bodyBytes, fmt.Errorf("HTTP Request failed: StatusCode %v", httpRes.StatusCode)
 			} else if httpRes.StatusCode == 408 || (httpRes.StatusCode >= 501 && httpRes.StatusCode <= 599) {
 				log.Printf("[ERROR] HTTP Request failed: StatusCode %v, Retries: %v", httpRes.StatusCode, attempts)
 				continue
-			} else if httpRes.StatusCode == 401 && strings.Contains(res.Get("error").String(), "token has expired") {
+			} else if httpRes.StatusCode == 401 && strings.Contains(string(bodyBytes), "token has expired") {
 				log.Printf("[ERROR] HTTP Request failed: StatusCode %v, Retries: %v", httpRes.StatusCode, attempts)
 				client.Token = ""
 				err := client.Authenticate()
 				if err != nil {
 					log.Printf("[ERROR] Authentication failed: StatusCode %v, Retries: %v", httpRes.StatusCode, attempts)
-					log.Printf("[DEBUG] Exit from Do method")
 					return bodyBytes, fmt.Errorf("HTTP Request failed: StatusCode %v", httpRes.StatusCode)
 				}
 			} else {
 				log.Printf("[ERROR] HTTP Request failed: StatusCode %v", httpRes.StatusCode)
-				log.Printf("[DEBUG] Exit from Do method")
 				return bodyBytes, fmt.Errorf("HTTP Request failed: StatusCode %v", httpRes.StatusCode)
 			}
 		}
@@ -386,26 +300,10 @@ func (client *Client) Delete(path string, data string, mods ...func(*Req)) (Res,
 	return client.Do(req)
 }
 
-func (client *Client) DeleteRaw(path string, data []string, mods ...func(*Req)) (Res, error) {
-	req := client.NewReqWithQueryString("DELETE", client.BasePath+path, data, mods...)
-	err := client.Authenticate()
-	if err != nil {
-		return Res{}, err
-	}
-	return client.Do(req)
-}
-
 // Post makes a POST request and returns a GJSON result.
 // Hint: Use the Body struct to easily create POST body data.
 func (client *Client) Post(path, data string, mods ...func(*Req)) (Res, error) {
-	var req Req
-	if !json.Valid([]byte(data)) {
-		log.Printf("POST: data is not valid JSON, creating raw request")
-		req = client.NewRawReq("POST", client.BasePath+path, strings.NewReader(data), mods...)
-	} else {
-		log.Printf("POST: data is valid json")
-		req = client.NewReq("POST", client.BasePath+path, strings.NewReader(data), mods...)
-	}
+	req := client.NewReq("POST", client.BasePath+path, strings.NewReader(data), mods...)
 	err := client.Authenticate()
 	if err != nil {
 		return Res{}, err
@@ -431,10 +329,10 @@ func (client *Client) Login() error {
 	body, _ = sjson.Set(body, "userPasswd", client.Pwd)
 	body, _ = sjson.Set(body, "domain", client.Domain)
 	req := client.NewReq("POST", "/login", strings.NewReader(body), NoLogPayload)
-	log.Printf("Client Login: starting http request")
+	log.Printf("[TRACE] Client Login: starting http request")
 	httpRes, err := client.HttpClient.Do(req.HttpReq)
 	if err != nil {
-		log.Printf("Client Login:HTTP request failed - %v", err)
+		log.Printf("[ERROR] Client Login:HTTP request failed - %v", err)
 		return err
 	}
 	defer httpRes.Body.Close()
@@ -455,18 +353,23 @@ func (client *Client) Login() error {
 	return nil
 }
 
-// Login if no token available.
+// Login if no token available or token timeout has reached
 func (client *Client) Authenticate() error {
 	var err error
-	log.Printf("Attempting authentication...")
+	log.Printf("[TRACE] Attempting authentication...")
 	client.AuthenticationMutex.Lock()
-	if client.Token == "" || time.Since(client.AuthTimeStamp) > (10*time.Minute) {
-		log.Printf("No token available or it has expired, attempting login...")
-		err = client.Login()
-	} else {
-		log.Printf("Token is still valid, skipping login")
+	loginNeeded := false
+	if client.Token == "" {
+		log.Printf("[DEBUG] No token available, attempting login...")
+		loginNeeded = true
+	} else if time.Since(client.AuthTimeStamp) > client.AuthTokenTimeout {
+		log.Printf("[DEBUG] Token has expired, attempting login...")
+		loginNeeded = true
 	}
-	log.Printf("Authentication complete")
+	if loginNeeded {
+		err = client.Login()
+	}
+	log.Printf("[TRACE] Authentication complete")
 	client.AuthenticationMutex.Unlock()
 	return err
 }
@@ -493,4 +396,35 @@ func (client *Client) Backoff(attempts int) bool {
 	time.Sleep(backoffDuration)
 	log.Printf("[DEBUG] Exit from backoff method with return value true")
 	return true
+}
+
+func (client *Client) checkAndFillTokenTimeout() bool {
+
+	req := client.NewReq("GET", "/api/config/dn/apigwcfg/default", nil, NoLogPayload)
+	err := client.Authenticate()
+	if err != nil {
+		log.Printf("[ERROR] Get API Config: Authentication failed - %v", err)
+		return false
+	}
+	result, err := client.Do(req)
+	if err != nil {
+		log.Printf("[ERROR] Get API Config: %v", err)
+		return false
+	}
+	/* Reposne Format
+			{
+			"config": {
+				"idle_session_timeout_sec": 3600,
+				"jwt_session_timeout_sec": 1200,
+				"log_level": "info"
+			},
+	    }
+	*/
+	tokenTimeout := result.Get("config.jwt_session_timeout_sec").Int()
+	if tokenTimeout > 0 {
+		client.AuthTokenTimeout = (time.Duration(tokenTimeout/2) * time.Second)
+		return true
+	}
+	log.Printf("[ERROR] Token timeout could not be read %v, using default value", result)
+	return false
 }

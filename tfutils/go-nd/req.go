@@ -65,3 +65,7 @@ type Req struct {
 func NoLogPayload(req *Req) {
 	req.LogPayload = false
 }
+
+func RemoveContentType(req *Req) {
+	req.HttpReq.Header.Del("Content-Type")
+}
