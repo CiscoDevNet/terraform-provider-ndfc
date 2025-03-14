@@ -140,3 +140,11 @@ func (c NDFC) DeleteFabricInventoryDevices(ctx context.Context, diags *diag.Diag
 		diags.AddError("Delete Devices Failed", err.Error())
 	}
 }
+
+func (c NDFC) GetDeviceRole(ctx context.Context, diags *diag.Diagnostics, serialNum string) gjson.Result {
+	res, err := c.apiClient.Get(fmt.Sprintf("/rest/control/switches/roles?serialNumber=%s", serialNum))
+	if err != nil {
+		diags.AddError("Get Device Role Failed", err.Error())
+	}
+	return res
+}

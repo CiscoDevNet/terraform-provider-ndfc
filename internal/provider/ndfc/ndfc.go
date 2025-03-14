@@ -114,3 +114,7 @@ func ReleaseResourceLock(rscName string) {
 	instance.deployMutex.RUnlock()
 	log.Printf("+++++++++++++++ReleaseResourceLock for %s+++++++++++pid %d", rscName, os.Getpid())
 }
+
+func getNDFCClient() *NDFC {
+	return instance
+}

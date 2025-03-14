@@ -49,10 +49,23 @@ func (i *NDFCEthernetInterface) DeleteInterface(ctx context.Context, dg *diag.Di
 		return
 	}
 	intfPayload := resource_interface_common.NDFCInterfacesPayload{}
-	intfPayload.Policy = inData.Policy
 
 	ifDeployPayload := resource_interface_common.NDFCInterfacesDeploy{}
-
+	client := getNDFCClient()
+	resp := client.GetDeviceRole(ctx, dg, inData.SerialNumber)
+	var role string
+	if !resp.Exists() {
+		// Avoiding error if the device role is not found and assuming the role is leaf
+		role = "leaf"
+	} else {
+		role = resp.Array()[0].Get("role").String()
+	}
+	tflog.Debug(ctx, fmt.Sprintf("Device role: %s", role))
+	if role == "leaf" {
+		intfPayload.Policy = "int_trunk_host"
+	} else {
+		intfPayload.Policy = "int_routed_host"
+	}
 	for k, intf := range inData.Interfaces {
 		tflog.Debug(ctx, fmt.Sprintf("Deleting interface: %s:%s", intf.SerialNumber, intf.InterfaceName))
 
@@ -66,13 +79,24 @@ func (i *NDFCEthernetInterface) DeleteInterface(ctx context.Context, dg *diag.Di
 		intf.NvPairs.Netflow = "false"
 		intf.NvPairs.NetflowMonitor = "###"
 		intf.NvPairs.NetflowSampler = "###"
-
-		//Set some default values
-		intf.NvPairs.Speed = "Auto"
-		intf.NvPairs.Mtu = "default"
-		intf.NvPairs.AdminState = "false"
-		intf.NvPairs.AllowedVlans = "none"
-
+		intf.NvPairs.InterfaceName = intf.InterfaceName
+		if role == "leaf" {
+			//Set default values when role is leaf
+			intf.NvPairs.Speed = "Auto"
+			intf.NvPairs.Mtu = "jumbo"
+			intf.NvPairs.FreeformConfig = "no shutdown"
+			intf.NvPairs.AllowedVlans = "none"
+			intf.NvPairs.BpduGuard = "false"
+			intf.NvPairs.PortTypeFast = "true"
+		} else {
+			intf.NvPairs.Speed = "Auto"
+			intf.NvPairs.Mtu = "9216"
+			intf.NvPairs.FreeformConfig = "no shutdown"
+			intf.NvPairs.Vrf = ""
+			intf.NvPairs.Ipv4Address = ""
+			intf.NvPairs.Ipv4PrefixLength = ""
+			intf.NvPairs.RoutingTag = ""
+		}
 		inData.Interfaces[k] = intf
 		intfPayload.Interfaces = append(intfPayload.Interfaces, intf)
 		ifDeployPayload = append(ifDeployPayload, resource_interface_common.NDFCInterfaceDeploy{
