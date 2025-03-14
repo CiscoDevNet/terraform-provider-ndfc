@@ -70,6 +70,7 @@ func (c *NDFC) RscCreatePolicy(ctx context.Context, dg *diag.Diagnostics, model 
 		dg.AddError("Failed to get policy", "Failed to get policy")
 		return
 	}
+	c.policyTrim(inData, newModel)
 	model.SetModelData(newModel)
 	model.Deploy = types.BoolValue(inData.Deploy)
 }
@@ -94,6 +95,7 @@ func (c *NDFC) RscReadPolicy(ctx context.Context, dg *diag.Diagnostics, model *r
 		dg.AddError("Failed to get policy", "Failed to get policy")
 		return
 	}
+	c.policyTrim(model.GetModelData(), data)
 	data.Deploy = Deploy
 	model.SetModelData(data)
 
@@ -178,7 +180,7 @@ func (c *NDFC) RscUpdatePolicy(ctx context.Context, dg *diag.Diagnostics, model 
 		dg.AddError("Failed to get policy", "Failed to get policy")
 		return
 	}
-
+	c.policyTrim(policyData, newModel)
 	model.SetModelData(newModel)
 	model.Deploy = types.BoolValue(policyData.Deploy)
 }
@@ -221,18 +223,26 @@ func (c *NDFC) RscDeletePolicy(ctx context.Context, dg *diag.Diagnostics, model 
 	// Incase of delete, policyID is made as FabricName:SerialNumber for switch deploy
 	// This avoids additional parameters to be passed to delete and also policyID is not used in delete
 	policyID = fabricName + ":" + serialNumber
-	c.RscDeployPolicy(ctx, dg, policyID)
-	if dg.HasError() {
+	dg1 := diag.Diagnostics{}
+	// Ignoring deployment errors as the policy is being deleted
+	// As the delete flag is set, the policy may get deleted later in ndfc - keeping in state will cause subsequent failures
+	c.RscDeployPolicy(ctx, &dg1, policyID)
+	if dg1.HasError() {
 		tflog.Error(ctx, "Failed to switch deploy")
-		return
 	}
 
-	log.Printf("[TRACE] Policy deleted with ID: %v", policyID)
 	newModel := c.rscGetPolicy(ctx, dg, policyID)
 	if newModel != nil {
+		// Check if deleted dlag is set - if so ndfc will remove the policy - so terrafom state must be removed
+		if newModel.Deleted != nil && *newModel.Deleted {
+			tflog.Debug(ctx, fmt.Sprintf("Policy ID %s marked as deleted", policyID))
+			return
+		}
+		// Policy is not marked for delete - so it is an error
 		dg.AddError("Failed to delete policy", fmt.Sprintf("Policy ID %s still exists", policyID))
 		return
 	}
+	log.Printf("[TRACE] Policy %v clean delete", policyID)
 
 }
 
@@ -315,3 +325,14 @@ func (c NDFC) rsUpdatePolicy(ctx context.Context, dg *diag.Diagnostics, pdata *r
 
 }
 */
+
+func (c NDFC) policyTrim(pdata *resource_policy.NDFCPolicyModel, ndata *resource_policy.NDFCPolicyModel) {
+	// Trim the data to remove any fields that are  returned by NDFC and not in policy_parameters
+	// This is to avoid inconsistencies between the data in the state file and the data in NDFC
+	for k := range ndata.PolicyParameters {
+		if _, ok := pdata.PolicyParameters[k]; !ok {
+			log.Printf("[DEBUG] Removing policy parameter: (%s,%s) as it was not in planned config", k, ndata.PolicyParameters[k])
+			delete(ndata.PolicyParameters, k)
+		}
+	}
+}

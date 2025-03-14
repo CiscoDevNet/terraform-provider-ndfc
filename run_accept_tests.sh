@@ -18,7 +18,8 @@ echo $PATTERN
 export TF_ACC=1
 export TF_LOG=DEBUG
 export TF_ACC_LOG=DEBUG
-export TF_ACC_LOG_PATH=/tmp/terraform-acceptance-tests_$(date '+%Y-%m-%d-%H-%M-%S').log
+TIME_DATE=$(date '+%Y-%m-%d-%H-%M-%S')
+export TF_ACC_LOG_PATH=/tmp/terraform-acceptance-tests_${TIME_DATE}.log
 export NDFC_TEST_CONFIG_FILE=${TEST_CFG}
 
 # Run the Terraform acceptance tests
@@ -27,5 +28,4 @@ rm -rf "$TF_ACC_LOG_PATH"
 go get gotest.tools/gotestsum
 go install gotest.tools/gotestsum
 #GOFLAGS="-count=1" go test -timeout ${TIMEOUT} -v -run ^${PATTERN} ./... 
-GOFLAGS="-count=1" $GOBIN/gotestsum --format testname  --format-hide-empty-pkg  --debug -- -v -timeout ${TIMEOUT} -run ^${PATTERN} ./internal/provider
-
+GOFLAGS="-count=1" $GOBIN/gotestsum --format testname  --format-hide-empty-pkg  --debug --jsonfile /tmp/tftest_output_${TIME_DATE}.json -- -failfast -v -timeout ${TIMEOUT} -run ^${PATTERN} ./internal/provider
