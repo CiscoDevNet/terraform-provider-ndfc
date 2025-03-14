@@ -16,6 +16,7 @@ import (
 	"strings"
 	"terraform-provider-ndfc/internal/provider/resources/resource_interface_common"
 	"terraform-provider-ndfc/internal/provider/resources/resource_networks"
+	"terraform-provider-ndfc/internal/provider/resources/resource_policy"
 	"terraform-provider-ndfc/internal/provider/resources/resource_vpc_pair"
 	"terraform-provider-ndfc/internal/provider/resources/resource_vrf_bulk"
 	"terraform-provider-ndfc/internal/provider/types"
@@ -209,6 +210,17 @@ func GetTFConfigWithSingleResource(tt string, cfg map[string]string, rscs []inte
 			args["RscName"] = rsNames[i]
 			args["RscType"] = "vpc_pair"
 			err = t.ExecuteTemplate(&output, "NDFC_VPCPAIR_RSC", args)
+			if err != nil {
+				panic(err)
+			}
+		}
+
+		policyRsc, ok := rsc.(*resource_policy.NDFCPolicyModel)
+		if ok {
+			args["Policy"] = policyRsc
+			args["RscName"] = rsNames[i]
+			args["RscType"] = "policy"
+			err = t.ExecuteTemplate(&output, "NDFC_POLICY_RSC", args)
 			if err != nil {
 				panic(err)
 			}

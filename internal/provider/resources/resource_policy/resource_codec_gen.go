@@ -24,7 +24,6 @@ type NDFCPolicyModel struct {
 	PolicyId           string            `json:"policyId,omitempty"`
 	IsPolicyGroup      bool              `json:"-"`
 	Deploy             bool              `json:"-"`
-	Status             string            `json:"status,omitempty"`
 	EntityName         string            `json:"entityName,omitempty"`
 	EntityType         string            `json:"entityType,omitempty"`
 	Description        string            `json:"description,omitempty"`
@@ -57,12 +56,6 @@ func (v *PolicyModel) SetModelData(jsonData *NDFCPolicyModel) diag.Diagnostics {
 	v.IsPolicyGroup = types.BoolValue(jsonData.IsPolicyGroup)
 
 	v.Deploy = types.BoolValue(jsonData.Deploy)
-	if jsonData.Status != "" {
-		v.Status = types.StringValue(jsonData.Status)
-	} else {
-		v.Status = types.StringNull()
-	}
-
 	if jsonData.EntityName != "" {
 		v.EntityName = types.StringValue(jsonData.EntityName)
 	} else {

@@ -99,14 +99,6 @@ func PolicyResourceSchema(ctx context.Context) schema.Schema {
 				Description:         "Source of the policy",
 				MarkdownDescription: "Source of the policy",
 			},
-			"status": schema.StringAttribute{
-				Computed:            true,
-				Description:         "Status of the policy",
-				MarkdownDescription: "Status of the policy",
-				PlanModifiers: []planmodifier.String{
-					stringplanmodifier.UseStateForUnknown(),
-				},
-			},
 			"template_name": schema.StringAttribute{
 				Required:            true,
 				Description:         "Name of the template",
@@ -135,6 +127,5 @@ type PolicyModel struct {
 	PolicyParameters   types.Map    `tfsdk:"policy_parameters"`
 	Priority           types.Int64  `tfsdk:"priority"`
 	Source             types.String `tfsdk:"source"`
-	Status             types.String `tfsdk:"status"`
 	TemplateName       types.String `tfsdk:"template_name"`
 }
