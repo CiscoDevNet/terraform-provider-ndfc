@@ -37,12 +37,6 @@ resource:
       ndfc_type: bool
       payload_hide: true
       example: true
-    - model_name: status
-      tf_name: status
-      type: String
-      description: "Status of the policy"
-      computed: true
-      use_state: true
     - model_name: entityName
       tf_name: entity_name
       type: String

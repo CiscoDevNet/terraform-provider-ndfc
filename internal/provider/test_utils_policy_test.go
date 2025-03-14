@@ -37,9 +37,6 @@ func PolicyModelHelperStateCheck(RscName string, c resource_policy.NDFCPolicyMod
 	} else {
 		ret = append(ret, resource.TestCheckResourceAttr(RscName, attrPath.AtName("deploy").String(), "false"))
 	}
-	if c.Status != "" {
-		ret = append(ret, resource.TestCheckResourceAttr(RscName, attrPath.AtName("status").String(), c.Status))
-	}
 	if c.EntityName != "" {
 		ret = append(ret, resource.TestCheckResourceAttr(RscName, attrPath.AtName("entity_name").String(), c.EntityName))
 	}

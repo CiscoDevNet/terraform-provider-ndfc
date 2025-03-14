@@ -58,7 +58,6 @@ resource "ndfc_policy" "test_resource_policy_1" {
 - `auto_generated` (Boolean) Auto generated policy
 - `id` (Number) ID of the policy
 - `policy_id` (String) Policy ID
-- `status` (String) Status of the policy
 
 ## Import
 
