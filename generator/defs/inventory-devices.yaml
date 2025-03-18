@@ -79,19 +79,11 @@ resource:
       default_value: false
       ndfc_type: bool
       example: false
-    - &save
-      model_name: save
-      tf_name: save
-      type: Bool
-      default_value: false
-      description: Save the configuration of the devices
-      ndfc_type: bool
-      example: true
     - &deploy
       model_name: deploy
       tf_name: deploy
       type: Bool
-      default_value: false
+      default_value: true
       description: Deploy the configuration of the devices
       ndfc_type: bool
       example: true

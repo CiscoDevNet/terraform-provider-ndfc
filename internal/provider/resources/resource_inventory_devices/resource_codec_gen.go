@@ -28,7 +28,6 @@ type NDFCInventoryDevicesModel struct {
 	MaxHops                              *int64                      `json:"maxHops,omitempty"`
 	SetAsIndividualDeviceWriteCredential *bool                       `json:"discoveryCredForLan,omitempty"`
 	PreserveConfig                       *bool                       `json:"preserveConfig,omitempty"`
-	Save                                 *bool                       `json:"save,omitempty"`
 	Deploy                               *bool                       `json:"deploy,omitempty"`
 	Retries                              *int64                      `json:"retries,omitempty"`
 	RetryWaitTimeout                     *int64                      `json:"retryWaitTimeout,omitempty"`
@@ -115,13 +114,6 @@ func (v *InventoryDevicesModel) SetModelData(jsonData *NDFCInventoryDevicesModel
 
 	} else {
 		v.PreserveConfig = types.BoolNull()
-	}
-
-	if jsonData.Save != nil {
-		v.Save = types.BoolValue(*jsonData.Save)
-
-	} else {
-		v.Save = types.BoolNull()
 	}
 
 	if jsonData.Deploy != nil {
@@ -390,13 +382,6 @@ func (v InventoryDevicesModel) GetModelData() *NDFCInventoryDevicesModel {
 		*data.PreserveConfig = v.PreserveConfig.ValueBool()
 	} else {
 		data.PreserveConfig = nil
-	}
-
-	if !v.Save.IsNull() && !v.Save.IsUnknown() {
-		data.Save = new(bool)
-		*data.Save = v.Save.ValueBool()
-	} else {
-		data.Save = nil
 	}
 
 	if !v.Deploy.IsNull() && !v.Deploy.IsUnknown() {

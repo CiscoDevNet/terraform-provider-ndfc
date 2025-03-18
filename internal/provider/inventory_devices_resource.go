@@ -58,50 +58,6 @@ type InventoryDevicesResource struct {
 	client *ndfc.NDFC
 }
 
-type InventoryDevicesModel struct {
-	Id                           types.String `tfsdk:"id"`
-	FabricName                   types.String `tfsdk:"fabric_name"`
-	SeedIp                       types.String `tfsdk:"seed_ip"`
-	AuthProtocol                 types.String `tfsdk:"auth_protocol"`
-	UserName                     types.String `tfsdk:"username"`
-	Password                     types.String `tfsdk:"password"`
-	MaxHops                      types.Int64  `tfsdk:"max_hops"`
-	PreserveConfig               types.Bool   `tfsdk:"preserve_config"`
-	SetAndUseDiscoveryCredForLan types.Bool   `tfsdk:"set_as_individual_device_write_credential"`
-	Save                         types.Bool   `tfsdk:"save"`
-	Deploy                       types.Bool   `tfsdk:"deploy"`
-	Retries                      types.Int64  `tfsdk:"retries"`
-	RetryWaitTimeout             types.Int64  `tfsdk:"retry_wait_timeout"`
-	Devices                      types.Map    `tfsdk:"devices"`
-}
-
-type DevicesValue struct {
-	Role                  types.String `tfsdk:"role"`
-	DiscoveryType         types.String `tfsdk:"discovery_type"`
-	DiscoveryUsername     types.String `tfsdk:"discovery_username"`
-	DiscoveryPassword     types.String `tfsdk:"discovery_password"`
-	DiscoveryAuthProtocol types.String `tfsdk:"discovery_auth_protocol"`
-	SerialNumber          types.String `tfsdk:"serial_number"`
-	Model                 types.String `tfsdk:"model"`
-	Version               types.String `tfsdk:"version"`
-	ImagePolicy           types.String `tfsdk:"image_policy"`
-	ModulesModel          types.Set    `tfsdk:"modules_model"`
-	Breakout              types.String `tfsdk:"breakout"`
-	PortMode              types.String `tfsdk:"port_mode"`
-	Hostname              types.String `tfsdk:"hostname"`
-	Gateway               types.String `tfsdk:"gateway"`
-	Uuid                  types.String `tfsdk:"uuid"`
-	SwitchDbId            types.String `tfsdk:"switch_db_id"`
-	DeviceIndex           types.String `tfsdk:"device_index"`
-	VdcId                 types.String `tfsdk:"vdc_id"`
-	VdcMac                types.String `tfsdk:"vdc_mac"`
-	Mode                  types.String `tfsdk:"mode"`
-	ConfigStatus          types.String `tfsdk:"config_status"`
-	OperStatus            types.String `tfsdk:"oper_status"`
-	DiscoveryStatus       types.String `tfsdk:"discovery_status"`
-	Managable             types.Bool   `tfsdk:"managable"`
-}
-
 var snmpAuthenticationProtocol = map[string]int{"md5": 0, "sha": 1, "md5_des": 2, "md5_aes": 3, "sha_des": 4, "sha_aes": 5}
 
 func (r *InventoryDevicesResource) Metadata(ctx context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
@@ -112,14 +68,14 @@ func (r *InventoryDevicesResource) Metadata(ctx context.Context, req resource.Me
 
 func (r InventoryDevicesResource) ValidateConfig(ctx context.Context, req resource.ValidateConfigRequest, resp *resource.ValidateConfigResponse) {
 	tflog.Debug(ctx, fmt.Sprintf("Start of %s ValidateConfig", loggingInventoryDevices))
-	var data InventoryDevicesModel
+	var data resource_inventory_devices.InventoryDevicesModel
 
 	resp.Diagnostics.Append(req.Config.Get(ctx, &data)...)
 	if resp.Diagnostics.HasError() {
 		return
 	}
 
-	var devices map[string]DevicesValue
+	var devices map[string]resource_inventory_devices.DevicesValue
 	data.Devices.ElementsAs(ctx, &devices, false)
 
 	for ipAddress, device := range devices {
@@ -218,7 +174,7 @@ func (r *InventoryDevicesResource) Configure(ctx context.Context, req resource.C
 
 func (r *InventoryDevicesResource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
 	tflog.Debug(ctx, fmt.Sprintf("Start of %s Create", loggingInventoryDevices))
-	var planData, stateData InventoryDevicesModel
+	var planData, stateData resource_inventory_devices.InventoryDevicesModel
 
 	resp.Diagnostics.Append(req.Plan.Get(ctx, &planData)...)
 	resp.Diagnostics.Append(req.Plan.Get(ctx, &stateData)...)
@@ -233,7 +189,7 @@ func (r *InventoryDevicesResource) Create(ctx context.Context, req resource.Crea
 		return
 	}
 
-	var stateDevices map[string]DevicesValue
+	var stateDevices map[string]resource_inventory_devices.DevicesValue
 	stateData.Devices.ElementsAs(ctx, &stateDevices, false)
 	if resp.Diagnostics.HasError() {
 		return
@@ -258,7 +214,7 @@ func (r *InventoryDevicesResource) Create(ctx context.Context, req resource.Crea
 
 func (r *InventoryDevicesResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
 	tflog.Debug(ctx, fmt.Sprintf("Start of %s Read", loggingInventoryDevices))
-	var stateData InventoryDevicesModel
+	var stateData resource_inventory_devices.InventoryDevicesModel
 
 	resp.Diagnostics.Append(req.State.Get(ctx, &stateData)...)
 	if resp.Diagnostics.HasError() {
@@ -286,7 +242,7 @@ func (r *InventoryDevicesResource) Read(ctx context.Context, req resource.ReadRe
 
 func (r *InventoryDevicesResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
 	tflog.Debug(ctx, fmt.Sprintf("Start of %s Update", loggingInventoryDevices))
-	var createData, planData, stateData InventoryDevicesModel
+	var createData, planData, stateData resource_inventory_devices.InventoryDevicesModel
 
 	resp.Diagnostics.Append(req.Plan.Get(ctx, &createData)...)
 	resp.Diagnostics.Append(req.Plan.Get(ctx, &planData)...)
@@ -298,7 +254,7 @@ func (r *InventoryDevicesResource) Update(ctx context.Context, req resource.Upda
 
 	planData.Id = basetypes.NewStringValue(planData.FabricName.ValueString())
 
-	var planDevices, stateDevices map[string]DevicesValue
+	var planDevices, stateDevices map[string]resource_inventory_devices.DevicesValue
 	planData.Devices.ElementsAs(ctx, &planDevices, false)
 	stateData.Devices.ElementsAs(ctx, &stateDevices, false)
 	if resp.Diagnostics.HasError() {
@@ -318,7 +274,7 @@ func (r *InventoryDevicesResource) Update(ctx context.Context, req resource.Upda
 		}
 	}
 
-	createDevices, updateDevices := map[string]DevicesValue{}, map[string]DevicesValue{}
+	createDevices, updateDevices := map[string]resource_inventory_devices.DevicesValue{}, map[string]resource_inventory_devices.DevicesValue{}
 	for ipAddress, planDevice := range planDevices {
 		if _, ok := stateDevices[ipAddress]; ok {
 			if planDevice.DiscoveryType.ValueString() == "rma" {
@@ -380,14 +336,14 @@ func (r *InventoryDevicesResource) Update(ctx context.Context, req resource.Upda
 
 func (r *InventoryDevicesResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
 	tflog.Debug(ctx, fmt.Sprintf("Start of %s Delete", loggingInventoryDevices))
-	var data InventoryDevicesModel
+	var data resource_inventory_devices.InventoryDevicesModel
 
 	resp.Diagnostics.Append(req.State.Get(ctx, &data)...)
 	if resp.Diagnostics.HasError() {
 		return
 	}
 
-	devices := map[string]DevicesValue{}
+	devices := map[string]resource_inventory_devices.DevicesValue{}
 	data.Devices.ElementsAs(ctx, &devices, false)
 	if resp.Diagnostics.HasError() {
 		return
@@ -443,7 +399,7 @@ func (r *InventoryDevicesResource) ImportState(ctx context.Context, req resource
 	deploy := getBoolValueFromEnv(ctx, &resp.Diagnostics, "NDFC_INVENTORY_DEPLOY", defaultDeploy)
 	resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("deploy"), deploy)...)
 
-	data := InventoryDevicesModel{}
+	data := resource_inventory_devices.InventoryDevicesModel{}
 	data.FabricName = basetypes.NewStringValue(req.ID)
 	data.Devices = types.MapNull(resource_inventory_devices.DevicesValue{}.Type(ctx))
 	getInventoryData(ctx, r.client, &resp.Diagnostics, &data)
@@ -474,15 +430,15 @@ func getBoolValueFromEnv(ctx context.Context, diags *diag.Diagnostics, envKey st
 	return defaultValue
 }
 
-func getInventoryData(ctx context.Context, client *ndfc.NDFC, diags *diag.Diagnostics, data *InventoryDevicesModel) {
+func getInventoryData(ctx context.Context, client *ndfc.NDFC, diags *diag.Diagnostics, data *resource_inventory_devices.InventoryDevicesModel) {
 
 	tflog.Debug(ctx, fmt.Sprintf("Start of %s getInventoryData", loggingInventoryDevices))
 	result := client.GetFabricInventory(ctx, diags, data.FabricName.ValueString())
 	if diags.HasError() {
 		return
 	}
-	devicesValues := map[string]DevicesValue{}
-	devices := map[string]DevicesValue{}
+	devicesValues := map[string]resource_inventory_devices.DevicesValue{}
+	devices := map[string]resource_inventory_devices.DevicesValue{}
 	*diags = data.Devices.ElementsAs(ctx, &devices, false)
 	if diags.HasError() {
 		return
@@ -495,14 +451,14 @@ func getInventoryData(ctx context.Context, client *ndfc.NDFC, diags *diag.Diagno
 			   - ../test-reachability returns vdcMac as a string
 			   - ../switchesByFabric returns vdcMac as a null when string is empty
 		*/
-		deviceUpdate := DevicesValue{}
+		deviceUpdate := resource_inventory_devices.DevicesValue{}
 		if device.Get("vdcMac").Value() != nil {
 			vdcMac := device.Get("vdcMac").String()
 			deviceUpdate.VdcMac = basetypes.NewStringValue(vdcMac)
 		} else {
 			deviceUpdate.VdcMac = basetypes.NewStringNull()
 		}
-		deviceUpdate = DevicesValue{
+		deviceUpdate = resource_inventory_devices.DevicesValue{
 			Hostname:        basetypes.NewStringValue(device.Get("logicalName").String()),
 			Uuid:            basetypes.NewStringValue(device.Get("swUUID").String()),
 			DeviceIndex:     basetypes.NewStringValue(fmt.Sprintf("%s(%s)", device.Get("logicalName"), device.Get("serialNumber"))),
@@ -591,13 +547,13 @@ func getInventoryData(ctx context.Context, client *ndfc.NDFC, diags *diag.Diagno
 	tflog.Debug(ctx, fmt.Sprintf("End of %s getInventoryData", loggingInventoryDevices))
 }
 
-func addDevicesToInventory(ctx context.Context, client *ndfc.NDFC, diags *diag.Diagnostics, data, stateData *InventoryDevicesModel) {
+func addDevicesToInventory(ctx context.Context, client *ndfc.NDFC, diags *diag.Diagnostics, data, stateData *resource_inventory_devices.InventoryDevicesModel) {
 	tflog.Debug(ctx, fmt.Sprintf("Start of %s addDevicesToInventory", loggingInventoryDevices))
-	discoverDevices := map[string]DevicesValue{}
-	poapDevices := map[string]DevicesValue{}
-	rmaDevices := map[string]DevicesValue{}
+	discoverDevices := map[string]resource_inventory_devices.DevicesValue{}
+	poapDevices := map[string]resource_inventory_devices.DevicesValue{}
+	rmaDevices := map[string]resource_inventory_devices.DevicesValue{}
 
-	var devices, stateDevices map[string]DevicesValue
+	var devices, stateDevices map[string]resource_inventory_devices.DevicesValue
 	data.Devices.ElementsAs(ctx, &devices, false)
 	stateData.Devices.ElementsAs(ctx, &stateDevices, false)
 	if diags.HasError() {
@@ -665,7 +621,7 @@ func addDevicesToInventory(ctx context.Context, client *ndfc.NDFC, diags *diag.D
 
 			if device, ok := devices[lanCredential.Get("ipAddress").String()]; ok && lanCredential.Get("credType").String() == "" {
 
-				username := data.UserName.ValueString()
+				username := data.Username.ValueString()
 				if !device.DiscoveryUsername.IsNull() && !device.DiscoveryUsername.IsUnknown() {
 					username = device.DiscoveryUsername.ValueString()
 				}
@@ -689,7 +645,7 @@ func addDevicesToInventory(ctx context.Context, client *ndfc.NDFC, diags *diag.D
 	tflog.Debug(ctx, fmt.Sprintf("End of %s addDevicesToInventory", loggingInventoryDevices))
 }
 
-func rma(ctx context.Context, client *ndfc.NDFC, diags *diag.Diagnostics, data *InventoryDevicesModel, devices, stateDevices map[string]DevicesValue) {
+func rma(ctx context.Context, client *ndfc.NDFC, diags *diag.Diagnostics, data *resource_inventory_devices.InventoryDevicesModel, devices, stateDevices map[string]resource_inventory_devices.DevicesValue) {
 	tflog.Debug(ctx, fmt.Sprintf("Start of %s rma", loggingInventoryDevices))
 	bootstrap := map[string]map[string]interface{}{}
 
@@ -746,7 +702,7 @@ func rma(ctx context.Context, client *ndfc.NDFC, diags *diag.Diagnostics, data *
 	tflog.Debug(ctx, fmt.Sprintf("End of %s rma", loggingInventoryDevices))
 }
 
-func poap(ctx context.Context, client *ndfc.NDFC, diags *diag.Diagnostics, data *InventoryDevicesModel, devices map[string]DevicesValue) {
+func poap(ctx context.Context, client *ndfc.NDFC, diags *diag.Diagnostics, data *resource_inventory_devices.InventoryDevicesModel, devices map[string]resource_inventory_devices.DevicesValue) {
 	tflog.Debug(ctx, fmt.Sprintf("Start of %s poap", loggingInventoryDevices))
 	var payload []map[string]interface{}
 	bootstrap := map[string]map[string]interface{}{}
@@ -852,7 +808,7 @@ func poap(ctx context.Context, client *ndfc.NDFC, diags *diag.Diagnostics, data 
 	tflog.Debug(ctx, fmt.Sprintf("End of %s poap", loggingInventoryDevices))
 }
 
-func discover(ctx context.Context, client *ndfc.NDFC, diags *diag.Diagnostics, data *InventoryDevicesModel, devices map[string]DevicesValue) {
+func discover(ctx context.Context, client *ndfc.NDFC, diags *diag.Diagnostics, data *resource_inventory_devices.InventoryDevicesModel, devices map[string]resource_inventory_devices.DevicesValue) {
 	tflog.Debug(ctx, fmt.Sprintf("Start of %s discover", loggingInventoryDevices))
 	reachableDevices := map[string]gjson.Result{}
 	var payload map[string]interface{}
@@ -863,12 +819,12 @@ func discover(ctx context.Context, client *ndfc.NDFC, diags *diag.Diagnostics, d
 	if !data.MaxHops.IsNull() && !data.MaxHops.IsUnknown() && !data.SeedIp.IsNull() && !data.SeedIp.IsUnknown() {
 		payload = map[string]interface{}{
 			"cdpSecondTimeout":    5,
-			"discoveryCredForLan": data.SetAndUseDiscoveryCredForLan.ValueBool(),
+			"discoveryCredForLan": data.SetAsIndividualDeviceWriteCredential.ValueBool(),
 			"password":            data.Password.ValueString(),
 			"maxHops":             strconv.FormatInt(data.MaxHops.ValueInt64(), 10),
 			"preserveConfig":      data.PreserveConfig.ValueBool(),
 			"snmpV3AuthProtocol":  snmpAuthenticationProtocol[data.AuthProtocol.ValueString()],
-			"username":            data.UserName.ValueString(),
+			"username":            data.Username.ValueString(),
 			"seedIP":              data.SeedIp.ValueString(),
 		}
 
@@ -890,18 +846,18 @@ func discover(ctx context.Context, client *ndfc.NDFC, diags *diag.Diagnostics, d
 	} else {
 		payload = map[string]interface{}{
 			"cdpSecondTimeout":    5,
-			"discoveryCredForLan": data.SetAndUseDiscoveryCredForLan.ValueBool(),
+			"discoveryCredForLan": data.SetAsIndividualDeviceWriteCredential.ValueBool(),
 			"password":            data.Password.ValueString(),
 			"preserveConfig":      data.PreserveConfig.ValueBool(),
 			"snmpV3AuthProtocol":  snmpAuthenticationProtocol[data.AuthProtocol.ValueString()],
-			"username":            data.UserName.ValueString(),
+			"username":            data.Username.ValueString(),
 		}
 	}
 
 	payload["maxHops"] = 0
 	ipAdresses := []string{}
 	switches := []map[string]interface{}{}
-	DevicesValues := map[string]DevicesValue{}
+	DevicesValues := map[string]resource_inventory_devices.DevicesValue{}
 	for ipAddress, device := range devices {
 		ipAdresses = append(ipAdresses, ipAddress)
 		if _, ok := reachableDevices[ipAddress]; !ok {
@@ -943,7 +899,7 @@ func discover(ctx context.Context, client *ndfc.NDFC, diags *diag.Diagnostics, d
 			return
 		}
 
-		discoveredDevice := DevicesValue{
+		discoveredDevice := resource_inventory_devices.DevicesValue{
 			Hostname:      basetypes.NewStringValue(reachableDevice.Get("sysName").String()),
 			DeviceIndex:   basetypes.NewStringValue(reachableDevice.Get("deviceIndex").String()),
 			Model:         basetypes.NewStringValue(reachableDevice.Get("platform").String()),
@@ -993,7 +949,7 @@ func discover(ctx context.Context, client *ndfc.NDFC, diags *diag.Diagnostics, d
 	}
 
 	client.SetFabricInventoryDiscover(
-		ctx, diags, data.FabricName.ValueString(), data.SetAndUseDiscoveryCredForLan.ValueBool(), jsonSwitchPayload,
+		ctx, diags, data.FabricName.ValueString(), data.SetAsIndividualDeviceWriteCredential.ValueBool(), jsonSwitchPayload,
 	)
 	if diags.HasError() {
 		return
@@ -1015,9 +971,9 @@ func discover(ctx context.Context, client *ndfc.NDFC, diags *diag.Diagnostics, d
 	tflog.Debug(ctx, fmt.Sprintf("End of %s discover", loggingInventoryDevices))
 }
 
-func deployAndSave(ctx context.Context, client *ndfc.NDFC, diags *diag.Diagnostics, data *InventoryDevicesModel) {
+func deployAndSave(ctx context.Context, client *ndfc.NDFC, diags *diag.Diagnostics, data *resource_inventory_devices.InventoryDevicesModel) {
 	tflog.Debug(ctx, fmt.Sprintf("Start of %s deployAndSave", loggingInventoryDevices))
-	var devices map[string]DevicesValue
+	var devices map[string]resource_inventory_devices.DevicesValue
 	data.Devices.ElementsAs(ctx, &devices, false)
 	if diags.HasError() {
 		return
@@ -1028,18 +984,16 @@ func deployAndSave(ctx context.Context, client *ndfc.NDFC, diags *diag.Diagnosti
 		return
 	}
 
-	if data.Save.ValueBool() || data.Deploy.ValueBool() && len(devices) > 0 {
+	if data.Deploy.ValueBool() && len(devices) > 0 {
 
 		rediscoverDevices(ctx, client, diags, data, []string{})
 		if diags.HasError() {
 			return
 		}
-		if data.Save.ValueBool() {
-			tflog.Debug(ctx, fmt.Sprintf("Start of %s save", loggingInventoryDevices))
-			validateFabric(ctx, client, diags, data, "discovered")
-			if diags.HasError() {
-				return
-			}
+		tflog.Debug(ctx, fmt.Sprintf("Start of %s save", loggingInventoryDevices))
+		validateFabric(ctx, client, diags, data, "discovered")
+		if diags.HasError() {
+			return
 		}
 		serialNumbers := []string{}
 		for _, device := range devices {
@@ -1048,17 +1002,17 @@ func deployAndSave(ctx context.Context, client *ndfc.NDFC, diags *diag.Diagnosti
 			}
 		}
 		sort.Strings(serialNumbers)
-		client.RecalculateAndDeploy(ctx, diags, data.FabricName.ValueString(), data.Save.ValueBool(), data.Deploy.ValueBool(), serialNumbers)
+		client.RecalculateAndDeploy(ctx, diags, data.FabricName.ValueString(), true, data.Deploy.ValueBool(), serialNumbers)
 		validateFabric(ctx, client, diags, data, "configured")
 	}
-	
+
 	tflog.Debug(ctx, fmt.Sprintf("End of %s deployAndSave", loggingInventoryDevices))
 }
 
-func rediscoverDevices(ctx context.Context, client *ndfc.NDFC, diags *diag.Diagnostics, data *InventoryDevicesModel, switchDbIDs []string) {
+func rediscoverDevices(ctx context.Context, client *ndfc.NDFC, diags *diag.Diagnostics, data *resource_inventory_devices.InventoryDevicesModel, switchDbIDs []string) {
 	tflog.Debug(ctx, fmt.Sprintf("Start of %s rediscoverDevices", loggingInventoryDevices))
 	if len(switchDbIDs) == 0 {
-		var devices map[string]DevicesValue
+		var devices map[string]resource_inventory_devices.DevicesValue
 		data.Devices.ElementsAs(ctx, &devices, false)
 		if diags.HasError() {
 			return
@@ -1080,63 +1034,64 @@ func rediscoverDevices(ctx context.Context, client *ndfc.NDFC, diags *diag.Diagn
 	}
 	tflog.Debug(ctx, fmt.Sprintf("End of %s rediscoverDevices", loggingInventoryDevices))
 }
+
 /*
-func save(ctx context.Context, client *ndfc.NDFC, diags *diag.Diagnostics, data *InventoryDevicesModel) {
-	tflog.Debug(ctx, fmt.Sprintf("Start of %s save", loggingInventoryDevices))
-	validateFabric(ctx, client, diags, data, "discovered")
-	if diags.HasError() {
-		return
-	}
-
-	if data.Save.ValueBool() {
-		client.SaveConfiguration(ctx, diags, data.FabricName.ValueString())
-		if diags.HasError() {
-			return
-		}
+	func save(ctx context.Context, client *ndfc.NDFC, diags *diag.Diagnostics, data *resource_inventory_devices.InventoryDevicesModel) {
+		tflog.Debug(ctx, fmt.Sprintf("Start of %s save", loggingInventoryDevices))
 		validateFabric(ctx, client, diags, data, "discovered")
-	}
-	tflog.Debug(ctx, fmt.Sprintf("End of %s save", loggingInventoryDevices))
-}
-
-func deploy(ctx context.Context, client *ndfc.NDFC, diags *diag.Diagnostics, data *InventoryDevicesModel) {
-	tflog.Debug(ctx, fmt.Sprintf("Start of %s deploy", loggingInventoryDevices))
-	validateFabric(ctx, client, diags, data, "discovered")
-	if diags.HasError() {
-		return
-	}
-
-	if data.Deploy.ValueBool() {
-		var devices map[string]DevicesValue
-		data.Devices.ElementsAs(ctx, &devices, false)
 		if diags.HasError() {
 			return
 		}
 
-		serialNumbers := []string{}
-		for _, device := range devices {
-			if device.ConfigStatus.ValueString() != "In-Sync" && device.DiscoveryType.ValueString() != "pre_provision" && device.Mode.ValueString() == "Normal" {
-				serialNumbers = append(serialNumbers, device.SerialNumber.ValueString())
+		if data.Save.ValueBool() {
+			client.SaveConfiguration(ctx, diags, data.FabricName.ValueString())
+			if diags.HasError() {
+				return
 			}
+			validateFabric(ctx, client, diags, data, "discovered")
 		}
+		tflog.Debug(ctx, fmt.Sprintf("End of %s save", loggingInventoryDevices))
+	}
 
-		sort.Strings(serialNumbers)
-
-		client.DeployConfiguration(ctx, diags, data.FabricName.ValueString(), serialNumbers)
+	func deploy(ctx context.Context, client *ndfc.NDFC, diags *diag.Diagnostics, data *resource_inventory_devices.InventoryDevicesModel) {
+		tflog.Debug(ctx, fmt.Sprintf("Start of %s deploy", loggingInventoryDevices))
+		validateFabric(ctx, client, diags, data, "discovered")
 		if diags.HasError() {
 			return
 		}
 
-		validateFabric(ctx, client, diags, data, "configured")
+		if data.Deploy.ValueBool() {
+			var devices map[string]resource_inventory_devices.DevicesValue
+			data.Devices.ElementsAs(ctx, &devices, false)
+			if diags.HasError() {
+				return
+			}
+
+			serialNumbers := []string{}
+			for _, device := range devices {
+				if device.ConfigStatus.ValueString() != "In-Sync" && device.DiscoveryType.ValueString() != "pre_provision" && device.Mode.ValueString() == "Normal" {
+					serialNumbers = append(serialNumbers, device.SerialNumber.ValueString())
+				}
+			}
+
+			sort.Strings(serialNumbers)
+
+			client.DeployConfiguration(ctx, diags, data.FabricName.ValueString(), serialNumbers)
+			if diags.HasError() {
+				return
+			}
+
+			validateFabric(ctx, client, diags, data, "configured")
+		}
+		tflog.Debug(ctx, fmt.Sprintf("End of %s deploy", loggingInventoryDevices))
 	}
-	tflog.Debug(ctx, fmt.Sprintf("End of %s deploy", loggingInventoryDevices))
-}
 */
-func validateFabric(ctx context.Context, client *ndfc.NDFC, diags *diag.Diagnostics, data *InventoryDevicesModel, state string) {
+func validateFabric(ctx context.Context, client *ndfc.NDFC, diags *diag.Diagnostics, data *resource_inventory_devices.InventoryDevicesModel, state string) {
 	tflog.Debug(ctx, fmt.Sprintf("Start of %s validateFabric - state %s", loggingInventoryDevices, state))
 	// Hardcoded delay to prevent validation before devices are ready
 	time.Sleep(30 * time.Second)
 
-	configDevices := map[string]DevicesValue{}
+	configDevices := map[string]resource_inventory_devices.DevicesValue{}
 	data.Devices.ElementsAs(ctx, &configDevices, false)
 
 	attempt := int64(1)
@@ -1151,7 +1106,7 @@ func validateFabric(ctx context.Context, client *ndfc.NDFC, diags *diag.Diagnost
 		}
 
 		allNormal = true
-		devices := map[string]DevicesValue{}
+		devices := map[string]resource_inventory_devices.DevicesValue{}
 		data.Devices.ElementsAs(ctx, &devices, false)
 
 		for ipAddress, device := range devices {

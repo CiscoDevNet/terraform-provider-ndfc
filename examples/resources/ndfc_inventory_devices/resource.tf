@@ -7,7 +7,6 @@ resource "ndfc_inventory_devices" "test_resource_inventory_devices_1" {
   max_hops                                  = 0
   set_as_individual_device_write_credential = false
   preserve_config                           = false
-  save                                      = true
   deploy                                    = true
   retries                                   = 300
   retry_wait_timeout                        = 20

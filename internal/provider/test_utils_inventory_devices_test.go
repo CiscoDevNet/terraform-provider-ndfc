@@ -51,15 +51,10 @@ func InventoryDevicesModelHelperStateCheck(RscName string, c resource_inventory_
 	} else {
 		ret = append(ret, resource.TestCheckResourceAttr(RscName, attrPath.AtName("preserve_config").String(), "false"))
 	}
-	if c.Save != nil {
-		ret = append(ret, resource.TestCheckResourceAttr(RscName, attrPath.AtName("save").String(), strconv.FormatBool(*c.Save)))
-	} else {
-		ret = append(ret, resource.TestCheckResourceAttr(RscName, attrPath.AtName("save").String(), "false"))
-	}
 	if c.Deploy != nil {
 		ret = append(ret, resource.TestCheckResourceAttr(RscName, attrPath.AtName("deploy").String(), strconv.FormatBool(*c.Deploy)))
 	} else {
-		ret = append(ret, resource.TestCheckResourceAttr(RscName, attrPath.AtName("deploy").String(), "false"))
+		ret = append(ret, resource.TestCheckResourceAttr(RscName, attrPath.AtName("deploy").String(), "true"))
 	}
 	if c.Retries != nil {
 		ret = append(ret, resource.TestCheckResourceAttr(RscName, attrPath.AtName("retries").String(), strconv.Itoa(int(*c.Retries))))

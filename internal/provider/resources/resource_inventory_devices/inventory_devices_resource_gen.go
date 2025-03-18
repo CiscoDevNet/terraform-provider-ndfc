@@ -41,7 +41,7 @@ func InventoryDevicesResourceSchema(ctx context.Context) schema.Schema {
 				Computed:            true,
 				Description:         "Deploy the configuration of the devices",
 				MarkdownDescription: "Deploy the configuration of the devices",
-				Default:             booldefault.StaticBool(false),
+				Default:             booldefault.StaticBool(true),
 			},
 			"devices": schema.MapNestedAttribute{
 				NestedObject: schema.NestedAttributeObject{
@@ -248,13 +248,6 @@ func InventoryDevicesResourceSchema(ctx context.Context) schema.Schema {
 				MarkdownDescription: "The time to wait between retries to validate fabric status before execution of requests",
 				Default:             int64default.StaticInt64(5),
 			},
-			"save": schema.BoolAttribute{
-				Optional:            true,
-				Computed:            true,
-				Description:         "Save the configuration of the devices",
-				MarkdownDescription: "Save the configuration of the devices",
-				Default:             booldefault.StaticBool(false),
-			},
 			"seed_ip": schema.StringAttribute{
 				Optional:            true,
 				Description:         "The seed IP address to use for the discovery devices",
@@ -289,7 +282,6 @@ type InventoryDevicesModel struct {
 	PreserveConfig                       types.Bool   `tfsdk:"preserve_config"`
 	Retries                              types.Int64  `tfsdk:"retries"`
 	RetryWaitTimeout                     types.Int64  `tfsdk:"retry_wait_timeout"`
-	Save                                 types.Bool   `tfsdk:"save"`
 	SeedIp                               types.String `tfsdk:"seed_ip"`
 	SetAsIndividualDeviceWriteCredential types.Bool   `tfsdk:"set_as_individual_device_write_credential"`
 	Username                             types.String `tfsdk:"username"`
