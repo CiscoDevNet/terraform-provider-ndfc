@@ -31,7 +31,6 @@ resource "ndfc_{{.RscType}}" "{{.RscName}}" {
         source               = "{{.Source}}"
         priority             = {{.Priority}}
         device_serial_number = "{{.DeviceSerialNumber}}"
-        deleted              = {{.Deleted}}
         policy_parameters = {
         {{- range $key, $value := .PolicyParameters }}
             {{$key}} = "{{$value}}"

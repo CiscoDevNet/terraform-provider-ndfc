@@ -29,7 +29,6 @@ resource "ndfc_policy" "test_resource_policy_1" {
     PORT   = "57900"
     VRF    = "management"
   }
-  deleted = false
 }
 ```
 
@@ -45,7 +44,6 @@ resource "ndfc_policy" "test_resource_policy_1" {
 
 ### Optional
 
-- `deleted` (Boolean) Deleted policy
 - `deploy` (Boolean) Deploy policy
 - `description` (String) Description of the policy
 - `is_policy_group` (Boolean) Policy Group

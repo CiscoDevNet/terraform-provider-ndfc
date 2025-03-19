@@ -98,7 +98,6 @@ resource:
       type: Bool
       ndfc_type: bool
       description: "Deleted policy"
-      computed: true
-      optional: true
-      example: false
+      tf_hide: true
+     
 

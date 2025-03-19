@@ -77,7 +77,6 @@ func TestAccPolicyResource(t *testing.T) {
 							  PORT   = "57900"
 							  VRF    = "management"
 							}
-							deleted = false
 						  }
 					*/
 					policyResource.Deploy = true

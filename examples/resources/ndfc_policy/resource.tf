@@ -15,5 +15,4 @@ resource "ndfc_policy" "test_resource_policy_1" {
     PORT   = "57900"
     VRF    = "management"
   }
-  deleted = false
 }
