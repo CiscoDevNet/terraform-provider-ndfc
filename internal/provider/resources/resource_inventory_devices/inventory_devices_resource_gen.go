@@ -39,9 +39,9 @@ func InventoryDevicesResourceSchema(ctx context.Context) schema.Schema {
 			"deploy": schema.BoolAttribute{
 				Optional:            true,
 				Computed:            true,
-				Description:         "Deploy the configuration of the devices",
-				MarkdownDescription: "Deploy the configuration of the devices",
-				Default:             booldefault.StaticBool(false),
+				Description:         "Default set to true. NDFC recommends deploying the configuration of the devices in inventory itself. Not doing so could lead to \"out-of-sync\" issues when configuring other resources during deployment in other resources.",
+				MarkdownDescription: "Default set to true. NDFC recommends deploying the configuration of the devices in inventory itself. Not doing so could lead to \"out-of-sync\" issues when configuring other resources during deployment in other resources.",
+				Default:             booldefault.StaticBool(true),
 			},
 			"devices": schema.MapNestedAttribute{
 				NestedObject: schema.NestedAttributeObject{
@@ -251,9 +251,9 @@ func InventoryDevicesResourceSchema(ctx context.Context) schema.Schema {
 			"save": schema.BoolAttribute{
 				Optional:            true,
 				Computed:            true,
-				Description:         "Save the configuration of the devices",
-				MarkdownDescription: "Save the configuration of the devices",
-				Default:             booldefault.StaticBool(false),
+				Description:         "Default set to true. NDFC recommends saving the configuration of the devices in inventory itself. Not doing so could lead to \"out-of-sync\" issues when configuring other resources during deployment in other resources.",
+				MarkdownDescription: "Default set to true. NDFC recommends saving the configuration of the devices in inventory itself. Not doing so could lead to \"out-of-sync\" issues when configuring other resources during deployment in other resources.",
+				Default:             booldefault.StaticBool(true),
 			},
 			"seed_ip": schema.StringAttribute{
 				Optional:            true,
