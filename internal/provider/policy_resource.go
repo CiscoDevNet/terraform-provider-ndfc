@@ -15,6 +15,7 @@ import (
 	"terraform-provider-ndfc/internal/provider/ndfc"
 	"terraform-provider-ndfc/internal/provider/resources/resource_policy"
 
+	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-log/tflog"
 )
@@ -81,13 +82,16 @@ func (r *policyResource) Read(ctx context.Context, req resource.ReadRequest, res
 	if resp.Diagnostics.HasError() {
 		return
 	}
-
-	r.client.RscReadPolicy(ctx, &resp.Diagnostics, &data)
-	if resp.Diagnostics.HasError() {
+	dg1 := diag.Diagnostics{}
+	r.client.RscReadPolicy(ctx, &dg1, &data)
+	if dg1.HasError() {
 		tflog.Error(ctx, "Read Policy Failed")
 		resp.Diagnostics.AddWarning("Read Failure", "No configuration found in NDFC")
 		//resp.Diagnostics.AddError("Read Failure", "No data received from NDFC")
-		resp.Diagnostics.Append(resp.State.Set(ctx, nil)...)
+		//resp.Diagnostics.Append(resp.State.Set(ctx, nil)...)
+		tflog.Error(ctx, "Read Policy Failed - removing resource from state")
+		resp.State.RemoveResource(ctx)
+		return
 	}
 	// Save updated data into Terraform state
 	resp.Diagnostics.Append(resp.State.Set(ctx, data)...)
