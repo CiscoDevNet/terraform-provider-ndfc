@@ -83,16 +83,16 @@ resource:
       model_name: save
       tf_name: save
       type: Bool
-      default_value: false
-      description: Save the configuration of the devices
+      default_value: true
+      description:  Default set to true. NDFC recommends saving the device configuration during "add devices" to avoid "out-of-sync" issues when deploying in other resources.
       ndfc_type: bool
       example: true
     - &deploy
       model_name: deploy
       tf_name: deploy
       type: Bool
-      default_value: false
-      description: Deploy the configuration of the devices
+      default_value: true
+      description: Default set to true. NDFC recommends deploying the device configuration during "add devices" to avoid "out-of-sync" issues when deploying in other resources.
       ndfc_type: bool
       example: true
     - &retries

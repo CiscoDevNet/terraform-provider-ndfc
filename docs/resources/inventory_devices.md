@@ -49,12 +49,12 @@ resource "ndfc_inventory_devices" "test_resource_inventory_devices_1" {
 ### Optional
 
 - `auth_protocol` (String) The authentication protocol to use for the devices
-- `deploy` (Boolean) Deploy the configuration of the devices
+- `deploy` (Boolean) Default set to true. NDFC recommends deploying the configuration of the devices in inventory itself. Not doing so could lead to "out-of-sync" issues when configuring other resources during deployment in other resources.
 - `max_hops` (Number) The maximum number of hops to use during the discovery of devices
 - `preserve_config` (Boolean) Preserve the configuration of the devices
 - `retries` (Number) The number of retries to use validate fabric status before execution of requests
 - `retry_wait_timeout` (Number) The time to wait between retries to validate fabric status before execution of requests
-- `save` (Boolean) Save the configuration of the devices
+- `save` (Boolean) Default set to true. NDFC recommends saving the configuration of the devices in inventory itself. Not doing so could lead to "out-of-sync" issues when configuring other resources during deployment in other resources.
 - `seed_ip` (String) The seed IP address to use for the discovery devices
 - `set_as_individual_device_write_credential` (Boolean) Set and use discovery credentials for LAN devices
 
