@@ -59,7 +59,13 @@ func (c *NDFC) RscCreatePolicy(ctx context.Context, dg *diag.Diagnostics, model 
 			tflog.Error(ctx, "Failed to deploy policy")
 			//Roll Back
 			model.PolicyId = types.StringValue(policyId)
-			c.RscDeletePolicy(ctx, dg, model)
+			policyApi.PolicyID = policyId
+			res, err := policyApi.Delete()
+			if err != nil {
+				tflog.Error(ctx, "Failed to delete policy")
+				dg.AddError("Failed to delete policy", fmt.Sprintf("Error %v: %v", err, res.String()))
+			}
+			tflog.Error(ctx, fmt.Sprintf("Policy-id %s is deleted", policyId))
 			return
 		}
 	}
@@ -216,9 +222,19 @@ func (c *NDFC) RscDeletePolicy(ctx context.Context, dg *diag.Diagnostics, model 
 	log.Printf("[DEBUG] Deleting policy with ID: %v: Marking delete with PUT Data |%s|", policyID, string(data))
 	res, err := policyApi.Put(data)
 	if err != nil {
-		tflog.Error(ctx, "Failed to mark delete policy")
-		dg.AddError("Failed to mark delete policy", fmt.Sprintf("Error %v: %v", err, res.String()))
-		return
+		log.Printf("[ERROR] Error deleting policy: %v, %v", err, res.String())
+		tflog.Error(ctx, "Failed to mark delete policy - attempting full delete")
+		// As marking failed - we must attempt a full sweep delete using the DELETE API
+		// This is to avoid the policy being left stale in NDFC causing subsequent deployments to fail
+		papi := api.NewPolicyAPI(c.GetLock(ResourcePolicy), &c.apiClient)
+		papi.PolicyID = policyID
+		err1 := res.String()
+		res, err = papi.Delete()
+		if err != nil {
+			tflog.Error(ctx, "Failed to delete policy")
+			dg.AddError("Failed to mark delete policy as well as force delete policy", fmt.Sprintf("Marking error: %v | Delete Error %v: %v", err1, err, res.String()))
+			return
+		}
 	}
 	// Incase of delete, policyID is made as FabricName:SerialNumber for switch deploy
 	// This avoids additional parameters to be passed to delete and also policyID is not used in delete
