@@ -12,7 +12,8 @@ import (
 	"fmt"
 	"strings"
 	"sync"
-	"terraform-provider-ndfc/tfutils/go-nd"
+
+	"github.com/netascode/go-nd"
 )
 
 type ConfigDeploymentAPI struct {
@@ -79,7 +80,6 @@ func (c *ConfigDeploymentAPI) SetDeleteList(qp []string) {
 func (c *ConfigDeploymentAPI) RscName() string {
 	return "config-deploy"
 }
-
 
 func NewConfigDeploymentAPI(lock *sync.Mutex, client *nd.Client) *ConfigDeploymentAPI {
 	api := new(ConfigDeploymentAPI)

@@ -12,7 +12,8 @@ import (
 	"fmt"
 	"strings"
 	"sync"
-	"terraform-provider-ndfc/tfutils/go-nd"
+
+	"github.com/netascode/go-nd"
 )
 
 type NetAttachAPI struct {
@@ -60,8 +61,6 @@ func (c *NetAttachAPI) SetDeleteList(qp []string) {
 func (c *NetAttachAPI) RscName() string {
 	return "networks"
 }
-
-
 
 func NewNetAttachAPI(fabricName string, lock *sync.Mutex, client *nd.Client) *NetAttachAPI {
 	api := new(NetAttachAPI)

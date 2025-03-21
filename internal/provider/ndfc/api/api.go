@@ -13,7 +13,8 @@ import (
 	"log"
 	"strings"
 	"sync"
-	"terraform-provider-ndfc/tfutils/go-nd"
+
+	"github.com/netascode/go-nd"
 
 	"github.com/tidwall/gjson"
 )

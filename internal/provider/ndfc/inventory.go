@@ -12,7 +12,8 @@ import (
 	"context"
 	"fmt"
 	"strings"
-	"terraform-provider-ndfc/tfutils/go-nd"
+
+	"github.com/netascode/go-nd"
 
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 

@@ -11,7 +11,8 @@ package api
 import (
 	"log"
 	"sync"
-	"terraform-provider-ndfc/tfutils/go-nd"
+
+	"github.com/netascode/go-nd"
 )
 
 type InterfaceAPI struct {
@@ -105,7 +106,6 @@ func (c *InterfaceAPI) SetAPI(function int) {
 func (c *InterfaceAPI) RscName() string {
 	return "interface"
 }
-
 
 func NewInterfaceAPI(lock *sync.Mutex, client *nd.Client) *InterfaceAPI {
 	api := new(InterfaceAPI)
