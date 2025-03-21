@@ -11,7 +11,8 @@ package api
 import (
 	"fmt"
 	"sync"
-	"terraform-provider-ndfc/tfutils/go-nd"
+
+	"github.com/netascode/go-nd"
 )
 
 type DeploymentAPI struct {

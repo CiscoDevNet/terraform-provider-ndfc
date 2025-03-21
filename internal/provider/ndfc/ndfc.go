@@ -13,8 +13,9 @@ import (
 	"os"
 	"sync"
 	"terraform-provider-ndfc/internal/provider/ndfc/api"
-	"terraform-provider-ndfc/tfutils/go-nd"
 	"time"
+
+	"github.com/netascode/go-nd"
 )
 
 type NDFC struct {
@@ -77,15 +78,15 @@ func GetLock(rscName string) *sync.Mutex {
 }
 
 /*
-	When global switch level deployment or resource level deplotment is started, if other resources are being configured
-	at the same time, NDFC moves to out-of-sync state sometimes
-	To avoid this, all resource create/update must stop until deployment is complete
-	To achieve this, a readers-writer lock is used
-	All resources before Create/Update operaton must acquire a read lock
-	Global/Resource level Deployment operation must acquire a write lock
-	This ensures that other resources can run in parallel while write lock(depoyment not happening) is available
-	Deployment (writer lock) waits for all resource create/update (readers lock) to exit before starting deployment
-	Once deployment is complete, it releases the write lock
+When global switch level deployment or resource level deplotment is started, if other resources are being configured
+at the same time, NDFC moves to out-of-sync state sometimes
+To avoid this, all resource create/update must stop until deployment is complete
+To achieve this, a readers-writer lock is used
+All resources before Create/Update operaton must acquire a read lock
+Global/Resource level Deployment operation must acquire a write lock
+This ensures that other resources can run in parallel while write lock(depoyment not happening) is available
+Deployment (writer lock) waits for all resource create/update (readers lock) to exit before starting deployment
+Once deployment is complete, it releases the write lock
 */
 func GlobalDeployLock(who string) {
 	log.Printf("**********Waiting for GlobalDeployLock Lock for %s deployment by pid %d***************", who, os.Getpid())
@@ -97,7 +98,6 @@ func GlobalDeployTrylock(who string) bool {
 	log.Printf("**********Checking  GlobalDeployLock  for %s deployment by pid %d***************", who, os.Getpid())
 	return instance.deployMutex.TryLock()
 }
-
 
 func GlobalDeployUnlock(who string) {
 	instance.deployMutex.Unlock()

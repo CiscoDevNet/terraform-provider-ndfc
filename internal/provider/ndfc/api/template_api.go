@@ -11,7 +11,8 @@ package api
 import (
 	"fmt"
 	"sync"
-	"terraform-provider-ndfc/tfutils/go-nd"
+
+	"github.com/netascode/go-nd"
 )
 
 type TemplateAPI struct {
@@ -72,7 +73,6 @@ func (c *TemplateAPI) SetTemplateName(name string) {
 func (c *TemplateAPI) RscName() string {
 	return "template"
 }
-
 
 func NewTemplateAPI(lock *sync.Mutex, client *nd.Client) *TemplateAPI {
 	tApi := new(TemplateAPI)
