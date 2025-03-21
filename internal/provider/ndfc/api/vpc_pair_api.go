@@ -11,7 +11,8 @@ package api
 import (
 	"fmt"
 	"sync"
-	"terraform-provider-ndfc/tfutils/go-nd"
+
+	"github.com/netascode/go-nd"
 )
 
 // VpcPairAPI is the API client for the vpc pair resource
@@ -60,7 +61,6 @@ func (c *VpcPairAPI) GetDeleteQP() []string {
 func (c *VpcPairAPI) RscName() string {
 	return "vpc-pair"
 }
-
 
 func NewVpcPairAPI(lock *sync.Mutex, c *nd.Client) *VpcPairAPI {
 	papi := new(VpcPairAPI)

@@ -12,8 +12,9 @@ import (
 	"context"
 	"reflect"
 	"terraform-provider-ndfc/internal/provider/resources/resource_vrf_bulk"
-	"terraform-provider-ndfc/tfutils/go-nd"
 	"testing"
+
+	"github.com/netascode/go-nd"
 
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 )

@@ -11,7 +11,8 @@ package api
 import (
 	"fmt"
 	"sync"
-	"terraform-provider-ndfc/tfutils/go-nd"
+
+	"github.com/netascode/go-nd"
 )
 
 // PolicyAPI is the API client for the policy resource
@@ -61,7 +62,6 @@ func (c *PolicyAPI) GetDeleteQP() []string {
 func (c *PolicyAPI) RscName() string {
 	return "policy"
 }
-
 
 func NewPolicyAPI(lock *sync.Mutex, c *nd.Client) *PolicyAPI {
 	papi := new(PolicyAPI)
