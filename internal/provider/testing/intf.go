@@ -17,9 +17,9 @@ import (
 var EthIntf int = 10
 
 func GenerateIntfResource(intfObj **resource_interface_common.NDFCInterfaceCommonModel, ifStart, ifCount int,
-	ifType string, deployNeeded bool, serials []string, globalSerial bool, append bool) {
+	ifType string, deployNeeded bool, serials []string, globalSerial bool, appendFlag bool) {
 	intf := *intfObj
-	if !append {
+	if !appendFlag {
 		//intf := new(resource_interface_common.NDFCInterfaceCommonModel)
 		intf.Interfaces = make(map[string]resource_interface_common.NDFCInterfacesValue)
 	}

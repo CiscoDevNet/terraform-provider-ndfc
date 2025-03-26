@@ -71,7 +71,7 @@ func (r *fabricIpfmResource) Create(ctx context.Context, req resource.CreateRequ
 	deploy := data.Deploy.ValueBool()
 	r.client.RscCreateFabric(ctx, &resp.Diagnostics, &data, ndfc.ResourceIpfmFabricType)
 	data.Deploy = types.BoolValue(deploy)
-	data.Id = types.String(data.FabricName)
+	data.Id = data.FabricName
 	tflog.Debug(ctx, "data.Id = "+data.Id.ValueString())
 	if deploy {
 		if resp.Diagnostics.HasError() || resp.Diagnostics.WarningsCount() > 0 {
@@ -111,7 +111,7 @@ func (r *fabricIpfmResource) Read(ctx context.Context, req resource.ReadRequest,
 	deploy := data.Deploy.ValueBool()
 	r.client.RscReadFabric(ctx, &resp.Diagnostics, &data, ndfc.ResourceIpfmFabricType)
 	data.Deploy = types.BoolValue(deploy)
-	data.Id = types.String(data.FabricName)
+	data.Id = data.FabricName
 	tflog.Debug(ctx, "data.FabricName = "+data.FabricName.ValueString())
 	if data.FabricName.IsNull() || data.FabricName.IsUnknown() {
 		// make diags error empty because fabric is not present in NDFC,
@@ -144,7 +144,7 @@ func (r *fabricIpfmResource) Update(ctx context.Context, req resource.UpdateRequ
 	deploy := planData.Deploy.ValueBool()
 	r.client.RscUpdateFabric(ctx, &resp.Diagnostics, &planData, ndfc.ResourceIpfmFabricType)
 	planData.Deploy = types.BoolValue(deploy)
-	planData.Id = types.String(planData.FabricName)
+	planData.Id = planData.FabricName
 	if resp.Diagnostics.HasError() {
 		tflog.Error(ctx, "Update Fabric Failed")
 		return

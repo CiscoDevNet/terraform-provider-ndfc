@@ -151,8 +151,8 @@ func DevicesValueHelperStateCheck(RscName string, c resource_inventory_devices.N
 	if c.DiscoveryStatus != "" {
 		ret = append(ret, resource.TestCheckResourceAttr(RscName, attrPath.AtName("discovery_status").String(), c.DiscoveryStatus))
 	}
-	if c.Managable != nil {
-		ret = append(ret, resource.TestCheckResourceAttr(RscName, attrPath.AtName("managable").String(), strconv.FormatBool(*c.Managable)))
+	if c.Manageable != nil {
+		ret = append(ret, resource.TestCheckResourceAttr(RscName, attrPath.AtName("manageable").String(), strconv.FormatBool(*c.Manageable)))
 	}
 	return ret
 }

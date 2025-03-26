@@ -34,7 +34,7 @@ Read-Only:
 - `discovery_status` (String) The operational status of the device
 - `hostname` (String) The hostname of the device
 - `ip_address` (String) The ip address to use for the device
-- `managable` (Boolean) The managable status of the device
+- `manageable` (Boolean) The manageable status of the device
 - `mode` (String) The mode of the device
 - `model` (String) The model of the device
 - `oper_status` (String) The operational status of the device

@@ -68,7 +68,7 @@ func TestAccInterfaceLoopbackResourceBasic(t *testing.T) {
 
 }
 
-// Create Loopback resouce with 10 entries, add 10 more
+// Create Loopback resource with 10 entries, add 10 more
 func TestAccInterfaceLoopbackResourceCreateAndAdd(t *testing.T) {
 
 	x := &map[string]string{

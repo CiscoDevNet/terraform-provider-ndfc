@@ -21,7 +21,7 @@ import (
 
 var rsType string = "ethernet"
 
-// Create Ethernet resouce with 10 entries, add 10 more
+// Create Ethernet resource with 10 entries, add 10 more
 func TestAccInterfaceEthernetResourceCreateAndAdd(t *testing.T) {
 
 	x := &map[string]string{
