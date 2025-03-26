@@ -31,11 +31,11 @@ func (c NDFC) RscDeployNetworkAttachments(ctx context.Context, dg *diag.Diagnost
 	var d *NDFCVrfNetworkDeployment
 	if va, ok := attachment.(*resource_networks.NDFCNetworksModel); ok {
 		d = NewVrfNetworkDeployment(&c, va.FabricName, ResourceNetworks)
-		c.fillNetDeploymentDBFromModel(ctx, dg, va, d, &detach_present)
+		c.fillNetDeploymentDBFromModel(ctx, va, d, &detach_present)
 	} else if payload, ok := attachment.(*rna.NDFCNetworkAttachments); ok {
 		log.Printf("RscDeployNetworkAttachments: deploy from payload; payload=%v", *payload)
 		d = NewVrfNetworkDeployment(&c, payload.FabricName, ResourceNetworks)
-		c.fillNetDeploymentDBFromPayload(ctx, dg, payload, d, &detach_present)
+		c.fillNetDeploymentDBFromPayload(ctx, payload, d, &detach_present)
 	}
 
 	if d.GetDeployPendingCount() == 0 {
@@ -56,11 +56,14 @@ func (c NDFC) RscDeployNetworkAttachments(ctx context.Context, dg *diag.Diagnost
 			"detach_present":        detach_present,
 			"WaitForDeployComplete": d.ctrlr.WaitForDeployComplete,
 		})
-		c.DeployBulk(ctx, dg, d)
+		err := c.DeployBulk(ctx, dg, d)
+		if err != nil {
+			tflog.Error(ctx, fmt.Sprintf("RscDeployNetworkAttachments: Deploying attachments - not waiting for completion, error: %v", err))
+		}
 	}
 }
 
-func (c NDFC) fillNetDeploymentDBFromModel(ctx context.Context, dg *diag.Diagnostics, va *resource_networks.NDFCNetworksModel,
+func (c NDFC) fillNetDeploymentDBFromModel(ctx context.Context, va *resource_networks.NDFCNetworksModel,
 	d *NDFCVrfNetworkDeployment, detach_present *bool) {
 	deployAll := false
 	*detach_present = false
@@ -86,7 +89,7 @@ func (c NDFC) fillNetDeploymentDBFromModel(ctx context.Context, dg *diag.Diagnos
 	}
 }
 
-func (c NDFC) fillNetDeploymentDBFromPayload(ctx context.Context, dg *diag.Diagnostics, payload *rna.NDFCNetworkAttachments,
+func (c NDFC) fillNetDeploymentDBFromPayload(ctx context.Context, payload *rna.NDFCNetworkAttachments,
 	deployment *NDFCVrfNetworkDeployment, detach_present *bool) {
 	tflog.Debug(ctx, "fillNetDeploymentDBFromPayload entry")
 	for _, nwEntry := range payload.NetworkAttachments {

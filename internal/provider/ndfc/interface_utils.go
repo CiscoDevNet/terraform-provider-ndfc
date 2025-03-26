@@ -145,7 +145,7 @@ func (c NDFC) IfPostProcess(inData *resource_interface_common.NDFCInterfaceCommo
 	}
 }
 
-func (c NDFC) ifDiff(ctx context.Context, dg *diag.Diagnostics,
+func (c NDFC) ifDiff(ctx context.Context,
 	state *resource_interface_common.NDFCInterfaceCommonModel,
 	plan *resource_interface_common.NDFCInterfaceCommonModel) map[string]interface{} {
 
@@ -236,7 +236,7 @@ func ToTitleCase(s string) string {
 	if len(s) == 0 {
 		return s
 	}
-	// next two lines - typecasting gimmics to convert first letter
+	// next two lines - typecasting to convert first letter
 	p := ([]rune(s))
 	p[0] = rune(strings.ToUpper(string(p[0]))[0])
 	return string(p)

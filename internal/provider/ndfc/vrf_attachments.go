@@ -89,7 +89,7 @@ func (c NDFC) RscCreateVrfAttachments(ctx context.Context, dg *diag.Diagnostics,
 
 func (c NDFC) RscGetVrfAttachments(ctx context.Context, dg *diag.Diagnostics, vrfs *resource_vrf_bulk.NDFCVrfBulkModel) error {
 	tflog.Debug(ctx, "RscGetVrfAttachments: Entering Get")
-	res, err := c.getVrfAttachments(ctx, dg, vrfs.FabricName, vrfs.GetVrfNames())
+	res, err := c.getVrfAttachments(ctx, vrfs.FabricName, vrfs.GetVrfNames())
 	if err != nil {
 		tflog.Error(ctx, fmt.Sprintf("RscGetVrfAttachments: Error getting VRF Attachments %s", err.Error()))
 		return err
@@ -173,7 +173,7 @@ func (c NDFC) RscUpdateVrfAttachments(ctx context.Context, dg *diag.Diagnostics,
 
 	// Create the VRF Attachments
 
-	printSummary(ctx, actionMap)
+	printSummary(actionMap)
 
 	if updateVA == nil || len(updateVA.VrfAttachments) == 0 {
 		tflog.Warn(ctx, "RscUpdateVrfAttachments: No VRF Attachments to update")
@@ -205,7 +205,7 @@ func (c NDFC) RscUpdateVrfAttachments(ctx context.Context, dg *diag.Diagnostics,
 		tflog.Warn(ctx, "RscUpdateVrfAttachments: Global Undeploy not supported yet")
 	} else {
 		tflog.Info(ctx, "RscUpdateVrfAttachments: Deploying the changes")
-		c.RscDeployVrfAttachments(ctx, dg, deployVA)	
+		c.RscDeployVrfAttachments(ctx, dg, deployVA)
 		//c.DeployVrfFromPayload(ctx, dg, deployVA)
 	}
 
@@ -219,7 +219,7 @@ func (c NDFC) RscUpdateVrfAttachments(ctx context.Context, dg *diag.Diagnostics,
 
 }
 
-func printSummary(ctx context.Context, actionMap map[string]*rva.NDFCVrfAttachmentsPayloads) {
+func printSummary(actionMap map[string]*rva.NDFCVrfAttachmentsPayloads) {
 	log.Printf("==========================ATTACHMENT SUMMARY====================================start")
 	log.Printf("Modified Attachments")
 	for i := range actionMap["update"].VrfAttachments {
@@ -306,7 +306,7 @@ func (c NDFC) DsGetVrfAttachments(ctx context.Context, dg *diag.Diagnostics, vrf
 		vrfs = append(vrfs, vrf.Vrfs[i].VrfName)
 		vrfMap[vrf.Vrfs[i].VrfName] = &vrf.Vrfs[i]
 	}
-	res, err := c.getVrfAttachments(ctx, dg, vrf.FabricName, vrfs)
+	res, err := c.getVrfAttachments(ctx, vrf.FabricName, vrfs)
 	if err != nil {
 		tflog.Error(ctx, fmt.Sprintf("RscGetVrfAttachments: Error getting VRF Attachments %s", err.Error()))
 		return err

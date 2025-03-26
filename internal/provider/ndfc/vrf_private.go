@@ -159,9 +159,9 @@ func (c NDFC) processBulkResponse(ctx context.Context, res gjson.Result) ([]stri
 		return fabricName, vrfs
 	}
 */
-func (c NDFC) vrfBulkGetDiff(ctx context.Context, dg *diag.Diagnostics,
+func (c NDFC) vrfBulkGetDiff(ctx context.Context,
 	vPlan *resource_vrf_bulk.VrfBulkModel,
-	vState *resource_vrf_bulk.VrfBulkModel, vConfig *resource_vrf_bulk.VrfBulkModel) map[string]interface{} {
+	vState *resource_vrf_bulk.VrfBulkModel, _ *resource_vrf_bulk.VrfBulkModel) map[string]interface{} {
 
 	actions := make(map[string]interface{})
 	vrfState := vState.GetModelData()
@@ -189,7 +189,7 @@ func (c NDFC) vrfBulkGetDiff(ctx context.Context, dg *diag.Diagnostics,
 			vrf.FilterThisValue = true
 			vrf.FabricName = newVRFs.FabricName
 			vrf.VrfName = sVrfName
-			cf := false //ignored here - should be taken care in attachments
+			cf := false                               //ignored here - should be taken care in attachments
 			updateAction := vrf.CreatePlan(sVrf, &cf) //vrfState.Vrfs[i].DeepEqual(*vrf)
 			if updateAction == ActionNone {
 				//Case 1: Both VRFs are equal - no change to the VRF entry
@@ -253,6 +253,6 @@ func (c NDFC) vrfBulkUpdate(ctx context.Context, dg *diag.Diagnostics, ndVRFs *r
 			dg.AddError(fmt.Sprintf("VRF %s, Update failed", payload.Vrfs[i].VrfName), fmt.Sprintf("Error %v, response %s", err, res.Str))
 			return
 		}
-		tflog.Info(ctx, fmt.Sprintf("Update VRF %s Successfull. Message %s", payload.Vrfs[i].VrfName, res.Str))
+		tflog.Info(ctx, fmt.Sprintf("Update VRF %s Successful. Message %s", payload.Vrfs[i].VrfName, res.Str))
 	}
 }

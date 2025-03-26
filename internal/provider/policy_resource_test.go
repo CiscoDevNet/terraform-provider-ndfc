@@ -21,8 +21,6 @@ import (
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 )
 
-const policyTestRscName = "ndfc_policy.policy_test"
-
 func TestAccPolicyResource(t *testing.T) {
 
 	x := &map[string]string{

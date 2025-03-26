@@ -357,7 +357,7 @@ func (c *NDFC) RscUpdateNetworks(ctx context.Context, dg *diag.Diagnostics, ID s
 		return
 	}
 
-	for k, _ := range newNw.Networks {
+	for k := range newNw.Networks {
 		if _, ok := nws.Networks[k]; ok {
 			// check if the network is marked for deletion
 			if _, ok := delNw.Networks[k]; ok {
@@ -372,7 +372,7 @@ func (c *NDFC) RscUpdateNetworks(ctx context.Context, dg *diag.Diagnostics, ID s
 
 	// 3 Check if networks to be deleted exists
 
-	for k, _ := range delNw.Networks {
+	for k := range delNw.Networks {
 		if _, ok := nws.Networks[k]; !ok {
 			// Should we error out in this situation or just continue ?
 			tflog.Error(ctx, "Network does not exist", map[string]interface{}{"Network": k})
@@ -387,7 +387,7 @@ func (c *NDFC) RscUpdateNetworks(ctx context.Context, dg *diag.Diagnostics, ID s
 
 	// 4 Check if networks to be updated exists
 
-	for k, _ := range putNw.Networks {
+	for k := range putNw.Networks {
 		if _, ok := nws.Networks[k]; !ok {
 			tflog.Error(ctx, "Network does not exist", map[string]interface{}{"Network": k})
 			dg.AddError("Network does not exist", fmt.Sprintf("Network %s does not exist", k))

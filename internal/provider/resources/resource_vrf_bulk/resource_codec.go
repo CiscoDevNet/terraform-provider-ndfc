@@ -47,7 +47,7 @@ func (v *NDFCVrfBulkModel) AddVrfEntry(vrfName string, vrfEntry NDFCVrfsValue) {
 
 func (v NDFCVrfBulkModel) GetVrfNames() []string {
 	vrfNames := make([]string, 0)
-	for k, _ := range v.Vrfs {
+	for k := range v.Vrfs {
 		vrfNames = append(vrfNames, k)
 	}
 	return vrfNames
@@ -164,7 +164,7 @@ func (v *NDFCVrfBulkModel) FillAttachmentsFromPayload(payload *rva.NDFCVrfAttach
  *  Fill all required payload fields
  *  Fill Deployment flag in DepMap
  */
-func (v *NDFCVrfBulkModel) FillAttachPayloadFromModel(delete bool) *rva.NDFCVrfAttachmentsPayloads {
+func (v *NDFCVrfBulkModel) FillAttachPayloadFromModel(delFlag bool) *rva.NDFCVrfAttachmentsPayloads {
 	payload := new(rva.NDFCVrfAttachmentsPayloads)
 	payload.VrfAttachments = make([]rva.NDFCVrfAttachmentsPayload, 0)
 	payload.DepMap = make(map[string][]string)
@@ -174,7 +174,7 @@ func (v *NDFCVrfBulkModel) FillAttachPayloadFromModel(delete bool) *rva.NDFCVrfA
 		payload.DepMap["global"] = []string{"all"}
 	}
 
-	if delete {
+	if delFlag {
 		payload.DepMap["global"] = []string{"all"}
 		v.DeployAllAttachments = true
 	}
@@ -201,7 +201,7 @@ func (v *NDFCVrfBulkModel) FillAttachPayloadFromModel(delete bool) *rva.NDFCVrfA
 				payload.DepMap[vrfName] = append(payload.DepMap[vrfName], attachKey)
 			}
 			log.Printf("DeployThisAttachment %s/%s", vrfName, attachKey)
-			if delete {
+			if delFlag {
 				attachEntry.Deployment = "false"
 			} else {
 				attachEntry.Deployment = "true"

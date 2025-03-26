@@ -23,7 +23,6 @@ type InterfaceAPI struct {
 	PortMode     string
 	Excludes     string
 	mutex        *sync.Mutex
-	deployFlag   bool
 	APIFunction  int
 }
 

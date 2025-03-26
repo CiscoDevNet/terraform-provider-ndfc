@@ -175,6 +175,7 @@ func (i *NDFCInterfaceCommon) getInterfaces(ctx context.Context, diags *diag.Dia
 	res, err := ifApi.Get()
 	//res, err := c.apiClient.GetRawJsonWithQueryString(url, []string{fmt.Sprintf("serialNumber=%s", serial), fmt.Sprintf("templateName=%s", policy)})
 	if err != nil {
+		tflog.Error(ctx, "Error getting interfaces")
 		diags.AddError("Error getting interfaces", err.Error())
 		return nil
 	}
@@ -210,6 +211,7 @@ func (i *NDFCInterfaceCommon) modifyInterface(ctx context.Context, diags *diag.D
 
 }
 
+/*
 func (i *NDFCInterfaceCommon) getDeployStatus(ctx context.Context, diags *diag.Diagnostics, serial string) {
 	ifApi := api.NewInterfaceAPI(i.lock, i.client)
 	ifApi.SwitchSerial = serial
@@ -221,6 +223,7 @@ func (i *NDFCInterfaceCommon) getDeployStatus(ctx context.Context, diags *diag.D
 	}
 	log.Printf("Response=%s", string(res))
 }
+*/
 
 func (i *NDFCInterfaceCommon) createInterface(ctx context.Context, diags *diag.Diagnostics,
 	intfPayload *resource_interface_common.NDFCInterfacesPayload) {

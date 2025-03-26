@@ -145,6 +145,7 @@ func (i *NDFCEthernetInterface) GetPayload(ctx context.Context, diags *diag.Diag
 	return rawData, nil
 }
 
+/*
 func printModel(model resource_interface_common.InterfaceModel) {
 	log.Printf("Model: %v", model)
 	inData := model.GetModelData()
@@ -174,3 +175,4 @@ func printModel(model resource_interface_common.InterfaceModel) {
 		log.Printf("Policy: |%s|", inData.Policy)
 	}
 }
+*/

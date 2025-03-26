@@ -26,7 +26,7 @@ func (c NDFC) RscCreateID(rsc interface{}, rscType string) string {
 	case ResourceNetworks:
 		ndNw := rsc.(*resource_networks.NDFCNetworksModel)
 		fname = ndNw.FabricName
-		for k, _ := range ndNw.Networks {
+		for k := range ndNw.Networks {
 			idList = append(idList, k)
 			idMap[k] = make([]string, 0)
 		}
@@ -35,7 +35,7 @@ func (c NDFC) RscCreateID(rsc interface{}, rscType string) string {
 		fname = ndVrfs.FabricName
 		for k, v := range ndVrfs.Vrfs {
 			idList = append(idList, k)
-			for kk, _ := range v.AttachList {
+			for kk := range v.AttachList {
 				idMap[k] = append(idMap[k], kk)
 			}
 		}

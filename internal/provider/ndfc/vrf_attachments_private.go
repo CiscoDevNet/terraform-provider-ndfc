@@ -17,7 +17,6 @@ import (
 	"terraform-provider-ndfc/internal/provider/resources/resource_vrf_bulk"
 	. "terraform-provider-ndfc/internal/provider/types"
 
-	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-log/tflog"
 	"github.com/tidwall/gjson"
 )
@@ -73,7 +72,7 @@ func (c NDFC) vrfAttachmentsPost(ctx context.Context, fabricName string, data []
 	return nil
 }
 
-func (c NDFC) getVrfAttachments(ctx context.Context, dg *diag.Diagnostics,
+func (c NDFC) getVrfAttachments(ctx context.Context,
 	fabricName string, vrfs []string) ([]byte, error) {
 
 	tflog.Debug(ctx, fmt.Sprintf("getVrfAttachments: Entering Id %s/{%v}", fabricName, vrfs))

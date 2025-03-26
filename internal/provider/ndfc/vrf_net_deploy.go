@@ -100,7 +100,7 @@ func (d *NDFCVrfNetworkDeployment) Deploy(ctx context.Context, dg *diag.Diagnost
 	if bulk {
 		// Bulk Deploy
 		// deployRsc is nil - use RscByAttachments
-		for serial, _ := range d.RscByAttachments {
+		for serial := range d.RscByAttachments {
 			deployment_ok := false
 			depAPI := api.NewDeploymentAPI("", d.GetLock(), &d.ctrlr.apiClient, d.RsType)
 			//depAPI.SetDeployLocked()

@@ -60,7 +60,6 @@ func (v *NDFCDhcpRelayServersValues) UnmarshalJSON(data []byte) error {
 	if err != nil {
 		log.Printf("String conversion error %s %s", string(data), err)
 		dataString = string(data)
-		err = nil
 	}
 	newServer := NDFCDHCPRelayInnerPayload{}
 	if strings.HasPrefix(dataString, "{") {

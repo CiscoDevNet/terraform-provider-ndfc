@@ -111,7 +111,7 @@ func (fsm *DeployFSM) StateInfoHandler(ctx context.Context, e *fsm.Event) {
 }
 
 func (fsm *DeployFSM) EventInfoHandler(ctx context.Context, e *fsm.Event) {
-	tflog.Debug(ctx, "DeployFSM: Event Occured ", map[string]interface{}{"event": e.Event})
+	tflog.Debug(ctx, "DeployFSM: Event Occurred ", map[string]interface{}{"event": e.Event})
 
 }
 
@@ -140,7 +140,7 @@ func (fsm *DeployFSM) CheckStateHandler(ctx context.Context, e *fsm.Event) {
 }
 
 func (fsm *DeployFSM) wait(ctx context.Context) {
-	pollTimer := time.NewTimer(fsm.PollTimer * time.Second)
+	pollTimer := time.NewTimer(fsm.PollTimer)
 	select {
 	case <-ctx.Done():
 		tflog.Error(ctx, "DeployFSM: Context Was done exit")
@@ -156,6 +156,7 @@ func (fsm *DeployFSM) wait(ctx context.Context) {
 }
 
 func (fsm *DeployFSM) postEvent(ctx context.Context, event string) {
+	tflog.Debug(ctx, "DeployFSM: Posting Event", map[string]interface{}{"event": event})
 	fsm.eventChannel <- event
 }
 
@@ -192,11 +193,12 @@ func (depfsm *DeployFSM) Init() {
 }
 
 func NewDeployFSM(ctx context.Context, dg *diag.Diagnostics, d *NDFCDeployment) *DeployFSM {
+	pollTimer := time.Second * time.Duration(d.ctrlr.DeployPollTimer)
 	fsm := &DeployFSM{
 		Deployment: d,
 		//ndfc:         c,
 		dg:                dg,
-		PollTimer:         time.Duration(d.ctrlr.DeployPollTimer),
+		PollTimer:         pollTimer,
 		TrustFactor:       d.ctrlr.DeployTrustFactor,
 		failCount:         0,
 		FailureRetry:      d.ctrlr.FailureRetry,
@@ -218,7 +220,10 @@ func (fsm *DeployFSM) Run(ctx context.Context) {
 			tflog.Error(ctx, "DeployFSM: Context Was done exit")
 			loop = false
 		case event := <-fsm.eventChannel:
-			fsm.fsm.Event(ctx, event)
+			err := fsm.fsm.Event(ctx, event)
+			if err != nil {
+				tflog.Error(ctx, "DeployFSM: Event error", map[string]interface{}{"event": event, "err": err})
+			}
 			continue
 		default:
 		}
