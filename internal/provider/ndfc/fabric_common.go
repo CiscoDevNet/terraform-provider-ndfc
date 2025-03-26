@@ -150,7 +150,7 @@ func (f *NDFC) RscDeleteFabric(ctx context.Context, dg *diag.Diagnostics, tf res
 	time.Sleep(3 * time.Second) // Wait for DB to sync
 	payload, err = fapi.Get()
 	tflog.Debug(ctx, fmt.Sprintf("RscDeleteFabric: payload %s", string(payload)))
-	if err != nil  || len(payload) == 0 || string(payload) == "[]"{
+	if err != nil || len(payload) == 0 || string(payload) == "[]" {
 		tflog.Info(ctx, "RscDeleteFabric: Fabric deleted")
 		/* Fabric is deleted. */
 		return

@@ -34,7 +34,7 @@ func (c NDFC) RecalculateAndDeploy(ctx context.Context, diags *diag.Diagnostics,
 	GlobalDeployLock("config_deploy")
 	defer GlobalDeployUnlock("config_deploy")
 	if saveConfig {
-		c.saveConfiguration(ctx, diags, fabricName)
+		c.saveConfiguration(diags, fabricName)
 		if diags.HasError() {
 			return
 		}
@@ -47,7 +47,7 @@ func (c NDFC) RecalculateAndDeploy(ctx context.Context, diags *diag.Diagnostics,
 		}
 	}
 }
-func (c NDFC) saveConfiguration(ctx context.Context, diags *diag.Diagnostics, fabricName string) {
+func (c NDFC) saveConfiguration(diags *diag.Diagnostics, fabricName string) {
 	saveApi := api.NewConfigDeploymentAPI(c.GetLock(ResourceConfigDeploy), &c.apiClient)
 	saveApi.FabricName = fabricName
 	saveApi.Deploy = false

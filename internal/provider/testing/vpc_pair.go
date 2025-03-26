@@ -18,4 +18,3 @@ func GenerateVpcPairResource(VpcPairObj **resource_vpc_pair.NDFCVpcPairModel, se
 	*vpcPair.UseVirtualPeerlink = VirtualPeerLink
 	vpcPair.Deploy = deploy
 }
-

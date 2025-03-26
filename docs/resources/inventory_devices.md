@@ -49,12 +49,12 @@ resource "ndfc_inventory_devices" "test_resource_inventory_devices_1" {
 ### Optional
 
 - `auth_protocol` (String) The authentication protocol to use for the devices
-- `deploy` (Boolean) Default set to true. NDFC recommends deploying the configuration of the devices in inventory itself. Not doing so could lead to "out-of-sync" issues when configuring other resources during deployment in other resources.
+- `deploy` (Boolean) Default set to true. NDFC recommends deploying the device configuration during "add devices" to avoid "out-of-sync" issues when deploying in other resources.
 - `max_hops` (Number) The maximum number of hops to use during the discovery of devices
 - `preserve_config` (Boolean) Preserve the configuration of the devices
 - `retries` (Number) The number of retries to use validate fabric status before execution of requests
 - `retry_wait_timeout` (Number) The time to wait between retries to validate fabric status before execution of requests
-- `save` (Boolean) Default set to true. NDFC recommends saving the configuration of the devices in inventory itself. Not doing so could lead to "out-of-sync" issues when configuring other resources during deployment in other resources.
+- `save` (Boolean) Default set to true. NDFC recommends saving the device configuration during "add devices" to avoid "out-of-sync" issues when deploying in other resources.
 - `seed_ip` (String) The seed IP address to use for the discovery devices
 - `set_as_individual_device_write_credential` (Boolean) Set and use discovery credentials for LAN devices
 
@@ -87,7 +87,7 @@ Read-Only:
 - `config_status` (String) The configuration status of the device
 - `device_index` (String) The NDFC device index
 - `discovery_status` (String) The operational status of the device
-- `managable` (Boolean) The managable status of the device
+- `manageable` (Boolean) The manageable status of the device
 - `mode` (String) The mode of the device
 - `oper_status` (String) The operational status of the device
 - `switch_db_id` (String) The NDFC switch DB ID of the device

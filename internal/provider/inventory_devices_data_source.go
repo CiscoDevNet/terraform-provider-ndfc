@@ -52,7 +52,7 @@ type DeviceDataSourceModel struct {
 	ConfigStatus    types.String `tfsdk:"config_status"`
 	OperStatus      types.String `tfsdk:"oper_status"`
 	DiscoveryStatus types.String `tfsdk:"discovery_status"`
-	Managable       types.Bool   `tfsdk:"managable"`
+	Manageable      types.Bool   `tfsdk:"manageable"`
 }
 
 func (d *InventoryDevicesDataSource) Metadata(ctx context.Context, req datasource.MetadataRequest, resp *datasource.MetadataResponse) {
@@ -111,7 +111,7 @@ func (d *InventoryDevicesDataSource) Read(ctx context.Context, req datasource.Re
 			ConfigStatus:    basetypes.NewStringValue(device.Get("ccStatus").String()),
 			OperStatus:      basetypes.NewStringValue(device.Get("operStatus").String()),
 			DiscoveryStatus: basetypes.NewStringValue(device.Get("status").String()),
-			Managable:       basetypes.NewBoolValue(device.Get("managable").Bool()),
+			Manageable:      basetypes.NewBoolValue(device.Get("managable").Bool()), //nolint:misspell
 		}
 
 		devices = append(devices, deviceUpdate)

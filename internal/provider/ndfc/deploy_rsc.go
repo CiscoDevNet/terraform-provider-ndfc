@@ -22,15 +22,15 @@ type DeployRsc interface {
 
 type NDFCDeployRsc struct {
 	DeployRsc
-	Key          string
-	PostPayload  string
-	GetQP        string
-	State        DeploymentState
-	checkTick    int
-	failCnt      int
-	checkCount   int
-	LastState    string
-	OOSyncCnt    int
+	Key         string
+	PostPayload string
+	GetQP       string
+	State       DeploymentState
+	checkTick   int
+	failCnt     int
+	checkCount  int
+	LastState   string
+	OOSyncCnt   int
 }
 
 func (n NDFCDeployRsc) GetKey() string {
@@ -72,6 +72,3 @@ func (n NDFCDeployRsc) GetFailureCount() int {
 func (n NDFCDeployRsc) GetCheckTick() int {
 	return n.checkTick
 }
-
-
-

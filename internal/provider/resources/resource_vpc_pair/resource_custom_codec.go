@@ -21,7 +21,7 @@ type NDFCVpcPairRecommendations struct {
 }
 
 type NDFCSwitchesByFabric struct {
-	SerialNumber string `json:"serialNumber"`
+	SerialNumber     string `json:"serialNumber"`
 	PeerSerialNumber string `json:"peerSerialNumber"`
 }
 

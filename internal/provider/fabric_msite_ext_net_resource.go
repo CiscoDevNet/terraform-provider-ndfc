@@ -71,7 +71,7 @@ func (r *fabricIntersiteNetworkResource) Create(ctx context.Context, req resourc
 	deploy := data.Deploy.ValueBool()
 	r.client.RscCreateFabric(ctx, &resp.Diagnostics, &data, ndfc.ResourceIsnFabricType)
 	data.Deploy = types.BoolValue(deploy)
-	data.Id = types.String(data.FabricName)
+	data.Id = data.FabricName
 	tflog.Debug(ctx, "data.Id = "+data.Id.ValueString())
 	if deploy {
 		if resp.Diagnostics.HasError() || resp.Diagnostics.WarningsCount() > 0 {
@@ -111,7 +111,7 @@ func (r *fabricIntersiteNetworkResource) Read(ctx context.Context, req resource.
 	deploy := data.Deploy.ValueBool()
 	r.client.RscReadFabric(ctx, &resp.Diagnostics, &data, ndfc.ResourceIsnFabricType)
 	data.Deploy = types.BoolValue(deploy)
-	data.Id = types.String(data.FabricName)
+	data.Id = data.FabricName
 	tflog.Debug(ctx, "data.FabricName = "+data.FabricName.ValueString())
 	if data.FabricName.IsNull() || data.FabricName.IsUnknown() {
 		// make diags error empty because fabric is not present in NDFC,
@@ -146,7 +146,7 @@ func (r *fabricIntersiteNetworkResource) Update(ctx context.Context, req resourc
 	deploy := planData.Deploy.ValueBool()
 	r.client.RscUpdateFabric(ctx, &resp.Diagnostics, &planData, ndfc.ResourceIsnFabricType)
 	planData.Deploy = types.BoolValue(deploy)
-	planData.Id = types.String(planData.FabricName)
+	planData.Id = planData.FabricName
 	if deploy {
 		if resp.Diagnostics.HasError() || resp.Diagnostics.WarningsCount() > 0 {
 			planData.DeploymentStatus = types.StringValue("Deployment pending")

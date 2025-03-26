@@ -79,7 +79,10 @@ func (tc *TerraformConfig) ModifyMapValue(mapName string, key string, value inte
 		}
 	}
 	tempFile := new(bytes.Buffer)
-	tc.File.WriteTo(tempFile)
+	_, err := tc.File.WriteTo(tempFile)
+	if err != nil {
+		log.Fatalf("Failed to write HCL: %v", err)
+	}
 	var dg hcl.Diagnostics
 	tc.File, dg = hclwrite.ParseConfig(tempFile.Bytes(), "unknown", hcl.Pos{Line: 1, Column: 1})
 	if dg.HasErrors() {
@@ -138,7 +141,10 @@ func (tc *TerraformConfig) ModifyMapKey(mapName string, key string, newKey strin
 		}
 	}
 	tempFile := new(bytes.Buffer)
-	tc.File.WriteTo(tempFile)
+	_, err := tc.File.WriteTo(tempFile)
+	if err != nil {
+		log.Fatalf("Failed to write HCL: %v", err)
+	}
 	var dg hcl.Diagnostics
 	tc.File, dg = hclwrite.ParseConfig(tempFile.Bytes(), "unknown", hcl.Pos{Line: 1, Column: 1})
 	if dg.HasErrors() {
@@ -303,7 +309,6 @@ func (tc *TerraformConfig) updateDependency(dependencies map[string][]string) {
 			break
 		}
 	}
-	return
 }
 
 /*
