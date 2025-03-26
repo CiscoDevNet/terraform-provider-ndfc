@@ -56,7 +56,7 @@ func NewNDFCClient(host string, user string, pass string, domain string, insecur
 		log.Printf("[DEBUG] Authentication failed during creation of NewNDFCClient")
 		return nil, err
 	}
-	log.Printf("[DEBUG] Authentication succesful during creation of NewNDFCClient with token: %s", ndfc.apiClient.Token)
+	log.Printf("[DEBUG] Authentication successful during creation of NewNDFCClient with token: %s", ndfc.apiClient.Token)
 
 	instance = ndfc
 	return ndfc, nil

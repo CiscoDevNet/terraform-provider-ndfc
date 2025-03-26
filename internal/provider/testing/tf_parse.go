@@ -277,7 +277,7 @@ func parseGraphWiz(dotContent string) (map[string][]string, error) {
 }
 
 // Function to update Terraform files with "depends_on"
-func (tc *TerraformConfig) updateDependency(dependencies map[string][]string) error {
+func (tc *TerraformConfig) updateDependency(dependencies map[string][]string) {
 	log.Printf("Updating dependencies %s.%s.%s", tc.Type, tc.RscType, tc.RscName)
 	body := tc.File.Body()
 	var block *hclwrite.Block
@@ -303,7 +303,7 @@ func (tc *TerraformConfig) updateDependency(dependencies map[string][]string) er
 			break
 		}
 	}
-	return nil
+	return
 }
 
 /*
