@@ -56,7 +56,7 @@ Call coming from FSM
 func (n *NDFCDeployment) Deploy(ctx context.Context, dg *diag.Diagnostics, rsc []DeployRsc, bulk bool) {
 	//rsc is nil at this level - using the same API for interface compatibility
 	//Call the override method
-	log.Println("Deploy: ", rsc, n)
+	log.Println("Deploy: ", rsc, n, bulk)
 	rscList := make([]DeployRsc, 0)
 	depCount := 0
 	inProCount := len(n.DeployRscDB[DeployInpro])
@@ -113,8 +113,8 @@ func (n *NDFCDeployment) Deploy(ctx context.Context, dg *diag.Diagnostics, rsc [
 	}
 }
 
-func (n *NDFCDeployment) CheckState(ctx context.Context, dg *diag.Diagnostics, rscs []DeployRsc) string {
-	rscs = make([]DeployRsc, 0)
+func (n *NDFCDeployment) CheckState(ctx context.Context, dg *diag.Diagnostics, _ []DeployRsc) string {
+	rscs := make([]DeployRsc, 0)
 	//Check the states of resources in inpro list
 	for _, v := range n.DeployRscDB[DeployInpro] {
 		rscs = append(rscs, v)

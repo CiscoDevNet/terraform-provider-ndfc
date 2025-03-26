@@ -28,7 +28,7 @@ func (c *NDFC) RscGetNetworkAttachments(ctx context.Context, nw *resource_networ
 		tflog.Error(ctx, "RscGetNetworkAttachments: Error getting network attachments", map[string]interface{}{"Err": err})
 		return err
 	}
-    c.createVpcPairMap(ctx,nw.FabricName)
+	c.createVpcPairMap(ctx, nw.FabricName)
 	nw.FillAttachmentsFromPayload(nwAttachPayload)
 
 	for netName, nwEntry := range nw.Networks {
@@ -75,7 +75,7 @@ func (c NDFC) RscGetPendingNetAttachments(ctx context.Context, nw *resource_netw
 
 }
 
-func (c *NDFC) RscUpdateNetAttachments(ctx context.Context, dg *diag.Diagnostics, actions map[string]interface{}) error {
+func (c *NDFC) RscUpdateNetAttachments(ctx context.Context, dg *diag.Diagnostics, actions map[string]interface{}) {
 
 	vPlan := actions["plan"].(*resource_networks.NDFCNetworksModel)
 	//vState := actions["state"].(*resource_networks.NDFCNetworksModel)
@@ -91,13 +91,13 @@ func (c *NDFC) RscUpdateNetAttachments(ctx context.Context, dg *diag.Diagnostics
 		if err != nil {
 			tflog.Error(ctx, "RscUpdateNetAttachments: Error marshalling attachments", map[string]interface{}{"Err": err})
 			dg.AddError("Error marshalling attachments", err.Error())
-			return err
+			return
 		}
 		err = c.netAttachmentsPostPayload(ctx, vPlan.FabricName, data)
 		if err != nil {
 			tflog.Error(ctx, "RscUpdateNetAttachments: Error updating network attachments", map[string]interface{}{"Err": err})
 			dg.AddError("Error updating network attachments", err.Error())
-			return err
+			return
 		}
 	}
 
@@ -130,7 +130,6 @@ func (c *NDFC) RscUpdateNetAttachments(ctx context.Context, dg *diag.Diagnostics
 	}
 
 	tflog.Info(ctx, "RscUpdateNetAttachments: Successfully updated attachments")
-	return nil
 }
 
 func (c NDFC) RscDeleteNetAttachments(ctx context.Context, dg *diag.Diagnostics, in *resource_networks.NDFCNetworksModel) error {

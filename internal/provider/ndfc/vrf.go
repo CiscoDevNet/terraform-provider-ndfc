@@ -429,7 +429,7 @@ func (c NDFC) RscUpdateBulkVrf(ctx context.Context,
 	vrfBulkPlan *resource_vrf_bulk.VrfBulkModel,
 	vrfState *resource_vrf_bulk.VrfBulkModel, vrfConfig *resource_vrf_bulk.VrfBulkModel) {
 
-	actions := c.vrfBulkGetDiff(ctx, dg, vrfBulkPlan, vrfState, vrfConfig)
+	actions := c.vrfBulkGetDiff(ctx, vrfBulkPlan, vrfState, vrfConfig)
 
 	// Validate the Diff
 	//Get the current VRFs from NDFC

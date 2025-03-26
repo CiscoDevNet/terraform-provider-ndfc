@@ -29,7 +29,7 @@ func main() {
 
 	flag.BoolVar(&debug, "debug", false, "set to true to run the provider with support for debuggers like delve")
 	flag.Parse()
-
+	log.Printf("[DEBUG] %s %s %s", version, commit, date)
 	opts := providerserver.ServeOpts{
 		// NOTE: This is not a typical Terraform Registry provider address,
 		// such as registry.terraform.io/hashicorp/hashicups. This specific

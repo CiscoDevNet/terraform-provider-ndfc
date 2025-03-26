@@ -79,7 +79,6 @@ func (c NDFC) RscGetInterfaces(ctx context.Context, dg *diag.Diagnostics, in res
 		gotDeployStatus := true
 		if dg.HasError() {
 			tflog.Error(ctx, "Error getting deployment status")
-			gotDeployStatus = false
 			return
 		}
 
@@ -117,7 +116,7 @@ func (c NDFC) RscGetInterfaces(ctx context.Context, dg *diag.Diagnostics, in res
 				if inData.SerialNumber != "" {
 					ifList[i].SerialNumber = ""
 				}
-				c.processCustomIfPolicy(ctx, dg, &ifList[i], data.PolicyType, inData.Interfaces[key].CustomPolicyParameters)
+				c.processCustomIfPolicy(ctx, &ifList[i], data.PolicyType, inData.Interfaces[key].CustomPolicyParameters)
 				data.Interfaces[key] = ifList[i]
 				log.Printf("Add entry %s:%v", key, ifList[i])
 			} else {
@@ -217,7 +216,7 @@ func (c NDFC) RscUpdateInterfaces(ctx context.Context, dg *diag.Diagnostics, uni
 	c.IfPreProcess(plan)
 	c.IfPreProcess(state)
 
-	actions := c.ifDiff(ctx, dg, state, plan)
+	actions := c.ifDiff(ctx, state, plan)
 	ifObj := c.NewInterfaceObject(planData.GetInterfaceType(), &c.apiClient, c.GetLock(ResourceInterfaces))
 
 	//Delete any interfaces marked for delete
@@ -436,16 +435,17 @@ func getIFImportMapKey(serial, ifName string, changeCase bool) string {
 	return s + "_" + serial
 }
 
-func (c NDFC) processCustomIfPolicy(ctx context.Context, diags *diag.Diagnostics,
-	payload *resource_interface_common.NDFCInterfacesValue, pType string, custParams map[string]string) error {
-	log.Printf("[DEBUG] Processing custom policy")
+func (c NDFC) processCustomIfPolicy(ctx context.Context,
+	payload *resource_interface_common.NDFCInterfacesValue, pType string, custParams map[string]string) {
+	tflog.Debug(ctx, "Processing custom policy")
 
 	if pType == "user-defined" {
 		// Reset NvPairs as this is a custom template
+
 		log.Printf("[DEBUG] Resetting NvPairs for user-defined policy")
 		(*payload).NvPairs = resource_interface_common.NDFCNvPairsValue{}
 		// Filter the custom values
-		for k, _ := range payload.CustomPolicyParameters {
+		for k := range payload.CustomPolicyParameters {
 			if _, ok := (custParams)[k]; !ok {
 				log.Printf("[DEBUG] Removing custom parameter %s", k)
 				delete(payload.CustomPolicyParameters, k)
@@ -456,6 +456,4 @@ func (c NDFC) processCustomIfPolicy(ctx context.Context, diags *diag.Diagnostics
 		log.Printf("[DEBUG] Resetting custom parameters for system policy")
 		clear((*payload).CustomPolicyParameters)
 	}
-
-	return nil
 }
