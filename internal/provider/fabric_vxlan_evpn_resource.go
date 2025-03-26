@@ -75,7 +75,7 @@ func (r *fabricVxlanEvpnResource) Create(ctx context.Context, req resource.Creat
 	deploy := data.Deploy.ValueBool()
 	r.client.RscCreateFabric(ctx, &resp.Diagnostics, &data, ndfc.ResourceVxlanEvpnType)
 	data.Deploy = types.BoolValue(deploy)
-	data.Id = types.String(data.FabricName)
+	data.Id = data.FabricName
 	tflog.Debug(ctx, "data.Id = "+data.Id.ValueString())
 	if deploy {
 		if resp.Diagnostics.HasError() || resp.Diagnostics.WarningsCount() > 0 {
@@ -115,7 +115,7 @@ func (r *fabricVxlanEvpnResource) Read(ctx context.Context, req resource.ReadReq
 
 	r.client.RscReadFabric(ctx, &resp.Diagnostics, &data, ndfc.ResourceVxlanEvpnType)
 	data.Deploy = types.BoolValue(deploy)
-	data.Id = types.String(data.FabricName)
+	data.Id = data.FabricName
 	tflog.Debug(ctx, "data.FabricName = "+data.FabricName.ValueString())
 	if data.FabricName.IsNull() || data.FabricName.IsUnknown() {
 		// make diags error empty because fabric is not present in NDFC,
@@ -154,7 +154,7 @@ func (r *fabricVxlanEvpnResource) Update(ctx context.Context, req resource.Updat
 	deploy := planData.Deploy.ValueBool()
 	r.client.RscUpdateFabric(ctx, &resp.Diagnostics, &planData, ndfc.ResourceVxlanEvpnType)
 	planData.Deploy = types.BoolValue(deploy)
-	planData.Id = types.String(planData.FabricName)
+	planData.Id = planData.FabricName
 	if deploy {
 		if resp.Diagnostics.HasError() || resp.Diagnostics.WarningsCount() > 0 {
 			planData.DeploymentStatus = types.StringValue("Deployment pending")

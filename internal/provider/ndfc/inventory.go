@@ -114,10 +114,10 @@ func (c NDFC) SetFabricInventoryRma(ctx context.Context, diags *diag.Diagnostics
 	return res
 }
 
-func (c NDFC) SetMaintananceMode(ctx context.Context, diags *diag.Diagnostics, fabricName, serialNumber string) {
+func (c NDFC) SetMaintenanceMode(ctx context.Context, diags *diag.Diagnostics, fabricName, serialNumber string) {
 	_, err := c.apiClient.Post(fmt.Sprintf("/lan-fabric/rest/control/fabrics/%s/switches/%s/maintenance-mode", fabricName, serialNumber), "")
 	if err != nil {
-		diags.AddError("Set Maintanance Mode Failed", err.Error())
+		diags.AddError("Set Maintenance Mode Failed", err.Error())
 	}
 }
 

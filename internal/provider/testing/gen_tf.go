@@ -427,7 +427,10 @@ func GetTFIntegrated(ts string, rsList []string, attrs map[string]interface{}, r
 			tt.ModifyAttributeValue("fabric_name", fabricName)
 			tt.ModifyAttributeValue("serial_numbers", []string{"ALL"})
 		}
-		tt.File.WriteTo(tfConfig)
+		_, err = tt.File.WriteTo(tfConfig)
+		if err != nil {
+			panic(err)
+		}
 		//tfConfig.Write(tt.File.Bytes())
 		tfConfig.Write([]byte("\n\n"))
 	}
@@ -448,6 +451,9 @@ func WriteConfigToFile(ts string, tfConfig *bytes.Buffer) {
 	if err != nil {
 		panic(err)
 	}
-	fp.Write(tfConfig.Bytes())
+	_, err = fp.Write(tfConfig.Bytes())
+	if err != nil {
+		panic(err)
+	}
 	fp.Close()
 }

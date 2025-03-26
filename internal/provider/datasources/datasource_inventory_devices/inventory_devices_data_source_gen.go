@@ -48,10 +48,10 @@ func InventoryDevicesDataSourceSchema(ctx context.Context) schema.Schema {
 							Description:         "The ip address to use for the device",
 							MarkdownDescription: "The ip address to use for the device",
 						},
-						"managable": schema.BoolAttribute{
+						"manageable": schema.BoolAttribute{
 							Computed:            true,
-							Description:         "The managable status of the device",
-							MarkdownDescription: "The managable status of the device",
+							Description:         "The manageable status of the device",
+							MarkdownDescription: "The manageable status of the device",
 						},
 						"mode": schema.StringAttribute{
 							Computed:            true,
@@ -254,22 +254,22 @@ func (t DevicesType) ValueFromObject(ctx context.Context, in basetypes.ObjectVal
 			fmt.Sprintf(`ip_address expected to be basetypes.StringValue, was: %T`, ipAddressAttribute))
 	}
 
-	managableAttribute, ok := attributes["managable"]
+	manageableAttribute, ok := attributes["manageable"]
 
 	if !ok {
 		diags.AddError(
 			"Attribute Missing",
-			`managable is missing from object`)
+			`manageable is missing from object`)
 
 		return nil, diags
 	}
 
-	managableVal, ok := managableAttribute.(basetypes.BoolValue)
+	manageableVal, ok := manageableAttribute.(basetypes.BoolValue)
 
 	if !ok {
 		diags.AddError(
 			"Attribute Wrong Type",
-			fmt.Sprintf(`managable expected to be basetypes.BoolValue, was: %T`, managableAttribute))
+			fmt.Sprintf(`manageable expected to be basetypes.BoolValue, was: %T`, manageableAttribute))
 	}
 
 	modeAttribute, ok := attributes["mode"]
@@ -462,7 +462,7 @@ func (t DevicesType) ValueFromObject(ctx context.Context, in basetypes.ObjectVal
 		DiscoveryStatus: discoveryStatusVal,
 		Hostname:        hostnameVal,
 		IpAddress:       ipAddressVal,
-		Managable:       managableVal,
+		Manageable:      manageableVal,
 		Mode:            modeVal,
 		Model:           modelVal,
 		OperStatus:      operStatusVal,
@@ -630,22 +630,22 @@ func NewDevicesValue(attributeTypes map[string]attr.Type, attributes map[string]
 			fmt.Sprintf(`ip_address expected to be basetypes.StringValue, was: %T`, ipAddressAttribute))
 	}
 
-	managableAttribute, ok := attributes["managable"]
+	manageableAttribute, ok := attributes["manageable"]
 
 	if !ok {
 		diags.AddError(
 			"Attribute Missing",
-			`managable is missing from object`)
+			`manageable is missing from object`)
 
 		return NewDevicesValueUnknown(), diags
 	}
 
-	managableVal, ok := managableAttribute.(basetypes.BoolValue)
+	manageableVal, ok := manageableAttribute.(basetypes.BoolValue)
 
 	if !ok {
 		diags.AddError(
 			"Attribute Wrong Type",
-			fmt.Sprintf(`managable expected to be basetypes.BoolValue, was: %T`, managableAttribute))
+			fmt.Sprintf(`manageable expected to be basetypes.BoolValue, was: %T`, manageableAttribute))
 	}
 
 	modeAttribute, ok := attributes["mode"]
@@ -838,7 +838,7 @@ func NewDevicesValue(attributeTypes map[string]attr.Type, attributes map[string]
 		DiscoveryStatus: discoveryStatusVal,
 		Hostname:        hostnameVal,
 		IpAddress:       ipAddressVal,
-		Managable:       managableVal,
+		Manageable:      manageableVal,
 		Mode:            modeVal,
 		Model:           modelVal,
 		OperStatus:      operStatusVal,
@@ -926,7 +926,7 @@ type DevicesValue struct {
 	DiscoveryStatus basetypes.StringValue `tfsdk:"discovery_status"`
 	Hostname        basetypes.StringValue `tfsdk:"hostname"`
 	IpAddress       basetypes.StringValue `tfsdk:"ip_address"`
-	Managable       basetypes.BoolValue   `tfsdk:"managable"`
+	Manageable      basetypes.BoolValue   `tfsdk:"manageable"`
 	Mode            basetypes.StringValue `tfsdk:"mode"`
 	Model           basetypes.StringValue `tfsdk:"model"`
 	OperStatus      basetypes.StringValue `tfsdk:"oper_status"`
@@ -951,7 +951,7 @@ func (v DevicesValue) ToTerraformValue(ctx context.Context) (tftypes.Value, erro
 	attrTypes["discovery_status"] = basetypes.StringType{}.TerraformType(ctx)
 	attrTypes["hostname"] = basetypes.StringType{}.TerraformType(ctx)
 	attrTypes["ip_address"] = basetypes.StringType{}.TerraformType(ctx)
-	attrTypes["managable"] = basetypes.BoolType{}.TerraformType(ctx)
+	attrTypes["manageable"] = basetypes.BoolType{}.TerraformType(ctx)
 	attrTypes["mode"] = basetypes.StringType{}.TerraformType(ctx)
 	attrTypes["model"] = basetypes.StringType{}.TerraformType(ctx)
 	attrTypes["oper_status"] = basetypes.StringType{}.TerraformType(ctx)
@@ -1009,13 +1009,13 @@ func (v DevicesValue) ToTerraformValue(ctx context.Context) (tftypes.Value, erro
 
 		vals["ip_address"] = val
 
-		val, err = v.Managable.ToTerraformValue(ctx)
+		val, err = v.Manageable.ToTerraformValue(ctx)
 
 		if err != nil {
 			return tftypes.NewValue(objectType, tftypes.UnknownValue), err
 		}
 
-		vals["managable"] = val
+		vals["manageable"] = val
 
 		val, err = v.Mode.ToTerraformValue(ctx)
 
@@ -1132,7 +1132,7 @@ func (v DevicesValue) ToObjectValue(ctx context.Context) (basetypes.ObjectValue,
 		"discovery_status": basetypes.StringType{},
 		"hostname":         basetypes.StringType{},
 		"ip_address":       basetypes.StringType{},
-		"managable":        basetypes.BoolType{},
+		"manageable":       basetypes.BoolType{},
 		"mode":             basetypes.StringType{},
 		"model":            basetypes.StringType{},
 		"oper_status":      basetypes.StringType{},
@@ -1161,7 +1161,7 @@ func (v DevicesValue) ToObjectValue(ctx context.Context) (basetypes.ObjectValue,
 			"discovery_status": v.DiscoveryStatus,
 			"hostname":         v.Hostname,
 			"ip_address":       v.IpAddress,
-			"managable":        v.Managable,
+			"manageable":       v.Manageable,
 			"mode":             v.Mode,
 			"model":            v.Model,
 			"oper_status":      v.OperStatus,
@@ -1212,7 +1212,7 @@ func (v DevicesValue) Equal(o attr.Value) bool {
 		return false
 	}
 
-	if !v.Managable.Equal(other.Managable) {
+	if !v.Manageable.Equal(other.Manageable) {
 		return false
 	}
 
@@ -1274,7 +1274,7 @@ func (v DevicesValue) AttributeTypes(ctx context.Context) map[string]attr.Type {
 		"discovery_status": basetypes.StringType{},
 		"hostname":         basetypes.StringType{},
 		"ip_address":       basetypes.StringType{},
-		"managable":        basetypes.BoolType{},
+		"manageable":       basetypes.BoolType{},
 		"mode":             basetypes.StringType{},
 		"model":            basetypes.StringType{},
 		"oper_status":      basetypes.StringType{},

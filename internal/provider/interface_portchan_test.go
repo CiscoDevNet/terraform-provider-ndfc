@@ -67,7 +67,7 @@ func TestAccInterfacePortchannelResourceBasic(t *testing.T) {
 	})
 }
 
-// Create Vlan resouce with 10 entries, add 10 more
+// Create Vlan resource with 10 entries, add 10 more
 func TestAccInterfacePortchannelResourceCreateAndAdd(t *testing.T) {
 
 	x := &map[string]string{

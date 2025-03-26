@@ -59,7 +59,7 @@ type NDFCDevicesValue struct {
 	ConfigStatus          string   `json:"config_status,string,omitempty"`
 	OperStatus            string   `json:"oper_status,string,omitempty"`
 	DiscoveryStatus       string   `json:"discovery_status,string,omitempty"`
-	Managable             *bool    `json:"managable,omitempty"`
+	Manageable            *bool    `json:"managable,omitempty"`
 }
 
 func (v *InventoryDevicesModel) SetModelData(jsonData *NDFCInventoryDevicesModel) diag.Diagnostics {
@@ -325,11 +325,11 @@ func (v *DevicesValue) SetValue(jsonData *NDFCDevicesValue) diag.Diagnostics {
 		v.DiscoveryStatus = types.StringNull()
 	}
 
-	if jsonData.Managable != nil {
-		v.Managable = types.BoolValue(*jsonData.Managable)
+	if jsonData.Manageable != nil {
+		v.Manageable = types.BoolValue(*jsonData.Manageable)
 
 	} else {
-		v.Managable = types.BoolNull()
+		v.Manageable = types.BoolNull()
 	}
 
 	return err
@@ -559,7 +559,7 @@ func (v InventoryDevicesModel) GetModelData() *NDFCInventoryDevicesModel {
 			// config_status | String| []| false
 			// oper_status | String| []| false
 			// discovery_status | String| []| false
-			// managable | Bool| []| false
+			// manageable | Bool| []| false
 			data.Devices[k1] = *data1
 
 		}

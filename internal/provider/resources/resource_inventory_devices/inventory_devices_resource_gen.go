@@ -39,8 +39,8 @@ func InventoryDevicesResourceSchema(ctx context.Context) schema.Schema {
 			"deploy": schema.BoolAttribute{
 				Optional:            true,
 				Computed:            true,
-				Description:         "Default set to true. NDFC recommends deploying the configuration of the devices in inventory itself. Not doing so could lead to \"out-of-sync\" issues when configuring other resources during deployment in other resources.",
-				MarkdownDescription: "Default set to true. NDFC recommends deploying the configuration of the devices in inventory itself. Not doing so could lead to \"out-of-sync\" issues when configuring other resources during deployment in other resources.",
+				Description:         "Default set to true. NDFC recommends deploying the device configuration during \"add devices\" to avoid \"out-of-sync\" issues when deploying in other resources.",
+				MarkdownDescription: "Default set to true. NDFC recommends deploying the device configuration during \"add devices\" to avoid \"out-of-sync\" issues when deploying in other resources.",
 				Default:             booldefault.StaticBool(true),
 			},
 			"devices": schema.MapNestedAttribute{
@@ -111,10 +111,10 @@ func InventoryDevicesResourceSchema(ctx context.Context) schema.Schema {
 							Description:         "The image policy to use for the device",
 							MarkdownDescription: "The image policy to use for the device",
 						},
-						"managable": schema.BoolAttribute{
+						"manageable": schema.BoolAttribute{
 							Computed:            true,
-							Description:         "The managable status of the device",
-							MarkdownDescription: "The managable status of the device",
+							Description:         "The manageable status of the device",
+							MarkdownDescription: "The manageable status of the device",
 						},
 						"mode": schema.StringAttribute{
 							Computed:            true,
@@ -251,8 +251,8 @@ func InventoryDevicesResourceSchema(ctx context.Context) schema.Schema {
 			"save": schema.BoolAttribute{
 				Optional:            true,
 				Computed:            true,
-				Description:         "Default set to true. NDFC recommends saving the configuration of the devices in inventory itself. Not doing so could lead to \"out-of-sync\" issues when configuring other resources during deployment in other resources.",
-				MarkdownDescription: "Default set to true. NDFC recommends saving the configuration of the devices in inventory itself. Not doing so could lead to \"out-of-sync\" issues when configuring other resources during deployment in other resources.",
+				Description:         "Default set to true. NDFC recommends saving the device configuration during \"add devices\" to avoid \"out-of-sync\" issues when deploying in other resources.",
+				MarkdownDescription: "Default set to true. NDFC recommends saving the device configuration during \"add devices\" to avoid \"out-of-sync\" issues when deploying in other resources.",
 				Default:             booldefault.StaticBool(true),
 			},
 			"seed_ip": schema.StringAttribute{
@@ -518,22 +518,22 @@ func (t DevicesType) ValueFromObject(ctx context.Context, in basetypes.ObjectVal
 			fmt.Sprintf(`image_policy expected to be basetypes.StringValue, was: %T`, imagePolicyAttribute))
 	}
 
-	managableAttribute, ok := attributes["managable"]
+	manageableAttribute, ok := attributes["manageable"]
 
 	if !ok {
 		diags.AddError(
 			"Attribute Missing",
-			`managable is missing from object`)
+			`manageable is missing from object`)
 
 		return nil, diags
 	}
 
-	managableVal, ok := managableAttribute.(basetypes.BoolValue)
+	manageableVal, ok := manageableAttribute.(basetypes.BoolValue)
 
 	if !ok {
 		diags.AddError(
 			"Attribute Wrong Type",
-			fmt.Sprintf(`managable expected to be basetypes.BoolValue, was: %T`, managableAttribute))
+			fmt.Sprintf(`manageable expected to be basetypes.BoolValue, was: %T`, manageableAttribute))
 	}
 
 	modeAttribute, ok := attributes["mode"]
@@ -768,7 +768,7 @@ func (t DevicesType) ValueFromObject(ctx context.Context, in basetypes.ObjectVal
 		Gateway:               gatewayVal,
 		Hostname:              hostnameVal,
 		ImagePolicy:           imagePolicyVal,
-		Managable:             managableVal,
+		Manageable:            manageableVal,
 		Mode:                  modeVal,
 		Model:                 modelVal,
 		ModulesModel:          modulesModelVal,
@@ -1046,22 +1046,22 @@ func NewDevicesValue(attributeTypes map[string]attr.Type, attributes map[string]
 			fmt.Sprintf(`image_policy expected to be basetypes.StringValue, was: %T`, imagePolicyAttribute))
 	}
 
-	managableAttribute, ok := attributes["managable"]
+	manageableAttribute, ok := attributes["manageable"]
 
 	if !ok {
 		diags.AddError(
 			"Attribute Missing",
-			`managable is missing from object`)
+			`manageable is missing from object`)
 
 		return NewDevicesValueUnknown(), diags
 	}
 
-	managableVal, ok := managableAttribute.(basetypes.BoolValue)
+	manageableVal, ok := manageableAttribute.(basetypes.BoolValue)
 
 	if !ok {
 		diags.AddError(
 			"Attribute Wrong Type",
-			fmt.Sprintf(`managable expected to be basetypes.BoolValue, was: %T`, managableAttribute))
+			fmt.Sprintf(`manageable expected to be basetypes.BoolValue, was: %T`, manageableAttribute))
 	}
 
 	modeAttribute, ok := attributes["mode"]
@@ -1296,7 +1296,7 @@ func NewDevicesValue(attributeTypes map[string]attr.Type, attributes map[string]
 		Gateway:               gatewayVal,
 		Hostname:              hostnameVal,
 		ImagePolicy:           imagePolicyVal,
-		Managable:             managableVal,
+		Manageable:            manageableVal,
 		Mode:                  modeVal,
 		Model:                 modelVal,
 		ModulesModel:          modulesModelVal,
@@ -1392,7 +1392,7 @@ type DevicesValue struct {
 	Gateway               basetypes.StringValue `tfsdk:"gateway"`
 	Hostname              basetypes.StringValue `tfsdk:"hostname"`
 	ImagePolicy           basetypes.StringValue `tfsdk:"image_policy"`
-	Managable             basetypes.BoolValue   `tfsdk:"managable"`
+	Manageable            basetypes.BoolValue   `tfsdk:"manageable"`
 	Mode                  basetypes.StringValue `tfsdk:"mode"`
 	Model                 basetypes.StringValue `tfsdk:"model"`
 	ModulesModel          basetypes.SetValue    `tfsdk:"modules_model"`
@@ -1425,7 +1425,7 @@ func (v DevicesValue) ToTerraformValue(ctx context.Context) (tftypes.Value, erro
 	attrTypes["gateway"] = basetypes.StringType{}.TerraformType(ctx)
 	attrTypes["hostname"] = basetypes.StringType{}.TerraformType(ctx)
 	attrTypes["image_policy"] = basetypes.StringType{}.TerraformType(ctx)
-	attrTypes["managable"] = basetypes.BoolType{}.TerraformType(ctx)
+	attrTypes["manageable"] = basetypes.BoolType{}.TerraformType(ctx)
 	attrTypes["mode"] = basetypes.StringType{}.TerraformType(ctx)
 	attrTypes["model"] = basetypes.StringType{}.TerraformType(ctx)
 	attrTypes["modules_model"] = basetypes.SetType{
@@ -1535,13 +1535,13 @@ func (v DevicesValue) ToTerraformValue(ctx context.Context) (tftypes.Value, erro
 
 		vals["image_policy"] = val
 
-		val, err = v.Managable.ToTerraformValue(ctx)
+		val, err = v.Manageable.ToTerraformValue(ctx)
 
 		if err != nil {
 			return tftypes.NewValue(objectType, tftypes.UnknownValue), err
 		}
 
-		vals["managable"] = val
+		vals["manageable"] = val
 
 		val, err = v.Mode.ToTerraformValue(ctx)
 
@@ -1685,7 +1685,7 @@ func (v DevicesValue) ToObjectValue(ctx context.Context) (basetypes.ObjectValue,
 			"gateway":                 basetypes.StringType{},
 			"hostname":                basetypes.StringType{},
 			"image_policy":            basetypes.StringType{},
-			"managable":               basetypes.BoolType{},
+			"manageable":              basetypes.BoolType{},
 			"mode":                    basetypes.StringType{},
 			"model":                   basetypes.StringType{},
 			"modules_model": basetypes.SetType{
@@ -1715,7 +1715,7 @@ func (v DevicesValue) ToObjectValue(ctx context.Context) (basetypes.ObjectValue,
 		"gateway":                 basetypes.StringType{},
 		"hostname":                basetypes.StringType{},
 		"image_policy":            basetypes.StringType{},
-		"managable":               basetypes.BoolType{},
+		"manageable":              basetypes.BoolType{},
 		"mode":                    basetypes.StringType{},
 		"model":                   basetypes.StringType{},
 		"modules_model": basetypes.SetType{
@@ -1754,7 +1754,7 @@ func (v DevicesValue) ToObjectValue(ctx context.Context) (basetypes.ObjectValue,
 			"gateway":                 v.Gateway,
 			"hostname":                v.Hostname,
 			"image_policy":            v.ImagePolicy,
-			"managable":               v.Managable,
+			"manageable":              v.Manageable,
 			"mode":                    v.Mode,
 			"model":                   v.Model,
 			"modules_model":           modulesModelVal,
@@ -1831,7 +1831,7 @@ func (v DevicesValue) Equal(o attr.Value) bool {
 		return false
 	}
 
-	if !v.Managable.Equal(other.Managable) {
+	if !v.Manageable.Equal(other.Manageable) {
 		return false
 	}
 
@@ -1907,7 +1907,7 @@ func (v DevicesValue) AttributeTypes(ctx context.Context) map[string]attr.Type {
 		"gateway":                 basetypes.StringType{},
 		"hostname":                basetypes.StringType{},
 		"image_policy":            basetypes.StringType{},
-		"managable":               basetypes.BoolType{},
+		"manageable":              basetypes.BoolType{},
 		"mode":                    basetypes.StringType{},
 		"model":                   basetypes.StringType{},
 		"modules_model": basetypes.SetType{

@@ -99,7 +99,7 @@ type DevicesValue struct {
 	ConfigStatus          types.String `tfsdk:"config_status"`
 	OperStatus            types.String `tfsdk:"oper_status"`
 	DiscoveryStatus       types.String `tfsdk:"discovery_status"`
-	Managable             types.Bool   `tfsdk:"managable"`
+	Manageable            types.Bool   `tfsdk:"manageable"`
 }
 
 var snmpAuthenticationProtocol = map[string]int{"md5": 0, "sha": 1, "md5_des": 2, "md5_aes": 3, "sha_des": 4, "sha_aes": 5}
@@ -431,16 +431,16 @@ func (r *InventoryDevicesResource) ImportState(ctx context.Context, req resource
 	}
 	resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("password"), password)...)
 
-	setAndUseDiscoveryCredForLan := getBoolValueFromEnv(ctx, &resp.Diagnostics, "NDFC_INVENTORY_SET_AS_INDIVIDUAL_DEVICE_WRITE_CREDENTIAL", defaultSetAndUseDiscoveryCredForLan)
+	setAndUseDiscoveryCredForLan := getBoolValueFromEnv(&resp.Diagnostics, "NDFC_INVENTORY_SET_AS_INDIVIDUAL_DEVICE_WRITE_CREDENTIAL", defaultSetAndUseDiscoveryCredForLan)
 	resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("set_as_individual_device_write_credential"), setAndUseDiscoveryCredForLan)...)
 
-	preserveConfig := getBoolValueFromEnv(ctx, &resp.Diagnostics, "NDFC_INVENTORY_PRESERVE_CONFIG", defaultPreserveConfig)
+	preserveConfig := getBoolValueFromEnv(&resp.Diagnostics, "NDFC_INVENTORY_PRESERVE_CONFIG", defaultPreserveConfig)
 	resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("preserve_config"), preserveConfig)...)
 
-	save := getBoolValueFromEnv(ctx, &resp.Diagnostics, "NDFC_INVENTORY_SAVE", defaultSave)
+	save := getBoolValueFromEnv(&resp.Diagnostics, "NDFC_INVENTORY_SAVE", defaultSave)
 	resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("save"), save)...)
 
-	deploy := getBoolValueFromEnv(ctx, &resp.Diagnostics, "NDFC_INVENTORY_DEPLOY", defaultDeploy)
+	deploy := getBoolValueFromEnv(&resp.Diagnostics, "NDFC_INVENTORY_DEPLOY", defaultDeploy)
 	resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("deploy"), deploy)...)
 
 	data := InventoryDevicesModel{}
@@ -456,7 +456,7 @@ func (r *InventoryDevicesResource) ImportState(ctx context.Context, req resource
 	tflog.Debug(ctx, fmt.Sprintf("End of %s ImportState", loggingInventoryDevices))
 }
 
-func getBoolValueFromEnv(ctx context.Context, diags *diag.Diagnostics, envKey string, defaultValue bool) bool {
+func getBoolValueFromEnv(diags *diag.Diagnostics, envKey string, defaultValue bool) bool {
 	envValue := os.Getenv(envKey)
 	if envValue == "" {
 		return defaultValue
@@ -516,7 +516,7 @@ func getInventoryData(ctx context.Context, client *ndfc.NDFC, diags *diag.Diagno
 			ConfigStatus:    basetypes.NewStringValue(device.Get("ccStatus").String()),
 			OperStatus:      basetypes.NewStringValue(device.Get("operStatus").String()),
 			DiscoveryStatus: basetypes.NewStringValue(device.Get("status").String()),
-			Managable:       basetypes.NewBoolValue(device.Get("managable").Bool()),
+			Manageable:      basetypes.NewBoolValue(device.Get("managable").Bool()), //nolint:misspell
 		}
 
 		if stateDevice, ok := devices[device.Get("ipAddress").String()]; ok {
@@ -1051,7 +1051,7 @@ func deployAndSave(ctx context.Context, client *ndfc.NDFC, diags *diag.Diagnosti
 		client.RecalculateAndDeploy(ctx, diags, data.FabricName.ValueString(), data.Save.ValueBool(), data.Deploy.ValueBool(), serialNumbers)
 		validateFabric(ctx, client, diags, data, "configured")
 	}
-	
+
 	tflog.Debug(ctx, fmt.Sprintf("End of %s deployAndSave", loggingInventoryDevices))
 }
 
@@ -1080,57 +1080,6 @@ func rediscoverDevices(ctx context.Context, client *ndfc.NDFC, diags *diag.Diagn
 	}
 	tflog.Debug(ctx, fmt.Sprintf("End of %s rediscoverDevices", loggingInventoryDevices))
 }
-/*
-func save(ctx context.Context, client *ndfc.NDFC, diags *diag.Diagnostics, data *InventoryDevicesModel) {
-	tflog.Debug(ctx, fmt.Sprintf("Start of %s save", loggingInventoryDevices))
-	validateFabric(ctx, client, diags, data, "discovered")
-	if diags.HasError() {
-		return
-	}
-
-	if data.Save.ValueBool() {
-		client.SaveConfiguration(ctx, diags, data.FabricName.ValueString())
-		if diags.HasError() {
-			return
-		}
-		validateFabric(ctx, client, diags, data, "discovered")
-	}
-	tflog.Debug(ctx, fmt.Sprintf("End of %s save", loggingInventoryDevices))
-}
-
-func deploy(ctx context.Context, client *ndfc.NDFC, diags *diag.Diagnostics, data *InventoryDevicesModel) {
-	tflog.Debug(ctx, fmt.Sprintf("Start of %s deploy", loggingInventoryDevices))
-	validateFabric(ctx, client, diags, data, "discovered")
-	if diags.HasError() {
-		return
-	}
-
-	if data.Deploy.ValueBool() {
-		var devices map[string]DevicesValue
-		data.Devices.ElementsAs(ctx, &devices, false)
-		if diags.HasError() {
-			return
-		}
-
-		serialNumbers := []string{}
-		for _, device := range devices {
-			if device.ConfigStatus.ValueString() != "In-Sync" && device.DiscoveryType.ValueString() != "pre_provision" && device.Mode.ValueString() == "Normal" {
-				serialNumbers = append(serialNumbers, device.SerialNumber.ValueString())
-			}
-		}
-
-		sort.Strings(serialNumbers)
-
-		client.DeployConfiguration(ctx, diags, data.FabricName.ValueString(), serialNumbers)
-		if diags.HasError() {
-			return
-		}
-
-		validateFabric(ctx, client, diags, data, "configured")
-	}
-	tflog.Debug(ctx, fmt.Sprintf("End of %s deploy", loggingInventoryDevices))
-}
-*/
 func validateFabric(ctx context.Context, client *ndfc.NDFC, diags *diag.Diagnostics, data *InventoryDevicesModel, state string) {
 	tflog.Debug(ctx, fmt.Sprintf("Start of %s validateFabric - state %s", loggingInventoryDevices, state))
 	// Hardcoded delay to prevent validation before devices are ready
@@ -1157,7 +1106,7 @@ func validateFabric(ctx context.Context, client *ndfc.NDFC, diags *diag.Diagnost
 		for ipAddress, device := range devices {
 
 			mode := device.Mode.ValueString()
-			manageable := device.Managable.ValueBool()
+			manageable := device.Manageable.ValueBool()
 			configStatus := device.ConfigStatus.ValueString()
 			discoverType := device.DiscoveryType.ValueString()
 			discoveryStatus := device.DiscoveryStatus.ValueString()

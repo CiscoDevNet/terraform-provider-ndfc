@@ -295,14 +295,13 @@ resource:
         description: The operational status of the device
         computed: true
         ndfc_type: string
-      - &managable
+      - &manageable
         model_name: managable
-        tf_name: managable
+        tf_name: manageable
         type: Bool
-        description: The managable status of the device
+        description: The manageable status of the device
         computed: true
         ndfc_type: bool
-      
 datasource:
   name: inventory_devices
   doc_category: Fabric
@@ -370,7 +369,6 @@ datasource:
       - <<: *discovery_status
         computed: true
         optional: false
-      - <<: *managable
+      - <<: *manageable
         computed: true
         optional: false
-      
