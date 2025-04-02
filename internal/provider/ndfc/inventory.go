@@ -138,7 +138,7 @@ func (c NDFC) UpdateSerialNumber(ctx context.Context, diags *diag.Diagnostics, f
 func (c NDFC) DeleteFabricInventoryDevices(ctx context.Context, diags *diag.Diagnostics, fabricName string, uuidList []string) {
 	_, err := c.apiClient.Delete(fmt.Sprintf("/lan-fabric/rest/control/fabrics/%s/switches/UUID/%s", fabricName, strings.Join(uuidList, ",")), "")
 	if err != nil {
-		diags.AddError("Delete Devices Failed", err.Error())
+		diags.Append(diag.NewErrorDiagnostic("Delete Devices Failed", err.Error()))
 	}
 }
 
