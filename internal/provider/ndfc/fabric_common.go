@@ -82,10 +82,10 @@ func (f *NDFC) RscCreateFabric(ctx context.Context, dg *diag.Diagnostics, tf res
 		return
 	}
 
-	_, err := fapi.Post(payload)
+	resp, err := fapi.Post(payload)
 	if err != nil {
 		tflog.Error(ctx, "RscCreateFabric: POST failed with payload %s", map[string]interface{}{"Payload": payload})
-		dg.AddError("Failed to create fabric", fmt.Sprintf("Error: %q", err.Error()))
+		dg.AddError("Failed to create fabric", fmt.Sprintf("Error: %q Response :%s", err.Error(), resp.String()))
 		return
 	}
 
