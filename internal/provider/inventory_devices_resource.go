@@ -223,6 +223,7 @@ func (r *InventoryDevicesResource) Create(ctx context.Context, req resource.Crea
 	resp.Diagnostics.Append(req.Plan.Get(ctx, &planData)...)
 	resp.Diagnostics.Append(req.Plan.Get(ctx, &stateData)...)
 	if resp.Diagnostics.HasError() {
+		tflog.Debug(ctx, "Create failed on planData")
 		return
 	}
 
@@ -230,12 +231,14 @@ func (r *InventoryDevicesResource) Create(ctx context.Context, req resource.Crea
 
 	getInventoryData(ctx, r.client, &resp.Diagnostics, &stateData)
 	if resp.Diagnostics.HasError() {
+		tflog.Debug(ctx, "Create failed on getInventoryData")
 		return
 	}
 
 	var stateDevices map[string]DevicesValue
 	stateData.Devices.ElementsAs(ctx, &stateDevices, false)
 	if resp.Diagnostics.HasError() {
+		tflog.Debug(ctx, "Create failed on retrieving stateDevices")
 		return
 	} else if len(stateDevices) > 0 {
 		resp.Diagnostics.AddError("Create Validation Error", "Devices already exist in the inventory, please import the state or delete the existing devices")
@@ -244,11 +247,18 @@ func (r *InventoryDevicesResource) Create(ctx context.Context, req resource.Crea
 
 	addDevicesToInventory(ctx, r.client, &resp.Diagnostics, &planData, &stateData)
 	if resp.Diagnostics.HasError() {
+		tflog.Debug(ctx, "Create failed, deleting devices from inventory")
+		// Get existing devices added
+		getInventoryData(ctx, r.client, &resp.Diagnostics, &stateData)
+		// Delete only the devices added
+		deleteDevicesFromInventory(ctx, r.client, &resp.Diagnostics, &stateData)
 		return
 	}
 
 	deployAndSave(ctx, r.client, &resp.Diagnostics, &planData)
 	if resp.Diagnostics.HasError() {
+		tflog.Debug(ctx, "Create failed, deleting devices from inventory")
+		deleteDevicesFromInventory(ctx, r.client, &resp.Diagnostics, &planData)
 		return
 	}
 
@@ -262,6 +272,7 @@ func (r *InventoryDevicesResource) Read(ctx context.Context, req resource.ReadRe
 
 	resp.Diagnostics.Append(req.State.Get(ctx, &stateData)...)
 	if resp.Diagnostics.HasError() {
+		tflog.Debug(ctx, "Read failed on stateData")
 		return
 	}
 
@@ -277,6 +288,7 @@ func (r *InventoryDevicesResource) Read(ctx context.Context, req resource.ReadRe
 
 	getInventoryData(ctx, r.client, &resp.Diagnostics, &stateData)
 	if resp.Diagnostics.HasError() {
+		tflog.Debug(ctx, "Read failed on getInventoryData")
 		return
 	}
 
@@ -293,6 +305,7 @@ func (r *InventoryDevicesResource) Update(ctx context.Context, req resource.Upda
 	resp.Diagnostics.Append(req.State.Get(ctx, &stateData)...)
 
 	if resp.Diagnostics.HasError() {
+		tflog.Debug(ctx, "Update failed on planData")
 		return
 	}
 
@@ -300,8 +313,13 @@ func (r *InventoryDevicesResource) Update(ctx context.Context, req resource.Upda
 
 	var planDevices, stateDevices map[string]DevicesValue
 	planData.Devices.ElementsAs(ctx, &planDevices, false)
+	if resp.Diagnostics.HasError() {
+		tflog.Debug(ctx, "Update failed on retrieving planDevices")
+		return
+	}
 	stateData.Devices.ElementsAs(ctx, &stateDevices, false)
 	if resp.Diagnostics.HasError() {
+		tflog.Debug(ctx, "Update failed on retrieving stateDevices")
 		return
 	}
 
@@ -314,6 +332,7 @@ func (r *InventoryDevicesResource) Update(ctx context.Context, req resource.Upda
 	if len(uuidList) > 0 {
 		r.client.DeleteFabricInventoryDevices(ctx, &resp.Diagnostics, planData.FabricName.ValueString(), uuidList)
 		if resp.Diagnostics.HasError() {
+			tflog.Debug(ctx, "Update failed on deleteDevicesFromInventory")
 			return
 		}
 	}
@@ -335,11 +354,13 @@ func (r *InventoryDevicesResource) Update(ctx context.Context, req resource.Upda
 		devicesMap, _ := types.MapValueFrom(ctx, createData.Devices.ElementType(ctx), createDevices)
 		createData.Devices = devicesMap
 		if resp.Diagnostics.HasError() {
+			tflog.Debug(ctx, "Update failed on createDevices")
 			return
 		}
 
 		addDevicesToInventory(ctx, r.client, &resp.Diagnostics, &createData, &stateData)
 		if resp.Diagnostics.HasError() {
+			tflog.Debug(ctx, "Update failed on addDevicesToInventory")
 			return
 		}
 	}
@@ -351,6 +372,7 @@ func (r *InventoryDevicesResource) Update(ctx context.Context, req resource.Upda
 			if stateDevice.Role.ValueString() != updateDevice.Role.ValueString() {
 				r.client.UpdateRole(ctx, &resp.Diagnostics, stateDevice.SwitchDbId.ValueString(), updateDevice.Role.ValueString())
 				if resp.Diagnostics.HasError() {
+					tflog.Debug(ctx, "Updaterole failed")
 					return
 				}
 			}
@@ -358,10 +380,12 @@ func (r *InventoryDevicesResource) Update(ctx context.Context, req resource.Upda
 			if stateDevice.SerialNumber.ValueString() != updateDevice.SerialNumber.ValueString() && !updateDevice.SerialNumber.IsUnknown() && !updateDevice.SerialNumber.IsNull() {
 				if updateDevice.DiscoveryType.ValueString() != "pre_provision" || stateDevice.DiscoveryType.ValueString() == "pre_provision" {
 					resp.Diagnostics.AddError("Provider Error", fmt.Sprintf("Serial Number updates are only allowed for pre_provision devices, got: %s", updateDevice.DiscoveryType.ValueString()))
+					tflog.Debug(ctx, "Serial Number updates are only allowed for pre_provision devices")
 					return
 				}
 				r.client.UpdateSerialNumber(ctx, &resp.Diagnostics, planData.FabricName.ValueString(), stateDevice.SerialNumber.ValueString(), updateDevice.SerialNumber.ValueString())
 				if resp.Diagnostics.HasError() {
+					tflog.Debug(ctx, "UpdateSerialNumber failed, deleting devices from inventory")
 					return
 				}
 			}
@@ -371,6 +395,7 @@ func (r *InventoryDevicesResource) Update(ctx context.Context, req resource.Upda
 
 	deployAndSave(ctx, r.client, &resp.Diagnostics, &planData)
 	if resp.Diagnostics.HasError() {
+		tflog.Debug(ctx, "Update failed on deployAndSave, deleting devices from inventory")
 		return
 	}
 
@@ -384,12 +409,14 @@ func (r *InventoryDevicesResource) Delete(ctx context.Context, req resource.Dele
 
 	resp.Diagnostics.Append(req.State.Get(ctx, &data)...)
 	if resp.Diagnostics.HasError() {
+		tflog.Debug(ctx, "Delete failed on retrieving state")
 		return
 	}
 
 	devices := map[string]DevicesValue{}
 	data.Devices.ElementsAs(ctx, &devices, false)
 	if resp.Diagnostics.HasError() {
+		tflog.Debug(ctx, "Delete failed on retrieving devices")
 		return
 	}
 
@@ -403,6 +430,7 @@ func (r *InventoryDevicesResource) Delete(ctx context.Context, req resource.Dele
 	if len(uuidList) > 0 {
 		r.client.DeleteFabricInventoryDevices(ctx, &resp.Diagnostics, data.FabricName.ValueString(), uuidList)
 		if resp.Diagnostics.HasError() {
+			tflog.Debug(ctx, "Delete failed on deleteDevicesFromInventory")
 			return
 		}
 	}
@@ -645,6 +673,7 @@ func addDevicesToInventory(ctx context.Context, client *ndfc.NDFC, diags *diag.D
 		// Validate that the serial number is updated in NDFC else terraform will error with state inconsistency
 		validateFabric(ctx, client, diags, data, "serial")
 		if diags.HasError() {
+			tflog.Debug(ctx, "Validation failed for state serial")
 			return
 		}
 	}
@@ -1025,6 +1054,7 @@ func deployAndSave(ctx context.Context, client *ndfc.NDFC, diags *diag.Diagnosti
 
 	validateFabric(ctx, client, diags, data, "managed")
 	if diags.HasError() {
+		tflog.Debug(ctx, "Validation failed for state managed")
 		return
 	}
 
@@ -1038,6 +1068,7 @@ func deployAndSave(ctx context.Context, client *ndfc.NDFC, diags *diag.Diagnosti
 			tflog.Debug(ctx, fmt.Sprintf("Start of %s save", loggingInventoryDevices))
 			validateFabric(ctx, client, diags, data, "discovered")
 			if diags.HasError() {
+				tflog.Debug(ctx, "Validation failed for state discovered")
 				return
 			}
 		}
@@ -1050,6 +1081,10 @@ func deployAndSave(ctx context.Context, client *ndfc.NDFC, diags *diag.Diagnosti
 		sort.Strings(serialNumbers)
 		client.RecalculateAndDeploy(ctx, diags, data.FabricName.ValueString(), data.Save.ValueBool(), data.Deploy.ValueBool(), serialNumbers)
 		validateFabric(ctx, client, diags, data, "configured")
+		if diags.HasError() {
+			tflog.Debug(ctx, "Validation failed for state configured")
+			return
+		}
 	}
 
 	tflog.Debug(ctx, fmt.Sprintf("End of %s deployAndSave", loggingInventoryDevices))
@@ -1167,4 +1202,32 @@ func validateFabric(ctx context.Context, client *ndfc.NDFC, diags *diag.Diagnost
 		attempt++
 	}
 	tflog.Debug(ctx, fmt.Sprintf("End of %s validateFabric", loggingInventoryDevices))
+}
+
+func deleteDevicesFromInventory(ctx context.Context, client *ndfc.NDFC, dg *diag.Diagnostics, data *InventoryDevicesModel) {
+	tflog.Debug(ctx, fmt.Sprintf("Start of %s deleteDevicesFromInventory", loggingInventoryDevices))
+	devices := map[string]DevicesValue{}
+	dg1 := data.Devices.ElementsAs(ctx, &devices, false)
+	if dg1.HasError() {
+		tflog.Debug(ctx, "Failed to get devices from DevicesValue map , skipping devices delete on failure")
+		return
+	}
+
+	uuidList := []string{}
+	for _, device := range devices {
+		uuidList = append(uuidList, device.Uuid.ValueString())
+	}
+	tflog.Debug(ctx, fmt.Sprintf("Deleting devices with UUIDs: %v", uuidList))
+
+	sort.Strings(uuidList)
+
+	if len(uuidList) > 0 {
+		client.DeleteFabricInventoryDevices(ctx, dg, data.FabricName.ValueString(), uuidList)
+		if dg.HasError() {
+			tflog.Debug(ctx, "Failed to delete devices from NDFC, skipping devices delete on failure")
+			return
+		}
+	}
+
+	tflog.Debug(ctx, fmt.Sprintf("End of %s deleteDevicesFromInventory", loggingInventoryDevices))
 }
