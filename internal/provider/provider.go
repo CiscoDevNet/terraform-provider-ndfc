@@ -86,7 +86,18 @@ func (p *ndfcProvider) Configure(ctx context.Context, req provider.ConfigureRequ
 	domain := os.Getenv("NDFC_DOMAIN")
 	user := os.Getenv("NDFC_USER")
 	password := os.Getenv("NDFC_PASSWORD")
-
+	insecure := os.Getenv("NDFC_INSECURE")
+	if insecure != "" {
+		boolValue, err := strconv.ParseBool(insecure)
+		if err != nil {
+			resp.Diagnostics.AddError(
+				"Invalid input",
+				"A boolean value must be provided for NDFC_INSECURE",
+			)
+			return
+		}
+		config.Insecure = types.BoolValue(boolValue)
+	}
 	if host == "" {
 		host = config.Host.ValueString()
 	}
