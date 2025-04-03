@@ -1,0 +1,55 @@
+---
+resource:
+  name: configuration_deploy
+  rest_endpoint: /lan-fabric/rest/control/fabrics/%s/inventory/switchesByFabric
+  doc_category: Fabric
+  generate_tf_resource: true
+  skip_codec: true
+  attributes:
+    - &id
+      model_name: id
+      tf_name: id
+      description: The Terraform Unique Identifier for the Inventory Devices resource
+      type: String
+      id: true
+      use_state: true
+      computed: true
+      ndfc_type: string
+    - &fabric_name
+      model_name: fabricName
+      tf_name: fabric_name
+      reference: true
+      description: The name of the fabric
+      type: String
+      example: CML
+      mandatory: true
+      tf_requires_replace: true
+      ndfc_type: string
+    - &serial_numbers
+      model_name: serialNumbers
+      tf_name: serial_numbers
+      description: Value 'ALL' if all switches in the fabric are to be deployed, or a list of serial numbers of the switches to be deployed
+      type: List:String
+      example: "[\"ALL\"]"
+      ndfc_type: set
+    - &config_save
+      model_name: configSave
+      tf_name: config_save
+      type: Bool
+      description: Save the configuration
+      default_value: false
+      ndfc_type: bool
+      payload_hide: true
+      example: true
+    - &trigger_deploy_on_update
+      model_name: trigger_deploy_on_update
+      tf_name: trigger_deploy_on_update
+      type: Bool
+      description: >-
+            Default set to false, config deploy will be only triggered on create of resource.
+            If set to true in resource update, the configurations are deployed to the switches and the flag will be toggled back to false after the deployment is completed,
+            when terraform refresh is performed. Terraform plan will always show in-place update for this field when set to true.
+      ndfc_type: bool
+      payload_hide: true
+      example: false
+      default_value: false

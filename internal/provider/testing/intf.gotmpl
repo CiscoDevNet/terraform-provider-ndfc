@@ -1,0 +1,87 @@
+{{define "NDFC_INT_RSC"}}
+resource "ndfc_{{.RscType}}" "{{.RscName}}" {
+{{with .Interface}}
+    policy = "{{.Policy}}"
+    {{- if ne .SerialNumber "" }}
+    serial_number = "{{.SerialNumber}}"
+    {{- end}}
+    deploy = {{.Deploy}}
+    interfaces = {
+    {{- range $key, $ifEntry := .Interfaces}}
+        "{{$key}}": {
+            interface_name = "{{$ifEntry.InterfaceName}}"
+            admin_state = "{{$ifEntry.NvPairs.AdminState}}"
+            interface_description = "{{$ifEntry.NvPairs.InterfaceDescription}}"
+            {{- if ne $ifEntry.NvPairs.FreeformConfig ""}}
+            freeform_config = "{{$ifEntry.NvPairs.FreeformConfig}}"
+            {{- end}}
+            {{- if ne $ifEntry.NvPairs.BpduGuard ""}}
+            bpdu_guard = "{{$ifEntry.NvPairs.BpduGuard}}"
+            {{- end}}
+            {{- if ne $ifEntry.NvPairs.PortTypeFast ""}}
+            port_type_fast = "{{$ifEntry.NvPairs.PortTypeFast}}"
+            {{- end}}
+            {{- if ne $ifEntry.NvPairs.Mtu ""}}
+            mtu = "{{$ifEntry.NvPairs.Mtu}}"
+            {{- end}}
+            {{- if ne $ifEntry.NvPairs.Speed ""}}
+            speed = "{{$ifEntry.NvPairs.Speed}}"
+            {{- end}}
+            {{- if ne (deref $ifEntry.NvPairs.AccessVlan) 0 }}
+            access_vlan = "{{$ifEntry.NvPairs.AccessVlan}}"
+            {{- end}}
+            {{- if ne $ifEntry.NvPairs.OrphanPort ""}}
+            orphan_port = "{{$ifEntry.NvPairs.OrphanPort}}"
+            {{- end}}
+            {{- if ne $ifEntry.NvPairs.Ptp ""}}
+            ptp  = "{{$ifEntry.NvPairs.Ptp}}"
+            {{- end}}
+            {{- if ne $ifEntry.NvPairs.Netflow ""}}
+            netflow = "{{$ifEntry.NvPairs.Netflow}}"
+            {{- end}}
+            {{- if ne $ifEntry.NvPairs.NetflowMonitor ""}}
+            netflow_monitor = "{{$ifEntry.NvPairs.NetflowMonitor}}"
+            {{- end}}
+            {{- if ne $ifEntry.NvPairs.NetflowSampler ""}}
+            netflow_sampler = "{{$ifEntry.NvPairs.NetflowSampler}}"
+            {{- end}}
+            {{- if ne $ifEntry.NvPairs.AllowedVlans ""}}
+            allowed_vlans = "{{$ifEntry.NvPairs.AllowedVlans}}"
+            {{- end}}
+            {{- if ne (deref $ifEntry.NvPairs.NativeVlan) 0}}
+            native_vlan = "{{$ifEntry.NvPairs.NativeVlan}}"
+            {{- end}}
+
+            {{- if ne $ifEntry.NvPairs.Ipv4Address ""}}
+            ipv4_address = "{{$ifEntry.NvPairs.Ipv4Address}}"
+            {{- end}}
+            {{- if ne $ifEntry.NvPairs.Ipv6Address  ""}}
+            ipv6_address = "{{$ifEntry.NvPairs.Ipv6Address}}"
+            {{- end}}
+            {{- if ne $ifEntry.NvPairs.Vrf ""}}
+            vrf = "{{$ifEntry.NvPairs.Vrf}}"
+            {{- end}}
+            {{- if ne $ifEntry.NvPairs.RouteMapTag  ""}}
+            route_map_tag = "{{$ifEntry.NvPairs.RouteMapTag}}"
+            {{- end}}
+            {{- if eq $ifEntry.InterfaceType "vlan" }}
+            ipv4_prefix_length = "{{$ifEntry.NvPairs.Ipv4PrefixLength}}"
+            {{end}}
+            {{- if ne $ifEntry.NvPairs.MemberInterfaces ""}}
+            member_interfaces = "{{$ifEntry.NvPairs.MemberInterfaces}}"
+            {{- end}}
+            {{- if ne $ifEntry.NvPairs.Mac ""}}
+            mac_address = "{{$ifEntry.NvPairs.Mac}}"
+            {{- end}}
+            {{- if ne $ifEntry.NvPairs.PortchannelMode ""}}
+            portchannel_mode = "{{$ifEntry.NvPairs.PortchannelMode}}"
+            {{- end}}  
+            {{- if ne $ifEntry.NvPairs.CopyPoDescription ""}}
+            copy_po_description = "{{$ifEntry.NvPairs.CopyPoDescription}}"
+            {{- end}}
+        }
+    {{- end}}
+    }
+{{end}}
+}
+{{end}}

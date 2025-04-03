@@ -1,0 +1,68 @@
+---
+resource:
+  name: vpc_pair
+  rest_endpoint: /lan-fabric/rest/vpcpair
+  doc_category: Fabric
+  generate_tf_resource: true
+  description: "Resource to configure vPC pair on a switch. Note only VXLAN EVPN fabric is supported"
+  import_id:
+    - "FDO245206N5:9990IQNFEZ6"
+  import_desc: 
+    - "Serial numbers of the switches in the vPC pair seperated by `:`. Must contain exactly two serial numbers"
+  attributes:
+    - model_name: id
+      tf_name: id
+      description: The Terraform Unique Identifier for the vPC pair resource
+      type: String
+      id: true
+      computed: true
+      payload_hide: true
+    - model_name: serialNumbers
+      tf_name: serial_numbers
+      description: Serial numbers of the switches in the vPC pair. Must contain exactly two serial numbers.
+      type: List:String
+      payload_hide: true
+      ndfc_type: set
+      example: "[\"FGE20360RRZ\", \"FGE20360RRY\"]"
+      mandatory: true
+      validator: SizeBetween(2, 2)
+      tf_requires_replace: true
+    - &peer_one_id
+      model_name: peerOneId
+      tf_name: peer_one_id
+      tf_hide: true
+      description: Serial number of the first vPC peer
+      type: String
+      example: FGE20360RRZ
+    - &peer_two_id
+      model_name: peerTwoId
+      tf_name: peer_two_id
+      tf_hide: true
+      description: Serial number of the second vPC peer
+      type: String
+      example: FGE20360RRK
+    - &use_virtual_peer_link
+      model_name: useVirtualPeerlink
+      tf_name: use_virtual_peerlink
+      ndfc_type: bool
+      type: Bool
+      description: Set to true to use virtual peer link
+      example: false
+      mandatory: true
+    - &peer1_fabric_name
+      model_name: fabricName
+      ndfc_nested: [peerOneSwitchDetails]
+      tf_name: fabric_name
+      tf_hide: true
+      type: String
+      description: Fabric name to which the vPC pair belongs, peer one and peer two will belong to the same fabric
+      example:
+    - &deploy
+      model_name: deploy
+      tf_name: deploy
+      type: Bool
+      description: "Deploy vPC pair"
+      mandatory: true
+      ndfc_type: bool
+      payload_hide: true
+      example: true

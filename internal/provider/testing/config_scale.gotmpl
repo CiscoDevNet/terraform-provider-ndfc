@@ -1,0 +1,161 @@
+{{ define "HEADER" }}
+terraform {
+  required_providers {
+    ndfc = {
+      source = "registry.terraform.io/cisco/ndfc"
+    }
+  }
+}
+{{end}}
+
+{{ define "NDFC" }}
+provider "ndfc" {
+  username = "{{.User}}"
+  password = "{{.Password}}"
+  host     = "{{.Host}}"
+  insecure = {{.Insecure}}
+}
+{{end}}
+
+{{ define "NDFC_VRF_RESOURCE" }}
+resource "ndfc_{{.RscType}}" "{{.RscName}}" {
+{{with .Vrf}}
+    fabric_name = "{{.FabricName}}"
+    deploy_all_attachments = {{.DeployAllAttachments}}
+    vrfs = {
+    {{- range $vrf, $vrfEntry := .Vrfs}}
+        "{{$vrf}}" : {
+            deploy_attachments = {{$vrfEntry.DeployAttachments}}
+            {{- if $vrfEntry.VrfId}}
+            vrf_id = "{{$vrfEntry.VrfId}}"
+            {{- end}}
+            {{- if $vrfEntry.VrfTemplateConfig.VrfDescription}}
+            vrf_description = "{{$vrfEntry.VrfTemplateConfig.VrfDescription}}"
+            {{- end}}
+            {{- if $vrfEntry.VrfTemplateConfig.VlanId}}
+            vlan_id = "{{$vrfEntry.VrfTemplateConfig.VlanId}}"
+            {{- end}}
+            {{- if $vrfEntry.VrfTemplateConfig.Mtu }}
+            mtu = "{{$vrfEntry.VrfTemplateConfig.Mtu}}"
+            {{- end}}
+            {{- if $vrfEntry.VrfTemplateConfig.LoopbackRoutingTag }}
+            loopback_routing_tag = "{{$vrfEntry.VrfTemplateConfig.LoopbackRoutingTag}}"
+            {{- end}}
+            {{- if $vrfEntry.VrfTemplateConfig.RpAddress }}
+            rp_address = "{{$vrfEntry.VrfTemplateConfig.RpAddress}}"
+            {{- end}}
+            {{- if $vrfEntry.VrfTemplateConfig.RpExternal }}
+            rp_external = "{{$vrfEntry.VrfTemplateConfig.RpExternal}}"
+            {{- end}}
+            {{- if $vrfEntry.VrfTemplateConfig.Netflow }}
+            netflow = "{{$vrfEntry.VrfTemplateConfig.Netflow}}"
+            {{- end}}
+            {{- if $vrfEntry.VrfTemplateConfig.MaxBgpPaths }}
+            max_bgp_paths = "{{$vrfEntry.VrfTemplateConfig.MaxBgpPaths}}"
+            {{- end}}
+            {{- if $vrfEntry.VrfTemplateConfig.Ipv6LinkLocal }}
+            ipv6_link_local = "{{$vrfEntry.VrfTemplateConfig.Ipv6LinkLocal}}"
+            {{- end}}
+            {{- if $vrfEntry.AttachList}}
+            attach_list = {
+                {{- range $attach, $attachEntry := $vrfEntry.AttachList}}
+                "{{$attach}}" : {
+                    serial_number = "{{$attachEntry.SerialNumber}}"
+                    {{- if $attachEntry.Vlan}}
+                    vlan = "{{$attachEntry.Vlan}}"
+                    {{- end}}
+                    deploy_this_attachment = {{$attachEntry.DeployThisAttachment}}
+                    {{- if $attachEntry.InstanceValues.LoopbackId }}
+                    loopback_id = "{{$attachEntry.InstanceValues.LoopbackId}}"
+                    {{- end}}
+                    {{- if $attachEntry.InstanceValues.LoopbackIpv4 }}
+                    loopback_ipv4 = "{{$attachEntry.InstanceValues.LoopbackIpv4}}"
+                    {{- end}}
+                    {{- if $attachEntry.InstanceValues.LoopbackIpv6 }}
+                    loopback_ipv6 = "{{$attachEntry.InstanceValues.LoopbackIpv6}}"
+                    {{- end}}
+                }
+                {{end}}
+            }
+            {{- end}}
+        }
+    {{end}}
+    }
+  {{end}}
+}
+{{end}}
+
+{{define "NDFC_NETWORK_RESOURCE"}}
+resource "ndfc_{{.RscType}}" "{{.RscName}}" {
+depends_on = [resource.ndfc_vrfs.{{.VrfRscName}}]
+{{with .Network}}
+    fabric_name = "{{.FabricName}}"
+    deploy_all_attachments = {{.DeployAllAttachments}}
+    networks = {
+    {{- range $network, $networkEntry := .Networks}}
+        "{{$network}}" : {
+            deploy_attachments = {{$networkEntry.DeployAttachments}}
+            vrf_name = "{{$networkEntry.VrfName}}"
+            {{- if $networkEntry.NetworkTemplateConfig.VlanId }}
+            vlan_id = "{{$networkEntry.NetworkTemplateConfig.VlanId}}"
+            {{- end}}
+            {{- if $networkEntry.NetworkTemplateConfig.SecondaryGateway1 }}
+            secondary_gateway_1 = "{{$networkEntry.NetworkTemplateConfig.SecondaryGateway1}}"
+            {{- end}}
+            {{- if $networkEntry.NetworkTemplateConfig.SecondaryGateway2 }}
+            secondary_gateway_2 = "{{$networkEntry.NetworkTemplateConfig.SecondaryGateway2}}"
+            {{- end}}
+            {{- if $networkEntry.NetworkTemplateConfig.SecondaryGateway3 }}
+            secondary_gateway_3 = "{{$networkEntry.NetworkTemplateConfig.SecondaryGateway3}}"
+            {{- end}}
+            {{- if $networkEntry.NetworkTemplateConfig.SecondaryGateway4 }}
+            secondary_gateway_4 = "{{$networkEntry.NetworkTemplateConfig.SecondaryGateway4}}"
+            {{- end}}
+            {{- if $networkEntry.NetworkTemplateConfig.ArpSuppression }}
+            arp_suppression = "{{$networkEntry.NetworkTemplateConfig.ArpSuppression}}"
+            {{- end}}
+            {{- if $networkEntry.NetworkTemplateConfig.DhcpRelayLoopbackId }}
+            dhcp_relay_loopback_id = "{{$networkEntry.NetworkTemplateConfig.DhcpRelayLoopbackId}}"
+            {{- end}}
+            {{- if $networkEntry.NetworkTemplateConfig.MulticastGroup }}
+            multicast_group = "{{$networkEntry.NetworkTemplateConfig.MulticastGroup}}"
+            {{- end}}
+            {{- if $networkEntry.NetworkTemplateConfig.Mtu }}
+            mtu = "{{$networkEntry.NetworkTemplateConfig.Mtu}}"
+            {{- end}}
+            {{- if $networkEntry.Attachments}}
+            attachments = {
+                {{- range $attach, $attachEntry := $networkEntry.Attachments}}
+                "{{$attach}}" : {
+                    deploy_this_attachment = {{$attachEntry.DeployThisAttachment}}
+                    {{- if $attachEntry.FreeformConfig }}
+                    freeform_config = "{{$attachEntry.FreeformConfig}}"
+                    {{- end}}
+                    {{- if gt (len $attachEntry.SwitchPorts) 0 }}
+                    switch_ports = [
+                        {{- range $switchPort := $attachEntry.SwitchPorts}}
+                        "{{$switchPort}}"{{- if ne $switchPort (index $attachEntry.SwitchPorts (add (len $attachEntry.SwitchPorts) -1))}},{{- end -}}
+                        {{- end}}
+                    ]
+                    {{- end}}
+                    {{- if gt (len $attachEntry.TorPorts) 0 }}
+                    tor_ports = [
+                        {{- range $torPort := $attachEntry.TorPorts}}
+                        {{$torPort}}
+                        {{- end}}
+                    ]
+                    {{- end}}
+                    {{- if $attachEntry.Vlan }}
+                    vlan = "{{$attachEntry.Vlan}}"
+                    {{- end}}
+                }
+                {{end}}
+            }
+            {{- end}}
+        }
+    {{end}}
+    }
+  {{end}}
+}
+{{end}}
+

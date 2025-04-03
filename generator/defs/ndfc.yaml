@@ -1,0 +1,36 @@
+---
+provider:
+  name: ndfc
+  attributes:
+    - model_name: username
+      tf_name: username
+      type: String
+      mandatory: true 
+      description: NDFC Login credentials - user
+    - model_name: password
+      sensitive: true
+      tf_name: password
+      type: String
+      mandatory: true 
+      description: NDFC Login credentials - password
+    - model_name: domain
+      tf_name: domain
+      type: String
+      mandatory: false 
+      description: NDFC Login credentials - domain
+    - model_name: host
+      tf_name: host
+      type: String
+      mandatory: true 
+      description: NDFC Login credentials - host
+    - model_name: insecure
+      tf_name: insecure
+      type: Bool
+      mandatory: true 
+      description: NDFC Login  - ignore certificate issues
+    - model_name: timeout
+      tf_name: timeout
+      type: Int64
+      min_int: 1
+      default_value: 1000
+      description: NDFC HTTP request timeout - timeout

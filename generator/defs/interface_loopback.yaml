@@ -1,0 +1,140 @@
+resource: 
+  name: interface_loopback
+  generate_tf_resource: true
+  parent_package: resource_interface_common
+  parent_model: interface_common
+  description: "Resource to configure loopback interfaces on a switch"
+  import_id:
+    - "int_loopback:FDO245206N5[Loopback1,Loopback2],9990IQNFEZ6[Loopback0,Loopback1]"
+    - "int_loopback:FDO245206N5"
+  import_desc: 
+    - "if_policy:serial_number[comma seperated list of interfaces]"
+    - "if_policy:serial_number"
+  attributes:
+    - model_name: id
+      tf_name: id
+      type: String
+      description: "Unique identifier for the interface"
+      example: 1
+      computed: true
+      id: true
+    - model_name: policy
+      tf_name: policy
+      type: String
+      default_value: int_loopback
+      description: "Name of the policy. Supported policies:: `int_loopback`, `int_multisite_loopback`"
+      example: int_loopback
+    - model_name: deploy
+      tf_name: deploy
+      type: Bool
+      default_value: false
+      payload_hide: true
+      description: "Deploy the configuration"
+      example: true
+      ndfc_type: bool
+    - model_name: serial_number
+      tf_name: serial_number
+      type: String
+      description: Serial number of switch to configure. This field cannot be specified if `serial_number` inside `interfaces` block is specified`
+      example: 9DBYO6WQJ46
+      payload_hide: true
+      tf_requires_replace: true
+      validator: ConflictsWith(path.Expressions {path.MatchRoot("interfaces").AtAnyMapKey().AtName("serial_number")}...)
+    - model_name: interfaces
+      tf_name: interfaces
+      bulk: true
+      filtered: true
+      type: Map
+      mandatory: true
+      description: "interfaces to configure"
+      parent_package: resource_interface_common
+      parent_model: interfaces
+      example: "Loopback100"
+      attributes:
+      - model_name: filterThisValue
+        tf_name: filter_this_value
+        type: Bool
+        tf_hide: true
+        payload_hide: true
+      - model_name: serialNumber
+        tf_name: serial_number
+        type: String
+        description: Serial number of switch to configure. This field cannot be specified if `serial_number` outside `interfaces` block is specified
+      - &ifName
+        model_name: ifName
+        tf_name: interface_name
+        type: String
+        description: "Name of the Interface. Example: `loopback1`"
+        example: loopback100
+        validator: RegexMatches(regexp.MustCompile(`^loopback\d+`), "Must be loopbackX where X is the loopbackID")
+        mandatory: true
+      - &ifType
+        model_name: interfaceType
+        tf_name: interface_type
+        tf_hide: true
+        type: String
+        description: "Type of interface. Examples: `ethernet`, `port-channel`"
+        example: ethernet
+        validator: OneOf("ethernet", "port-channel", "loopback", "vlan", "mgmt", "port-channel-sub")
+      - <<: *ifName
+        tf_hide: true
+        payload_hide: false
+        model_name: INTF_NAME
+        ndfc_nested: [nvPairs]
+      - model_name: ADMIN_STATE
+        ndfc_nested: [nvPairs]
+        tf_name: admin_state
+        type: Bool
+        model_type_string: true
+        default_value: true
+        description: Administratively enable or disable the interface
+        example: false
+      - model_name: CONF
+        ndfc_nested: [nvPairs]
+        tf_name: freeform_config
+        type: String
+        description: Additional CLI commands to be executed for the interface
+        default_value: ""
+      - model_name: DESC
+        ndfc_nested: [nvPairs]
+        tf_name: interface_description
+        type: String
+        description: Interface description
+        example: This is a loopback interface used for XYZ
+      - model_name: INTF_VRF
+        ndfc_nested: [nvPairs]
+        tf_name: vrf
+        type: String
+        description: VRF name
+        example: default
+        default_value: default
+      - model_name: IP
+        ndfc_nested: [nvPairs]
+        tf_name: ipv4_address
+        type: String
+        description: IPv4 address
+        example: 192.168.20.1
+      - model_name: V6IP
+        ndfc_nested: [nvPairs]
+        tf_name: ipv6_address
+        type: String
+        description: IPv6 address
+        example: 2002:db8::1
+      - model_name: ROUTE_MAP_TAG
+        ndfc_nested: [nvPairs]
+        tf_name: route_map_tag
+        type: String
+        description: Route map tag
+        example: 100
+        default_value: 12345
+      - model_name: deployment_status
+        tf_name: deployment_status
+        type: String
+        description: "Status of the deployment"
+        example: "success"
+        computed: true
+        payload_hide: true
+
+
+      
+      

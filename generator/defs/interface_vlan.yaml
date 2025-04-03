@@ -1,0 +1,272 @@
+---
+resource: 
+  name: interface_vlan
+  generate_tf_resource: true
+  parent_package: resource_interface_common
+  parent_model: interface_common
+  description: "Resource to configure Switch Virtual Interface (SVI) on a switch"
+  import_id:
+    - "int_vlan:FDO245206N5[Vlan1000,Vlan1001],9990IQNFEZ6[Vlan1000,Vlan1001]"
+    - "int_vlan:FDO245206N5"
+  import_desc: 
+    - "if_policy:serial_number[comma seperated list of interfaces]"
+    - "if_policy:serial_number"
+  attributes:
+    - model_name: id
+      tf_name: id
+      type: String
+      description: "Unique identifier for the interface"
+      example: 1
+      computed: true
+      id: true
+    - &policy
+      model_name: policy
+      tf_name: policy
+      type: String
+      default_value: int_vlan
+      tf_requires_replace: true
+      description: "Name of the policy. Examples: `int_vlan`, `int_freeform`"
+      example: int_vlan
+    - model_name: deploy
+      tf_name: deploy
+      type: Bool
+      default_value: false
+      payload_hide: true
+      description: "Deploy the configuration"
+      example: true
+      ndfc_type: bool
+    - &serialNumber
+      model_name: serial_number
+      tf_name: serial_number
+      type: String
+      description: Serial number of switch to configure
+      example: 9DBYO6WQJ46
+      payload_hide: true
+      tf_requires_replace: true
+      validator: ConflictsWith(path.Expressions {path.MatchRoot("interfaces").AtAnyMapKey().AtName("serial_number")}...)
+    - &interfaces
+      model_name: interfaces
+      tf_name: interfaces
+      bulk: true
+      filtered: true
+      type: Map
+      mandatory: true
+      description: "interfaces to configure"
+      parent_package: resource_interface_common
+      parent_model: interfaces
+      example: "Vlan1000"
+      attributes:
+      - model_name: filterThisValue
+        tf_name: filter_this_value
+        type: Bool
+        tf_hide: true
+        payload_hide: true
+      - model_name: serialNumber
+        tf_name: serial_number
+        type: String
+        description: Serial number of switch to configure
+      - &ifName
+        model_name: ifName
+        tf_name: interface_name
+        type: String
+        description: "Name of the Interface. Example: `Vlan1000`"
+        example: Vlan1000
+        mandatory: true
+        requires_replace: true
+      - &ifType
+        model_name: interfaceType
+        tf_name: interface_type
+        tf_hide: true
+        type: String
+        description: "Type of interface. Must be one of the following: `ethernet`, `port-channel`, `loopback`, `vlan`"
+        example: ethernet
+        validator: OneOf("ethernet", "port-channel", "loopback", "vlan", "vPC")
+      - <<: *ifName
+        tf_hide: true
+        payload_hide: false
+        model_name: INTF_NAME
+        ndfc_nested: [nvPairs]
+      - model_name: CONF
+        ndfc_nested: [nvPairs]
+        tf_name: freeform_config
+        type: String
+        description: Additional CLI for the interface
+        default_value: ""
+      - model_name: ADMIN_STATE
+        ndfc_nested: [nvPairs]
+        tf_name: admin_state
+        type: Bool
+        default_value: true
+        description: Enable or disable the interface
+        example: false
+      - model_name: DESC
+        ndfc_nested: [nvPairs]
+        tf_name: interface_description
+        type: String
+        description: Interface description
+        example: My interface description
+      - model_name: MTU
+        ndfc_nested: [nvPairs]
+        tf_name: mtu
+        type: String
+        description: MTU for the interface - range 68-9216
+        example: 1518
+      - model_name: ENABLE_NETFLOW
+        ndfc_nested: [nvPairs]
+        tf_name: netflow
+        type: Bool
+        default_value: false
+        description: Netflow is supported only if it is enabled on fabric
+        example: false
+      - model_name: NETFLOW_MONITOR
+        ndfc_nested: [nvPairs]
+        tf_name: netflow_monitor
+        type: String
+        description: Provide the Layer 2 Monitor Name
+        default_value: ""
+        example: MON1
+        exclude_test: true
+      - model_name: NETFLOW_SAMPLER
+        ndfc_nested: [nvPairs]
+        tf_name: netflow_sampler
+        type: String
+        description: Netflow sampler name, applicable to N7K only
+        example: SAMPLER1
+        exclude_test: true
+        default_value: ""
+      - model_name: INTF_VRF
+        ndfc_nested: [nvPairs]
+        tf_name: vrf
+        type: String
+        description: VRF name
+        example: default
+        default_value: default
+      - model_name: IP
+        ndfc_nested: [nvPairs]
+        tf_name: ipv4_address
+        type: String
+        description: IPv4 address
+        example: "10.1.1.1"
+      - model_name: PREFIX
+        ndfc_nested: [nvPairs]
+        tf_name: ipv4_prefix_length
+        type: String
+        description: Prefix length for the IPv4 address
+        example: 24
+      - model_name: ROUTING_TAG
+        ndfc_nested: [nvPairs]
+        tf_name: routing_tag
+        type: String
+        description: Routing tag
+        example: 123
+      - model_name: DISABLE_IP_REDIRECTS
+        ndfc_nested: [nvPairs]
+        tf_name: disable_ip_redirects
+        type: Bool
+        default_value: true
+        description: Disable IP redirects
+        example: false
+      - model_name: ENABLE_HSRP
+        ndfc_nested: [nvPairs]
+        tf_name: enable_hsrp
+        type: Bool
+        default_value: false
+        description: Enable HSRP
+        example: false
+      - model_name: HSRP_GROUP
+        ndfc_nested: [nvPairs]
+        tf_name: hsrp_group
+        type: Int64
+        min_int: 0
+        max_int: 255
+        validator: Between(0, 255)
+        description: HSRP group number
+        handle_empty: true
+        default_value: 1
+      - model_name: HSRP_VIP
+        ndfc_nested: [nvPairs]
+        tf_name: hsrp_vip
+        type: String
+        description: HSRP virtual IP address
+        example:
+      - model_name: HSRP_PRIORITY
+        ndfc_nested: [nvPairs]
+        tf_name: hsrp_priority
+        type: Int64
+        ndfc_type: string
+        min_int: 1
+        max_int: 255
+        description: HSRP priority
+        handle_empty: true
+        validator: Between(1, 255)
+      - model_name: HSRP_VERSION
+        ndfc_nested: [nvPairs]
+        tf_name: hsrp_version
+        type: String
+        validator: OneOf("1", "2")
+        enum_values: ["1", "2"]
+        default_value: "2"
+        description: HSRP version
+      - model_name: PREEMPT
+        ndfc_nested: [nvPairs]
+        tf_name: preempt
+        type: Bool
+        default_value: false
+        description: Enable HSRP preempt
+        example: false
+      - model_name: MAC
+        ndfc_nested: [nvPairs]
+        tf_name: mac
+        type: String
+        description: MAC address
+        example: 00:0a:00:00:00:98
+      - model_name: dhcpServerAddr1
+        ndfc_nested: [nvPairs]
+        tf_name: dhcp_server_addr1
+        type: String
+        description: DHCP server address 1
+        example: 20.10.1.2
+      - model_name: dhcpServerAddr2
+        ndfc_nested: [nvPairs]
+        tf_name: dhcp_server_addr2
+        type: String
+        description: DHCP server address 2
+        example: 29.1.2.1
+      - model_name: dhcpServerAddr3
+        ndfc_nested: [nvPairs]
+        tf_name: dhcp_server_addr3
+        type: String
+        description: DHCP server address 3
+        example: 31.2.3.1
+      - model_name: vrfDhcp1
+        ndfc_nested: [nvPairs]
+        tf_name: vrf_dhcp1
+        type: String
+        description: VRF for DHCP server 1
+        example: mobile_net
+      - model_name: vrfDhcp2
+        ndfc_nested: [nvPairs]
+        tf_name: vrf_dhcp2
+        type: String
+        description: VRF for DHCP server 2
+        example: triple_play
+      - model_name: vrfDhcp3
+        ndfc_nested: [nvPairs]
+        tf_name: vrf_dhcp3
+        type: String
+        description: VRF for DHCP server 3
+        example: iptv
+      - model_name: advSubnetInUnderlay
+        ndfc_nested: [nvPairs]
+        tf_name: advertise_subnet_in_underlay
+        type: Bool
+        default_value: false
+        description: Advertise subnet in underlay
+        example: true
+      - model_name: deployment_status
+        tf_name: deployment_status
+        type: String
+        description: "Status of the deployment"
+        example: "success"
+        computed: true
+        payload_hide: true
