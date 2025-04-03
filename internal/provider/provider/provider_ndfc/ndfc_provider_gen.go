@@ -14,34 +14,34 @@ func NdfcProviderSchema(ctx context.Context) schema.Schema {
 		Attributes: map[string]schema.Attribute{
 			"domain": schema.StringAttribute{
 				Optional:            true,
-				Description:         "NDFC Login credentials - domain",
-				MarkdownDescription: "NDFC Login credentials - domain",
+				Description:         "NDFC Login credentials - domain. Enviroment variable `NDFC_DOMAIN` can be used to override the provider configuration.",
+				MarkdownDescription: "NDFC Login credentials - domain. Enviroment variable `NDFC_DOMAIN` can be used to override the provider configuration.",
 			},
 			"host": schema.StringAttribute{
 				Required:            true,
-				Description:         "NDFC Login credentials - host",
-				MarkdownDescription: "NDFC Login credentials - host",
+				Description:         "NDFC Login credentials - host. Enviroment variable `NDFC_HOST` can be used to override the provider configuration.",
+				MarkdownDescription: "NDFC Login credentials - host. Enviroment variable `NDFC_HOST` can be used to override the provider configuration.",
 			},
 			"insecure": schema.BoolAttribute{
-				Required:            true,
-				Description:         "NDFC Login  - ignore certificate issues",
-				MarkdownDescription: "NDFC Login  - ignore certificate issues",
+				Optional:            true,
+				Description:         "Controls whether ND server's certificate chain and host name is verified. This can also be set as the `NDFC_INSECURE` (true or false) environment variable.",
+				MarkdownDescription: "Controls whether ND server's certificate chain and host name is verified. This can also be set as the `NDFC_INSECURE` (true or false) environment variable.",
 			},
 			"password": schema.StringAttribute{
 				Required:            true,
 				Sensitive:           true,
-				Description:         "NDFC Login credentials - password",
-				MarkdownDescription: "NDFC Login credentials - password",
+				Description:         "NDFC Login credentials - password. Enviroment variable `NDFC_PASSWORD` can be used to override the provider configuration.",
+				MarkdownDescription: "NDFC Login credentials - password. Enviroment variable `NDFC_PASSWORD` can be used to override the provider configuration.",
 			},
 			"timeout": schema.Int64Attribute{
 				Optional:            true,
-				Description:         "NDFC HTTP request timeout - timeout",
-				MarkdownDescription: "NDFC HTTP request timeout - timeout",
+				Description:         "NDFC HTTP request timeout - timeout. Enviroment variable `NDFC_TIMEOUT` can be used to override the provider configuration.",
+				MarkdownDescription: "NDFC HTTP request timeout - timeout. Enviroment variable `NDFC_TIMEOUT` can be used to override the provider configuration.",
 			},
 			"username": schema.StringAttribute{
 				Required:            true,
-				Description:         "NDFC Login credentials - user",
-				MarkdownDescription: "NDFC Login credentials - user",
+				Description:         "NDFC Login credentials - user.  Enviroment variable `NDFC_USER` can be used to override the provider configuration.",
+				MarkdownDescription: "NDFC Login credentials - user.  Enviroment variable `NDFC_USER` can be used to override the provider configuration.",
 			},
 		},
 	}
