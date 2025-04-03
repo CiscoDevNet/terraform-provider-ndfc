@@ -1,0 +1,181 @@
+---
+resource:
+  name: vrf_attachments
+  doc_category: Fabric
+  generate_tf_resource: false
+  attributes:
+    - model_name: id
+      tf_name: id
+      description: Terraform unique Id for the resource
+      type: String
+      id: true
+      computed: true
+    - &fabricName
+      model_name: fabric
+      tf_name: fabric_name
+      type: String
+      id: false
+      mandatory: true
+      description: The name of the fabric
+      example: myFabric
+      tf_requires_replace: true
+    - &deploy
+      model_name: deployAllAttachments
+      tf_name: deploy_all_attachments
+      type: Bool
+      default_value: false
+      payload_hide: true
+      description: Deploy all attachments in this resource
+      ndfc_type: bool
+      example: true
+    - model_name: attachments
+      tf_name: vrf_attachments
+      type: Map
+      description: List of Attachments
+      bulk: true
+      mandatory: true
+      filtered: true
+      attributes:
+        - model_name: id
+          tf_name: id
+          type: Int64
+          tf_hide: true
+          sort: true
+          payload_hide: true
+        - &filterThis
+          model_name: filterThisValue
+          tf_name: filter_this_value
+          type: Bool
+          tf_hide: true
+          payload_hide: true
+        - &vrfName
+          model_name: vrfName
+          tf_name: vrf_name
+          type: String
+          id: false
+          mandatory: true
+          description: The name of the VRF
+          example: VRF1
+          requires_replace: true
+          list_key: true
+        - <<: *deploy
+          description: Deploy all attachments in this VRF
+        - model_name: lanAttachList
+          tf_name: attach_list
+          type: MapNested
+          description: List of switches attached to the VRF
+          bulk: true
+          optional: true
+          filtered: true
+          example: "SWITCH_SERIAL_NO"
+          attributes:
+            - *filterThis
+            - model_name: id
+              tf_name: id
+              type: Int64
+              tf_hide: true
+              sort: true
+              payload_hide: true
+            - <<: *fabricName
+              mandatory: false
+              tf_hide: true
+            - <<: *vrfName
+              mandatory: false
+              tf_hide: true
+              list_key: false
+            - model_name: serialNumber
+              tf_name: serial_number
+              unmarshal_tag: switchSerialNo
+              type: String
+              tf_hide: true
+              description: Serial number of a switch
+              example: FDO245206N5
+              requires_replace: true
+              list_key: true
+            - &switchName
+              model_name: switchName
+              tf_name: switch_name
+              type: String
+              computed: true
+              description: The name of the switch
+              example: switch1
+            - &VlanId
+              model_name: vlan
+              tf_name: vlan
+              unmarshal_tag: vlanId
+              type: Int64
+              optional: true
+              computed: true
+              use_state: true
+              min_int: 2
+              max_int: 4094
+              description: VLAN ID
+              example: 1500
+              handle_empty: true
+            - &deployment
+              model_name: deployment
+              tf_name: deployment
+              type: Bool
+              default_value: false
+              tf_hide: true
+              description: Deploy the attachment
+              example: true
+            - &attach_state
+              model_name: lanAttachState
+              tf_name: attach_state
+              type: String
+              description: The state of the attachment
+              example: attached
+              computed: true
+            - &attached_flag
+              model_name: isLanAttached
+              tf_name: attached
+              type: Bool
+              description: The state of the attachment
+              example: true
+              computed: true
+              ndfc_type: bool
+            - model_name: freeformconfig
+              tf_name: freeform_config
+              type: String
+              description: This field covers any configuration not included in overlay templates which is needed as part of this VRF attachment
+              exclude_test: true
+            - model_name: deployThisAttachment
+              type: Bool
+              tf_name: deploy_this_attachment
+              payload_hide: true
+              default_value: false
+              ndfc_type: bool
+              description: If set to `true`, does a deployment of the attachment. This parameter cannot be set to `true` if  `deploy_all_attachments` in the resource is set or `deploy_attachment` in the corresponding `vrf` is set
+              example: false
+            - model_name: loopbackId
+              tf_name: loopback_id
+              type: Int64
+              handle_empty: true
+              ndfc_nested: [instanceValues]
+              min_int: 0
+              max_int: 1023
+              description: Override loopback ID
+              example: 101
+              exclude_test: true
+            - model_name: loopbackIpAddress
+              tf_name: loopback_ipv4
+              ndfc_nested: [instanceValues]
+              type: String
+              description: Override loopback IPv4 address
+              example: 1.2.3.4
+              exclude_test: true
+            - model_name: loopbackIpv6Address
+              ndfc_nested: [instanceValues]
+              tf_name: loopback_ipv6
+              type: String
+              description: Override loopback IPv6 address
+              example: 2001::1
+              exclude_test: true
+            - model_name: update_action
+              tf_name: update_action
+              type: BitMask
+              payload_hide: true
+              tf_hide: true
+
+        

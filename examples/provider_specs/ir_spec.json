@@ -1,0 +1,1431 @@
+{
+    "datasources": [
+      {
+        "name": "example",
+        "schema": {
+          "attributes": [
+            {
+              "name": "bool_attribute",
+              "bool": {
+                "computed_optional_required": "computed"
+              }
+            },
+            {
+              "name": "list_list_attribute",
+              "list": {
+                "computed_optional_required": "computed",
+                "element_type": {
+                  "list": {
+                    "element_type": {
+                      "string": {}
+                    }
+                  }
+                }
+              }
+            },
+            {
+              "name": "list_map_attribute",
+              "list": {
+                "computed_optional_required": "computed",
+                "element_type": {
+                  "map": {
+                    "element_type": {
+                      "string": {}
+                    }
+                  }
+                }
+              }
+            },
+            {
+              "name": "list_object_attribute",
+              "list": {
+                "computed_optional_required": "computed",
+                "element_type": {
+                  "object": {
+                    "attribute_types": [
+                      {
+                        "name": "obj_string_attr",
+                        "string": {}
+                      }
+                    ]
+                  }
+                }
+              }
+            },
+            {
+              "name": "list_object_object_attribute",
+              "list": {
+                "computed_optional_required": "computed",
+                "element_type": {
+                  "object": {
+                    "attribute_types": [
+                      {
+                        "name": "obj_obj_attr",
+                        "object": {
+                          "attribute_types": [
+                            {
+                              "name": "obj_obj_string_attr",
+                              "string": {}
+                            }
+                          ]
+                        }
+                      }
+                    ]
+                  }
+                }
+              }
+            },
+            {
+              "name": "object_attribute",
+              "object": {
+                "computed_optional_required": "computed",
+                "attribute_types": [
+                  {
+                    "name": "obj_string_attr",
+                    "string": {}
+                  }
+                ]
+              }
+            },
+            {
+              "name": "object_list_attribute",
+              "object": {
+                "computed_optional_required": "computed",
+                "attribute_types": [
+                  {
+                    "name": "obj_list_attr",
+                    "list": {
+                      "element_type": {
+                        "string": {}
+                      }
+                    }
+                  }
+                ]
+              }
+            },
+            {
+              "name": "object_list_object_attribute",
+              "object": {
+                "computed_optional_required": "computed",
+                "attribute_types": [
+                  {
+                    "name": "obj_list_attr",
+                    "list": {
+                      "element_type": {
+                        "object": {
+                          "attribute_types": [
+                            {
+                              "name": "obj_list_obj_attr",
+                              "string": {}
+                            }
+                          ]
+                        }
+                      }
+                    }
+                  }
+                ]
+              }
+            },
+            {
+              "name": "list_nested_attribute_one",
+              "list_nested": {
+                "computed_optional_required": "computed",
+                "nested_object": {
+                  "attributes": [
+                    {
+                      "name": "bool_attribute",
+                      "bool": {
+                        "computed_optional_required": "computed"
+                      }
+                    }
+                  ]
+                }
+              }
+            },
+            {
+              "name": "list_nested_attribute_two",
+              "list_nested": {
+                "computed_optional_required": "computed",
+                "nested_object": {
+                  "attributes": [
+                    {
+                      "name": "list_nested_attribute_two_list_nested_attribute_one",
+                      "list_nested": {
+                        "computed_optional_required": "computed",
+                        "nested_object": {
+                          "attributes": [
+                            {
+                              "name": "bool_attribute",
+                              "bool": {
+                                "computed_optional_required": "computed"
+                              }
+                            }
+                          ]
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            },
+            {
+              "name": "list_nested_attribute_three",
+              "list_nested": {
+                "computed_optional_required": "computed",
+                "nested_object": {
+                  "attributes": [
+                    {
+                      "name": "list_nested_attribute_three_list_nested_attribute_one",
+                      "list_nested": {
+                        "computed_optional_required": "computed",
+                        "nested_object": {
+                          "attributes": [
+                            {
+                              "name": "list_attribute",
+                              "list": {
+                                "computed_optional_required": "computed",
+                                "element_type": {
+                                  "string": {}
+                                }
+                              }
+                            }
+                          ]
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            },
+            {
+              "name": "list_nested_attribute_assoc_ext_type",
+              "list_nested": {
+                "nested_object": {
+                  "associated_external_type": {
+                    "import": {
+                      "path": "example.com/apisdk"
+                    },
+                    "type": "*apisdk.Type"
+                  },
+                  "attributes": [
+                    {
+                      "name": "bool_attribute",
+                      "bool": {
+                        "computed_optional_required": "computed"
+                      }
+                    },
+                    {
+                      "name": "float64_attribute",
+                      "float64": {
+                        "computed_optional_required": "computed_optional"
+                      }
+                    },
+                    {
+                      "name": "int64_attribute",
+                      "int64": {
+                        "computed_optional_required": "computed_optional"
+                      }
+                    },
+                    {
+                      "name": "number_attribute",
+                      "number": {
+                        "computed_optional_required": "computed_optional"
+                      }
+                    },
+                    {
+                      "name": "string_attribute",
+                      "string": {
+                        "computed_optional_required": "computed_optional"
+                      }
+                    }
+                  ]
+                },
+                "computed_optional_required": "optional"
+              }
+            },
+            {
+              "name": "map_nested_attribute_assoc_ext_type",
+              "map_nested": {
+                "nested_object": {
+                  "associated_external_type": {
+                    "import": {
+                      "path": "example.com/apisdk"
+                    },
+                    "type": "*apisdk.Type"
+                  },
+                  "attributes": [
+                    {
+                      "name": "bool_attribute",
+                      "bool": {
+                        "computed_optional_required": "computed"
+                      }
+                    },
+                    {
+                      "name": "float64_attribute",
+                      "float64": {
+                        "computed_optional_required": "computed_optional"
+                      }
+                    },
+                    {
+                      "name": "int64_attribute",
+                      "int64": {
+                        "computed_optional_required": "computed_optional"
+                      }
+                    },
+                    {
+                      "name": "number_attribute",
+                      "number": {
+                        "computed_optional_required": "computed_optional"
+                      }
+                    },
+                    {
+                      "name": "string_attribute",
+                      "string": {
+                        "computed_optional_required": "computed_optional"
+                      }
+                    }
+                  ]
+                },
+                "computed_optional_required": "optional"
+              }
+            },
+            {
+              "name": "set_nested_attribute_assoc_ext_type",
+              "set_nested": {
+                "nested_object": {
+                  "associated_external_type": {
+                    "import": {
+                      "path": "example.com/apisdk"
+                    },
+                    "type": "*apisdk.Type"
+                  },
+                  "attributes": [
+                    {
+                      "name": "bool_attribute",
+                      "bool": {
+                        "computed_optional_required": "computed"
+                      }
+                    },
+                    {
+                      "name": "float64_attribute",
+                      "float64": {
+                        "computed_optional_required": "computed_optional"
+                      }
+                    },
+                    {
+                      "name": "int64_attribute",
+                      "int64": {
+                        "computed_optional_required": "computed_optional"
+                      }
+                    },
+                    {
+                      "name": "number_attribute",
+                      "number": {
+                        "computed_optional_required": "computed_optional"
+                      }
+                    },
+                    {
+                      "name": "string_attribute",
+                      "string": {
+                        "computed_optional_required": "computed_optional"
+                      }
+                    }
+                  ]
+                },
+                "computed_optional_required": "optional"
+              }
+            },
+            {
+              "name": "single_nested_attribute_one",
+              "single_nested": {
+                "attributes": [
+                  {
+                    "name": "bool_attribute",
+                    "bool": {
+                      "computed_optional_required": "computed"
+                    }
+                  }
+                ],
+                "computed_optional_required": "computed"
+              }
+            },
+            {
+              "name": "single_nested_attribute_two",
+              "single_nested": {
+                "attributes": [
+                  {
+                    "name": "single_nested_attribute_two_single_nested_attribute_one",
+                    "single_nested": {
+                      "attributes": [
+                        {
+                          "name": "bool_attribute",
+                          "bool": {
+                            "computed_optional_required": "computed"
+                          }
+                        }
+                      ],
+                      "computed_optional_required": "computed"
+                    }
+                  }
+                ],
+                "computed_optional_required": "computed"
+              }
+            },
+            {
+              "name": "single_nested_attribute_three",
+              "single_nested": {
+                "attributes": [
+                  {
+                    "name": "single_nested_attribute_three_single_nested_attribute_one",
+                    "single_nested": {
+                      "attributes": [
+                        {
+                          "name": "list_attribute",
+                          "list": {
+                            "computed_optional_required": "computed",
+                            "element_type": {
+                              "string": {}
+                            }
+                          }
+                        }
+                      ],
+                      "computed_optional_required": "computed"
+                    }
+                  }
+                ],
+                "computed_optional_required": "computed"
+              }
+            },
+            {
+              "name": "single_nested_attribute_assoc_ext_type",
+              "single_nested": {
+                "associated_external_type": {
+                  "import": {
+                    "path": "example.com/apisdk"
+                  },
+                  "type": "*apisdk.Type"
+                },
+                "attributes": [
+                  {
+                    "name": "bool_attribute",
+                    "bool": {
+                      "computed_optional_required": "computed"
+                    }
+                  },
+                  {
+                    "name": "float64_attribute",
+                    "float64": {
+                      "computed_optional_required": "computed_optional"
+                    }
+                  },
+                  {
+                    "name": "int64_attribute",
+                    "int64": {
+                      "computed_optional_required": "computed_optional"
+                    }
+                  },
+                  {
+                    "name": "number_attribute",
+                    "number": {
+                      "computed_optional_required": "computed_optional"
+                    }
+                  },
+                  {
+                    "name": "string_attribute",
+                    "string": {
+                      "computed_optional_required": "computed_optional"
+                    }
+                  }
+                ],
+                "computed_optional_required": "optional"
+              }
+            }
+          ],
+          "blocks": [
+            {
+              "name": "list_nested_block_one",
+              "list_nested": {
+                "nested_object": {
+                  "attributes": [
+                    {
+                      "name": "bool_attribute",
+                      "bool": {
+                        "computed_optional_required": "computed"
+                      }
+                    }
+                  ]
+                }
+              }
+            },
+            {
+              "name": "list_nested_block_two",
+              "list_nested": {
+                "nested_object": {
+                  "blocks": [
+                    {
+                      "name": "list_nested_block_two_list_nested_block_one",
+                      "list_nested": {
+                        "nested_object": {
+                          "attributes": [
+                            {
+                              "name": "bool_attribute",
+                              "bool": {
+                                "computed_optional_required": "computed"
+                              }
+                            }
+                          ]
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            },
+            {
+              "name": "list_nested_block_three",
+              "list_nested": {
+                "nested_object": {
+                  "attributes": [
+                    {
+                      "name": "object_attribute",
+                      "object": {
+                        "computed_optional_required": "computed",
+                        "attribute_types": [
+                          {
+                            "name": "string_attribute_type",
+                            "string": {}
+                          }
+                        ]
+                      }
+                    }
+                  ],
+                  "blocks": [
+                    {
+                      "name": "list_nested_block_three_list_nested_block_one",
+                      "list_nested": {
+                        "nested_object": {
+                          "attributes": [
+                            {
+                              "name": "list_attribute",
+                              "list": {
+                                "computed_optional_required": "computed",
+                                "element_type": {
+                                  "string": {}
+                                }
+                              }
+                            }
+                          ]
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            },
+            {
+              "name": "list_nested_block_assoc_ext_type",
+              "list_nested": {
+                "nested_object": {
+                  "associated_external_type": {
+                    "import": {
+                      "path": "example.com/apisdk"
+                    },
+                    "type": "*apisdk.Type"
+                  },
+                  "attributes": [
+                    {
+                      "name": "bool_attribute",
+                      "bool": {
+                        "computed_optional_required": "computed"
+                      }
+                    },
+                    {
+                      "name": "float64_attribute",
+                      "float64": {
+                        "computed_optional_required": "computed_optional"
+                      }
+                    },
+                    {
+                      "name": "int64_attribute",
+                      "int64": {
+                        "computed_optional_required": "computed_optional"
+                      }
+                    },
+                    {
+                      "name": "number_attribute",
+                      "number": {
+                        "computed_optional_required": "computed_optional"
+                      }
+                    },
+                    {
+                      "name": "string_attribute",
+                      "string": {
+                        "computed_optional_required": "computed_optional"
+                      }
+                    }
+                  ]
+                }
+              }
+            },
+            {
+              "name": "set_nested_block_assoc_ext_type",
+              "set_nested": {
+                "nested_object": {
+                  "associated_external_type": {
+                    "import": {
+                      "path": "example.com/apisdk"
+                    },
+                    "type": "*apisdk.Type"
+                  },
+                  "attributes": [
+                    {
+                      "name": "bool_attribute",
+                      "bool": {
+                        "computed_optional_required": "computed"
+                      }
+                    },
+                    {
+                      "name": "float64_attribute",
+                      "float64": {
+                        "computed_optional_required": "computed_optional"
+                      }
+                    },
+                    {
+                      "name": "int64_attribute",
+                      "int64": {
+                        "computed_optional_required": "computed_optional"
+                      }
+                    },
+                    {
+                      "name": "number_attribute",
+                      "number": {
+                        "computed_optional_required": "computed_optional"
+                      }
+                    },
+                    {
+                      "name": "string_attribute",
+                      "string": {
+                        "computed_optional_required": "computed_optional"
+                      }
+                    }
+                  ]
+                }
+              }
+            },
+            {
+              "name": "single_nested_block_one",
+              "single_nested": {
+                "attributes": [
+                  {
+                    "name": "bool_attribute",
+                    "bool": {
+                      "computed_optional_required": "computed"
+                    }
+                  }
+                ]
+              }
+            },
+            {
+              "name": "single_nested_block_two",
+              "single_nested": {
+                "blocks": [
+                  {
+                    "name": "single_nested_block_two_single_nested_block_one",
+                    "single_nested": {
+                      "attributes": [
+                        {
+                          "name": "bool_attribute",
+                          "bool": {
+                            "computed_optional_required": "computed"
+                          }
+                        }
+                      ]
+                    }
+                  }
+                ]
+              }
+            },
+            {
+              "name": "single_nested_block_three",
+              "single_nested": {
+                "attributes": [
+                  {
+                    "name": "object_attribute",
+                    "object": {
+                      "computed_optional_required": "computed",
+                      "attribute_types": [
+                        {
+                          "name": "string_attribute_type",
+                          "string": {}
+                        }
+                      ]
+                    }
+                  }
+                ],
+                "blocks": [
+                  {
+                    "name": "single_nested_block_three_list_nested_block_one",
+                    "list_nested": {
+                      "nested_object": {
+                        "attributes": [
+                          {
+                            "name": "list_attribute",
+                            "list": {
+                              "computed_optional_required": "computed",
+                              "element_type": {
+                                "string": {}
+                              }
+                            }
+                          }
+                        ]
+                      }
+                    }
+                  }
+                ]
+              }
+            },
+            {
+              "name": "single_nested_block_assoc_ext_type",
+              "single_nested": {
+                "associated_external_type": {
+                  "import": {
+                    "path": "example.com/apisdk"
+                  },
+                  "type": "*apisdk.Type"
+                },
+                "attributes": [
+                  {
+                    "name": "bool_attribute",
+                    "bool": {
+                      "computed_optional_required": "computed"
+                    }
+                  },
+                  {
+                    "name": "float64_attribute",
+                    "float64": {
+                      "computed_optional_required": "computed_optional"
+                    }
+                  },
+                  {
+                    "name": "int64_attribute",
+                    "int64": {
+                      "computed_optional_required": "computed_optional"
+                    }
+                  },
+                  {
+                    "name": "number_attribute",
+                    "number": {
+                      "computed_optional_required": "computed_optional"
+                    }
+                  },
+                  {
+                    "name": "string_attribute",
+                    "string": {
+                      "computed_optional_required": "computed_optional"
+                    }
+                  }
+                ]
+              }
+            }
+          ]
+        }
+      }
+    ],
+    "provider": {
+      "name": "example",
+      "schema": {
+        "attributes": [
+          {
+            "name": "list_nested_attribute_assoc_ext_type",
+            "list_nested": {
+              "nested_object": {
+                "associated_external_type": {
+                  "import": {
+                    "path": "example.com/apisdk"
+                  },
+                  "type": "*apisdk.Type"
+                },
+                "attributes": [
+                  {
+                    "name": "bool_attribute",
+                    "bool": {
+                      "optional_required": "optional"
+                    }
+                  },
+                  {
+                    "name": "float64_attribute",
+                    "float64": {
+                      "optional_required": "optional"
+                    }
+                  },
+                  {
+                    "name": "int64_attribute",
+                    "int64": {
+                      "optional_required": "optional"
+                    }
+                  },
+                  {
+                    "name": "number_attribute",
+                    "number": {
+                      "optional_required": "optional"
+                    }
+                  },
+                  {
+                    "name": "string_attribute",
+                    "string": {
+                      "optional_required": "optional"
+                    }
+                  }
+                ]
+              },
+              "optional_required": "optional"
+            }
+          },
+          {
+            "name": "map_nested_attribute_assoc_ext_type",
+            "map_nested": {
+              "nested_object": {
+                "associated_external_type": {
+                  "import": {
+                    "path": "example.com/apisdk"
+                  },
+                  "type": "*apisdk.Type"
+                },
+                "attributes": [
+                  {
+                    "name": "bool_attribute",
+                    "bool": {
+                      "optional_required": "optional"
+                    }
+                  },
+                  {
+                    "name": "float64_attribute",
+                    "float64": {
+                      "optional_required": "optional"
+                    }
+                  },
+                  {
+                    "name": "int64_attribute",
+                    "int64": {
+                      "optional_required": "optional"
+                    }
+                  },
+                  {
+                    "name": "number_attribute",
+                    "number": {
+                      "optional_required": "optional"
+                    }
+                  },
+                  {
+                    "name": "string_attribute",
+                    "string": {
+                      "optional_required": "optional"
+                    }
+                  }
+                ]
+              },
+              "optional_required": "optional"
+            }
+          },
+          {
+            "name": "set_nested_attribute_assoc_ext_type",
+            "set_nested": {
+              "nested_object": {
+                "associated_external_type": {
+                  "import": {
+                    "path": "example.com/apisdk"
+                  },
+                  "type": "*apisdk.Type"
+                },
+                "attributes": [
+                  {
+                    "name": "bool_attribute",
+                    "bool": {
+                      "optional_required": "optional"
+                    }
+                  },
+                  {
+                    "name": "float64_attribute",
+                    "float64": {
+                      "optional_required": "optional"
+                    }
+                  },
+                  {
+                    "name": "int64_attribute",
+                    "int64": {
+                      "optional_required": "optional"
+                    }
+                  },
+                  {
+                    "name": "number_attribute",
+                    "number": {
+                      "optional_required": "optional"
+                    }
+                  },
+                  {
+                    "name": "string_attribute",
+                    "string": {
+                      "optional_required": "optional"
+                    }
+                  }
+                ]
+              },
+              "optional_required": "optional"
+            }
+          },
+          {
+            "name": "single_nested_attribute_assoc_ext_type",
+            "single_nested": {
+              "associated_external_type": {
+                "import": {
+                  "path": "example.com/apisdk"
+                },
+                "type": "*apisdk.Type"
+              },
+              "attributes": [
+                {
+                  "name": "bool_attribute",
+                  "bool": {
+                    "optional_required": "optional"
+                  }
+                },
+                {
+                  "name": "float64_attribute",
+                  "float64": {
+                    "optional_required": "optional"
+                  }
+                },
+                {
+                  "name": "int64_attribute",
+                  "int64": {
+                    "optional_required": "optional"
+                  }
+                },
+                {
+                  "name": "number_attribute",
+                  "number": {
+                    "optional_required": "optional"
+                  }
+                },
+                {
+                  "name": "string_attribute",
+                  "string": {
+                    "optional_required": "optional"
+                  }
+                }
+              ],
+              "optional_required": "optional"
+            }
+          }
+        ],
+        "blocks": [
+          {
+            "name": "list_nested_block_assoc_ext_type",
+            "list_nested": {
+              "nested_object": {
+                "associated_external_type": {
+                  "import": {
+                    "path": "example.com/apisdk"
+                  },
+                  "type": "*apisdk.Type"
+                },
+                "attributes": [
+                  {
+                    "name": "bool_attribute",
+                    "bool": {
+                      "optional_required": "optional"
+                    }
+                  },
+                  {
+                    "name": "float64_attribute",
+                    "float64": {
+                      "optional_required": "optional"
+                    }
+                  },
+                  {
+                    "name": "int64_attribute",
+                    "int64": {
+                      "optional_required": "optional"
+                    }
+                  },
+                  {
+                    "name": "number_attribute",
+                    "number": {
+                      "optional_required": "optional"
+                    }
+                  },
+                  {
+                    "name": "string_attribute",
+                    "string": {
+                      "optional_required": "optional"
+                    }
+                  }
+                ]
+              }
+            }
+          },
+          {
+            "name": "set_nested_block_assoc_ext_type",
+            "set_nested": {
+              "nested_object": {
+                "associated_external_type": {
+                  "import": {
+                    "path": "example.com/apisdk"
+                  },
+                  "type": "*apisdk.Type"
+                },
+                "attributes": [
+                  {
+                    "name": "bool_attribute",
+                    "bool": {
+                      "optional_required": "optional"
+                    }
+                  },
+                  {
+                    "name": "float64_attribute",
+                    "float64": {
+                      "optional_required": "optional"
+                    }
+                  },
+                  {
+                    "name": "int64_attribute",
+                    "int64": {
+                      "optional_required": "optional"
+                    }
+                  },
+                  {
+                    "name": "number_attribute",
+                    "number": {
+                      "optional_required": "optional"
+                    }
+                  },
+                  {
+                    "name": "string_attribute",
+                    "string": {
+                      "optional_required": "optional"
+                    }
+                  }
+                ]
+              }
+            }
+          },
+          {
+            "name": "single_nested_block_assoc_ext_type",
+            "single_nested": {
+              "associated_external_type": {
+                "import": {
+                  "path": "example.com/apisdk"
+                },
+                "type": "*apisdk.Type"
+              },
+              "attributes": [
+                {
+                  "name": "bool_attribute",
+                  "bool": {
+                    "optional_required": "optional"
+                  }
+                },
+                {
+                  "name": "float64_attribute",
+                  "float64": {
+                    "optional_required": "optional"
+                  }
+                },
+                {
+                  "name": "int64_attribute",
+                  "int64": {
+                    "optional_required": "optional"
+                  }
+                },
+                {
+                  "name": "number_attribute",
+                  "number": {
+                    "optional_required": "optional"
+                  }
+                },
+                {
+                  "name": "string_attribute",
+                  "string": {
+                    "optional_required": "optional"
+                  }
+                }
+              ]
+            }
+          }
+        ]
+      }
+    },
+    "resources": [
+      {
+        "name": "example",
+        "schema": {
+          "attributes": [
+            {
+              "name": "bool_attribute",
+              "bool": {
+                "computed_optional_required": "computed",
+                "custom_type": {
+                  "import": {
+                    "alias": "boolalias",
+                    "path": "github.com/my_account_my_project/bool"
+                  },
+                  "type": "my_bool_type",
+                  "value_type": "my_bool_value"
+                },
+                "default": {
+                  "static": true
+                },
+                "plan_modifiers": [
+                  {
+                    "requires_replace": {}
+                  },
+                  {
+                    "custom": {
+                      "imports": [
+                        {
+                          "alias": "planmodifieralias",
+                          "path": "github.com/my_account/my_project/myboolplanmodifier"
+                        }
+                      ],
+                      "schema_definition": "myboolplanmodifier.Modify()"
+                    }
+                  }
+                ],
+                "validators": [
+                  {
+                    "custom": {
+                      "imports": [
+                        {
+                          "alias": "validatoralias",
+                          "path": "github.com/my_account/my_project/myboolvalidator"
+                        }
+                      ],
+                      "schema_definition": "myboolvalidator.Validate()"
+                    }
+                  }
+                ]
+              }
+            },
+            {
+              "name": "list_nested_attribute_assoc_ext_type",
+              "list_nested": {
+                "nested_object": {
+                  "associated_external_type": {
+                    "import": {
+                      "path": "example.com/apisdk"
+                    },
+                    "type": "*apisdk.Type"
+                  },
+                  "attributes": [
+                    {
+                      "name": "bool_attribute",
+                      "bool": {
+                        "computed_optional_required": "optional"
+                      }
+                    },
+                    {
+                      "name": "float64_attribute",
+                      "float64": {
+                        "computed_optional_required": "optional"
+                      }
+                    },
+                    {
+                      "name": "int64_attribute",
+                      "int64": {
+                        "computed_optional_required": "optional"
+                      }
+                    },
+                    {
+                      "name": "number_attribute",
+                      "number": {
+                        "computed_optional_required": "optional"
+                      }
+                    },
+                    {
+                      "name": "string_attribute",
+                      "string": {
+                        "computed_optional_required": "optional"
+                      }
+                    }
+                  ]
+                },
+                "computed_optional_required": "optional"
+              }
+            },
+            {
+              "name": "map_nested_attribute_assoc_ext_type",
+              "map_nested": {
+                "nested_object": {
+                  "associated_external_type": {
+                    "import": {
+                      "path": "example.com/apisdk"
+                    },
+                    "type": "*apisdk.Type"
+                  },
+                  "attributes": [
+                    {
+                      "name": "bool_attribute",
+                      "bool": {
+                        "computed_optional_required": "optional"
+                      }
+                    },
+                    {
+                      "name": "float64_attribute",
+                      "float64": {
+                        "computed_optional_required": "optional"
+                      }
+                    },
+                    {
+                      "name": "int64_attribute",
+                      "int64": {
+                        "computed_optional_required": "optional"
+                      }
+                    },
+                    {
+                      "name": "number_attribute",
+                      "number": {
+                        "computed_optional_required": "optional"
+                      }
+                    },
+                    {
+                      "name": "string_attribute",
+                      "string": {
+                        "computed_optional_required": "optional"
+                      }
+                    }
+                  ]
+                },
+                "computed_optional_required": "optional"
+              }
+            },
+            {
+              "name": "set_nested_attribute_assoc_ext_type",
+              "set_nested": {
+                "nested_object": {
+                  "associated_external_type": {
+                    "import": {
+                      "path": "example.com/apisdk"
+                    },
+                    "type": "*apisdk.Type"
+                  },
+                  "attributes": [
+                    {
+                      "name": "bool_attribute",
+                      "bool": {
+                        "computed_optional_required": "optional"
+                      }
+                    },
+                    {
+                      "name": "float64_attribute",
+                      "float64": {
+                        "computed_optional_required": "optional"
+                      }
+                    },
+                    {
+                      "name": "int64_attribute",
+                      "int64": {
+                        "computed_optional_required": "optional"
+                      }
+                    },
+                    {
+                      "name": "number_attribute",
+                      "number": {
+                        "computed_optional_required": "optional"
+                      }
+                    },
+                    {
+                      "name": "string_attribute",
+                      "string": {
+                        "computed_optional_required": "optional"
+                      }
+                    }
+                  ]
+                },
+                "computed_optional_required": "optional"
+              }
+            },
+            {
+              "name": "single_nested_attribute_assoc_ext_type",
+              "single_nested": {
+                "associated_external_type": {
+                  "import": {
+                    "path": "example.com/apisdk"
+                  },
+                  "type": "*apisdk.Type"
+                },
+                "attributes": [
+                  {
+                    "name": "bool_attribute",
+                    "bool": {
+                      "computed_optional_required": "optional"
+                    }
+                  },
+                  {
+                    "name": "float64_attribute",
+                    "float64": {
+                      "computed_optional_required": "optional"
+                    }
+                  },
+                  {
+                    "name": "int64_attribute",
+                    "int64": {
+                      "computed_optional_required": "optional"
+                    }
+                  },
+                  {
+                    "name": "number_attribute",
+                    "number": {
+                      "computed_optional_required": "optional"
+                    }
+                  },
+                  {
+                    "name": "string_attribute",
+                    "string": {
+                      "computed_optional_required": "optional"
+                    }
+                  }
+                ],
+                "computed_optional_required": "optional"
+              }
+            }
+          ],
+          "blocks": [
+            {
+              "name": "list_nested_block_assoc_ext_type",
+              "list_nested": {
+                "nested_object": {
+                  "associated_external_type": {
+                    "import": {
+                      "path": "example.com/apisdk"
+                    },
+                    "type": "*apisdk.Type"
+                  },
+                  "attributes": [
+                    {
+                      "name": "bool_attribute",
+                      "bool": {
+                        "computed_optional_required": "optional"
+                      }
+                    },
+                    {
+                      "name": "float64_attribute",
+                      "float64": {
+                        "computed_optional_required": "optional"
+                      }
+                    },
+                    {
+                      "name": "int64_attribute",
+                      "int64": {
+                        "computed_optional_required": "optional"
+                      }
+                    },
+                    {
+                      "name": "number_attribute",
+                      "number": {
+                        "computed_optional_required": "optional"
+                      }
+                    },
+                    {
+                      "name": "string_attribute",
+                      "string": {
+                        "computed_optional_required": "optional"
+                      }
+                    }
+                  ]
+                }
+              }
+            },
+            {
+              "name": "set_nested_block_assoc_ext_type",
+              "set_nested": {
+                "nested_object": {
+                  "associated_external_type": {
+                    "import": {
+                      "path": "example.com/apisdk"
+                    },
+                    "type": "*apisdk.Type"
+                  },
+                  "attributes": [
+                    {
+                      "name": "bool_attribute",
+                      "bool": {
+                        "computed_optional_required": "optional"
+                      }
+                    },
+                    {
+                      "name": "float64_attribute",
+                      "float64": {
+                        "computed_optional_required": "optional"
+                      }
+                    },
+                    {
+                      "name": "int64_attribute",
+                      "int64": {
+                        "computed_optional_required": "optional"
+                      }
+                    },
+                    {
+                      "name": "number_attribute",
+                      "number": {
+                        "computed_optional_required": "optional"
+                      }
+                    },
+                    {
+                      "name": "string_attribute",
+                      "string": {
+                        "computed_optional_required": "optional"
+                      }
+                    }
+                  ]
+                }
+              }
+            },
+            {
+              "name": "single_nested_block_assoc_ext_type",
+              "single_nested": {
+                "associated_external_type": {
+                  "import": {
+                    "path": "example.com/apisdk"
+                  },
+                  "type": "*apisdk.Type"
+                },
+                "attributes": [
+                  {
+                    "name": "bool_attribute",
+                    "bool": {
+                      "computed_optional_required": "optional"
+                    }
+                  },
+                  {
+                    "name": "float64_attribute",
+                    "float64": {
+                      "computed_optional_required": "optional"
+                    }
+                  },
+                  {
+                    "name": "int64_attribute",
+                    "int64": {
+                      "computed_optional_required": "optional"
+                    }
+                  },
+                  {
+                    "name": "number_attribute",
+                    "number": {
+                      "computed_optional_required": "optional"
+                    }
+                  },
+                  {
+                    "name": "string_attribute",
+                    "string": {
+                      "computed_optional_required": "optional"
+                    }
+                  }
+                ]
+              }
+            }
+          ]
+        }
+      }
+    ],
+      "version": "0.1"
+  }

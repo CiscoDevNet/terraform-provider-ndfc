@@ -1,0 +1,27 @@
+---
+files:
+  - ndfc.yaml
+  - vrf-bulk.yaml
+  - vrf-attachments.yaml
+  - networks.yaml
+  - network-attachments.yaml
+  - interface_common.yaml
+  - interface_eth.yaml
+  - interface_loopback.yaml
+  - interface_vlan.yaml
+  - inventory-reachability.yaml
+  - configuration-deploy.yaml
+  - inventory-devices.yaml
+  - interface_portchannel.yaml
+  - interface_vpc.yaml
+  - templates.yaml
+  - policy.yaml
+  - vpc-pair.yaml
+  - fabric_common.yaml
+  - fabric_lan_classic.yaml
+  - fabric_ipfm.yaml
+  - fabric_vxlan_evpn.yaml
+  - fabric_vxlan_msd.yaml
+  - fabric_msite_ext_net.yaml
+
+

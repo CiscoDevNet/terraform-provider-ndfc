@@ -1,0 +1,488 @@
+---
+resource:
+  name: networks
+  rest_endpoint: /lan-fabric/rest/top-down/v2/fabrics/%v/networks/
+  doc_category: Fabric
+  generate_tf_resource: true
+  import_id: ["fabric_vxlan/[net1, net2, net3]"]
+  import_desc: ["fabric_name/[comma separated list of networks]"]
+  description: This resource can be used to manage networks on a fabric. Single resource handles multiple networks.
+  attributes:
+    - model_name: id
+      tf_name: id
+      description: Terraform unique Id for the resource
+      type: String
+      id: true
+      computed: true
+      payload_hide: true
+    - &fname
+      model_name: fabric
+      tf_name: fabric_name
+      description: The name of the fabric
+      type: String
+      example: CML
+      mandatory: true
+      tf_requires_replace: true
+    - &deploy
+      model_name: deployAllAttachments
+      tf_name: deploy_all_attachments
+      type: Bool
+      default_value: false
+      payload_hide: true
+      description: If set to `true`, do a deployment of all attachments in this resource. This parameter cannot be `true` if either  `deploy_attachments` inside any `network` or `deploy_this_attachment` in any `attachments` is set to `true`
+      ndfc_type: bool
+      example: true
+    - model_name: networks
+      tf_name: networks
+      description: List of networks
+      type: Map
+      bulk: true
+      mandatory: true
+      filtered: true
+      ndfc_type: List
+      map_key: network_name
+      gen_backend: true
+      example: NET1
+      attributes:
+      - model_name: filterThisValue
+        tf_name: filter_this_value
+        type: Bool
+        tf_hide: true
+        payload_hide: true
+      - &netName
+        model_name: networkName
+        tf_name: network_name
+        type: String
+        id: false
+        mandatory: true
+        description: The name of the network
+        example: NET1
+        tf_hide: true
+      - model_name: fabric
+        tf_name: fabric_name
+        reference: true
+        description: The name of the fabric
+        type: String
+        example: CML
+        tf_hide: true
+      - &displayName
+        model_name: displayName
+        tf_name: display_name
+        type: String
+        optional: true
+        computed: true
+        description: Customized name of the network. By default, it will be same as the network name
+        example: NET1
+      - &netId
+        model_name: networkId
+        tf_name: network_id
+        type: Int64
+        computed: true
+        optional: true
+        min_int: 1
+        max_int: 16777214
+        description: VNI ID of the network
+        example: 30001
+        requires_replace: true
+        use_state: true
+      - &netTemplate
+        model_name: networkTemplate
+        tf_name: network_template
+        type: String
+        description: The name of the network template. This is only applicable for leaf switches
+        default_value: Default_Network_Universal
+        example: Default_Network_Universal
+      - &netExtensionTemplate
+        model_name: networkExtensionTemplate
+        tf_name: network_extension_template
+        type: String
+        description: The name of the network extension template. Applicable to Switch(es) with role Border
+        default_value: Default_Network_Extension_Universal
+        example: Default_Network_Extension_Universal
+      - &vrf
+        model_name: vrf
+        tf_name: vrf_name
+        type: String
+        default_value: NA
+        description: The name of the vrf
+        example: VRF1
+      - &primaryNetworkId
+        model_name: primaryNetworkId
+        tf_name: primary_network_id
+        type: Int64
+        handle_empty: true
+        computed: true
+        optional: true
+        description: Primary network VNI ID. This is applicable only when PVLAN is enabled in fabric.
+        example: 30000
+        use_state: true
+      - &type
+        model_name: type
+        tf_name: network_type
+        type: String
+        enum_values: ["Normal", "Primary", "Community", "Isolated"]
+        description: Network Type
+        default_value: Normal
+        example: Normal
+      - &nwStatus
+        model_name: networkStatus
+        tf_name: network_status
+        type: String
+        description: Network status
+        computed: true
+      - &gatewayIpAddress
+        model_name: gatewayIpAddress
+        ndfc_nested: [networkTemplateConfig]
+        tf_name: gateway_ipv4_address
+        type: String
+        description: Gateway IPv4 address, for example `192.0.2.1/24`
+        example: 192.0.2.1/24
+      - &gatewayIpV6Address
+        model_name: gatewayIpV6Address
+        ndfc_nested: [networkTemplateConfig]
+        tf_name: gateway_ipv6_address
+        type: String
+        description: Gateway IPv6 addresses, for example `2001:db8::1/64,2001:db9::1/64`
+        example: "2001:db8::1/64"
+      - &vlanId
+        model_name: vlanId
+        ndfc_nested: [networkTemplateConfig]
+        tf_name: vlan_id
+        type: Int64
+        computed: true
+        optional: true
+        min_int: 2
+        max_int: 4094
+        description: VLAN ID
+        example: 1600
+        handle_empty: true
+        use_state: true
+      - &vlanName
+        model_name: vlanName
+        ndfc_nested: [networkTemplateConfig]
+        tf_name: vlan_name
+        type: String
+        description: Vlan name. If > 32 chars, enable 'system vlan long-name' for NX-OS, disable VTPv1 and VTPv2 or switch to VTPv3 for IOS XE.
+        example: VLAN2000
+      - &isLayer2Only
+        model_name: isLayer2Only
+        ndfc_nested: [networkTemplateConfig]
+        tf_name: layer2_only
+        type: Bool
+        default_value: false
+        description: Layer-2 only flag
+        example: false
+      - &intfDescription
+        model_name: intfDescription
+        ndfc_nested: [networkTemplateConfig]
+        tf_name: interface_description
+        type: String
+        description: Interface description
+        example: My int description
+      - &mtu
+        model_name: mtu
+        ndfc_nested: [networkTemplateConfig]
+        tf_name: mtu
+        type: Int64
+        min_int: 68
+        max_int: 9216
+        default_value: 9216
+        description: MTU for L3 interface
+        example: 9200
+        handle_empty: true
+      - &secondaryGW1
+        model_name: secondaryGW1
+        ndfc_nested: [networkTemplateConfig]
+        tf_name: secondary_gateway_1
+        type: String
+        description: IPv4 Secondary GW1
+        example: 192.168.2.1/24
+      - &secondaryGW2
+        model_name: secondaryGW2
+        ndfc_nested: [networkTemplateConfig]
+        tf_name: secondary_gateway_2
+        type: String
+        description: IPv4 Secondary GW2
+        example: 192.168.3.1/24
+      - &secondaryGW3
+        model_name: secondaryGW3
+        ndfc_nested: [networkTemplateConfig]
+        tf_name: secondary_gateway_3
+        type: String
+        description: IPv4 Secondary GW3
+        example: 192.168.4.1/24
+      - &secondaryGW4
+        model_name: secondaryGW4
+        ndfc_nested: [networkTemplateConfig]
+        tf_name: secondary_gateway_4
+        type: String
+        description: IPv4 Secondary GW4
+        example: 192.168.5.1/24
+      - &suppressArp
+        model_name: suppressArp
+        ndfc_nested: [networkTemplateConfig]
+        tf_name: arp_suppression
+        type: Bool
+        description: ARP suppression is only supported if SVI is present when Layer-2-Only is not enabled. NX-OS Specific.
+        example: false
+      - &enableIR
+        model_name: enableIR
+        ndfc_nested: [networkTemplateConfig]
+        tf_name: ingress_replication
+        type: Bool
+        default_value: false
+        description: Ingress replication flag. Read-only per network, Fabric-wide setting.
+        example: false
+      - &mcastGroup
+        model_name: mcastGroup
+        ndfc_nested: [networkTemplateConfig]
+        tf_name: multicast_group
+        type: String
+        computed: true
+        optional: true
+        description: Multicast group address
+        example: 233.1.1.1
+      - &dhcpServers
+        model_name: dhcpServers
+        tf_name: dhcp_relay_servers
+        type: List
+        optional: true
+        ndfc_nested: [networkTemplateConfig]
+        description: List of DHCP relay servers
+        attributes:
+          - model_name: srvrAddr
+            tf_name: address
+            type: String
+            description: Server IP V4 Address
+            example: 2.3.4.5
+          - model_name: srvrVrf
+            tf_name: vrf
+            type: String
+            description: Server VRF. If management vrf, enter 'management'. If default/global vrf, enter 'default'.
+            example: VRF1
+      - &loopbackId
+        model_name: loopbackId
+        ndfc_nested: [networkTemplateConfig]
+        tf_name: dhcp_relay_loopback_id
+        type: Int64
+        handle_empty: true
+        min_int: 0
+        max_int: 1023
+        description: Loopback ID for DHCP Relay interface
+        example: 134
+      - &tag
+        model_name: tag
+        ndfc_nested: [networkTemplateConfig]
+        tf_name: routing_tag
+        type: Int64
+        handle_empty: true
+        default_value: 12345
+        description: Routing tag
+        example: 11111
+      - &trmEnabled
+        model_name: trmEnabled
+        ndfc_nested: [networkTemplateConfig]
+        tf_name: trm
+        type: Bool
+        description: Enable Tenant Routed Multicast
+        example: true
+      - &rtBothAuto
+        model_name: rtBothAuto
+        ndfc_nested: [networkTemplateConfig]
+        tf_name: route_target_both
+        type: Bool
+        default_value: false
+        description: L2 VNI Route-Target Both Enable. NX-OS specific.
+        example: true
+      - &enableNetflow
+        model_name: ENABLE_NETFLOW
+        ndfc_nested: [networkTemplateConfig]
+        tf_name: netflow
+        type: Bool
+        default_value: false
+        description: Netflow enable flag. Netflow is supported only if it is enabled on fabric. For NX-OS only.
+        example: false
+      - &sviNetflowMonitor
+        model_name: SVI_NETFLOW_MONITOR
+        ndfc_nested: [networkTemplateConfig]
+        tf_name: svi_netflow_monitor
+        type: String
+        description: Interface Vlan Netflow Monitor. Applicable only if 'Layer 2 Only' is not enabled. Provide monitor name defined in fabric setting for Layer 3 Record. For NX-OS only.
+        example: MON1
+      - &vlanNetflowMonitor
+        model_name: VLAN_NETFLOW_MONITOR
+        ndfc_nested: [networkTemplateConfig]
+        tf_name: vlan_netflow_monitor
+        type: String
+        description: Vlan Netflow Monitor. Provide monitor name defined in fabric setting for Layer 3 Record. For NX-OS only
+        example: MON1
+      - &enableL3OnBorder
+        model_name: enableL3OnBorder
+        ndfc_nested: [networkTemplateConfig]
+        tf_name: l3_gatway_border
+        type: Bool
+        default_value: false
+        description: Enable L3 Gateway on Border
+        example: true
+      - &igmpVerion
+        model_name: igmpVersion
+        ndfc_nested: [networkTemplateConfig]
+        tf_name: igmp_version
+        type: String
+        description: IGMP version
+        optional: true
+        computed: true
+        example: 3
+      - model_name: deploy_attachments
+        tf_name: deploy_attachments
+        type: Bool
+        default_value: false
+        payload_hide: true
+        description: If set to `true`, deploys all attachments in the network. This parameter cannot be `true` if `deploy_all_attachments` at resource level is set to `true` or `deploy_this_attachment` in any `attachments` is set to `true`
+        ndfc_type: bool
+        example: false
+      - model_name: lanAttachList
+        augment_from: network_attachments.networkAttachments.lanAttachList
+datasource:
+  name: networks
+  doc_category: Fabric
+  generate_tf_resource: true
+  attributes:
+    - <<: *fname
+      mandatory: true
+    - model_name: networks
+      tf_name: networks
+      description: List of Networks
+      type: List
+      bulk: true
+      attributes:
+        - <<: *netName
+          tf_hide: false
+        - *displayName
+        - *netId
+        - *netTemplate
+        - *netExtensionTemplate
+        - *vrf
+        - *primaryNetworkId
+        - *type
+        - *nwStatus
+        - *gatewayIpAddress
+        - *gatewayIpV6Address
+        - *vlanId
+        - *vlanName
+        - *isLayer2Only
+        - *intfDescription
+        - *mtu
+        - *secondaryGW1
+        - *secondaryGW2
+        - *secondaryGW3
+        - *secondaryGW4
+        - *suppressArp
+        - *enableIR
+        - *mcastGroup
+        - *dhcpServers
+        - *loopbackId
+        - *tag
+        - *trmEnabled
+        - *rtBothAuto
+        - *enableNetflow
+        - *sviNetflowMonitor
+        - *vlanNetflowMonitor
+        - *enableL3OnBorder
+        - *igmpVerion
+        - model_name: lanAttachList
+          tf_name: attachments
+          type: List
+          description: List of switches attached to the network
+          attributes:
+            - model_name: serialNumber
+              tf_name: serial_number
+              unmarshal_tag: switchSerialNo
+              type: String
+              tf_hide: false
+              description: Serial number of a switch
+              example: FDO245206N5
+              requires_replace: true
+              list_key: true
+            - &switchName
+              model_name: switchName
+              tf_name: switch_name
+              type: String
+              computed: true
+              description: The name of the switch
+              example: switch1
+            - &dispName
+              model_name: displayName
+              tf_name: display_name
+              type: String
+              computed: true
+              optional: true
+              description: The name of the switch
+              example: switch1
+            - &VlanId
+              model_name: vlan
+              tf_name: vlan
+              unmarshal_tag: vlanId
+              type: Int64
+              optional: true
+              computed: true
+              use_state: true
+              min_int: 2
+              max_int: 4094
+              description: VLAN ID
+              example: 1600
+              handle_empty: true
+            - &attach_state
+              model_name: lanAttachState
+              tf_name: attach_state
+              type: String
+              description: The state of the attachment
+              example: attached
+              computed: true
+            - &attached_flag
+              model_name: isLanAttached
+              tf_name: attached
+              type: Bool
+              description: The state of the attachment
+              example: true
+              computed: true
+              ndfc_type: bool
+            - model_name: freeformconfig
+              tf_name: freeform_config
+              type: String
+              description: This field covers any configuration not included in overlay templates which is needed as part of this VRF attachment
+              example: "interface Vlan2000\\r\\n  delay 200"
+              exclude_test: true
+            - model_name: switchPorts
+              tf_name: switch_ports
+              type: List:String
+              description: List of switch ports
+              ndfc_type: csv
+              optional: true
+              computed: true
+              example: "[Ethernet1/1, Ethernet1/2]"
+            - model_name: portNames
+              tf_name: port_names
+              type: String
+              description: Combined port list in response of ndfc
+              example: "[Ethernet1/1, Ethernet1/2]"
+              tf_hide: true
+            - model_name: torPorts
+              tf_name: tor_ports
+              type: List:String
+              description: List of TOR ports
+              optional: true
+              computed: true
+              ndfc_type: csv
+              example: "[Ethernet1/1, Ethernet1/2]"
+            - model_name: instanceValues
+              tf_name: instance_values
+              type: String
+              optional: true
+              computed: true
+              description: Instance values
+              example: "isActive=false"
+
+
+
+
