@@ -30,7 +30,9 @@ type NDFC struct {
 	deployMutex           *sync.RWMutex
 }
 
+const ResourceRestAPI = "rest_api"
 var instance *NDFC
+
 
 func NewNDFCClient(host string, user string, pass string, domain string, insecure bool, timeout int64) (*NDFC, error) {
 	log.Printf("New NDFC client")
