@@ -1,0 +1,115 @@
+---
+resource:
+  name: rest_api
+  doc_category: Fabric
+  generate_tf_resource: true
+  description: |
+    Resource to execute any REST API on NDFC.  
+    -  `url` - specify the API and `method` to specify the HTTP method to be used for CRUD operations.  
+    -  `payload` - specify the payload for the create and update operations.    
+    -  `update_url` - specify the URL for the update operation. Text/Template supported
+    -  `update_method` - specify the HTTP method for the update operation.  
+    -  `update_payload` - specify the payload for the update operation. Text/Template supported
+    -  `delete_url` - specify the URL for the delete operations.  Text/Template supported
+    -  `delete_method` - specify the HTTP method for the delete operation.  
+    -  `delete_payload` - specify the payload for the delete operation.  Text/Template supported
+    -  `delete_parameters` - specify the query parameters for the delete operation.
+    -  `stateful` - control the execution of the plan:  
+      - If set to `true`, the plan will be executed only if there is a change in the config.  
+      - If set to `false`, the plan will be executed every time.  
+
+  skip_codec: true
+  attributes:
+    - model_name: id
+      tf_name: id
+      type: String
+      description: "ID of the policy"
+      computed: true
+    - model_name: url
+      tf_name: url
+      type: String
+      description: "URL to be used for operations - mainly CREATE"
+      mandatory: true
+      example: "/lan-fabric/rest/control/policies"
+    - model_name: method
+      tf_name: method
+      type: String
+      description: "Method to use GET/POST/PUT"
+      mandatory: true
+      example: "POST"
+    - model_name: payload
+      tf_name: payload
+      type: String
+      description: "Payload to send for CREATE/UPDATE operations"
+      mandatory: true
+      example: |
+        { "nvPairs": { "IF_NAME": "ethernet1/20", "VRF_NAME": "red", "IP_MASK": "20.1.1.1/24", "NEIGHBOR_IP": "20.1.1.12", "IPv6_MASK": "", "NEIGHBOR_IPv6": "", "NEIGHBOR_ASN": "86000", "asn": "", "bgpPassword": "", "bgpPasswordKeyType": "", "MTU": "9216", "SERIAL_NUMBER": "", "SOURCE": "", "POLICY_ID": "", "ROUTING_TAG": "", "ROUTE_MAP_IN": "", "ROUTE_MAP_OUT": "", "IPV6_ROUTE_MAP_IN": "", "IPV6_ROUTE_MAP_OUT": "", "DESC": "", "CONF": "", "ADMIN_STATE": "true" }, "entityName": "SWITCH", "entityType": "SWITCH", "source": "", "priority": 500, "description": "", "templateName": "Ext_VRF_Lite_Routed", "serialNumber": "9TQYTJSZ1VJ" }    
+      ndfc_type: "jsonencode"
+    - model_name: delete_parameters
+      tf_name: delete_parameters
+      type: String
+      description: "Query parameters for DELETE API if any; format is key1=value1&key2=value2"
+    - model_name: read_url
+      tf_name: read_url
+      type: String
+      description: |
+       URL to be used for GET(Read) operation. If not specified Read does not query NDFC
+       This field supports Text/template. Use `{{.field_name}}` to refer to a field from the `response_message`
+       The response from the GET operation is used to overwrite `payload`
+       Note: The GET response must be an exact match of `payload`
+    - model_name: stateful
+      tf_name: stateful
+      type: Bool
+      description: "Stateful set to true triggers update only when something changes in config. If set to false every plan shows changes "
+      default_value: true
+      example: false
+    - model_name: update_method
+      tf_name: update_method
+      type: String
+      description: "Method to use for update operation. PUT is used if not specified"
+      example: "PUT"
+    - model_name: update_payload
+      tf_name: update_payload
+      type: String
+      description: |
+        Payload to send for update operation. If not specified, the same payload as the create payload is used. 
+        This field supports Text/template. Use `{{.field_name}}` to refer to a field from the `response_message`
+      example: |
+        { "nvPairs": { "IF_NAME": "ethernet1/20", "VRF_NAME": "red", "IP_MASK": "20.1.1.1/24", "NEIGHBOR_IP": "20.1.1.12", "IPv6_MASK": "", "NEIGHBOR_IPv6": "", "NEIGHBOR_ASN": "86000", "asn": "", "bgpPassword": "", "bgpPasswordKeyType": "", "MTU": "9216", "SERIAL_NUMBER": "", "SOURCE": "", "POLICY_ID": "", "ROUTING_TAG": "", "ROUTE_MAP_IN": "", "ROUTE_MAP_OUT": "", "IPV6_ROUTE_MAP_IN": "", "IPV6_ROUTE_MAP_OUT": "", "DESC": "", "CONF": "", "ADMIN_STATE": "true" }, "id": "{{.id}}", "entityName": "SWITCH", "entityType": "SWITCH", "source": "", "priority": 500, "description": "New description", "templateName": "Ext_VRF_Lite_Routed", "serialNumber": "9TQYTJSZ1VJ" }
+      ndfc_type: "jsonencode"
+    - model_name: update_url
+      tf_name: update_url
+      type: String
+      description: | 
+        URL to be used for update operation. If not specified, the same URL as the create URL is used. 
+        This field supports Text/template. Use `{{.field_name}}` to refer to a field from the `response_message`
+      example: "/lan-fabric/rest/control/policies/{{.policyId}}"
+    - model_name: delete_url
+      tf_name: delete_url
+      type: String
+      description: "URL to be used for delete operation. If not specified, the same URL as the create URL is used"
+      example: "/lan-fabric/rest/control/policies/{{.policyId}}"
+    - model_name: delete_method
+      tf_name: delete_method
+      type: String
+      description: "Method to use for delete operation. If not specified, DELETE is used"
+    - model_name: delete_payload
+      tf_name: delete_payload
+      type: String
+      description: |
+        Payload to send for delete operation. Ignored if the method is `DELETE`.
+        This field supports Text/template. Use `{{.field_name}}` to refer to a field from the `response_message`
+      example: |
+        { "nvPairs": { "IF_NAME": "ethernet1/20", "VRF_NAME": "red", "IP_MASK": "20.1.1.1/24", "NEIGHBOR_IP": "20.1.1.12", "IPv6_MASK": "", "NEIGHBOR_IPv6": "", "NEIGHBOR_ASN": "86000", "asn": "", "bgpPassword": "", "bgpPasswordKeyType": "", "MTU": "9216", "SERIAL_NUMBER": "", "SOURCE": "", "POLICY_ID": "", "ROUTING_TAG": "", "ROUTE_MAP_IN": "", "ROUTE_MAP_OUT": "", "IPV6_ROUTE_MAP_IN": "", "IPV6_ROUTE_MAP_OUT": "", "DESC": "", "CONF": "", "ADMIN_STATE": "true" }, "id": "{{.id}}", "deleted": true, "entityName": "SWITCH", "entityType": "SWITCH", "source": "", "priority": 500, "description": "New description", "templateName": "Ext_VRF_Lite_Routed", "serialNumber": "9TQYTJSZ1VJ" }
+      ndfc_type: "jsonencode"
+    - model_name: response_message
+      tf_name: response_message
+      type: String
+      description: |
+        Response message from the API for the Create/Update operation
+        This field is used for template replacements of the `update_url`, `update_payload`, `delete_url`, `delete_payload` if they contain go template fields like `{{.field_name}}`
+      computed: true
+
+     
+     
+  
