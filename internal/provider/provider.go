@@ -135,6 +135,7 @@ func (p *ndfcProvider) Configure(ctx context.Context, req provider.ConfigureRequ
 	ndfc.NewResource(ndfc.ResourceVpcPair)
 	ndfc.NewResource(ndfc.ResourceConfigDeploy)
 	ndfc.NewResource(ndfc.ResourceFabrics)
+	ndfc.NewResource(ndfc.ResourceRestAPI)
 
 	// Make the HashiCups client available during DataSource and Resource
 	// type Configure methods.
@@ -181,5 +182,6 @@ func (p *ndfcProvider) Resources(ctx context.Context) []func() resource.Resource
 		NewFabricVxlanMsdResource,
 		NewFabricIpfmResource,
 		NewLinksResource,
+		NewRestApiResource,
 	}
 }
