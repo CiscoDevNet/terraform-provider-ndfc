@@ -5,10 +5,7 @@ package resource_fabric_msite_ext_net
 import (
 	"context"
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
-	"github.com/hashicorp/terraform-plugin-framework/resource/schema/booldefault"
-	"github.com/hashicorp/terraform-plugin-framework/resource/schema/int64default"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
-	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringdefault"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
@@ -24,7 +21,6 @@ func FabricMsiteExtNetResourceSchema(ctx context.Context) schema.Schema {
 				Computed:            true,
 				Description:         "Enable only, when IP Authorization is enabled in the AAA Server",
 				MarkdownDescription: "Enable only, when IP Authorization is enabled in the AAA Server",
-				Default:             booldefault.StaticBool(false),
 			},
 			"aaa_server_conf": schema.StringAttribute{
 				Optional:            true,
@@ -56,14 +52,12 @@ func FabricMsiteExtNetResourceSchema(ctx context.Context) schema.Schema {
 				Computed:            true,
 				Description:         "lines with # prefix are ignored here",
 				MarkdownDescription: "lines with # prefix are ignored here",
-				Default:             stringdefault.StaticString("#Scope_Start_IP, Scope_End_IP, Scope_Default_Gateway, Scope_Subnet_Prefix"),
 			},
 			"cdp_enable": schema.BoolAttribute{
 				Optional:            true,
 				Computed:            true,
 				Description:         "Enable CDP on management interface",
 				MarkdownDescription: "Enable CDP on management interface",
-				Default:             booldefault.StaticBool(false),
 			},
 			"deploy": schema.BoolAttribute{
 				Required:            true,
@@ -80,7 +74,6 @@ func FabricMsiteExtNetResourceSchema(ctx context.Context) schema.Schema {
 				Computed:            true,
 				Description:         "Automatic IP Assignment For POAP From Local DHCP Server",
 				MarkdownDescription: "Automatic IP Assignment For POAP From Local DHCP Server",
-				Default:             booldefault.StaticBool(false),
 			},
 			"dhcp_end": schema.StringAttribute{
 				Optional:            true,
@@ -115,21 +108,18 @@ func FabricMsiteExtNetResourceSchema(ctx context.Context) schema.Schema {
 				Computed:            true,
 				Description:         "Enable Netflow on VTEPs",
 				MarkdownDescription: "Enable Netflow on VTEPs",
-				Default:             booldefault.StaticBool(false),
 			},
 			"enable_nxapi": schema.BoolAttribute{
 				Optional:            true,
 				Computed:            true,
 				Description:         "Enable HTTPS NX-API",
 				MarkdownDescription: "Enable HTTPS NX-API",
-				Default:             booldefault.StaticBool(false),
 			},
 			"enable_nxapi_http": schema.BoolAttribute{
 				Optional:            true,
 				Computed:            true,
 				Description:         "No description available",
 				MarkdownDescription: "No description available",
-				Default:             booldefault.StaticBool(false),
 			},
 			"enable_realtime_backup": schema.BoolAttribute{
 				Optional:            true,
@@ -159,7 +149,6 @@ func FabricMsiteExtNetResourceSchema(ctx context.Context) schema.Schema {
 				Computed:            true,
 				Description:         "No description available",
 				MarkdownDescription: "No description available",
-				Default:             booldefault.StaticBool(false),
 			},
 			"id": schema.StringAttribute{
 				Computed:            true,
@@ -176,7 +165,6 @@ func FabricMsiteExtNetResourceSchema(ctx context.Context) schema.Schema {
 				Computed:            true,
 				Description:         "Import switches with inband connectivity",
 				MarkdownDescription: "Import switches with inband connectivity",
-				Default:             booldefault.StaticBool(false),
 			},
 			"intf_stat_load_interval": schema.Int64Attribute{
 				Optional:            true,
@@ -188,7 +176,6 @@ func FabricMsiteExtNetResourceSchema(ctx context.Context) schema.Schema {
 				Computed:            true,
 				Description:         "If enabled, fabric is only monitored. No configuration will be deployed",
 				MarkdownDescription: "If enabled, fabric is only monitored. No configuration will be deployed",
-				Default:             booldefault.StaticBool(true),
 			},
 			"mgmt_gw": schema.StringAttribute{
 				Optional:            true,
@@ -210,7 +197,6 @@ func FabricMsiteExtNetResourceSchema(ctx context.Context) schema.Schema {
 				Computed:            true,
 				Description:         "No description available",
 				MarkdownDescription: "No description available",
-				Default:             booldefault.StaticBool(false),
 			},
 			"mpls_lb_id": schema.Int64Attribute{
 				Optional:            true,
@@ -247,21 +233,18 @@ func FabricMsiteExtNetResourceSchema(ctx context.Context) schema.Schema {
 				Computed:            true,
 				Description:         "No description available",
 				MarkdownDescription: "No description available",
-				Default:             int64default.StaticInt64(80),
 			},
 			"nxapi_https_port": schema.Int64Attribute{
 				Optional:            true,
 				Computed:            true,
 				Description:         "No description available",
 				MarkdownDescription: "No description available",
-				Default:             int64default.StaticInt64(443),
 			},
 			"pm_enable": schema.BoolAttribute{
 				Optional:            true,
 				Computed:            true,
 				Description:         "No description available",
 				MarkdownDescription: "No description available",
-				Default:             booldefault.StaticBool(false),
 			},
 			"pnp_enable": schema.BoolAttribute{
 				Optional:            true,
@@ -276,7 +259,6 @@ func FabricMsiteExtNetResourceSchema(ctx context.Context) schema.Schema {
 				Validators: []validator.String{
 					stringvalidator.OneOf("ps-redundant", "combined", "insrc-redundant"),
 				},
-				Default: stringdefault.StaticString("ps-redundant"),
 			},
 			"ptp_domain_id": schema.Int64Attribute{
 				Optional:            true,
@@ -298,14 +280,12 @@ func FabricMsiteExtNetResourceSchema(ctx context.Context) schema.Schema {
 				Computed:            true,
 				Description:         "Configure NDFC as a receiver for SNMP traps",
 				MarkdownDescription: "Configure NDFC as a receiver for SNMP traps",
-				Default:             booldefault.StaticBool(true),
 			},
 			"subinterface_range": schema.StringAttribute{
 				Optional:            true,
 				Computed:            true,
 				Description:         "Per Border Dot1q Range For VRF Lite Connectivity",
 				MarkdownDescription: "Per Border Dot1q Range For VRF Lite Connectivity",
-				Default:             stringdefault.StaticString("2-511"),
 			},
 		},
 		Description:         "Resource to configure an Multi-Site Network Fabric",
