@@ -23,7 +23,9 @@ resource:
     - model_name: AAA_REMOTE_IP_ENABLED
       tf_name: aaa_remote_ip_enabled
       description: Enable only when IP Authorization is enabled in the AAA Server
-      default_value: false
+#       default_value: false
+      computed: true
+      optional: true
       type: Bool
       example: false
     - model_name: AAA_SERVER_CONF
@@ -44,15 +46,19 @@ resource:
     - model_name: BOOTSTRAP_ENABLE
       tf_name: bootstrap_enable
       description: Automatic IP Assignment For POAP
-      default_value: false
+#       default_value: false
+      computed: true
+      optional: true
       type: Bool
       example: false
     - model_name: BOOTSTRAP_MULTISUBNET
       tf_name: bootstrap_multisubnet
       description: 'lines with # prefix are ignored here'
-      default_value: >-
+#       default_value: >-
         #Scope_Start_IP, Scope_End_IP, Scope_Default_Gateway,
-        Scope_Subnet_Prefix
+        #Scope_Subnet_Prefix
+      computed: true
+      optional: true
       type: String
       example: >-
         #Scope_Start_IP, Scope_End_IP, Scope_Default_Gateway,
@@ -60,13 +66,17 @@ resource:
     - model_name: CDP_ENABLE
       tf_name: cdp_enable
       description: Enable CDP on management interface
-      default_value: false
+#       default_value: false
+      computed: true
+      optional: true
       type: Bool
       example: false
     - model_name: DHCP_ENABLE
       tf_name: dhcp_enable
       description: Automatic IP Assignment For POAP From Local DHCP Server
-      default_value: false
+#       default_value: false
+      computed: true
+      optional: true
       type: Bool
       example: false
     - model_name: DHCP_END
@@ -95,19 +105,25 @@ resource:
     - model_name: ENABLE_AAA
       tf_name: enable_aaa
       description: Include AAA configs from Manageability tab during device bootup
-      default_value: false
+#       default_value: false
+      computed: true
+      optional: true
       type: Bool
       example: false
     - model_name: ENABLE_ASM
       tf_name: enable_asm
       description: 'Enable groups with receivers sending (*,G) joins'
-      default_value: false
+#       default_value: false
+      computed: true
+      optional: true
       type: Bool
       example: false
     - model_name: ENABLE_NBM_PASSIVE
       tf_name: enable_nbm_passive
       description: Enable NBM mode to pim-passive for default VRF
-      default_value: false
+#       default_value: false
+      computed: true
+      optional: true
       type: Bool
       example: false
     - model_name: EXTRA_CONF_INTRA_LINKS
@@ -129,27 +145,35 @@ resource:
     - model_name: FABRIC_INTERFACE_TYPE
       tf_name: fabric_interface_type
       description: Only Numbered(Point-to-Point) is supported
-      default_value: p2p
+#       default_value: p2p
+      computed: true
+      optional: true
       type: String
       validator: OneOf("p2p")
       example: p2p
     - model_name: FABRIC_MTU
       tf_name: fabric_mtu
       description: Must be an even number
-      default_value: 9216
+#       default_value: 9216
+      computed: true
+      optional: true
       type: Int64
       handle_empty: true
       example: 9216
     - model_name: FEATURE_PTP
       tf_name: feature_ptp
       description: No description available
-      default_value: false
+#       default_value: false
+      computed: true
+      optional: true
       type: Bool
       example: false
     - model_name: ISIS_AUTH_ENABLE
       tf_name: isis_auth_enable
       description: No description available
-      default_value: false
+#       default_value: false
+      computed: true
+      optional: true
       type: Bool
       example: false
     - model_name: ISIS_AUTH_KEY
@@ -168,7 +192,9 @@ resource:
     - model_name: ISIS_LEVEL
       tf_name: isis_level
       description: 'Supported IS types: level-1, level-2'
-      default_value: level-2
+#       default_value: level-2
+      computed: true
+      optional: true
       type: String
       validator: 'OneOf("level-1", "level-2")'
       example: level-2
@@ -181,27 +207,35 @@ resource:
     - model_name: L2_HOST_INTF_MTU
       tf_name: l2_host_intf_mtu
       description: Must be an even number
-      default_value: 9216
+#       default_value: 9216
+      computed: true
+      optional: true
       type: Int64
       handle_empty: true
       example: 9216
     - model_name: LINK_STATE_ROUTING
       tf_name: link_state_routing
       description: Used for Spine-Leaf Connectivity
-      default_value: ospf
+#       default_value: ospf
+      computed: true
+      optional: true
       type: String
       validator: 'OneOf("ospf", "is-is")'
       example: ospf
     - model_name: LINK_STATE_ROUTING_TAG
       tf_name: link_state_routing_tag
       description: Routing process tag for the fabric
-      default_value: '1'
+#       default_value: '1'
+      computed: true
+      optional: true
       type: String
       example: '1'
     - model_name: LOOPBACK0_IP_RANGE
       tf_name: loopback0_ip_range
       description: Routing Loopback IP Address Range
-      default_value: 10.2.0.0/22
+#       default_value: 10.2.0.0/22
+      computed: true
+      optional: true
       type: String
       example: 10.2.0.0/22
     - model_name: MGMT_GW
@@ -226,20 +260,26 @@ resource:
     - model_name: NXAPI_VRF
       tf_name: nxapi_vrf
       description: VRF used for NX-API communication
-      default_value: management
+#       default_value: management
+      computed: true
+      optional: true
       type: String
       validator: 'OneOf("management", "default")'
       example: management
     - model_name: OSPF_AREA_ID
       tf_name: ospf_area_id
       description: OSPF Area Id in IP address format
-      default_value: 0.0.0.0
+#       default_value: 0.0.0.0
+      computed: true
+      optional: true
       type: String
       example: 0.0.0.0
     - model_name: OSPF_AUTH_ENABLE
       tf_name: ospf_auth_enable
       description: No description available
-      default_value: false
+#       default_value: false
+      computed: true
+      optional: true
       type: Bool
       example: false
     - model_name: OSPF_AUTH_KEY
@@ -254,7 +294,9 @@ resource:
     - model_name: PIM_HELLO_AUTH_ENABLE
       tf_name: pim_hello_auth_enable
       description: No description available
-      default_value: false
+#       default_value: false
+      computed: true
+      optional: true
       type: Bool
       example: false
     - model_name: PIM_HELLO_AUTH_KEY
@@ -264,13 +306,17 @@ resource:
     - model_name: PM_ENABLE
       tf_name: pm_enable
       description: No description available
-      default_value: false
+#       default_value: false
+      computed: true
+      optional: true
       type: Bool
       example: false
     - model_name: POWER_REDUNDANCY_MODE
       tf_name: power_redundancy_mode
       description: Default power supply mode for the fabric
-      default_value: ps-redundant
+#       default_value: ps-redundant
+      computed: true
+      optional: true
       type: String
       validator: 'OneOf("ps-redundant", "combined", "insrc-redundant")'
       example: ps-redundant
@@ -292,7 +338,9 @@ resource:
     - model_name: ROUTING_LB_ID
       tf_name: routing_lb_id
       description: No description available
-      default_value: 0
+#       default_value: 0
+      computed: true
+      optional: true
       type: Int64
       handle_empty: true
       example: 0
@@ -308,25 +356,33 @@ resource:
     - model_name: SNMP_SERVER_HOST_TRAP
       tf_name: snmp_server_host_trap
       description: Configure NDFC as a receiver for SNMP traps
-      default_value: true
+#       default_value: true
+      computed: true
+      optional: true
       type: Bool
       example: true
     - model_name: STATIC_UNDERLAY_IP_ALLOC
       tf_name: static_underlay_ip_alloc
       description: Checking this will disable Dynamic Fabric IP Address Allocations
-      default_value: false
+#       default_value: false
+      computed: true
+      optional: true
       type: Bool
       example: false
     - model_name: SUBNET_RANGE
       tf_name: subnet_range
       description: Address range to assign Numbered IPs
-      default_value: 10.4.0.0/16
+#       default_value: 10.4.0.0/16
+      computed: true
+      optional: true
       type: String
       example: 10.4.0.0/16
     - model_name: SUBNET_TARGET_MASK
       tf_name: subnet_target_mask
       description: Mask for Fabric Subnet IP Range
-      default_value: 30
+#       default_value: 30
+      computed: true
+      optional: true
       type: Int64
       handle_empty: true
       validator: 'OneOf(30, 31)'

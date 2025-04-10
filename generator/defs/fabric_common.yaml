@@ -13,7 +13,9 @@ resource:
   - model_name: AAA_REMOTE_IP_ENABLED
     tf_name: aaa_remote_ip_enabled
     description: Enable only, when IP Authorization is enabled in the AAA Server
-    default_value: false
+   #default_value: false
+    computed: true
+    optional: true
     type: Bool
   - model_name: AAA_SERVER_CONF
     tf_name: aaa_server_conf
