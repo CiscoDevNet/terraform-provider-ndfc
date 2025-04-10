@@ -6,10 +6,7 @@ import (
 	"context"
 	"github.com/hashicorp/terraform-plugin-framework-validators/int64validator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
-	"github.com/hashicorp/terraform-plugin-framework/resource/schema/booldefault"
-	"github.com/hashicorp/terraform-plugin-framework/resource/schema/int64default"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
-	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringdefault"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
@@ -25,7 +22,6 @@ func FabricIpfmResourceSchema(ctx context.Context) schema.Schema {
 				Computed:            true,
 				Description:         "Enable only when IP Authorization is enabled in the AAA Server",
 				MarkdownDescription: "Enable only when IP Authorization is enabled in the AAA Server",
-				Default:             booldefault.StaticBool(false),
 			},
 			"aaa_server_conf": schema.StringAttribute{
 				Optional:            true,
@@ -47,21 +43,18 @@ func FabricIpfmResourceSchema(ctx context.Context) schema.Schema {
 				Computed:            true,
 				Description:         "Automatic IP Assignment For POAP",
 				MarkdownDescription: "Automatic IP Assignment For POAP",
-				Default:             booldefault.StaticBool(false),
 			},
 			"bootstrap_multisubnet": schema.StringAttribute{
 				Optional:            true,
 				Computed:            true,
 				Description:         "lines with # prefix are ignored here",
 				MarkdownDescription: "lines with # prefix are ignored here",
-				Default:             stringdefault.StaticString("#Scope_Start_IP, Scope_End_IP, Scope_Default_Gateway, Scope_Subnet_Prefix"),
 			},
 			"cdp_enable": schema.BoolAttribute{
 				Optional:            true,
 				Computed:            true,
 				Description:         "Enable CDP on management interface",
 				MarkdownDescription: "Enable CDP on management interface",
-				Default:             booldefault.StaticBool(false),
 			},
 			"deploy": schema.BoolAttribute{
 				Required:            true,
@@ -78,7 +71,6 @@ func FabricIpfmResourceSchema(ctx context.Context) schema.Schema {
 				Computed:            true,
 				Description:         "Automatic IP Assignment For POAP From Local DHCP Server",
 				MarkdownDescription: "Automatic IP Assignment For POAP From Local DHCP Server",
-				Default:             booldefault.StaticBool(false),
 			},
 			"dhcp_end": schema.StringAttribute{
 				Optional:            true,
@@ -113,21 +105,18 @@ func FabricIpfmResourceSchema(ctx context.Context) schema.Schema {
 				Computed:            true,
 				Description:         "Include AAA configs from Manageability tab during device bootup",
 				MarkdownDescription: "Include AAA configs from Manageability tab during device bootup",
-				Default:             booldefault.StaticBool(false),
 			},
 			"enable_asm": schema.BoolAttribute{
 				Optional:            true,
 				Computed:            true,
 				Description:         "Enable groups with receivers sending (*,G) joins",
 				MarkdownDescription: "Enable groups with receivers sending (*,G) joins",
-				Default:             booldefault.StaticBool(false),
 			},
 			"enable_nbm_passive": schema.BoolAttribute{
 				Optional:            true,
 				Computed:            true,
 				Description:         "Enable NBM mode to pim-passive for default VRF",
 				MarkdownDescription: "Enable NBM mode to pim-passive for default VRF",
-				Default:             booldefault.StaticBool(false),
 			},
 			"extra_conf_intra_links": schema.StringAttribute{
 				Optional:            true,
@@ -152,14 +141,12 @@ func FabricIpfmResourceSchema(ctx context.Context) schema.Schema {
 				Validators: []validator.String{
 					stringvalidator.OneOf("p2p"),
 				},
-				Default: stringdefault.StaticString("p2p"),
 			},
 			"fabric_mtu": schema.Int64Attribute{
 				Optional:            true,
 				Computed:            true,
 				Description:         "Must be an even number",
 				MarkdownDescription: "Must be an even number",
-				Default:             int64default.StaticInt64(9216),
 			},
 			"fabric_name": schema.StringAttribute{
 				Required:            true,
@@ -174,7 +161,6 @@ func FabricIpfmResourceSchema(ctx context.Context) schema.Schema {
 				Computed:            true,
 				Description:         "No description available",
 				MarkdownDescription: "No description available",
-				Default:             booldefault.StaticBool(false),
 			},
 			"id": schema.StringAttribute{
 				Computed:            true,
@@ -186,7 +172,6 @@ func FabricIpfmResourceSchema(ctx context.Context) schema.Schema {
 				Computed:            true,
 				Description:         "No description available",
 				MarkdownDescription: "No description available",
-				Default:             booldefault.StaticBool(false),
 			},
 			"isis_auth_key": schema.StringAttribute{
 				Optional:            true,
@@ -211,7 +196,6 @@ func FabricIpfmResourceSchema(ctx context.Context) schema.Schema {
 				Validators: []validator.String{
 					stringvalidator.OneOf("level-1", "level-2"),
 				},
-				Default: stringdefault.StaticString("level-2"),
 			},
 			"isis_p2p_enable": schema.BoolAttribute{
 				Optional:            true,
@@ -223,7 +207,6 @@ func FabricIpfmResourceSchema(ctx context.Context) schema.Schema {
 				Computed:            true,
 				Description:         "Must be an even number",
 				MarkdownDescription: "Must be an even number",
-				Default:             int64default.StaticInt64(9216),
 			},
 			"link_state_routing": schema.StringAttribute{
 				Optional:            true,
@@ -233,21 +216,18 @@ func FabricIpfmResourceSchema(ctx context.Context) schema.Schema {
 				Validators: []validator.String{
 					stringvalidator.OneOf("ospf", "is-is"),
 				},
-				Default: stringdefault.StaticString("ospf"),
 			},
 			"link_state_routing_tag": schema.StringAttribute{
 				Optional:            true,
 				Computed:            true,
 				Description:         "Routing process tag for the fabric",
 				MarkdownDescription: "Routing process tag for the fabric",
-				Default:             stringdefault.StaticString("1"),
 			},
 			"loopback0_ip_range": schema.StringAttribute{
 				Optional:            true,
 				Computed:            true,
 				Description:         "Routing Loopback IP Address Range",
 				MarkdownDescription: "Routing Loopback IP Address Range",
-				Default:             stringdefault.StaticString("10.2.0.0/22"),
 			},
 			"mgmt_gw": schema.StringAttribute{
 				Optional:            true,
@@ -277,21 +257,18 @@ func FabricIpfmResourceSchema(ctx context.Context) schema.Schema {
 				Validators: []validator.String{
 					stringvalidator.OneOf("management", "default"),
 				},
-				Default: stringdefault.StaticString("management"),
 			},
 			"ospf_area_id": schema.StringAttribute{
 				Optional:            true,
 				Computed:            true,
 				Description:         "OSPF Area Id in IP address format",
 				MarkdownDescription: "OSPF Area Id in IP address format",
-				Default:             stringdefault.StaticString("0.0.0.0"),
 			},
 			"ospf_auth_enable": schema.BoolAttribute{
 				Optional:            true,
 				Computed:            true,
 				Description:         "No description available",
 				MarkdownDescription: "No description available",
-				Default:             booldefault.StaticBool(false),
 			},
 			"ospf_auth_key": schema.StringAttribute{
 				Optional:            true,
@@ -308,7 +285,6 @@ func FabricIpfmResourceSchema(ctx context.Context) schema.Schema {
 				Computed:            true,
 				Description:         "No description available",
 				MarkdownDescription: "No description available",
-				Default:             booldefault.StaticBool(false),
 			},
 			"pim_hello_auth_key": schema.StringAttribute{
 				Optional:            true,
@@ -320,7 +296,6 @@ func FabricIpfmResourceSchema(ctx context.Context) schema.Schema {
 				Computed:            true,
 				Description:         "No description available",
 				MarkdownDescription: "No description available",
-				Default:             booldefault.StaticBool(false),
 			},
 			"power_redundancy_mode": schema.StringAttribute{
 				Optional:            true,
@@ -330,7 +305,6 @@ func FabricIpfmResourceSchema(ctx context.Context) schema.Schema {
 				Validators: []validator.String{
 					stringvalidator.OneOf("ps-redundant", "combined", "insrc-redundant"),
 				},
-				Default: stringdefault.StaticString("ps-redundant"),
 			},
 			"ptp_domain_id": schema.Int64Attribute{
 				Optional:            true,
@@ -355,7 +329,6 @@ func FabricIpfmResourceSchema(ctx context.Context) schema.Schema {
 				Computed:            true,
 				Description:         "No description available",
 				MarkdownDescription: "No description available",
-				Default:             int64default.StaticInt64(0),
 			},
 			"rp_ip_range": schema.StringAttribute{
 				Optional:            true,
@@ -372,21 +345,18 @@ func FabricIpfmResourceSchema(ctx context.Context) schema.Schema {
 				Computed:            true,
 				Description:         "Configure NDFC as a receiver for SNMP traps",
 				MarkdownDescription: "Configure NDFC as a receiver for SNMP traps",
-				Default:             booldefault.StaticBool(true),
 			},
 			"static_underlay_ip_alloc": schema.BoolAttribute{
 				Optional:            true,
 				Computed:            true,
 				Description:         "Checking this will disable Dynamic Fabric IP Address Allocations",
 				MarkdownDescription: "Checking this will disable Dynamic Fabric IP Address Allocations",
-				Default:             booldefault.StaticBool(false),
 			},
 			"subnet_range": schema.StringAttribute{
 				Optional:            true,
 				Computed:            true,
 				Description:         "Address range to assign Numbered IPs",
 				MarkdownDescription: "Address range to assign Numbered IPs",
-				Default:             stringdefault.StaticString("10.4.0.0/16"),
 			},
 			"subnet_target_mask": schema.Int64Attribute{
 				Optional:            true,
@@ -396,7 +366,6 @@ func FabricIpfmResourceSchema(ctx context.Context) schema.Schema {
 				Validators: []validator.Int64{
 					int64validator.OneOf(30, 31),
 				},
-				Default: int64default.StaticInt64(30),
 			},
 			"syslog_server_ip_list": schema.StringAttribute{
 				Optional:            true,

@@ -26,8 +26,6 @@ func FabricLanClassicModelHelperStateCheck(RscName string, c resource_fabric_com
 	}
 	if c.AaaRemoteIpEnabled != "" {
 		ret = append(ret, resource.TestCheckResourceAttr(RscName, attrPath.AtName("aaa_remote_ip_enabled").String(), c.AaaRemoteIpEnabled))
-	} else {
-		ret = append(ret, resource.TestCheckResourceAttr(RscName, attrPath.AtName("aaa_remote_ip_enabled").String(), "false"))
 	}
 	if c.AaaServerConf != "" {
 		ret = append(ret, resource.TestCheckResourceAttr(RscName, attrPath.AtName("aaa_server_conf").String(), c.AaaServerConf))
@@ -40,18 +38,12 @@ func FabricLanClassicModelHelperStateCheck(RscName string, c resource_fabric_com
 	}
 	if c.BootstrapMultisubnet != "" {
 		ret = append(ret, resource.TestCheckResourceAttr(RscName, attrPath.AtName("bootstrap_multisubnet").String(), c.BootstrapMultisubnet))
-	} else {
-		ret = append(ret, resource.TestCheckResourceAttr(RscName, attrPath.AtName("bootstrap_multisubnet").String(), "#Scope_Start_IP, Scope_End_IP, Scope_Default_Gateway, Scope_Subnet_Prefix"))
 	}
 	if c.CdpEnable != "" {
 		ret = append(ret, resource.TestCheckResourceAttr(RscName, attrPath.AtName("cdp_enable").String(), c.CdpEnable))
-	} else {
-		ret = append(ret, resource.TestCheckResourceAttr(RscName, attrPath.AtName("cdp_enable").String(), "false"))
 	}
 	if c.DhcpEnable != "" {
 		ret = append(ret, resource.TestCheckResourceAttr(RscName, attrPath.AtName("dhcp_enable").String(), c.DhcpEnable))
-	} else {
-		ret = append(ret, resource.TestCheckResourceAttr(RscName, attrPath.AtName("dhcp_enable").String(), "false"))
 	}
 	if c.DhcpEnd != "" {
 		ret = append(ret, resource.TestCheckResourceAttr(RscName, attrPath.AtName("dhcp_end").String(), c.DhcpEnd))
@@ -67,39 +59,27 @@ func FabricLanClassicModelHelperStateCheck(RscName string, c resource_fabric_com
 	}
 	if c.EnableNetflow != "" {
 		ret = append(ret, resource.TestCheckResourceAttr(RscName, attrPath.AtName("enable_netflow").String(), c.EnableNetflow))
-	} else {
-		ret = append(ret, resource.TestCheckResourceAttr(RscName, attrPath.AtName("enable_netflow").String(), "false"))
 	}
 	if c.EnableNxapi != "" {
 		ret = append(ret, resource.TestCheckResourceAttr(RscName, attrPath.AtName("enable_nxapi").String(), c.EnableNxapi))
-	} else {
-		ret = append(ret, resource.TestCheckResourceAttr(RscName, attrPath.AtName("enable_nxapi").String(), "false"))
 	}
 	if c.EnableNxapiHttp != "" {
 		ret = append(ret, resource.TestCheckResourceAttr(RscName, attrPath.AtName("enable_nxapi_http").String(), c.EnableNxapiHttp))
-	} else {
-		ret = append(ret, resource.TestCheckResourceAttr(RscName, attrPath.AtName("enable_nxapi_http").String(), "false"))
 	}
 	if c.FabricFreeform != "" {
 		ret = append(ret, resource.TestCheckResourceAttr(RscName, attrPath.AtName("fabric_freeform").String(), c.FabricFreeform))
 	}
 	if c.FeaturePtp != "" {
 		ret = append(ret, resource.TestCheckResourceAttr(RscName, attrPath.AtName("feature_ptp").String(), c.FeaturePtp))
-	} else {
-		ret = append(ret, resource.TestCheckResourceAttr(RscName, attrPath.AtName("feature_ptp").String(), "false"))
 	}
 	if c.InbandEnable != "" {
 		ret = append(ret, resource.TestCheckResourceAttr(RscName, attrPath.AtName("inband_enable").String(), c.InbandEnable))
 	}
 	if c.InbandMgmt != "" {
 		ret = append(ret, resource.TestCheckResourceAttr(RscName, attrPath.AtName("inband_mgmt").String(), c.InbandMgmt))
-	} else {
-		ret = append(ret, resource.TestCheckResourceAttr(RscName, attrPath.AtName("inband_mgmt").String(), "false"))
 	}
 	if c.IsReadOnly != "" {
 		ret = append(ret, resource.TestCheckResourceAttr(RscName, attrPath.AtName("is_read_only").String(), c.IsReadOnly))
-	} else {
-		ret = append(ret, resource.TestCheckResourceAttr(RscName, attrPath.AtName("is_read_only").String(), "true"))
 	}
 	if c.MgmtGw != "" {
 		ret = append(ret, resource.TestCheckResourceAttr(RscName, attrPath.AtName("mgmt_gw").String(), c.MgmtGw))
@@ -112,8 +92,6 @@ func FabricLanClassicModelHelperStateCheck(RscName string, c resource_fabric_com
 	}
 	if c.MplsHandoff != "" {
 		ret = append(ret, resource.TestCheckResourceAttr(RscName, attrPath.AtName("mpls_handoff").String(), c.MplsHandoff))
-	} else {
-		ret = append(ret, resource.TestCheckResourceAttr(RscName, attrPath.AtName("mpls_handoff").String(), "false"))
 	}
 	if c.MplsLbId != nil {
 		ret = append(ret, resource.TestCheckResourceAttr(RscName, attrPath.AtName("mpls_lb_id").String(), strconv.Itoa(int(*c.MplsLbId))))
@@ -135,23 +113,15 @@ func FabricLanClassicModelHelperStateCheck(RscName string, c resource_fabric_com
 	}
 	if c.NxapiHttpsPort != nil {
 		ret = append(ret, resource.TestCheckResourceAttr(RscName, attrPath.AtName("nxapi_https_port").String(), strconv.Itoa(int(*c.NxapiHttpsPort))))
-	} else {
-		ret = append(ret, resource.TestCheckResourceAttr(RscName, attrPath.AtName("nxapi_https_port").String(), "443"))
 	}
 	if c.NxapiHttpPort != nil {
 		ret = append(ret, resource.TestCheckResourceAttr(RscName, attrPath.AtName("nxapi_http_port").String(), strconv.Itoa(int(*c.NxapiHttpPort))))
-	} else {
-		ret = append(ret, resource.TestCheckResourceAttr(RscName, attrPath.AtName("nxapi_http_port").String(), "80"))
 	}
 	if c.PmEnable != "" {
 		ret = append(ret, resource.TestCheckResourceAttr(RscName, attrPath.AtName("pm_enable").String(), c.PmEnable))
-	} else {
-		ret = append(ret, resource.TestCheckResourceAttr(RscName, attrPath.AtName("pm_enable").String(), "false"))
 	}
 	if c.PowerRedundancyMode != "" {
 		ret = append(ret, resource.TestCheckResourceAttr(RscName, attrPath.AtName("power_redundancy_mode").String(), c.PowerRedundancyMode))
-	} else {
-		ret = append(ret, resource.TestCheckResourceAttr(RscName, attrPath.AtName("power_redundancy_mode").String(), "ps-redundant"))
 	}
 	if c.PtpDomainId != nil {
 		ret = append(ret, resource.TestCheckResourceAttr(RscName, attrPath.AtName("ptp_domain_id").String(), strconv.Itoa(int(*c.PtpDomainId))))
@@ -161,23 +131,15 @@ func FabricLanClassicModelHelperStateCheck(RscName string, c resource_fabric_com
 	}
 	if c.SnmpServerHostTrap != "" {
 		ret = append(ret, resource.TestCheckResourceAttr(RscName, attrPath.AtName("snmp_server_host_trap").String(), c.SnmpServerHostTrap))
-	} else {
-		ret = append(ret, resource.TestCheckResourceAttr(RscName, attrPath.AtName("snmp_server_host_trap").String(), "true"))
 	}
 	if c.SubinterfaceRange != "" {
 		ret = append(ret, resource.TestCheckResourceAttr(RscName, attrPath.AtName("subinterface_range").String(), c.SubinterfaceRange))
-	} else {
-		ret = append(ret, resource.TestCheckResourceAttr(RscName, attrPath.AtName("subinterface_range").String(), "2-511"))
 	}
 	if c.EnableRealtimeBackup != "" {
 		ret = append(ret, resource.TestCheckResourceAttr(RscName, attrPath.AtName("enable_realtime_backup").String(), c.EnableRealtimeBackup))
-	} else {
-		ret = append(ret, resource.TestCheckResourceAttr(RscName, attrPath.AtName("enable_realtime_backup").String(), "false"))
 	}
 	if c.EnableScheduledBackup != "" {
 		ret = append(ret, resource.TestCheckResourceAttr(RscName, attrPath.AtName("enable_scheduled_backup").String(), c.EnableScheduledBackup))
-	} else {
-		ret = append(ret, resource.TestCheckResourceAttr(RscName, attrPath.AtName("enable_scheduled_backup").String(), "false"))
 	}
 	if c.ScheduledTime != "" {
 		ret = append(ret, resource.TestCheckResourceAttr(RscName, attrPath.AtName("scheduled_time").String(), c.ScheduledTime))

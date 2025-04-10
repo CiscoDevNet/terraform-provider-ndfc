@@ -23,7 +23,9 @@ resource:
     - model_name: AAA_REMOTE_IP_ENABLED
       tf_name: aaa_remote_ip_enabled
       description: 'Enable only, when IP Authorization is enabled in the AAA Server'
-      default_value: false
+#       default_value: false
+      computed: true
+      optional: true
       type: Bool
       example: false
     - model_name: AAA_SERVER_CONF
@@ -53,9 +55,11 @@ resource:
     - model_name: BOOTSTRAP_MULTISUBNET
       tf_name: bootstrap_multisubnet
       description: 'lines with # prefix are ignored here'
-      default_value: >-
+#       default_value: >-
         #Scope_Start_IP, Scope_End_IP, Scope_Default_Gateway,
-        Scope_Subnet_Prefix
+        #Scope_Subnet_Prefix
+      computed: true
+      optional: true
       type: String
       example: >-
         #Scope_Start_IP, Scope_End_IP, Scope_Default_Gateway,
@@ -63,13 +67,17 @@ resource:
     - model_name: CDP_ENABLE
       tf_name: cdp_enable
       description: Enable CDP on management interface
-      default_value: false
+#       default_value: false
+      computed: true
+      optional: true
       type: Bool
       example: false
     - model_name: DHCP_ENABLE
       tf_name: dhcp_enable
       description: Automatic IP Assignment For POAP From Local DHCP Server
-      default_value: false
+#       default_value: false
+      computed: true
+      optional: true
       type: Bool
       example: false
     - model_name: DHCP_END
@@ -96,19 +104,25 @@ resource:
     - model_name: ENABLE_NETFLOW
       tf_name: enable_netflow
       description: Enable Netflow on VTEPs
-      default_value: false
+#       default_value: false
+      computed: true
+      optional: true
       type: Bool
       example: false
     - model_name: ENABLE_NXAPI
       tf_name: enable_nxapi
       description: Enable HTTPS NX-API
-      default_value: false
+#       default_value: false
+      computed: true
+      optional: true
       type: Bool
       example: false
     - model_name: ENABLE_NXAPI_HTTP
       tf_name: enable_nxapi_http
       description: No description available
-      default_value: false
+#       default_value: false
+      computed: true
+      optional: true
       type: Bool
       example: false
 #    - model_name: ENABLE_RT_INTF_STATS
@@ -126,7 +140,9 @@ resource:
     - model_name: FEATURE_PTP
       tf_name: feature_ptp
       description: No description available
-      default_value: false
+#       default_value: false
+      computed: true
+      optional: true
       type: Bool
       example: false
     - model_name: INBAND_ENABLE
@@ -138,7 +154,9 @@ resource:
     - model_name: INBAND_MGMT
       tf_name: inband_mgmt
       description: Import switches with inband connectivity
-      default_value: false
+#       default_value: false
+      computed: true
+      optional: true
       type: Bool
       example: false
     - model_name: INTF_STAT_LOAD_INTERVAL
@@ -149,7 +167,9 @@ resource:
     - model_name: IS_READ_ONLY
       tf_name: is_read_only
       description: 'If enabled, fabric is only monitored. No configuration will be deployed'
-      default_value: true
+#       default_value: true
+      computed: true
+      optional: true
       type: Bool
       example: true
     - model_name: MGMT_GW
@@ -169,7 +189,9 @@ resource:
     - model_name: MPLS_HANDOFF
       tf_name: mpls_handoff
       description: No description available
-      default_value: false
+#       default_value: false
+      computed: true
+      optional: true
       type: Bool
       example: false
     - model_name: MPLS_LB_ID
@@ -212,21 +234,27 @@ resource:
     - model_name: NXAPI_HTTPS_PORT
       tf_name: nxapi_https_port
       description: No description available
-      default_value: 443
+#       default_value: 443
+      computed: true
+      optional: true
       type: Int64
       handle_empty: true
       example: 443
     - model_name: NXAPI_HTTP_PORT
       tf_name: nxapi_http_port
       description: No description available
-      default_value: 80
+#       default_value: 80
+      computed: true
+      optional: true
       type: Int64
       handle_empty: true
       example: 80
     - model_name: PM_ENABLE
       tf_name: pm_enable
       description: No description available
-      default_value: false
+#       default_value: false
+      computed: true
+      optional: true
       type: Bool
       example: false
     - model_name: PNP_ENABLE
@@ -236,7 +264,9 @@ resource:
     - model_name: POWER_REDUNDANCY_MODE
       tf_name: power_redundancy_mode
       description: Default Power Supply Mode For Bootstrapped NX-OS Switches
-      default_value: ps-redundant
+#       default_value: ps-redundant
+      computed: true
+      optional: true
       type: String
       validator: 'OneOf("ps-redundant", "combined", "insrc-redundant")'
       example: ps-redundant
@@ -253,13 +283,17 @@ resource:
     - model_name: SNMP_SERVER_HOST_TRAP
       tf_name: snmp_server_host_trap
       description: Configure NDFC as a receiver for SNMP traps
-      default_value: true
+#       default_value: true
+      computed: true
+      optional: true
       type: Bool
       example: true
     - model_name: SUBINTERFACE_RANGE
       tf_name: subinterface_range
       description: Per Border Dot1q Range For VRF Lite Connectivity
-      default_value: 2-511
+#       default_value: 2-511
+      computed: true
+      optional: true
       type: String
       example: 2-511
     - model_name: enableRealTimeBackup

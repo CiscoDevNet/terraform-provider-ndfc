@@ -6,10 +6,7 @@ import (
 	"context"
 	"github.com/hashicorp/terraform-plugin-framework-validators/int64validator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
-	"github.com/hashicorp/terraform-plugin-framework/resource/schema/booldefault"
-	"github.com/hashicorp/terraform-plugin-framework/resource/schema/int64default"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
-	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringdefault"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
@@ -25,7 +22,6 @@ func FabricVxlanMsdResourceSchema(ctx context.Context) schema.Schema {
 				Computed:            true,
 				Description:         "Shared MAC address for all leaves",
 				MarkdownDescription: "Shared MAC address for all leaves",
-				Default:             stringdefault.StaticString("2020.0000.00aa"),
 			},
 			"bgp_rp_asn": schema.StringAttribute{
 				Optional:            true,
@@ -37,7 +33,6 @@ func FabricVxlanMsdResourceSchema(ctx context.Context) schema.Schema {
 				Computed:            true,
 				Description:         "Routing tag associated with IP address of loopback and DCI interfaces",
 				MarkdownDescription: "Routing tag associated with IP address of loopback and DCI interfaces",
-				Default:             int64default.StaticInt64(54321),
 			},
 			"border_gwy_connections": schema.StringAttribute{
 				Optional:            true,
@@ -47,7 +42,6 @@ func FabricVxlanMsdResourceSchema(ctx context.Context) schema.Schema {
 				Validators: []validator.String{
 					stringvalidator.OneOf("Manual", "Centralized_To_Route_Server", "Direct_To_BGWS"),
 				},
-				Default: stringdefault.StaticString("Manual"),
 			},
 			"cloudsec_algorithm": schema.StringAttribute{
 				Optional:            true,
@@ -59,7 +53,6 @@ func FabricVxlanMsdResourceSchema(ctx context.Context) schema.Schema {
 				Computed:            true,
 				Description:         "Auto Config CloudSec on Border Gateways",
 				MarkdownDescription: "Auto Config CloudSec on Border Gateways",
-				Default:             booldefault.StaticBool(false),
 			},
 			"cloudsec_enforcement": schema.StringAttribute{
 				Optional:            true,
@@ -81,14 +74,12 @@ func FabricVxlanMsdResourceSchema(ctx context.Context) schema.Schema {
 				Computed:            true,
 				Description:         "Address range to assign P2P DCI Links",
 				MarkdownDescription: "Address range to assign P2P DCI Links",
-				Default:             stringdefault.StaticString("10.10.1.0/24"),
 			},
 			"dci_subnet_target_mask": schema.Int64Attribute{
 				Optional:            true,
 				Computed:            true,
 				Description:         "Target Mask for Subnet Range",
 				MarkdownDescription: "Target Mask for Subnet Range",
-				Default:             int64default.StaticInt64(30),
 			},
 			"default_network": schema.StringAttribute{
 				Optional:            true,
@@ -98,7 +89,6 @@ func FabricVxlanMsdResourceSchema(ctx context.Context) schema.Schema {
 				Validators: []validator.String{
 					stringvalidator.OneOf("Default_Network_Universal", "Service_Network_Universal"),
 				},
-				Default: stringdefault.StaticString("Default_Network_Universal"),
 			},
 			"default_pvlan_sec_network": schema.StringAttribute{
 				Optional:            true,
@@ -110,14 +100,12 @@ func FabricVxlanMsdResourceSchema(ctx context.Context) schema.Schema {
 				Computed:            true,
 				Description:         "Default Overlay VRF Template For Leafs",
 				MarkdownDescription: "Default Overlay VRF Template For Leafs",
-				Default:             stringdefault.StaticString("Default_VRF_Universal"),
 			},
 			"delay_restore": schema.Int64Attribute{
 				Optional:            true,
 				Computed:            true,
 				Description:         "Multi-Site underlay and overlay control plane convergence time in seconds",
 				MarkdownDescription: "Multi-Site underlay and overlay control plane convergence time in seconds",
-				Default:             int64default.StaticInt64(300),
 			},
 			"deploy": schema.BoolAttribute{
 				Required:            true,
@@ -149,7 +137,6 @@ func FabricVxlanMsdResourceSchema(ctx context.Context) schema.Schema {
 				Computed:            true,
 				Description:         "Enable PVLAN on MSD and its child fabrics",
 				MarkdownDescription: "Enable PVLAN on MSD and its child fabrics",
-				Default:             booldefault.StaticBool(false),
 			},
 			"enable_rs_redist_direct": schema.BoolAttribute{
 				Optional:            true,
@@ -179,21 +166,18 @@ func FabricVxlanMsdResourceSchema(ctx context.Context) schema.Schema {
 				Computed:            true,
 				Description:         "Overlay Network Identifier Range",
 				MarkdownDescription: "Overlay Network Identifier Range",
-				Default:             stringdefault.StaticString("30000-49000"),
 			},
 			"l3_partition_id_range": schema.StringAttribute{
 				Optional:            true,
 				Computed:            true,
 				Description:         "Overlay VRF Identifier Range",
 				MarkdownDescription: "Overlay VRF Identifier Range",
-				Default:             stringdefault.StaticString("50000-59000"),
 			},
 			"loopback100_ip_range": schema.StringAttribute{
 				Optional:            true,
 				Computed:            true,
 				Description:         "Typically Loopback100 IP Address Range",
 				MarkdownDescription: "Typically Loopback100 IP Address Range",
-				Default:             stringdefault.StaticString("10.10.0.0/24"),
 			},
 			"ms_ifc_bgp_auth_key_type": schema.Int64Attribute{
 				Optional:            true,
@@ -213,28 +197,24 @@ func FabricVxlanMsdResourceSchema(ctx context.Context) schema.Schema {
 				Computed:            true,
 				Description:         "eBGP password for Multi-Site underlay/overlay IFCs",
 				MarkdownDescription: "eBGP password for Multi-Site underlay/overlay IFCs",
-				Default:             booldefault.StaticBool(false),
 			},
 			"ms_loopback_id": schema.Int64Attribute{
 				Optional:            true,
 				Computed:            true,
 				Description:         "No description available",
 				MarkdownDescription: "No description available",
-				Default:             int64default.StaticInt64(100),
 			},
 			"ms_underlay_autoconfig": schema.BoolAttribute{
 				Optional:            true,
 				Computed:            true,
 				Description:         "No description available",
 				MarkdownDescription: "No description available",
-				Default:             booldefault.StaticBool(false),
 			},
 			"network_extension_template": schema.StringAttribute{
 				Optional:            true,
 				Computed:            true,
 				Description:         "Default Overlay Network Template For Borders",
 				MarkdownDescription: "Default Overlay Network Template For Borders",
-				Default:             stringdefault.StaticString("Default_Network_Extension_Universal"),
 			},
 			"rp_server_ip": schema.StringAttribute{
 				Optional:            true,
@@ -256,14 +236,12 @@ func FabricVxlanMsdResourceSchema(ctx context.Context) schema.Schema {
 				Computed:            true,
 				Description:         "Enables Overlay VLANs on uplink between ToRs and Leafs",
 				MarkdownDescription: "Enables Overlay VLANs on uplink between ToRs and Leafs",
-				Default:             booldefault.StaticBool(false),
 			},
 			"vrf_extension_template": schema.StringAttribute{
 				Optional:            true,
 				Computed:            true,
 				Description:         "Default Overlay VRF Template For Borders",
 				MarkdownDescription: "Default Overlay VRF Template For Borders",
-				Default:             stringdefault.StaticString("Default_VRF_Extension_Universal"),
 			},
 		},
 		Description:         "Resource to configure and manage a VXLAN MSD Fabric",
