@@ -6,10 +6,7 @@ import (
 	"context"
 	"github.com/hashicorp/terraform-plugin-framework-validators/int64validator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
-	"github.com/hashicorp/terraform-plugin-framework/resource/schema/booldefault"
-	"github.com/hashicorp/terraform-plugin-framework/resource/schema/int64default"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
-	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringdefault"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
@@ -25,7 +22,6 @@ func FabricVxlanEvpnResourceSchema(ctx context.Context) schema.Schema {
 				Computed:            true,
 				Description:         "Enable only, when IP Authorization is enabled in the AAA Server",
 				MarkdownDescription: "Enable only, when IP Authorization is enabled in the AAA Server",
-				Default:             booldefault.StaticBool(false),
 			},
 			"aaa_server_conf": schema.StringAttribute{
 				Optional:            true,
@@ -37,28 +33,24 @@ func FabricVxlanEvpnResourceSchema(ctx context.Context) schema.Schema {
 				Computed:            true,
 				Description:         "For Primary VTEP IP Advertisement As Next-Hop Of Prefix Routes",
 				MarkdownDescription: "For Primary VTEP IP Advertisement As Next-Hop Of Prefix Routes",
-				Default:             booldefault.StaticBool(false),
 			},
 			"advertise_pip_on_border": schema.BoolAttribute{
 				Optional:            true,
 				Computed:            true,
 				Description:         "Enable advertise-pip on vPC borders and border gateways only. Applicable only when vPC advertise-pip is not enabled",
 				MarkdownDescription: "Enable advertise-pip on vPC borders and border gateways only. Applicable only when vPC advertise-pip is not enabled",
-				Default:             booldefault.StaticBool(true),
 			},
 			"anycast_bgw_advertise_pip": schema.BoolAttribute{
 				Optional:            true,
 				Computed:            true,
 				Description:         "To advertise Anycast Border Gateway PIP as VTEP. Effective on MSD fabric Recalculate Config",
 				MarkdownDescription: "To advertise Anycast Border Gateway PIP as VTEP. Effective on MSD fabric Recalculate Config",
-				Default:             booldefault.StaticBool(false),
 			},
 			"anycast_gw_mac": schema.StringAttribute{
 				Optional:            true,
 				Computed:            true,
 				Description:         "Shared MAC address for all leafs (xxxx.xxxx.xxxx)",
 				MarkdownDescription: "Shared MAC address for all leafs (xxxx.xxxx.xxxx)",
-				Default:             stringdefault.StaticString("2020.0000.00aa"),
 			},
 			"anycast_lb_id": schema.Int64Attribute{
 				Optional:            true,
@@ -70,35 +62,30 @@ func FabricVxlanEvpnResourceSchema(ctx context.Context) schema.Schema {
 				Computed:            true,
 				Description:         "Anycast or Phantom RP IP Address Range",
 				MarkdownDescription: "Anycast or Phantom RP IP Address Range",
-				Default:             stringdefault.StaticString("10.254.254.0/24"),
 			},
 			"auto_symmetric_default_vrf": schema.BoolAttribute{
 				Optional:            true,
 				Computed:            true,
 				Description:         "Whether to auto generate Default VRF interface and BGP peering configuration on managed neighbor devices. If set, auto created VRF Lite IFC links will have Auto Deploy Default VRF for Peer enabled.",
 				MarkdownDescription: "Whether to auto generate Default VRF interface and BGP peering configuration on managed neighbor devices. If set, auto created VRF Lite IFC links will have Auto Deploy Default VRF for Peer enabled.",
-				Default:             booldefault.StaticBool(false),
 			},
 			"auto_symmetric_vrf_lite": schema.BoolAttribute{
 				Optional:            true,
 				Computed:            true,
 				Description:         "Whether to auto generate VRF LITE sub-interface and BGP peering configuration on managed neighbor devices. If set, auto created VRF Lite IFC links will have Auto Deploy for Peer enabled.",
 				MarkdownDescription: "Whether to auto generate VRF LITE sub-interface and BGP peering configuration on managed neighbor devices. If set, auto created VRF Lite IFC links will have Auto Deploy for Peer enabled.",
-				Default:             booldefault.StaticBool(false),
 			},
 			"auto_unique_vrf_lite_ip_prefix": schema.BoolAttribute{
 				Optional:            true,
 				Computed:            true,
 				Description:         "When enabled, IP prefix allocated to the VRF LITE IFC is not reused on VRF extension over VRF LITE IFC. Instead, unique IP Subnet is allocated for each VRF extension over VRF LITE IFC.",
 				MarkdownDescription: "When enabled, IP prefix allocated to the VRF LITE IFC is not reused on VRF extension over VRF LITE IFC. Instead, unique IP Subnet is allocated for each VRF extension over VRF LITE IFC.",
-				Default:             booldefault.StaticBool(false),
 			},
 			"auto_vrflite_ifc_default_vrf": schema.BoolAttribute{
 				Optional:            true,
 				Computed:            true,
 				Description:         "Whether to auto generate Default VRF interface and BGP peering configuration on VRF LITE IFC auto deployment. If set, auto created VRF Lite IFC links will have Auto Deploy Default VRF enabled.",
 				MarkdownDescription: "Whether to auto generate Default VRF interface and BGP peering configuration on VRF LITE IFC auto deployment. If set, auto created VRF Lite IFC links will have Auto Deploy Default VRF enabled.",
-				Default:             booldefault.StaticBool(false),
 			},
 			"banner": schema.StringAttribute{
 				Optional:            true,
@@ -110,7 +97,6 @@ func FabricVxlanEvpnResourceSchema(ctx context.Context) schema.Schema {
 				Computed:            true,
 				Description:         "Valid for P2P Interfaces only",
 				MarkdownDescription: "Valid for P2P Interfaces only",
-				Default:             booldefault.StaticBool(false),
 			},
 			"bfd_auth_key": schema.StringAttribute{
 				Optional:            true,
@@ -127,35 +113,30 @@ func FabricVxlanEvpnResourceSchema(ctx context.Context) schema.Schema {
 				Computed:            true,
 				Description:         "Valid for IPv4 Underlay only",
 				MarkdownDescription: "Valid for IPv4 Underlay only",
-				Default:             booldefault.StaticBool(false),
 			},
 			"bfd_ibgp_enable": schema.BoolAttribute{
 				Optional:            true,
 				Computed:            true,
 				Description:         "No description available",
 				MarkdownDescription: "No description available",
-				Default:             booldefault.StaticBool(false),
 			},
 			"bfd_isis_enable": schema.BoolAttribute{
 				Optional:            true,
 				Computed:            true,
 				Description:         "No description available",
 				MarkdownDescription: "No description available",
-				Default:             booldefault.StaticBool(false),
 			},
 			"bfd_ospf_enable": schema.BoolAttribute{
 				Optional:            true,
 				Computed:            true,
 				Description:         "No description available",
 				MarkdownDescription: "No description available",
-				Default:             booldefault.StaticBool(false),
 			},
 			"bfd_pim_enable": schema.BoolAttribute{
 				Optional:            true,
 				Computed:            true,
 				Description:         "No description available",
 				MarkdownDescription: "No description available",
-				Default:             booldefault.StaticBool(false),
 			},
 			"bgp_as": schema.StringAttribute{
 				Required:            true,
@@ -167,7 +148,6 @@ func FabricVxlanEvpnResourceSchema(ctx context.Context) schema.Schema {
 				Computed:            true,
 				Description:         "No description available",
 				MarkdownDescription: "No description available",
-				Default:             booldefault.StaticBool(false),
 			},
 			"bgp_auth_key": schema.StringAttribute{
 				Optional:            true,
@@ -182,14 +162,12 @@ func FabricVxlanEvpnResourceSchema(ctx context.Context) schema.Schema {
 				Validators: []validator.Int64{
 					int64validator.OneOf(3, 7),
 				},
-				Default: int64default.StaticInt64(3),
 			},
 			"bgp_lb_id": schema.Int64Attribute{
 				Optional:            true,
 				Computed:            true,
 				Description:         "No description available",
 				MarkdownDescription: "No description available",
-				Default:             int64default.StaticInt64(0),
 			},
 			"bootstrap_conf": schema.StringAttribute{
 				Optional:            true,
@@ -201,35 +179,30 @@ func FabricVxlanEvpnResourceSchema(ctx context.Context) schema.Schema {
 				Computed:            true,
 				Description:         "Automatic IP Assignment For POAP",
 				MarkdownDescription: "Automatic IP Assignment For POAP",
-				Default:             booldefault.StaticBool(false),
 			},
 			"bootstrap_multisubnet": schema.StringAttribute{
 				Optional:            true,
 				Computed:            true,
 				Description:         "'lines with # prefix are ignored here'",
 				MarkdownDescription: "'lines with # prefix are ignored here'",
-				Default:             stringdefault.StaticString("#Scope_Start_IP, Scope_End_IP, Scope_Default_Gateway, Scope_Subnet_Prefix"),
 			},
 			"brownfield_network_name_format": schema.StringAttribute{
 				Optional:            true,
 				Computed:            true,
 				Description:         "Generated network name should be < 64 characters",
 				MarkdownDescription: "Generated network name should be < 64 characters",
-				Default:             stringdefault.StaticString("Auto_Net_VNI$$VNI$$_VLAN$$VLAN_ID$$"),
 			},
 			"brownfield_skip_overlay_network_attachments": schema.BoolAttribute{
 				Optional:            true,
 				Computed:            true,
 				Description:         "Enable to skip overlay network interface attachments for Brownfield and Host Port Resync cases",
 				MarkdownDescription: "Enable to skip overlay network interface attachments for Brownfield and Host Port Resync cases",
-				Default:             booldefault.StaticBool(false),
 			},
 			"cdp_enable": schema.BoolAttribute{
 				Optional:            true,
 				Computed:            true,
 				Description:         "Enable CDP on management interface",
 				MarkdownDescription: "Enable CDP on management interface",
-				Default:             booldefault.StaticBool(false),
 			},
 			"copp_policy": schema.StringAttribute{
 				Optional:            true,
@@ -239,21 +212,18 @@ func FabricVxlanEvpnResourceSchema(ctx context.Context) schema.Schema {
 				Validators: []validator.String{
 					stringvalidator.OneOf("dense", "lenient", "moderate", "strict", "manual"),
 				},
-				Default: stringdefault.StaticString("strict"),
 			},
 			"dci_subnet_range": schema.StringAttribute{
 				Optional:            true,
 				Computed:            true,
 				Description:         "Address range to assign P2P Interfabric Connections",
 				MarkdownDescription: "Address range to assign P2P Interfabric Connections",
-				Default:             stringdefault.StaticString("10.33.0.0/16"),
 			},
 			"dci_subnet_target_mask": schema.Int64Attribute{
 				Optional:            true,
 				Computed:            true,
 				Description:         "No description available",
 				MarkdownDescription: "No description available",
-				Default:             int64default.StaticInt64(30),
 			},
 			"default_network": schema.StringAttribute{
 				Optional:            true,
@@ -263,7 +233,6 @@ func FabricVxlanEvpnResourceSchema(ctx context.Context) schema.Schema {
 				Validators: []validator.String{
 					stringvalidator.OneOf("Default_Network_Universal", "Service_Network_Universal"),
 				},
-				Default: stringdefault.StaticString("Default_Network_Universal"),
 			},
 			"default_pvlan_sec_network": schema.StringAttribute{
 				Optional:            true,
@@ -278,7 +247,6 @@ func FabricVxlanEvpnResourceSchema(ctx context.Context) schema.Schema {
 				Validators: []validator.String{
 					stringvalidator.OneOf("queuing_policy_default_4q_cloudscale", "queuing_policy_default_8q_cloudscale"),
 				},
-				Default: stringdefault.StaticString("queuing_policy_default_8q_cloudscale"),
 			},
 			"default_queuing_policy_other": schema.StringAttribute{
 				Optional:            true,
@@ -288,7 +256,6 @@ func FabricVxlanEvpnResourceSchema(ctx context.Context) schema.Schema {
 				Validators: []validator.String{
 					stringvalidator.OneOf("queuing_policy_default_other"),
 				},
-				Default: stringdefault.StaticString("queuing_policy_default_other"),
 			},
 			"default_queuing_policy_r_series": schema.StringAttribute{
 				Optional:            true,
@@ -298,14 +265,12 @@ func FabricVxlanEvpnResourceSchema(ctx context.Context) schema.Schema {
 				Validators: []validator.String{
 					stringvalidator.OneOf("queuing_policy_default_r_series"),
 				},
-				Default: stringdefault.StaticString("queuing_policy_default_r_series"),
 			},
 			"default_vrf": schema.StringAttribute{
 				Optional:            true,
 				Computed:            true,
 				Description:         "Default Overlay VRF Template For Leafs",
 				MarkdownDescription: "Default Overlay VRF Template For Leafs",
-				Default:             stringdefault.StaticString("Default_VRF_Universal"),
 			},
 			"default_vrf_redis_bgp_rmap": schema.StringAttribute{
 				Optional:            true,
@@ -327,7 +292,6 @@ func FabricVxlanEvpnResourceSchema(ctx context.Context) schema.Schema {
 				Computed:            true,
 				Description:         "Automatic IP Assignment For POAP From Local DHCP Server",
 				MarkdownDescription: "Automatic IP Assignment For POAP From Local DHCP Server",
-				Default:             booldefault.StaticBool(false),
 			},
 			"dhcp_end": schema.StringAttribute{
 				Optional:            true,
@@ -362,70 +326,60 @@ func FabricVxlanEvpnResourceSchema(ctx context.Context) schema.Schema {
 				Computed:            true,
 				Description:         "Include AAA configs from Manageability tab during device bootup",
 				MarkdownDescription: "Include AAA configs from Manageability tab during device bootup",
-				Default:             booldefault.StaticBool(false),
 			},
 			"enable_default_queuing_policy": schema.BoolAttribute{
 				Optional:            true,
 				Computed:            true,
 				Description:         "No description available",
 				MarkdownDescription: "No description available",
-				Default:             booldefault.StaticBool(false),
 			},
 			"enable_fabric_vpc_domain_id": schema.BoolAttribute{
 				Optional:            true,
 				Computed:            true,
 				Description:         "(Not Recommended)",
 				MarkdownDescription: "(Not Recommended)",
-				Default:             booldefault.StaticBool(false),
 			},
 			"enable_macsec": schema.BoolAttribute{
 				Optional:            true,
 				Computed:            true,
 				Description:         "Enable MACsec in the fabric",
 				MarkdownDescription: "Enable MACsec in the fabric",
-				Default:             booldefault.StaticBool(false),
 			},
 			"enable_netflow": schema.BoolAttribute{
 				Optional:            true,
 				Computed:            true,
 				Description:         "Enable Netflow on VTEPs",
 				MarkdownDescription: "Enable Netflow on VTEPs",
-				Default:             booldefault.StaticBool(false),
 			},
 			"enable_ngoam": schema.BoolAttribute{
 				Optional:            true,
 				Computed:            true,
 				Description:         "Enable the Next Generation (NG) OAM feature for all switches in the fabric to aid in trouble-shooting VXLAN EVPN fabrics",
 				MarkdownDescription: "Enable the Next Generation (NG) OAM feature for all switches in the fabric to aid in trouble-shooting VXLAN EVPN fabrics",
-				Default:             booldefault.StaticBool(true),
 			},
 			"enable_nxapi": schema.BoolAttribute{
 				Optional:            true,
 				Computed:            true,
 				Description:         "Enable HTTPS NX-API",
 				MarkdownDescription: "Enable HTTPS NX-API",
-				Default:             booldefault.StaticBool(true),
 			},
 			"enable_nxapi_http": schema.BoolAttribute{
 				Optional:            true,
 				Computed:            true,
 				Description:         "No description available",
 				MarkdownDescription: "No description available",
-				Default:             booldefault.StaticBool(true),
 			},
 			"enable_pbr": schema.BoolAttribute{
 				Optional:            true,
 				Computed:            true,
 				Description:         "When ESR option is ePBR, enable ePBR will enable pbr, sla sender and epbr features on the switch",
 				MarkdownDescription: "When ESR option is ePBR, enable ePBR will enable pbr, sla sender and epbr features on the switch",
-				Default:             booldefault.StaticBool(false),
 			},
 			"enable_pvlan": schema.BoolAttribute{
 				Optional:            true,
 				Computed:            true,
 				Description:         "Enable PVLAN on switches except spines and super spines",
 				MarkdownDescription: "Enable PVLAN on switches except spines and super spines",
-				Default:             booldefault.StaticBool(false),
 			},
 			"enable_realtime_backup": schema.BoolAttribute{
 				Optional:            true,
@@ -442,21 +396,18 @@ func FabricVxlanEvpnResourceSchema(ctx context.Context) schema.Schema {
 				Computed:            true,
 				Description:         "No description available",
 				MarkdownDescription: "No description available",
-				Default:             booldefault.StaticBool(true),
 			},
 			"enable_trm": schema.BoolAttribute{
 				Optional:            true,
 				Computed:            true,
 				Description:         "For Overlay Multicast Support In VXLAN Fabrics",
 				MarkdownDescription: "For Overlay Multicast Support In VXLAN Fabrics",
-				Default:             booldefault.StaticBool(false),
 			},
 			"enable_vpc_peer_link_native_vlan": schema.BoolAttribute{
 				Optional:            true,
 				Computed:            true,
 				Description:         "No description available",
 				MarkdownDescription: "No description available",
-				Default:             booldefault.StaticBool(false),
 			},
 			"extra_conf_intra_links": schema.StringAttribute{
 				Optional:            true,
@@ -486,14 +437,12 @@ func FabricVxlanEvpnResourceSchema(ctx context.Context) schema.Schema {
 				Validators: []validator.String{
 					stringvalidator.OneOf("p2p", "unnumbered"),
 				},
-				Default: stringdefault.StaticString("p2p"),
 			},
 			"fabric_mtu": schema.Int64Attribute{
 				Optional:            true,
 				Computed:            true,
 				Description:         "Must be an even number",
 				MarkdownDescription: "Must be an even number",
-				Default:             int64default.StaticInt64(9216),
 			},
 			"fabric_name": schema.StringAttribute{
 				Required:            true,
@@ -513,21 +462,18 @@ func FabricVxlanEvpnResourceSchema(ctx context.Context) schema.Schema {
 				Computed:            true,
 				Description:         "Qos on spines for guaranteed delivery of vPC Fabric Peering communication",
 				MarkdownDescription: "Qos on spines for guaranteed delivery of vPC Fabric Peering communication",
-				Default:             booldefault.StaticBool(false),
 			},
 			"fabric_vpc_qos_policy_name": schema.StringAttribute{
 				Optional:            true,
 				Computed:            true,
 				Description:         "Qos Policy name should be same on all spines",
 				MarkdownDescription: "Qos Policy name should be same on all spines",
-				Default:             stringdefault.StaticString("spine_qos_for_fabric_vpc_peering"),
 			},
 			"feature_ptp": schema.BoolAttribute{
 				Optional:            true,
 				Computed:            true,
 				Description:         "No description available",
 				MarkdownDescription: "No description available",
-				Default:             booldefault.StaticBool(false),
 			},
 			"grfield_debug_flag": schema.StringAttribute{
 				Optional:            true,
@@ -537,21 +483,18 @@ func FabricVxlanEvpnResourceSchema(ctx context.Context) schema.Schema {
 				Validators: []validator.String{
 					stringvalidator.OneOf("Enable", "Disable"),
 				},
-				Default: stringdefault.StaticString("Disable"),
 			},
 			"hd_time": schema.Int64Attribute{
 				Optional:            true,
 				Computed:            true,
 				Description:         "NVE Source Inteface HoldDown Time in seconds",
 				MarkdownDescription: "NVE Source Inteface HoldDown Time in seconds",
-				Default:             int64default.StaticInt64(180),
 			},
 			"host_intf_admin_state": schema.BoolAttribute{
 				Optional:            true,
 				Computed:            true,
 				Description:         "No description available",
 				MarkdownDescription: "No description available",
-				Default:             booldefault.StaticBool(true),
 			},
 			"ibgp_peer_template": schema.StringAttribute{
 				Optional:            true,
@@ -578,14 +521,12 @@ func FabricVxlanEvpnResourceSchema(ctx context.Context) schema.Schema {
 				Computed:            true,
 				Description:         "Manage switches with only Inband connectivity",
 				MarkdownDescription: "Manage switches with only Inband connectivity",
-				Default:             booldefault.StaticBool(false),
 			},
 			"isis_auth_enable": schema.BoolAttribute{
 				Optional:            true,
 				Computed:            true,
 				Description:         "No description available",
 				MarkdownDescription: "No description available",
-				Default:             booldefault.StaticBool(false),
 			},
 			"isis_auth_key": schema.StringAttribute{
 				Optional:            true,
@@ -610,7 +551,6 @@ func FabricVxlanEvpnResourceSchema(ctx context.Context) schema.Schema {
 				Validators: []validator.String{
 					stringvalidator.OneOf("level-1", "level-2"),
 				},
-				Default: stringdefault.StaticString("level-2"),
 			},
 			"isis_overload_elapse_time": schema.Int64Attribute{
 				Optional:            true,
@@ -632,21 +572,18 @@ func FabricVxlanEvpnResourceSchema(ctx context.Context) schema.Schema {
 				Computed:            true,
 				Description:         "Must be an even number",
 				MarkdownDescription: "Must be an even number",
-				Default:             int64default.StaticInt64(9216),
 			},
 			"l2_segment_id_range": schema.StringAttribute{
 				Optional:            true,
 				Computed:            true,
 				Description:         "Overlay Network Identifier Range",
 				MarkdownDescription: "Overlay Network Identifier Range",
-				Default:             stringdefault.StaticString("30000-49000"),
 			},
 			"l3_partition_id_range": schema.StringAttribute{
 				Optional:            true,
 				Computed:            true,
 				Description:         "Overlay VRF Identifier Range",
 				MarkdownDescription: "Overlay VRF Identifier Range",
-				Default:             stringdefault.StaticString("50000-59000"),
 			},
 			"l3vni_mcast_group": schema.StringAttribute{
 				Optional:            true,
@@ -661,21 +598,18 @@ func FabricVxlanEvpnResourceSchema(ctx context.Context) schema.Schema {
 				Validators: []validator.String{
 					stringvalidator.OneOf("ospf", "is-is"),
 				},
-				Default: stringdefault.StaticString("ospf"),
 			},
 			"link_state_routing_tag": schema.StringAttribute{
 				Optional:            true,
 				Computed:            true,
 				Description:         "Underlay Routing Process Tag",
 				MarkdownDescription: "Underlay Routing Process Tag",
-				Default:             stringdefault.StaticString("UNDERLAY"),
 			},
 			"loopback0_ip_range": schema.StringAttribute{
 				Optional:            true,
 				Computed:            true,
 				Description:         "Typically Loopback0 IP Address Range",
 				MarkdownDescription: "Typically Loopback0 IP Address Range",
-				Default:             stringdefault.StaticString("10.2.0.0/22"),
 			},
 			"loopback0_ipv6_range": schema.StringAttribute{
 				Optional:            true,
@@ -687,7 +621,6 @@ func FabricVxlanEvpnResourceSchema(ctx context.Context) schema.Schema {
 				Computed:            true,
 				Description:         "Typically Loopback1 IP Address Range",
 				MarkdownDescription: "Typically Loopback1 IP Address Range",
-				Default:             stringdefault.StaticString("10.3.0.0/22"),
 			},
 			"loopback1_ipv6_range": schema.StringAttribute{
 				Optional:            true,
@@ -744,7 +677,6 @@ func FabricVxlanEvpnResourceSchema(ctx context.Context) schema.Schema {
 				Computed:            true,
 				Description:         "No description available",
 				MarkdownDescription: "No description available",
-				Default:             booldefault.StaticBool(false),
 			},
 			"mpls_lb_id": schema.Int64Attribute{
 				Optional:            true,
@@ -766,7 +698,6 @@ func FabricVxlanEvpnResourceSchema(ctx context.Context) schema.Schema {
 				Computed:            true,
 				Description:         "Multicast pool prefix between 8 to 30. A multicast group IP from this pool is used for BUM traffic for each overlay network.",
 				MarkdownDescription: "Multicast pool prefix between 8 to 30. A multicast group IP from this pool is used for BUM traffic for each overlay network.",
-				Default:             stringdefault.StaticString("239.1.1.0/25"),
 			},
 			"netflow_exporter_list": schema.StringAttribute{
 				Optional:            true,
@@ -788,14 +719,12 @@ func FabricVxlanEvpnResourceSchema(ctx context.Context) schema.Schema {
 				Computed:            true,
 				Description:         "Default Overlay Network Template For Borders",
 				MarkdownDescription: "Default Overlay Network Template For Borders",
-				Default:             stringdefault.StaticString("Default_Network_Extension_Universal"),
 			},
 			"network_vlan_range": schema.StringAttribute{
 				Optional:            true,
 				Computed:            true,
 				Description:         "Per Switch Overlay Network VLAN Range",
 				MarkdownDescription: "Per Switch Overlay Network VLAN Range",
-				Default:             stringdefault.StaticString("2300-2999"),
 			},
 			"ntp_server_ip_list": schema.StringAttribute{
 				Optional:            true,
@@ -812,42 +741,36 @@ func FabricVxlanEvpnResourceSchema(ctx context.Context) schema.Schema {
 				Computed:            true,
 				Description:         "No description available",
 				MarkdownDescription: "No description available",
-				Default:             int64default.StaticInt64(1),
 			},
 			"nxapi_http_port": schema.Int64Attribute{
 				Optional:            true,
 				Computed:            true,
 				Description:         "No description available",
 				MarkdownDescription: "No description available",
-				Default:             int64default.StaticInt64(80),
 			},
 			"nxapi_https_port": schema.Int64Attribute{
 				Optional:            true,
 				Computed:            true,
 				Description:         "No description available",
 				MarkdownDescription: "No description available",
-				Default:             int64default.StaticInt64(443),
 			},
 			"object_tracking_number_range": schema.StringAttribute{
 				Optional:            true,
 				Computed:            true,
 				Description:         "Per switch tracked object ID Range",
 				MarkdownDescription: "Per switch tracked object ID Range",
-				Default:             stringdefault.StaticString("100-299"),
 			},
 			"ospf_area_id": schema.StringAttribute{
 				Optional:            true,
 				Computed:            true,
 				Description:         "OSPF Area Id in IP address format",
 				MarkdownDescription: "OSPF Area Id in IP address format",
-				Default:             stringdefault.StaticString("0.0.0.0"),
 			},
 			"ospf_auth_enable": schema.BoolAttribute{
 				Optional:            true,
 				Computed:            true,
 				Description:         "No description available",
 				MarkdownDescription: "No description available",
-				Default:             booldefault.StaticBool(false),
 			},
 			"ospf_auth_key": schema.StringAttribute{
 				Optional:            true,
@@ -864,14 +787,12 @@ func FabricVxlanEvpnResourceSchema(ctx context.Context) schema.Schema {
 				Computed:            true,
 				Description:         "VRF/Network configuration using config-profile or CLI",
 				MarkdownDescription: "VRF/Network configuration using config-profile or CLI",
-				Default:             stringdefault.StaticString("cli"),
 			},
 			"per_vrf_loopback_auto_provision": schema.BoolAttribute{
 				Optional:            true,
 				Computed:            true,
 				Description:         "Auto provision a loopback on a VTEP on VRF attachment",
 				MarkdownDescription: "Auto provision a loopback on a VTEP on VRF attachment",
-				Default:             booldefault.StaticBool(false),
 			},
 			"per_vrf_loopback_ip_range": schema.StringAttribute{
 				Optional:            true,
@@ -903,7 +824,6 @@ func FabricVxlanEvpnResourceSchema(ctx context.Context) schema.Schema {
 				Computed:            true,
 				Description:         "Valid for IPv4 Underlay only",
 				MarkdownDescription: "Valid for IPv4 Underlay only",
-				Default:             booldefault.StaticBool(false),
 			},
 			"pim_hello_auth_key": schema.StringAttribute{
 				Optional:            true,
@@ -915,7 +835,6 @@ func FabricVxlanEvpnResourceSchema(ctx context.Context) schema.Schema {
 				Computed:            true,
 				Description:         "No description available",
 				MarkdownDescription: "No description available",
-				Default:             booldefault.StaticBool(false),
 			},
 			"power_redundancy_mode": schema.StringAttribute{
 				Optional:            true,
@@ -925,7 +844,6 @@ func FabricVxlanEvpnResourceSchema(ctx context.Context) schema.Schema {
 				Validators: []validator.String{
 					stringvalidator.OneOf("ps-redundant", "combined", "insrc-redundant"),
 				},
-				Default: stringdefault.StaticString("ps-redundant"),
 			},
 			"ptp_domain_id": schema.Int64Attribute{
 				Optional:            true,
@@ -945,14 +863,12 @@ func FabricVxlanEvpnResourceSchema(ctx context.Context) schema.Schema {
 				Validators: []validator.String{
 					stringvalidator.OneOf("Multicast", "Ingress"),
 				},
-				Default: stringdefault.StaticString("Multicast"),
 			},
 			"route_map_sequence_number_range": schema.StringAttribute{
 				Optional:            true,
 				Computed:            true,
 				Description:         "No description available",
 				MarkdownDescription: "No description available",
-				Default:             stringdefault.StaticString("1-65534"),
 			},
 			"router_id_range": schema.StringAttribute{
 				Optional:            true,
@@ -967,14 +883,12 @@ func FabricVxlanEvpnResourceSchema(ctx context.Context) schema.Schema {
 				Validators: []validator.Int64{
 					int64validator.OneOf(2, 4),
 				},
-				Default: int64default.StaticInt64(2),
 			},
 			"rp_lb_id": schema.Int64Attribute{
 				Optional:            true,
 				Computed:            true,
 				Description:         "No description available",
 				MarkdownDescription: "No description available",
-				Default:             int64default.StaticInt64(254),
 			},
 			"rp_mode": schema.StringAttribute{
 				Optional:            true,
@@ -984,7 +898,6 @@ func FabricVxlanEvpnResourceSchema(ctx context.Context) schema.Schema {
 				Validators: []validator.String{
 					stringvalidator.OneOf("asm", "bidir"),
 				},
-				Default: stringdefault.StaticString("asm"),
 			},
 			"rr_count": schema.Int64Attribute{
 				Optional:            true,
@@ -994,7 +907,6 @@ func FabricVxlanEvpnResourceSchema(ctx context.Context) schema.Schema {
 				Validators: []validator.Int64{
 					int64validator.OneOf(2, 4),
 				},
-				Default: int64default.StaticInt64(2),
 			},
 			"scheduled_time": schema.StringAttribute{
 				Optional:            true,
@@ -1011,7 +923,6 @@ func FabricVxlanEvpnResourceSchema(ctx context.Context) schema.Schema {
 				Computed:            true,
 				Description:         "Per Switch Overlay Service Network VLAN Range",
 				MarkdownDescription: "Per Switch Overlay Service Network VLAN Range",
-				Default:             stringdefault.StaticString("3000-3199"),
 			},
 			"site_id": schema.StringAttribute{
 				Optional:            true,
@@ -1024,14 +935,12 @@ func FabricVxlanEvpnResourceSchema(ctx context.Context) schema.Schema {
 				Computed:            true,
 				Description:         "Per switch SLA ID Range",
 				MarkdownDescription: "Per switch SLA ID Range",
-				Default:             stringdefault.StaticString("10000-19999"),
 			},
 			"snmp_server_host_trap": schema.BoolAttribute{
 				Optional:            true,
 				Computed:            true,
 				Description:         "Configure NDFC as a receiver for SNMP traps",
 				MarkdownDescription: "Configure NDFC as a receiver for SNMP traps",
-				Default:             booldefault.StaticBool(true),
 			},
 			"spine_switch_core_interfaces": schema.StringAttribute{
 				Optional:            true,
@@ -1043,7 +952,6 @@ func FabricVxlanEvpnResourceSchema(ctx context.Context) schema.Schema {
 				Computed:            true,
 				Description:         "Checking this will disable Dynamic Underlay IP Address Allocations",
 				MarkdownDescription: "Checking this will disable Dynamic Underlay IP Address Allocations",
-				Default:             booldefault.StaticBool(false),
 			},
 			"stp_bridge_priority": schema.Int64Attribute{
 				Optional:            true,
@@ -1058,7 +966,6 @@ func FabricVxlanEvpnResourceSchema(ctx context.Context) schema.Schema {
 				Validators: []validator.String{
 					stringvalidator.OneOf("rpvst+", "mst", "unmanaged"),
 				},
-				Default: stringdefault.StaticString("unmanaged"),
 			},
 			"stp_vlan_range": schema.StringAttribute{
 				Optional:            true,
@@ -1070,21 +977,18 @@ func FabricVxlanEvpnResourceSchema(ctx context.Context) schema.Schema {
 				Computed:            true,
 				Description:         "Enable bi-directional compliance checks to flag additional configs in the running config that are not in the intent/expected config",
 				MarkdownDescription: "Enable bi-directional compliance checks to flag additional configs in the running config that are not in the intent/expected config",
-				Default:             booldefault.StaticBool(false),
 			},
 			"subinterface_range": schema.StringAttribute{
 				Optional:            true,
 				Computed:            true,
 				Description:         "Per Border Dot1q Range For VRF Lite Connectivity",
 				MarkdownDescription: "Per Border Dot1q Range For VRF Lite Connectivity",
-				Default:             stringdefault.StaticString("2-511"),
 			},
 			"subnet_range": schema.StringAttribute{
 				Optional:            true,
 				Computed:            true,
 				Description:         "Address range to assign Numbered and Peer Link SVI IPs",
 				MarkdownDescription: "Address range to assign Numbered and Peer Link SVI IPs",
-				Default:             stringdefault.StaticString("10.4.0.0/16"),
 			},
 			"subnet_target_mask": schema.Int64Attribute{
 				Optional:            true,
@@ -1094,7 +998,6 @@ func FabricVxlanEvpnResourceSchema(ctx context.Context) schema.Schema {
 				Validators: []validator.Int64{
 					int64validator.OneOf(30, 31),
 				},
-				Default: int64default.StaticInt64(30),
 			},
 			"syslog_server_ip_list": schema.StringAttribute{
 				Optional:            true,
@@ -1116,14 +1019,12 @@ func FabricVxlanEvpnResourceSchema(ctx context.Context) schema.Schema {
 				Computed:            true,
 				Description:         "TCAM commands are automatically generated for VxLAN and vPC Fabric Peering when Enabled",
 				MarkdownDescription: "TCAM commands are automatically generated for VxLAN and vPC Fabric Peering when Enabled",
-				Default:             booldefault.StaticBool(true),
 			},
 			"underlay_is_v6": schema.BoolAttribute{
 				Optional:            true,
 				Computed:            true,
 				Description:         "If not enabled, IPv4 underlay is used",
 				MarkdownDescription: "If not enabled, IPv4 underlay is used",
-				Default:             booldefault.StaticBool(false),
 			},
 			"unnum_bootstrap_lb_id": schema.Int64Attribute{
 				Optional:            true,
@@ -1145,7 +1046,6 @@ func FabricVxlanEvpnResourceSchema(ctx context.Context) schema.Schema {
 				Computed:            true,
 				Description:         "If not enabled, Spine-Leaf interfaces will use global IPv6 addresses",
 				MarkdownDescription: "If not enabled, Spine-Leaf interfaces will use global IPv6 addresses",
-				Default:             booldefault.StaticBool(true),
 			},
 			"v6_subnet_range": schema.StringAttribute{
 				Optional:            true,
@@ -1160,35 +1060,30 @@ func FabricVxlanEvpnResourceSchema(ctx context.Context) schema.Schema {
 				Validators: []validator.Int64{
 					int64validator.OneOf(126, 127),
 				},
-				Default: int64default.StaticInt64(126),
 			},
 			"vpc_auto_recovery_time": schema.Int64Attribute{
 				Optional:            true,
 				Computed:            true,
 				Description:         "No description available",
 				MarkdownDescription: "No description available",
-				Default:             int64default.StaticInt64(360),
 			},
 			"vpc_delay_restore": schema.Int64Attribute{
 				Optional:            true,
 				Computed:            true,
 				Description:         "No description available",
 				MarkdownDescription: "No description available",
-				Default:             int64default.StaticInt64(150),
 			},
 			"vpc_domain_id_range": schema.StringAttribute{
 				Optional:            true,
 				Computed:            true,
 				Description:         "vPC Domain id range to use for new pairings",
 				MarkdownDescription: "vPC Domain id range to use for new pairings",
-				Default:             stringdefault.StaticString("1-1000"),
 			},
 			"vpc_enable_ipv6_nd_sync": schema.BoolAttribute{
 				Optional:            true,
 				Computed:            true,
 				Description:         "Enable IPv6 ND synchronization between vPC peers",
 				MarkdownDescription: "Enable IPv6 ND synchronization between vPC peers",
-				Default:             booldefault.StaticBool(true),
 			},
 			"vpc_peer_keep_alive_option": schema.StringAttribute{
 				Optional:            true,
@@ -1198,28 +1093,24 @@ func FabricVxlanEvpnResourceSchema(ctx context.Context) schema.Schema {
 				Validators: []validator.String{
 					stringvalidator.OneOf("loopback", "management"),
 				},
-				Default: stringdefault.StaticString("management"),
 			},
 			"vpc_peer_link_po": schema.Int64Attribute{
 				Optional:            true,
 				Computed:            true,
 				Description:         "No description available",
 				MarkdownDescription: "No description available",
-				Default:             int64default.StaticInt64(500),
 			},
 			"vpc_peer_link_vlan": schema.Int64Attribute{
 				Optional:            true,
 				Computed:            true,
 				Description:         "VLAN range for vPC Peer Link SVI",
 				MarkdownDescription: "VLAN range for vPC Peer Link SVI",
-				Default:             int64default.StaticInt64(3600),
 			},
 			"vrf_extension_template": schema.StringAttribute{
 				Optional:            true,
 				Computed:            true,
 				Description:         "Default Overlay VRF Template For Borders",
 				MarkdownDescription: "Default Overlay VRF Template For Borders",
-				Default:             stringdefault.StaticString("Default_VRF_Extension_Universal"),
 			},
 			"vrf_lite_autoconfig": schema.StringAttribute{
 				Optional:            true,
@@ -1229,14 +1120,12 @@ func FabricVxlanEvpnResourceSchema(ctx context.Context) schema.Schema {
 				Validators: []validator.String{
 					stringvalidator.OneOf("Manual", "Back2Back&ToExternal"),
 				},
-				Default: stringdefault.StaticString("Manual"),
 			},
 			"vrf_vlan_range": schema.StringAttribute{
 				Optional:            true,
 				Computed:            true,
 				Description:         "Per Switch Overlay VRF VLAN Range",
 				MarkdownDescription: "Per Switch Overlay VRF VLAN Range",
-				Default:             stringdefault.StaticString("2000-2299"),
 			},
 		},
 		Description:         "Resource to configure and manage a VXLAN EVPN Fabric",
