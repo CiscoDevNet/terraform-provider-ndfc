@@ -3,13 +3,15 @@
 page_title: "ndfc_rest_api Resource - terraform-provider-ndfc"
 subcategory: ""
 description: |-
-  Resource to execute any REST API on NDFC.
+  Resource to execute any REST API on NDFC.  Note: url fields are pre-fixed with the NDFC base URL which also includes <base_url>/appcenter/cisco/ndfc/api/v1/.    Hence always use urls relative to above base URL.
   url - specify the API and method to specify the HTTP method to be used for CRUD operations.payload - specify the payload for the create and update operations.update_url - specify the URL for the update operation. Text/Template supportedupdate_method - specify the HTTP method for the update operation.update_payload - specify the payload for the update operation. Text/Template supporteddelete_url - specify the URL for the delete operations.  Text/Template supporteddelete_method - specify the HTTP method for the delete operation.delete_payload - specify the payload for the delete operation.  Text/Template supporteddelete_parameters - specify the query parameters for the delete operation.stateful - control the execution of the plan:If set to true, the plan will be executed only if there is a change in the config.If set to false, the plan will be executed every time.
 ---
 
 # ndfc_rest_api (Resource)
 
-Resource to execute any REST API on NDFC.  
+Resource to execute any REST API on NDFC.     
+Note: `url` fields are pre-fixed with the NDFC base URL which also includes `<base_url>/appcenter/cisco/ndfc/api/v1/`.       
+Hence always use urls relative to above base URL.        
 -  `url` - specify the API and `method` to specify the HTTP method to be used for CRUD operations.  
 -  `payload` - specify the payload for the create and update operations.    
 -  `update_url` - specify the URL for the update operation. Text/Template supported
@@ -160,7 +162,7 @@ resource "ndfc_rest_api" "test_resource_rest_api_1" {
 
 - `delete_method` (String) Method to use for delete operation. If not specified, DELETE is used
 - `delete_parameters` (String) Query parameters for DELETE API if any; format is key1=value1&key2=value2
-- `delete_payload` (String) Payload to send for delete operation. Ignored if the method is `DELETE`
+- `delete_payload` (String) Payload to send for delete operation. Ignored if the method is `DELETE`.
 This field supports Text/template. Use `{{.field_name}}` to refer to a field from the `response_message`
 - `delete_url` (String) URL to be used for delete operation. If not specified, the same URL as the create URL is used
 - `read_url` (String) URL to be used for GET(Read) operation. If not specified Read does not query NDFC
@@ -169,9 +171,9 @@ The response from the GET operation is used to overwrite `payload`
 Note: The GET response must be an exact match of `payload`
 - `stateful` (Boolean) Stateful set to true triggers update only when something changes in config. If set to false every plan shows changes
 - `update_method` (String) Method to use for update operation. PUT is used if not specified
-- `update_payload` (String) Payload to send for update operation. If not specified, the same payload as the create payload is used
+- `update_payload` (String) Payload to send for update operation. If not specified, the same payload as the create payload is used. 
 This field supports Text/template. Use `{{.field_name}}` to refer to a field from the `response_message`
-- `update_url` (String) URL to be used for update operation. If not specified, the same URL as the create URL is used
+- `update_url` (String) URL to be used for update operation. If not specified, the same URL as the create URL is used. 
 This field supports Text/template. Use `{{.field_name}}` to refer to a field from the `response_message`
 
 ### Read-Only
