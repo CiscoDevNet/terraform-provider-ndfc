@@ -109,7 +109,7 @@ func (c NDFCAPICommon) Post(payload []byte) (gjson.Result, error) {
 		res, err = c.client.Post(c.NDFCAPI.PostUrl(), string(payload))
 	}
 	if err != nil {
-		log.Printf("[ERR] Failed to make POST request: %s", err)
+		log.Printf("[ERR] Failed to make POST request: %s |%v|", err, res)
 		return res, err
 	}
 	log.Printf("[DEBUG] POST request was ok")
