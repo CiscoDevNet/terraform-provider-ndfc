@@ -9,6 +9,7 @@ import (
 	"html/template"
 	"log"
 	"strings"
+	"terraform-provider-ndfc/internal/provider/datasources/datasource_rest_api"
 	"terraform-provider-ndfc/internal/provider/ndfc/api"
 	"terraform-provider-ndfc/internal/provider/resources/resource_rest_api"
 
@@ -49,6 +50,27 @@ func (c NDFC) RscCreateRestAPI(ctx context.Context, diags *diag.Diagnostics, dat
 	/* Set the checksum of payload as Id */
 
 	data.Id = types.StringValue(computeMD5Sum(data.Payload.ValueString()))
+}
+
+func (c NDFC) DsGetRestAPI(ctx context.Context, data *datasource_rest_api.RestApiModel, dg *diag.Diagnostics) {
+	if data.Url.IsNull() {
+		dg.AddError("Url is required", "Url is a required field for the rest_api resource")
+		return
+	}
+
+	restApi := api.NewRestAPI(c.GetLock(ResourceRestAPI), &c.apiClient)
+	restApi.Url = data.Url.ValueString()
+
+	if !data.QueryParameters.IsNull() {
+		restApi.Url = restApi.Url + "?=" + data.QueryParameters.ValueString()
+	}
+
+	resp, err := restApi.Get()
+	if err != nil {
+		dg.AddError("Failed to make API request", err.Error())
+		return
+	}
+	data.ResponseMessage = types.StringValue(string(resp))
 }
 
 func (c NDFC) RscGetRestAPI(ctx context.Context, data *resource_rest_api.RestApiModel, dg *diag.Diagnostics) {

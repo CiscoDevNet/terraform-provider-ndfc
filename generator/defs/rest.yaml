@@ -4,7 +4,9 @@ resource:
   doc_category: Fabric
   generate_tf_resource: true
   description: |
-    Resource to execute any REST API on NDFC.  
+    Resource to execute any REST API on NDFC.     
+    Note: `url` fields are pre-fixed with the NDFC base URL which also includes `<base_url>/appcenter/cisco/ndfc/api/v1/`.       
+    Hence always use urls relative to above base URL.        
     -  `url` - specify the API and `method` to specify the HTTP method to be used for CRUD operations.  
     -  `payload` - specify the payload for the create and update operations.    
     -  `update_url` - specify the URL for the update operation. Text/Template supported
@@ -110,6 +112,33 @@ resource:
         This field is used for template replacements of the `update_url`, `update_payload`, `delete_url`, `delete_payload` if they contain go template fields like `{{.field_name}}`
       computed: true
 
-     
-     
-  
+datasource:
+  name: rest_api
+  doc_category: Fabric
+  generate_tf_resource: true
+  description: |
+    Datasource to retrieve data from any REST API on NDFC.  
+    Note: `url` fields are pre-fixed with the NDFC base URL which also includes `<base_url>/appcenter/cisco/ndfc/api/v1/`.       
+    Hence always use urls relative to above base URL.        
+    -  `url` - specify the API and `method` to specify the HTTP method to be used for CRUD operations.  
+    -  `query_parameters` - specify the query parameters for the GET operation if any
+    -  `response_message` - The response message from the API for the GET operation
+
+  skip_codec: true
+  attributes:
+    - model_name: url
+      tf_name: url
+      type: String
+      description: "URL to be used for GET - Note: This is prefixed with base_url"
+      mandatory: true
+      example: "/lan-fabric/rest/control/policies"
+    - model_name: query_parameters
+      tf_name: query_parameters
+      type: String
+      description: "Query parameters for GET API if any; format is key1=value1&key2=value2"
+    - model_name: response_message
+      tf_name: response_message
+      type: String
+      description: |
+        Response message from the API for the GET operation
+      computed: true
