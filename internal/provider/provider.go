@@ -159,6 +159,7 @@ func (p *ndfcProvider) DataSources(ctx context.Context) []func() datasource.Data
 		NewInterfacesDataSource,
 		NewInventoryDevicesDataSource,
 		NewInventoryReachabilityDataSource,
+		NewRestApiDatasource,
 	}
 }
 
