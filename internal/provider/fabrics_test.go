@@ -47,19 +47,18 @@ func TestAccFabricVxlanEvpnResource(t *testing.T) {
 				}(),
 				//Check:       resource.ComposeTestCheckFunc(FabricVxlanEvpnModelHelperStateCheck("ndfc_fabric_vxlan_evpn.test_resource_fabric_vxlan_evpn_1", FabricRsc, path.Empty())...),
 				ExpectError: regexp.MustCompile("bgp_as cannot be updated"),
-			}, { // modify fields like CDP_ENABLE, BFD_ENABLE, enable_trm with wrong configs and MTU with different values and deploy true
-				Config: func() string {
-					*stepCount++
-					tt := fmt.Sprintf("%s%d", t.Name(), *stepCount)
-					return helper.GenerateFabricConfig(tt, cfg, helper.Enable_trm_config_file)
-				}(),
-				//Check: resource.ComposeTestCheckFunc(FabricVxlanEvpnModelHelperStateCheck("ndfc_fabric_vxlan_evpn.test_resource_fabric_vxlan_evpn_1", FabricRsc, path.Empty())...),
-				ExpectError: regexp.MustCompile("l3vni_mcast_group is required for TRM"),
 			}, { // modify fields like CDP_ENABLE, BFD_ENABLE, enable_trm with correct configs and MTU with different values and deploy true
 				Config: func() string {
 					*stepCount++
 					tt := fmt.Sprintf("%s%d", t.Name(), *stepCount)
 					return helper.GenerateFabricConfig(tt, cfg, helper.Modified_file)
+				}(),
+				//Check: resource.ComposeTestCheckFunc(FabricVxlanEvpnModelHelperStateCheck("ndfc_fabric_vxlan_evpn.test_resource_fabric_vxlan_evpn_1", FabricRsc, path.Empty())...),
+			}, { //Test 9 different fabric profiles
+				Config: func() string {
+					*stepCount++
+					tt := fmt.Sprintf("%s%d", t.Name(), *stepCount)
+					return helper.GenerateFabricConfig(tt, cfg, helper.Different_fabric_profiles)
 				}(),
 				//Check: resource.ComposeTestCheckFunc(FabricVxlanEvpnModelHelperStateCheck("ndfc_fabric_vxlan_evpn.test_resource_fabric_vxlan_evpn_1", FabricRsc, path.Empty())...),
 			},
