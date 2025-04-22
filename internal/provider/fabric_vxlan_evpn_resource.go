@@ -68,9 +68,6 @@ func (r *fabricVxlanEvpnResource) Create(ctx context.Context, req resource.Creat
 		panic("Client is nil")
 	}
 	resp.Diagnostics.Append(req.Config.Get(ctx, &data)...)
-	if data.EnableTrm.ValueBool() && data.L3vniMcastGroup.ValueString() == "" {
-		resp.Diagnostics.AddError("l3vni_mcast_group is required for TRM", "l3vni_mcast_group is mandatory when enable_trm is true")
-	}
 	// Create API call logic
 	deploy := data.Deploy.ValueBool()
 	r.client.RscCreateFabric(ctx, &resp.Diagnostics, &data, ndfc.ResourceVxlanEvpnType)
@@ -147,9 +144,6 @@ func (r *fabricVxlanEvpnResource) Update(ctx context.Context, req resource.Updat
 		resp.Diagnostics.AddError("bgp_as cannot be updated", "bgp_as is immutable")
 	}
 	resp.Diagnostics.Append(req.Config.Get(ctx, &planData)...)
-	if planData.EnableTrm.ValueBool() && planData.L3vniMcastGroup.ValueString() == "" {
-		resp.Diagnostics.AddError("l3vni_mcast_group is required for TRM", "l3vni_mcast_group is mandatory when enable_trm is true")
-	}
 	// Create API call logic
 	deploy := planData.Deploy.ValueBool()
 	r.client.RscUpdateFabric(ctx, &resp.Diagnostics, &planData, ndfc.ResourceVxlanEvpnType)
