@@ -18,7 +18,7 @@ const (
 	Base_file = iota
 	Modified_file
 	Bgp_as_change_file
-	Enable_trm_config_file
+	Different_fabric_profiles
 )
 
 func GenerateFabricConfig(tt string, cfg map[string]string, fileType int) string {
@@ -47,8 +47,8 @@ func GenerateFabricConfig(tt string, cfg map[string]string, fileType int) string
 		filePath = folder + "/resource_modified.tf"
 	case Bgp_as_change_file:
 		filePath = folder + "/resource_bgp_as_change.tf"
-	case Enable_trm_config_file:
-		filePath = folder + "/resource_enable_trm.tf"
+	case Different_fabric_profiles:
+		filePath = folder + "/resource_different_fabric_profiles.tf"
 	default:
 		log.Fatalf("Invalid file type: %d", fileType)
 	}
