@@ -29,7 +29,7 @@ type fabricDataSource struct {
 }
 
 func (d *fabricDataSource) Metadata(ctx context.Context, req datasource.MetadataRequest, resp *datasource.MetadataResponse) {
-	resp.TypeName = req.ProviderTypeName + "_" + ndfc.DataSourceFabric
+	resp.TypeName = req.ProviderTypeName + "_" + ndfc.ResourceFabrics
 }
 
 func (d *fabricDataSource) Schema(ctx context.Context, req datasource.SchemaRequest, resp *datasource.SchemaResponse) {
@@ -66,7 +66,12 @@ func (d *fabricDataSource) Read(ctx context.Context, req datasource.ReadRequest,
 	if resp.Diagnostics.HasError() {
 		return
 	}
-	fb := d.client.DSGetFabricBulk(ctx, &resp.Diagnostics)
+	if data.FabricName.IsNull() || data.FabricName.IsUnknown() {
+		resp.Diagnostics.AddError("Fabric name is required", "Fabric name is required")
+		return
+	}
+
+	fb := d.client.DSGetFabric(ctx, &resp.Diagnostics, data.FabricName.ValueString())
 	// Save data into Terraform state
 	resp.Diagnostics.Append(resp.State.Set(ctx, fb)...)
 }
