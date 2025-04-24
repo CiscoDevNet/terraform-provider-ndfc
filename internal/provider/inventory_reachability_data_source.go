@@ -62,7 +62,7 @@ type ReachabilityDetailsModel struct {
 }
 
 func (d *InventoryReachabilityDataSource) Metadata(ctx context.Context, req datasource.MetadataRequest, resp *datasource.MetadataResponse) {
-	resp.TypeName = req.ProviderTypeName + "_reachability"
+	resp.TypeName = req.ProviderTypeName + "_inventory_reachability"
 }
 
 func (d *InventoryReachabilityDataSource) Schema(ctx context.Context, req datasource.SchemaRequest, resp *datasource.SchemaResponse) {

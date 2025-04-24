@@ -530,21 +530,25 @@ datasource:
           type: String
           description: "Name of the Interface. Example: `Ethernet1/3`"
           example: Ethernet1/13
+          computed: true
         - model_name: ifType
           tf_name: interface_type
           type: String
           description: "Type of interface. Examples: `ethernet`, `port-channel`"
           example: ethernet
+          computed: true
         - model_name: ifIndex
           tf_name: interface_index
           type: Int64
           description: "Index of the interface"
           example: 1
+          computed: true
         - model_name: isPhysical
           tf_name: is_physical
           type: Bool
           description: "Is the interface physical"
           example: true
+          computed: true
         - model_name: mode
           tf_name: mode
           type: String
@@ -554,69 +558,83 @@ datasource:
           tf_name: native_vlan_id
           type: Int64
           description: "Native VLAN ID"
+          computed: true
           example: 1
         - model_name: operStatusStr
           tf_name: oper_status
           type: String
           description: "Operational status of the interface"
           example: up
+          computed: true
         - model_name: operStatusCause
           tf_name: oper_status_cause
           type: String
           description: "Cause of the operational status"
           example: "Admin Up"
+          computed: true
         - model_name: policyName
           tf_name: policy_name
           type: String
           description: "Name of the policy"
           example: int_trunk_host
+          computed: true
         - model_name: speedStr
           tf_name: speed
           type: String
           description: "Speed of the interface"
           example: Auto
+          computed: true
         - model_name: sysName
           tf_name: switch_name
           type: String
           description: "Name of the system"
           example: "switch1"
+          computed: true
         - model_name: vrf
           tf_name: vrf
           type: String
           description: "VRF name"
           example: my_vrf
+          computed: true
         - model_name: adminStatusStr
           tf_name: admin_status
           type: String
           description: "Admin status of the interface"
           example: up
+          computed: true
         - model_name: allowedVLANs
           tf_name: allowed_vlans
           type: String
           description: "Allowed vlans for the ethernet interface"
           example: 10-20
+          computed: true
         - model_name: fabricName
           tf_name: fabric_name
           type: String
           description: "Name of the fabric"
           example: "fabric1"
+          computed: true
         - model_name: ipAddress
           tf_name: ipv4_address
           type: String
           description: "IPv4 address"
           example:
+          computed: true
         - model_name: alias
           tf_name: description
           type: String
           description: "Description of the interface"
           example: "alias1"
+          computed: true
         - model_name: complianceStatus
           tf_name: deployment_status
           type: String
           description: "Deployment status of the interface"
           example: "success"
+          computed: true
         - model_name: switchDbId
           tf_name: switch_dbid
           type: Int64
           description: "Switch database ID"
           example: "1"
+          computed: true
