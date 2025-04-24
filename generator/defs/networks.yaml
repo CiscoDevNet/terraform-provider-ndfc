@@ -355,44 +355,117 @@ datasource:
       description: List of Networks
       type: List
       bulk: true
+      computed: true
       attributes:
         - <<: *netName
           tf_hide: false
-        - *displayName
-        - *netId
-        - *netTemplate
-        - *netExtensionTemplate
-        - *vrf
-        - *primaryNetworkId
-        - *type
-        - *nwStatus
-        - *gatewayIpAddress
-        - *gatewayIpV6Address
-        - *vlanId
-        - *vlanName
-        - *isLayer2Only
-        - *intfDescription
-        - *mtu
-        - *secondaryGW1
-        - *secondaryGW2
-        - *secondaryGW3
-        - *secondaryGW4
-        - *suppressArp
-        - *enableIR
-        - *mcastGroup
-        - *dhcpServers
-        - *loopbackId
-        - *tag
-        - *trmEnabled
-        - *rtBothAuto
-        - *enableNetflow
-        - *sviNetflowMonitor
-        - *vlanNetflowMonitor
-        - *enableL3OnBorder
-        - *igmpVerion
+          computed: true
+          optional: false
+          mandatory: false
+        - <<: *displayName
+          computed: true
+          optional: false
+        - <<: *netId
+          computed: true
+          optional: false
+        - <<: *netTemplate
+          computed: true
+          optional: false
+        - <<: *netExtensionTemplate
+          computed: true
+          optional: false
+        - <<: *vrf
+          computed: true
+          optional: false
+        - <<: *primaryNetworkId
+          computed: true
+          optional: false
+        - <<: *type
+          computed: true
+          optional: false
+        - <<: *nwStatus
+          computed: true
+          optional: false
+        - <<: *gatewayIpAddress
+          computed: true
+          optional: false
+        - <<: *gatewayIpV6Address
+          computed: true
+          optional: false
+        - <<: *vlanId
+          computed: true
+          optional: false
+        - <<: *vlanName
+          computed: true
+          optional: false
+        - <<: *isLayer2Only
+          computed: true
+          optional: false
+        - <<: *intfDescription
+          computed: true
+          optional: false
+        - <<: *mtu
+          computed: true
+          optional: false
+        - <<: *secondaryGW1
+          computed: true
+          optional: false
+        - <<: *secondaryGW2
+          computed: true
+          optional: false
+        - <<: *secondaryGW3
+          computed: true
+          optional: false
+        - <<: *secondaryGW4
+          computed: true
+          optional: false
+        - <<: *suppressArp
+          computed: true
+          optional: false
+        - <<: *enableIR
+          computed: true
+          optional: false
+        - <<: *mcastGroup
+          computed: true
+          optional: false
+        - <<: *dhcpServers
+          computed: true
+          optional: false
+        - <<: *loopbackId
+          computed: true
+          optional: false
+        - <<: *tag
+          computed: true
+          optional: false
+        - <<: *trmEnabled
+          computed: true
+          optional: false
+        - <<: *rtBothAuto
+          computed: true
+          optional: false
+        - <<: *enableNetflow
+          computed: true
+          optional: false
+        - <<: *sviNetflowMonitor
+          computed: true
+          optional: false
+        - <<: *vlanNetflowMonitor
+          computed: true
+          optional: false
+        - <<: *enableL3OnBorder
+          computed: true
+          optional: false
+        - model_name: igmpVersion
+          ndfc_nested: [networkTemplateConfig]
+          tf_name: igmp_version
+          type: String
+          description: IGMP version
+          optional: false
+          computed: true
         - model_name: lanAttachList
           tf_name: attachments
           type: List
+          computed: true
           description: List of switches attached to the network
           attributes:
             - model_name: serialNumber
@@ -400,6 +473,7 @@ datasource:
               unmarshal_tag: switchSerialNo
               type: String
               tf_hide: false
+              computed: true
               description: Serial number of a switch
               example: FDO245206N5
               requires_replace: true
@@ -416,7 +490,6 @@ datasource:
               tf_name: display_name
               type: String
               computed: true
-              optional: true
               description: The name of the switch
               example: switch1
             - &VlanId
@@ -424,7 +497,7 @@ datasource:
               tf_name: vlan
               unmarshal_tag: vlanId
               type: Int64
-              optional: true
+              optional: false
               computed: true
               use_state: true
               min_int: 2
@@ -453,12 +526,13 @@ datasource:
               description: This field covers any configuration not included in overlay templates which is needed as part of this VRF attachment
               example: "interface Vlan2000\\r\\n  delay 200"
               exclude_test: true
+              computed: true
             - model_name: switchPorts
               tf_name: switch_ports
               type: List:String
               description: List of switch ports
               ndfc_type: csv
-              optional: true
+              optional: false
               computed: true
               example: "[Ethernet1/1, Ethernet1/2]"
             - model_name: portNames
@@ -471,14 +545,14 @@ datasource:
               tf_name: tor_ports
               type: List:String
               description: List of TOR ports
-              optional: true
+              optional: false
               computed: true
               ndfc_type: csv
               example: "[Ethernet1/1, Ethernet1/2]"
             - model_name: instanceValues
               tf_name: instance_values
               type: String
-              optional: true
+              optional: false
               computed: true
               description: Instance values
               example: "isActive=false"
