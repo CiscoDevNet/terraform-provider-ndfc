@@ -66,52 +66,85 @@ resource "ndfc_fabric_vxlan_evpn" "test_resource_fabric_vxlan_evpn_1" {
   loopback1_ip_range                          = "10.3.0.0/22"
   mpls_handoff                                = false
   multicast_group_subnet                      = "239.1.1.0/25"
-  netflow_exporter_list                       = jsonencode({ "NETFLOW_EXPORTER_LIST" : [{ "EXPORTER_NAME" : "Test2", "IP" : "10.1.1.1", "VRF" : "", "SRC_IF_NAME" : "eth1/1", "UDP_PORT" : "800" }] })
-  netflow_monitor_list                        = jsonencode({ "NETFLOW_MONITOR_LIST" : [{ "MONITOR_NAME" : "Test", "RECORD_NAME" : "Test1", "EXPORTER1" : "Test2", "EXPORTER2" : "" }] })
-  netflow_record_list                         = jsonencode({ "NETFLOW_RECORD_LIST" : [{ "RECORD_NAME" : "Test1", "RECORD_TEMPLATE" : "netflow_ipv4_record", "LAYER2_RECORD" : "false" }] })
-  network_vlan_range                          = "2300-2999"
-  nve_lb_id                                   = 1
-  nxapi_https_port                            = 443
-  nxapi_http_port                             = 80
-  object_tracking_number_range                = "100-299"
-  ospf_area_id                                = "0.0.0.0"
-  ospf_auth_enable                            = false
-  overlay_mode                                = "cli"
-  per_vrf_loopback_auto_provision             = false
-  pim_hello_auth_enable                       = false
-  pm_enable                                   = false
-  power_redundancy_mode                       = "ps-redundant"
-  replication_mode                            = "Multicast"
-  route_map_sequence_number_range             = "1-65534"
-  rp_count                                    = 2
-  rp_lb_id                                    = 254
-  rp_mode                                     = "asm"
-  rr_count                                    = 2
-  service_network_vlan_range                  = "3000-3199"
-  sla_id_range                                = "10000-19999"
-  snmp_server_host_trap                       = true
-  static_underlay_ip_alloc                    = false
-  stp_root_option                             = "unmanaged"
-  strict_cc_mode                              = false
-  subinterface_range                          = "2-511"
-  subnet_range                                = "10.4.0.0/16"
-  subnet_target_mask                          = 30
-  tcam_allocation                             = true
-  underlay_is_v6                              = false
-  use_link_local                              = true
-  v6_subnet_target_mask                       = 126
-  vpc_auto_recovery_time                      = 360
-  vpc_delay_restore                           = 150
-  vpc_domain_id_range                         = "1-1000"
-  vpc_enable_ipv6_nd_sync                     = true
-  vpc_peer_keep_alive_option                  = "management"
-  vpc_peer_link_po                            = 500
-  vpc_peer_link_vlan                          = 3600
-  vrf_lite_autoconfig                         = "Manual"
-  vrf_vlan_range                              = "2000-2299"
-  default_network                             = "Default_Network_Universal"
-  default_vrf                                 = "Default_VRF_Universal"
-  network_extension_template                  = "Default_Network_Extension_Universal"
-  vrf_extension_template                      = "Default_VRF_Extension_Universal"
-  deploy                                      = false
+  netflow_exporter_list = jsonencode(
+    {
+      "NETFLOW_EXPORTER_LIST" : [
+        {
+          "EXPORTER_NAME" : "Test2",
+          "IP" : "10.1.1.1",
+          "VRF" : "",
+          "SRC_IF_NAME" : "eth1/1",
+          "UDP_PORT" : "800"
+        }
+      ]
+    }
+  )
+  netflow_monitor_list = jsonencode(
+    {
+      "NETFLOW_MONITOR_LIST" : [
+        {
+          "MONITOR_NAME" : "Test",
+          "RECORD_NAME" : "Test1",
+          "EXPORTER1" : "Test2",
+          "EXPORTER2" : ""
+        }
+      ]
+    }
+  )
+  netflow_record_list = jsonencode(
+    {
+      "NETFLOW_RECORD_LIST" : [
+        {
+          "RECORD_NAME" : "Test1",
+          "RECORD_TEMPLATE" : "netflow_ipv4_record",
+          "LAYER2_RECORD" : "false"
+        }
+      ]
+    }
+  )
+  network_vlan_range              = "2300-2999"
+  nve_lb_id                       = 1
+  nxapi_https_port                = 443
+  nxapi_http_port                 = 80
+  object_tracking_number_range    = "100-299"
+  ospf_area_id                    = "0.0.0.0"
+  ospf_auth_enable                = false
+  overlay_mode                    = "cli"
+  per_vrf_loopback_auto_provision = false
+  pim_hello_auth_enable           = false
+  pm_enable                       = false
+  power_redundancy_mode           = "ps-redundant"
+  replication_mode                = "Multicast"
+  route_map_sequence_number_range = "1-65534"
+  rp_count                        = 2
+  rp_lb_id                        = 254
+  rp_mode                         = "asm"
+  rr_count                        = 2
+  service_network_vlan_range      = "3000-3199"
+  sla_id_range                    = "10000-19999"
+  snmp_server_host_trap           = true
+  static_underlay_ip_alloc        = false
+  stp_root_option                 = "unmanaged"
+  strict_cc_mode                  = false
+  subinterface_range              = "2-511"
+  subnet_range                    = "10.4.0.0/16"
+  subnet_target_mask              = 30
+  tcam_allocation                 = true
+  underlay_is_v6                  = false
+  use_link_local                  = true
+  v6_subnet_target_mask           = 126
+  vpc_auto_recovery_time          = 360
+  vpc_delay_restore               = 150
+  vpc_domain_id_range             = "1-1000"
+  vpc_enable_ipv6_nd_sync         = true
+  vpc_peer_keep_alive_option      = "management"
+  vpc_peer_link_po                = 500
+  vpc_peer_link_vlan              = 3600
+  vrf_lite_autoconfig             = "Manual"
+  vrf_vlan_range                  = "2000-2299"
+  default_network                 = "Default_Network_Universal"
+  default_vrf                     = "Default_VRF_Universal"
+  network_extension_template      = "Default_Network_Extension_Universal"
+  vrf_extension_template          = "Default_VRF_Extension_Universal"
+  deploy                          = false
 }
