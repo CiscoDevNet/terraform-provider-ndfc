@@ -32,7 +32,7 @@ func GenerateFabricConfig(tt string, cfg map[string]string, fileType int) string
 			}
 		}
 		provider "ndfc" {
-			host     = "` + cfg["Host"] + `"
+			url     = "` + cfg["Host"] + `"
 			username = "` + cfg["User"] + `"
 			password = "` + cfg["Password"] + `"
 			insecure = true
