@@ -6,7 +6,6 @@ ndfc:
   insecure: true
   fabric: CML
   switches:
-    - "9FE076D8EJL"
     - "9TQYTJSZ1VJ"
     - "9QBCTIN0FMY"
   #VRFs/Networks created during the tests will have below prefix
