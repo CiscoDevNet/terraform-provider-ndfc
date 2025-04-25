@@ -19,10 +19,10 @@ provider:
       mandatory: false
       description: NDFC Login credentials - domain. Enviroment variable `NDFC_DOMAIN` can be used to override the provider configuration.
     - model_name: host
-      tf_name: host
+      tf_name: url
       type: String
       mandatory: true
-      description: NDFC Login credentials - host. Enviroment variable `NDFC_HOST` can be used to override the provider configuration.
+      description: URL to connect to NDFC - Enviroment variable `NDFC_URL` can be used to override the provider configuration.
     - model_name: insecure
       tf_name: insecure
       type: Bool

@@ -33,7 +33,7 @@ func (tc *TerraformConfig) AddContent(fc []byte) {
 	body := tc.File.Body()
 	blocks := body.Blocks()
 	for _, block := range blocks {
-		if block.Type() == "resource" {
+		if block.Type() == "resource" || block.Type() == "data" {
 			//log.Printf("Found resource block: %s %v", block.Type(), block.Labels())
 			tc.Type = block.Type()
 			tc.RscType = block.Labels()[0]
