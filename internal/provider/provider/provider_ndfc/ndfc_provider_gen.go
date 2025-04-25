@@ -17,11 +17,6 @@ func NdfcProviderSchema(ctx context.Context) schema.Schema {
 				Description:         "NDFC Login credentials - domain. Enviroment variable `NDFC_DOMAIN` can be used to override the provider configuration.",
 				MarkdownDescription: "NDFC Login credentials - domain. Enviroment variable `NDFC_DOMAIN` can be used to override the provider configuration.",
 			},
-			"host": schema.StringAttribute{
-				Required:            true,
-				Description:         "NDFC Login credentials - host. Enviroment variable `NDFC_HOST` can be used to override the provider configuration.",
-				MarkdownDescription: "NDFC Login credentials - host. Enviroment variable `NDFC_HOST` can be used to override the provider configuration.",
-			},
 			"insecure": schema.BoolAttribute{
 				Optional:            true,
 				Description:         "Controls whether ND server's certificate chain and host name is verified. This can also be set as the `NDFC_INSECURE` (true or false) environment variable.",
@@ -38,6 +33,11 @@ func NdfcProviderSchema(ctx context.Context) schema.Schema {
 				Description:         "NDFC HTTP request timeout - timeout. Enviroment variable `NDFC_TIMEOUT` can be used to override the provider configuration.",
 				MarkdownDescription: "NDFC HTTP request timeout - timeout. Enviroment variable `NDFC_TIMEOUT` can be used to override the provider configuration.",
 			},
+			"url": schema.StringAttribute{
+				Required:            true,
+				Description:         "URL to connect to NDFC - Enviroment variable `NDFC_URL` can be used to override the provider configuration.",
+				MarkdownDescription: "URL to connect to NDFC - Enviroment variable `NDFC_URL` can be used to override the provider configuration.",
+			},
 			"username": schema.StringAttribute{
 				Required:            true,
 				Description:         "NDFC Login credentials - user.  Enviroment variable `NDFC_USER` can be used to override the provider configuration.",
@@ -49,9 +49,9 @@ func NdfcProviderSchema(ctx context.Context) schema.Schema {
 
 type NdfcModel struct {
 	Domain   types.String `tfsdk:"domain"`
-	Host     types.String `tfsdk:"host"`
 	Insecure types.Bool   `tfsdk:"insecure"`
 	Password types.String `tfsdk:"password"`
 	Timeout  types.Int64  `tfsdk:"timeout"`
+	Url      types.String `tfsdk:"url"`
 	Username types.String `tfsdk:"username"`
 }
