@@ -75,6 +75,9 @@ func FabricMsiteExtNetModelHelperStateCheck(RscName string, c resource_fabric_co
 	if c.EnableNxapiHttp != "" {
 		ret = append(ret, resource.TestCheckResourceAttr(RscName, attrPath.AtName("enable_nxapi_http").String(), c.EnableNxapiHttp))
 	}
+	if c.EnableRtIntfStats != "" {
+		ret = append(ret, resource.TestCheckResourceAttr(RscName, attrPath.AtName("enable_rt_intf_stats").String(), c.EnableRtIntfStats))
+	}
 	if c.FabricFreeform != "" {
 		ret = append(ret, resource.TestCheckResourceAttr(RscName, attrPath.AtName("fabric_freeform").String(), c.FabricFreeform))
 	}
@@ -150,8 +153,8 @@ func FabricMsiteExtNetModelHelperStateCheck(RscName string, c resource_fabric_co
 	if c.SubinterfaceRange != "" {
 		ret = append(ret, resource.TestCheckResourceAttr(RscName, attrPath.AtName("subinterface_range").String(), c.SubinterfaceRange))
 	}
-	if c.EnableRealtimeBackup != "" {
-		ret = append(ret, resource.TestCheckResourceAttr(RscName, attrPath.AtName("enable_realtime_backup").String(), c.EnableRealtimeBackup))
+	if c.EnableRealTimeBackup != "" {
+		ret = append(ret, resource.TestCheckResourceAttr(RscName, attrPath.AtName("enable_real_time_backup").String(), c.EnableRealTimeBackup))
 	}
 	if c.EnableScheduledBackup != "" {
 		ret = append(ret, resource.TestCheckResourceAttr(RscName, attrPath.AtName("enable_scheduled_backup").String(), c.EnableScheduledBackup))

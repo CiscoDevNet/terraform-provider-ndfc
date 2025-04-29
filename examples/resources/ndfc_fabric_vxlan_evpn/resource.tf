@@ -2,7 +2,6 @@
 resource "ndfc_fabric_vxlan_evpn" "test_resource_fabric_vxlan_evpn_1" {
   fabric_name                                 = "TF_FABRIC_VXLAN_EVPN"
   aaa_remote_ip_enabled                       = false
-  advertise_pip_bgp                           = false
   advertise_pip_on_border                     = true
   anycast_bgw_advertise_pip                   = false
   anycast_gw_mac                              = "2020.0000.00aa"
@@ -12,7 +11,6 @@ resource "ndfc_fabric_vxlan_evpn" "test_resource_fabric_vxlan_evpn_1" {
   auto_unique_vrf_lite_ip_prefix              = false
   auto_vrflite_ifc_default_vrf                = false
   bfd_auth_enable                             = false
-  bfd_enable                                  = false
   bfd_ibgp_enable                             = false
   bfd_isis_enable                             = false
   bfd_ospf_enable                             = false
@@ -22,7 +20,6 @@ resource "ndfc_fabric_vxlan_evpn" "test_resource_fabric_vxlan_evpn_1" {
   bgp_auth_key_type                           = 3
   bgp_lb_id                                   = 0
   bootstrap_enable                            = false
-  bootstrap_multisubnet                       = "#Scope_Start_IP, Scope_End_IP, Scope_Default_Gateway, Scope_Subnet_Prefix"
   brownfield_network_name_format              = "Auto_Net_VNI$$VNI$$_VLAN$$VLAN_ID$$"
   brownfield_skip_overlay_network_attachments = false
   cdp_enable                                  = false
@@ -35,14 +32,12 @@ resource "ndfc_fabric_vxlan_evpn" "test_resource_fabric_vxlan_evpn_1" {
   dhcp_enable                                 = false
   enable_aaa                                  = false
   enable_default_queuing_policy               = false
-  enable_fabric_vpc_domain_id                 = false
   enable_macsec                               = false
   enable_netflow                              = false
   enable_ngoam                                = true
   enable_nxapi                                = true
   enable_nxapi_http                           = true
   enable_pbr                                  = false
-  enable_pvlan                                = false
   enable_tenant_dhcp                          = true
   enable_trm                                  = false
   enable_vpc_peer_link_native_vlan            = false
@@ -51,14 +46,13 @@ resource "ndfc_fabric_vxlan_evpn" "test_resource_fabric_vxlan_evpn_1" {
   fabric_vpc_qos                              = false
   fabric_vpc_qos_policy_name                  = "spine_qos_for_fabric_vpc_peering"
   feature_ptp                                 = false
-  grfield_debug_flag                          = "Enable"
+  grfield_debug_flag                          = "Disable"
   hd_time                                     = 180
   host_intf_admin_state                       = true
   inband_mgmt                                 = false
   isis_auth_enable                            = false
   isis_level                                  = "level-2"
   l2_host_intf_mtu                            = 9216
-  l2_segment_id_range                         = "30000-49000"
   l3_partition_id_range                       = "50000-59000"
   link_state_routing                          = "ospf"
   link_state_routing_tag                      = "UNDERLAY"
@@ -144,7 +138,7 @@ resource "ndfc_fabric_vxlan_evpn" "test_resource_fabric_vxlan_evpn_1" {
   vrf_vlan_range                  = "2000-2299"
   default_network                 = "Default_Network_Universal"
   default_vrf                     = "Default_VRF_Universal"
+  deploy                          = false
   network_extension_template      = "Default_Network_Extension_Universal"
   vrf_extension_template          = "Default_VRF_Extension_Universal"
-  deploy                          = false
 }
