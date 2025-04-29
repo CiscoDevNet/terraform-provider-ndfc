@@ -251,7 +251,7 @@ resource:
           example: 2-511
 
         - model_name: enableRealTimeBackup
-          tf_name: enable_realtime_backup
+          tf_name: enable_real_time_backup
           description: Backup hourly only if there is any config deployment since last backup
           type: Bool
           example: false

@@ -3282,11 +3282,19 @@ func (v AttachmentsValue) String() string {
 func (v AttachmentsValue) ToObjectValue(ctx context.Context) (basetypes.ObjectValue, diag.Diagnostics) {
 	var diags diag.Diagnostics
 
-	switchPortsVal, d := types.SetValue(types.StringType, v.SwitchPorts.Elements())
+	var switchPortsVal basetypes.SetValue
+	switch {
+	case v.SwitchPorts.IsUnknown():
+		switchPortsVal = types.SetUnknown(types.StringType)
+	case v.SwitchPorts.IsNull():
+		switchPortsVal = types.SetNull(types.StringType)
+	default:
+		var d diag.Diagnostics
+		switchPortsVal, d = types.SetValue(types.StringType, v.SwitchPorts.Elements())
+		diags.Append(d...)
+	}
 
-	diags.Append(d...)
-
-	if d.HasError() {
+	if diags.HasError() {
 		return types.ObjectUnknown(map[string]attr.Type{
 			"attach_state":           basetypes.StringType{},
 			"attached":               basetypes.BoolType{},
@@ -3305,11 +3313,19 @@ func (v AttachmentsValue) ToObjectValue(ctx context.Context) (basetypes.ObjectVa
 		}), diags
 	}
 
-	torPortsVal, d := types.SetValue(types.StringType, v.TorPorts.Elements())
+	var torPortsVal basetypes.SetValue
+	switch {
+	case v.TorPorts.IsUnknown():
+		torPortsVal = types.SetUnknown(types.StringType)
+	case v.TorPorts.IsNull():
+		torPortsVal = types.SetNull(types.StringType)
+	default:
+		var d diag.Diagnostics
+		torPortsVal, d = types.SetValue(types.StringType, v.TorPorts.Elements())
+		diags.Append(d...)
+	}
 
-	diags.Append(d...)
-
-	if d.HasError() {
+	if diags.HasError() {
 		return types.ObjectUnknown(map[string]attr.Type{
 			"attach_state":           basetypes.StringType{},
 			"attached":               basetypes.BoolType{},

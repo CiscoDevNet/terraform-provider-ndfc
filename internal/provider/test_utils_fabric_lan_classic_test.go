@@ -135,8 +135,8 @@ func FabricLanClassicModelHelperStateCheck(RscName string, c resource_fabric_com
 	if c.SubinterfaceRange != "" {
 		ret = append(ret, resource.TestCheckResourceAttr(RscName, attrPath.AtName("subinterface_range").String(), c.SubinterfaceRange))
 	}
-	if c.EnableRealtimeBackup != "" {
-		ret = append(ret, resource.TestCheckResourceAttr(RscName, attrPath.AtName("enable_realtime_backup").String(), c.EnableRealtimeBackup))
+	if c.EnableRealTimeBackup != "" {
+		ret = append(ret, resource.TestCheckResourceAttr(RscName, attrPath.AtName("enable_real_time_backup").String(), c.EnableRealTimeBackup))
 	}
 	if c.EnableScheduledBackup != "" {
 		ret = append(ret, resource.TestCheckResourceAttr(RscName, attrPath.AtName("enable_scheduled_backup").String(), c.EnableScheduledBackup))

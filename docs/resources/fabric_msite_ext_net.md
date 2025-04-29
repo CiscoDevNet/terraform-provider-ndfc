@@ -111,7 +111,8 @@ resource "ndfc_fabric_msite_ext_net" "test_resource_fabric_msite_ext_net_1" {
 - `enable_netflow` (Boolean) Enable Netflow on VTEPs
 - `enable_nxapi` (Boolean) Enable HTTPS NX-API
 - `enable_nxapi_http` (Boolean) No description available
-- `enable_realtime_backup` (Boolean) Backup hourly only if there is any config deployment since last backup
+- `enable_real_time_backup` (Boolean) Backup hourly only if there is any config deployment since last backup
+- `enable_rt_intf_stats` (Boolean) Valid for NX-OS only
 - `enable_scheduled_backup` (Boolean) Backup at the specified time
 - `fabric_freeform` (String) Additional supported CLIs for all same OS (e.g. all NxOS or IOS-XE, etc) switches
 - `feature_ptp` (Boolean) No description available

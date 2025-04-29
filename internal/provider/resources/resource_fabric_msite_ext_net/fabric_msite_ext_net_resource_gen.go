@@ -18,7 +18,6 @@ func FabricMsiteExtNetResourceSchema(ctx context.Context) schema.Schema {
 		Attributes: map[string]schema.Attribute{
 			"aaa_remote_ip_enabled": schema.BoolAttribute{
 				Optional:            true,
-				Computed:            true,
 				Description:         "Enable only, when IP Authorization is enabled in the AAA Server",
 				MarkdownDescription: "Enable only, when IP Authorization is enabled in the AAA Server",
 			},
@@ -49,13 +48,11 @@ func FabricMsiteExtNetResourceSchema(ctx context.Context) schema.Schema {
 			},
 			"bootstrap_multisubnet": schema.StringAttribute{
 				Optional:            true,
-				Computed:            true,
 				Description:         "lines with # prefix are ignored here",
 				MarkdownDescription: "lines with # prefix are ignored here",
 			},
 			"cdp_enable": schema.BoolAttribute{
 				Optional:            true,
-				Computed:            true,
 				Description:         "Enable CDP on management interface",
 				MarkdownDescription: "Enable CDP on management interface",
 			},
@@ -71,7 +68,6 @@ func FabricMsiteExtNetResourceSchema(ctx context.Context) schema.Schema {
 			},
 			"dhcp_enable": schema.BoolAttribute{
 				Optional:            true,
-				Computed:            true,
 				Description:         "Automatic IP Assignment For POAP From Local DHCP Server",
 				MarkdownDescription: "Automatic IP Assignment For POAP From Local DHCP Server",
 			},
@@ -105,26 +101,29 @@ func FabricMsiteExtNetResourceSchema(ctx context.Context) schema.Schema {
 			},
 			"enable_netflow": schema.BoolAttribute{
 				Optional:            true,
-				Computed:            true,
 				Description:         "Enable Netflow on VTEPs",
 				MarkdownDescription: "Enable Netflow on VTEPs",
 			},
 			"enable_nxapi": schema.BoolAttribute{
 				Optional:            true,
-				Computed:            true,
 				Description:         "Enable HTTPS NX-API",
 				MarkdownDescription: "Enable HTTPS NX-API",
 			},
 			"enable_nxapi_http": schema.BoolAttribute{
 				Optional:            true,
-				Computed:            true,
 				Description:         "No description available",
 				MarkdownDescription: "No description available",
 			},
-			"enable_realtime_backup": schema.BoolAttribute{
+			"enable_real_time_backup": schema.BoolAttribute{
 				Optional:            true,
 				Description:         "Backup hourly only if there is any config deployment since last backup",
 				MarkdownDescription: "Backup hourly only if there is any config deployment since last backup",
+			},
+			"enable_rt_intf_stats": schema.BoolAttribute{
+				Optional:            true,
+				Computed:            true,
+				Description:         "Valid for NX-OS only",
+				MarkdownDescription: "Valid for NX-OS only",
 			},
 			"enable_scheduled_backup": schema.BoolAttribute{
 				Optional:            true,
@@ -146,7 +145,6 @@ func FabricMsiteExtNetResourceSchema(ctx context.Context) schema.Schema {
 			},
 			"feature_ptp": schema.BoolAttribute{
 				Optional:            true,
-				Computed:            true,
 				Description:         "No description available",
 				MarkdownDescription: "No description available",
 			},
@@ -162,7 +160,6 @@ func FabricMsiteExtNetResourceSchema(ctx context.Context) schema.Schema {
 			},
 			"inband_mgmt": schema.BoolAttribute{
 				Optional:            true,
-				Computed:            true,
 				Description:         "Import switches with inband connectivity",
 				MarkdownDescription: "Import switches with inband connectivity",
 			},
@@ -173,7 +170,6 @@ func FabricMsiteExtNetResourceSchema(ctx context.Context) schema.Schema {
 			},
 			"is_read_only": schema.BoolAttribute{
 				Optional:            true,
-				Computed:            true,
 				Description:         "If enabled, fabric is only monitored. No configuration will be deployed",
 				MarkdownDescription: "If enabled, fabric is only monitored. No configuration will be deployed",
 			},
@@ -194,7 +190,6 @@ func FabricMsiteExtNetResourceSchema(ctx context.Context) schema.Schema {
 			},
 			"mpls_handoff": schema.BoolAttribute{
 				Optional:            true,
-				Computed:            true,
 				Description:         "No description available",
 				MarkdownDescription: "No description available",
 			},
@@ -230,19 +225,16 @@ func FabricMsiteExtNetResourceSchema(ctx context.Context) schema.Schema {
 			},
 			"nxapi_http_port": schema.Int64Attribute{
 				Optional:            true,
-				Computed:            true,
 				Description:         "No description available",
 				MarkdownDescription: "No description available",
 			},
 			"nxapi_https_port": schema.Int64Attribute{
 				Optional:            true,
-				Computed:            true,
 				Description:         "No description available",
 				MarkdownDescription: "No description available",
 			},
 			"pm_enable": schema.BoolAttribute{
 				Optional:            true,
-				Computed:            true,
 				Description:         "No description available",
 				MarkdownDescription: "No description available",
 			},
@@ -253,7 +245,6 @@ func FabricMsiteExtNetResourceSchema(ctx context.Context) schema.Schema {
 			},
 			"power_redundancy_mode": schema.StringAttribute{
 				Optional:            true,
-				Computed:            true,
 				Description:         "Default Power Supply Mode For Bootstrapped NX-OS Switches",
 				MarkdownDescription: "Default Power Supply Mode For Bootstrapped NX-OS Switches",
 				Validators: []validator.String{
@@ -277,13 +268,11 @@ func FabricMsiteExtNetResourceSchema(ctx context.Context) schema.Schema {
 			},
 			"snmp_server_host_trap": schema.BoolAttribute{
 				Optional:            true,
-				Computed:            true,
 				Description:         "Configure NDFC as a receiver for SNMP traps",
 				MarkdownDescription: "Configure NDFC as a receiver for SNMP traps",
 			},
 			"subinterface_range": schema.StringAttribute{
 				Optional:            true,
-				Computed:            true,
 				Description:         "Per Border Dot1q Range For VRF Lite Connectivity",
 				MarkdownDescription: "Per Border Dot1q Range For VRF Lite Connectivity",
 			},
@@ -313,7 +302,8 @@ type FabricMsiteExtNetModel struct {
 	EnableNetflow         types.Bool   `tfsdk:"enable_netflow"`
 	EnableNxapi           types.Bool   `tfsdk:"enable_nxapi"`
 	EnableNxapiHttp       types.Bool   `tfsdk:"enable_nxapi_http"`
-	EnableRealtimeBackup  types.Bool   `tfsdk:"enable_realtime_backup"`
+	EnableRealTimeBackup  types.Bool   `tfsdk:"enable_real_time_backup"`
+	EnableRtIntfStats     types.Bool   `tfsdk:"enable_rt_intf_stats"`
 	EnableScheduledBackup types.Bool   `tfsdk:"enable_scheduled_backup"`
 	FabricFreeform        types.String `tfsdk:"fabric_freeform"`
 	FabricName            types.String `tfsdk:"fabric_name"`
