@@ -19,7 +19,6 @@ func FabricVxlanMsdResourceSchema(ctx context.Context) schema.Schema {
 		Attributes: map[string]schema.Attribute{
 			"anycast_gw_mac": schema.StringAttribute{
 				Optional:            true,
-				Computed:            true,
 				Description:         "Shared MAC address for all leaves",
 				MarkdownDescription: "Shared MAC address for all leaves",
 			},
@@ -30,13 +29,11 @@ func FabricVxlanMsdResourceSchema(ctx context.Context) schema.Schema {
 			},
 			"bgw_routing_tag": schema.Int64Attribute{
 				Optional:            true,
-				Computed:            true,
 				Description:         "Routing tag associated with IP address of loopback and DCI interfaces",
 				MarkdownDescription: "Routing tag associated with IP address of loopback and DCI interfaces",
 			},
 			"border_gwy_connections": schema.StringAttribute{
 				Optional:            true,
-				Computed:            true,
 				Description:         "Manual, Auto Overlay EVPN Peering to Route Servers, Auto Overlay EVPN Direct Peering to Border Gateways",
 				MarkdownDescription: "Manual, Auto Overlay EVPN Peering to Route Servers, Auto Overlay EVPN Direct Peering to Border Gateways",
 				Validators: []validator.String{
@@ -50,7 +47,6 @@ func FabricVxlanMsdResourceSchema(ctx context.Context) schema.Schema {
 			},
 			"cloudsec_autoconfig": schema.BoolAttribute{
 				Optional:            true,
-				Computed:            true,
 				Description:         "Auto Config CloudSec on Border Gateways",
 				MarkdownDescription: "Auto Config CloudSec on Border Gateways",
 			},
@@ -71,19 +67,16 @@ func FabricVxlanMsdResourceSchema(ctx context.Context) schema.Schema {
 			},
 			"dci_subnet_range": schema.StringAttribute{
 				Optional:            true,
-				Computed:            true,
 				Description:         "Address range to assign P2P DCI Links",
 				MarkdownDescription: "Address range to assign P2P DCI Links",
 			},
 			"dci_subnet_target_mask": schema.Int64Attribute{
 				Optional:            true,
-				Computed:            true,
 				Description:         "Target Mask for Subnet Range",
 				MarkdownDescription: "Target Mask for Subnet Range",
 			},
 			"default_network": schema.StringAttribute{
 				Optional:            true,
-				Computed:            true,
 				Description:         "Default Overlay Network Template For Leafs",
 				MarkdownDescription: "Default Overlay Network Template For Leafs",
 				Validators: []validator.String{
@@ -97,13 +90,11 @@ func FabricVxlanMsdResourceSchema(ctx context.Context) schema.Schema {
 			},
 			"default_vrf": schema.StringAttribute{
 				Optional:            true,
-				Computed:            true,
 				Description:         "Default Overlay VRF Template For Leafs",
 				MarkdownDescription: "Default Overlay VRF Template For Leafs",
 			},
 			"delay_restore": schema.Int64Attribute{
 				Optional:            true,
-				Computed:            true,
 				Description:         "Multi-Site underlay and overlay control plane convergence time in seconds",
 				MarkdownDescription: "Multi-Site underlay and overlay control plane convergence time in seconds",
 			},
@@ -134,7 +125,6 @@ func FabricVxlanMsdResourceSchema(ctx context.Context) schema.Schema {
 			},
 			"enable_pvlan": schema.BoolAttribute{
 				Optional:            true,
-				Computed:            true,
 				Description:         "Enable PVLAN on MSD and its child fabrics",
 				MarkdownDescription: "Enable PVLAN on MSD and its child fabrics",
 			},
@@ -163,19 +153,16 @@ func FabricVxlanMsdResourceSchema(ctx context.Context) schema.Schema {
 			},
 			"l2_segment_id_range": schema.StringAttribute{
 				Optional:            true,
-				Computed:            true,
 				Description:         "Overlay Network Identifier Range",
 				MarkdownDescription: "Overlay Network Identifier Range",
 			},
 			"l3_partition_id_range": schema.StringAttribute{
 				Optional:            true,
-				Computed:            true,
 				Description:         "Overlay VRF Identifier Range",
 				MarkdownDescription: "Overlay VRF Identifier Range",
 			},
 			"loopback100_ip_range": schema.StringAttribute{
 				Optional:            true,
-				Computed:            true,
 				Description:         "Typically Loopback100 IP Address Range",
 				MarkdownDescription: "Typically Loopback100 IP Address Range",
 			},
@@ -194,25 +181,21 @@ func FabricVxlanMsdResourceSchema(ctx context.Context) schema.Schema {
 			},
 			"ms_ifc_bgp_password_enable": schema.BoolAttribute{
 				Optional:            true,
-				Computed:            true,
 				Description:         "eBGP password for Multi-Site underlay/overlay IFCs",
 				MarkdownDescription: "eBGP password for Multi-Site underlay/overlay IFCs",
 			},
 			"ms_loopback_id": schema.Int64Attribute{
 				Optional:            true,
-				Computed:            true,
 				Description:         "No description available",
 				MarkdownDescription: "No description available",
 			},
 			"ms_underlay_autoconfig": schema.BoolAttribute{
 				Optional:            true,
-				Computed:            true,
 				Description:         "No description available",
 				MarkdownDescription: "No description available",
 			},
 			"network_extension_template": schema.StringAttribute{
 				Optional:            true,
-				Computed:            true,
 				Description:         "Default Overlay Network Template For Borders",
 				MarkdownDescription: "Default Overlay Network Template For Borders",
 			},
@@ -233,13 +216,11 @@ func FabricVxlanMsdResourceSchema(ctx context.Context) schema.Schema {
 			},
 			"tor_auto_deploy": schema.BoolAttribute{
 				Optional:            true,
-				Computed:            true,
 				Description:         "Enables Overlay VLANs on uplink between ToRs and Leafs",
 				MarkdownDescription: "Enables Overlay VLANs on uplink between ToRs and Leafs",
 			},
 			"vrf_extension_template": schema.StringAttribute{
 				Optional:            true,
-				Computed:            true,
 				Description:         "Default Overlay VRF Template For Borders",
 				MarkdownDescription: "Default Overlay VRF Template For Borders",
 			},
