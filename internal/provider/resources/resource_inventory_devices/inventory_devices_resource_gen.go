@@ -1668,11 +1668,19 @@ func (v DevicesValue) String() string {
 func (v DevicesValue) ToObjectValue(ctx context.Context) (basetypes.ObjectValue, diag.Diagnostics) {
 	var diags diag.Diagnostics
 
-	modulesModelVal, d := types.SetValue(types.StringType, v.ModulesModel.Elements())
+	var modulesModelVal basetypes.SetValue
+	switch {
+	case v.ModulesModel.IsUnknown():
+		modulesModelVal = types.SetUnknown(types.StringType)
+	case v.ModulesModel.IsNull():
+		modulesModelVal = types.SetNull(types.StringType)
+	default:
+		var d diag.Diagnostics
+		modulesModelVal, d = types.SetValue(types.StringType, v.ModulesModel.Elements())
+		diags.Append(d...)
+	}
 
-	diags.Append(d...)
-
-	if d.HasError() {
+	if diags.HasError() {
 		return types.ObjectUnknown(map[string]attr.Type{
 			"breakout":                basetypes.StringType{},
 			"config_status":           basetypes.StringType{},

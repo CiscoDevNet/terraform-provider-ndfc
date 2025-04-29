@@ -295,11 +295,11 @@ func (v *FabricLanClassicModel) SetModelData(jsonData *resource_fabric_common.ND
 		v.SubinterfaceRange = types.StringNull()
 	}
 
-	if jsonData.EnableRealtimeBackup != "" {
-		x, _ := strconv.ParseBool(jsonData.EnableRealtimeBackup)
-		v.EnableRealtimeBackup = types.BoolValue(x)
+	if jsonData.EnableRealTimeBackup != "" {
+		x, _ := strconv.ParseBool(jsonData.EnableRealTimeBackup)
+		v.EnableRealTimeBackup = types.BoolValue(x)
 	} else {
-		v.EnableRealtimeBackup = types.BoolNull()
+		v.EnableRealTimeBackup = types.BoolNull()
 	}
 
 	if jsonData.EnableScheduledBackup != "" {
@@ -565,10 +565,10 @@ func (v FabricLanClassicModel) GetModelData() *resource_fabric_common.NDFCFabric
 		data.SubinterfaceRange = ""
 	}
 
-	if !v.EnableRealtimeBackup.IsNull() && !v.EnableRealtimeBackup.IsUnknown() {
-		data.EnableRealtimeBackup = strconv.FormatBool(v.EnableRealtimeBackup.ValueBool())
+	if !v.EnableRealTimeBackup.IsNull() && !v.EnableRealTimeBackup.IsUnknown() {
+		data.EnableRealTimeBackup = strconv.FormatBool(v.EnableRealTimeBackup.ValueBool())
 	} else {
-		data.EnableRealtimeBackup = ""
+		data.EnableRealTimeBackup = ""
 	}
 
 	if !v.EnableScheduledBackup.IsNull() && !v.EnableScheduledBackup.IsUnknown() {

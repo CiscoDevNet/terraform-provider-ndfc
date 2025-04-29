@@ -198,12 +198,143 @@ type NDFCFabricModel struct {
 	DefaultNetwork                          string       `json:"default_network,omitempty"`
 	DefaultPvlanSecNetwork                  string       `json:"default_pvlan_sec_network,omitempty"`
 	DefaultVrf                              string       `json:"default_vrf,omitempty"`
-	EnableRealtimeBackup                    string       `json:"enableRealTimeBackup,omitempty"`
+	EnableRealTimeBackup                    string       `json:"enableRealTimeBackup,omitempty"`
 	EnableScheduledBackup                   string       `json:"enableScheduledBackup,omitempty"`
 	NetworkExtensionTemplate                string       `json:"network_extension_template,omitempty"`
 	ScheduledTime                           string       `json:"scheduledTime,omitempty"`
 	VrfExtensionTemplate                    string       `json:"vrf_extension_template,omitempty"`
 	DeploymentStatus                        string       `json:"deployment_status,omitempty"`
+	Ipv6MulticastGroupSubnet                string       `json:"IPv6_MULTICAST_GROUP_SUBNET,omitempty"`
+	EnableTrmv6                             string       `json:"ENABLE_TRMv6,omitempty"`
+	L3vniIpv6McastGroup                     string       `json:"L3VNI_IPv6_MCAST_GROUP,omitempty"`
+	MvpnVriIdRange                          string       `json:"MVPN_VRI_ID_RANGE,omitempty"`
+	EnableVriIdRealloc                      string       `json:"ENABLE_VRI_ID_REALLOC,omitempty"`
+	EnableAggAccIdRange                     string       `json:"ENABLE_AGG_ACC_ID_RANGE,omitempty"`
+	AggAccVpcPoIdRange                      string       `json:"AGG_ACC_VPC_PO_ID_RANGE,omitempty"`
+	IsisAreaNum                             string       `json:"ISIS_AREA_NUM,omitempty"`
+	EnableSgt                               string       `json:"ENABLE_SGT,omitempty"`
+	SgtNamePrefix                           string       `json:"SGT_NAME_PREFIX,omitempty"`
+	SgtIdRange                              string       `json:"SGT_ID_RANGE,omitempty"`
+	SgtPreprovision                         string       `json:"SGT_PREPROVISION,omitempty"`
+	EnableDciMacsec                         string       `json:"ENABLE_DCI_MACSEC,omitempty"`
+	EnableQkd                               string       `json:"ENABLE_QKD,omitempty"`
+	AllowL3vniNoVlan                        string       `json:"ALLOW_L3VNI_NO_VLAN,omitempty"`
+	EnableL3vniNoVlan                       string       `json:"ENABLE_L3VNI_NO_VLAN,omitempty"`
+	MplsIsisAreaNum                         string       `json:"MPLS_ISIS_AREA_NUM,omitempty"`
+	EnableAiMlQosPolicy                     string       `json:"ENABLE_AI_ML_QOS_POLICY,omitempty"`
+	AiMlQosPolicy                           string       `json:"AI_ML_QOS_POLICY,omitempty"`
+	PfcWatchInt                             *Int64Custom `json:"PFC_WATCH_INT,omitempty"`
+	EnableRtIntfStats                       string       `json:"ENABLE_RT_INTF_STATS,omitempty"`
+	Ipv6AnycastRpIpRange                    string       `json:"IPv6_ANYCAST_RP_IP_RANGE,omitempty"`
+	KmeServerIp                             string       `json:"KME_SERVER_IP,omitempty"`
+	KmeServerPort                           *Int64Custom `json:"KME_SERVER_PORT,omitempty"`
+	TrustpointLabel                         string       `json:"TRUSTPOINT_LABEL,omitempty"`
+	IgnoreCert                              string       `json:"IGNORE_CERT,omitempty"`
+	DeploymentFreeze                        string       `json:"DEPLOYMENT_FREEZE,omitempty"`
+	QkdProfileName                          string       `json:"QKD_PROFILE_NAME,omitempty"`
+	PerVrfLoopbackAutoProvisionV6           string       `json:"PER_VRF_LOOPBACK_AUTO_PROVISION_V6,omitempty"`
+	PerVrfLoopbackIpRangeV6                 string       `json:"PER_VRF_LOOPBACK_IP_RANGE_V6,omitempty"`
+	EsrOption                               string       `json:"ESR_OPTION,omitempty"`
+	PtpVlanId                               *Int64Custom `json:"PTP_VLAN_ID,omitempty"`
+	AllowNxc                                string       `json:"ALLOW_NXC,omitempty"`
+	OverwriteGlobalNxc                      string       `json:"OVERWRITE_GLOBAL_NXC,omitempty"`
+	NxcDestVrf                              string       `json:"NXC_DEST_VRF,omitempty"`
+	NxcSrcIntf                              string       `json:"NXC_SRC_INTF,omitempty"`
+	NxcProxyServer                          string       `json:"NXC_PROXY_SERVER,omitempty"`
+	NxcProxyPort                            *Int64Custom `json:"NXC_PROXY_PORT,omitempty"`
+	VpcDelayRestoreTime                     *Int64Custom `json:"VPC_DELAY_RESTORE_TIME,omitempty"`
+	FabricType                              string       `json:"FABRIC_TYPE,omitempty"`
+	ExtFabricType                           string       `json:"EXT_FABRIC_TYPE,omitempty"`
+	EnableAgent                             string       `json:"ENABLE_AGENT,omitempty"`
+	AgentIntf                               string       `json:"AGENT_INTF,omitempty"`
+	SspineAddDelDebugFlag                   string       `json:"SSPINE_ADD_DEL_DEBUG_FLAG,omitempty"`
+	BrfieldDebugFlag                        string       `json:"BRFIELD_DEBUG_FLAG,omitempty"`
+	ActiveMigration                         string       `json:"ACTIVE_MIGRATION,omitempty"`
+	Ff                                      string       `json:"FF,omitempty"`
+	BgpAsPrev                               string       `json:"BGP_AS_PREV,omitempty"`
+	UnderlayIsV6Prev                        string       `json:"UNDERLAY_IS_V6_PREV,omitempty"`
+	PmEnablePrev                            string       `json:"PM_ENABLE_PREV,omitempty"`
+	EnableFabricVpcDomainIdPrev             string       `json:"ENABLE_FABRIC_VPC_DOMAIN_ID_PREV,omitempty"`
+	OverlayModePrev                         string       `json:"OVERLAY_MODE_PREV,omitempty"`
+	AllowL3vniNoVlanPrev                    string       `json:"ALLOW_L3VNI_NO_VLAN_PREV,omitempty"`
+	EnablePvlanPrev                         string       `json:"ENABLE_PVLAN_PREV,omitempty"`
+	AutoUniqueVrfLiteIpPrefixPrev           string       `json:"AUTO_UNIQUE_VRF_LITE_IP_PREFIX_PREV,omitempty"`
+	PerVrfLoopbackAutoProvisionPrev         string       `json:"PER_VRF_LOOPBACK_AUTO_PROVISION_PREV,omitempty"`
+	PerVrfLoopbackAutoProvisionV6Prev       string       `json:"PER_VRF_LOOPBACK_AUTO_PROVISION_V6_PREV,omitempty"`
+	MsoSiteId                               string       `json:"MSO_SITE_ID,omitempty"`
+	MsoControlerId                          string       `json:"MSO_CONTROLER_ID,omitempty"`
+	MsoSiteGroupName                        string       `json:"MSO_SITE_GROUP_NAME,omitempty"`
+	PremsoParentFabric                      string       `json:"PREMSO_PARENT_FABRIC,omitempty"`
+	MsoConnectivityDeployed                 string       `json:"MSO_CONNECTIVITY_DEPLOYED,omitempty"`
+	AnycastRpIpRangeInternal                string       `json:"ANYCAST_RP_IP_RANGE_INTERNAL,omitempty"`
+	Ipv6AnycastRpIpRangeInternal            string       `json:"IPv6_ANYCAST_RP_IP_RANGE_INTERNAL,omitempty"`
+	DhcpStartInternal                       string       `json:"DHCP_START_INTERNAL,omitempty"`
+	DhcpEndInternal                         string       `json:"DHCP_END_INTERNAL,omitempty"`
+	MgmtGwInternal                          string       `json:"MGMT_GW_INTERNAL,omitempty"`
+	MgmtPrefixInternal                      *Int64Custom `json:"MGMT_PREFIX_INTERNAL,omitempty"`
+	BootstrapMultisubnetInternal            string       `json:"BOOTSTRAP_MULTISUBNET_INTERNAL,omitempty"`
+	MgmtV6prefixInternal                    *Int64Custom `json:"MGMT_V6PREFIX_INTERNAL,omitempty"`
+	DhcpIpv6EnableInternal                  string       `json:"DHCP_IPV6_ENABLE_INTERNAL,omitempty"`
+	UnnumDhcpStartInternal                  string       `json:"UNNUM_DHCP_START_INTERNAL,omitempty"`
+	UnnumDhcpEndInternal                    string       `json:"UNNUM_DHCP_END_INTERNAL,omitempty"`
+	EnableEvpn                              string       `json:"ENABLE_EVPN,omitempty"`
+	FeaturePtpInternal                      string       `json:"FEATURE_PTP_INTERNAL,omitempty"`
+	SspineCount                             *Int64Custom `json:"SSPINE_COUNT,omitempty"`
+	SpineCount                              *Int64Custom `json:"SPINE_COUNT,omitempty"`
+	AbstractFeatureLeaf                     string       `json:"abstract_feature_leaf,omitempty"`
+	AbstractFeatureSpine                    string       `json:"abstract_feature_spine,omitempty"`
+	AbstractDhcp                            string       `json:"abstract_dhcp,omitempty"`
+	AbstractMulticast                       string       `json:"abstract_multicast,omitempty"`
+	AbstractAnycastRp                       string       `json:"abstract_anycast_rp,omitempty"`
+	AbstractLoopbackInterface               string       `json:"abstract_loopback_interface,omitempty"`
+	AbstractIsis                            string       `json:"abstract_isis,omitempty"`
+	AbstractOspf                            string       `json:"abstract_ospf,omitempty"`
+	AbstractVpcDomain                       string       `json:"abstract_vpc_domain,omitempty"`
+	AbstractVlanInterface                   string       `json:"abstract_vlan_interface,omitempty"`
+	AbstractIsisInterface                   string       `json:"abstract_isis_interface,omitempty"`
+	AbstractOspfInterface                   string       `json:"abstract_ospf_interface,omitempty"`
+	AbstractPimInterface                    string       `json:"abstract_pim_interface,omitempty"`
+	AbstractRouteMap                        string       `json:"abstract_route_map,omitempty"`
+	AbstractBgp                             string       `json:"abstract_bgp,omitempty"`
+	AbstractBgpRr                           string       `json:"abstract_bgp_rr,omitempty"`
+	AbstractBgpNeighbor                     string       `json:"abstract_bgp_neighbor,omitempty"`
+	AbstractExtraConfigLeaf                 string       `json:"abstract_extra_config_leaf,omitempty"`
+	AbstractExtraConfigSpine                string       `json:"abstract_extra_config_spine,omitempty"`
+	AbstractExtraConfigTor                  string       `json:"abstract_extra_config_tor,omitempty"`
+	AbstractExtraConfigBootstrap            string       `json:"abstract_extra_config_bootstrap,omitempty"`
+	TempAnycastGateway                      string       `json:"temp_anycast_gateway,omitempty"`
+	TempVpcDomainMgmt                       string       `json:"temp_vpc_domain_mgmt,omitempty"`
+	TempVpcPeerLink                         string       `json:"temp_vpc_peer_link,omitempty"`
+	AbstractRoutedHost                      string       `json:"abstract_routed_host,omitempty"`
+	UpgradeFromVersion                      string       `json:"UPGRADE_FROM_VERSION,omitempty"`
+	TopdownConfigRmTracking                 string       `json:"TOPDOWN_CONFIG_RM_TRACKING,omitempty"`
+	SiteIdPolicyId                          *Int64Custom `json:"SITE_ID_POLICY_ID,omitempty"`
+	FabricVpcDomainIdPrev                   *Int64Custom `json:"FABRIC_VPC_DOMAIN_ID_PREV,omitempty"`
+	LinkStateRoutingTagPrev                 string       `json:"LINK_STATE_ROUTING_TAG_PREV,omitempty"`
+	BfdEnablePrev                           string       `json:"BFD_ENABLE_PREV,omitempty"`
+	EnableSgtPrev                           string       `json:"ENABLE_SGT_PREV,omitempty"`
+	SgtPreprovisionPrev                     string       `json:"SGT_PREPROVISION_PREV,omitempty"`
+	SgtPreprovRecalcStatus                  string       `json:"SGT_PREPROV_RECALC_STATUS,omitempty"`
+	SgtRecalcStatus                         string       `json:"SGT_RECALC_STATUS,omitempty"`
+	SgtOperStatus                           string       `json:"SGT_OPER_STATUS,omitempty"`
+	EnableMacsecPrev                        string       `json:"ENABLE_MACSEC_PREV,omitempty"`
+	EnableDciMacsecPrev                     string       `json:"ENABLE_DCI_MACSEC_PREV,omitempty"`
+	DciMacsecFallbackKeyString              string       `json:"DCI_MACSEC_FALLBACK_KEY_STRING,omitempty"`
+	DciMacsecFallbackAlgorithm              string       `json:"DCI_MACSEC_FALLBACK_ALGORITHM,omitempty"`
+	DciMacsecAlgorithm                      string       `json:"DCI_MACSEC_ALGORITHM,omitempty"`
+	DciMacsecKeyString                      string       `json:"DCI_MACSEC_KEY_STRING,omitempty"`
+	DciMacsecCipherSuite                    string       `json:"DCI_MACSEC_CIPHER_SUITE,omitempty"`
+	QkdProfileNamePrev                      string       `json:"QKD_PROFILE_NAME_PREV,omitempty"`
+	FabricMtuPrev                           *Int64Custom `json:"FABRIC_MTU_PREV,omitempty"`
+	L2HostIntfMtuPrev                       *Int64Custom `json:"L2_HOST_INTF_MTU_PREV,omitempty"`
+	MplsIsisAreaNumPrev                     string       `json:"MPLS_ISIS_AREA_NUM_PREV,omitempty"`
+	IsisAreaNumPrev                         string       `json:"ISIS_AREA_NUM_PREV,omitempty"`
+	EnableAiMlQosPolicyFlap                 string       `json:"ENABLE_AI_ML_QOS_POLICY_FLAP,omitempty"`
+	PfcWatchIntPrev                         *Int64Custom `json:"PFC_WATCH_INT_PREV,omitempty"`
+	InbandMgmtPrev                          string       `json:"INBAND_MGMT_PREV,omitempty"`
+	BootstrapEnablePrev                     string       `json:"BOOTSTRAP_ENABLE_PREV,omitempty"`
+	EnableNetflowPrev                       string       `json:"ENABLE_NETFLOW_PREV,omitempty"`
+	AllowNxcPrev                            string       `json:"ALLOW_NXC_PREV,omitempty"`
 }
 
 func (v *FabricModel) SetModelData(jsonData *NDFCFabricModel) diag.Diagnostics {
@@ -1479,11 +1610,11 @@ func (v *FabricModel) SetModelData(jsonData *NDFCFabricModel) diag.Diagnostics {
 		v.DefaultVrf = types.StringNull()
 	}
 
-	if jsonData.EnableRealtimeBackup != "" {
-		x, _ := strconv.ParseBool(jsonData.EnableRealtimeBackup)
-		v.EnableRealtimeBackup = types.BoolValue(x)
+	if jsonData.EnableRealTimeBackup != "" {
+		x, _ := strconv.ParseBool(jsonData.EnableRealTimeBackup)
+		v.EnableRealTimeBackup = types.BoolValue(x)
 	} else {
-		v.EnableRealtimeBackup = types.BoolNull()
+		v.EnableRealTimeBackup = types.BoolNull()
 	}
 
 	if jsonData.EnableScheduledBackup != "" {
@@ -1515,6 +1646,887 @@ func (v *FabricModel) SetModelData(jsonData *NDFCFabricModel) diag.Diagnostics {
 		v.DeploymentStatus = types.StringValue(jsonData.DeploymentStatus)
 	} else {
 		v.DeploymentStatus = types.StringNull()
+	}
+
+	if jsonData.Ipv6MulticastGroupSubnet != "" {
+		v.Ipv6MulticastGroupSubnet = types.StringValue(jsonData.Ipv6MulticastGroupSubnet)
+	} else {
+		v.Ipv6MulticastGroupSubnet = types.StringNull()
+	}
+
+	if jsonData.EnableTrmv6 != "" {
+		x, _ := strconv.ParseBool(jsonData.EnableTrmv6)
+		v.EnableTrmv6 = types.BoolValue(x)
+	} else {
+		v.EnableTrmv6 = types.BoolNull()
+	}
+
+	if jsonData.L3vniIpv6McastGroup != "" {
+		v.L3vniIpv6McastGroup = types.StringValue(jsonData.L3vniIpv6McastGroup)
+	} else {
+		v.L3vniIpv6McastGroup = types.StringNull()
+	}
+
+	if jsonData.MvpnVriIdRange != "" {
+		v.MvpnVriIdRange = types.StringValue(jsonData.MvpnVriIdRange)
+	} else {
+		v.MvpnVriIdRange = types.StringNull()
+	}
+
+	if jsonData.EnableVriIdRealloc != "" {
+		x, _ := strconv.ParseBool(jsonData.EnableVriIdRealloc)
+		v.EnableVriIdRealloc = types.BoolValue(x)
+	} else {
+		v.EnableVriIdRealloc = types.BoolNull()
+	}
+
+	if jsonData.EnableAggAccIdRange != "" {
+		x, _ := strconv.ParseBool(jsonData.EnableAggAccIdRange)
+		v.EnableAggAccIdRange = types.BoolValue(x)
+	} else {
+		v.EnableAggAccIdRange = types.BoolNull()
+	}
+
+	if jsonData.AggAccVpcPoIdRange != "" {
+		v.AggAccVpcPoIdRange = types.StringValue(jsonData.AggAccVpcPoIdRange)
+	} else {
+		v.AggAccVpcPoIdRange = types.StringNull()
+	}
+
+	if jsonData.IsisAreaNum != "" {
+		v.IsisAreaNum = types.StringValue(jsonData.IsisAreaNum)
+	} else {
+		v.IsisAreaNum = types.StringNull()
+	}
+
+	if jsonData.EnableSgt != "" {
+		x, _ := strconv.ParseBool(jsonData.EnableSgt)
+		v.EnableSgt = types.BoolValue(x)
+	} else {
+		v.EnableSgt = types.BoolNull()
+	}
+
+	if jsonData.SgtNamePrefix != "" {
+		v.SgtNamePrefix = types.StringValue(jsonData.SgtNamePrefix)
+	} else {
+		v.SgtNamePrefix = types.StringNull()
+	}
+
+	if jsonData.SgtIdRange != "" {
+		v.SgtIdRange = types.StringValue(jsonData.SgtIdRange)
+	} else {
+		v.SgtIdRange = types.StringNull()
+	}
+
+	if jsonData.SgtPreprovision != "" {
+		x, _ := strconv.ParseBool(jsonData.SgtPreprovision)
+		v.SgtPreprovision = types.BoolValue(x)
+	} else {
+		v.SgtPreprovision = types.BoolNull()
+	}
+
+	if jsonData.EnableDciMacsec != "" {
+		x, _ := strconv.ParseBool(jsonData.EnableDciMacsec)
+		v.EnableDciMacsec = types.BoolValue(x)
+	} else {
+		v.EnableDciMacsec = types.BoolNull()
+	}
+
+	if jsonData.EnableQkd != "" {
+		x, _ := strconv.ParseBool(jsonData.EnableQkd)
+		v.EnableQkd = types.BoolValue(x)
+	} else {
+		v.EnableQkd = types.BoolNull()
+	}
+
+	if jsonData.AllowL3vniNoVlan != "" {
+		x, _ := strconv.ParseBool(jsonData.AllowL3vniNoVlan)
+		v.AllowL3vniNoVlan = types.BoolValue(x)
+	} else {
+		v.AllowL3vniNoVlan = types.BoolNull()
+	}
+
+	if jsonData.EnableL3vniNoVlan != "" {
+		x, _ := strconv.ParseBool(jsonData.EnableL3vniNoVlan)
+		v.EnableL3vniNoVlan = types.BoolValue(x)
+	} else {
+		v.EnableL3vniNoVlan = types.BoolNull()
+	}
+
+	if jsonData.MplsIsisAreaNum != "" {
+		v.MplsIsisAreaNum = types.StringValue(jsonData.MplsIsisAreaNum)
+	} else {
+		v.MplsIsisAreaNum = types.StringNull()
+	}
+
+	if jsonData.EnableAiMlQosPolicy != "" {
+		x, _ := strconv.ParseBool(jsonData.EnableAiMlQosPolicy)
+		v.EnableAiMlQosPolicy = types.BoolValue(x)
+	} else {
+		v.EnableAiMlQosPolicy = types.BoolNull()
+	}
+
+	if jsonData.AiMlQosPolicy != "" {
+		v.AiMlQosPolicy = types.StringValue(jsonData.AiMlQosPolicy)
+	} else {
+		v.AiMlQosPolicy = types.StringNull()
+	}
+
+	if jsonData.PfcWatchInt != nil {
+		if jsonData.PfcWatchInt.IsEmpty() {
+			v.PfcWatchInt = types.Int64Null()
+		} else {
+			v.PfcWatchInt = types.Int64Value(int64(*jsonData.PfcWatchInt))
+		}
+	} else {
+		v.PfcWatchInt = types.Int64Null()
+	}
+
+	if jsonData.EnableRtIntfStats != "" {
+		x, _ := strconv.ParseBool(jsonData.EnableRtIntfStats)
+		v.EnableRtIntfStats = types.BoolValue(x)
+	} else {
+		v.EnableRtIntfStats = types.BoolNull()
+	}
+
+	if jsonData.Ipv6AnycastRpIpRange != "" {
+		v.Ipv6AnycastRpIpRange = types.StringValue(jsonData.Ipv6AnycastRpIpRange)
+	} else {
+		v.Ipv6AnycastRpIpRange = types.StringNull()
+	}
+
+	if jsonData.KmeServerIp != "" {
+		v.KmeServerIp = types.StringValue(jsonData.KmeServerIp)
+	} else {
+		v.KmeServerIp = types.StringNull()
+	}
+
+	if jsonData.KmeServerPort != nil {
+		if jsonData.KmeServerPort.IsEmpty() {
+			v.KmeServerPort = types.Int64Null()
+		} else {
+			v.KmeServerPort = types.Int64Value(int64(*jsonData.KmeServerPort))
+		}
+	} else {
+		v.KmeServerPort = types.Int64Null()
+	}
+
+	if jsonData.TrustpointLabel != "" {
+		v.TrustpointLabel = types.StringValue(jsonData.TrustpointLabel)
+	} else {
+		v.TrustpointLabel = types.StringNull()
+	}
+
+	if jsonData.IgnoreCert != "" {
+		x, _ := strconv.ParseBool(jsonData.IgnoreCert)
+		v.IgnoreCert = types.BoolValue(x)
+	} else {
+		v.IgnoreCert = types.BoolNull()
+	}
+
+	if jsonData.DeploymentFreeze != "" {
+		x, _ := strconv.ParseBool(jsonData.DeploymentFreeze)
+		v.DeploymentFreeze = types.BoolValue(x)
+	} else {
+		v.DeploymentFreeze = types.BoolNull()
+	}
+
+	if jsonData.QkdProfileName != "" {
+		v.QkdProfileName = types.StringValue(jsonData.QkdProfileName)
+	} else {
+		v.QkdProfileName = types.StringNull()
+	}
+
+	if jsonData.PerVrfLoopbackAutoProvisionV6 != "" {
+		x, _ := strconv.ParseBool(jsonData.PerVrfLoopbackAutoProvisionV6)
+		v.PerVrfLoopbackAutoProvisionV6 = types.BoolValue(x)
+	} else {
+		v.PerVrfLoopbackAutoProvisionV6 = types.BoolNull()
+	}
+
+	if jsonData.PerVrfLoopbackIpRangeV6 != "" {
+		v.PerVrfLoopbackIpRangeV6 = types.StringValue(jsonData.PerVrfLoopbackIpRangeV6)
+	} else {
+		v.PerVrfLoopbackIpRangeV6 = types.StringNull()
+	}
+
+	if jsonData.EsrOption != "" {
+		v.EsrOption = types.StringValue(jsonData.EsrOption)
+	} else {
+		v.EsrOption = types.StringNull()
+	}
+
+	if jsonData.PtpVlanId != nil {
+		if jsonData.PtpVlanId.IsEmpty() {
+			v.PtpVlanId = types.Int64Null()
+		} else {
+			v.PtpVlanId = types.Int64Value(int64(*jsonData.PtpVlanId))
+		}
+	} else {
+		v.PtpVlanId = types.Int64Null()
+	}
+
+	if jsonData.AllowNxc != "" {
+		x, _ := strconv.ParseBool(jsonData.AllowNxc)
+		v.AllowNxc = types.BoolValue(x)
+	} else {
+		v.AllowNxc = types.BoolNull()
+	}
+
+	if jsonData.OverwriteGlobalNxc != "" {
+		x, _ := strconv.ParseBool(jsonData.OverwriteGlobalNxc)
+		v.OverwriteGlobalNxc = types.BoolValue(x)
+	} else {
+		v.OverwriteGlobalNxc = types.BoolNull()
+	}
+
+	if jsonData.NxcDestVrf != "" {
+		v.NxcDestVrf = types.StringValue(jsonData.NxcDestVrf)
+	} else {
+		v.NxcDestVrf = types.StringNull()
+	}
+
+	if jsonData.NxcSrcIntf != "" {
+		v.NxcSrcIntf = types.StringValue(jsonData.NxcSrcIntf)
+	} else {
+		v.NxcSrcIntf = types.StringNull()
+	}
+
+	if jsonData.NxcProxyServer != "" {
+		v.NxcProxyServer = types.StringValue(jsonData.NxcProxyServer)
+	} else {
+		v.NxcProxyServer = types.StringNull()
+	}
+
+	if jsonData.NxcProxyPort != nil {
+		if jsonData.NxcProxyPort.IsEmpty() {
+			v.NxcProxyPort = types.Int64Null()
+		} else {
+			v.NxcProxyPort = types.Int64Value(int64(*jsonData.NxcProxyPort))
+		}
+	} else {
+		v.NxcProxyPort = types.Int64Null()
+	}
+
+	if jsonData.VpcDelayRestoreTime != nil {
+		if jsonData.VpcDelayRestoreTime.IsEmpty() {
+			v.VpcDelayRestoreTime = types.Int64Null()
+		} else {
+			v.VpcDelayRestoreTime = types.Int64Value(int64(*jsonData.VpcDelayRestoreTime))
+		}
+	} else {
+		v.VpcDelayRestoreTime = types.Int64Null()
+	}
+
+	if jsonData.FabricType != "" {
+		v.FabricType = types.StringValue(jsonData.FabricType)
+	} else {
+		v.FabricType = types.StringNull()
+	}
+
+	if jsonData.ExtFabricType != "" {
+		v.ExtFabricType = types.StringValue(jsonData.ExtFabricType)
+	} else {
+		v.ExtFabricType = types.StringNull()
+	}
+
+	if jsonData.EnableAgent != "" {
+		x, _ := strconv.ParseBool(jsonData.EnableAgent)
+		v.EnableAgent = types.BoolValue(x)
+	} else {
+		v.EnableAgent = types.BoolNull()
+	}
+
+	if jsonData.AgentIntf != "" {
+		v.AgentIntf = types.StringValue(jsonData.AgentIntf)
+	} else {
+		v.AgentIntf = types.StringNull()
+	}
+
+	if jsonData.SspineAddDelDebugFlag != "" {
+		v.SspineAddDelDebugFlag = types.StringValue(jsonData.SspineAddDelDebugFlag)
+	} else {
+		v.SspineAddDelDebugFlag = types.StringNull()
+	}
+
+	if jsonData.BrfieldDebugFlag != "" {
+		v.BrfieldDebugFlag = types.StringValue(jsonData.BrfieldDebugFlag)
+	} else {
+		v.BrfieldDebugFlag = types.StringNull()
+	}
+
+	if jsonData.ActiveMigration != "" {
+		x, _ := strconv.ParseBool(jsonData.ActiveMigration)
+		v.ActiveMigration = types.BoolValue(x)
+	} else {
+		v.ActiveMigration = types.BoolNull()
+	}
+
+	if jsonData.Ff != "" {
+		v.Ff = types.StringValue(jsonData.Ff)
+	} else {
+		v.Ff = types.StringNull()
+	}
+
+	if jsonData.BgpAsPrev != "" {
+		v.BgpAsPrev = types.StringValue(jsonData.BgpAsPrev)
+	} else {
+		v.BgpAsPrev = types.StringNull()
+	}
+
+	if jsonData.UnderlayIsV6Prev != "" {
+		x, _ := strconv.ParseBool(jsonData.UnderlayIsV6Prev)
+		v.UnderlayIsV6Prev = types.BoolValue(x)
+	} else {
+		v.UnderlayIsV6Prev = types.BoolNull()
+	}
+
+	if jsonData.PmEnablePrev != "" {
+		x, _ := strconv.ParseBool(jsonData.PmEnablePrev)
+		v.PmEnablePrev = types.BoolValue(x)
+	} else {
+		v.PmEnablePrev = types.BoolNull()
+	}
+
+	if jsonData.EnableFabricVpcDomainIdPrev != "" {
+		x, _ := strconv.ParseBool(jsonData.EnableFabricVpcDomainIdPrev)
+		v.EnableFabricVpcDomainIdPrev = types.BoolValue(x)
+	} else {
+		v.EnableFabricVpcDomainIdPrev = types.BoolNull()
+	}
+
+	if jsonData.OverlayModePrev != "" {
+		v.OverlayModePrev = types.StringValue(jsonData.OverlayModePrev)
+	} else {
+		v.OverlayModePrev = types.StringNull()
+	}
+
+	if jsonData.AllowL3vniNoVlanPrev != "" {
+		x, _ := strconv.ParseBool(jsonData.AllowL3vniNoVlanPrev)
+		v.AllowL3vniNoVlanPrev = types.BoolValue(x)
+	} else {
+		v.AllowL3vniNoVlanPrev = types.BoolNull()
+	}
+
+	if jsonData.EnablePvlanPrev != "" {
+		x, _ := strconv.ParseBool(jsonData.EnablePvlanPrev)
+		v.EnablePvlanPrev = types.BoolValue(x)
+	} else {
+		v.EnablePvlanPrev = types.BoolNull()
+	}
+
+	if jsonData.AutoUniqueVrfLiteIpPrefixPrev != "" {
+		x, _ := strconv.ParseBool(jsonData.AutoUniqueVrfLiteIpPrefixPrev)
+		v.AutoUniqueVrfLiteIpPrefixPrev = types.BoolValue(x)
+	} else {
+		v.AutoUniqueVrfLiteIpPrefixPrev = types.BoolNull()
+	}
+
+	if jsonData.PerVrfLoopbackAutoProvisionPrev != "" {
+		x, _ := strconv.ParseBool(jsonData.PerVrfLoopbackAutoProvisionPrev)
+		v.PerVrfLoopbackAutoProvisionPrev = types.BoolValue(x)
+	} else {
+		v.PerVrfLoopbackAutoProvisionPrev = types.BoolNull()
+	}
+
+	if jsonData.PerVrfLoopbackAutoProvisionV6Prev != "" {
+		x, _ := strconv.ParseBool(jsonData.PerVrfLoopbackAutoProvisionV6Prev)
+		v.PerVrfLoopbackAutoProvisionV6Prev = types.BoolValue(x)
+	} else {
+		v.PerVrfLoopbackAutoProvisionV6Prev = types.BoolNull()
+	}
+
+	if jsonData.MsoSiteId != "" {
+		v.MsoSiteId = types.StringValue(jsonData.MsoSiteId)
+	} else {
+		v.MsoSiteId = types.StringNull()
+	}
+
+	if jsonData.MsoControlerId != "" {
+		v.MsoControlerId = types.StringValue(jsonData.MsoControlerId)
+	} else {
+		v.MsoControlerId = types.StringNull()
+	}
+
+	if jsonData.MsoSiteGroupName != "" {
+		v.MsoSiteGroupName = types.StringValue(jsonData.MsoSiteGroupName)
+	} else {
+		v.MsoSiteGroupName = types.StringNull()
+	}
+
+	if jsonData.PremsoParentFabric != "" {
+		v.PremsoParentFabric = types.StringValue(jsonData.PremsoParentFabric)
+	} else {
+		v.PremsoParentFabric = types.StringNull()
+	}
+
+	if jsonData.MsoConnectivityDeployed != "" {
+		v.MsoConnectivityDeployed = types.StringValue(jsonData.MsoConnectivityDeployed)
+	} else {
+		v.MsoConnectivityDeployed = types.StringNull()
+	}
+
+	if jsonData.AnycastRpIpRangeInternal != "" {
+		v.AnycastRpIpRangeInternal = types.StringValue(jsonData.AnycastRpIpRangeInternal)
+	} else {
+		v.AnycastRpIpRangeInternal = types.StringNull()
+	}
+
+	if jsonData.Ipv6AnycastRpIpRangeInternal != "" {
+		v.Ipv6AnycastRpIpRangeInternal = types.StringValue(jsonData.Ipv6AnycastRpIpRangeInternal)
+	} else {
+		v.Ipv6AnycastRpIpRangeInternal = types.StringNull()
+	}
+
+	if jsonData.DhcpStartInternal != "" {
+		v.DhcpStartInternal = types.StringValue(jsonData.DhcpStartInternal)
+	} else {
+		v.DhcpStartInternal = types.StringNull()
+	}
+
+	if jsonData.DhcpEndInternal != "" {
+		v.DhcpEndInternal = types.StringValue(jsonData.DhcpEndInternal)
+	} else {
+		v.DhcpEndInternal = types.StringNull()
+	}
+
+	if jsonData.MgmtGwInternal != "" {
+		v.MgmtGwInternal = types.StringValue(jsonData.MgmtGwInternal)
+	} else {
+		v.MgmtGwInternal = types.StringNull()
+	}
+
+	if jsonData.MgmtPrefixInternal != nil {
+		if jsonData.MgmtPrefixInternal.IsEmpty() {
+			v.MgmtPrefixInternal = types.Int64Null()
+		} else {
+			v.MgmtPrefixInternal = types.Int64Value(int64(*jsonData.MgmtPrefixInternal))
+		}
+	} else {
+		v.MgmtPrefixInternal = types.Int64Null()
+	}
+
+	if jsonData.BootstrapMultisubnetInternal != "" {
+		v.BootstrapMultisubnetInternal = types.StringValue(jsonData.BootstrapMultisubnetInternal)
+	} else {
+		v.BootstrapMultisubnetInternal = types.StringNull()
+	}
+
+	if jsonData.MgmtV6prefixInternal != nil {
+		if jsonData.MgmtV6prefixInternal.IsEmpty() {
+			v.MgmtV6prefixInternal = types.Int64Null()
+		} else {
+			v.MgmtV6prefixInternal = types.Int64Value(int64(*jsonData.MgmtV6prefixInternal))
+		}
+	} else {
+		v.MgmtV6prefixInternal = types.Int64Null()
+	}
+
+	if jsonData.DhcpIpv6EnableInternal != "" {
+		v.DhcpIpv6EnableInternal = types.StringValue(jsonData.DhcpIpv6EnableInternal)
+	} else {
+		v.DhcpIpv6EnableInternal = types.StringNull()
+	}
+
+	if jsonData.UnnumDhcpStartInternal != "" {
+		v.UnnumDhcpStartInternal = types.StringValue(jsonData.UnnumDhcpStartInternal)
+	} else {
+		v.UnnumDhcpStartInternal = types.StringNull()
+	}
+
+	if jsonData.UnnumDhcpEndInternal != "" {
+		v.UnnumDhcpEndInternal = types.StringValue(jsonData.UnnumDhcpEndInternal)
+	} else {
+		v.UnnumDhcpEndInternal = types.StringNull()
+	}
+
+	if jsonData.EnableEvpn != "" {
+		x, _ := strconv.ParseBool(jsonData.EnableEvpn)
+		v.EnableEvpn = types.BoolValue(x)
+	} else {
+		v.EnableEvpn = types.BoolNull()
+	}
+
+	if jsonData.FeaturePtpInternal != "" {
+		x, _ := strconv.ParseBool(jsonData.FeaturePtpInternal)
+		v.FeaturePtpInternal = types.BoolValue(x)
+	} else {
+		v.FeaturePtpInternal = types.BoolNull()
+	}
+
+	if jsonData.SspineCount != nil {
+		if jsonData.SspineCount.IsEmpty() {
+			v.SspineCount = types.Int64Null()
+		} else {
+			v.SspineCount = types.Int64Value(int64(*jsonData.SspineCount))
+		}
+	} else {
+		v.SspineCount = types.Int64Null()
+	}
+
+	if jsonData.SpineCount != nil {
+		if jsonData.SpineCount.IsEmpty() {
+			v.SpineCount = types.Int64Null()
+		} else {
+			v.SpineCount = types.Int64Value(int64(*jsonData.SpineCount))
+		}
+	} else {
+		v.SpineCount = types.Int64Null()
+	}
+
+	if jsonData.AbstractFeatureLeaf != "" {
+		v.AbstractFeatureLeaf = types.StringValue(jsonData.AbstractFeatureLeaf)
+	} else {
+		v.AbstractFeatureLeaf = types.StringNull()
+	}
+
+	if jsonData.AbstractFeatureSpine != "" {
+		v.AbstractFeatureSpine = types.StringValue(jsonData.AbstractFeatureSpine)
+	} else {
+		v.AbstractFeatureSpine = types.StringNull()
+	}
+
+	if jsonData.AbstractDhcp != "" {
+		v.AbstractDhcp = types.StringValue(jsonData.AbstractDhcp)
+	} else {
+		v.AbstractDhcp = types.StringNull()
+	}
+
+	if jsonData.AbstractMulticast != "" {
+		v.AbstractMulticast = types.StringValue(jsonData.AbstractMulticast)
+	} else {
+		v.AbstractMulticast = types.StringNull()
+	}
+
+	if jsonData.AbstractAnycastRp != "" {
+		v.AbstractAnycastRp = types.StringValue(jsonData.AbstractAnycastRp)
+	} else {
+		v.AbstractAnycastRp = types.StringNull()
+	}
+
+	if jsonData.AbstractLoopbackInterface != "" {
+		v.AbstractLoopbackInterface = types.StringValue(jsonData.AbstractLoopbackInterface)
+	} else {
+		v.AbstractLoopbackInterface = types.StringNull()
+	}
+
+	if jsonData.AbstractIsis != "" {
+		v.AbstractIsis = types.StringValue(jsonData.AbstractIsis)
+	} else {
+		v.AbstractIsis = types.StringNull()
+	}
+
+	if jsonData.AbstractOspf != "" {
+		v.AbstractOspf = types.StringValue(jsonData.AbstractOspf)
+	} else {
+		v.AbstractOspf = types.StringNull()
+	}
+
+	if jsonData.AbstractVpcDomain != "" {
+		v.AbstractVpcDomain = types.StringValue(jsonData.AbstractVpcDomain)
+	} else {
+		v.AbstractVpcDomain = types.StringNull()
+	}
+
+	if jsonData.AbstractVlanInterface != "" {
+		v.AbstractVlanInterface = types.StringValue(jsonData.AbstractVlanInterface)
+	} else {
+		v.AbstractVlanInterface = types.StringNull()
+	}
+
+	if jsonData.AbstractIsisInterface != "" {
+		v.AbstractIsisInterface = types.StringValue(jsonData.AbstractIsisInterface)
+	} else {
+		v.AbstractIsisInterface = types.StringNull()
+	}
+
+	if jsonData.AbstractOspfInterface != "" {
+		v.AbstractOspfInterface = types.StringValue(jsonData.AbstractOspfInterface)
+	} else {
+		v.AbstractOspfInterface = types.StringNull()
+	}
+
+	if jsonData.AbstractPimInterface != "" {
+		v.AbstractPimInterface = types.StringValue(jsonData.AbstractPimInterface)
+	} else {
+		v.AbstractPimInterface = types.StringNull()
+	}
+
+	if jsonData.AbstractRouteMap != "" {
+		v.AbstractRouteMap = types.StringValue(jsonData.AbstractRouteMap)
+	} else {
+		v.AbstractRouteMap = types.StringNull()
+	}
+
+	if jsonData.AbstractBgp != "" {
+		v.AbstractBgp = types.StringValue(jsonData.AbstractBgp)
+	} else {
+		v.AbstractBgp = types.StringNull()
+	}
+
+	if jsonData.AbstractBgpRr != "" {
+		v.AbstractBgpRr = types.StringValue(jsonData.AbstractBgpRr)
+	} else {
+		v.AbstractBgpRr = types.StringNull()
+	}
+
+	if jsonData.AbstractBgpNeighbor != "" {
+		v.AbstractBgpNeighbor = types.StringValue(jsonData.AbstractBgpNeighbor)
+	} else {
+		v.AbstractBgpNeighbor = types.StringNull()
+	}
+
+	if jsonData.AbstractExtraConfigLeaf != "" {
+		v.AbstractExtraConfigLeaf = types.StringValue(jsonData.AbstractExtraConfigLeaf)
+	} else {
+		v.AbstractExtraConfigLeaf = types.StringNull()
+	}
+
+	if jsonData.AbstractExtraConfigSpine != "" {
+		v.AbstractExtraConfigSpine = types.StringValue(jsonData.AbstractExtraConfigSpine)
+	} else {
+		v.AbstractExtraConfigSpine = types.StringNull()
+	}
+
+	if jsonData.AbstractExtraConfigTor != "" {
+		v.AbstractExtraConfigTor = types.StringValue(jsonData.AbstractExtraConfigTor)
+	} else {
+		v.AbstractExtraConfigTor = types.StringNull()
+	}
+
+	if jsonData.AbstractExtraConfigBootstrap != "" {
+		v.AbstractExtraConfigBootstrap = types.StringValue(jsonData.AbstractExtraConfigBootstrap)
+	} else {
+		v.AbstractExtraConfigBootstrap = types.StringNull()
+	}
+
+	if jsonData.TempAnycastGateway != "" {
+		v.TempAnycastGateway = types.StringValue(jsonData.TempAnycastGateway)
+	} else {
+		v.TempAnycastGateway = types.StringNull()
+	}
+
+	if jsonData.TempVpcDomainMgmt != "" {
+		v.TempVpcDomainMgmt = types.StringValue(jsonData.TempVpcDomainMgmt)
+	} else {
+		v.TempVpcDomainMgmt = types.StringNull()
+	}
+
+	if jsonData.TempVpcPeerLink != "" {
+		v.TempVpcPeerLink = types.StringValue(jsonData.TempVpcPeerLink)
+	} else {
+		v.TempVpcPeerLink = types.StringNull()
+	}
+
+	if jsonData.AbstractRoutedHost != "" {
+		v.AbstractRoutedHost = types.StringValue(jsonData.AbstractRoutedHost)
+	} else {
+		v.AbstractRoutedHost = types.StringNull()
+	}
+
+	if jsonData.UpgradeFromVersion != "" {
+		v.UpgradeFromVersion = types.StringValue(jsonData.UpgradeFromVersion)
+	} else {
+		v.UpgradeFromVersion = types.StringNull()
+	}
+
+	if jsonData.TopdownConfigRmTracking != "" {
+		v.TopdownConfigRmTracking = types.StringValue(jsonData.TopdownConfigRmTracking)
+	} else {
+		v.TopdownConfigRmTracking = types.StringNull()
+	}
+
+	if jsonData.SiteIdPolicyId != nil {
+		if jsonData.SiteIdPolicyId.IsEmpty() {
+			v.SiteIdPolicyId = types.Int64Null()
+		} else {
+			v.SiteIdPolicyId = types.Int64Value(int64(*jsonData.SiteIdPolicyId))
+		}
+	} else {
+		v.SiteIdPolicyId = types.Int64Null()
+	}
+
+	if jsonData.FabricVpcDomainIdPrev != nil {
+		if jsonData.FabricVpcDomainIdPrev.IsEmpty() {
+			v.FabricVpcDomainIdPrev = types.Int64Null()
+		} else {
+			v.FabricVpcDomainIdPrev = types.Int64Value(int64(*jsonData.FabricVpcDomainIdPrev))
+		}
+	} else {
+		v.FabricVpcDomainIdPrev = types.Int64Null()
+	}
+
+	if jsonData.LinkStateRoutingTagPrev != "" {
+		v.LinkStateRoutingTagPrev = types.StringValue(jsonData.LinkStateRoutingTagPrev)
+	} else {
+		v.LinkStateRoutingTagPrev = types.StringNull()
+	}
+
+	if jsonData.BfdEnablePrev != "" {
+		x, _ := strconv.ParseBool(jsonData.BfdEnablePrev)
+		v.BfdEnablePrev = types.BoolValue(x)
+	} else {
+		v.BfdEnablePrev = types.BoolNull()
+	}
+
+	if jsonData.EnableSgtPrev != "" {
+		x, _ := strconv.ParseBool(jsonData.EnableSgtPrev)
+		v.EnableSgtPrev = types.BoolValue(x)
+	} else {
+		v.EnableSgtPrev = types.BoolNull()
+	}
+
+	if jsonData.SgtPreprovisionPrev != "" {
+		x, _ := strconv.ParseBool(jsonData.SgtPreprovisionPrev)
+		v.SgtPreprovisionPrev = types.BoolValue(x)
+	} else {
+		v.SgtPreprovisionPrev = types.BoolNull()
+	}
+
+	if jsonData.SgtPreprovRecalcStatus != "" {
+		v.SgtPreprovRecalcStatus = types.StringValue(jsonData.SgtPreprovRecalcStatus)
+	} else {
+		v.SgtPreprovRecalcStatus = types.StringNull()
+	}
+
+	if jsonData.SgtRecalcStatus != "" {
+		v.SgtRecalcStatus = types.StringValue(jsonData.SgtRecalcStatus)
+	} else {
+		v.SgtRecalcStatus = types.StringNull()
+	}
+
+	if jsonData.SgtOperStatus != "" {
+		v.SgtOperStatus = types.StringValue(jsonData.SgtOperStatus)
+	} else {
+		v.SgtOperStatus = types.StringNull()
+	}
+
+	if jsonData.EnableMacsecPrev != "" {
+		x, _ := strconv.ParseBool(jsonData.EnableMacsecPrev)
+		v.EnableMacsecPrev = types.BoolValue(x)
+	} else {
+		v.EnableMacsecPrev = types.BoolNull()
+	}
+
+	if jsonData.EnableDciMacsecPrev != "" {
+		x, _ := strconv.ParseBool(jsonData.EnableDciMacsecPrev)
+		v.EnableDciMacsecPrev = types.BoolValue(x)
+	} else {
+		v.EnableDciMacsecPrev = types.BoolNull()
+	}
+
+	if jsonData.DciMacsecFallbackKeyString != "" {
+		v.DciMacsecFallbackKeyString = types.StringValue(jsonData.DciMacsecFallbackKeyString)
+	} else {
+		v.DciMacsecFallbackKeyString = types.StringNull()
+	}
+
+	if jsonData.DciMacsecFallbackAlgorithm != "" {
+		v.DciMacsecFallbackAlgorithm = types.StringValue(jsonData.DciMacsecFallbackAlgorithm)
+	} else {
+		v.DciMacsecFallbackAlgorithm = types.StringNull()
+	}
+
+	if jsonData.DciMacsecAlgorithm != "" {
+		v.DciMacsecAlgorithm = types.StringValue(jsonData.DciMacsecAlgorithm)
+	} else {
+		v.DciMacsecAlgorithm = types.StringNull()
+	}
+
+	if jsonData.DciMacsecKeyString != "" {
+		v.DciMacsecKeyString = types.StringValue(jsonData.DciMacsecKeyString)
+	} else {
+		v.DciMacsecKeyString = types.StringNull()
+	}
+
+	if jsonData.DciMacsecCipherSuite != "" {
+		v.DciMacsecCipherSuite = types.StringValue(jsonData.DciMacsecCipherSuite)
+	} else {
+		v.DciMacsecCipherSuite = types.StringNull()
+	}
+
+	if jsonData.QkdProfileNamePrev != "" {
+		x, _ := strconv.ParseBool(jsonData.QkdProfileNamePrev)
+		v.QkdProfileNamePrev = types.BoolValue(x)
+	} else {
+		v.QkdProfileNamePrev = types.BoolNull()
+	}
+
+	if jsonData.FabricMtuPrev != nil {
+		if jsonData.FabricMtuPrev.IsEmpty() {
+			v.FabricMtuPrev = types.Int64Null()
+		} else {
+			v.FabricMtuPrev = types.Int64Value(int64(*jsonData.FabricMtuPrev))
+		}
+	} else {
+		v.FabricMtuPrev = types.Int64Null()
+	}
+
+	if jsonData.L2HostIntfMtuPrev != nil {
+		if jsonData.L2HostIntfMtuPrev.IsEmpty() {
+			v.L2HostIntfMtuPrev = types.Int64Null()
+		} else {
+			v.L2HostIntfMtuPrev = types.Int64Value(int64(*jsonData.L2HostIntfMtuPrev))
+		}
+	} else {
+		v.L2HostIntfMtuPrev = types.Int64Null()
+	}
+
+	if jsonData.MplsIsisAreaNumPrev != "" {
+		v.MplsIsisAreaNumPrev = types.StringValue(jsonData.MplsIsisAreaNumPrev)
+	} else {
+		v.MplsIsisAreaNumPrev = types.StringNull()
+	}
+
+	if jsonData.IsisAreaNumPrev != "" {
+		v.IsisAreaNumPrev = types.StringValue(jsonData.IsisAreaNumPrev)
+	} else {
+		v.IsisAreaNumPrev = types.StringNull()
+	}
+
+	if jsonData.EnableAiMlQosPolicyFlap != "" {
+		x, _ := strconv.ParseBool(jsonData.EnableAiMlQosPolicyFlap)
+		v.EnableAiMlQosPolicyFlap = types.BoolValue(x)
+	} else {
+		v.EnableAiMlQosPolicyFlap = types.BoolNull()
+	}
+
+	if jsonData.PfcWatchIntPrev != nil {
+		if jsonData.PfcWatchIntPrev.IsEmpty() {
+			v.PfcWatchIntPrev = types.Int64Null()
+		} else {
+			v.PfcWatchIntPrev = types.Int64Value(int64(*jsonData.PfcWatchIntPrev))
+		}
+	} else {
+		v.PfcWatchIntPrev = types.Int64Null()
+	}
+
+	if jsonData.InbandMgmtPrev != "" {
+		x, _ := strconv.ParseBool(jsonData.InbandMgmtPrev)
+		v.InbandMgmtPrev = types.BoolValue(x)
+	} else {
+		v.InbandMgmtPrev = types.BoolNull()
+	}
+
+	if jsonData.BootstrapEnablePrev != "" {
+		x, _ := strconv.ParseBool(jsonData.BootstrapEnablePrev)
+		v.BootstrapEnablePrev = types.BoolValue(x)
+	} else {
+		v.BootstrapEnablePrev = types.BoolNull()
+	}
+
+	if jsonData.EnableNetflowPrev != "" {
+		x, _ := strconv.ParseBool(jsonData.EnableNetflowPrev)
+		v.EnableNetflowPrev = types.BoolValue(x)
+	} else {
+		v.EnableNetflowPrev = types.BoolNull()
+	}
+
+	if jsonData.AllowNxcPrev != "" {
+		x, _ := strconv.ParseBool(jsonData.AllowNxcPrev)
+		v.AllowNxcPrev = types.BoolValue(x)
+	} else {
+		v.AllowNxcPrev = types.BoolNull()
 	}
 
 	return err
