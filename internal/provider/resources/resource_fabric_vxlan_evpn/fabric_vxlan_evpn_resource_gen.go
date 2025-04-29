@@ -4,11 +4,8 @@ package resource_fabric_vxlan_evpn
 
 import (
 	"context"
-	"github.com/hashicorp/terraform-plugin-framework-validators/int64validator"
-	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
-	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
@@ -25,8 +22,125 @@ func FabricVxlanEvpnResourceSchema(ctx context.Context) schema.Schema {
 			},
 			"aaa_server_conf": schema.StringAttribute{
 				Optional:            true,
+				Computed:            true,
 				Description:         "AAA Configurations",
 				MarkdownDescription: "AAA Configurations",
+			},
+			"abstract_anycast_rp": schema.StringAttribute{
+				Computed:            true,
+				Description:         "Anycast RP Configuration",
+				MarkdownDescription: "Anycast RP Configuration",
+			},
+			"abstract_bgp": schema.StringAttribute{
+				Computed:            true,
+				Description:         "BGP Configuration",
+				MarkdownDescription: "BGP Configuration",
+			},
+			"abstract_bgp_neighbor": schema.StringAttribute{
+				Computed:            true,
+				Description:         "BGP Neighbor Configuration",
+				MarkdownDescription: "BGP Neighbor Configuration",
+			},
+			"abstract_bgp_rr": schema.StringAttribute{
+				Computed:            true,
+				Description:         "BGP RR Configuration",
+				MarkdownDescription: "BGP RR Configuration",
+			},
+			"abstract_dhcp": schema.StringAttribute{
+				Computed:            true,
+				Description:         "DHCP Configuration",
+				MarkdownDescription: "DHCP Configuration",
+			},
+			"abstract_extra_config_bootstrap": schema.StringAttribute{
+				Computed:            true,
+				Description:         "Add Extra Configuration for Bootstrap",
+				MarkdownDescription: "Add Extra Configuration for Bootstrap",
+			},
+			"abstract_extra_config_leaf": schema.StringAttribute{
+				Computed:            true,
+				Description:         "Add Extra Configuration for Leaf",
+				MarkdownDescription: "Add Extra Configuration for Leaf",
+			},
+			"abstract_extra_config_spine": schema.StringAttribute{
+				Computed:            true,
+				Description:         "Add Extra Configuration for Spine",
+				MarkdownDescription: "Add Extra Configuration for Spine",
+			},
+			"abstract_extra_config_tor": schema.StringAttribute{
+				Computed:            true,
+				Description:         "Add Extra Configuration for ToR",
+				MarkdownDescription: "Add Extra Configuration for ToR",
+			},
+			"abstract_feature_leaf": schema.StringAttribute{
+				Computed:            true,
+				Description:         "Feature Configuration for Leaf",
+				MarkdownDescription: "Feature Configuration for Leaf",
+			},
+			"abstract_feature_spine": schema.StringAttribute{
+				Computed:            true,
+				Description:         "Feature Configuration for Spine",
+				MarkdownDescription: "Feature Configuration for Spine",
+			},
+			"abstract_isis": schema.StringAttribute{
+				Computed:            true,
+				Description:         "ISIS Network Configuration",
+				MarkdownDescription: "ISIS Network Configuration",
+			},
+			"abstract_isis_interface": schema.StringAttribute{
+				Computed:            true,
+				Description:         "ISIS Interface Configuration",
+				MarkdownDescription: "ISIS Interface Configuration",
+			},
+			"abstract_loopback_interface": schema.StringAttribute{
+				Computed:            true,
+				Description:         "Primary Loopback Interface Configuration",
+				MarkdownDescription: "Primary Loopback Interface Configuration",
+			},
+			"abstract_multicast": schema.StringAttribute{
+				Computed:            true,
+				Description:         "Multicast Configuration",
+				MarkdownDescription: "Multicast Configuration",
+			},
+			"abstract_ospf": schema.StringAttribute{
+				Computed:            true,
+				Description:         "OSPF Network Configuration",
+				MarkdownDescription: "OSPF Network Configuration",
+			},
+			"abstract_ospf_interface": schema.StringAttribute{
+				Computed:            true,
+				Description:         "OSPF Interface Configuration",
+				MarkdownDescription: "OSPF Interface Configuration",
+			},
+			"abstract_pim_interface": schema.StringAttribute{
+				Computed:            true,
+				Description:         "PIM Interface Configuration",
+				MarkdownDescription: "PIM Interface Configuration",
+			},
+			"abstract_route_map": schema.StringAttribute{
+				Computed:            true,
+				Description:         "Route-Map Configuration",
+				MarkdownDescription: "Route-Map Configuration",
+			},
+			"abstract_routed_host": schema.StringAttribute{
+				Computed:            true,
+				Description:         "Routed Host Port Configuration",
+				MarkdownDescription: "Routed Host Port Configuration",
+			},
+			"abstract_vlan_interface": schema.StringAttribute{
+				Computed:            true,
+				Description:         "VLAN Interface Configuration",
+				MarkdownDescription: "VLAN Interface Configuration",
+			},
+			"abstract_vpc_domain": schema.StringAttribute{
+				Computed:            true,
+				Description:         "vPC Domain Configuration",
+				MarkdownDescription: "vPC Domain Configuration",
+			},
+			"active_migration": schema.BoolAttribute{
+				Optional:            true,
+				Computed:            true,
+				Description:         "Active Migration",
+				MarkdownDescription: "Active Migration",
 			},
 			"advertise_pip_bgp": schema.BoolAttribute{
 				Optional:            true,
@@ -37,14 +151,54 @@ func FabricVxlanEvpnResourceSchema(ctx context.Context) schema.Schema {
 			"advertise_pip_on_border": schema.BoolAttribute{
 				Optional:            true,
 				Computed:            true,
-				Description:         "Enable advertise-pip on vPC borders and border gateways only. Applicable only when vPC advertise-pip is not enabled",
-				MarkdownDescription: "Enable advertise-pip on vPC borders and border gateways only. Applicable only when vPC advertise-pip is not enabled",
+				Description:         "Enable advertise-pip on vPC borders and border gateways only. Applicable only when vPC advertise-pip is not enabled.",
+				MarkdownDescription: "Enable advertise-pip on vPC borders and border gateways only. Applicable only when vPC advertise-pip is not enabled.",
+			},
+			"agent_intf": schema.StringAttribute{
+				Optional:            true,
+				Computed:            true,
+				Description:         "Interface to connect to Agent",
+				MarkdownDescription: "Interface to connect to Agent",
+			},
+			"agg_acc_vpc_po_id_range": schema.StringAttribute{
+				Optional:            true,
+				Computed:            true,
+				Description:         "Specify one vPC/Port-Channel ID range, this range is used for auto-allocating vPC/Port-Channel IDs for leaf-tor pairings",
+				MarkdownDescription: "Specify one vPC/Port-Channel ID range, this range is used for auto-allocating vPC/Port-Channel IDs for leaf-tor pairings",
+			},
+			"ai_ml_qos_policy": schema.StringAttribute{
+				Optional:            true,
+				Computed:            true,
+				Description:         "Queuing Policy based on predominant fabric link speed: 400G / 100G / 25G",
+				MarkdownDescription: "Queuing Policy based on predominant fabric link speed: 400G / 100G / 25G",
+			},
+			"allow_l3vni_no_vlan": schema.BoolAttribute{
+				Optional:            true,
+				Computed:            true,
+				Description:         "Whether allows L3 VNI configuration without VLAN configuration",
+				MarkdownDescription: "Whether allows L3 VNI configuration without VLAN configuration",
+			},
+			"allow_l3vni_no_vlan_prev": schema.BoolAttribute{
+				Computed:            true,
+				Description:         "Previous state of Allow L3VNI without VLAN",
+				MarkdownDescription: "Previous state of Allow L3VNI without VLAN",
+			},
+			"allow_nxc": schema.BoolAttribute{
+				Optional:            true,
+				Computed:            true,
+				Description:         "Allow onboarding of this fabric to Nexus Cloud",
+				MarkdownDescription: "Allow onboarding of this fabric to Nexus Cloud",
+			},
+			"allow_nxc_prev": schema.BoolAttribute{
+				Computed:            true,
+				Description:         "Previous state of Allow Nexus Cloud",
+				MarkdownDescription: "Previous state of Allow Nexus Cloud",
 			},
 			"anycast_bgw_advertise_pip": schema.BoolAttribute{
 				Optional:            true,
 				Computed:            true,
-				Description:         "To advertise Anycast Border Gateway PIP as VTEP. Effective on MSD fabric Recalculate Config",
-				MarkdownDescription: "To advertise Anycast Border Gateway PIP as VTEP. Effective on MSD fabric Recalculate Config",
+				Description:         "To advertise Anycast Border Gateway PIP as VTEP. Effective on MSD fabric 'Recalculate Config'",
+				MarkdownDescription: "To advertise Anycast Border Gateway PIP as VTEP. Effective on MSD fabric 'Recalculate Config'",
 			},
 			"anycast_gw_mac": schema.StringAttribute{
 				Optional:            true,
@@ -54,8 +208,9 @@ func FabricVxlanEvpnResourceSchema(ctx context.Context) schema.Schema {
 			},
 			"anycast_lb_id": schema.Int64Attribute{
 				Optional:            true,
-				Description:         "Used for vPC Peering in VXLANv6 Fabrics",
-				MarkdownDescription: "Used for vPC Peering in VXLANv6 Fabrics",
+				Computed:            true,
+				Description:         "Underlay Anycast Loopback Id - Used for vPC Peering in VXLANv6 Fabrics (Min:0, Max:1023)",
+				MarkdownDescription: "Underlay Anycast Loopback Id - Used for vPC Peering in VXLANv6 Fabrics (Min:0, Max:1023)",
 			},
 			"anycast_rp_ip_range": schema.StringAttribute{
 				Optional:            true,
@@ -63,17 +218,22 @@ func FabricVxlanEvpnResourceSchema(ctx context.Context) schema.Schema {
 				Description:         "Anycast or Phantom RP IP Address Range",
 				MarkdownDescription: "Anycast or Phantom RP IP Address Range",
 			},
+			"anycast_rp_ip_range_internal": schema.StringAttribute{
+				Computed:            true,
+				Description:         "Internal Anycast RP IP Range",
+				MarkdownDescription: "Internal Anycast RP IP Range",
+			},
 			"auto_symmetric_default_vrf": schema.BoolAttribute{
 				Optional:            true,
 				Computed:            true,
-				Description:         "Whether to auto generate Default VRF interface and BGP peering configuration on managed neighbor devices. If set, auto created VRF Lite IFC links will have Auto Deploy Default VRF for Peer enabled.",
-				MarkdownDescription: "Whether to auto generate Default VRF interface and BGP peering configuration on managed neighbor devices. If set, auto created VRF Lite IFC links will have Auto Deploy Default VRF for Peer enabled.",
+				Description:         "Whether to auto generate Default VRF interface and BGP peering configuration on managed neighbor devices. If set, auto created VRF Lite IFC links will have 'Auto Deploy Default VRF for Peer' enabled.",
+				MarkdownDescription: "Whether to auto generate Default VRF interface and BGP peering configuration on managed neighbor devices. If set, auto created VRF Lite IFC links will have 'Auto Deploy Default VRF for Peer' enabled.",
 			},
 			"auto_symmetric_vrf_lite": schema.BoolAttribute{
 				Optional:            true,
 				Computed:            true,
-				Description:         "Whether to auto generate VRF LITE sub-interface and BGP peering configuration on managed neighbor devices. If set, auto created VRF Lite IFC links will have Auto Deploy for Peer enabled.",
-				MarkdownDescription: "Whether to auto generate VRF LITE sub-interface and BGP peering configuration on managed neighbor devices. If set, auto created VRF Lite IFC links will have Auto Deploy for Peer enabled.",
+				Description:         "Whether to auto generate VRF LITE sub-interface and BGP peering configuration on managed neighbor devices. If set, auto created VRF Lite IFC links will have 'Auto Deploy for Peer' enabled.",
+				MarkdownDescription: "Whether to auto generate VRF LITE sub-interface and BGP peering configuration on managed neighbor devices. If set, auto created VRF Lite IFC links will have 'Auto Deploy for Peer' enabled.",
 			},
 			"auto_unique_vrf_lite_ip_prefix": schema.BoolAttribute{
 				Optional:            true,
@@ -81,96 +241,113 @@ func FabricVxlanEvpnResourceSchema(ctx context.Context) schema.Schema {
 				Description:         "When enabled, IP prefix allocated to the VRF LITE IFC is not reused on VRF extension over VRF LITE IFC. Instead, unique IP Subnet is allocated for each VRF extension over VRF LITE IFC.",
 				MarkdownDescription: "When enabled, IP prefix allocated to the VRF LITE IFC is not reused on VRF extension over VRF LITE IFC. Instead, unique IP Subnet is allocated for each VRF extension over VRF LITE IFC.",
 			},
+			"auto_unique_vrf_lite_ip_prefix_prev": schema.BoolAttribute{
+				Computed:            true,
+				Description:         "Previous state of Auto Unique VRF Lite IP Prefix",
+				MarkdownDescription: "Previous state of Auto Unique VRF Lite IP Prefix",
+			},
 			"auto_vrflite_ifc_default_vrf": schema.BoolAttribute{
 				Optional:            true,
 				Computed:            true,
-				Description:         "Whether to auto generate Default VRF interface and BGP peering configuration on VRF LITE IFC auto deployment. If set, auto created VRF Lite IFC links will have Auto Deploy Default VRF enabled.",
-				MarkdownDescription: "Whether to auto generate Default VRF interface and BGP peering configuration on VRF LITE IFC auto deployment. If set, auto created VRF Lite IFC links will have Auto Deploy Default VRF enabled.",
+				Description:         "For IPv4 underlay, whether to auto generate BGP peering in Default VRF for VRF Lite IFC auto deployment option. If set, will auto create VRF Lite Inter-Fabric links with 'Auto Deploy Default VRF' knob enabled",
+				MarkdownDescription: "For IPv4 underlay, whether to auto generate BGP peering in Default VRF for VRF Lite IFC auto deployment option. If set, will auto create VRF Lite Inter-Fabric links with 'Auto Deploy Default VRF' knob enabled",
 			},
 			"banner": schema.StringAttribute{
 				Optional:            true,
-				Description:         "Message of the Day (motd) banner. Delimiter char (very first char is delimiter char) followed by message ending with delimiter)",
-				MarkdownDescription: "Message of the Day (motd) banner. Delimiter char (very first char is delimiter char) followed by message ending with delimiter)",
+				Computed:            true,
+				Description:         "Message of the Day (motd) banner. Delimiter char (very first char is delimiter char) followed by message ending with delimiter",
+				MarkdownDescription: "Message of the Day (motd) banner. Delimiter char (very first char is delimiter char) followed by message ending with delimiter",
 			},
 			"bfd_auth_enable": schema.BoolAttribute{
 				Optional:            true,
 				Computed:            true,
-				Description:         "Valid for P2P Interfaces only",
-				MarkdownDescription: "Valid for P2P Interfaces only",
+				Description:         "Enable BFD Authentication - Valid for P2P Interfaces only",
+				MarkdownDescription: "Enable BFD Authentication - Valid for P2P Interfaces only",
 			},
 			"bfd_auth_key": schema.StringAttribute{
 				Optional:            true,
-				Description:         "Encrypted SHA1 secret value",
-				MarkdownDescription: "Encrypted SHA1 secret value",
+				Computed:            true,
+				Description:         "BFD Authentication Key - Encrypted SHA1 secret value",
+				MarkdownDescription: "BFD Authentication Key - Encrypted SHA1 secret value",
 			},
 			"bfd_auth_key_id": schema.Int64Attribute{
 				Optional:            true,
-				Description:         "No description available",
-				MarkdownDescription: "No description available",
+				Computed:            true,
+				Description:         "BFD Authentication Key ID",
+				MarkdownDescription: "BFD Authentication Key ID",
 			},
 			"bfd_enable": schema.BoolAttribute{
 				Optional:            true,
 				Computed:            true,
-				Description:         "Valid for IPv4 Underlay only",
-				MarkdownDescription: "Valid for IPv4 Underlay only",
+				Description:         "Enable BFD - Valid for IPv4 Underlay only",
+				MarkdownDescription: "Enable BFD - Valid for IPv4 Underlay only",
+			},
+			"bfd_enable_prev": schema.BoolAttribute{
+				Computed:            true,
+				Description:         "Previous state of BFD Enable",
+				MarkdownDescription: "Previous state of BFD Enable",
 			},
 			"bfd_ibgp_enable": schema.BoolAttribute{
 				Optional:            true,
 				Computed:            true,
-				Description:         "No description available",
-				MarkdownDescription: "No description available",
+				Description:         "Enable BFD For iBGP",
+				MarkdownDescription: "Enable BFD For iBGP",
 			},
 			"bfd_isis_enable": schema.BoolAttribute{
 				Optional:            true,
 				Computed:            true,
-				Description:         "No description available",
-				MarkdownDescription: "No description available",
+				Description:         "Enable BFD For ISIS",
+				MarkdownDescription: "Enable BFD For ISIS",
 			},
 			"bfd_ospf_enable": schema.BoolAttribute{
 				Optional:            true,
 				Computed:            true,
-				Description:         "No description available",
-				MarkdownDescription: "No description available",
+				Description:         "Enable BFD For OSPF",
+				MarkdownDescription: "Enable BFD For OSPF",
 			},
 			"bfd_pim_enable": schema.BoolAttribute{
 				Optional:            true,
 				Computed:            true,
-				Description:         "No description available",
-				MarkdownDescription: "No description available",
+				Description:         "Enable BFD For PIM",
+				MarkdownDescription: "Enable BFD For PIM",
 			},
 			"bgp_as": schema.StringAttribute{
 				Required:            true,
-				Description:         "1-4294967295 | 1-65535.0-65535 It is a good practice to have a unique ASN for each Fabric.",
-				MarkdownDescription: "1-4294967295 | 1-65535.0-65535 It is a good practice to have a unique ASN for each Fabric.",
+				Description:         "1-4294967295 | 1-65535[.0-65535] It is a good practice to have a unique ASN for each Fabric.",
+				MarkdownDescription: "1-4294967295 | 1-65535[.0-65535] It is a good practice to have a unique ASN for each Fabric.",
+			},
+			"bgp_as_prev": schema.StringAttribute{
+				Computed:            true,
+				Description:         "Previous BGP AS value",
+				MarkdownDescription: "Previous BGP AS value",
 			},
 			"bgp_auth_enable": schema.BoolAttribute{
 				Optional:            true,
 				Computed:            true,
-				Description:         "No description available",
-				MarkdownDescription: "No description available",
+				Description:         "Enable BGP Authentication",
+				MarkdownDescription: "Enable BGP Authentication",
 			},
 			"bgp_auth_key": schema.StringAttribute{
 				Optional:            true,
-				Description:         "Encrypted BGP Authentication Key based on type",
-				MarkdownDescription: "Encrypted BGP Authentication Key based on type",
+				Computed:            true,
+				Description:         "BGP Authentication Key - Encrypted BGP Authentication Key based on type",
+				MarkdownDescription: "BGP Authentication Key - Encrypted BGP Authentication Key based on type",
 			},
 			"bgp_auth_key_type": schema.Int64Attribute{
 				Optional:            true,
 				Computed:            true,
-				Description:         "BGP Key Encryption Type: 3 - 3DES, 7 - Cisco",
-				MarkdownDescription: "BGP Key Encryption Type: 3 - 3DES, 7 - Cisco",
-				Validators: []validator.Int64{
-					int64validator.OneOf(3, 7),
-				},
+				Description:         "BGP Authentication Key Encryption Type: 3 - 3DES, 7 - Cisco",
+				MarkdownDescription: "BGP Authentication Key Encryption Type: 3 - 3DES, 7 - Cisco",
 			},
 			"bgp_lb_id": schema.Int64Attribute{
 				Optional:            true,
 				Computed:            true,
-				Description:         "No description available",
-				MarkdownDescription: "No description available",
+				Description:         "Underlay Routing Loopback Id (Min:0, Max:1023)",
+				MarkdownDescription: "Underlay Routing Loopback Id (Min:0, Max:1023)",
 			},
 			"bootstrap_conf": schema.StringAttribute{
 				Optional:            true,
+				Computed:            true,
 				Description:         "Additional CLIs required during device bootup/login e.g. AAA/Radius",
 				MarkdownDescription: "Additional CLIs required during device bootup/login e.g. AAA/Radius",
 			},
@@ -180,17 +357,33 @@ func FabricVxlanEvpnResourceSchema(ctx context.Context) schema.Schema {
 				Description:         "Automatic IP Assignment For POAP",
 				MarkdownDescription: "Automatic IP Assignment For POAP",
 			},
+			"bootstrap_enable_prev": schema.BoolAttribute{
+				Computed:            true,
+				Description:         "Previous state of Bootstrap Enable",
+				MarkdownDescription: "Previous state of Bootstrap Enable",
+			},
 			"bootstrap_multisubnet": schema.StringAttribute{
 				Optional:            true,
 				Computed:            true,
-				Description:         "'lines with # prefix are ignored here'",
-				MarkdownDescription: "'lines with # prefix are ignored here'",
+				Description:         "DHCPv4 Multi Subnet Scope - lines with",
+				MarkdownDescription: "DHCPv4 Multi Subnet Scope - lines with",
+			},
+			"bootstrap_multisubnet_internal": schema.StringAttribute{
+				Computed:            true,
+				Description:         "Internal Bootstrap Multi Subnet Scope",
+				MarkdownDescription: "Internal Bootstrap Multi Subnet Scope",
+			},
+			"brfield_debug_flag": schema.StringAttribute{
+				Optional:            true,
+				Computed:            true,
+				Description:         "Only for brf debugging purpose !!!",
+				MarkdownDescription: "Only for brf debugging purpose !!!",
 			},
 			"brownfield_network_name_format": schema.StringAttribute{
 				Optional:            true,
 				Computed:            true,
-				Description:         "Generated network name should be < 64 characters",
-				MarkdownDescription: "Generated network name should be < 64 characters",
+				Description:         "Brownfield Overlay Network Name Format - Generated network name should be < 64 characters",
+				MarkdownDescription: "Brownfield Overlay Network Name Format - Generated network name should be < 64 characters",
 			},
 			"brownfield_skip_overlay_network_attachments": schema.BoolAttribute{
 				Optional:            true,
@@ -201,17 +394,44 @@ func FabricVxlanEvpnResourceSchema(ctx context.Context) schema.Schema {
 			"cdp_enable": schema.BoolAttribute{
 				Optional:            true,
 				Computed:            true,
-				Description:         "Enable CDP on management interface",
-				MarkdownDescription: "Enable CDP on management interface",
+				Description:         "Enable CDP for Bootstrapped Switch - Enable CDP on management interface",
+				MarkdownDescription: "Enable CDP for Bootstrapped Switch - Enable CDP on management interface",
 			},
 			"copp_policy": schema.StringAttribute{
 				Optional:            true,
 				Computed:            true,
-				Description:         "Fabric Wide CoPP Policy. Customized CoPP policy should be provided when manual is selected",
-				MarkdownDescription: "Fabric Wide CoPP Policy. Customized CoPP policy should be provided when manual is selected",
-				Validators: []validator.String{
-					stringvalidator.OneOf("dense", "lenient", "moderate", "strict", "manual"),
-				},
+				Description:         "Fabric Wide CoPP Policy. Customized CoPP policy should be provided when 'manual' is selected",
+				MarkdownDescription: "Fabric Wide CoPP Policy. Customized CoPP policy should be provided when 'manual' is selected",
+			},
+			"dci_macsec_algorithm": schema.StringAttribute{
+				Optional:            true,
+				Computed:            true,
+				Description:         "AES_128_CMAC or AES_256_CMAC",
+				MarkdownDescription: "AES_128_CMAC or AES_256_CMAC",
+			},
+			"dci_macsec_cipher_suite": schema.StringAttribute{
+				Optional:            true,
+				Computed:            true,
+				Description:         "Configure Cipher Suite",
+				MarkdownDescription: "Configure Cipher Suite",
+			},
+			"dci_macsec_fallback_algorithm": schema.StringAttribute{
+				Optional:            true,
+				Computed:            true,
+				Description:         "AES_128_CMAC or AES_256_CMAC. This parameter is used when DCI link has QKD disabled.",
+				MarkdownDescription: "AES_128_CMAC or AES_256_CMAC. This parameter is used when DCI link has QKD disabled.",
+			},
+			"dci_macsec_fallback_key_string": schema.StringAttribute{
+				Optional:            true,
+				Computed:            true,
+				Description:         "Cisco Type 7 Encrypted Octet String. This parameter is used when DCI link has QKD disabled.",
+				MarkdownDescription: "Cisco Type 7 Encrypted Octet String. This parameter is used when DCI link has QKD disabled.",
+			},
+			"dci_macsec_key_string": schema.StringAttribute{
+				Optional:            true,
+				Computed:            true,
+				Description:         "Cisco Type 7 Encrypted Octet String",
+				MarkdownDescription: "Cisco Type 7 Encrypted Octet String",
 			},
 			"dci_subnet_range": schema.StringAttribute{
 				Optional:            true,
@@ -222,20 +442,18 @@ func FabricVxlanEvpnResourceSchema(ctx context.Context) schema.Schema {
 			"dci_subnet_target_mask": schema.Int64Attribute{
 				Optional:            true,
 				Computed:            true,
-				Description:         "No description available",
-				MarkdownDescription: "No description available",
+				Description:         "VRF Lite Subnet Mask (Min:8, Max:31)",
+				MarkdownDescription: "VRF Lite Subnet Mask (Min:8, Max:31)",
 			},
 			"default_network": schema.StringAttribute{
 				Optional:            true,
 				Computed:            true,
 				Description:         "Default Overlay Network Template For Leafs",
 				MarkdownDescription: "Default Overlay Network Template For Leafs",
-				Validators: []validator.String{
-					stringvalidator.OneOf("Default_Network_Universal", "Service_Network_Universal"),
-				},
 			},
 			"default_pvlan_sec_network": schema.StringAttribute{
 				Optional:            true,
+				Computed:            true,
 				Description:         "Default PVLAN Secondary Network Template",
 				MarkdownDescription: "Default PVLAN Secondary Network Template",
 			},
@@ -244,27 +462,18 @@ func FabricVxlanEvpnResourceSchema(ctx context.Context) schema.Schema {
 				Computed:            true,
 				Description:         "Queuing Policy for all 92xx, -EX, -FX, -FX2, -FX3, -GX series switches in the fabric",
 				MarkdownDescription: "Queuing Policy for all 92xx, -EX, -FX, -FX2, -FX3, -GX series switches in the fabric",
-				Validators: []validator.String{
-					stringvalidator.OneOf("queuing_policy_default_4q_cloudscale", "queuing_policy_default_8q_cloudscale"),
-				},
 			},
 			"default_queuing_policy_other": schema.StringAttribute{
 				Optional:            true,
 				Computed:            true,
 				Description:         "Queuing Policy for all other switches in the fabric",
 				MarkdownDescription: "Queuing Policy for all other switches in the fabric",
-				Validators: []validator.String{
-					stringvalidator.OneOf("queuing_policy_default_other"),
-				},
 			},
 			"default_queuing_policy_r_series": schema.StringAttribute{
 				Optional:            true,
 				Computed:            true,
 				Description:         "Queuing Policy for all R-Series switches in the fabric",
 				MarkdownDescription: "Queuing Policy for all R-Series switches in the fabric",
-				Validators: []validator.String{
-					stringvalidator.OneOf("queuing_policy_default_r_series"),
-				},
 			},
 			"default_vrf": schema.StringAttribute{
 				Optional:            true,
@@ -274,13 +483,20 @@ func FabricVxlanEvpnResourceSchema(ctx context.Context) schema.Schema {
 			},
 			"default_vrf_redis_bgp_rmap": schema.StringAttribute{
 				Optional:            true,
+				Computed:            true,
 				Description:         "Route Map used to redistribute BGP routes to IGP in default vrf in auto created VRF Lite IFC links",
 				MarkdownDescription: "Route Map used to redistribute BGP routes to IGP in default vrf in auto created VRF Lite IFC links",
 			},
 			"deploy": schema.BoolAttribute{
 				Required:            true,
-				Description:         "This flag does configuration save and deploy, this is only applicable in update case not valid for fabric creation.",
-				MarkdownDescription: "This flag does configuration save and deploy, this is only applicable in update case not valid for fabric creation.",
+				Description:         "This flag does configuration save and deploy",
+				MarkdownDescription: "This flag does configuration save and deploy",
+			},
+			"deployment_freeze": schema.BoolAttribute{
+				Optional:            true,
+				Computed:            true,
+				Description:         "Disable all deployments in this fabric",
+				MarkdownDescription: "Disable all deployments in this fabric",
 			},
 			"deployment_status": schema.StringAttribute{
 				Computed:            true,
@@ -295,29 +511,46 @@ func FabricVxlanEvpnResourceSchema(ctx context.Context) schema.Schema {
 			},
 			"dhcp_end": schema.StringAttribute{
 				Optional:            true,
+				Computed:            true,
 				Description:         "End Address For Switch POAP",
 				MarkdownDescription: "End Address For Switch POAP",
 			},
+			"dhcp_end_internal": schema.StringAttribute{
+				Computed:            true,
+				Description:         "Internal DHCP Scope End Address",
+				MarkdownDescription: "Internal DHCP Scope End Address",
+			},
 			"dhcp_ipv6_enable": schema.StringAttribute{
 				Optional:            true,
-				Description:         "No description available",
-				MarkdownDescription: "No description available",
-				Validators: []validator.String{
-					stringvalidator.OneOf("DHCPv4", "DHCPv6"),
-				},
+				Computed:            true,
+				Description:         "DHCP Version",
+				MarkdownDescription: "DHCP Version",
+			},
+			"dhcp_ipv6_enable_internal": schema.StringAttribute{
+				Computed:            true,
+				Description:         "Internal DHCP IPv6 Enable Flag",
+				MarkdownDescription: "Internal DHCP IPv6 Enable Flag",
 			},
 			"dhcp_start": schema.StringAttribute{
 				Optional:            true,
+				Computed:            true,
 				Description:         "Start Address For Switch POAP",
 				MarkdownDescription: "Start Address For Switch POAP",
 			},
+			"dhcp_start_internal": schema.StringAttribute{
+				Computed:            true,
+				Description:         "Internal DHCP Scope Start Address",
+				MarkdownDescription: "Internal DHCP Scope Start Address",
+			},
 			"dns_server_ip_list": schema.StringAttribute{
 				Optional:            true,
-				Description:         "Comma separated list of IP Addresses(v4/v6)",
-				MarkdownDescription: "Comma separated list of IP Addresses(v4/v6)",
+				Computed:            true,
+				Description:         "Comma separated list of IP Addresses (v4/v6)",
+				MarkdownDescription: "Comma separated list of IP Addresses (v4/v6)",
 			},
 			"dns_server_vrf": schema.StringAttribute{
 				Optional:            true,
+				Computed:            true,
 				Description:         "One VRF for all DNS servers or a comma separated list of VRFs, one per DNS server",
 				MarkdownDescription: "One VRF for all DNS servers or a comma separated list of VRFs, one per DNS server",
 			},
@@ -327,23 +560,78 @@ func FabricVxlanEvpnResourceSchema(ctx context.Context) schema.Schema {
 				Description:         "Include AAA configs from Manageability tab during device bootup",
 				MarkdownDescription: "Include AAA configs from Manageability tab during device bootup",
 			},
+			"enable_agent": schema.BoolAttribute{
+				Optional:            true,
+				Computed:            true,
+				Description:         "Enable Agnet (development purpose only)",
+				MarkdownDescription: "Enable Agnet (development purpose only)",
+			},
+			"enable_agg_acc_id_range": schema.BoolAttribute{
+				Optional:            true,
+				Computed:            true,
+				Description:         "Use specific vPC/Port-channel ID range for leaf-tor pairings",
+				MarkdownDescription: "Use specific vPC/Port-channel ID range for leaf-tor pairings",
+			},
+			"enable_ai_ml_qos_policy": schema.BoolAttribute{
+				Optional:            true,
+				Computed:            true,
+				Description:         "Configures QoS and Queuing Policies specific to N9K Cloud Scale switch fabric for AI/ML network loads",
+				MarkdownDescription: "Configures QoS and Queuing Policies specific to N9K Cloud Scale switch fabric for AI/ML network loads",
+			},
+			"enable_ai_ml_qos_policy_flap": schema.BoolAttribute{
+				Computed:            true,
+				Description:         "Previous state of Enable AI/ML QoS Policy Flap",
+				MarkdownDescription: "Previous state of Enable AI/ML QoS Policy Flap",
+			},
+			"enable_dci_macsec": schema.BoolAttribute{
+				Optional:            true,
+				Computed:            true,
+				Description:         "Enable DCI MACsec - Enable MACsec on DCI links. DCI MACsec fabric parameters are used for configuring MACsec on a DCI link if 'Use Link MACsec Setting' is disabled on the link.",
+				MarkdownDescription: "Enable DCI MACsec - Enable MACsec on DCI links. DCI MACsec fabric parameters are used for configuring MACsec on a DCI link if 'Use Link MACsec Setting' is disabled on the link.",
+			},
+			"enable_dci_macsec_prev": schema.BoolAttribute{
+				Computed:            true,
+				Description:         "Previous state of Enable DCI MACsec",
+				MarkdownDescription: "Previous state of Enable DCI MACsec",
+			},
 			"enable_default_queuing_policy": schema.BoolAttribute{
 				Optional:            true,
 				Computed:            true,
-				Description:         "No description available",
-				MarkdownDescription: "No description available",
+				Description:         "Enable Default Queuing Policies",
+				MarkdownDescription: "Enable Default Queuing Policies",
+			},
+			"enable_evpn": schema.BoolAttribute{
+				Computed:            true,
+				Description:         "Enable EVPN",
+				MarkdownDescription: "Enable EVPN",
 			},
 			"enable_fabric_vpc_domain_id": schema.BoolAttribute{
 				Optional:            true,
 				Computed:            true,
-				Description:         "(Not Recommended)",
-				MarkdownDescription: "(Not Recommended)",
+				Description:         "Enable the same vPC Domain Id for all vPC Pairs (Not Recommended)",
+				MarkdownDescription: "Enable the same vPC Domain Id for all vPC Pairs (Not Recommended)",
+			},
+			"enable_fabric_vpc_domain_id_prev": schema.BoolAttribute{
+				Computed:            true,
+				Description:         "Previous state of Enable Fabric VPC Domain ID",
+				MarkdownDescription: "Previous state of Enable Fabric VPC Domain ID",
+			},
+			"enable_l3vni_no_vlan": schema.BoolAttribute{
+				Optional:            true,
+				Computed:            true,
+				Description:         "L3 VNI configuration without VLAN configuration. This value is propagated on vrf creation as the default value of 'Enable L3VNI w/o VLAN' in vrf",
+				MarkdownDescription: "L3 VNI configuration without VLAN configuration. This value is propagated on vrf creation as the default value of 'Enable L3VNI w/o VLAN' in vrf",
 			},
 			"enable_macsec": schema.BoolAttribute{
 				Optional:            true,
 				Computed:            true,
-				Description:         "Enable MACsec in the fabric",
-				MarkdownDescription: "Enable MACsec in the fabric",
+				Description:         "Enable MACsec - Enable MACsec in the fabric. MACsec fabric parameters are used for configuring MACsec on a fabric link if MACsec is enabled on the link.",
+				MarkdownDescription: "Enable MACsec - Enable MACsec in the fabric. MACsec fabric parameters are used for configuring MACsec on a fabric link if MACsec is enabled on the link.",
+			},
+			"enable_macsec_prev": schema.BoolAttribute{
+				Computed:            true,
+				Description:         "Previous state of Enable MACsec",
+				MarkdownDescription: "Previous state of Enable MACsec",
 			},
 			"enable_netflow": schema.BoolAttribute{
 				Optional:            true,
@@ -351,98 +639,163 @@ func FabricVxlanEvpnResourceSchema(ctx context.Context) schema.Schema {
 				Description:         "Enable Netflow on VTEPs",
 				MarkdownDescription: "Enable Netflow on VTEPs",
 			},
+			"enable_netflow_prev": schema.BoolAttribute{
+				Computed:            true,
+				Description:         "Previous state of Enable Netflow",
+				MarkdownDescription: "Previous state of Enable Netflow",
+			},
 			"enable_ngoam": schema.BoolAttribute{
 				Optional:            true,
 				Computed:            true,
-				Description:         "Enable the Next Generation (NG) OAM feature for all switches in the fabric to aid in trouble-shooting VXLAN EVPN fabrics",
-				MarkdownDescription: "Enable the Next Generation (NG) OAM feature for all switches in the fabric to aid in trouble-shooting VXLAN EVPN fabrics",
+				Description:         "Enable VXLAN OAM - Enable the Next Generation (NG) OAM feature for all switches in the fabric to aid in trouble-shooting VXLAN EVPN fabrics",
+				MarkdownDescription: "Enable VXLAN OAM - Enable the Next Generation (NG) OAM feature for all switches in the fabric to aid in trouble-shooting VXLAN EVPN fabrics",
 			},
 			"enable_nxapi": schema.BoolAttribute{
 				Optional:            true,
 				Computed:            true,
-				Description:         "Enable HTTPS NX-API",
-				MarkdownDescription: "Enable HTTPS NX-API",
+				Description:         "Enable NX-API - Enable HTTPS NX-API",
+				MarkdownDescription: "Enable NX-API - Enable HTTPS NX-API",
 			},
 			"enable_nxapi_http": schema.BoolAttribute{
 				Optional:            true,
 				Computed:            true,
-				Description:         "No description available",
-				MarkdownDescription: "No description available",
+				Description:         "Enable HTTP NX-API",
+				MarkdownDescription: "Enable HTTP NX-API",
 			},
 			"enable_pbr": schema.BoolAttribute{
 				Optional:            true,
 				Computed:            true,
-				Description:         "When ESR option is ePBR, enable ePBR will enable pbr, sla sender and epbr features on the switch",
-				MarkdownDescription: "When ESR option is ePBR, enable ePBR will enable pbr, sla sender and epbr features on the switch",
+				Description:         "Enable feature pbr, sla sender, epbr, or enable feature pbr, based on the L4-L7 Services use case",
+				MarkdownDescription: "Enable feature pbr, sla sender, epbr, or enable feature pbr, based on the L4-L7 Services use case",
 			},
 			"enable_pvlan": schema.BoolAttribute{
 				Optional:            true,
 				Computed:            true,
-				Description:         "Enable PVLAN on switches except spines and super spines",
-				MarkdownDescription: "Enable PVLAN on switches except spines and super spines",
+				Description:         "Enable Private VLAN (PVLAN) - Enable PVLAN on switches except spines and super spines",
+				MarkdownDescription: "Enable Private VLAN (PVLAN) - Enable PVLAN on switches except spines and super spines",
 			},
-			"enable_realtime_backup": schema.BoolAttribute{
+			"enable_pvlan_prev": schema.BoolAttribute{
+				Computed:            true,
+				Description:         "Previous state of Enable Private VLAN",
+				MarkdownDescription: "Previous state of Enable Private VLAN",
+			},
+			"enable_qkd": schema.BoolAttribute{
 				Optional:            true,
+				Computed:            true,
+				Description:         "Enable QKD - Enable DCI MACsec with QKD config",
+				MarkdownDescription: "Enable QKD - Enable DCI MACsec with QKD config",
+			},
+			"enable_real_time_backup": schema.BoolAttribute{
+				Optional:            true,
+				Computed:            true,
 				Description:         "Backup hourly only if there is any config deployment since last backup",
 				MarkdownDescription: "Backup hourly only if there is any config deployment since last backup",
 			},
+			"enable_rt_intf_stats": schema.BoolAttribute{
+				Optional:            true,
+				Computed:            true,
+				Description:         "Enable Real Time Interface Statistics Collection - Valid for NX-OS only",
+				MarkdownDescription: "Enable Real Time Interface Statistics Collection - Valid for NX-OS only",
+			},
 			"enable_scheduled_backup": schema.BoolAttribute{
 				Optional:            true,
+				Computed:            true,
 				Description:         "Backup at the specified time",
 				MarkdownDescription: "Backup at the specified time",
+			},
+			"enable_sgt": schema.BoolAttribute{
+				Optional:            true,
+				Computed:            true,
+				Description:         "Enable Security Groups - Security group can be enabled only with V4 underlay and CLI overlay mode",
+				MarkdownDescription: "Enable Security Groups - Security group can be enabled only with V4 underlay and CLI overlay mode",
+			},
+			"enable_sgt_prev": schema.BoolAttribute{
+				Computed:            true,
+				Description:         "Previous state of Enable Security Groups",
+				MarkdownDescription: "Previous state of Enable Security Groups",
 			},
 			"enable_tenant_dhcp": schema.BoolAttribute{
 				Optional:            true,
 				Computed:            true,
-				Description:         "No description available",
-				MarkdownDescription: "No description available",
+				Description:         "Enable Tenant DHCP",
+				MarkdownDescription: "Enable Tenant DHCP",
 			},
 			"enable_trm": schema.BoolAttribute{
 				Optional:            true,
 				Computed:            true,
-				Description:         "For Overlay Multicast Support In VXLAN Fabrics",
-				MarkdownDescription: "For Overlay Multicast Support In VXLAN Fabrics",
+				Description:         "For Overlay IPv4 Multicast Support In VXLAN Fabrics",
+				MarkdownDescription: "For Overlay IPv4 Multicast Support In VXLAN Fabrics",
+			},
+			"enable_trmv6": schema.BoolAttribute{
+				Optional:            true,
+				Computed:            true,
+				Description:         "For Overlay IPv6 Multicast Support In VXLAN Fabrics",
+				MarkdownDescription: "For Overlay IPv6 Multicast Support In VXLAN Fabrics",
 			},
 			"enable_vpc_peer_link_native_vlan": schema.BoolAttribute{
 				Optional:            true,
 				Computed:            true,
-				Description:         "No description available",
-				MarkdownDescription: "No description available",
+				Description:         "Make vPC Peer Link VLAN as Native VLAN",
+				MarkdownDescription: "Make vPC Peer Link VLAN as Native VLAN",
+			},
+			"enable_vri_id_realloc": schema.BoolAttribute{
+				Optional:            true,
+				Computed:            true,
+				Description:         "One time VRI ID re-allocation based on 'MVPN VRI ID Range'",
+				MarkdownDescription: "One time VRI ID re-allocation based on 'MVPN VRI ID Range'",
+			},
+			"esr_option": schema.StringAttribute{
+				Optional:            true,
+				Computed:            true,
+				Description:         "Policy-Based Routing (PBR) or Enhanced PBR (ePBR)",
+				MarkdownDescription: "Policy-Based Routing (PBR) or Enhanced PBR (ePBR)",
+			},
+			"ext_fabric_type": schema.StringAttribute{
+				Optional:            true,
+				Computed:            true,
+				Description:         "External Fabric Type",
+				MarkdownDescription: "External Fabric Type",
 			},
 			"extra_conf_intra_links": schema.StringAttribute{
 				Optional:            true,
+				Computed:            true,
 				Description:         "Additional CLIs For All Intra-Fabric Links",
 				MarkdownDescription: "Additional CLIs For All Intra-Fabric Links",
 			},
 			"extra_conf_leaf": schema.StringAttribute{
 				Optional:            true,
+				Computed:            true,
 				Description:         "Additional CLIs For All Leafs As Captured From Show Running Configuration",
 				MarkdownDescription: "Additional CLIs For All Leafs As Captured From Show Running Configuration",
 			},
 			"extra_conf_spine": schema.StringAttribute{
 				Optional:            true,
+				Computed:            true,
 				Description:         "Additional CLIs For All Spines As Captured From Show Running Configuration",
 				MarkdownDescription: "Additional CLIs For All Spines As Captured From Show Running Configuration",
 			},
 			"extra_conf_tor": schema.StringAttribute{
 				Optional:            true,
+				Computed:            true,
 				Description:         "Additional CLIs For All ToRs As Captured From Show Running Configuration",
 				MarkdownDescription: "Additional CLIs For All ToRs As Captured From Show Running Configuration",
 			},
 			"fabric_interface_type": schema.StringAttribute{
 				Optional:            true,
 				Computed:            true,
-				Description:         "Numbered(Point-to-Point) or Unnumbered",
-				MarkdownDescription: "Numbered(Point-to-Point) or Unnumbered",
-				Validators: []validator.String{
-					stringvalidator.OneOf("p2p", "unnumbered"),
-				},
+				Description:         "Fabric Interface Numbering - Numbered(Point-to-Point) or Unnumbered",
+				MarkdownDescription: "Fabric Interface Numbering - Numbered(Point-to-Point) or Unnumbered",
 			},
 			"fabric_mtu": schema.Int64Attribute{
 				Optional:            true,
 				Computed:            true,
-				Description:         "Must be an even number",
-				MarkdownDescription: "Must be an even number",
+				Description:         "Intra Fabric Interface MTU (Min:576, Max:9216). Must be an even number",
+				MarkdownDescription: "Intra Fabric Interface MTU (Min:576, Max:9216). Must be an even number",
+			},
+			"fabric_mtu_prev": schema.Int64Attribute{
+				Computed:            true,
+				Description:         "Previous state of Fabric MTU",
+				MarkdownDescription: "Previous state of Fabric MTU",
 			},
 			"fabric_name": schema.StringAttribute{
 				Required:            true,
@@ -452,10 +805,21 @@ func FabricVxlanEvpnResourceSchema(ctx context.Context) schema.Schema {
 					stringplanmodifier.RequiresReplace(),
 				},
 			},
+			"fabric_type": schema.StringAttribute{
+				Computed:            true,
+				Description:         "Fabric Type",
+				MarkdownDescription: "Fabric Type",
+			},
 			"fabric_vpc_domain_id": schema.Int64Attribute{
 				Optional:            true,
+				Computed:            true,
 				Description:         "vPC Domain Id to be used on all vPC pairs",
 				MarkdownDescription: "vPC Domain Id to be used on all vPC pairs",
+			},
+			"fabric_vpc_domain_id_prev": schema.Int64Attribute{
+				Computed:            true,
+				Description:         "Internal Fabric Wide vPC Domain ID",
+				MarkdownDescription: "Internal Fabric Wide vPC Domain ID",
 			},
 			"fabric_vpc_qos": schema.BoolAttribute{
 				Optional:            true,
@@ -472,47 +836,64 @@ func FabricVxlanEvpnResourceSchema(ctx context.Context) schema.Schema {
 			"feature_ptp": schema.BoolAttribute{
 				Optional:            true,
 				Computed:            true,
-				Description:         "No description available",
-				MarkdownDescription: "No description available",
+				Description:         "Enable Precision Time Protocol (PTP)",
+				MarkdownDescription: "Enable Precision Time Protocol (PTP)",
+			},
+			"feature_ptp_internal": schema.BoolAttribute{
+				Computed:            true,
+				Description:         "Internal PTP Feature Enable Flag",
+				MarkdownDescription: "Internal PTP Feature Enable Flag",
+			},
+			"ff": schema.StringAttribute{
+				Optional:            true,
+				Computed:            true,
+				Description:         "Template Family",
+				MarkdownDescription: "Template Family",
 			},
 			"grfield_debug_flag": schema.StringAttribute{
 				Optional:            true,
 				Computed:            true,
-				Description:         "Enable to clean switch configuration without reload when PreserveConfig=no",
-				MarkdownDescription: "Enable to clean switch configuration without reload when PreserveConfig=no",
-				Validators: []validator.String{
-					stringvalidator.OneOf("Enable", "Disable"),
-				},
+				Description:         "Greenfield Cleanup Option - Enable to clean switch configuration without reload when PreserveConfig=no",
+				MarkdownDescription: "Greenfield Cleanup Option - Enable to clean switch configuration without reload when PreserveConfig=no",
 			},
 			"hd_time": schema.Int64Attribute{
 				Optional:            true,
 				Computed:            true,
-				Description:         "NVE Source Inteface HoldDown Time in seconds",
-				MarkdownDescription: "NVE Source Inteface HoldDown Time in seconds",
+				Description:         "NVE Source Interface HoldDown Time (Min:1, Max:1500) in seconds",
+				MarkdownDescription: "NVE Source Interface HoldDown Time (Min:1, Max:1500) in seconds",
 			},
 			"host_intf_admin_state": schema.BoolAttribute{
 				Optional:            true,
 				Computed:            true,
-				Description:         "No description available",
-				MarkdownDescription: "No description available",
+				Description:         "Unshut Host Interfaces by Default",
+				MarkdownDescription: "Unshut Host Interfaces by Default",
 			},
 			"ibgp_peer_template": schema.StringAttribute{
 				Optional:            true,
-				Description:         "Speficies the iBGP Peer-Template config used for RR and spines with border role.",
-				MarkdownDescription: "Speficies the iBGP Peer-Template config used for RR and spines with border role.",
+				Computed:            true,
+				Description:         "iBGP Peer-Template Config - Specifies the iBGP Peer-Template config used for RR and spines with border role.",
+				MarkdownDescription: "iBGP Peer-Template Config - Specifies the iBGP Peer-Template config used for RR and spines with border role.",
 			},
 			"ibgp_peer_template_leaf": schema.StringAttribute{
 				Optional:            true,
-				Description:         "Specifies the config used for leaf, border or border gateway. If this field is empty, the peer template defined in iBGP Peer-Template Config is used on all BGP enabled devices (RRs,leafs, border or border gateway roles.",
-				MarkdownDescription: "Specifies the config used for leaf, border or border gateway. If this field is empty, the peer template defined in iBGP Peer-Template Config is used on all BGP enabled devices (RRs,leafs, border or border gateway roles.",
+				Computed:            true,
+				Description:         "Leaf/Border/Border Gateway iBGP Peer-Template Config - Specifies the config used for leaf, border or border gateway.",
+				MarkdownDescription: "Leaf/Border/Border Gateway iBGP Peer-Template Config - Specifies the config used for leaf, border or border gateway.",
 			},
 			"id": schema.StringAttribute{
 				Computed:            true,
-				Description:         "Terraform unique Id for the fabric resource",
-				MarkdownDescription: "Terraform unique Id for the fabric resource",
+				Description:         "Terraform unique Id for the fabric_vxlan_evpn resource",
+				MarkdownDescription: "Terraform unique Id for the fabric_vxlan_evpn resource",
+			},
+			"ignore_cert": schema.BoolAttribute{
+				Optional:            true,
+				Computed:            true,
+				Description:         "Skip verification of incoming certificate",
+				MarkdownDescription: "Skip verification of incoming certificate",
 			},
 			"inband_dhcp_servers": schema.StringAttribute{
 				Optional:            true,
+				Computed:            true,
 				Description:         "Comma separated list of IPv4 Addresses (Max 3)",
 				MarkdownDescription: "Comma separated list of IPv4 Addresses (Max 3)",
 			},
@@ -522,88 +903,156 @@ func FabricVxlanEvpnResourceSchema(ctx context.Context) schema.Schema {
 				Description:         "Manage switches with only Inband connectivity",
 				MarkdownDescription: "Manage switches with only Inband connectivity",
 			},
+			"inband_mgmt_prev": schema.BoolAttribute{
+				Computed:            true,
+				Description:         "Previous state of Inband Management",
+				MarkdownDescription: "Previous state of Inband Management",
+			},
+			"intf_stat_load_interval": schema.Int64Attribute{
+				Optional:            true,
+				Computed:            true,
+				Description:         "Interface Statistics Load Interval - Time in seconds (Min:5, Max:300)",
+				MarkdownDescription: "Interface Statistics Load Interval - Time in seconds (Min:5, Max:300)",
+			},
+			"ipv6_anycast_rp_ip_range": schema.StringAttribute{
+				Optional:            true,
+				Computed:            true,
+				Description:         "Anycast RP IPv6 Address Range",
+				MarkdownDescription: "Anycast RP IPv6 Address Range",
+			},
+			"ipv6_anycast_rp_ip_range_internal": schema.StringAttribute{
+				Computed:            true,
+				Description:         "Internal IPv6 Anycast RP IP Range",
+				MarkdownDescription: "Internal IPv6 Anycast RP IP Range",
+			},
+			"ipv6_multicast_group_subnet": schema.StringAttribute{
+				Optional:            true,
+				Computed:            true,
+				Description:         "IPv6 Multicast Group Subnet - IPv6 Multicast address with prefix 112 to 128",
+				MarkdownDescription: "IPv6 Multicast Group Subnet - IPv6 Multicast address with prefix 112 to 128",
+			},
+			"isis_area_num": schema.StringAttribute{
+				Optional:            true,
+				Computed:            true,
+				Description:         "IS-IS NET Area Number - NET in form of XX.<4-hex-digit Custom Area Number>.XXXX.XXXX.XXXX.00",
+				MarkdownDescription: "IS-IS NET Area Number - NET in form of XX.<4-hex-digit Custom Area Number>.XXXX.XXXX.XXXX.00",
+			},
+			"isis_area_num_prev": schema.StringAttribute{
+				Computed:            true,
+				Description:         "Area Number last used for generating IS-IS NET",
+				MarkdownDescription: "Area Number last used for generating IS-IS NET",
+			},
 			"isis_auth_enable": schema.BoolAttribute{
 				Optional:            true,
 				Computed:            true,
-				Description:         "No description available",
-				MarkdownDescription: "No description available",
+				Description:         "Enable IS-IS Authentication",
+				MarkdownDescription: "Enable IS-IS Authentication",
 			},
 			"isis_auth_key": schema.StringAttribute{
 				Optional:            true,
-				Description:         "Cisco Type 7 Encrypted",
-				MarkdownDescription: "Cisco Type 7 Encrypted",
+				Computed:            true,
+				Description:         "IS-IS Authentication Key - Cisco Type 7 Encrypted",
+				MarkdownDescription: "IS-IS Authentication Key - Cisco Type 7 Encrypted",
 			},
 			"isis_auth_keychain_key_id": schema.Int64Attribute{
 				Optional:            true,
-				Description:         "No description available",
-				MarkdownDescription: "No description available",
+				Computed:            true,
+				Description:         "IS-IS Authentication Key ID (Min:0, Max:*****)",
+				MarkdownDescription: "IS-IS Authentication Key ID (Min:0, Max:*****)",
 			},
 			"isis_auth_keychain_name": schema.StringAttribute{
 				Optional:            true,
-				Description:         "No description available",
-				MarkdownDescription: "No description available",
+				Computed:            true,
+				Description:         "IS-IS Authentication Keychain Name",
+				MarkdownDescription: "IS-IS Authentication Keychain Name",
 			},
 			"isis_level": schema.StringAttribute{
 				Optional:            true,
 				Computed:            true,
-				Description:         "Supported IS types: level-1, level-2",
-				MarkdownDescription: "Supported IS types: level-1, level-2",
-				Validators: []validator.String{
-					stringvalidator.OneOf("level-1", "level-2"),
-				},
+				Description:         "IS-IS Level - Supported IS types: level-1, level-2",
+				MarkdownDescription: "IS-IS Level - Supported IS types: level-1, level-2",
 			},
 			"isis_overload_elapse_time": schema.Int64Attribute{
 				Optional:            true,
-				Description:         "Clear the overload bit after an elapsed time in seconds",
-				MarkdownDescription: "Clear the overload bit after an elapsed time in seconds",
+				Computed:            true,
+				Description:         "IS-IS Overload Bit Elapsed Time - Clear the overload bit after an elapsed time in seconds",
+				MarkdownDescription: "IS-IS Overload Bit Elapsed Time - Clear the overload bit after an elapsed time in seconds",
 			},
 			"isis_overload_enable": schema.BoolAttribute{
 				Optional:            true,
-				Description:         "When enabled, set the overload bit for an elapsed time after a reload",
-				MarkdownDescription: "When enabled, set the overload bit for an elapsed time after a reload",
+				Computed:            true,
+				Description:         "Set IS-IS Overload Bit - When enabled, set the overload bit for an elapsed time after a reload",
+				MarkdownDescription: "Set IS-IS Overload Bit - When enabled, set the overload bit for an elapsed time after a reload",
 			},
 			"isis_p2p_enable": schema.BoolAttribute{
 				Optional:            true,
-				Description:         "This will enable network point-to-point on fabric interfaces which are numbered",
-				MarkdownDescription: "This will enable network point-to-point on fabric interfaces which are numbered",
+				Computed:            true,
+				Description:         "Enable IS-IS Network Point-to-Point - This will enable network point-to-point on fabric interfaces which are numbered",
+				MarkdownDescription: "Enable IS-IS Network Point-to-Point - This will enable network point-to-point on fabric interfaces which are numbered",
+			},
+			"kme_server_ip": schema.StringAttribute{
+				Optional:            true,
+				Computed:            true,
+				Description:         "Key Management Entity server IPv4 address",
+				MarkdownDescription: "Key Management Entity server IPv4 address",
+			},
+			"kme_server_port": schema.Int64Attribute{
+				Optional:            true,
+				Computed:            true,
+				Description:         "Key Management Entity server port number",
+				MarkdownDescription: "Key Management Entity server port number",
 			},
 			"l2_host_intf_mtu": schema.Int64Attribute{
 				Optional:            true,
 				Computed:            true,
-				Description:         "Must be an even number",
-				MarkdownDescription: "Must be an even number",
+				Description:         "Layer 2 Host Interface MTU (Min:1500, Max:9216). Must be an even number",
+				MarkdownDescription: "Layer 2 Host Interface MTU (Min:1500, Max:9216). Must be an even number",
+			},
+			"l2_host_intf_mtu_prev": schema.Int64Attribute{
+				Computed:            true,
+				Description:         "Previous state of Layer 2 Host Interface MTU",
+				MarkdownDescription: "Previous state of Layer 2 Host Interface MTU",
 			},
 			"l2_segment_id_range": schema.StringAttribute{
 				Optional:            true,
 				Computed:            true,
-				Description:         "Overlay Network Identifier Range",
-				MarkdownDescription: "Overlay Network Identifier Range",
+				Description:         "Overlay Network Identifier Range (Min:1, Max:16777214)",
+				MarkdownDescription: "Overlay Network Identifier Range (Min:1, Max:16777214)",
 			},
 			"l3_partition_id_range": schema.StringAttribute{
 				Optional:            true,
 				Computed:            true,
-				Description:         "Overlay VRF Identifier Range",
-				MarkdownDescription: "Overlay VRF Identifier Range",
+				Description:         "Overlay VRF Identifier Range (Min:1, Max:16777214)",
+				MarkdownDescription: "Overlay VRF Identifier Range (Min:1, Max:16777214)",
+			},
+			"l3vni_ipv6_mcast_group": schema.StringAttribute{
+				Optional:            true,
+				Computed:            true,
+				Description:         "Default MDT IPv6 Address for TRM VRFs - Default Underlay Multicast group IP6 address assigned for every overlay VRF",
+				MarkdownDescription: "Default MDT IPv6 Address for TRM VRFs - Default Underlay Multicast group IP6 address assigned for every overlay VRF",
 			},
 			"l3vni_mcast_group": schema.StringAttribute{
 				Optional:            true,
-				Description:         "Default Underlay Multicast group IP assigned for every overlay VRF.",
-				MarkdownDescription: "Default Underlay Multicast group IP assigned for every overlay VRF.",
+				Computed:            true,
+				Description:         "Default MDT IPv4 Address for TRM VRFs - Default Underlay Multicast group IPv4 address assigned for every overlay VRF",
+				MarkdownDescription: "Default MDT IPv4 Address for TRM VRFs - Default Underlay Multicast group IPv4 address assigned for every overlay VRF",
 			},
 			"link_state_routing": schema.StringAttribute{
 				Optional:            true,
 				Computed:            true,
-				Description:         "Used for Spine-Leaf Connectivity",
-				MarkdownDescription: "Used for Spine-Leaf Connectivity",
-				Validators: []validator.String{
-					stringvalidator.OneOf("ospf", "is-is"),
-				},
+				Description:         "Underlay Routing Protocol - Used for Spine-Leaf Connectivity",
+				MarkdownDescription: "Underlay Routing Protocol - Used for Spine-Leaf Connectivity",
 			},
 			"link_state_routing_tag": schema.StringAttribute{
 				Optional:            true,
 				Computed:            true,
-				Description:         "Underlay Routing Process Tag",
-				MarkdownDescription: "Underlay Routing Process Tag",
+				Description:         "Underlay Routing Protocol Tag - Underlay Routing Process Tag",
+				MarkdownDescription: "Underlay Routing Protocol Tag - Underlay Routing Process Tag",
+			},
+			"link_state_routing_tag_prev": schema.StringAttribute{
+				Computed:            true,
+				Description:         "Previous Link State Routing Tag",
+				MarkdownDescription: "Previous Link State Routing Tag",
 			},
 			"loopback0_ip_range": schema.StringAttribute{
 				Optional:            true,
@@ -613,6 +1062,7 @@ func FabricVxlanEvpnResourceSchema(ctx context.Context) schema.Schema {
 			},
 			"loopback0_ipv6_range": schema.StringAttribute{
 				Optional:            true,
+				Computed:            true,
 				Description:         "Typically Loopback0 IPv6 Address Range",
 				MarkdownDescription: "Typically Loopback0 IPv6 Address Range",
 			},
@@ -624,93 +1074,161 @@ func FabricVxlanEvpnResourceSchema(ctx context.Context) schema.Schema {
 			},
 			"loopback1_ipv6_range": schema.StringAttribute{
 				Optional:            true,
+				Computed:            true,
 				Description:         "Typically Loopback1 and Anycast Loopback IPv6 Address Range",
 				MarkdownDescription: "Typically Loopback1 and Anycast Loopback IPv6 Address Range",
 			},
 			"macsec_algorithm": schema.StringAttribute{
 				Optional:            true,
-				Description:         "AES_128_CMAC or AES_256_CMAC",
-				MarkdownDescription: "AES_128_CMAC or AES_256_CMAC",
+				Computed:            true,
+				Description:         "MACsec Primary Cryptographic Algorithm - AES_128_CMAC or AES_256_CMAC",
+				MarkdownDescription: "MACsec Primary Cryptographic Algorithm - AES_128_CMAC or AES_256_CMAC",
 			},
 			"macsec_cipher_suite": schema.StringAttribute{
 				Optional:            true,
-				Description:         "Configure Cipher Suite",
-				MarkdownDescription: "Configure Cipher Suite",
+				Computed:            true,
+				Description:         "MACsec Cipher Suite - Configure Cipher Suite",
+				MarkdownDescription: "MACsec Cipher Suite - Configure Cipher Suite",
 			},
 			"macsec_fallback_algorithm": schema.StringAttribute{
 				Optional:            true,
-				Description:         "AES_128_CMAC or AES_256_CMAC",
-				MarkdownDescription: "AES_128_CMAC or AES_256_CMAC",
+				Computed:            true,
+				Description:         "MACsec Fallback Cryptographic Algorithm - AES_128_CMAC or AES_256_CMAC",
+				MarkdownDescription: "MACsec Fallback Cryptographic Algorithm - AES_128_CMAC or AES_256_CMAC",
 			},
 			"macsec_fallback_key_string": schema.StringAttribute{
 				Optional:            true,
-				Description:         "Cisco Type 7 Encrypted Octet String",
-				MarkdownDescription: "Cisco Type 7 Encrypted Octet String",
+				Computed:            true,
+				Description:         "MACsec Fallback Key String - Cisco Type 7 Encrypted Octet String",
+				MarkdownDescription: "MACsec Fallback Key String - Cisco Type 7 Encrypted Octet String",
 			},
 			"macsec_key_string": schema.StringAttribute{
 				Optional:            true,
-				Description:         "Cisco Type 7 Encrypted Octet String",
-				MarkdownDescription: "Cisco Type 7 Encrypted Octet String",
+				Computed:            true,
+				Description:         "MACsec Primary Key String - Cisco Type 7 Encrypted Octet String",
+				MarkdownDescription: "MACsec Primary Key String - Cisco Type 7 Encrypted Octet String",
 			},
 			"macsec_report_timer": schema.Int64Attribute{
 				Optional:            true,
-				Description:         "MACsec Operational Status periodic report timer in minutes",
-				MarkdownDescription: "MACsec Operational Status periodic report timer in minutes",
+				Computed:            true,
+				Description:         "MACsec Status Report Timer - MACsec Operational Status periodic report timer in minutes",
+				MarkdownDescription: "MACsec Status Report Timer - MACsec Operational Status periodic report timer in minutes",
 			},
 			"mgmt_gw": schema.StringAttribute{
 				Optional:            true,
+				Computed:            true,
 				Description:         "Default Gateway For Management VRF On The Switch",
 				MarkdownDescription: "Default Gateway For Management VRF On The Switch",
 			},
+			"mgmt_gw_internal": schema.StringAttribute{
+				Computed:            true,
+				Description:         "Internal Management Gateway",
+				MarkdownDescription: "Internal Management Gateway",
+			},
 			"mgmt_prefix": schema.Int64Attribute{
 				Optional:            true,
-				Description:         "No description available",
-				MarkdownDescription: "No description available",
+				Computed:            true,
+				Description:         "Switch Mgmt IP Subnet Prefix (Min:8, Max:30)",
+				MarkdownDescription: "Switch Mgmt IP Subnet Prefix (Min:8, Max:30)",
+			},
+			"mgmt_prefix_internal": schema.Int64Attribute{
+				Computed:            true,
+				Description:         "Internal Management Subnet Prefix",
+				MarkdownDescription: "Internal Management Subnet Prefix",
 			},
 			"mgmt_v6prefix": schema.Int64Attribute{
 				Optional:            true,
-				Description:         "No description available",
-				MarkdownDescription: "No description available",
+				Computed:            true,
+				Description:         "Switch Mgmt IPv6 Subnet Prefix (Min:64, Max:126)",
+				MarkdownDescription: "Switch Mgmt IPv6 Subnet Prefix (Min:64, Max:126)",
+			},
+			"mgmt_v6prefix_internal": schema.Int64Attribute{
+				Computed:            true,
+				Description:         "Internal Management IPv6 Subnet Prefix",
+				MarkdownDescription: "Internal Management IPv6 Subnet Prefix",
 			},
 			"mpls_handoff": schema.BoolAttribute{
 				Optional:            true,
 				Computed:            true,
-				Description:         "No description available",
-				MarkdownDescription: "No description available",
+				Description:         "Enable MPLS Handoff",
+				MarkdownDescription: "Enable MPLS Handoff",
+			},
+			"mpls_isis_area_num": schema.StringAttribute{
+				Optional:            true,
+				Computed:            true,
+				Description:         "IS-IS NET Area Number for MPLS Handoff - NET in form of XX.<4-hex-digit Custom Area Number>.XXXX.XXXX.XXXX.00",
+				MarkdownDescription: "IS-IS NET Area Number for MPLS Handoff - NET in form of XX.<4-hex-digit Custom Area Number>.XXXX.XXXX.XXXX.00",
+			},
+			"mpls_isis_area_num_prev": schema.StringAttribute{
+				Computed:            true,
+				Description:         "Previous state of MPLS IS-IS Area Number",
+				MarkdownDescription: "Previous state of MPLS IS-IS Area Number",
 			},
 			"mpls_lb_id": schema.Int64Attribute{
 				Optional:            true,
-				Description:         "Used for VXLAN to MPLS SR/LDP Handoff",
-				MarkdownDescription: "Used for VXLAN to MPLS SR/LDP Handoff",
+				Computed:            true,
+				Description:         "Underlay MPLS Loopback Id - Used for VXLAN to MPLS SR/LDP Handoff (Min:0, Max:1023)",
+				MarkdownDescription: "Underlay MPLS Loopback Id - Used for VXLAN to MPLS SR/LDP Handoff (Min:0, Max:1023)",
 			},
 			"mpls_loopback_ip_range": schema.StringAttribute{
 				Optional:            true,
+				Computed:            true,
 				Description:         "Used for VXLAN to MPLS SR/LDP Handoff",
 				MarkdownDescription: "Used for VXLAN to MPLS SR/LDP Handoff",
 			},
+			"mso_connectivity_deployed": schema.StringAttribute{
+				Computed:            true,
+				Description:         "MSO Connectivity Deployed",
+				MarkdownDescription: "MSO Connectivity Deployed",
+			},
+			"mso_controler_id": schema.StringAttribute{
+				Computed:            true,
+				Description:         "MSO Controller ID",
+				MarkdownDescription: "MSO Controller ID",
+			},
+			"mso_site_group_name": schema.StringAttribute{
+				Computed:            true,
+				Description:         "MSO Site Group Name",
+				MarkdownDescription: "MSO Site Group Name",
+			},
+			"mso_site_id": schema.StringAttribute{
+				Computed:            true,
+				Description:         "MSO Site ID",
+				MarkdownDescription: "MSO Site ID",
+			},
 			"mst_instance_range": schema.StringAttribute{
 				Optional:            true,
-				Description:         "MST instance range, Example: 0-3,5,7-9, Default is 0",
-				MarkdownDescription: "MST instance range, Example: 0-3,5,7-9, Default is 0",
+				Computed:            true,
+				Description:         "",
+				MarkdownDescription: "",
 			},
 			"multicast_group_subnet": schema.StringAttribute{
 				Optional:            true,
 				Computed:            true,
-				Description:         "Multicast pool prefix between 8 to 30. A multicast group IP from this pool is used for BUM traffic for each overlay network.",
-				MarkdownDescription: "Multicast pool prefix between 8 to 30. A multicast group IP from this pool is used for BUM traffic for each overlay network.",
+				Description:         "Multicast Group Subnet - Multicast pool prefix between 8 to 30. A multicast group IP from this pool is used for BUM traffic for each overlay network.",
+				MarkdownDescription: "Multicast Group Subnet - Multicast pool prefix between 8 to 30. A multicast group IP from this pool is used for BUM traffic for each overlay network.",
+			},
+			"mvpn_vri_id_range": schema.StringAttribute{
+				Optional:            true,
+				Computed:            true,
+				Description:         "MVPN VRI ID for vPC, applicable when TRM is enabled with IPv6 underlay, or TRM is enabled with IPv4 underlay while fabric allows L3VNI without VLAN option",
+				MarkdownDescription: "MVPN VRI ID for vPC, applicable when TRM is enabled with IPv6 underlay, or TRM is enabled with IPv4 underlay while fabric allows L3VNI without VLAN option",
 			},
 			"netflow_exporter_list": schema.StringAttribute{
 				Optional:            true,
+				Computed:            true,
 				Description:         "One or Multiple Netflow Exporters",
 				MarkdownDescription: "One or Multiple Netflow Exporters",
 			},
 			"netflow_monitor_list": schema.StringAttribute{
 				Optional:            true,
+				Computed:            true,
 				Description:         "One or Multiple Netflow Monitors",
 				MarkdownDescription: "One or Multiple Netflow Monitors",
 			},
 			"netflow_record_list": schema.StringAttribute{
 				Optional:            true,
+				Computed:            true,
 				Description:         "One or Multiple Netflow Records",
 				MarkdownDescription: "One or Multiple Netflow Records",
 			},
@@ -723,42 +1241,68 @@ func FabricVxlanEvpnResourceSchema(ctx context.Context) schema.Schema {
 			"network_vlan_range": schema.StringAttribute{
 				Optional:            true,
 				Computed:            true,
-				Description:         "Per Switch Overlay Network VLAN Range",
-				MarkdownDescription: "Per Switch Overlay Network VLAN Range",
+				Description:         "Per Switch Overlay Network VLAN Range (Min:2, Max:4094)",
+				MarkdownDescription: "Per Switch Overlay Network VLAN Range (Min:2, Max:4094)",
 			},
 			"ntp_server_ip_list": schema.StringAttribute{
 				Optional:            true,
-				Description:         "Comma separated list of IP Addresses(v4/v6)",
-				MarkdownDescription: "Comma separated list of IP Addresses(v4/v6)",
+				Computed:            true,
+				Description:         "Comma separated list of IP Addresses (v4/v6)",
+				MarkdownDescription: "Comma separated list of IP Addresses (v4/v6)",
 			},
 			"ntp_server_vrf": schema.StringAttribute{
 				Optional:            true,
+				Computed:            true,
 				Description:         "One VRF for all NTP servers or a comma separated list of VRFs, one per NTP server",
 				MarkdownDescription: "One VRF for all NTP servers or a comma separated list of VRFs, one per NTP server",
 			},
 			"nve_lb_id": schema.Int64Attribute{
 				Optional:            true,
 				Computed:            true,
-				Description:         "No description available",
-				MarkdownDescription: "No description available",
+				Description:         "Underlay VTEP Loopback Id (Min:0, Max:1023)",
+				MarkdownDescription: "Underlay VTEP Loopback Id (Min:0, Max:1023)",
 			},
 			"nxapi_http_port": schema.Int64Attribute{
 				Optional:            true,
 				Computed:            true,
-				Description:         "No description available",
-				MarkdownDescription: "No description available",
+				Description:         "NX-API HTTP Port Number",
+				MarkdownDescription: "NX-API HTTP Port Number",
 			},
 			"nxapi_https_port": schema.Int64Attribute{
 				Optional:            true,
 				Computed:            true,
-				Description:         "No description available",
-				MarkdownDescription: "No description available",
+				Description:         "NX-API HTTPS Port Number",
+				MarkdownDescription: "NX-API HTTPS Port Number",
+			},
+			"nxc_dest_vrf": schema.StringAttribute{
+				Optional:            true,
+				Computed:            true,
+				Description:         "VRF to be used to reach Nexus Cloud, enter 'management' for management VRF and 'default' for default VRF",
+				MarkdownDescription: "VRF to be used to reach Nexus Cloud, enter 'management' for management VRF and 'default' for default VRF",
+			},
+			"nxc_proxy_port": schema.Int64Attribute{
+				Optional:            true,
+				Computed:            true,
+				Description:         "Proxy port number, default is 8080",
+				MarkdownDescription: "Proxy port number, default is 8080",
+			},
+			"nxc_proxy_server": schema.StringAttribute{
+				Optional:            true,
+				Computed:            true,
+				Description:         "IPv4 or IPv6 address, or DNS name of the proxy server",
+				MarkdownDescription: "IPv4 or IPv6 address, or DNS name of the proxy server",
+			},
+			"nxc_src_intf": schema.StringAttribute{
+				Optional:            true,
+				Computed:            true,
+				Description:         "Source interface for communication to Nexus Cloud, mandatory if Destination VRF is not management, supported interfaces: loopback, port-channel, vlan",
+				MarkdownDescription: "Source interface for communication to Nexus Cloud, mandatory if Destination VRF is not management, supported interfaces: loopback, port-channel, vlan",
 			},
 			"object_tracking_number_range": schema.StringAttribute{
 				Optional:            true,
 				Computed:            true,
-				Description:         "Per switch tracked object ID Range",
-				MarkdownDescription: "Per switch tracked object ID Range",
+				Description:         "Tracked Object ID Range - Per switch tracked object ID Range (Min:1, Max:512)",
+				MarkdownDescription: "Tracked Object ID Range - Per switch tracked object ID Range (Min:1, Max:512)",
 			},
 			"ospf_area_id": schema.StringAttribute{
 				Optional:            true,
@@ -769,172 +1313,284 @@ func FabricVxlanEvpnResourceSchema(ctx context.Context) schema.Schema {
 			"ospf_auth_enable": schema.BoolAttribute{
 				Optional:            true,
 				Computed:            true,
-				Description:         "No description available",
-				MarkdownDescription: "No description available",
+				Description:         "Enable OSPF Authentication",
+				MarkdownDescription: "Enable OSPF Authentication",
 			},
 			"ospf_auth_key": schema.StringAttribute{
 				Optional:            true,
-				Description:         "3DES Encrypted",
-				MarkdownDescription: "3DES Encrypted",
+				Computed:            true,
+				Description:         "OSPF Authentication Key - 3DES Encrypted",
+				MarkdownDescription: "OSPF Authentication Key - 3DES Encrypted",
 			},
 			"ospf_auth_key_id": schema.Int64Attribute{
 				Optional:            true,
-				Description:         "No description available",
-				MarkdownDescription: "No description available",
+				Computed:            true,
+				Description:         "OSPF Authentication Key ID (Min:0, Max:255)",
+				MarkdownDescription: "OSPF Authentication Key ID (Min:0, Max:255)",
 			},
 			"overlay_mode": schema.StringAttribute{
 				Optional:            true,
 				Computed:            true,
-				Description:         "VRF/Network configuration using config-profile or CLI",
-				MarkdownDescription: "VRF/Network configuration using config-profile or CLI",
+				Description:         "Overlay Mode - VRF/Network configuration using config-profile or CLI",
+				MarkdownDescription: "Overlay Mode - VRF/Network configuration using config-profile or CLI",
+			},
+			"overlay_mode_prev": schema.StringAttribute{
+				Computed:            true,
+				Description:         "Previous Overlay Mode value",
+				MarkdownDescription: "Previous Overlay Mode value",
+			},
+			"overwrite_global_nxc": schema.BoolAttribute{
+				Optional:            true,
+				Computed:            true,
+				Description:         "If enabled, Fabric NxCloud Settings will be used",
+				MarkdownDescription: "If enabled, Fabric NxCloud Settings will be used",
 			},
 			"per_vrf_loopback_auto_provision": schema.BoolAttribute{
 				Optional:            true,
 				Computed:            true,
-				Description:         "Auto provision a loopback on a VTEP on VRF attachment",
-				MarkdownDescription: "Auto provision a loopback on a VTEP on VRF attachment",
+				Description:         "Per VRF Per VTEP Loopback IPv4 Auto-Provisioning - Auto provision a loopback IPv4 on a VTEP on VRF attachment. Note: Enabling this option auto-provisions loopback on existing VRF attachments also when Edit, QuickAttach, or Multiattach actions are performed. Provisioned loopbacks cannot be deleted until VRFs are unattached.",
+				MarkdownDescription: "Per VRF Per VTEP Loopback IPv4 Auto-Provisioning - Auto provision a loopback IPv4 on a VTEP on VRF attachment. Note: Enabling this option auto-provisions loopback on existing VRF attachments also when Edit, QuickAttach, or Multiattach actions are performed. Provisioned loopbacks cannot be deleted until VRFs are unattached.",
+			},
+			"per_vrf_loopback_auto_provision_prev": schema.BoolAttribute{
+				Computed:            true,
+				Description:         "Previous state of Per VRF Loopback Auto Provisioning",
+				MarkdownDescription: "Previous state of Per VRF Loopback Auto Provisioning",
+			},
+			"per_vrf_loopback_auto_provision_v6": schema.BoolAttribute{
+				Optional:            true,
+				Computed:            true,
+				Description:         "Auto provision a loopback IPv6 on a VTEP on VRF attachment",
+				MarkdownDescription: "Auto provision a loopback IPv6 on a VTEP on VRF attachment",
+			},
+			"per_vrf_loopback_auto_provision_v6_prev": schema.BoolAttribute{
+				Computed:            true,
+				Description:         "Previous state of Per VRF Loopback IPv6 Auto Provisioning",
+				MarkdownDescription: "Previous state of Per VRF Loopback IPv6 Auto Provisioning",
 			},
 			"per_vrf_loopback_ip_range": schema.StringAttribute{
 				Optional:            true,
-				Description:         "Prefix pool to assign IP addresses to loopbacks on VTEPs on a per VRF basis",
-				MarkdownDescription: "Prefix pool to assign IP addresses to loopbacks on VTEPs on a per VRF basis",
+				Computed:            true,
+				Description:         "Prefix pool to assign IPv4 addresses to loopbacks on VTEPs on a per VRF basis",
+				MarkdownDescription: "Prefix pool to assign IPv4 addresses to loopbacks on VTEPs on a per VRF basis",
+			},
+			"per_vrf_loopback_ip_range_v6": schema.StringAttribute{
+				Optional:            true,
+				Computed:            true,
+				Description:         "Prefix pool to assign IPv6 addresses to loopbacks on VTEPs on a per VRF basis",
+				MarkdownDescription: "Prefix pool to assign IPv6 addresses to loopbacks on VTEPs on a per VRF basis",
+			},
+			"pfc_watch_int": schema.Int64Attribute{
+				Optional:            true,
+				Computed:            true,
+				Description:         "Priority flow control watch-dog interval - Acceptable values from 101 to 1000 (milliseconds). Leave blank for system default (100ms).",
+				MarkdownDescription: "Priority flow control watch-dog interval - Acceptable values from 101 to 1000 (milliseconds). Leave blank for system default (100ms).",
+			},
+			"pfc_watch_int_prev": schema.Int64Attribute{
+				Computed:            true,
+				Description:         "Previous state of Priority Flow Control Watch Interval",
+				MarkdownDescription: "Previous state of Priority Flow Control Watch Interval",
 			},
 			"phantom_rp_lb_id1": schema.Int64Attribute{
 				Optional:            true,
-				Description:         "Used for Bidir-PIM Phantom RP",
-				MarkdownDescription: "Used for Bidir-PIM Phantom RP",
+				Computed:            true,
+				Description:         "Underlay Primary RP Loopback Id - Used for Bidir-PIM Phantom RP (Min:0, Max:1023)",
+				MarkdownDescription: "Underlay Primary RP Loopback Id - Used for Bidir-PIM Phantom RP (Min:0, Max:1023)",
 			},
 			"phantom_rp_lb_id2": schema.Int64Attribute{
 				Optional:            true,
-				Description:         "Used for Fallback Bidir-PIM Phantom RP",
-				MarkdownDescription: "Used for Fallback Bidir-PIM Phantom RP",
+				Computed:            true,
+				Description:         "Underlay Backup RP Loopback Id - Used for Fallback Bidir-PIM Phantom RP (Min:0, Max:1023)",
+				MarkdownDescription: "Underlay Backup RP Loopback Id - Used for Fallback Bidir-PIM Phantom RP (Min:0, Max:1023)",
 			},
 			"phantom_rp_lb_id3": schema.Int64Attribute{
 				Optional:            true,
-				Description:         "Used for second Fallback Bidir-PIM Phantom RP",
-				MarkdownDescription: "Used for second Fallback Bidir-PIM Phantom RP",
+				Computed:            true,
+				Description:         "Underlay Second Backup RP Loopback Id - Used for second Fallback Bidir-PIM Phantom RP (Min:0, Max:1023)",
+				MarkdownDescription: "Underlay Second Backup RP Loopback Id - Used for second Fallback Bidir-PIM Phantom RP (Min:0, Max:1023)",
 			},
 			"phantom_rp_lb_id4": schema.Int64Attribute{
 				Optional:            true,
-				Description:         "Used for third Fallback Bidir-PIM Phantom RP",
-				MarkdownDescription: "Used for third Fallback Bidir-PIM Phantom RP",
+				Computed:            true,
+				Description:         "Underlay Third Backup RP Loopback Id - Used for third Fallback Bidir-PIM Phantom RP (Min:0, Max:1023)",
+				MarkdownDescription: "Underlay Third Backup RP Loopback Id - Used for third Fallback Bidir-PIM Phantom RP (Min:0, Max:1023)",
 			},
 			"pim_hello_auth_enable": schema.BoolAttribute{
 				Optional:            true,
 				Computed:            true,
-				Description:         "Valid for IPv4 Underlay only",
-				MarkdownDescription: "Valid for IPv4 Underlay only",
+				Description:         "Enable PIM Hello Authentication - Valid for IPv4 Underlay only",
+				MarkdownDescription: "Enable PIM Hello Authentication - Valid for IPv4 Underlay only",
 			},
 			"pim_hello_auth_key": schema.StringAttribute{
 				Optional:            true,
-				Description:         "3DES Encrypted",
-				MarkdownDescription: "3DES Encrypted",
+				Computed:            true,
+				Description:         "PIM Hello Authentication Key - 3DES Encrypted",
+				MarkdownDescription: "PIM Hello Authentication Key - 3DES Encrypted",
 			},
 			"pm_enable": schema.BoolAttribute{
 				Optional:            true,
 				Computed:            true,
-				Description:         "No description available",
-				MarkdownDescription: "No description available",
+				Description:         "Enable Performance Monitoring",
+				MarkdownDescription: "Enable Performance Monitoring",
+			},
+			"pm_enable_prev": schema.BoolAttribute{
+				Computed:            true,
+				Description:         "Previous state of Performance Monitoring Enable",
+				MarkdownDescription: "Previous state of Performance Monitoring Enable",
 			},
 			"power_redundancy_mode": schema.StringAttribute{
 				Optional:            true,
 				Computed:            true,
 				Description:         "Default Power Supply Mode For The Fabric",
 				MarkdownDescription: "Default Power Supply Mode For The Fabric",
-				Validators: []validator.String{
-					stringvalidator.OneOf("ps-redundant", "combined", "insrc-redundant"),
-				},
+			},
+			"premso_parent_fabric": schema.StringAttribute{
+				Computed:            true,
+				Description:         "Pre-MSO Parent Fabric",
+				MarkdownDescription: "Pre-MSO Parent Fabric",
 			},
 			"ptp_domain_id": schema.Int64Attribute{
 				Optional:            true,
-				Description:         "Multiple Independent PTP Clocking Subdomains on a Single Network",
-				MarkdownDescription: "Multiple Independent PTP Clocking Subdomains on a Single Network",
+				Computed:            true,
+				Description:         "PTP Domain Id - Multiple Independent PTP Clocking Subdomains on a Single Network (Min:0, Max:127)",
+				MarkdownDescription: "PTP Domain Id - Multiple Independent PTP Clocking Subdomains on a Single Network (Min:0, Max:127)",
 			},
 			"ptp_lb_id": schema.Int64Attribute{
 				Optional:            true,
-				Description:         "No description available",
-				MarkdownDescription: "No description available",
+				Computed:            true,
+				Description:         "PTP Source Loopback Id (Min:0, Max:1023)",
+				MarkdownDescription: "PTP Source Loopback Id (Min:0, Max:1023)",
+			},
+			"ptp_vlan_id": schema.Int64Attribute{
+				Optional:            true,
+				Computed:            true,
+				Description:         "(Min:2, Max:3967) SVI used for PTP source on ToRs",
+				MarkdownDescription: "(Min:2, Max:3967) SVI used for PTP source on ToRs",
+			},
+			"qkd_profile_name": schema.StringAttribute{
+				Optional:            true,
+				Computed:            true,
+				Description:         "Name of crypto profile (Max Size 63)",
+				MarkdownDescription: "Name of crypto profile (Max Size 63)",
+			},
+			"qkd_profile_name_prev": schema.BoolAttribute{
+				Computed:            true,
+				Description:         "Previous state of QKD Profile Name",
+				MarkdownDescription: "Previous state of QKD Profile Name",
 			},
 			"replication_mode": schema.StringAttribute{
 				Optional:            true,
 				Computed:            true,
 				Description:         "Replication Mode for BUM Traffic",
 				MarkdownDescription: "Replication Mode for BUM Traffic",
-				Validators: []validator.String{
-					stringvalidator.OneOf("Multicast", "Ingress"),
-				},
 			},
 			"route_map_sequence_number_range": schema.StringAttribute{
 				Optional:            true,
 				Computed:            true,
-				Description:         "No description available",
-				MarkdownDescription: "No description available",
+				Description:         "Route Map Sequence Number Range (Min:1, Max:65534)",
+				MarkdownDescription: "Route Map Sequence Number Range (Min:1, Max:65534)",
 			},
 			"router_id_range": schema.StringAttribute{
 				Optional:            true,
-				Description:         "No description available",
-				MarkdownDescription: "No description available",
+				Computed:            true,
+				Description:         "BGP Router ID Range for IPv6 Underlay - IPv4 Address Range for BGP Router Id",
+				MarkdownDescription: "BGP Router ID Range for IPv6 Underlay - IPv4 Address Range for BGP Router Id",
 			},
 			"rp_count": schema.Int64Attribute{
 				Optional:            true,
 				Computed:            true,
 				Description:         "Number of spines acting as Rendezvous-Point (RP)",
 				MarkdownDescription: "Number of spines acting as Rendezvous-Point (RP)",
-				Validators: []validator.Int64{
-					int64validator.OneOf(2, 4),
-				},
 			},
 			"rp_lb_id": schema.Int64Attribute{
 				Optional:            true,
 				Computed:            true,
-				Description:         "No description available",
-				MarkdownDescription: "No description available",
+				Description:         "Underlay RP Loopback Id (Min:0, Max:1023)",
+				MarkdownDescription: "Underlay RP Loopback Id (Min:0, Max:1023)",
 			},
 			"rp_mode": schema.StringAttribute{
 				Optional:            true,
 				Computed:            true,
-				Description:         "Multicast RP Mode",
-				MarkdownDescription: "Multicast RP Mode",
-				Validators: []validator.String{
-					stringvalidator.OneOf("asm", "bidir"),
-				},
+				Description:         "Multicast RP Mode. For IPv6 underlay, please use asm only",
+				MarkdownDescription: "Multicast RP Mode. For IPv6 underlay, please use asm only",
 			},
 			"rr_count": schema.Int64Attribute{
 				Optional:            true,
 				Computed:            true,
 				Description:         "Number of spines acting as Route-Reflectors",
 				MarkdownDescription: "Number of spines acting as Route-Reflectors",
-				Validators: []validator.Int64{
-					int64validator.OneOf(2, 4),
-				},
 			},
 			"scheduled_time": schema.StringAttribute{
 				Optional:            true,
+				Computed:            true,
 				Description:         "Time (UTC) in 24hr format. (00:00 to 23:59)",
 				MarkdownDescription: "Time (UTC) in 24hr format. (00:00 to 23:59)",
 			},
 			"seed_switch_core_interfaces": schema.StringAttribute{
 				Optional:            true,
+				Computed:            true,
 				Description:         "Core-facing Interface list on Seed Switch (e.g. e1/1-30,e1/32)",
 				MarkdownDescription: "Core-facing Interface list on Seed Switch (e.g. e1/1-30,e1/32)",
 			},
 			"service_network_vlan_range": schema.StringAttribute{
 				Optional:            true,
 				Computed:            true,
-				Description:         "Per Switch Overlay Service Network VLAN Range",
-				MarkdownDescription: "Per Switch Overlay Service Network VLAN Range",
+				Description:         "Per Switch Overlay Service Network VLAN Range (Min:2, Max:4094)",
+				MarkdownDescription: "Per Switch Overlay Service Network VLAN Range (Min:2, Max:4094)",
+			},
+			"sgt_id_range": schema.StringAttribute{
+				Optional:            true,
+				Computed:            true,
+				Description:         "Security Group Tag (SGT) ID Range - Min:16, Max:65535. Reserved Range: 0-15",
+				MarkdownDescription: "Security Group Tag (SGT) ID Range - Min:16, Max:65535. Reserved Range: 0-15",
+			},
+			"sgt_name_prefix": schema.StringAttribute{
+				Optional:            true,
+				Computed:            true,
+				Description:         "Security Group Name Prefix - Prefix to be used when a new Security Group is created (Min:1, Max:10 characters)",
+				MarkdownDescription: "Security Group Name Prefix - Prefix to be used when a new Security Group is created (Min:1, Max:10 characters)",
+			},
+			"sgt_oper_status": schema.StringAttribute{
+				Computed:            true,
+				Description:         "Operational status for Security Group",
+				MarkdownDescription: "Operational status for Security Group",
+			},
+			"sgt_preprov_recalc_status": schema.StringAttribute{
+				Computed:            true,
+				Description:         "Recalculation status for Security Group pre-provisioning",
+				MarkdownDescription: "Recalculation status for Security Group pre-provisioning",
+			},
+			"sgt_preprovision": schema.BoolAttribute{
+				Optional:            true,
+				Computed:            true,
+				Description:         "Security Groups Pre-provision - Generate security groups configuration for non-enforced VRFs",
+				MarkdownDescription: "Security Groups Pre-provision - Generate security groups configuration for non-enforced VRFs",
+			},
+			"sgt_preprovision_prev": schema.BoolAttribute{
+				Computed:            true,
+				Description:         "Previous state of Security Group Tag Preprovision",
+				MarkdownDescription: "Previous state of Security Group Tag Preprovision",
+			},
+			"sgt_recalc_status": schema.StringAttribute{
+				Computed:            true,
+				Description:         "Recalculation status for Security Group",
+				MarkdownDescription: "Recalculation status for Security Group",
 			},
 			"site_id": schema.StringAttribute{
 				Optional:            true,
 				Computed:            true,
-				Description:         "For EVPN Multi-Site Support . Defaults to Fabric ASN",
-				MarkdownDescription: "For EVPN Multi-Site Support . Defaults to Fabric ASN",
+				Description:         "For EVPN Multi-Site Support (Min:1, Max:281474976710655). Defaults to Fabric ASN",
+				MarkdownDescription: "For EVPN Multi-Site Support (Min:1, Max:281474976710655). Defaults to Fabric ASN",
+			},
+			"site_id_policy_id": schema.Int64Attribute{
+				Computed:            true,
+				Description:         "Site ID Policy ID",
+				MarkdownDescription: "Site ID Policy ID",
 			},
 			"sla_id_range": schema.StringAttribute{
 				Optional:            true,
 				Computed:            true,
-				Description:         "Per switch SLA ID Range",
-				MarkdownDescription: "Per switch SLA ID Range",
+				Description:         "Service Level Agreement (SLA) ID Range - Per switch SLA ID Range (Min:1, Max:2147483647)",
+				MarkdownDescription: "Service Level Agreement (SLA) ID Range - Per switch SLA ID Range (Min:1, Max:2147483647)",
 			},
 			"snmp_server_host_trap": schema.BoolAttribute{
 				Optional:            true,
@@ -942,35 +1598,51 @@ func FabricVxlanEvpnResourceSchema(ctx context.Context) schema.Schema {
 				Description:         "Configure NDFC as a receiver for SNMP traps",
 				MarkdownDescription: "Configure NDFC as a receiver for SNMP traps",
 			},
+			"spine_count": schema.Int64Attribute{
+				Computed:            true,
+				Description:         "Spine Count",
+				MarkdownDescription: "Spine Count",
+			},
 			"spine_switch_core_interfaces": schema.StringAttribute{
 				Optional:            true,
+				Computed:            true,
 				Description:         "Core-facing Interface list on all Spines (e.g. e1/1-30,e1/32)",
 				MarkdownDescription: "Core-facing Interface list on all Spines (e.g. e1/1-30,e1/32)",
+			},
+			"sspine_add_del_debug_flag": schema.StringAttribute{
+				Optional:            true,
+				Computed:            true,
+				Description:         "Allow First Super Spine Add or Last Super Spine Delete From Topology",
+				MarkdownDescription: "Allow First Super Spine Add or Last Super Spine Delete From Topology",
+			},
+			"sspine_count": schema.Int64Attribute{
+				Computed:            true,
+				Description:         "Super Spine Count",
+				MarkdownDescription: "Super Spine Count",
 			},
 			"static_underlay_ip_alloc": schema.BoolAttribute{
 				Optional:            true,
 				Computed:            true,
-				Description:         "Checking this will disable Dynamic Underlay IP Address Allocations",
-				MarkdownDescription: "Checking this will disable Dynamic Underlay IP Address Allocations",
+				Description:         "Manual Underlay IP Address Allocation - Checking this will disable Dynamic Underlay IP Address Allocations",
+				MarkdownDescription: "Manual Underlay IP Address Allocation - Checking this will disable Dynamic Underlay IP Address Allocations",
 			},
 			"stp_bridge_priority": schema.Int64Attribute{
 				Optional:            true,
-				Description:         "Bridge priority for the spanning tree in increments of 4096",
-				MarkdownDescription: "Bridge priority for the spanning tree in increments of 4096",
+				Computed:            true,
+				Description:         "Spanning Tree Bridge Priority - Bridge priority for the spanning tree in increments of 4096",
+				MarkdownDescription: "Spanning Tree Bridge Priority - Bridge priority for the spanning tree in increments of 4096",
 			},
 			"stp_root_option": schema.StringAttribute{
 				Optional:            true,
 				Computed:            true,
 				Description:         "Which protocol to use for configuring root bridge? rpvst+: Rapid Per-VLAN Spanning Tree, mst: Multiple Spanning Tree, unmanaged (default): STP Root not managed by NDFC",
 				MarkdownDescription: "Which protocol to use for configuring root bridge? rpvst+: Rapid Per-VLAN Spanning Tree, mst: Multiple Spanning Tree, unmanaged (default): STP Root not managed by NDFC",
-				Validators: []validator.String{
-					stringvalidator.OneOf("rpvst+", "mst", "unmanaged"),
-				},
 			},
 			"stp_vlan_range": schema.StringAttribute{
 				Optional:            true,
-				Description:         "Vlan range, Example: 1,3-5,7,9-11, Default is 1-3967",
-				MarkdownDescription: "Vlan range, Example: 1,3-5,7,9-11, Default is 1-3967",
+				Computed:            true,
+				Description:         "",
+				MarkdownDescription: "",
 			},
 			"strict_cc_mode": schema.BoolAttribute{
 				Optional:            true,
@@ -981,8 +1653,8 @@ func FabricVxlanEvpnResourceSchema(ctx context.Context) schema.Schema {
 			"subinterface_range": schema.StringAttribute{
 				Optional:            true,
 				Computed:            true,
-				Description:         "Per Border Dot1q Range For VRF Lite Connectivity",
-				MarkdownDescription: "Per Border Dot1q Range For VRF Lite Connectivity",
+				Description:         "Per Border Dot1q Range For VRF Lite Connectivity (Min:2, Max:4093)",
+				MarkdownDescription: "Per Border Dot1q Range For VRF Lite Connectivity (Min:2, Max:4093)",
 			},
 			"subnet_range": schema.StringAttribute{
 				Optional:            true,
@@ -993,85 +1665,126 @@ func FabricVxlanEvpnResourceSchema(ctx context.Context) schema.Schema {
 			"subnet_target_mask": schema.Int64Attribute{
 				Optional:            true,
 				Computed:            true,
-				Description:         "Mask for Underlay Subnet IP Range",
-				MarkdownDescription: "Mask for Underlay Subnet IP Range",
-				Validators: []validator.Int64{
-					int64validator.OneOf(30, 31),
-				},
+				Description:         "Underlay Subnet IP Mask - Mask for Underlay Subnet IP Range",
+				MarkdownDescription: "Underlay Subnet IP Mask - Mask for Underlay Subnet IP Range",
 			},
 			"syslog_server_ip_list": schema.StringAttribute{
 				Optional:            true,
-				Description:         "Comma separated list of IP Addresses(v4/v6)",
-				MarkdownDescription: "Comma separated list of IP Addresses(v4/v6)",
+				Computed:            true,
+				Description:         "Comma separated list of IP Addresses (v4/v6)",
+				MarkdownDescription: "Comma separated list of IP Addresses (v4/v6)",
 			},
 			"syslog_server_vrf": schema.StringAttribute{
 				Optional:            true,
+				Computed:            true,
 				Description:         "One VRF for all Syslog servers or a comma separated list of VRFs, one per Syslog server",
 				MarkdownDescription: "One VRF for all Syslog servers or a comma separated list of VRFs, one per Syslog server",
 			},
 			"syslog_sev": schema.StringAttribute{
 				Optional:            true,
-				Description:         "Comma separated list of Syslog severity values, one per Syslog server",
-				MarkdownDescription: "Comma separated list of Syslog severity values, one per Syslog server",
+				Computed:            true,
+				Description:         "Comma separated list of Syslog severity values, one per Syslog server (Min:0, Max:7)",
+				MarkdownDescription: "Comma separated list of Syslog severity values, one per Syslog server (Min:0, Max:7)",
 			},
 			"tcam_allocation": schema.BoolAttribute{
 				Optional:            true,
 				Computed:            true,
-				Description:         "TCAM commands are automatically generated for VxLAN and vPC Fabric Peering when Enabled",
-				MarkdownDescription: "TCAM commands are automatically generated for VxLAN and vPC Fabric Peering when Enabled",
+				Description:         "Enable TCAM Allocation - TCAM commands are automatically generated for VxLAN and vPC Fabric Peering when Enabled",
+				MarkdownDescription: "Enable TCAM Allocation - TCAM commands are automatically generated for VxLAN and vPC Fabric Peering when Enabled",
+			},
+			"temp_anycast_gateway": schema.StringAttribute{
+				Computed:            true,
+				Description:         "Anycast Gateway MAC Configuration",
+				MarkdownDescription: "Anycast Gateway MAC Configuration",
+			},
+			"temp_vpc_domain_mgmt": schema.StringAttribute{
+				Computed:            true,
+				Description:         "vPC Keep-alive Configuration using Management VRF",
+				MarkdownDescription: "vPC Keep-alive Configuration using Management VRF",
+			},
+			"temp_vpc_peer_link": schema.StringAttribute{
+				Computed:            true,
+				Description:         "vPC Peer-Link Configuration",
+				MarkdownDescription: "vPC Peer-Link Configuration",
+			},
+			"topdown_config_rm_tracking": schema.StringAttribute{
+				Computed:            true,
+				Description:         "Top-Down Config RM Tracking",
+				MarkdownDescription: "Top-Down Config RM Tracking",
+			},
+			"trustpoint_label": schema.StringAttribute{
+				Optional:            true,
+				Computed:            true,
+				Description:         "Tls authentication type trustpoint label (Max Size 64)",
+				MarkdownDescription: "Tls authentication type trustpoint label (Max Size 64)",
 			},
 			"underlay_is_v6": schema.BoolAttribute{
 				Optional:            true,
 				Computed:            true,
-				Description:         "If not enabled, IPv4 underlay is used",
-				MarkdownDescription: "If not enabled, IPv4 underlay is used",
+				Description:         "Enable IPv6 Underlay - If not enabled, IPv4 underlay is used",
+				MarkdownDescription: "Enable IPv6 Underlay - If not enabled, IPv4 underlay is used",
+			},
+			"underlay_is_v6_prev": schema.BoolAttribute{
+				Computed:            true,
+				Description:         "Previous state of UNDERLAY_IS_V6",
+				MarkdownDescription: "Previous state of UNDERLAY_IS_V6",
 			},
 			"unnum_bootstrap_lb_id": schema.Int64Attribute{
 				Optional:            true,
-				Description:         "No description available",
-				MarkdownDescription: "No description available",
+				Computed:            true,
+				Description:         "Bootstrap Seed Switch Loopback Interface ID",
+				MarkdownDescription: "Bootstrap Seed Switch Loopback Interface ID",
 			},
-			"unnum_dhcp_end": schema.StringAttribute{
-				Optional:            true,
-				Description:         "Must be a subset of IGP/BGP Loopback Prefix Pool",
-				MarkdownDescription: "Must be a subset of IGP/BGP Loopback Prefix Pool",
+			"unnum_dhcp_end_internal": schema.StringAttribute{
+				Computed:            true,
+				Description:         "Internal Unnumbered DHCP End Address",
+				MarkdownDescription: "Internal Unnumbered DHCP End Address",
 			},
-			"unnum_dhcp_start": schema.StringAttribute{
-				Optional:            true,
-				Description:         "Must be a subset of IGP/BGP Loopback Prefix Pool",
-				MarkdownDescription: "Must be a subset of IGP/BGP Loopback Prefix Pool",
+			"unnum_dhcp_start_internal": schema.StringAttribute{
+				Computed:            true,
+				Description:         "Internal Unnumbered DHCP Start Address",
+				MarkdownDescription: "Internal Unnumbered DHCP Start Address",
+			},
+			"upgrade_from_version": schema.StringAttribute{
+				Computed:            true,
+				Description:         "Upgrade from Version",
+				MarkdownDescription: "Upgrade from Version",
 			},
 			"use_link_local": schema.BoolAttribute{
 				Optional:            true,
 				Computed:            true,
-				Description:         "If not enabled, Spine-Leaf interfaces will use global IPv6 addresses",
-				MarkdownDescription: "If not enabled, Spine-Leaf interfaces will use global IPv6 addresses",
+				Description:         "Enable IPv6 Link-Local Address - If not enabled, Spine-Leaf interfaces will use global IPv6 addresses",
+				MarkdownDescription: "Enable IPv6 Link-Local Address - If not enabled, Spine-Leaf interfaces will use global IPv6 addresses",
 			},
 			"v6_subnet_range": schema.StringAttribute{
 				Optional:            true,
+				Computed:            true,
 				Description:         "IPv6 Address range to assign Numbered and Peer Link SVI IPs",
 				MarkdownDescription: "IPv6 Address range to assign Numbered and Peer Link SVI IPs",
 			},
 			"v6_subnet_target_mask": schema.Int64Attribute{
 				Optional:            true,
 				Computed:            true,
-				Description:         "Mask for Underlay Subnet IPv6 Range",
-				MarkdownDescription: "Mask for Underlay Subnet IPv6 Range",
-				Validators: []validator.Int64{
-					int64validator.OneOf(126, 127),
-				},
+				Description:         "Underlay Subnet IPv6 Mask - Mask for Underlay Subnet IPv6 Range",
+				MarkdownDescription: "Underlay Subnet IPv6 Mask - Mask for Underlay Subnet IPv6 Range",
 			},
 			"vpc_auto_recovery_time": schema.Int64Attribute{
 				Optional:            true,
 				Computed:            true,
-				Description:         "No description available",
-				MarkdownDescription: "No description available",
+				Description:         "vPC Auto Recovery Time (In Seconds) (Min:240, Max:3600)",
+				MarkdownDescription: "vPC Auto Recovery Time (In Seconds) (Min:240, Max:3600)",
 			},
 			"vpc_delay_restore": schema.Int64Attribute{
 				Optional:            true,
 				Computed:            true,
-				Description:         "No description available",
-				MarkdownDescription: "No description available",
+				Description:         "vPC Delay Restore Time (In Seconds) (Min:1, Max:3600)",
+				MarkdownDescription: "vPC Delay Restore Time (In Seconds) (Min:1, Max:3600)",
+			},
+			"vpc_delay_restore_time": schema.Int64Attribute{
+				Optional:            true,
+				Computed:            true,
+				Description:         "vPC Delay Restore Time For vPC links in seconds (Min:1, Max:3600)",
+				MarkdownDescription: "vPC Delay Restore Time For vPC links in seconds (Min:1, Max:3600)",
 			},
 			"vpc_domain_id_range": schema.StringAttribute{
 				Optional:            true,
@@ -1090,21 +1803,18 @@ func FabricVxlanEvpnResourceSchema(ctx context.Context) schema.Schema {
 				Computed:            true,
 				Description:         "Use vPC Peer Keep Alive with Loopback or Management",
 				MarkdownDescription: "Use vPC Peer Keep Alive with Loopback or Management",
-				Validators: []validator.String{
-					stringvalidator.OneOf("loopback", "management"),
-				},
 			},
 			"vpc_peer_link_po": schema.Int64Attribute{
 				Optional:            true,
 				Computed:            true,
-				Description:         "No description available",
-				MarkdownDescription: "No description available",
+				Description:         "vPC Peer Link Port Channel ID (Min:1, Max:4096)",
+				MarkdownDescription: "vPC Peer Link Port Channel ID (Min:1, Max:4096)",
 			},
 			"vpc_peer_link_vlan": schema.Int64Attribute{
 				Optional:            true,
 				Computed:            true,
-				Description:         "VLAN range for vPC Peer Link SVI",
-				MarkdownDescription: "VLAN range for vPC Peer Link SVI",
+				Description:         "VLAN range for vPC Peer Link SVI (Min:2, Max:4094)",
+				MarkdownDescription: "VLAN range for vPC Peer Link SVI (Min:2, Max:4094)",
 			},
 			"vrf_extension_template": schema.StringAttribute{
 				Optional:            true,
@@ -1115,17 +1825,14 @@ func FabricVxlanEvpnResourceSchema(ctx context.Context) schema.Schema {
 			"vrf_lite_autoconfig": schema.StringAttribute{
 				Optional:            true,
 				Computed:            true,
-				Description:         "VRF Lite Inter-Fabric Connection Deployment Options. If Back2Back&ToExternal is selected, VRF Lite IFCs are auto created between border devices of two Easy Fabrics, and between border devices in Easy Fabric and edge routers in External Fabric. The IP address is taken from the VRF Lite Subnet IP Range pool.",
-				MarkdownDescription: "VRF Lite Inter-Fabric Connection Deployment Options. If Back2Back&ToExternal is selected, VRF Lite IFCs are auto created between border devices of two Easy Fabrics, and between border devices in Easy Fabric and edge routers in External Fabric. The IP address is taken from the VRF Lite Subnet IP Range pool.",
-				Validators: []validator.String{
-					stringvalidator.OneOf("Manual", "Back2Back&ToExternal"),
-				},
+				Description:         "VRF Lite Inter-Fabric Connection Deployment Options. If 'Back2Back&ToExternal' is selected, VRF Lite IFCs are auto created between border devices of two Easy Fabrics, and between border devices in Easy Fabric and edge routers in External Fabric. The IP address is taken from the 'VRF Lite Subnet IP Range' pool.",
+				MarkdownDescription: "VRF Lite Inter-Fabric Connection Deployment Options. If 'Back2Back&ToExternal' is selected, VRF Lite IFCs are auto created between border devices of two Easy Fabrics, and between border devices in Easy Fabric and edge routers in External Fabric. The IP address is taken from the 'VRF Lite Subnet IP Range' pool.",
 			},
 			"vrf_vlan_range": schema.StringAttribute{
 				Optional:            true,
 				Computed:            true,
-				Description:         "Per Switch Overlay VRF VLAN Range",
-				MarkdownDescription: "Per Switch Overlay VRF VLAN Range",
+				Description:         "Per Switch Overlay VRF VLAN Range (Min:2, Max:4094)",
+				MarkdownDescription: "Per Switch Overlay VRF VLAN Range (Min:2, Max:4094)",
 			},
 		},
 		Description:         "Resource to configure and manage a VXLAN EVPN Fabric",
@@ -1136,37 +1843,79 @@ func FabricVxlanEvpnResourceSchema(ctx context.Context) schema.Schema {
 type FabricVxlanEvpnModel struct {
 	AaaRemoteIpEnabled                      types.Bool   `tfsdk:"aaa_remote_ip_enabled"`
 	AaaServerConf                           types.String `tfsdk:"aaa_server_conf"`
+	AbstractAnycastRp                       types.String `tfsdk:"abstract_anycast_rp"`
+	AbstractBgp                             types.String `tfsdk:"abstract_bgp"`
+	AbstractBgpNeighbor                     types.String `tfsdk:"abstract_bgp_neighbor"`
+	AbstractBgpRr                           types.String `tfsdk:"abstract_bgp_rr"`
+	AbstractDhcp                            types.String `tfsdk:"abstract_dhcp"`
+	AbstractExtraConfigBootstrap            types.String `tfsdk:"abstract_extra_config_bootstrap"`
+	AbstractExtraConfigLeaf                 types.String `tfsdk:"abstract_extra_config_leaf"`
+	AbstractExtraConfigSpine                types.String `tfsdk:"abstract_extra_config_spine"`
+	AbstractExtraConfigTor                  types.String `tfsdk:"abstract_extra_config_tor"`
+	AbstractFeatureLeaf                     types.String `tfsdk:"abstract_feature_leaf"`
+	AbstractFeatureSpine                    types.String `tfsdk:"abstract_feature_spine"`
+	AbstractIsis                            types.String `tfsdk:"abstract_isis"`
+	AbstractIsisInterface                   types.String `tfsdk:"abstract_isis_interface"`
+	AbstractLoopbackInterface               types.String `tfsdk:"abstract_loopback_interface"`
+	AbstractMulticast                       types.String `tfsdk:"abstract_multicast"`
+	AbstractOspf                            types.String `tfsdk:"abstract_ospf"`
+	AbstractOspfInterface                   types.String `tfsdk:"abstract_ospf_interface"`
+	AbstractPimInterface                    types.String `tfsdk:"abstract_pim_interface"`
+	AbstractRouteMap                        types.String `tfsdk:"abstract_route_map"`
+	AbstractRoutedHost                      types.String `tfsdk:"abstract_routed_host"`
+	AbstractVlanInterface                   types.String `tfsdk:"abstract_vlan_interface"`
+	AbstractVpcDomain                       types.String `tfsdk:"abstract_vpc_domain"`
+	ActiveMigration                         types.Bool   `tfsdk:"active_migration"`
 	AdvertisePipBgp                         types.Bool   `tfsdk:"advertise_pip_bgp"`
 	AdvertisePipOnBorder                    types.Bool   `tfsdk:"advertise_pip_on_border"`
+	AgentIntf                               types.String `tfsdk:"agent_intf"`
+	AggAccVpcPoIdRange                      types.String `tfsdk:"agg_acc_vpc_po_id_range"`
+	AiMlQosPolicy                           types.String `tfsdk:"ai_ml_qos_policy"`
+	AllowL3vniNoVlan                        types.Bool   `tfsdk:"allow_l3vni_no_vlan"`
+	AllowL3vniNoVlanPrev                    types.Bool   `tfsdk:"allow_l3vni_no_vlan_prev"`
+	AllowNxc                                types.Bool   `tfsdk:"allow_nxc"`
+	AllowNxcPrev                            types.Bool   `tfsdk:"allow_nxc_prev"`
 	AnycastBgwAdvertisePip                  types.Bool   `tfsdk:"anycast_bgw_advertise_pip"`
 	AnycastGwMac                            types.String `tfsdk:"anycast_gw_mac"`
 	AnycastLbId                             types.Int64  `tfsdk:"anycast_lb_id"`
 	AnycastRpIpRange                        types.String `tfsdk:"anycast_rp_ip_range"`
+	AnycastRpIpRangeInternal                types.String `tfsdk:"anycast_rp_ip_range_internal"`
 	AutoSymmetricDefaultVrf                 types.Bool   `tfsdk:"auto_symmetric_default_vrf"`
 	AutoSymmetricVrfLite                    types.Bool   `tfsdk:"auto_symmetric_vrf_lite"`
 	AutoUniqueVrfLiteIpPrefix               types.Bool   `tfsdk:"auto_unique_vrf_lite_ip_prefix"`
+	AutoUniqueVrfLiteIpPrefixPrev           types.Bool   `tfsdk:"auto_unique_vrf_lite_ip_prefix_prev"`
 	AutoVrfliteIfcDefaultVrf                types.Bool   `tfsdk:"auto_vrflite_ifc_default_vrf"`
 	Banner                                  types.String `tfsdk:"banner"`
 	BfdAuthEnable                           types.Bool   `tfsdk:"bfd_auth_enable"`
 	BfdAuthKey                              types.String `tfsdk:"bfd_auth_key"`
 	BfdAuthKeyId                            types.Int64  `tfsdk:"bfd_auth_key_id"`
 	BfdEnable                               types.Bool   `tfsdk:"bfd_enable"`
+	BfdEnablePrev                           types.Bool   `tfsdk:"bfd_enable_prev"`
 	BfdIbgpEnable                           types.Bool   `tfsdk:"bfd_ibgp_enable"`
 	BfdIsisEnable                           types.Bool   `tfsdk:"bfd_isis_enable"`
 	BfdOspfEnable                           types.Bool   `tfsdk:"bfd_ospf_enable"`
 	BfdPimEnable                            types.Bool   `tfsdk:"bfd_pim_enable"`
 	BgpAs                                   types.String `tfsdk:"bgp_as"`
+	BgpAsPrev                               types.String `tfsdk:"bgp_as_prev"`
 	BgpAuthEnable                           types.Bool   `tfsdk:"bgp_auth_enable"`
 	BgpAuthKey                              types.String `tfsdk:"bgp_auth_key"`
 	BgpAuthKeyType                          types.Int64  `tfsdk:"bgp_auth_key_type"`
 	BgpLbId                                 types.Int64  `tfsdk:"bgp_lb_id"`
 	BootstrapConf                           types.String `tfsdk:"bootstrap_conf"`
 	BootstrapEnable                         types.Bool   `tfsdk:"bootstrap_enable"`
+	BootstrapEnablePrev                     types.Bool   `tfsdk:"bootstrap_enable_prev"`
 	BootstrapMultisubnet                    types.String `tfsdk:"bootstrap_multisubnet"`
+	BootstrapMultisubnetInternal            types.String `tfsdk:"bootstrap_multisubnet_internal"`
+	BrfieldDebugFlag                        types.String `tfsdk:"brfield_debug_flag"`
 	BrownfieldNetworkNameFormat             types.String `tfsdk:"brownfield_network_name_format"`
 	BrownfieldSkipOverlayNetworkAttachments types.Bool   `tfsdk:"brownfield_skip_overlay_network_attachments"`
 	CdpEnable                               types.Bool   `tfsdk:"cdp_enable"`
 	CoppPolicy                              types.String `tfsdk:"copp_policy"`
+	DciMacsecAlgorithm                      types.String `tfsdk:"dci_macsec_algorithm"`
+	DciMacsecCipherSuite                    types.String `tfsdk:"dci_macsec_cipher_suite"`
+	DciMacsecFallbackAlgorithm              types.String `tfsdk:"dci_macsec_fallback_algorithm"`
+	DciMacsecFallbackKeyString              types.String `tfsdk:"dci_macsec_fallback_key_string"`
+	DciMacsecKeyString                      types.String `tfsdk:"dci_macsec_key_string"`
 	DciSubnetRange                          types.String `tfsdk:"dci_subnet_range"`
 	DciSubnetTargetMask                     types.Int64  `tfsdk:"dci_subnet_target_mask"`
 	DefaultNetwork                          types.String `tfsdk:"default_network"`
@@ -1177,47 +1926,84 @@ type FabricVxlanEvpnModel struct {
 	DefaultVrf                              types.String `tfsdk:"default_vrf"`
 	DefaultVrfRedisBgpRmap                  types.String `tfsdk:"default_vrf_redis_bgp_rmap"`
 	Deploy                                  types.Bool   `tfsdk:"deploy"`
+	DeploymentFreeze                        types.Bool   `tfsdk:"deployment_freeze"`
 	DeploymentStatus                        types.String `tfsdk:"deployment_status"`
 	DhcpEnable                              types.Bool   `tfsdk:"dhcp_enable"`
 	DhcpEnd                                 types.String `tfsdk:"dhcp_end"`
+	DhcpEndInternal                         types.String `tfsdk:"dhcp_end_internal"`
 	DhcpIpv6Enable                          types.String `tfsdk:"dhcp_ipv6_enable"`
+	DhcpIpv6EnableInternal                  types.String `tfsdk:"dhcp_ipv6_enable_internal"`
 	DhcpStart                               types.String `tfsdk:"dhcp_start"`
+	DhcpStartInternal                       types.String `tfsdk:"dhcp_start_internal"`
 	DnsServerIpList                         types.String `tfsdk:"dns_server_ip_list"`
 	DnsServerVrf                            types.String `tfsdk:"dns_server_vrf"`
 	EnableAaa                               types.Bool   `tfsdk:"enable_aaa"`
+	EnableAgent                             types.Bool   `tfsdk:"enable_agent"`
+	EnableAggAccIdRange                     types.Bool   `tfsdk:"enable_agg_acc_id_range"`
+	EnableAiMlQosPolicy                     types.Bool   `tfsdk:"enable_ai_ml_qos_policy"`
+	EnableAiMlQosPolicyFlap                 types.Bool   `tfsdk:"enable_ai_ml_qos_policy_flap"`
+	EnableDciMacsec                         types.Bool   `tfsdk:"enable_dci_macsec"`
+	EnableDciMacsecPrev                     types.Bool   `tfsdk:"enable_dci_macsec_prev"`
 	EnableDefaultQueuingPolicy              types.Bool   `tfsdk:"enable_default_queuing_policy"`
+	EnableEvpn                              types.Bool   `tfsdk:"enable_evpn"`
 	EnableFabricVpcDomainId                 types.Bool   `tfsdk:"enable_fabric_vpc_domain_id"`
+	EnableFabricVpcDomainIdPrev             types.Bool   `tfsdk:"enable_fabric_vpc_domain_id_prev"`
+	EnableL3vniNoVlan                       types.Bool   `tfsdk:"enable_l3vni_no_vlan"`
 	EnableMacsec                            types.Bool   `tfsdk:"enable_macsec"`
+	EnableMacsecPrev                        types.Bool   `tfsdk:"enable_macsec_prev"`
 	EnableNetflow                           types.Bool   `tfsdk:"enable_netflow"`
+	EnableNetflowPrev                       types.Bool   `tfsdk:"enable_netflow_prev"`
 	EnableNgoam                             types.Bool   `tfsdk:"enable_ngoam"`
 	EnableNxapi                             types.Bool   `tfsdk:"enable_nxapi"`
 	EnableNxapiHttp                         types.Bool   `tfsdk:"enable_nxapi_http"`
 	EnablePbr                               types.Bool   `tfsdk:"enable_pbr"`
 	EnablePvlan                             types.Bool   `tfsdk:"enable_pvlan"`
-	EnableRealtimeBackup                    types.Bool   `tfsdk:"enable_realtime_backup"`
+	EnablePvlanPrev                         types.Bool   `tfsdk:"enable_pvlan_prev"`
+	EnableQkd                               types.Bool   `tfsdk:"enable_qkd"`
+	EnableRealTimeBackup                    types.Bool   `tfsdk:"enable_real_time_backup"`
+	EnableRtIntfStats                       types.Bool   `tfsdk:"enable_rt_intf_stats"`
 	EnableScheduledBackup                   types.Bool   `tfsdk:"enable_scheduled_backup"`
+	EnableSgt                               types.Bool   `tfsdk:"enable_sgt"`
+	EnableSgtPrev                           types.Bool   `tfsdk:"enable_sgt_prev"`
 	EnableTenantDhcp                        types.Bool   `tfsdk:"enable_tenant_dhcp"`
 	EnableTrm                               types.Bool   `tfsdk:"enable_trm"`
+	EnableTrmv6                             types.Bool   `tfsdk:"enable_trmv6"`
 	EnableVpcPeerLinkNativeVlan             types.Bool   `tfsdk:"enable_vpc_peer_link_native_vlan"`
+	EnableVriIdRealloc                      types.Bool   `tfsdk:"enable_vri_id_realloc"`
+	EsrOption                               types.String `tfsdk:"esr_option"`
+	ExtFabricType                           types.String `tfsdk:"ext_fabric_type"`
 	ExtraConfIntraLinks                     types.String `tfsdk:"extra_conf_intra_links"`
 	ExtraConfLeaf                           types.String `tfsdk:"extra_conf_leaf"`
 	ExtraConfSpine                          types.String `tfsdk:"extra_conf_spine"`
 	ExtraConfTor                            types.String `tfsdk:"extra_conf_tor"`
 	FabricInterfaceType                     types.String `tfsdk:"fabric_interface_type"`
 	FabricMtu                               types.Int64  `tfsdk:"fabric_mtu"`
+	FabricMtuPrev                           types.Int64  `tfsdk:"fabric_mtu_prev"`
 	FabricName                              types.String `tfsdk:"fabric_name"`
+	FabricType                              types.String `tfsdk:"fabric_type"`
 	FabricVpcDomainId                       types.Int64  `tfsdk:"fabric_vpc_domain_id"`
+	FabricVpcDomainIdPrev                   types.Int64  `tfsdk:"fabric_vpc_domain_id_prev"`
 	FabricVpcQos                            types.Bool   `tfsdk:"fabric_vpc_qos"`
 	FabricVpcQosPolicyName                  types.String `tfsdk:"fabric_vpc_qos_policy_name"`
 	FeaturePtp                              types.Bool   `tfsdk:"feature_ptp"`
+	FeaturePtpInternal                      types.Bool   `tfsdk:"feature_ptp_internal"`
+	Ff                                      types.String `tfsdk:"ff"`
 	GrfieldDebugFlag                        types.String `tfsdk:"grfield_debug_flag"`
 	HdTime                                  types.Int64  `tfsdk:"hd_time"`
 	HostIntfAdminState                      types.Bool   `tfsdk:"host_intf_admin_state"`
 	IbgpPeerTemplate                        types.String `tfsdk:"ibgp_peer_template"`
 	IbgpPeerTemplateLeaf                    types.String `tfsdk:"ibgp_peer_template_leaf"`
 	Id                                      types.String `tfsdk:"id"`
+	IgnoreCert                              types.Bool   `tfsdk:"ignore_cert"`
 	InbandDhcpServers                       types.String `tfsdk:"inband_dhcp_servers"`
 	InbandMgmt                              types.Bool   `tfsdk:"inband_mgmt"`
+	InbandMgmtPrev                          types.Bool   `tfsdk:"inband_mgmt_prev"`
+	IntfStatLoadInterval                    types.Int64  `tfsdk:"intf_stat_load_interval"`
+	Ipv6AnycastRpIpRange                    types.String `tfsdk:"ipv6_anycast_rp_ip_range"`
+	Ipv6AnycastRpIpRangeInternal            types.String `tfsdk:"ipv6_anycast_rp_ip_range_internal"`
+	Ipv6MulticastGroupSubnet                types.String `tfsdk:"ipv6_multicast_group_subnet"`
+	IsisAreaNum                             types.String `tfsdk:"isis_area_num"`
+	IsisAreaNumPrev                         types.String `tfsdk:"isis_area_num_prev"`
 	IsisAuthEnable                          types.Bool   `tfsdk:"isis_auth_enable"`
 	IsisAuthKey                             types.String `tfsdk:"isis_auth_key"`
 	IsisAuthKeychainKeyId                   types.Int64  `tfsdk:"isis_auth_keychain_key_id"`
@@ -1226,12 +2012,17 @@ type FabricVxlanEvpnModel struct {
 	IsisOverloadElapseTime                  types.Int64  `tfsdk:"isis_overload_elapse_time"`
 	IsisOverloadEnable                      types.Bool   `tfsdk:"isis_overload_enable"`
 	IsisP2pEnable                           types.Bool   `tfsdk:"isis_p2p_enable"`
+	KmeServerIp                             types.String `tfsdk:"kme_server_ip"`
+	KmeServerPort                           types.Int64  `tfsdk:"kme_server_port"`
 	L2HostIntfMtu                           types.Int64  `tfsdk:"l2_host_intf_mtu"`
+	L2HostIntfMtuPrev                       types.Int64  `tfsdk:"l2_host_intf_mtu_prev"`
 	L2SegmentIdRange                        types.String `tfsdk:"l2_segment_id_range"`
 	L3PartitionIdRange                      types.String `tfsdk:"l3_partition_id_range"`
+	L3vniIpv6McastGroup                     types.String `tfsdk:"l3vni_ipv6_mcast_group"`
 	L3vniMcastGroup                         types.String `tfsdk:"l3vni_mcast_group"`
 	LinkStateRouting                        types.String `tfsdk:"link_state_routing"`
 	LinkStateRoutingTag                     types.String `tfsdk:"link_state_routing_tag"`
+	LinkStateRoutingTagPrev                 types.String `tfsdk:"link_state_routing_tag_prev"`
 	Loopback0IpRange                        types.String `tfsdk:"loopback0_ip_range"`
 	Loopback0Ipv6Range                      types.String `tfsdk:"loopback0_ipv6_range"`
 	Loopback1IpRange                        types.String `tfsdk:"loopback1_ip_range"`
@@ -1243,13 +2034,23 @@ type FabricVxlanEvpnModel struct {
 	MacsecKeyString                         types.String `tfsdk:"macsec_key_string"`
 	MacsecReportTimer                       types.Int64  `tfsdk:"macsec_report_timer"`
 	MgmtGw                                  types.String `tfsdk:"mgmt_gw"`
+	MgmtGwInternal                          types.String `tfsdk:"mgmt_gw_internal"`
 	MgmtPrefix                              types.Int64  `tfsdk:"mgmt_prefix"`
+	MgmtPrefixInternal                      types.Int64  `tfsdk:"mgmt_prefix_internal"`
 	MgmtV6prefix                            types.Int64  `tfsdk:"mgmt_v6prefix"`
+	MgmtV6prefixInternal                    types.Int64  `tfsdk:"mgmt_v6prefix_internal"`
 	MplsHandoff                             types.Bool   `tfsdk:"mpls_handoff"`
+	MplsIsisAreaNum                         types.String `tfsdk:"mpls_isis_area_num"`
+	MplsIsisAreaNumPrev                     types.String `tfsdk:"mpls_isis_area_num_prev"`
 	MplsLbId                                types.Int64  `tfsdk:"mpls_lb_id"`
 	MplsLoopbackIpRange                     types.String `tfsdk:"mpls_loopback_ip_range"`
+	MsoConnectivityDeployed                 types.String `tfsdk:"mso_connectivity_deployed"`
+	MsoControlerId                          types.String `tfsdk:"mso_controler_id"`
+	MsoSiteGroupName                        types.String `tfsdk:"mso_site_group_name"`
+	MsoSiteId                               types.String `tfsdk:"mso_site_id"`
 	MstInstanceRange                        types.String `tfsdk:"mst_instance_range"`
 	MulticastGroupSubnet                    types.String `tfsdk:"multicast_group_subnet"`
+	MvpnVriIdRange                          types.String `tfsdk:"mvpn_vri_id_range"`
 	NetflowExporterList                     types.String `tfsdk:"netflow_exporter_list"`
 	NetflowMonitorList                      types.String `tfsdk:"netflow_monitor_list"`
 	NetflowRecordList                       types.String `tfsdk:"netflow_record_list"`
@@ -1260,14 +2061,26 @@ type FabricVxlanEvpnModel struct {
 	NveLbId                                 types.Int64  `tfsdk:"nve_lb_id"`
 	NxapiHttpPort                           types.Int64  `tfsdk:"nxapi_http_port"`
 	NxapiHttpsPort                          types.Int64  `tfsdk:"nxapi_https_port"`
+	NxcDestVrf                              types.String `tfsdk:"nxc_dest_vrf"`
+	NxcProxyPort                            types.Int64  `tfsdk:"nxc_proxy_port"`
+	NxcProxyServer                          types.String `tfsdk:"nxc_proxy_server"`
+	NxcSrcIntf                              types.String `tfsdk:"nxc_src_intf"`
 	ObjectTrackingNumberRange               types.String `tfsdk:"object_tracking_number_range"`
 	OspfAreaId                              types.String `tfsdk:"ospf_area_id"`
 	OspfAuthEnable                          types.Bool   `tfsdk:"ospf_auth_enable"`
 	OspfAuthKey                             types.String `tfsdk:"ospf_auth_key"`
 	OspfAuthKeyId                           types.Int64  `tfsdk:"ospf_auth_key_id"`
 	OverlayMode                             types.String `tfsdk:"overlay_mode"`
+	OverlayModePrev                         types.String `tfsdk:"overlay_mode_prev"`
+	OverwriteGlobalNxc                      types.Bool   `tfsdk:"overwrite_global_nxc"`
 	PerVrfLoopbackAutoProvision             types.Bool   `tfsdk:"per_vrf_loopback_auto_provision"`
+	PerVrfLoopbackAutoProvisionPrev         types.Bool   `tfsdk:"per_vrf_loopback_auto_provision_prev"`
+	PerVrfLoopbackAutoProvisionV6           types.Bool   `tfsdk:"per_vrf_loopback_auto_provision_v6"`
+	PerVrfLoopbackAutoProvisionV6Prev       types.Bool   `tfsdk:"per_vrf_loopback_auto_provision_v6_prev"`
 	PerVrfLoopbackIpRange                   types.String `tfsdk:"per_vrf_loopback_ip_range"`
+	PerVrfLoopbackIpRangeV6                 types.String `tfsdk:"per_vrf_loopback_ip_range_v6"`
+	PfcWatchInt                             types.Int64  `tfsdk:"pfc_watch_int"`
+	PfcWatchIntPrev                         types.Int64  `tfsdk:"pfc_watch_int_prev"`
 	PhantomRpLbId1                          types.Int64  `tfsdk:"phantom_rp_lb_id1"`
 	PhantomRpLbId2                          types.Int64  `tfsdk:"phantom_rp_lb_id2"`
 	PhantomRpLbId3                          types.Int64  `tfsdk:"phantom_rp_lb_id3"`
@@ -1275,9 +2088,14 @@ type FabricVxlanEvpnModel struct {
 	PimHelloAuthEnable                      types.Bool   `tfsdk:"pim_hello_auth_enable"`
 	PimHelloAuthKey                         types.String `tfsdk:"pim_hello_auth_key"`
 	PmEnable                                types.Bool   `tfsdk:"pm_enable"`
+	PmEnablePrev                            types.Bool   `tfsdk:"pm_enable_prev"`
 	PowerRedundancyMode                     types.String `tfsdk:"power_redundancy_mode"`
+	PremsoParentFabric                      types.String `tfsdk:"premso_parent_fabric"`
 	PtpDomainId                             types.Int64  `tfsdk:"ptp_domain_id"`
 	PtpLbId                                 types.Int64  `tfsdk:"ptp_lb_id"`
+	PtpVlanId                               types.Int64  `tfsdk:"ptp_vlan_id"`
+	QkdProfileName                          types.String `tfsdk:"qkd_profile_name"`
+	QkdProfileNamePrev                      types.Bool   `tfsdk:"qkd_profile_name_prev"`
 	ReplicationMode                         types.String `tfsdk:"replication_mode"`
 	RouteMapSequenceNumberRange             types.String `tfsdk:"route_map_sequence_number_range"`
 	RouterIdRange                           types.String `tfsdk:"router_id_range"`
@@ -1288,10 +2106,21 @@ type FabricVxlanEvpnModel struct {
 	ScheduledTime                           types.String `tfsdk:"scheduled_time"`
 	SeedSwitchCoreInterfaces                types.String `tfsdk:"seed_switch_core_interfaces"`
 	ServiceNetworkVlanRange                 types.String `tfsdk:"service_network_vlan_range"`
+	SgtIdRange                              types.String `tfsdk:"sgt_id_range"`
+	SgtNamePrefix                           types.String `tfsdk:"sgt_name_prefix"`
+	SgtOperStatus                           types.String `tfsdk:"sgt_oper_status"`
+	SgtPreprovRecalcStatus                  types.String `tfsdk:"sgt_preprov_recalc_status"`
+	SgtPreprovision                         types.Bool   `tfsdk:"sgt_preprovision"`
+	SgtPreprovisionPrev                     types.Bool   `tfsdk:"sgt_preprovision_prev"`
+	SgtRecalcStatus                         types.String `tfsdk:"sgt_recalc_status"`
 	SiteId                                  types.String `tfsdk:"site_id"`
+	SiteIdPolicyId                          types.Int64  `tfsdk:"site_id_policy_id"`
 	SlaIdRange                              types.String `tfsdk:"sla_id_range"`
 	SnmpServerHostTrap                      types.Bool   `tfsdk:"snmp_server_host_trap"`
+	SpineCount                              types.Int64  `tfsdk:"spine_count"`
 	SpineSwitchCoreInterfaces               types.String `tfsdk:"spine_switch_core_interfaces"`
+	SspineAddDelDebugFlag                   types.String `tfsdk:"sspine_add_del_debug_flag"`
+	SspineCount                             types.Int64  `tfsdk:"sspine_count"`
 	StaticUnderlayIpAlloc                   types.Bool   `tfsdk:"static_underlay_ip_alloc"`
 	StpBridgePriority                       types.Int64  `tfsdk:"stp_bridge_priority"`
 	StpRootOption                           types.String `tfsdk:"stp_root_option"`
@@ -1304,15 +2133,23 @@ type FabricVxlanEvpnModel struct {
 	SyslogServerVrf                         types.String `tfsdk:"syslog_server_vrf"`
 	SyslogSev                               types.String `tfsdk:"syslog_sev"`
 	TcamAllocation                          types.Bool   `tfsdk:"tcam_allocation"`
+	TempAnycastGateway                      types.String `tfsdk:"temp_anycast_gateway"`
+	TempVpcDomainMgmt                       types.String `tfsdk:"temp_vpc_domain_mgmt"`
+	TempVpcPeerLink                         types.String `tfsdk:"temp_vpc_peer_link"`
+	TopdownConfigRmTracking                 types.String `tfsdk:"topdown_config_rm_tracking"`
+	TrustpointLabel                         types.String `tfsdk:"trustpoint_label"`
 	UnderlayIsV6                            types.Bool   `tfsdk:"underlay_is_v6"`
+	UnderlayIsV6Prev                        types.Bool   `tfsdk:"underlay_is_v6_prev"`
 	UnnumBootstrapLbId                      types.Int64  `tfsdk:"unnum_bootstrap_lb_id"`
-	UnnumDhcpEnd                            types.String `tfsdk:"unnum_dhcp_end"`
-	UnnumDhcpStart                          types.String `tfsdk:"unnum_dhcp_start"`
+	UnnumDhcpEndInternal                    types.String `tfsdk:"unnum_dhcp_end_internal"`
+	UnnumDhcpStartInternal                  types.String `tfsdk:"unnum_dhcp_start_internal"`
+	UpgradeFromVersion                      types.String `tfsdk:"upgrade_from_version"`
 	UseLinkLocal                            types.Bool   `tfsdk:"use_link_local"`
 	V6SubnetRange                           types.String `tfsdk:"v6_subnet_range"`
 	V6SubnetTargetMask                      types.Int64  `tfsdk:"v6_subnet_target_mask"`
 	VpcAutoRecoveryTime                     types.Int64  `tfsdk:"vpc_auto_recovery_time"`
 	VpcDelayRestore                         types.Int64  `tfsdk:"vpc_delay_restore"`
+	VpcDelayRestoreTime                     types.Int64  `tfsdk:"vpc_delay_restore_time"`
 	VpcDomainIdRange                        types.String `tfsdk:"vpc_domain_id_range"`
 	VpcEnableIpv6NdSync                     types.Bool   `tfsdk:"vpc_enable_ipv6_nd_sync"`
 	VpcPeerKeepAliveOption                  types.String `tfsdk:"vpc_peer_keep_alive_option"`

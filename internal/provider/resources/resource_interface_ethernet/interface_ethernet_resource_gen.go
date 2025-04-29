@@ -1366,11 +1366,19 @@ func (v InterfacesValue) String() string {
 func (v InterfacesValue) ToObjectValue(ctx context.Context) (basetypes.ObjectValue, diag.Diagnostics) {
 	var diags diag.Diagnostics
 
-	customPolicyParametersVal, d := types.MapValue(types.StringType, v.CustomPolicyParameters.Elements())
+	var customPolicyParametersVal basetypes.MapValue
+	switch {
+	case v.CustomPolicyParameters.IsUnknown():
+		customPolicyParametersVal = types.MapUnknown(types.StringType)
+	case v.CustomPolicyParameters.IsNull():
+		customPolicyParametersVal = types.MapNull(types.StringType)
+	default:
+		var d diag.Diagnostics
+		customPolicyParametersVal, d = types.MapValue(types.StringType, v.CustomPolicyParameters.Elements())
+		diags.Append(d...)
+	}
 
-	diags.Append(d...)
-
-	if d.HasError() {
+	if diags.HasError() {
 		return types.ObjectUnknown(map[string]attr.Type{
 			"access_vlan":   basetypes.Int64Type{},
 			"admin_state":   basetypes.BoolType{},
