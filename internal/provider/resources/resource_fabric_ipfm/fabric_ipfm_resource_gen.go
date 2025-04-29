@@ -19,7 +19,6 @@ func FabricIpfmResourceSchema(ctx context.Context) schema.Schema {
 		Attributes: map[string]schema.Attribute{
 			"aaa_remote_ip_enabled": schema.BoolAttribute{
 				Optional:            true,
-				Computed:            true,
 				Description:         "Enable only when IP Authorization is enabled in the AAA Server",
 				MarkdownDescription: "Enable only when IP Authorization is enabled in the AAA Server",
 			},
@@ -40,19 +39,16 @@ func FabricIpfmResourceSchema(ctx context.Context) schema.Schema {
 			},
 			"bootstrap_enable": schema.BoolAttribute{
 				Optional:            true,
-				Computed:            true,
 				Description:         "Automatic IP Assignment For POAP",
 				MarkdownDescription: "Automatic IP Assignment For POAP",
 			},
 			"bootstrap_multisubnet": schema.StringAttribute{
 				Optional:            true,
-				Computed:            true,
 				Description:         "lines with # prefix are ignored here",
 				MarkdownDescription: "lines with # prefix are ignored here",
 			},
 			"cdp_enable": schema.BoolAttribute{
 				Optional:            true,
-				Computed:            true,
 				Description:         "Enable CDP on management interface",
 				MarkdownDescription: "Enable CDP on management interface",
 			},
@@ -68,7 +64,6 @@ func FabricIpfmResourceSchema(ctx context.Context) schema.Schema {
 			},
 			"dhcp_enable": schema.BoolAttribute{
 				Optional:            true,
-				Computed:            true,
 				Description:         "Automatic IP Assignment For POAP From Local DHCP Server",
 				MarkdownDescription: "Automatic IP Assignment For POAP From Local DHCP Server",
 			},
@@ -102,19 +97,16 @@ func FabricIpfmResourceSchema(ctx context.Context) schema.Schema {
 			},
 			"enable_aaa": schema.BoolAttribute{
 				Optional:            true,
-				Computed:            true,
 				Description:         "Include AAA configs from Manageability tab during device bootup",
 				MarkdownDescription: "Include AAA configs from Manageability tab during device bootup",
 			},
 			"enable_asm": schema.BoolAttribute{
 				Optional:            true,
-				Computed:            true,
 				Description:         "Enable groups with receivers sending (*,G) joins",
 				MarkdownDescription: "Enable groups with receivers sending (*,G) joins",
 			},
 			"enable_nbm_passive": schema.BoolAttribute{
 				Optional:            true,
-				Computed:            true,
 				Description:         "Enable NBM mode to pim-passive for default VRF",
 				MarkdownDescription: "Enable NBM mode to pim-passive for default VRF",
 			},
@@ -135,7 +127,6 @@ func FabricIpfmResourceSchema(ctx context.Context) schema.Schema {
 			},
 			"fabric_interface_type": schema.StringAttribute{
 				Optional:            true,
-				Computed:            true,
 				Description:         "Only Numbered(Point-to-Point) is supported",
 				MarkdownDescription: "Only Numbered(Point-to-Point) is supported",
 				Validators: []validator.String{
@@ -144,7 +135,6 @@ func FabricIpfmResourceSchema(ctx context.Context) schema.Schema {
 			},
 			"fabric_mtu": schema.Int64Attribute{
 				Optional:            true,
-				Computed:            true,
 				Description:         "Must be an even number",
 				MarkdownDescription: "Must be an even number",
 			},
@@ -158,7 +148,6 @@ func FabricIpfmResourceSchema(ctx context.Context) schema.Schema {
 			},
 			"feature_ptp": schema.BoolAttribute{
 				Optional:            true,
-				Computed:            true,
 				Description:         "No description available",
 				MarkdownDescription: "No description available",
 			},
@@ -169,7 +158,6 @@ func FabricIpfmResourceSchema(ctx context.Context) schema.Schema {
 			},
 			"isis_auth_enable": schema.BoolAttribute{
 				Optional:            true,
-				Computed:            true,
 				Description:         "No description available",
 				MarkdownDescription: "No description available",
 			},
@@ -190,7 +178,6 @@ func FabricIpfmResourceSchema(ctx context.Context) schema.Schema {
 			},
 			"isis_level": schema.StringAttribute{
 				Optional:            true,
-				Computed:            true,
 				Description:         "Supported IS types: level-1, level-2",
 				MarkdownDescription: "Supported IS types: level-1, level-2",
 				Validators: []validator.String{
@@ -204,13 +191,11 @@ func FabricIpfmResourceSchema(ctx context.Context) schema.Schema {
 			},
 			"l2_host_intf_mtu": schema.Int64Attribute{
 				Optional:            true,
-				Computed:            true,
 				Description:         "Must be an even number",
 				MarkdownDescription: "Must be an even number",
 			},
 			"link_state_routing": schema.StringAttribute{
 				Optional:            true,
-				Computed:            true,
 				Description:         "Used for Spine-Leaf Connectivity",
 				MarkdownDescription: "Used for Spine-Leaf Connectivity",
 				Validators: []validator.String{
@@ -219,13 +204,11 @@ func FabricIpfmResourceSchema(ctx context.Context) schema.Schema {
 			},
 			"link_state_routing_tag": schema.StringAttribute{
 				Optional:            true,
-				Computed:            true,
 				Description:         "Routing process tag for the fabric",
 				MarkdownDescription: "Routing process tag for the fabric",
 			},
 			"loopback0_ip_range": schema.StringAttribute{
 				Optional:            true,
-				Computed:            true,
 				Description:         "Routing Loopback IP Address Range",
 				MarkdownDescription: "Routing Loopback IP Address Range",
 			},
@@ -251,7 +234,6 @@ func FabricIpfmResourceSchema(ctx context.Context) schema.Schema {
 			},
 			"nxapi_vrf": schema.StringAttribute{
 				Optional:            true,
-				Computed:            true,
 				Description:         "VRF used for NX-API communication",
 				MarkdownDescription: "VRF used for NX-API communication",
 				Validators: []validator.String{
@@ -260,13 +242,11 @@ func FabricIpfmResourceSchema(ctx context.Context) schema.Schema {
 			},
 			"ospf_area_id": schema.StringAttribute{
 				Optional:            true,
-				Computed:            true,
 				Description:         "OSPF Area Id in IP address format",
 				MarkdownDescription: "OSPF Area Id in IP address format",
 			},
 			"ospf_auth_enable": schema.BoolAttribute{
 				Optional:            true,
-				Computed:            true,
 				Description:         "No description available",
 				MarkdownDescription: "No description available",
 			},
@@ -282,7 +262,6 @@ func FabricIpfmResourceSchema(ctx context.Context) schema.Schema {
 			},
 			"pim_hello_auth_enable": schema.BoolAttribute{
 				Optional:            true,
-				Computed:            true,
 				Description:         "No description available",
 				MarkdownDescription: "No description available",
 			},
@@ -293,13 +272,11 @@ func FabricIpfmResourceSchema(ctx context.Context) schema.Schema {
 			},
 			"pm_enable": schema.BoolAttribute{
 				Optional:            true,
-				Computed:            true,
 				Description:         "No description available",
 				MarkdownDescription: "No description available",
 			},
 			"power_redundancy_mode": schema.StringAttribute{
 				Optional:            true,
-				Computed:            true,
 				Description:         "Default power supply mode for the fabric",
 				MarkdownDescription: "Default power supply mode for the fabric",
 				Validators: []validator.String{
@@ -326,7 +303,6 @@ func FabricIpfmResourceSchema(ctx context.Context) schema.Schema {
 			},
 			"routing_lb_id": schema.Int64Attribute{
 				Optional:            true,
-				Computed:            true,
 				Description:         "No description available",
 				MarkdownDescription: "No description available",
 			},
@@ -342,25 +318,21 @@ func FabricIpfmResourceSchema(ctx context.Context) schema.Schema {
 			},
 			"snmp_server_host_trap": schema.BoolAttribute{
 				Optional:            true,
-				Computed:            true,
 				Description:         "Configure NDFC as a receiver for SNMP traps",
 				MarkdownDescription: "Configure NDFC as a receiver for SNMP traps",
 			},
 			"static_underlay_ip_alloc": schema.BoolAttribute{
 				Optional:            true,
-				Computed:            true,
 				Description:         "Checking this will disable Dynamic Fabric IP Address Allocations",
 				MarkdownDescription: "Checking this will disable Dynamic Fabric IP Address Allocations",
 			},
 			"subnet_range": schema.StringAttribute{
 				Optional:            true,
-				Computed:            true,
 				Description:         "Address range to assign Numbered IPs",
 				MarkdownDescription: "Address range to assign Numbered IPs",
 			},
 			"subnet_target_mask": schema.Int64Attribute{
 				Optional:            true,
-				Computed:            true,
 				Description:         "Mask for Fabric Subnet IP Range",
 				MarkdownDescription: "Mask for Fabric Subnet IP Range",
 				Validators: []validator.Int64{

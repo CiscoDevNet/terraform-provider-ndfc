@@ -16,8 +16,7 @@ mkdir -p $OUTDIR
 
 if [[ ! -f $GOPATH/bin/tfplugingen-framework ]]
 then
-    echo "Install tfplugingen-framework" 
-    exit 1 
+    go install github.com/hashicorp/terraform-plugin-codegen-framework/cmd/tfplugingen-framework@latest
 fi
 if [[ ! -f $GOPATH/bin/generator ]]
 then
@@ -81,8 +80,7 @@ if [[ -f $GOPATH/bin/tfplugindocs ]]
 then
     $GOPATH/bin/tfplugindocs generate --website-source-dir doctemplates
 else
-    echo "Install tfplugindocs"
-    exit 1
+    go install github.com/hashicorp/terraform-plugin-docs/cmd/tfplugindocs@latest
 fi
 
 rm -rf ./out

@@ -65,7 +65,7 @@ resource "ndfc_fabric_lan_classic" "test_resource_fabric_lan_classic_1" {
   power_redundancy_mode   = "ps-redundant"
   snmp_server_host_trap   = true
   subinterface_range      = "2-511"
-  enable_realtime_backup  = false
+  enable_real_time_backup = false
   enable_scheduled_backup = false
   deploy                  = false
 }
