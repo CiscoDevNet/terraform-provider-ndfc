@@ -14,6 +14,7 @@ import (
 	"terraform-provider-ndfc/internal/provider/ndfc"
 	"terraform-provider-ndfc/internal/provider/resources/resource_vpc_pair"
 
+	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-log/tflog"
@@ -94,12 +95,22 @@ func (r *vpcPairResource) Read(ctx context.Context, req resource.ReadRequest, re
 
 	unique_id := data.Id.ValueString()
 	tflog.Info(ctx, fmt.Sprintf("Incoming ID %s", unique_id))
-	r.client.RscReadVpcPair(ctx, resp, &data)
-	if resp.Diagnostics.HasError() {
+	err := r.client.RscReadVpcPair(ctx, resp, &data)
+
+	if err != nil && err.Error() == ndfc.ErrVpcPairNotFound {
+		// make diags error empty because vPC pair is not present in NDFC,
+		// it needs to be recreated.
+		tflog.Debug(ctx, "vPC Pair is not present in NDFC")
+		resp.Diagnostics = diag.Diagnostics{}
+		// This will clear the state for current fabric, making it eligible for creation
+		resp.State.RemoveResource(ctx)
+	} else if err != nil {
+		tflog.Error(ctx, "Read vPC Pair Failed")
 		return
+	} else {
+		// Save updated data into Terraform state
+		resp.Diagnostics.Append(resp.State.Set(ctx, data)...)
 	}
-	// Save updated data into Terraform state
-	resp.Diagnostics.Append(resp.State.Set(ctx, data)...)
 
 }
 
