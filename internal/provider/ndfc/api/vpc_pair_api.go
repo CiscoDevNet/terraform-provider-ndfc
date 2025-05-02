@@ -50,9 +50,7 @@ func (c *VpcPairAPI) PutUrl() string {
 }
 
 func (c *VpcPairAPI) DeleteUrl() string {
-	url := urlVpcPair
-	url += "?serialNumber=" + c.VpcPairID
-	return url
+	return fmt.Sprintf(urlVpcPairGet, c.VpcPairID)
 }
 func (c *VpcPairAPI) GetDeleteQP() []string {
 	return nil
