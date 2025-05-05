@@ -1,301 +1,286 @@
+---
 resource:
-  name: fabric_lan_classic
-  doc_category: Fabric
-  generate_tf_resource: true
-  parent_package: resource_fabric_common
-  parent_model: fabric_common
-  description: Resource to configure and manage a LAN Classic Fabric
-  attributes:
-    - model_name: id
-      tf_name: id
-      description: Terraform unique Id for the fabric resource
-      type: String
-      id: true
-      computed: true
-      payload_hide: true
-    - model_name: FABRIC_NAME
-      tf_name: fabric_name
-      description: 'Fabric name to be created, updated or deleted (Max Size 64).'
-      type: String
-      example: TF_FABRIC_LAN_CLASSIC
-      mandatory: true
-      tf_requires_replace: true
-    - model_name: AAA_REMOTE_IP_ENABLED
-      tf_name: aaa_remote_ip_enabled
-      description: 'Enable only, when IP Authorization is enabled in the AAA Server'
-#       default_value: false
-      computed: true
-      optional: true
-      type: Bool
-      example: false
-    - model_name: AAA_SERVER_CONF
-      tf_name: aaa_server_conf
-      description: AAA Configurations
-      type: String
-    - model_name: BOOTSTRAP_CONF
-      tf_name: bootstrap_conf
-      description: Additional CLIs required during device bootup/login e.g. AAA/Radius
-      type: String
-    - model_name: BOOTSTRAP_ENABLE
-      tf_name: bootstrap_enable
-      description: Automatic IP Assignment For POAP
-      type: Bool
-    - model_name: BOOTSTRAP_MULTISUBNET
-      tf_name: bootstrap_multisubnet
-      description: 'lines with # prefix are ignored here'
-#       default_value: >-
-        #Scope_Start_IP, Scope_End_IP, Scope_Default_Gateway,
-        #Scope_Subnet_Prefix
-      computed: true
-      optional: true
-      type: String
-      example: >-
-        #Scope_Start_IP, Scope_End_IP, Scope_Default_Gateway,
-        Scope_Subnet_Prefix
-    - model_name: CDP_ENABLE
-      tf_name: cdp_enable
-      description: Enable CDP on management interface
-#       default_value: false
-      computed: true
-      optional: true
-      type: Bool
-      example: false
-    - model_name: DHCP_ENABLE
-      tf_name: dhcp_enable
-      description: Automatic IP Assignment For POAP From Local DHCP Server
-#       default_value: false
-      computed: true
-      optional: true
-      type: Bool
-      example: false
-    - model_name: DHCP_END
-      tf_name: dhcp_end
-      description: End Address For Switch POAP
-      type: String
-    - model_name: DHCP_IPV6_ENABLE
-      tf_name: dhcp_ipv6_enable
-      description: No description available
-      type: String
-      validator: 'OneOf("DHCPv4", "DHCPv6")'
-    - model_name: DHCP_START
-      tf_name: dhcp_start
-      description: Start Address For Switch POAP
-      type: String
-    - model_name: ENABLE_AAA
-      tf_name: enable_aaa
-      description: Include AAA configs from Advanced tab during device bootup
-      type: Bool
-    - model_name: ENABLE_NETFLOW
-      tf_name: enable_netflow
-      description: Enable Netflow on VTEPs
-#       default_value: false
-      computed: true
-      optional: true
-      type: Bool
-      example: false
-    - model_name: ENABLE_NXAPI
-      tf_name: enable_nxapi
-      description: Enable HTTPS NX-API
-#       default_value: false
-      computed: true
-      optional: true
-      type: Bool
-      example: false
-    - model_name: ENABLE_NXAPI_HTTP
-      tf_name: enable_nxapi_http
-      description: No description available
-#       default_value: false
-      computed: true
-      optional: true
-      type: Bool
-      example: false
-    - model_name: FABRIC_FREEFORM
-      tf_name: fabric_freeform
-      description: Additional supported CLIs for all same OS (e.g. all NxOS etc) switches
-      type: String
-    - model_name: FEATURE_PTP
-      tf_name: feature_ptp
-      description: No description available
-#       default_value: false
-      computed: true
-      optional: true
-      type: Bool
-      example: false
-    - model_name: INBAND_ENABLE
-      tf_name: inband_enable
-      description: >-
-        Enable POAP over Inband Interface (Pre-req: Inband Mgmt Knob should be
-        Enabled)
-      type: Bool
-    - model_name: INBAND_MGMT
-      tf_name: inband_mgmt
-      description: Import switches with inband connectivity
-#       default_value: false
-      computed: true
-      optional: true
-      type: Bool
-      example: false
-    - model_name: IS_READ_ONLY
-      tf_name: is_read_only
-      description: 'If enabled, fabric is only monitored. No configuration will be deployed'
-#       default_value: true
-      computed: true
-      optional: true
-      type: Bool
-      example: true
-    - model_name: MGMT_GW
-      tf_name: mgmt_gw
-      description: Default Gateway For Management VRF On The Switch
-      type: String
-    - model_name: MGMT_PREFIX
-      tf_name: mgmt_prefix
-      description: No description available
-      type: Int64
-      handle_empty: true
-    - model_name: MGMT_V6PREFIX
-      tf_name: mgmt_v6prefix
-      description: No description available
-      type: Int64
-      handle_empty: true
-    - model_name: MPLS_HANDOFF
-      tf_name: mpls_handoff
-      description: No description available
-#       default_value: false
-      computed: true
-      optional: true
-      type: Bool
-      example: false
-    - model_name: MPLS_LB_ID
-      tf_name: mpls_lb_id
-      description: No description available
-      type: Int64
-      handle_empty: true
-    - model_name: MPLS_LOOPBACK_IP_RANGE
-      tf_name: mpls_loopback_ip_range
-      description: MPLS Loopback IP Address Range
-      type: String
-    - model_name: NETFLOW_EXPORTER_LIST
-      tf_name: netflow_exporter_list
-      description: One or Multiple Netflow Exporters
-      example: >-
-        {"NETFLOW_EXPORTER_LIST":[{"EXPORTER_NAME":"Test2","IP":"10.1.1.1","VRF":"","SRC_IF_NAME":"eth1/1","UDP_PORT":"800"}]}
-      type: String
-      ndfc_type: jsonencode
-    - model_name: NETFLOW_MONITOR_LIST
-      tf_name: netflow_monitor_list
-      description: One or Multiple Netflow Monitors
-      example: >-
-        {"NETFLOW_MONITOR_LIST":[{"MONITOR_NAME":"Test","RECORD_NAME":"Test1","EXPORTER1":"Test2","EXPORTER2":""}]}
-      type: String
-      ndfc_type: jsonencode
-    - model_name: NETFLOW_RECORD_LIST
-      tf_name: netflow_record_list
-      description: One or Multiple Netflow Records
-      type: String
-      ndfc_type: jsonencode
-      example: >-
-        {"NETFLOW_RECORD_LIST":[{"RECORD_NAME":"Test1","RECORD_TEMPLATE":"netflow_ipv4_record","LAYER2_RECORD":"false"}]}
-    - model_name: NETFLOW_SAMPLER_LIST
-      tf_name: netflow_sampler_list
-      description: One or multiple netflow Samplers. Applicable to N7K only
-      type: String
-      ndfc_type: jsonencode
-      example: >-
-        {"NETFLOW_SAMPLER_LIST":[{"SAMPLER_NAME":"Test1","NUM_SAMPLES":12,"SAMPLING_RATE":10}]}
-    - model_name: NXAPI_HTTPS_PORT
-      tf_name: nxapi_https_port
-      description: No description available
-#       default_value: 443
-      computed: true
-      optional: true
-      type: Int64
-      handle_empty: true
-      example: 443
-    - model_name: NXAPI_HTTP_PORT
-      tf_name: nxapi_http_port
-      description: No description available
-#       default_value: 80
-      computed: true
-      optional: true
-      type: Int64
-      handle_empty: true
-      example: 80
-    - model_name: PM_ENABLE
-      tf_name: pm_enable
-      description: No description available
-#       default_value: false
-      computed: true
-      optional: true
-      type: Bool
-      example: false
-    - model_name: POWER_REDUNDANCY_MODE
-      tf_name: power_redundancy_mode
-      description: Default Power Supply Mode For Bootstrapped NX-OS Switches
-#       default_value: ps-redundant
-      computed: true
-      optional: true
-      type: String
-      validator: 'OneOf("ps-redundant", "combined", "insrc-redundant")'
-      example: ps-redundant
-    - model_name: PTP_DOMAIN_ID
-      tf_name: ptp_domain_id
-      description: Multiple Independent PTP Clocking Subdomains on a Single Network
-      type: Int64
-      handle_empty: true
-    - model_name: PTP_LB_ID
-      tf_name: ptp_lb_id
-      description: No description available
-      type: Int64
-      handle_empty: true
-    - model_name: SNMP_SERVER_HOST_TRAP
-      tf_name: snmp_server_host_trap
-      description: Configure NDFC as a receiver for SNMP traps
-#       default_value: true
-      computed: true
-      optional: true
-      type: Bool
-      example: true
-    - model_name: SUBINTERFACE_RANGE
-      tf_name: subinterface_range
-      description: Per Border Dot1q Range For VRF Lite Connectivity
-#       default_value: 2-511
-      computed: true
-      optional: true
-      type: String
-      example: 2-511
-    - model_name: enableRealTimeBackup
-      tf_name: enable_realtime_backup
-      description: Backup hourly only if there is any config deployment since last backup
-#       default_value: false
-      computed: true
-      optional: true
-      type: Bool
-      example: false
-    - model_name: enableScheduledBackup
-      tf_name: enable_scheduled_backup
-      description: Backup at the specified time
-#       default_value: false
-      computed: true
-      optional: true
-      type: Bool
-      example: false
-    - model_name: scheduledTime
-      tf_name: scheduled_time
-      description: 'Time (UTC) in 24hr format. (00:00 to 23:59)'
-      type: String
-    - model_name: deploy
-      tf_name: deploy
-      description: This flag does configuration save and deploy
-      type: Bool
-      mandatory: true
-      ndfc_type: bool
-      example: false
-      payload_hide: true
-    - model_name: deployment_status
-      tf_name: deployment_status
-      description: >-
-        This fields shows the  status of the deployment. It can be one of the
-        following: Deployment pending Deployment successful
-      type: String
-      computed: true
-      payload_hide: true
+    name: fabric_lan_classic
+    doc_category: Fabric
+    generate_tf_resource: true
+    parent_package: resource_fabric_common
+    parent_model: fabric_common
+    description: Resource to configure and manage a LAN Classic Fabric
+    attributes:
+        - model_name: id
+          tf_name: id
+          description: Terraform unique Id for the fabric resource
+          type: String
+          id: true
+          computed: true
+          payload_hide: true
+
+        - model_name: FABRIC_NAME
+          tf_name: fabric_name
+          description: 'Fabric name to be created, updated or deleted (Max Size 64).'
+          type: String
+          example: TF_FABRIC_LAN_CLASSIC
+          mandatory: true
+          tf_requires_replace: true
+
+        - model_name: AAA_REMOTE_IP_ENABLED
+          tf_name: aaa_remote_ip_enabled
+          description: 'Enable only, when IP Authorization is enabled in the AAA Server'
+          type: Bool
+          example: false
+
+        - model_name: AAA_SERVER_CONF
+          tf_name: aaa_server_conf
+          description: AAA Configurations
+          type: String
+
+        - model_name: BOOTSTRAP_CONF
+          tf_name: bootstrap_conf
+          description: Additional CLIs required during device bootup/login e.g. AAA/Radius
+          type: String
+
+        - model_name: BOOTSTRAP_ENABLE
+          tf_name: bootstrap_enable
+          description: Automatic IP Assignment For POAP
+          type: Bool
+
+        - model_name: BOOTSTRAP_MULTISUBNET
+          tf_name: bootstrap_multisubnet
+          description: 'lines with # prefix are ignored here'
+          type: String
+          example: >-
+            #Scope_Start_IP, Scope_End_IP, Scope_Default_Gateway,
+            Scope_Subnet_Prefix
+
+        - model_name: CDP_ENABLE
+          tf_name: cdp_enable
+          description: Enable CDP on management interface
+          type: Bool
+          example: false
+
+        - model_name: DHCP_ENABLE
+          tf_name: dhcp_enable
+          description: Automatic IP Assignment For POAP From Local DHCP Server
+          type: Bool
+          example: false
+
+        - model_name: DHCP_END
+          tf_name: dhcp_end
+          description: End Address For Switch POAP
+          type: String
+
+        - model_name: DHCP_IPV6_ENABLE
+          tf_name: dhcp_ipv6_enable
+          description: No description available
+          type: String
+          validator: 'OneOf("DHCPv4", "DHCPv6")'
+
+        - model_name: DHCP_START
+          tf_name: dhcp_start
+          description: Start Address For Switch POAP
+          type: String
+
+        - model_name: ENABLE_AAA
+          tf_name: enable_aaa
+          description: Include AAA configs from Advanced tab during device bootup
+          type: Bool
+
+        - model_name: ENABLE_NETFLOW
+          tf_name: enable_netflow
+          description: Enable Netflow on VTEPs
+          type: Bool
+          example: false
+
+        - model_name: ENABLE_NXAPI
+          tf_name: enable_nxapi
+          description: Enable HTTPS NX-API
+          type: Bool
+          example: false
+
+        - model_name: ENABLE_NXAPI_HTTP
+          tf_name: enable_nxapi_http
+          description: No description available
+          type: Bool
+          example: false
+
+        - model_name: FABRIC_FREEFORM
+          tf_name: fabric_freeform
+          description: Additional supported CLIs for all same OS (e.g. all NxOS etc) switches
+          type: String
+
+        - model_name: FEATURE_PTP
+          tf_name: feature_ptp
+          description: No description available
+          type: Bool
+          example: false
+
+        - model_name: INBAND_ENABLE
+          tf_name: inband_enable
+          description: >-
+            Enable POAP over Inband Interface (Pre-req: Inband Mgmt Knob should be
+            Enabled)
+          type: Bool
+
+        - model_name: INBAND_MGMT
+          tf_name: inband_mgmt
+          description: Import switches with inband connectivity
+          type: Bool
+          example: false
+
+        - model_name: IS_READ_ONLY
+          tf_name: is_read_only
+          description: 'If enabled, fabric is only monitored. No configuration will be deployed'
+          type: Bool
+          example: true
+
+        - model_name: MGMT_GW
+          tf_name: mgmt_gw
+          description: Default Gateway For Management VRF On The Switch
+          type: String
+
+        - model_name: MGMT_PREFIX
+          tf_name: mgmt_prefix
+          description: No description available
+          type: Int64
+          handle_empty: true
+
+        - model_name: MGMT_V6PREFIX
+          tf_name: mgmt_v6prefix
+          description: No description available
+          type: Int64
+          handle_empty: true
+
+        - model_name: MPLS_HANDOFF
+          tf_name: mpls_handoff
+          description: No description available
+          type: Bool
+          example: false
+
+        - model_name: MPLS_LB_ID
+          tf_name: mpls_lb_id
+          description: No description available
+          type: Int64
+          handle_empty: true
+
+        - model_name: MPLS_LOOPBACK_IP_RANGE
+          tf_name: mpls_loopback_ip_range
+          description: MPLS Loopback IP Address Range
+          type: String
+
+        - model_name: NETFLOW_EXPORTER_LIST
+          tf_name: netflow_exporter_list
+          description: One or Multiple Netflow Exporters
+          example: >-
+            {"NETFLOW_EXPORTER_LIST":[{"EXPORTER_NAME":"Test2","IP":"10.1.1.1","VRF":"","SRC_IF_NAME":"eth1/1","UDP_PORT":"800"}]}
+          type: String
+          ndfc_type: jsonencode
+
+        - model_name: NETFLOW_MONITOR_LIST
+          tf_name: netflow_monitor_list
+          description: One or Multiple Netflow Monitors
+          example: >-
+            {"NETFLOW_MONITOR_LIST":[{"MONITOR_NAME":"Test","RECORD_NAME":"Test1","EXPORTER1":"Test2","EXPORTER2":""}]}
+          type: String
+          ndfc_type: jsonencode
+
+        - model_name: NETFLOW_RECORD_LIST
+          tf_name: netflow_record_list
+          description: One or Multiple Netflow Records
+          type: String
+          ndfc_type: jsonencode
+          example: >-
+            {"NETFLOW_RECORD_LIST":[{"RECORD_NAME":"Test1","RECORD_TEMPLATE":"netflow_ipv4_record","LAYER2_RECORD":"false"}]}
+
+        - model_name: NETFLOW_SAMPLER_LIST
+          tf_name: netflow_sampler_list
+          description: One or multiple netflow Samplers. Applicable to N7K only
+          type: String
+          ndfc_type: jsonencode
+          example: >-
+            {"NETFLOW_SAMPLER_LIST":[{"SAMPLER_NAME":"Test1","NUM_SAMPLES":12,"SAMPLING_RATE":10}]}
+
+        - model_name: NXAPI_HTTPS_PORT
+          tf_name: nxapi_https_port
+          description: No description available
+          type: Int64
+          handle_empty: true
+          example: 443
+
+        - model_name: NXAPI_HTTP_PORT
+          tf_name: nxapi_http_port
+          description: No description available
+          type: Int64
+          handle_empty: true
+          example: 80
+
+        - model_name: PM_ENABLE
+          tf_name: pm_enable
+          description: No description available
+          type: Bool
+          example: false
+
+        - model_name: POWER_REDUNDANCY_MODE
+          tf_name: power_redundancy_mode
+          description: Default Power Supply Mode For Bootstrapped NX-OS Switches
+          type: String
+          validator: 'OneOf("ps-redundant", "combined", "insrc-redundant")'
+          example: ps-redundant
+
+        - model_name: PTP_DOMAIN_ID
+          tf_name: ptp_domain_id
+          description: Multiple Independent PTP Clocking Subdomains on a Single Network
+          type: Int64
+          handle_empty: true
+
+        - model_name: PTP_LB_ID
+          tf_name: ptp_lb_id
+          description: No description available
+          type: Int64
+          handle_empty: true
+
+        - model_name: SNMP_SERVER_HOST_TRAP
+          tf_name: snmp_server_host_trap
+          description: Configure NDFC as a receiver for SNMP traps
+          type: Bool
+          example: true
+
+        - model_name: SUBINTERFACE_RANGE
+          tf_name: subinterface_range
+          description: Per Border Dot1q Range For VRF Lite Connectivity
+          type: String
+          example: 2-511
+
+        - model_name: enableRealTimeBackup
+          tf_name: enable_realtime_backup
+          description: Backup hourly only if there is any config deployment since last backup
+          type: Bool
+          example: false
+
+        - model_name: enableScheduledBackup
+          tf_name: enable_scheduled_backup
+          description: Backup at the specified time
+          type: Bool
+          example: false
+
+        - model_name: scheduledTime
+          tf_name: scheduled_time
+          description: 'Time (UTC) in 24hr format. (00:00 to 23:59)'
+          type: String
+
+        - model_name: deploy
+          tf_name: deploy
+          description: This flag does configuration save and deploy
+          type: Bool
+          mandatory: true
+          ndfc_type: bool
+          example: false
+          payload_hide: true
+
+        - model_name: deployment_status
+          tf_name: deployment_status
+          description: >-
+            This fields shows the  status of the deployment. It can be one of the
+            following: Deployment pending Deployment successful
+          type: String
+          computed: true
+          payload_hide: true
