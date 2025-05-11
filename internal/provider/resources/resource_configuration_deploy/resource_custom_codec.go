@@ -11,8 +11,8 @@ type SwitchStatusDB struct {
 }
 
 type SwitchStatus struct {
-	SwitchId string `json:"switchId"`
-	Status   string `json:"status"`
+	SerialNumber string `json:"serialNumber"`
+	Status       string `json:"ccStatus"`
 }
 
 func (m *SwitchStatusDB) UnmarshalJSON(data []byte) error {
@@ -22,7 +22,7 @@ func (m *SwitchStatusDB) UnmarshalJSON(data []byte) error {
 		return err
 	}
 	for _, entry := range customModel {
-		m.SerialNumMap[entry.SwitchId] = entry
+		m.SerialNumMap[entry.SerialNumber] = entry
 	}
 	return nil
 }
