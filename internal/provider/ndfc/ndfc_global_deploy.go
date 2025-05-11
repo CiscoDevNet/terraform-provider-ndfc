@@ -90,17 +90,26 @@ func (c NDFC) deployConfiguration(ctx context.Context, diags *diag.Diagnostics, 
 	diags.AddError("Deploy failed", "Switches are still out of sync")
 }
 
-func (c NDFC) checkDeployStatus(ctx context.Context, diags *diag.Diagnostics, fabricName string, serialNumbers []string) []string {
+func (c *NDFC) checkDeployStatus(ctx context.Context, diags *diag.Diagnostics, fabricName string, serialNumbers []string) []string {
 	previewApi := api.NewConfigDeploymentAPI(c.GetLock(ResourceConfigDeploy), &c.apiClient)
 	previewApi.FabricName = fabricName
 	previewApi.Preview = true
 	var response resource_configuration_deploy.SwitchStatusDB
 
+	// Config Preview refreshes the config status of switches in the fabric
 	payload, err := previewApi.Get()
-	if err != nil || len(payload) == 0 {
+	if err != nil || len(payload) == 0 || string(payload) == "[]" {
 		diags.AddError("Deploy failed", "Configuration preview failed")
 		return nil
 	}
+
+	// Get the current config status of switches in the fabric
+	payload, err = c.GetSwitchesInFabric(ctx, fabricName)
+	if err != nil || len(payload) == 0 || string(payload) == "[]" {
+		diags.AddError("Deploy failed", "Failed to get switches in fabric")
+		return nil
+	}
+
 	err = json.Unmarshal(payload, &response)
 	if err != nil {
 		diags.AddError("Deploy failed", err.Error())
