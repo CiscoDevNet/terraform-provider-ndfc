@@ -314,6 +314,16 @@ func FabricDataSourceSchema(ctx context.Context) schema.Schema {
 				Description:         "No description available",
 				MarkdownDescription: "No description available",
 			},
+			"bgw_routing_tag": schema.Int64Attribute{
+				Computed:            true,
+				Description:         "Routing tag associated with IP address of loopback and DCI interfaces",
+				MarkdownDescription: "Routing tag associated with IP address of loopback and DCI interfaces",
+			},
+			"bgw_routing_tag_prev": schema.StringAttribute{
+				Computed:            true,
+				Description:         "Previous state of Border Gateway Routing Tag",
+				MarkdownDescription: "Previous state of Border Gateway Routing Tag",
+			},
 			"bootstrap_conf": schema.StringAttribute{
 				Computed:            true,
 				Description:         "Additional CLIs required during device bootup/login e.g. AAA/Radius",
@@ -398,6 +408,11 @@ func FabricDataSourceSchema(ctx context.Context) schema.Schema {
 				Computed:            true,
 				Description:         "No description available",
 				MarkdownDescription: "No description available",
+			},
+			"dcnm_id": schema.StringAttribute{
+				Computed:            true,
+				Description:         "DCNM ID",
+				MarkdownDescription: "DCNM ID",
 			},
 			"default_network": schema.StringAttribute{
 				Computed:            true,
@@ -489,6 +504,11 @@ func FabricDataSourceSchema(ctx context.Context) schema.Schema {
 				Description:         "One VRF for all DNS servers or a comma separated list of VRFs, one per DNS server",
 				MarkdownDescription: "One VRF for all DNS servers or a comma separated list of VRFs, one per DNS server",
 			},
+			"domain_name_internal": schema.StringAttribute{
+				Computed:            true,
+				Description:         "Internal Domain Name",
+				MarkdownDescription: "Internal Domain Name",
+			},
 			"enable_aaa": schema.BoolAttribute{
 				Computed:            true,
 				Description:         "Include AAA configs from Manageability tab during device bootup",
@@ -513,6 +533,11 @@ func FabricDataSourceSchema(ctx context.Context) schema.Schema {
 				Computed:            true,
 				Description:         "Previous state of Enable AI/ML QoS Policy Flap",
 				MarkdownDescription: "Previous state of Enable AI/ML QoS Policy Flap",
+			},
+			"enable_asm": schema.BoolAttribute{
+				Computed:            true,
+				Description:         "Enable groups with receivers sending (*,G) joins",
+				MarkdownDescription: "Enable groups with receivers sending (*,G) joins",
 			},
 			"enable_dci_macsec": schema.BoolAttribute{
 				Computed:            true,
@@ -558,6 +583,11 @@ func FabricDataSourceSchema(ctx context.Context) schema.Schema {
 				Computed:            true,
 				Description:         "Previous state of Enable MACsec",
 				MarkdownDescription: "Previous state of Enable MACsec",
+			},
+			"enable_nbm_passive_prev": schema.BoolAttribute{
+				Computed:            true,
+				Description:         "Previous state of Enable NBM Passive Mode",
+				MarkdownDescription: "Previous state of Enable NBM Passive Mode",
 			},
 			"enable_netflow": schema.BoolAttribute{
 				Computed:            true,
@@ -639,6 +669,16 @@ func FabricDataSourceSchema(ctx context.Context) schema.Schema {
 				Description:         "For Overlay Multicast Support In VXLAN Fabrics",
 				MarkdownDescription: "For Overlay Multicast Support In VXLAN Fabrics",
 			},
+			"enable_trm_trmv6": schema.BoolAttribute{
+				Computed:            true,
+				Description:         "Enable IPv4 and/or IPv6 Tenant Routed Multicast across sites",
+				MarkdownDescription: "Enable IPv4 and/or IPv6 Tenant Routed Multicast across sites",
+			},
+			"enable_trm_trmv6_prev": schema.BoolAttribute{
+				Computed:            true,
+				Description:         "Previous state of Enable IPv4 and/or IPv6 Tenant Routed Multicast across sites",
+				MarkdownDescription: "Previous state of Enable IPv4 and/or IPv6 Tenant Routed Multicast across sites",
+			},
 			"enable_trmv6": schema.BoolAttribute{
 				Computed:            true,
 				Description:         "For Overlay IPv6 Multicast Support In VXLAN Fabrics",
@@ -706,6 +746,11 @@ func FabricDataSourceSchema(ctx context.Context) schema.Schema {
 				Required:            true,
 				Description:         "Fabric name",
 				MarkdownDescription: "Fabric name",
+			},
+			"fabric_technology": schema.StringAttribute{
+				Computed:            true,
+				Description:         "Fabric Technology",
+				MarkdownDescription: "Fabric Technology",
 			},
 			"fabric_type": schema.StringAttribute{
 				Computed:            true,
@@ -782,6 +827,11 @@ func FabricDataSourceSchema(ctx context.Context) schema.Schema {
 				Description:         "Comma separated list of IPv4 Addresses (Max 3)",
 				MarkdownDescription: "Comma separated list of IPv4 Addresses (Max 3)",
 			},
+			"inband_enable_prev": schema.BoolAttribute{
+				Computed:            true,
+				Description:         "Previous state of Enable POAP over Inband Interface",
+				MarkdownDescription: "Previous state of Enable POAP over Inband Interface",
+			},
 			"inband_mgmt": schema.BoolAttribute{
 				Computed:            true,
 				Description:         "Manage switches with only Inband connectivity",
@@ -791,6 +841,26 @@ func FabricDataSourceSchema(ctx context.Context) schema.Schema {
 				Computed:            true,
 				Description:         "Previous state of Inband Management",
 				MarkdownDescription: "Previous state of Inband Management",
+			},
+			"interface_ethernet_default_policy": schema.StringAttribute{
+				Computed:            true,
+				Description:         "Default policy for Ethernet interface of spine/leaf/tier2-leaf switches",
+				MarkdownDescription: "Default policy for Ethernet interface of spine/leaf/tier2-leaf switches",
+			},
+			"interface_loopback_default_policy": schema.StringAttribute{
+				Computed:            true,
+				Description:         "Loopback Interface Default Policy",
+				MarkdownDescription: "Loopback Interface Default Policy",
+			},
+			"interface_port_channel_default_policy": schema.StringAttribute{
+				Computed:            true,
+				Description:         "Port Channel Interface Default Policy",
+				MarkdownDescription: "Port Channel Interface Default Policy",
+			},
+			"interface_vlan_default_policy": schema.StringAttribute{
+				Computed:            true,
+				Description:         "VLAN Interface Default Policy",
+				MarkdownDescription: "VLAN Interface Default Policy",
 			},
 			"ipv6_anycast_rp_ip_range": schema.StringAttribute{
 				Computed:            true,
@@ -922,6 +992,11 @@ func FabricDataSourceSchema(ctx context.Context) schema.Schema {
 				Description:         "Typically Loopback0 IPv6 Address Range",
 				MarkdownDescription: "Typically Loopback0 IPv6 Address Range",
 			},
+			"loopback100_ipv6_range": schema.StringAttribute{
+				Computed:            true,
+				Description:         "Multi-Site VTEP VIP Loopback IPv6 Range",
+				MarkdownDescription: "Multi-Site VTEP VIP Loopback IPv6 Range",
+			},
 			"loopback1_ip_range": schema.StringAttribute{
 				Computed:            true,
 				Description:         "Typically Loopback1 IP Address Range",
@@ -1016,6 +1091,26 @@ func FabricDataSourceSchema(ctx context.Context) schema.Schema {
 				Computed:            true,
 				Description:         "Used for VXLAN to MPLS SR/LDP Handoff",
 				MarkdownDescription: "Used for VXLAN to MPLS SR/LDP Handoff",
+			},
+			"ms_ifc_bgp_auth_key_type": schema.Int64Attribute{
+				Computed:            true,
+				Description:         "BGP Key Encryption Type: 3 - 3DES, 7 - Cisco",
+				MarkdownDescription: "BGP Key Encryption Type: 3 - 3DES, 7 - Cisco",
+			},
+			"ms_ifc_bgp_auth_key_type_prev": schema.Int64Attribute{
+				Computed:            true,
+				Description:         "BGP Key Encryption Type: 3 - 3DES, 7 - Cisco",
+				MarkdownDescription: "BGP Key Encryption Type: 3 - 3DES, 7 - Cisco",
+			},
+			"ms_ifc_bgp_password_enable_prev": schema.BoolAttribute{
+				Computed:            true,
+				Description:         "Previous state of Enable Multi-Site eBGP Password",
+				MarkdownDescription: "Previous state of Enable Multi-Site eBGP Password",
+			},
+			"ms_ifc_bgp_password_prev": schema.StringAttribute{
+				Computed:            true,
+				Description:         "Previous state of eBGP Password",
+				MarkdownDescription: "Previous state of eBGP Password",
 			},
 			"mso_connectivity_deployed": schema.StringAttribute{
 				Computed:            true,
@@ -1162,6 +1257,11 @@ func FabricDataSourceSchema(ctx context.Context) schema.Schema {
 				Description:         "If enabled, Fabric NxCloud Settings will be used",
 				MarkdownDescription: "If enabled, Fabric NxCloud Settings will be used",
 			},
+			"parent_onemanage_fabric": schema.StringAttribute{
+				Computed:            true,
+				Description:         "Parent OneManage Fabric",
+				MarkdownDescription: "Parent OneManage Fabric",
+			},
 			"per_vrf_loopback_auto_provision": schema.BoolAttribute{
 				Computed:            true,
 				Description:         "Auto provision a loopback on a VTEP on VRF attachment",
@@ -1242,6 +1342,11 @@ func FabricDataSourceSchema(ctx context.Context) schema.Schema {
 				Description:         "Previous state of Performance Monitoring Enable",
 				MarkdownDescription: "Previous state of Performance Monitoring Enable",
 			},
+			"pnp_enable_internal": schema.BoolAttribute{
+				Computed:            true,
+				Description:         "Internal PnP Enable",
+				MarkdownDescription: "Internal PnP Enable",
+			},
 			"power_redundancy_mode": schema.StringAttribute{
 				Computed:            true,
 				Description:         "Default Power Supply Mode For The Fabric",
@@ -1297,6 +1402,11 @@ func FabricDataSourceSchema(ctx context.Context) schema.Schema {
 				Description:         "Number of spines acting as Rendezvous-Point (RP)",
 				MarkdownDescription: "Number of spines acting as Rendezvous-Point (RP)",
 			},
+			"rp_ip_range_internal": schema.StringAttribute{
+				Computed:            true,
+				Description:         "Internal RP IP Range",
+				MarkdownDescription: "Internal RP IP Range",
+			},
 			"rp_lb_id": schema.Int64Attribute{
 				Computed:            true,
 				Description:         "No description available",
@@ -1332,10 +1442,20 @@ func FabricDataSourceSchema(ctx context.Context) schema.Schema {
 				Description:         "Security Group Tag (SGT) ID Range - Min:16, Max:65535. Reserved Range: 0-15",
 				MarkdownDescription: "Security Group Tag (SGT) ID Range - Min:16, Max:65535. Reserved Range: 0-15",
 			},
+			"sgt_id_range_prev": schema.StringAttribute{
+				Computed:            true,
+				Description:         "Previous state of Security Group Tag (SGT) ID Range",
+				MarkdownDescription: "Previous state of Security Group Tag (SGT) ID Range",
+			},
 			"sgt_name_prefix": schema.StringAttribute{
 				Computed:            true,
 				Description:         "Security Group Name Prefix - Prefix to be used when a new Security Group is created (Min:1, Max:10 characters)",
 				MarkdownDescription: "Security Group Name Prefix - Prefix to be used when a new Security Group is created (Min:1, Max:10 characters)",
+			},
+			"sgt_name_prefix_prev": schema.StringAttribute{
+				Computed:            true,
+				Description:         "Previous state of Security Group Name Prefix",
+				MarkdownDescription: "Previous state of Security Group Name Prefix",
 			},
 			"sgt_oper_status": schema.StringAttribute{
 				Computed:            true,
@@ -1532,6 +1652,16 @@ func FabricDataSourceSchema(ctx context.Context) schema.Schema {
 				Description:         "If not enabled, Spine-Leaf interfaces will use global IPv6 addresses",
 				MarkdownDescription: "If not enabled, Spine-Leaf interfaces will use global IPv6 addresses",
 			},
+			"v6_dci_subnet_range": schema.StringAttribute{
+				Computed:            true,
+				Description:         "Address range to assign P2P DCI Links",
+				MarkdownDescription: "Address range to assign P2P DCI Links",
+			},
+			"v6_dci_subnet_target_mask": schema.Int64Attribute{
+				Computed:            true,
+				Description:         "Target IPv6 Mask for Subnet Range (Min:120, Max:127)",
+				MarkdownDescription: "Target IPv6 Mask for Subnet Range (Min:120, Max:127)",
+			},
 			"v6_subnet_range": schema.StringAttribute{
 				Computed:            true,
 				Description:         "IPv6 Address range to assign Numbered and Peer Link SVI IPs",
@@ -1596,6 +1726,11 @@ func FabricDataSourceSchema(ctx context.Context) schema.Schema {
 				Computed:            true,
 				Description:         "Per Switch Overlay VRF VLAN Range",
 				MarkdownDescription: "Per Switch Overlay VRF VLAN Range",
+			},
+			"vxlan_underlay_is_v6": schema.BoolAttribute{
+				Computed:            true,
+				Description:         "If not enabled, IPv4 underlay is used in child VXLAN fabric",
+				MarkdownDescription: "If not enabled, IPv4 underlay is used in child VXLAN fabric",
 			},
 		},
 		Description:         "Basic data source attribute for all fabric types",
@@ -1664,6 +1799,8 @@ type FabricModel struct {
 	BgpAuthKey                              types.String `tfsdk:"bgp_auth_key"`
 	BgpAuthKeyType                          types.Int64  `tfsdk:"bgp_auth_key_type"`
 	BgpLbId                                 types.Int64  `tfsdk:"bgp_lb_id"`
+	BgwRoutingTag                           types.Int64  `tfsdk:"bgw_routing_tag"`
+	BgwRoutingTagPrev                       types.String `tfsdk:"bgw_routing_tag_prev"`
 	BootstrapConf                           types.String `tfsdk:"bootstrap_conf"`
 	BootstrapEnable                         types.Bool   `tfsdk:"bootstrap_enable"`
 	BootstrapEnablePrev                     types.Bool   `tfsdk:"bootstrap_enable_prev"`
@@ -1681,6 +1818,7 @@ type FabricModel struct {
 	DciMacsecKeyString                      types.String `tfsdk:"dci_macsec_key_string"`
 	DciSubnetRange                          types.String `tfsdk:"dci_subnet_range"`
 	DciSubnetTargetMask                     types.Int64  `tfsdk:"dci_subnet_target_mask"`
+	DcnmId                                  types.String `tfsdk:"dcnm_id"`
 	DefaultNetwork                          types.String `tfsdk:"default_network"`
 	DefaultPvlanSecNetwork                  types.String `tfsdk:"default_pvlan_sec_network"`
 	DefaultQueuingPolicyCloudscale          types.String `tfsdk:"default_queuing_policy_cloudscale"`
@@ -1699,11 +1837,13 @@ type FabricModel struct {
 	DhcpStartInternal                       types.String `tfsdk:"dhcp_start_internal"`
 	DnsServerIpList                         types.String `tfsdk:"dns_server_ip_list"`
 	DnsServerVrf                            types.String `tfsdk:"dns_server_vrf"`
+	DomainNameInternal                      types.String `tfsdk:"domain_name_internal"`
 	EnableAaa                               types.Bool   `tfsdk:"enable_aaa"`
 	EnableAgent                             types.Bool   `tfsdk:"enable_agent"`
 	EnableAggAccIdRange                     types.Bool   `tfsdk:"enable_agg_acc_id_range"`
 	EnableAiMlQosPolicy                     types.Bool   `tfsdk:"enable_ai_ml_qos_policy"`
 	EnableAiMlQosPolicyFlap                 types.Bool   `tfsdk:"enable_ai_ml_qos_policy_flap"`
+	EnableAsm                               types.Bool   `tfsdk:"enable_asm"`
 	EnableDciMacsec                         types.Bool   `tfsdk:"enable_dci_macsec"`
 	EnableDciMacsecPrev                     types.Bool   `tfsdk:"enable_dci_macsec_prev"`
 	EnableDefaultQueuingPolicy              types.Bool   `tfsdk:"enable_default_queuing_policy"`
@@ -1713,6 +1853,7 @@ type FabricModel struct {
 	EnableL3vniNoVlan                       types.Bool   `tfsdk:"enable_l3vni_no_vlan"`
 	EnableMacsec                            types.Bool   `tfsdk:"enable_macsec"`
 	EnableMacsecPrev                        types.Bool   `tfsdk:"enable_macsec_prev"`
+	EnableNbmPassivePrev                    types.Bool   `tfsdk:"enable_nbm_passive_prev"`
 	EnableNetflow                           types.Bool   `tfsdk:"enable_netflow"`
 	EnableNetflowPrev                       types.Bool   `tfsdk:"enable_netflow_prev"`
 	EnableNgoam                             types.Bool   `tfsdk:"enable_ngoam"`
@@ -1729,6 +1870,8 @@ type FabricModel struct {
 	EnableSgtPrev                           types.Bool   `tfsdk:"enable_sgt_prev"`
 	EnableTenantDhcp                        types.Bool   `tfsdk:"enable_tenant_dhcp"`
 	EnableTrm                               types.Bool   `tfsdk:"enable_trm"`
+	EnableTrmTrmv6                          types.Bool   `tfsdk:"enable_trm_trmv6"`
+	EnableTrmTrmv6Prev                      types.Bool   `tfsdk:"enable_trm_trmv6_prev"`
 	EnableTrmv6                             types.Bool   `tfsdk:"enable_trmv6"`
 	EnableVpcPeerLinkNativeVlan             types.Bool   `tfsdk:"enable_vpc_peer_link_native_vlan"`
 	EnableVriIdRealloc                      types.Bool   `tfsdk:"enable_vri_id_realloc"`
@@ -1742,6 +1885,7 @@ type FabricModel struct {
 	FabricMtu                               types.Int64  `tfsdk:"fabric_mtu"`
 	FabricMtuPrev                           types.Int64  `tfsdk:"fabric_mtu_prev"`
 	FabricName                              types.String `tfsdk:"fabric_name"`
+	FabricTechnology                        types.String `tfsdk:"fabric_technology"`
 	FabricType                              types.String `tfsdk:"fabric_type"`
 	FabricVpcDomainId                       types.Int64  `tfsdk:"fabric_vpc_domain_id"`
 	FabricVpcDomainIdPrev                   types.Int64  `tfsdk:"fabric_vpc_domain_id_prev"`
@@ -1757,8 +1901,13 @@ type FabricModel struct {
 	IbgpPeerTemplateLeaf                    types.String `tfsdk:"ibgp_peer_template_leaf"`
 	IgnoreCert                              types.Bool   `tfsdk:"ignore_cert"`
 	InbandDhcpServers                       types.String `tfsdk:"inband_dhcp_servers"`
+	InbandEnablePrev                        types.Bool   `tfsdk:"inband_enable_prev"`
 	InbandMgmt                              types.Bool   `tfsdk:"inband_mgmt"`
 	InbandMgmtPrev                          types.Bool   `tfsdk:"inband_mgmt_prev"`
+	InterfaceEthernetDefaultPolicy          types.String `tfsdk:"interface_ethernet_default_policy"`
+	InterfaceLoopbackDefaultPolicy          types.String `tfsdk:"interface_loopback_default_policy"`
+	InterfacePortChannelDefaultPolicy       types.String `tfsdk:"interface_port_channel_default_policy"`
+	InterfaceVlanDefaultPolicy              types.String `tfsdk:"interface_vlan_default_policy"`
 	Ipv6AnycastRpIpRange                    types.String `tfsdk:"ipv6_anycast_rp_ip_range"`
 	Ipv6AnycastRpIpRangeInternal            types.String `tfsdk:"ipv6_anycast_rp_ip_range_internal"`
 	Ipv6MulticastGroupSubnet                types.String `tfsdk:"ipv6_multicast_group_subnet"`
@@ -1785,6 +1934,7 @@ type FabricModel struct {
 	LinkStateRoutingTagPrev                 types.String `tfsdk:"link_state_routing_tag_prev"`
 	Loopback0IpRange                        types.String `tfsdk:"loopback0_ip_range"`
 	Loopback0Ipv6Range                      types.String `tfsdk:"loopback0_ipv6_range"`
+	Loopback100Ipv6Range                    types.String `tfsdk:"loopback100_ipv6_range"`
 	Loopback1IpRange                        types.String `tfsdk:"loopback1_ip_range"`
 	Loopback1Ipv6Range                      types.String `tfsdk:"loopback1_ipv6_range"`
 	MacsecAlgorithm                         types.String `tfsdk:"macsec_algorithm"`
@@ -1804,6 +1954,10 @@ type FabricModel struct {
 	MplsIsisAreaNumPrev                     types.String `tfsdk:"mpls_isis_area_num_prev"`
 	MplsLbId                                types.Int64  `tfsdk:"mpls_lb_id"`
 	MplsLoopbackIpRange                     types.String `tfsdk:"mpls_loopback_ip_range"`
+	MsIfcBgpAuthKeyType                     types.Int64  `tfsdk:"ms_ifc_bgp_auth_key_type"`
+	MsIfcBgpAuthKeyTypePrev                 types.Int64  `tfsdk:"ms_ifc_bgp_auth_key_type_prev"`
+	MsIfcBgpPasswordEnablePrev              types.Bool   `tfsdk:"ms_ifc_bgp_password_enable_prev"`
+	MsIfcBgpPasswordPrev                    types.String `tfsdk:"ms_ifc_bgp_password_prev"`
 	MsoConnectivityDeployed                 types.String `tfsdk:"mso_connectivity_deployed"`
 	MsoControlerId                          types.String `tfsdk:"mso_controler_id"`
 	MsoSiteGroupName                        types.String `tfsdk:"mso_site_group_name"`
@@ -1833,6 +1987,7 @@ type FabricModel struct {
 	OverlayMode                             types.String `tfsdk:"overlay_mode"`
 	OverlayModePrev                         types.String `tfsdk:"overlay_mode_prev"`
 	OverwriteGlobalNxc                      types.Bool   `tfsdk:"overwrite_global_nxc"`
+	ParentOnemanageFabric                   types.String `tfsdk:"parent_onemanage_fabric"`
 	PerVrfLoopbackAutoProvision             types.Bool   `tfsdk:"per_vrf_loopback_auto_provision"`
 	PerVrfLoopbackAutoProvisionPrev         types.Bool   `tfsdk:"per_vrf_loopback_auto_provision_prev"`
 	PerVrfLoopbackAutoProvisionV6           types.Bool   `tfsdk:"per_vrf_loopback_auto_provision_v6"`
@@ -1849,6 +2004,7 @@ type FabricModel struct {
 	PimHelloAuthKey                         types.String `tfsdk:"pim_hello_auth_key"`
 	PmEnable                                types.Bool   `tfsdk:"pm_enable"`
 	PmEnablePrev                            types.Bool   `tfsdk:"pm_enable_prev"`
+	PnpEnableInternal                       types.Bool   `tfsdk:"pnp_enable_internal"`
 	PowerRedundancyMode                     types.String `tfsdk:"power_redundancy_mode"`
 	PremsoParentFabric                      types.String `tfsdk:"premso_parent_fabric"`
 	PtpDomainId                             types.Int64  `tfsdk:"ptp_domain_id"`
@@ -1860,6 +2016,7 @@ type FabricModel struct {
 	RouteMapSequenceNumberRange             types.String `tfsdk:"route_map_sequence_number_range"`
 	RouterIdRange                           types.String `tfsdk:"router_id_range"`
 	RpCount                                 types.Int64  `tfsdk:"rp_count"`
+	RpIpRangeInternal                       types.String `tfsdk:"rp_ip_range_internal"`
 	RpLbId                                  types.Int64  `tfsdk:"rp_lb_id"`
 	RpMode                                  types.String `tfsdk:"rp_mode"`
 	RrCount                                 types.Int64  `tfsdk:"rr_count"`
@@ -1867,7 +2024,9 @@ type FabricModel struct {
 	SeedSwitchCoreInterfaces                types.String `tfsdk:"seed_switch_core_interfaces"`
 	ServiceNetworkVlanRange                 types.String `tfsdk:"service_network_vlan_range"`
 	SgtIdRange                              types.String `tfsdk:"sgt_id_range"`
+	SgtIdRangePrev                          types.String `tfsdk:"sgt_id_range_prev"`
 	SgtNamePrefix                           types.String `tfsdk:"sgt_name_prefix"`
+	SgtNamePrefixPrev                       types.String `tfsdk:"sgt_name_prefix_prev"`
 	SgtOperStatus                           types.String `tfsdk:"sgt_oper_status"`
 	SgtPreprovRecalcStatus                  types.String `tfsdk:"sgt_preprov_recalc_status"`
 	SgtPreprovision                         types.Bool   `tfsdk:"sgt_preprovision"`
@@ -1907,6 +2066,8 @@ type FabricModel struct {
 	UnnumDhcpStartInternal                  types.String `tfsdk:"unnum_dhcp_start_internal"`
 	UpgradeFromVersion                      types.String `tfsdk:"upgrade_from_version"`
 	UseLinkLocal                            types.Bool   `tfsdk:"use_link_local"`
+	V6DciSubnetRange                        types.String `tfsdk:"v6_dci_subnet_range"`
+	V6DciSubnetTargetMask                   types.Int64  `tfsdk:"v6_dci_subnet_target_mask"`
 	V6SubnetRange                           types.String `tfsdk:"v6_subnet_range"`
 	V6SubnetTargetMask                      types.Int64  `tfsdk:"v6_subnet_target_mask"`
 	VpcAutoRecoveryTime                     types.Int64  `tfsdk:"vpc_auto_recovery_time"`
@@ -1920,4 +2081,5 @@ type FabricModel struct {
 	VrfExtensionTemplate                    types.String `tfsdk:"vrf_extension_template"`
 	VrfLiteAutoconfig                       types.String `tfsdk:"vrf_lite_autoconfig"`
 	VrfVlanRange                            types.String `tfsdk:"vrf_vlan_range"`
+	VxlanUnderlayIsV6                       types.Bool   `tfsdk:"vxlan_underlay_is_v6"`
 }
