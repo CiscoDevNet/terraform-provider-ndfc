@@ -5,7 +5,10 @@ resource:
     generate_tf_resource: true
     parent_package: resource_fabric_common
     parent_model: fabric_common
-    description: Resource to configure and manage a VXLAN MSD Fabric
+    description: >-
+        Resource to configure and manage a VXLAN MSD Fabric.
+        Only creation/updation/deletion of the fabric is supported,
+        resources on top of the fabric are not supported yet.
     attributes:
         - model_name: id
           tf_name: id
@@ -17,7 +20,7 @@ resource:
 
         - model_name: FABRIC_NAME
           tf_name: fabric_name
-          description: 'Fabric name to be created, updated or deleted (Max Size 64).'
+          description: Fabric name to be created, updated or deleted.
           type: String
           example: TF_FABRIC_VXLAN_MSD
           mandatory: true
@@ -25,70 +28,109 @@ resource:
 
         - model_name: ANYCAST_GW_MAC
           tf_name: anycast_gw_mac
-          description: Shared MAC address for all leaves
+          description: Shared MAC address for all leafs
           type: String
           example: 2020.0000.00aa
+          optional: true
+          computed: true
 
         - model_name: BGP_RP_ASN
           tf_name: bgp_rp_asn
-          description: '1-4294967295 | 1-65535.0-65535, e.g. 65000, 65001'
+          description: 1-4294967295 | 1-65535[.0-65535], e.g. 65000, 65001
           type: String
+          optional: true
+          computed: true
 
         - model_name: BGW_ROUTING_TAG
           tf_name: bgw_routing_tag
-          description: Routing tag associated with IP address of loopback and DCI interfaces
+          description: Routing tag associated with IP address of loopback
+              and DCI interfaces
           type: Int64
           handle_empty: true
           example: 54321
+          optional: true
+          computed: true
+
+        - model_name: BGW_ROUTING_TAG_PREV
+          tf_name: bgw_routing_tag_prev
+          description: Previous state of Border Gateway Routing Tag
+          type: String
+          computed: true
 
         - model_name: BORDER_GWY_CONNECTIONS
           tf_name: border_gwy_connections
           description: >-
-            Manual, Auto Overlay EVPN Peering to Route Servers, Auto Overlay EVPN
-            Direct Peering to Border Gateways
+            Manual, Auto Overlay EVPN Peering to Route Servers, Auto
+            Overlay EVPN Direct Peering to Border Gateways
           type: String
-          validator: 'OneOf("Manual", "Centralized_To_Route_Server", "Direct_To_BGWS")'
+          validator: 'OneOf("Manual", "Centralized_To_Route_Server",
+              "Direct_To_BGWS")'
           example: Manual
+          optional: true
+          computed: true
 
         - model_name: CLOUDSEC_ALGORITHM
           tf_name: cloudsec_algorithm
-          description: AES_128_CMAC or AES_256_CMAC
+          description: CloudSec Cryptographic Algorithm
           type: String
+          validator: 'OneOf("AES_128_CMAC", "AES_256_CMAC")'
+          optional: true
+          computed: true
 
         - model_name: CLOUDSEC_AUTOCONFIG
           tf_name: cloudsec_autoconfig
           description: Auto Config CloudSec on Border Gateways
           type: Bool
           example: false
+          optional: true
+          computed: true
 
         - model_name: CLOUDSEC_ENFORCEMENT
           tf_name: cloudsec_enforcement
-          description: 'If set to strict, data across site must be encrypted.'
+          description: If set to 'strict', data across site must be encrypted.
           type: String
+          validator: 'OneOf("strict", "loose")'
+          optional: true
+          computed: true
 
         - model_name: CLOUDSEC_KEY_STRING
           tf_name: cloudsec_key_string
           description: Cisco Type 7 Encrypted Octet String
           type: String
+          optional: true
+          computed: true
 
         - model_name: CLOUDSEC_REPORT_TIMER
           tf_name: cloudsec_report_timer
-          description: CloudSec Operational Status periodic report timer in minutes
+          description: CloudSec Operational Status periodic report timer in
+              minutes
           type: Int64
           handle_empty: true
+          optional: true
+          computed: true
 
         - model_name: DCI_SUBNET_RANGE
           tf_name: dci_subnet_range
           description: Address range to assign P2P DCI Links
           type: String
           example: 10.10.1.0/24
+          optional: true
+          computed: true
 
         - model_name: DCI_SUBNET_TARGET_MASK
           tf_name: dci_subnet_target_mask
-          description: Target Mask for Subnet Range
+          description: Target Mask for Subnet Range (Min:8, Max:31)
           type: Int64
           handle_empty: true
           example: 30
+          optional: true
+          computed: true
+
+        - model_name: DCNM_ID
+          tf_name: dcnm_id
+          description: DCNM ID
+          type: String
+          computed: true
 
         - model_name: DELAY_RESTORE
           tf_name: delay_restore
@@ -98,53 +140,146 @@ resource:
           type: Int64
           handle_empty: true
           example: 300
+          optional: true
+          computed: true
 
         - model_name: ENABLE_BGP_BFD
           tf_name: enable_bgp_bfd
-          description: For auto-created Multi-Site Underlay IFCs
+          description: BGP BFD on Multi-Site Underlay IFCs
           type: Bool
+          optional: true
+          computed: true
 
         - model_name: ENABLE_BGP_LOG_NEIGHBOR_CHANGE
           tf_name: enable_bgp_log_neighbor_change
-          description: For auto-created Multi-Site Underlay IFCs
+          description: BGP log neighbor change on Multi-Site Underlay IFCs
           type: Bool
+          optional: true
+          computed: true
 
         - model_name: ENABLE_BGP_SEND_COMM
           tf_name: enable_bgp_send_comm
-          description: For auto-created Multi-Site Underlay IFCs
+          description: BGP Send-community on Multi-Site Underlay IFCs
           type: Bool
+          optional: true
+          computed: true
 
         - model_name: ENABLE_PVLAN
           tf_name: enable_pvlan
           description: Enable PVLAN on MSD and its child fabrics
           type: Bool
           example: false
+          optional: true
+          computed: true
+
+        - model_name: ENABLE_PVLAN_PREV
+          tf_name: enable_pvlan_prev
+          description: Previous state of Enable PVLAN
+          type: Bool
+          computed: true
 
         - model_name: ENABLE_RS_REDIST_DIRECT
           tf_name: enable_rs_redist_direct
           description: >-
-            For auto-created Multi-Site overlay IFCs in Route Servers. Applicable
-            only when Multi-Site Overlay IFC Deployment Method is
+            For auto-created Multi-Site overlay IFCs in Route Servers.
+            Applicable only when Multi-Site Overlay IFC Deployment Method is
             Centralized_To_Route_Server.
           type: Bool
+          optional: true
+          computed: true
+
+        - model_name: ENABLE_SGT
+          tf_name: enable_sgt
+          description: Enable Security Groups
+          type: String
+          validator: 'OneOf("off", "strict")'
+          optional: true
+          computed: true
+
+        - model_name: ENABLE_SGT_PREV
+          tf_name: enable_sgt_prev
+          description: Previous state of Enable Security Groups
+          type: String
+          validator: 'OneOf("off", "strict")'
+          computed: true
+
+        - model_name: ENABLE_TRM_TRMv6
+          tf_name: enable_trm_trmv6
+          description: Enable IPv4 and/or IPv6 Tenant Routed Multicast
+              across sites
+          type: Bool
+          optional: true
+          computed: true
+
+        - model_name: ENABLE_TRM_TRMv6_PREV
+          tf_name: enable_trm_trmv6_prev
+          description: Previous state of Enable IPv4 and/or IPv6 Tenant Routed
+              Multicast across sites
+          type: Bool
+          computed: true
+
+        - model_name: EXT_FABRIC_TYPE
+          tf_name: ext_fabric_type
+          description: External Fabric Type
+          type: String
+          optional: true
+          computed: true
+
+        - model_name: FABRIC_TYPE
+          tf_name: fabric_type
+          description: Fabric Type
+          type: String
+          computed: true
+
+        - model_name: FF
+          tf_name: ff
+          description: Template Family
+          type: String
+          optional: true
+          computed: true
 
         - model_name: L2_SEGMENT_ID_RANGE
           tf_name: l2_segment_id_range
           description: Overlay Network Identifier Range
           type: String
           example: 30000-49000
+          optional: true
+          computed: true
 
         - model_name: L3_PARTITION_ID_RANGE
           tf_name: l3_partition_id_range
           description: Overlay VRF Identifier Range
           type: String
           example: 50000-59000
+          optional: true
+          computed: true
+
+        - model_name: LOOPBACK100_IPV6_RANGE
+          tf_name: loopback100_ipv6_range
+          description: Multi-Site VTEP VIP Loopback IPv6 Range
+          type: String
+          optional: true
+          computed: true
 
         - model_name: LOOPBACK100_IP_RANGE
           tf_name: loopback100_ip_range
-          description: Typically Loopback100 IP Address Range
+          description: Multi-Site VTEP VIP Loopback IP Range
           type: String
           example: 10.10.0.0/24
+          optional: true
+          computed: true
+
+        - model_name: MSO_CONTROLER_ID
+          tf_name: mso_controler_id
+          description: MSO Controller ID
+          type: String
+          computed: true
+
+        - model_name: MSO_SITE_GROUP_NAME
+          tf_name: mso_site_group_name
+          description: MSO Site Group Name
+          type: String
+          computed: true
 
         - model_name: MS_IFC_BGP_AUTH_KEY_TYPE
           tf_name: ms_ifc_bgp_auth_key_type
@@ -152,38 +287,81 @@ resource:
           type: Int64
           handle_empty: true
           validator: 'OneOf(3, 7)'
+          optional: true
+          computed: true
+
+        - model_name: MS_IFC_BGP_AUTH_KEY_TYPE_PREV
+          tf_name: ms_ifc_bgp_auth_key_type_prev
+          description: 'BGP Key Encryption Type: 3 - 3DES, 7 - Cisco'
+          type: Int64
+          handle_empty: true
+          computed: true
 
         - model_name: MS_IFC_BGP_PASSWORD
           tf_name: ms_ifc_bgp_password
           description: Encrypted eBGP Password Hex String
           type: String
+          optional: true
+          computed: true
 
         - model_name: MS_IFC_BGP_PASSWORD_ENABLE
           tf_name: ms_ifc_bgp_password_enable
-          description: eBGP password for Multi-Site underlay/overlay IFCs
+          description: Enable Multi-Site eBGP Password
           type: Bool
           example: false
+          optional: true
+          computed: true
+
+        - model_name: MS_IFC_BGP_PASSWORD_ENABLE_PREV
+          tf_name: ms_ifc_bgp_password_enable_prev
+          description: Previous state of Enable Multi-Site eBGP Password
+          type: Bool
+          computed: true
+
+        - model_name: MS_IFC_BGP_PASSWORD_PREV
+          tf_name: ms_ifc_bgp_password_prev
+          description: Previous state of eBGP Password
+          type: String
+          computed: true
 
         - model_name: MS_LOOPBACK_ID
           tf_name: ms_loopback_id
-          description: No description available
+          description: Multi-Site VTEP VIP Loopback ID
           type: Int64
           handle_empty: true
           example: 100
+          optional: true
+          computed: true
 
         - model_name: MS_UNDERLAY_AUTOCONFIG
           tf_name: ms_underlay_autoconfig
-          description: No description available
+          description: Multi-Site Underlay IFC Auto Deployment Flag
           type: Bool
           example: false
+          optional: true
+          computed: true
+
+        - model_name: PARENT_ONEMANAGE_FABRIC
+          tf_name: parent_onemanage_fabric
+          description: Parent OneManage Fabric
+          type: String
+          computed: true
+
+        - model_name: PREMSO_PARENT_FABRIC
+          tf_name: premso_parent_fabric
+          description: Pre-MSO Parent Fabric
+          type: String
+          computed: true
 
         - model_name: RP_SERVER_IP
           tf_name: rp_server_ip
           description: >-
             Multi-Site Route-Server peer list (typically loopback IP address on
-            Route-Server for Multi-Site EVPN peering with BGWs), e.g. 128.89.0.1,
-            128.89.0.2
+            Route-Server for Multi-Site EVPN peering with BGWs),
+            e.g. 128.89.0.1, 128.89.0.2
           type: String
+          optional: true
+          computed: true
 
         - model_name: RS_ROUTING_TAG
           tf_name: rs_routing_tag
@@ -192,55 +370,158 @@ resource:
             This is the IP used in eBGP EVPN peering.
           type: Int64
           handle_empty: true
+          optional: true
+          computed: true
+
+        - model_name: SGT_ID_RANGE
+          tf_name: sgt_id_range
+          description: Security Group Tag (SGT) ID Range
+          type: String
+          optional: true
+          computed: true
+
+        - model_name: SGT_ID_RANGE_PREV
+          tf_name: sgt_id_range_prev
+          description: Previous state of Security Group Tag (SGT) ID Range
+          type: String
+          computed: true
+
+        - model_name: SGT_NAME_PREFIX
+          tf_name: sgt_name_prefix
+          description: Prefix to be used when a new Security Group is created.
+          type: String
+          optional: true
+          computed: true
+
+        - model_name: SGT_NAME_PREFIX_PREV
+          tf_name: sgt_name_prefix_prev
+          description: Previous state of Security Group Name Prefix
+          type: String
+          computed: true
+
+        - model_name: SGT_OPER_STATUS
+          tf_name: sgt_oper_status
+          description: Operational status for Security Groups
+          type: String
+          validator: 'OneOf("on", "off")'
+          computed: true
+
+        - model_name: SGT_PREPROVISION
+          tf_name: sgt_preprovision
+          description: Generate security groups configuration for non-enforced
+              VRFs
+          type: Bool
+          optional: true
+          computed: true
+
+        - model_name: SGT_PREPROVISION_PREV
+          tf_name: sgt_preprovision_prev
+          description: Previous state of Security Groups Pre-provision
+          type: Bool
+          computed: true
+
+        - model_name: SGT_PREPROV_RECALC_STATUS
+          tf_name: sgt_preprov_recalc_status
+          description: Recalculation status for Security Groups Pre-provision
+          type: String
+          validator: 'OneOf("start", "empty", "completed")'
+          computed: true
+
+        - model_name: SGT_RECALC_STATUS
+          tf_name: sgt_recalc_status
+          description: Recalculation status for Security Groups
+          validator: 'OneOf("start", "empty", "completed")'
+          type: String
+          computed: true
 
         - model_name: TOR_AUTO_DEPLOY
           tf_name: tor_auto_deploy
           description: Enables Overlay VLANs on uplink between ToRs and Leafs
           type: Bool
           example: false
+          optional: true
+          computed: true
+
+        - model_name: V6_DCI_SUBNET_RANGE
+          tf_name: v6_dci_subnet_range
+          description: Address range to assign P2P DCI Links
+          type: String
+          optional: true
+          computed: true
+
+        - model_name: V6_DCI_SUBNET_TARGET_MASK
+          tf_name: v6_dci_subnet_target_mask
+          description: Target IPv6 Mask for Subnet Range (Min:120, Max:127)
+          type: Int64
+          handle_empty: true
+          optional: true
+          computed: true
+
+        - model_name: VXLAN_UNDERLAY_IS_V6
+          tf_name: vxlan_underlay_is_v6
+          description: If not enabled, IPv4 underlay is used in child VXLAN
+              fabric
+          type: Bool
+          optional: true
+          computed: true
 
         - model_name: default_network
           tf_name: default_network
           description: Default Overlay Network Template For Leafs
           type: String
-          validator: 'OneOf("Default_Network_Universal", "Service_Network_Universal")'
+          validator: 'OneOf("Default_Network_Universal",
+              "Service_Network_Universal")'
           example: Default_Network_Universal
+          optional: true
+          computed: true
 
         - model_name: default_pvlan_sec_network
           tf_name: default_pvlan_sec_network
           description: Default PVLAN Secondary Network Template
           type: String
+          optional: true
+          computed: true
 
         - model_name: default_vrf
           tf_name: default_vrf
           description: Default Overlay VRF Template For Leafs
           type: String
           example: Default_VRF_Universal
+          optional: true
+          computed: true
 
         - model_name: enableScheduledBackup
           tf_name: enable_scheduled_backup
           description: >-
-            Backup at the specified time. Note: Fabric Backup/Restore functionality
-            is being deprecated for MSD fabrics. Recommendation is to use NDFC
-            Backup & Restore
+            Backup at the specified time. Note: Fabric Backup/Restore
+            functionality is being deprecated for MSD fabrics.
+            Recommendation is to use NDFC Backup & Restore
           type: Bool
+          optional: true
+          computed: true
 
         - model_name: network_extension_template
           tf_name: network_extension_template
           description: Default Overlay Network Template For Borders
           type: String
           example: Default_Network_Extension_Universal
+          optional: true
+          computed: true
 
         - model_name: scheduledTime
           tf_name: scheduled_time
-          description: 'Time (UTC) in 24hr format. (00:00 to 23:59)'
+          description: Time (UTC) in 24hr format. (00:00 to 23:59)
           type: String
+          optional: true
+          computed: true
 
         - model_name: vrf_extension_template
           tf_name: vrf_extension_template
           description: Default Overlay VRF Template For Borders
           type: String
           example: Default_VRF_Extension_Universal
+          optional: true
+          computed: true
 
         - model_name: deploy
           tf_name: deploy
@@ -254,8 +535,8 @@ resource:
         - model_name: deployment_status
           tf_name: deployment_status
           description: >-
-            This fields shows the actual status of the deployment. It can be one of
-            the following: Deployment pending Deployment successful
+            This fields shows the actual status of the deployment. It can be
+            one of the following: Deployment pending Deployment successful
           type: String
           computed: true
           payload_hide: true
