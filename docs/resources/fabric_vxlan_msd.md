@@ -3,12 +3,12 @@
 page_title: "ndfc_fabric_vxlan_msd Resource - terraform-provider-ndfc"
 subcategory: ""
 description: |-
-  Resource to configure and manage a VXLAN MSD Fabric
+  Resource to configure and manage a VXLAN MSD Fabric. Only creation/updation/deletion of the fabric is supported, resources on top of the fabric are not supported yet.
 ---
 
 # ndfc_fabric_vxlan_msd (Resource)
 
-Resource to configure and manage a VXLAN MSD Fabric
+Resource to configure and manage a VXLAN MSD Fabric. Only creation/updation/deletion of the fabric is supported, resources on top of the fabric are not supported yet.
 
 ## Example Usage
 
@@ -44,47 +44,77 @@ resource "ndfc_fabric_vxlan_msd" "test_resource_fabric_vxlan_msd_1" {
 ### Required
 
 - `deploy` (Boolean) This flag does configuration save and deploy
-- `fabric_name` (String) Fabric name to be created, updated or deleted (Max Size 64).
+- `fabric_name` (String) Fabric name to be created, updated or deleted.
 
 ### Optional
 
-- `anycast_gw_mac` (String) Shared MAC address for all leaves
-- `bgp_rp_asn` (String) 1-4294967295 | 1-65535.0-65535, e.g. 65000, 65001
+- `anycast_gw_mac` (String) Shared MAC address for all leafs
+- `bgp_rp_asn` (String) 1-4294967295 | 1-65535[.0-65535], e.g. 65000, 65001
 - `bgw_routing_tag` (Number) Routing tag associated with IP address of loopback and DCI interfaces
 - `border_gwy_connections` (String) Manual, Auto Overlay EVPN Peering to Route Servers, Auto Overlay EVPN Direct Peering to Border Gateways
-- `cloudsec_algorithm` (String) AES_128_CMAC or AES_256_CMAC
+- `cloudsec_algorithm` (String) CloudSec Cryptographic Algorithm
 - `cloudsec_autoconfig` (Boolean) Auto Config CloudSec on Border Gateways
-- `cloudsec_enforcement` (String) If set to strict, data across site must be encrypted.
+- `cloudsec_enforcement` (String) If set to 'strict', data across site must be encrypted.
 - `cloudsec_key_string` (String) Cisco Type 7 Encrypted Octet String
 - `cloudsec_report_timer` (Number) CloudSec Operational Status periodic report timer in minutes
 - `dci_subnet_range` (String) Address range to assign P2P DCI Links
-- `dci_subnet_target_mask` (Number) Target Mask for Subnet Range
+- `dci_subnet_target_mask` (Number) Target Mask for Subnet Range (Min:8, Max:31)
 - `default_network` (String) Default Overlay Network Template For Leafs
 - `default_pvlan_sec_network` (String) Default PVLAN Secondary Network Template
 - `default_vrf` (String) Default Overlay VRF Template For Leafs
 - `delay_restore` (Number) Multi-Site underlay and overlay control plane convergence time in seconds
-- `enable_bgp_bfd` (Boolean) For auto-created Multi-Site Underlay IFCs
-- `enable_bgp_log_neighbor_change` (Boolean) For auto-created Multi-Site Underlay IFCs
-- `enable_bgp_send_comm` (Boolean) For auto-created Multi-Site Underlay IFCs
+- `enable_bgp_bfd` (Boolean) BGP BFD on Multi-Site Underlay IFCs
+- `enable_bgp_log_neighbor_change` (Boolean) BGP log neighbor change on Multi-Site Underlay IFCs
+- `enable_bgp_send_comm` (Boolean) BGP Send-community on Multi-Site Underlay IFCs
 - `enable_pvlan` (Boolean) Enable PVLAN on MSD and its child fabrics
 - `enable_rs_redist_direct` (Boolean) For auto-created Multi-Site overlay IFCs in Route Servers. Applicable only when Multi-Site Overlay IFC Deployment Method is Centralized_To_Route_Server.
 - `enable_scheduled_backup` (Boolean) Backup at the specified time. Note: Fabric Backup/Restore functionality is being deprecated for MSD fabrics. Recommendation is to use NDFC Backup & Restore
+- `enable_sgt` (String) Enable Security Groups
+- `enable_trm_trmv6` (Boolean) Enable IPv4 and/or IPv6 Tenant Routed Multicast across sites
+- `ext_fabric_type` (String) External Fabric Type
+- `ff` (String) Template Family
 - `l2_segment_id_range` (String) Overlay Network Identifier Range
 - `l3_partition_id_range` (String) Overlay VRF Identifier Range
-- `loopback100_ip_range` (String) Typically Loopback100 IP Address Range
+- `loopback100_ip_range` (String) Multi-Site VTEP VIP Loopback IP Range
+- `loopback100_ipv6_range` (String) Multi-Site VTEP VIP Loopback IPv6 Range
 - `ms_ifc_bgp_auth_key_type` (Number) BGP Key Encryption Type: 3 - 3DES, 7 - Cisco
 - `ms_ifc_bgp_password` (String) Encrypted eBGP Password Hex String
-- `ms_ifc_bgp_password_enable` (Boolean) eBGP password for Multi-Site underlay/overlay IFCs
-- `ms_loopback_id` (Number) No description available
-- `ms_underlay_autoconfig` (Boolean) No description available
+- `ms_ifc_bgp_password_enable` (Boolean) Enable Multi-Site eBGP Password
+- `ms_loopback_id` (Number) Multi-Site VTEP VIP Loopback ID
+- `ms_underlay_autoconfig` (Boolean) Multi-Site Underlay IFC Auto Deployment Flag
 - `network_extension_template` (String) Default Overlay Network Template For Borders
 - `rp_server_ip` (String) Multi-Site Route-Server peer list (typically loopback IP address on Route-Server for Multi-Site EVPN peering with BGWs), e.g. 128.89.0.1, 128.89.0.2
 - `rs_routing_tag` (Number) Routing tag associated with Route Server IP for redistribute direct. This is the IP used in eBGP EVPN peering.
 - `scheduled_time` (String) Time (UTC) in 24hr format. (00:00 to 23:59)
+- `sgt_id_range` (String) Security Group Tag (SGT) ID Range
+- `sgt_name_prefix` (String) Prefix to be used when a new Security Group is created.
+- `sgt_preprovision` (Boolean) Generate security groups configuration for non-enforced VRFs
 - `tor_auto_deploy` (Boolean) Enables Overlay VLANs on uplink between ToRs and Leafs
+- `v6_dci_subnet_range` (String) Address range to assign P2P DCI Links
+- `v6_dci_subnet_target_mask` (Number) Target IPv6 Mask for Subnet Range (Min:120, Max:127)
 - `vrf_extension_template` (String) Default Overlay VRF Template For Borders
+- `vxlan_underlay_is_v6` (Boolean) If not enabled, IPv4 underlay is used in child VXLAN fabric
 
 ### Read-Only
 
+- `bgw_routing_tag_prev` (String) Previous state of Border Gateway Routing Tag
+- `dcnm_id` (String) DCNM ID
 - `deployment_status` (String) This fields shows the actual status of the deployment. It can be one of the following: Deployment pending Deployment successful
+- `enable_pvlan_prev` (Boolean) Previous state of Enable PVLAN
+- `enable_sgt_prev` (String) Previous state of Enable Security Groups
+- `enable_trm_trmv6_prev` (Boolean) Previous state of Enable IPv4 and/or IPv6 Tenant Routed Multicast across sites
+- `fabric_type` (String) Fabric Type
 - `id` (String) Terraform unique Id for the fabric resource
+- `ms_ifc_bgp_auth_key_type_prev` (Number) BGP Key Encryption Type: 3 - 3DES, 7 - Cisco
+- `ms_ifc_bgp_password_enable_prev` (Boolean) Previous state of Enable Multi-Site eBGP Password
+- `ms_ifc_bgp_password_prev` (String) Previous state of eBGP Password
+- `mso_controler_id` (String) MSO Controller ID
+- `mso_site_group_name` (String) MSO Site Group Name
+- `parent_onemanage_fabric` (String) Parent OneManage Fabric
+- `premso_parent_fabric` (String) Pre-MSO Parent Fabric
+- `sgt_id_range_prev` (String) Previous state of Security Group Tag (SGT) ID Range
+- `sgt_name_prefix_prev` (String) Previous state of Security Group Name Prefix
+- `sgt_oper_status` (String) Operational status for Security Groups
+- `sgt_preprov_recalc_status` (String) Recalculation status for Security Groups Pre-provision
+- `sgt_preprovision_prev` (Boolean) Previous state of Security Groups Pre-provision
+- `sgt_recalc_status` (String) Recalculation status for Security Groups

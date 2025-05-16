@@ -9,7 +9,6 @@ resource "ndfc_fabric_ipfm" "test_resource_fabric_ipfm_1" {
   enable_aaa               = false
   enable_asm               = false
   enable_nbm_passive       = false
-  fabric_interface_type    = "p2p"
   fabric_mtu               = 9216
   feature_ptp              = false
   isis_auth_enable         = false
