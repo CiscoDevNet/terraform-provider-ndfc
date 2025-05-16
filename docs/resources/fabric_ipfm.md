@@ -3,12 +3,12 @@
 page_title: "ndfc_fabric_ipfm Resource - terraform-provider-ndfc"
 subcategory: ""
 description: |-
-  Resource to configure and manage IP Fabric Media
+  Resource to configure and manage IP Fabric Media.  Only creation/updation/deletion of the fabric is supported, resources on top of the fabric are not supported yet.
 ---
 
 # ndfc_fabric_ipfm (Resource)
 
-Resource to configure and manage IP Fabric Media
+Resource to configure and manage IP Fabric Media.  Only creation/updation/deletion of the fabric is supported, resources on top of the fabric are not supported yet.
 
 ## Example Usage
 
@@ -23,7 +23,6 @@ resource "ndfc_fabric_ipfm" "test_resource_fabric_ipfm_1" {
   enable_aaa               = false
   enable_asm               = false
   enable_nbm_passive       = false
-  fabric_interface_type    = "p2p"
   fabric_mtu               = 9216
   feature_ptp              = false
   isis_auth_enable         = false
@@ -53,17 +52,21 @@ resource "ndfc_fabric_ipfm" "test_resource_fabric_ipfm_1" {
 ### Required
 
 - `deploy` (Boolean) This flag does configuration save and deploy
-- `fabric_name` (String) Fabric name to be created, updated or deleted (Max Size 64).
+- `fabric_name` (String) Fabric name to be created, updated or deleted.
 
 ### Optional
 
-- `aaa_remote_ip_enabled` (Boolean) Enable only when IP Authorization is enabled in the AAA Server
+- `aaa_remote_ip_enabled` (Boolean) Enable only, when IP Authorization is enabled in the AAA \ Server
 - `aaa_server_conf` (String) AAA Configurations
+- `active_migration` (Boolean) Active Migration
+- `agent_intf` (String) Interface to connect to Agent
 - `asm_group_ranges` (String) ASM group ranges with prefixes (len:4-32) example: 239.1.1.0/25, max 20 ranges. Enabling SPT-Threshold Infinity to prevent switchover to source-tree.
 - `bootstrap_conf` (String) Additional CLIs required during device bootup/login e.g. AAA/Radius
 - `bootstrap_enable` (Boolean) Automatic IP Assignment For POAP
-- `bootstrap_multisubnet` (String) lines with # prefix are ignored here
+- `bootstrap_multisubnet` (String) DHCPv4 Multi Subnet Scope - lines with # prefix are ignored here
+- `brfield_debug_flag` (String) Only for brf debugging purpose !!!
 - `cdp_enable` (Boolean) Enable CDP on management interface
+- `deployment_freeze` (Boolean) Disable all deployments in this fabric
 - `dhcp_enable` (Boolean) Automatic IP Assignment For POAP From Local DHCP Server
 - `dhcp_end` (String) End Address For Switch Out-of-Band POAP
 - `dhcp_ipv6_enable` (String) No description available
@@ -71,18 +74,25 @@ resource "ndfc_fabric_ipfm" "test_resource_fabric_ipfm_1" {
 - `dns_server_ip_list` (String) Comma separated list of IP Addresses (v4/v6)
 - `dns_server_vrf` (String) One VRF for all DNS servers or a comma separated list of VRFs, one per DNS server
 - `enable_aaa` (Boolean) Include AAA configs from Manageability tab during device bootup
+- `enable_agent` (Boolean) Enable Agent (development purpose only)
 - `enable_asm` (Boolean) Enable groups with receivers sending (*,G) joins
 - `enable_nbm_passive` (Boolean) Enable NBM mode to pim-passive for default VRF
+- `enable_nxapi` (Boolean) Enable HTTPS NX-API
+- `enable_nxapi_http` (Boolean) Enable HTTP NX-API
+- `enable_rt_intf_stats` (Boolean) Valid for NX-OS only
+- `ext_fabric_type` (String) External Fabric Type
 - `extra_conf_intra_links` (String) Additional CLIs For All Intra-Fabric Links
 - `extra_conf_leaf` (String) Additional CLIs For All Leafs and Tier2 Leafs As Captured From Show Running Configuration
 - `extra_conf_spine` (String) Additional CLIs For All Spines As Captured From Show Running Configuration
-- `fabric_interface_type` (String) Only Numbered(Point-to-Point) is supported
 - `fabric_mtu` (Number) Must be an even number
-- `feature_ptp` (Boolean) No description available
-- `isis_auth_enable` (Boolean) No description available
+- `feature_ptp` (Boolean) Enable Precision Time Protocol (PTP)
+- `ff` (String) Template Family
+- `grfield_debug_flag` (String) Enable to clean switch configuration without reload when PreserveConfig=no
+- `intf_stat_load_interval` (Number) Time in seconds (Min:5, Max:300)
+- `isis_auth_enable` (Boolean) Enable IS-IS Authentication
 - `isis_auth_key` (String) Cisco Type 7 Encrypted
-- `isis_auth_keychain_key_id` (Number) No description available
-- `isis_auth_keychain_name` (String) No description available
+- `isis_auth_keychain_key_id` (Number) IS-IS Authentication Key ID (Min:0, Max:65535)
+- `isis_auth_keychain_name` (String) IS-IS Authentication Keychain Name
 - `isis_level` (String) Supported IS types: level-1, level-2
 - `isis_p2p_enable` (Boolean) This will enable network point-to-point on fabric interfaces which are numbered
 - `l2_host_intf_mtu` (Number) Must be an even number
@@ -90,21 +100,24 @@ resource "ndfc_fabric_ipfm" "test_resource_fabric_ipfm_1" {
 - `link_state_routing_tag` (String) Routing process tag for the fabric
 - `loopback0_ip_range` (String) Routing Loopback IP Address Range
 - `mgmt_gw` (String) Default Gateway For Management VRF On The Switch
-- `mgmt_prefix` (Number) No description available
+- `mgmt_prefix` (Number) Switch Mgmt IP Subnet Prefix (Min:8, Max:30)
 - `ntp_server_ip_list` (String) Comma separated list of IP Addresses (v4/v6)
 - `ntp_server_vrf` (String) One VRF for all NTP servers or a comma separated list of VRFs, one per NTP server
+- `nxapi_http_port` (Number) NX-API HTTP Port Number
+- `nxapi_https_port` (Number) NX-API HTTPS Port Number
 - `nxapi_vrf` (String) VRF used for NX-API communication
 - `ospf_area_id` (String) OSPF Area Id in IP address format
-- `ospf_auth_enable` (Boolean) No description available
+- `ospf_auth_enable` (Boolean) Enable OSPF Authentication
 - `ospf_auth_key` (String) 3DES Encrypted
 - `ospf_auth_key_id` (Number) No description available
-- `pim_hello_auth_enable` (Boolean) No description available
+- `pim_hello_auth_enable` (Boolean) Enable PIM Hello Authentication
 - `pim_hello_auth_key` (String) 3DES Encrypted
-- `pm_enable` (Boolean) No description available
+- `pm_enable` (Boolean) Enable Performance Monitoring
 - `power_redundancy_mode` (String) Default power supply mode for the fabric
-- `ptp_domain_id` (Number) Multiple Independent PTP Clocking Subdomains on a Single Network
+- `ptp_domain_id` (Number) Multiple Independent PTP Clocking Subdomains on a Single Network (Min:0, Max:127)
 - `ptp_lb_id` (Number) No description available
 - `ptp_profile` (String) Enabled on ISL links only
+- `replication_mode` (String) Replication Mode
 - `routing_lb_id` (Number) No description available
 - `rp_ip_range` (String) RP Loopback IP Address Range
 - `rp_lb_id` (Number) No description available
@@ -114,9 +127,44 @@ resource "ndfc_fabric_ipfm" "test_resource_fabric_ipfm_1" {
 - `subnet_target_mask` (Number) Mask for Fabric Subnet IP Range
 - `syslog_server_ip_list` (String) Comma separated list of IP Addresses (v4/v6)
 - `syslog_server_vrf` (String) One VRF for all Syslog servers or a comma separated list of VRFs, one per Syslog server
-- `syslog_sev` (String) Comma separated list of Syslog severity values, one per Syslog server
+- `syslog_sev` (String) Comma separated list of Syslog severity values, one per Syslog server (Min:0, Max:7)
 
 ### Read-Only
 
+- `abstract_dhcp` (String) DHCP Configuration
+- `abstract_extra_config_bootstrap` (String) Add Extra Configuration for Bootstrap
+- `abstract_extra_config_leaf` (String) Add Extra Configuration for Leaf
+- `abstract_extra_config_spine` (String) Add Extra Configuration for Spine
+- `abstract_isis` (String) ISIS Network Configuration
+- `abstract_isis_interface` (String) ISIS Interface Configuration
+- `abstract_loopback_interface` (String) Primary Loopback Interface Configuration
+- `abstract_ospf` (String) OSPF Network Configuration
+- `abstract_ospf_interface` (String) OSPF Interface Configuration
+- `abstract_pim_interface` (String) PIM Interface Configuration
+- `abstract_routed_host` (String) L3 Port Configuration
+- `bootstrap_multisubnet_internal` (String) Internal Bootstrap Multi Subnet Scope
 - `deployment_status` (String) This fields shows the actual status of the deployment. It can be one of the following: Deployment pending Deployment successful
-- `id` (String) Terraform unique Id for the fabric resource
+- `dhcp_end_internal` (String) Internal DHCP End Address
+- `dhcp_ipv6_enable_internal` (String) Internal DHCP IPv6 Enable
+- `dhcp_start_internal` (String) Internal DHCP Start Address
+- `enable_nbm_passive_prev` (Boolean) Previous state of Enable NBM Passive Mode
+- `fabric_interface_type` (String) Only Numbered(Point-to-Point) is supported
+- `fabric_mtu_prev` (Number) Previous state of Fabric MTU
+- `fabric_technology` (String) Fabric Technology
+- `fabric_type` (String) Fabric Type
+- `feature_ptp_internal` (Boolean) Internal Feature PTP
+- `id` (String) Terraform unique Id for the ipfm fabric resource
+- `interface_ethernet_default_policy` (String) Default policy for Ethernet interface of spine/leaf/ tier2-leaf switches
+- `interface_loopback_default_policy` (String) Loopback Interface Default Policy
+- `interface_port_channel_default_policy` (String) Port Channel Interface Default Policy
+- `interface_vlan_default_policy` (String) VLAN Interface Default Policy
+- `l2_host_intf_mtu_prev` (Number) Previous state of Layer 2 Host Interface MTU
+- `link_state_routing_tag_prev` (String) Previous state of Link State Routing Tag
+- `mgmt_gw_internal` (String) Internal Management Gateway
+- `mgmt_prefix_internal` (Number) Internal Management Prefix
+- `mgmt_v6prefix` (Number) Switch Mgmt IPv6 Subnet Prefix (Min:64, Max:126)
+- `mgmt_v6prefix_internal` (Number) Internal Management IPv6 Prefix
+- `pm_enable_prev` (Boolean) Previous state of Enable Performance Monitoring
+- `rp_ip_range_internal` (String) Internal RP IP Range
+- `spine_count` (Number) Spine Count
+- `upgrade_from_version` (String) Upgrade From Version

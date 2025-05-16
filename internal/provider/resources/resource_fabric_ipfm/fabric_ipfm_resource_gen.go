@@ -19,36 +19,127 @@ func FabricIpfmResourceSchema(ctx context.Context) schema.Schema {
 		Attributes: map[string]schema.Attribute{
 			"aaa_remote_ip_enabled": schema.BoolAttribute{
 				Optional:            true,
-				Description:         "Enable only when IP Authorization is enabled in the AAA Server",
-				MarkdownDescription: "Enable only when IP Authorization is enabled in the AAA Server",
+				Computed:            true,
+				Description:         "Enable only, when IP Authorization is enabled in the AAA \\ Server",
+				MarkdownDescription: "Enable only, when IP Authorization is enabled in the AAA \\ Server",
 			},
 			"aaa_server_conf": schema.StringAttribute{
 				Optional:            true,
+				Computed:            true,
 				Description:         "AAA Configurations",
 				MarkdownDescription: "AAA Configurations",
 			},
+			"abstract_dhcp": schema.StringAttribute{
+				Computed:            true,
+				Description:         "DHCP Configuration",
+				MarkdownDescription: "DHCP Configuration",
+			},
+			"abstract_extra_config_bootstrap": schema.StringAttribute{
+				Computed:            true,
+				Description:         "Add Extra Configuration for Bootstrap",
+				MarkdownDescription: "Add Extra Configuration for Bootstrap",
+			},
+			"abstract_extra_config_leaf": schema.StringAttribute{
+				Computed:            true,
+				Description:         "Add Extra Configuration for Leaf",
+				MarkdownDescription: "Add Extra Configuration for Leaf",
+			},
+			"abstract_extra_config_spine": schema.StringAttribute{
+				Computed:            true,
+				Description:         "Add Extra Configuration for Spine",
+				MarkdownDescription: "Add Extra Configuration for Spine",
+			},
+			"abstract_isis": schema.StringAttribute{
+				Computed:            true,
+				Description:         "ISIS Network Configuration",
+				MarkdownDescription: "ISIS Network Configuration",
+			},
+			"abstract_isis_interface": schema.StringAttribute{
+				Computed:            true,
+				Description:         "ISIS Interface Configuration",
+				MarkdownDescription: "ISIS Interface Configuration",
+			},
+			"abstract_loopback_interface": schema.StringAttribute{
+				Computed:            true,
+				Description:         "Primary Loopback Interface Configuration",
+				MarkdownDescription: "Primary Loopback Interface Configuration",
+			},
+			"abstract_ospf": schema.StringAttribute{
+				Computed:            true,
+				Description:         "OSPF Network Configuration",
+				MarkdownDescription: "OSPF Network Configuration",
+			},
+			"abstract_ospf_interface": schema.StringAttribute{
+				Computed:            true,
+				Description:         "OSPF Interface Configuration",
+				MarkdownDescription: "OSPF Interface Configuration",
+			},
+			"abstract_pim_interface": schema.StringAttribute{
+				Computed:            true,
+				Description:         "PIM Interface Configuration",
+				MarkdownDescription: "PIM Interface Configuration",
+			},
+			"abstract_routed_host": schema.StringAttribute{
+				Computed:            true,
+				Description:         "L3 Port Configuration",
+				MarkdownDescription: "L3 Port Configuration",
+			},
+			"active_migration": schema.BoolAttribute{
+				Optional:            true,
+				Computed:            true,
+				Description:         "Active Migration",
+				MarkdownDescription: "Active Migration",
+			},
+			"agent_intf": schema.StringAttribute{
+				Optional:            true,
+				Computed:            true,
+				Description:         "Interface to connect to Agent",
+				MarkdownDescription: "Interface to connect to Agent",
+				Validators: []validator.String{
+					stringvalidator.OneOf("eth0", "eth1"),
+				},
+			},
 			"asm_group_ranges": schema.StringAttribute{
 				Optional:            true,
+				Computed:            true,
 				Description:         "ASM group ranges with prefixes (len:4-32) example: 239.1.1.0/25, max 20 ranges. Enabling SPT-Threshold Infinity to prevent switchover to source-tree.",
 				MarkdownDescription: "ASM group ranges with prefixes (len:4-32) example: 239.1.1.0/25, max 20 ranges. Enabling SPT-Threshold Infinity to prevent switchover to source-tree.",
 			},
 			"bootstrap_conf": schema.StringAttribute{
 				Optional:            true,
+				Computed:            true,
 				Description:         "Additional CLIs required during device bootup/login e.g. AAA/Radius",
 				MarkdownDescription: "Additional CLIs required during device bootup/login e.g. AAA/Radius",
 			},
 			"bootstrap_enable": schema.BoolAttribute{
 				Optional:            true,
+				Computed:            true,
 				Description:         "Automatic IP Assignment For POAP",
 				MarkdownDescription: "Automatic IP Assignment For POAP",
 			},
 			"bootstrap_multisubnet": schema.StringAttribute{
 				Optional:            true,
-				Description:         "lines with # prefix are ignored here",
-				MarkdownDescription: "lines with # prefix are ignored here",
+				Computed:            true,
+				Description:         "DHCPv4 Multi Subnet Scope - lines with # prefix are ignored here",
+				MarkdownDescription: "DHCPv4 Multi Subnet Scope - lines with # prefix are ignored here",
+			},
+			"bootstrap_multisubnet_internal": schema.StringAttribute{
+				Computed:            true,
+				Description:         "Internal Bootstrap Multi Subnet Scope",
+				MarkdownDescription: "Internal Bootstrap Multi Subnet Scope",
+			},
+			"brfield_debug_flag": schema.StringAttribute{
+				Optional:            true,
+				Computed:            true,
+				Description:         "Only for brf debugging purpose !!!",
+				MarkdownDescription: "Only for brf debugging purpose !!!",
+				Validators: []validator.String{
+					stringvalidator.OneOf("Enable", "Disable"),
+				},
 			},
 			"cdp_enable": schema.BoolAttribute{
 				Optional:            true,
+				Computed:            true,
 				Description:         "Enable CDP on management interface",
 				MarkdownDescription: "Enable CDP on management interface",
 			},
@@ -57,6 +148,12 @@ func FabricIpfmResourceSchema(ctx context.Context) schema.Schema {
 				Description:         "This flag does configuration save and deploy",
 				MarkdownDescription: "This flag does configuration save and deploy",
 			},
+			"deployment_freeze": schema.BoolAttribute{
+				Optional:            true,
+				Computed:            true,
+				Description:         "Disable all deployments in this fabric",
+				MarkdownDescription: "Disable all deployments in this fabric",
+			},
 			"deployment_status": schema.StringAttribute{
 				Computed:            true,
 				Description:         "This fields shows the actual status of the deployment. It can be one of the following: Deployment pending Deployment successful",
@@ -64,69 +161,131 @@ func FabricIpfmResourceSchema(ctx context.Context) schema.Schema {
 			},
 			"dhcp_enable": schema.BoolAttribute{
 				Optional:            true,
+				Computed:            true,
 				Description:         "Automatic IP Assignment For POAP From Local DHCP Server",
 				MarkdownDescription: "Automatic IP Assignment For POAP From Local DHCP Server",
 			},
 			"dhcp_end": schema.StringAttribute{
 				Optional:            true,
+				Computed:            true,
 				Description:         "End Address For Switch Out-of-Band POAP",
 				MarkdownDescription: "End Address For Switch Out-of-Band POAP",
 			},
+			"dhcp_end_internal": schema.StringAttribute{
+				Computed:            true,
+				Description:         "Internal DHCP End Address",
+				MarkdownDescription: "Internal DHCP End Address",
+			},
 			"dhcp_ipv6_enable": schema.StringAttribute{
 				Optional:            true,
+				Computed:            true,
 				Description:         "No description available",
 				MarkdownDescription: "No description available",
 				Validators: []validator.String{
 					stringvalidator.OneOf("DHCPv4"),
 				},
 			},
+			"dhcp_ipv6_enable_internal": schema.StringAttribute{
+				Computed:            true,
+				Description:         "Internal DHCP IPv6 Enable",
+				MarkdownDescription: "Internal DHCP IPv6 Enable",
+			},
 			"dhcp_start": schema.StringAttribute{
 				Optional:            true,
+				Computed:            true,
 				Description:         "Start Address For Switch Out-of-Band POAP",
 				MarkdownDescription: "Start Address For Switch Out-of-Band POAP",
 			},
+			"dhcp_start_internal": schema.StringAttribute{
+				Computed:            true,
+				Description:         "Internal DHCP Start Address",
+				MarkdownDescription: "Internal DHCP Start Address",
+			},
 			"dns_server_ip_list": schema.StringAttribute{
 				Optional:            true,
+				Computed:            true,
 				Description:         "Comma separated list of IP Addresses (v4/v6)",
 				MarkdownDescription: "Comma separated list of IP Addresses (v4/v6)",
 			},
 			"dns_server_vrf": schema.StringAttribute{
 				Optional:            true,
+				Computed:            true,
 				Description:         "One VRF for all DNS servers or a comma separated list of VRFs, one per DNS server",
 				MarkdownDescription: "One VRF for all DNS servers or a comma separated list of VRFs, one per DNS server",
 			},
 			"enable_aaa": schema.BoolAttribute{
 				Optional:            true,
+				Computed:            true,
 				Description:         "Include AAA configs from Manageability tab during device bootup",
 				MarkdownDescription: "Include AAA configs from Manageability tab during device bootup",
 			},
+			"enable_agent": schema.BoolAttribute{
+				Optional:            true,
+				Computed:            true,
+				Description:         "Enable Agent (development purpose only)",
+				MarkdownDescription: "Enable Agent (development purpose only)",
+			},
 			"enable_asm": schema.BoolAttribute{
 				Optional:            true,
+				Computed:            true,
 				Description:         "Enable groups with receivers sending (*,G) joins",
 				MarkdownDescription: "Enable groups with receivers sending (*,G) joins",
 			},
 			"enable_nbm_passive": schema.BoolAttribute{
 				Optional:            true,
+				Computed:            true,
 				Description:         "Enable NBM mode to pim-passive for default VRF",
 				MarkdownDescription: "Enable NBM mode to pim-passive for default VRF",
 			},
+			"enable_nbm_passive_prev": schema.BoolAttribute{
+				Computed:            true,
+				Description:         "Previous state of Enable NBM Passive Mode",
+				MarkdownDescription: "Previous state of Enable NBM Passive Mode",
+			},
+			"enable_nxapi": schema.BoolAttribute{
+				Optional:            true,
+				Computed:            true,
+				Description:         "Enable HTTPS NX-API",
+				MarkdownDescription: "Enable HTTPS NX-API",
+			},
+			"enable_nxapi_http": schema.BoolAttribute{
+				Optional:            true,
+				Computed:            true,
+				Description:         "Enable HTTP NX-API",
+				MarkdownDescription: "Enable HTTP NX-API",
+			},
+			"enable_rt_intf_stats": schema.BoolAttribute{
+				Optional:            true,
+				Computed:            true,
+				Description:         "Valid for NX-OS only",
+				MarkdownDescription: "Valid for NX-OS only",
+			},
+			"ext_fabric_type": schema.StringAttribute{
+				Optional:            true,
+				Computed:            true,
+				Description:         "External Fabric Type",
+				MarkdownDescription: "External Fabric Type",
+			},
 			"extra_conf_intra_links": schema.StringAttribute{
 				Optional:            true,
+				Computed:            true,
 				Description:         "Additional CLIs For All Intra-Fabric Links",
 				MarkdownDescription: "Additional CLIs For All Intra-Fabric Links",
 			},
 			"extra_conf_leaf": schema.StringAttribute{
 				Optional:            true,
+				Computed:            true,
 				Description:         "Additional CLIs For All Leafs and Tier2 Leafs As Captured From Show Running Configuration",
 				MarkdownDescription: "Additional CLIs For All Leafs and Tier2 Leafs As Captured From Show Running Configuration",
 			},
 			"extra_conf_spine": schema.StringAttribute{
 				Optional:            true,
+				Computed:            true,
 				Description:         "Additional CLIs For All Spines As Captured From Show Running Configuration",
 				MarkdownDescription: "Additional CLIs For All Spines As Captured From Show Running Configuration",
 			},
 			"fabric_interface_type": schema.StringAttribute{
-				Optional:            true,
+				Computed:            true,
 				Description:         "Only Numbered(Point-to-Point) is supported",
 				MarkdownDescription: "Only Numbered(Point-to-Point) is supported",
 				Validators: []validator.String{
@@ -135,49 +294,117 @@ func FabricIpfmResourceSchema(ctx context.Context) schema.Schema {
 			},
 			"fabric_mtu": schema.Int64Attribute{
 				Optional:            true,
+				Computed:            true,
 				Description:         "Must be an even number",
 				MarkdownDescription: "Must be an even number",
 			},
+			"fabric_mtu_prev": schema.Int64Attribute{
+				Computed:            true,
+				Description:         "Previous state of Fabric MTU",
+				MarkdownDescription: "Previous state of Fabric MTU",
+			},
 			"fabric_name": schema.StringAttribute{
 				Required:            true,
-				Description:         "Fabric name to be created, updated or deleted (Max Size 64).",
-				MarkdownDescription: "Fabric name to be created, updated or deleted (Max Size 64).",
+				Description:         "Fabric name to be created, updated or deleted.",
+				MarkdownDescription: "Fabric name to be created, updated or deleted.",
 				PlanModifiers: []planmodifier.String{
 					stringplanmodifier.RequiresReplace(),
 				},
 			},
+			"fabric_technology": schema.StringAttribute{
+				Computed:            true,
+				Description:         "Fabric Technology",
+				MarkdownDescription: "Fabric Technology",
+			},
+			"fabric_type": schema.StringAttribute{
+				Computed:            true,
+				Description:         "Fabric Type",
+				MarkdownDescription: "Fabric Type",
+			},
 			"feature_ptp": schema.BoolAttribute{
 				Optional:            true,
-				Description:         "No description available",
-				MarkdownDescription: "No description available",
+				Computed:            true,
+				Description:         "Enable Precision Time Protocol (PTP)",
+				MarkdownDescription: "Enable Precision Time Protocol (PTP)",
+			},
+			"feature_ptp_internal": schema.BoolAttribute{
+				Computed:            true,
+				Description:         "Internal Feature PTP",
+				MarkdownDescription: "Internal Feature PTP",
+			},
+			"ff": schema.StringAttribute{
+				Optional:            true,
+				Computed:            true,
+				Description:         "Template Family",
+				MarkdownDescription: "Template Family",
+			},
+			"grfield_debug_flag": schema.StringAttribute{
+				Optional:            true,
+				Computed:            true,
+				Description:         "Enable to clean switch configuration without reload when PreserveConfig=no",
+				MarkdownDescription: "Enable to clean switch configuration without reload when PreserveConfig=no",
+				Validators: []validator.String{
+					stringvalidator.OneOf("Enable", "Disable"),
+				},
 			},
 			"id": schema.StringAttribute{
 				Computed:            true,
-				Description:         "Terraform unique Id for the fabric resource",
-				MarkdownDescription: "Terraform unique Id for the fabric resource",
+				Description:         "Terraform unique Id for the ipfm fabric resource",
+				MarkdownDescription: "Terraform unique Id for the ipfm fabric resource",
+			},
+			"interface_ethernet_default_policy": schema.StringAttribute{
+				Computed:            true,
+				Description:         "Default policy for Ethernet interface of spine/leaf/ tier2-leaf switches",
+				MarkdownDescription: "Default policy for Ethernet interface of spine/leaf/ tier2-leaf switches",
+			},
+			"interface_loopback_default_policy": schema.StringAttribute{
+				Computed:            true,
+				Description:         "Loopback Interface Default Policy",
+				MarkdownDescription: "Loopback Interface Default Policy",
+			},
+			"interface_port_channel_default_policy": schema.StringAttribute{
+				Computed:            true,
+				Description:         "Port Channel Interface Default Policy",
+				MarkdownDescription: "Port Channel Interface Default Policy",
+			},
+			"interface_vlan_default_policy": schema.StringAttribute{
+				Computed:            true,
+				Description:         "VLAN Interface Default Policy",
+				MarkdownDescription: "VLAN Interface Default Policy",
+			},
+			"intf_stat_load_interval": schema.Int64Attribute{
+				Optional:            true,
+				Computed:            true,
+				Description:         "Time in seconds (Min:5, Max:300)",
+				MarkdownDescription: "Time in seconds (Min:5, Max:300)",
 			},
 			"isis_auth_enable": schema.BoolAttribute{
 				Optional:            true,
-				Description:         "No description available",
-				MarkdownDescription: "No description available",
+				Computed:            true,
+				Description:         "Enable IS-IS Authentication",
+				MarkdownDescription: "Enable IS-IS Authentication",
 			},
 			"isis_auth_key": schema.StringAttribute{
 				Optional:            true,
+				Computed:            true,
 				Description:         "Cisco Type 7 Encrypted",
 				MarkdownDescription: "Cisco Type 7 Encrypted",
 			},
 			"isis_auth_keychain_key_id": schema.Int64Attribute{
 				Optional:            true,
-				Description:         "No description available",
-				MarkdownDescription: "No description available",
+				Computed:            true,
+				Description:         "IS-IS Authentication Key ID (Min:0, Max:65535)",
+				MarkdownDescription: "IS-IS Authentication Key ID (Min:0, Max:65535)",
 			},
 			"isis_auth_keychain_name": schema.StringAttribute{
 				Optional:            true,
-				Description:         "No description available",
-				MarkdownDescription: "No description available",
+				Computed:            true,
+				Description:         "IS-IS Authentication Keychain Name",
+				MarkdownDescription: "IS-IS Authentication Keychain Name",
 			},
 			"isis_level": schema.StringAttribute{
 				Optional:            true,
+				Computed:            true,
 				Description:         "Supported IS types: level-1, level-2",
 				MarkdownDescription: "Supported IS types: level-1, level-2",
 				Validators: []validator.String{
@@ -186,16 +413,24 @@ func FabricIpfmResourceSchema(ctx context.Context) schema.Schema {
 			},
 			"isis_p2p_enable": schema.BoolAttribute{
 				Optional:            true,
+				Computed:            true,
 				Description:         "This will enable network point-to-point on fabric interfaces which are numbered",
 				MarkdownDescription: "This will enable network point-to-point on fabric interfaces which are numbered",
 			},
 			"l2_host_intf_mtu": schema.Int64Attribute{
 				Optional:            true,
+				Computed:            true,
 				Description:         "Must be an even number",
 				MarkdownDescription: "Must be an even number",
 			},
+			"l2_host_intf_mtu_prev": schema.Int64Attribute{
+				Computed:            true,
+				Description:         "Previous state of Layer 2 Host Interface MTU",
+				MarkdownDescription: "Previous state of Layer 2 Host Interface MTU",
+			},
 			"link_state_routing": schema.StringAttribute{
 				Optional:            true,
+				Computed:            true,
 				Description:         "Used for Spine-Leaf Connectivity",
 				MarkdownDescription: "Used for Spine-Leaf Connectivity",
 				Validators: []validator.String{
@@ -204,36 +439,80 @@ func FabricIpfmResourceSchema(ctx context.Context) schema.Schema {
 			},
 			"link_state_routing_tag": schema.StringAttribute{
 				Optional:            true,
+				Computed:            true,
 				Description:         "Routing process tag for the fabric",
 				MarkdownDescription: "Routing process tag for the fabric",
 			},
+			"link_state_routing_tag_prev": schema.StringAttribute{
+				Computed:            true,
+				Description:         "Previous state of Link State Routing Tag",
+				MarkdownDescription: "Previous state of Link State Routing Tag",
+			},
 			"loopback0_ip_range": schema.StringAttribute{
 				Optional:            true,
+				Computed:            true,
 				Description:         "Routing Loopback IP Address Range",
 				MarkdownDescription: "Routing Loopback IP Address Range",
 			},
 			"mgmt_gw": schema.StringAttribute{
 				Optional:            true,
+				Computed:            true,
 				Description:         "Default Gateway For Management VRF On The Switch",
 				MarkdownDescription: "Default Gateway For Management VRF On The Switch",
 			},
+			"mgmt_gw_internal": schema.StringAttribute{
+				Computed:            true,
+				Description:         "Internal Management Gateway",
+				MarkdownDescription: "Internal Management Gateway",
+			},
 			"mgmt_prefix": schema.Int64Attribute{
 				Optional:            true,
-				Description:         "No description available",
-				MarkdownDescription: "No description available",
+				Computed:            true,
+				Description:         "Switch Mgmt IP Subnet Prefix (Min:8, Max:30)",
+				MarkdownDescription: "Switch Mgmt IP Subnet Prefix (Min:8, Max:30)",
+			},
+			"mgmt_prefix_internal": schema.Int64Attribute{
+				Computed:            true,
+				Description:         "Internal Management Prefix",
+				MarkdownDescription: "Internal Management Prefix",
+			},
+			"mgmt_v6prefix": schema.Int64Attribute{
+				Computed:            true,
+				Description:         "Switch Mgmt IPv6 Subnet Prefix (Min:64, Max:126)",
+				MarkdownDescription: "Switch Mgmt IPv6 Subnet Prefix (Min:64, Max:126)",
+			},
+			"mgmt_v6prefix_internal": schema.Int64Attribute{
+				Computed:            true,
+				Description:         "Internal Management IPv6 Prefix",
+				MarkdownDescription: "Internal Management IPv6 Prefix",
 			},
 			"ntp_server_ip_list": schema.StringAttribute{
 				Optional:            true,
+				Computed:            true,
 				Description:         "Comma separated list of IP Addresses (v4/v6)",
 				MarkdownDescription: "Comma separated list of IP Addresses (v4/v6)",
 			},
 			"ntp_server_vrf": schema.StringAttribute{
 				Optional:            true,
+				Computed:            true,
 				Description:         "One VRF for all NTP servers or a comma separated list of VRFs, one per NTP server",
 				MarkdownDescription: "One VRF for all NTP servers or a comma separated list of VRFs, one per NTP server",
 			},
+			"nxapi_http_port": schema.Int64Attribute{
+				Optional:            true,
+				Computed:            true,
+				Description:         "NX-API HTTP Port Number",
+				MarkdownDescription: "NX-API HTTP Port Number",
+			},
+			"nxapi_https_port": schema.Int64Attribute{
+				Optional:            true,
+				Computed:            true,
+				Description:         "NX-API HTTPS Port Number",
+				MarkdownDescription: "NX-API HTTPS Port Number",
+			},
 			"nxapi_vrf": schema.StringAttribute{
 				Optional:            true,
+				Computed:            true,
 				Description:         "VRF used for NX-API communication",
 				MarkdownDescription: "VRF used for NX-API communication",
 				Validators: []validator.String{
@@ -242,41 +521,54 @@ func FabricIpfmResourceSchema(ctx context.Context) schema.Schema {
 			},
 			"ospf_area_id": schema.StringAttribute{
 				Optional:            true,
+				Computed:            true,
 				Description:         "OSPF Area Id in IP address format",
 				MarkdownDescription: "OSPF Area Id in IP address format",
 			},
 			"ospf_auth_enable": schema.BoolAttribute{
 				Optional:            true,
-				Description:         "No description available",
-				MarkdownDescription: "No description available",
+				Computed:            true,
+				Description:         "Enable OSPF Authentication",
+				MarkdownDescription: "Enable OSPF Authentication",
 			},
 			"ospf_auth_key": schema.StringAttribute{
 				Optional:            true,
+				Computed:            true,
 				Description:         "3DES Encrypted",
 				MarkdownDescription: "3DES Encrypted",
 			},
 			"ospf_auth_key_id": schema.Int64Attribute{
 				Optional:            true,
+				Computed:            true,
 				Description:         "No description available",
 				MarkdownDescription: "No description available",
 			},
 			"pim_hello_auth_enable": schema.BoolAttribute{
 				Optional:            true,
-				Description:         "No description available",
-				MarkdownDescription: "No description available",
+				Computed:            true,
+				Description:         "Enable PIM Hello Authentication",
+				MarkdownDescription: "Enable PIM Hello Authentication",
 			},
 			"pim_hello_auth_key": schema.StringAttribute{
 				Optional:            true,
+				Computed:            true,
 				Description:         "3DES Encrypted",
 				MarkdownDescription: "3DES Encrypted",
 			},
 			"pm_enable": schema.BoolAttribute{
 				Optional:            true,
-				Description:         "No description available",
-				MarkdownDescription: "No description available",
+				Computed:            true,
+				Description:         "Enable Performance Monitoring",
+				MarkdownDescription: "Enable Performance Monitoring",
+			},
+			"pm_enable_prev": schema.BoolAttribute{
+				Computed:            true,
+				Description:         "Previous state of Enable Performance Monitoring",
+				MarkdownDescription: "Previous state of Enable Performance Monitoring",
 			},
 			"power_redundancy_mode": schema.StringAttribute{
 				Optional:            true,
+				Computed:            true,
 				Description:         "Default power supply mode for the fabric",
 				MarkdownDescription: "Default power supply mode for the fabric",
 				Validators: []validator.String{
@@ -285,54 +577,83 @@ func FabricIpfmResourceSchema(ctx context.Context) schema.Schema {
 			},
 			"ptp_domain_id": schema.Int64Attribute{
 				Optional:            true,
-				Description:         "Multiple Independent PTP Clocking Subdomains on a Single Network",
-				MarkdownDescription: "Multiple Independent PTP Clocking Subdomains on a Single Network",
+				Computed:            true,
+				Description:         "Multiple Independent PTP Clocking Subdomains on a Single Network (Min:0, Max:127)",
+				MarkdownDescription: "Multiple Independent PTP Clocking Subdomains on a Single Network (Min:0, Max:127)",
 			},
 			"ptp_lb_id": schema.Int64Attribute{
 				Optional:            true,
+				Computed:            true,
 				Description:         "No description available",
 				MarkdownDescription: "No description available",
 			},
 			"ptp_profile": schema.StringAttribute{
 				Optional:            true,
+				Computed:            true,
 				Description:         "Enabled on ISL links only",
 				MarkdownDescription: "Enabled on ISL links only",
 				Validators: []validator.String{
 					stringvalidator.OneOf("IEEE-1588v2", "SMPTE-2059-2", "AES67-2015"),
 				},
 			},
+			"replication_mode": schema.StringAttribute{
+				Optional:            true,
+				Computed:            true,
+				Description:         "Replication Mode",
+				MarkdownDescription: "Replication Mode",
+				Validators: []validator.String{
+					stringvalidator.OneOf("Multicast"),
+				},
+			},
 			"routing_lb_id": schema.Int64Attribute{
 				Optional:            true,
+				Computed:            true,
 				Description:         "No description available",
 				MarkdownDescription: "No description available",
 			},
 			"rp_ip_range": schema.StringAttribute{
 				Optional:            true,
+				Computed:            true,
 				Description:         "RP Loopback IP Address Range",
 				MarkdownDescription: "RP Loopback IP Address Range",
 			},
+			"rp_ip_range_internal": schema.StringAttribute{
+				Computed:            true,
+				Description:         "Internal RP IP Range",
+				MarkdownDescription: "Internal RP IP Range",
+			},
 			"rp_lb_id": schema.Int64Attribute{
 				Optional:            true,
+				Computed:            true,
 				Description:         "No description available",
 				MarkdownDescription: "No description available",
 			},
 			"snmp_server_host_trap": schema.BoolAttribute{
 				Optional:            true,
+				Computed:            true,
 				Description:         "Configure NDFC as a receiver for SNMP traps",
 				MarkdownDescription: "Configure NDFC as a receiver for SNMP traps",
 			},
+			"spine_count": schema.Int64Attribute{
+				Computed:            true,
+				Description:         "Spine Count",
+				MarkdownDescription: "Spine Count",
+			},
 			"static_underlay_ip_alloc": schema.BoolAttribute{
 				Optional:            true,
+				Computed:            true,
 				Description:         "Checking this will disable Dynamic Fabric IP Address Allocations",
 				MarkdownDescription: "Checking this will disable Dynamic Fabric IP Address Allocations",
 			},
 			"subnet_range": schema.StringAttribute{
 				Optional:            true,
+				Computed:            true,
 				Description:         "Address range to assign Numbered IPs",
 				MarkdownDescription: "Address range to assign Numbered IPs",
 			},
 			"subnet_target_mask": schema.Int64Attribute{
 				Optional:            true,
+				Computed:            true,
 				Description:         "Mask for Fabric Subnet IP Range",
 				MarkdownDescription: "Mask for Fabric Subnet IP Range",
 				Validators: []validator.Int64{
@@ -341,86 +662,143 @@ func FabricIpfmResourceSchema(ctx context.Context) schema.Schema {
 			},
 			"syslog_server_ip_list": schema.StringAttribute{
 				Optional:            true,
+				Computed:            true,
 				Description:         "Comma separated list of IP Addresses (v4/v6)",
 				MarkdownDescription: "Comma separated list of IP Addresses (v4/v6)",
 			},
 			"syslog_server_vrf": schema.StringAttribute{
 				Optional:            true,
+				Computed:            true,
 				Description:         "One VRF for all Syslog servers or a comma separated list of VRFs, one per Syslog server",
 				MarkdownDescription: "One VRF for all Syslog servers or a comma separated list of VRFs, one per Syslog server",
 			},
 			"syslog_sev": schema.StringAttribute{
 				Optional:            true,
-				Description:         "Comma separated list of Syslog severity values, one per Syslog server",
-				MarkdownDescription: "Comma separated list of Syslog severity values, one per Syslog server",
+				Computed:            true,
+				Description:         "Comma separated list of Syslog severity values, one per Syslog server (Min:0, Max:7)",
+				MarkdownDescription: "Comma separated list of Syslog severity values, one per Syslog server (Min:0, Max:7)",
+			},
+			"upgrade_from_version": schema.StringAttribute{
+				Computed:            true,
+				Description:         "Upgrade From Version",
+				MarkdownDescription: "Upgrade From Version",
 			},
 		},
-		Description:         "Resource to configure and manage IP Fabric Media",
-		MarkdownDescription: "Resource to configure and manage IP Fabric Media",
+		Description:         "Resource to configure and manage IP Fabric Media.  Only creation/updation/deletion of the fabric is supported, resources on top of the fabric are not supported yet.",
+		MarkdownDescription: "Resource to configure and manage IP Fabric Media.  Only creation/updation/deletion of the fabric is supported, resources on top of the fabric are not supported yet.",
 	}
 }
 
 type FabricIpfmModel struct {
-	AaaRemoteIpEnabled    types.Bool   `tfsdk:"aaa_remote_ip_enabled"`
-	AaaServerConf         types.String `tfsdk:"aaa_server_conf"`
-	AsmGroupRanges        types.String `tfsdk:"asm_group_ranges"`
-	BootstrapConf         types.String `tfsdk:"bootstrap_conf"`
-	BootstrapEnable       types.Bool   `tfsdk:"bootstrap_enable"`
-	BootstrapMultisubnet  types.String `tfsdk:"bootstrap_multisubnet"`
-	CdpEnable             types.Bool   `tfsdk:"cdp_enable"`
-	Deploy                types.Bool   `tfsdk:"deploy"`
-	DeploymentStatus      types.String `tfsdk:"deployment_status"`
-	DhcpEnable            types.Bool   `tfsdk:"dhcp_enable"`
-	DhcpEnd               types.String `tfsdk:"dhcp_end"`
-	DhcpIpv6Enable        types.String `tfsdk:"dhcp_ipv6_enable"`
-	DhcpStart             types.String `tfsdk:"dhcp_start"`
-	DnsServerIpList       types.String `tfsdk:"dns_server_ip_list"`
-	DnsServerVrf          types.String `tfsdk:"dns_server_vrf"`
-	EnableAaa             types.Bool   `tfsdk:"enable_aaa"`
-	EnableAsm             types.Bool   `tfsdk:"enable_asm"`
-	EnableNbmPassive      types.Bool   `tfsdk:"enable_nbm_passive"`
-	ExtraConfIntraLinks   types.String `tfsdk:"extra_conf_intra_links"`
-	ExtraConfLeaf         types.String `tfsdk:"extra_conf_leaf"`
-	ExtraConfSpine        types.String `tfsdk:"extra_conf_spine"`
-	FabricInterfaceType   types.String `tfsdk:"fabric_interface_type"`
-	FabricMtu             types.Int64  `tfsdk:"fabric_mtu"`
-	FabricName            types.String `tfsdk:"fabric_name"`
-	FeaturePtp            types.Bool   `tfsdk:"feature_ptp"`
-	Id                    types.String `tfsdk:"id"`
-	IsisAuthEnable        types.Bool   `tfsdk:"isis_auth_enable"`
-	IsisAuthKey           types.String `tfsdk:"isis_auth_key"`
-	IsisAuthKeychainKeyId types.Int64  `tfsdk:"isis_auth_keychain_key_id"`
-	IsisAuthKeychainName  types.String `tfsdk:"isis_auth_keychain_name"`
-	IsisLevel             types.String `tfsdk:"isis_level"`
-	IsisP2pEnable         types.Bool   `tfsdk:"isis_p2p_enable"`
-	L2HostIntfMtu         types.Int64  `tfsdk:"l2_host_intf_mtu"`
-	LinkStateRouting      types.String `tfsdk:"link_state_routing"`
-	LinkStateRoutingTag   types.String `tfsdk:"link_state_routing_tag"`
-	Loopback0IpRange      types.String `tfsdk:"loopback0_ip_range"`
-	MgmtGw                types.String `tfsdk:"mgmt_gw"`
-	MgmtPrefix            types.Int64  `tfsdk:"mgmt_prefix"`
-	NtpServerIpList       types.String `tfsdk:"ntp_server_ip_list"`
-	NtpServerVrf          types.String `tfsdk:"ntp_server_vrf"`
-	NxapiVrf              types.String `tfsdk:"nxapi_vrf"`
-	OspfAreaId            types.String `tfsdk:"ospf_area_id"`
-	OspfAuthEnable        types.Bool   `tfsdk:"ospf_auth_enable"`
-	OspfAuthKey           types.String `tfsdk:"ospf_auth_key"`
-	OspfAuthKeyId         types.Int64  `tfsdk:"ospf_auth_key_id"`
-	PimHelloAuthEnable    types.Bool   `tfsdk:"pim_hello_auth_enable"`
-	PimHelloAuthKey       types.String `tfsdk:"pim_hello_auth_key"`
-	PmEnable              types.Bool   `tfsdk:"pm_enable"`
-	PowerRedundancyMode   types.String `tfsdk:"power_redundancy_mode"`
-	PtpDomainId           types.Int64  `tfsdk:"ptp_domain_id"`
-	PtpLbId               types.Int64  `tfsdk:"ptp_lb_id"`
-	PtpProfile            types.String `tfsdk:"ptp_profile"`
-	RoutingLbId           types.Int64  `tfsdk:"routing_lb_id"`
-	RpIpRange             types.String `tfsdk:"rp_ip_range"`
-	RpLbId                types.Int64  `tfsdk:"rp_lb_id"`
-	SnmpServerHostTrap    types.Bool   `tfsdk:"snmp_server_host_trap"`
-	StaticUnderlayIpAlloc types.Bool   `tfsdk:"static_underlay_ip_alloc"`
-	SubnetRange           types.String `tfsdk:"subnet_range"`
-	SubnetTargetMask      types.Int64  `tfsdk:"subnet_target_mask"`
-	SyslogServerIpList    types.String `tfsdk:"syslog_server_ip_list"`
-	SyslogServerVrf       types.String `tfsdk:"syslog_server_vrf"`
-	SyslogSev             types.String `tfsdk:"syslog_sev"`
+	AaaRemoteIpEnabled                types.Bool   `tfsdk:"aaa_remote_ip_enabled"`
+	AaaServerConf                     types.String `tfsdk:"aaa_server_conf"`
+	AbstractDhcp                      types.String `tfsdk:"abstract_dhcp"`
+	AbstractExtraConfigBootstrap      types.String `tfsdk:"abstract_extra_config_bootstrap"`
+	AbstractExtraConfigLeaf           types.String `tfsdk:"abstract_extra_config_leaf"`
+	AbstractExtraConfigSpine          types.String `tfsdk:"abstract_extra_config_spine"`
+	AbstractIsis                      types.String `tfsdk:"abstract_isis"`
+	AbstractIsisInterface             types.String `tfsdk:"abstract_isis_interface"`
+	AbstractLoopbackInterface         types.String `tfsdk:"abstract_loopback_interface"`
+	AbstractOspf                      types.String `tfsdk:"abstract_ospf"`
+	AbstractOspfInterface             types.String `tfsdk:"abstract_ospf_interface"`
+	AbstractPimInterface              types.String `tfsdk:"abstract_pim_interface"`
+	AbstractRoutedHost                types.String `tfsdk:"abstract_routed_host"`
+	ActiveMigration                   types.Bool   `tfsdk:"active_migration"`
+	AgentIntf                         types.String `tfsdk:"agent_intf"`
+	AsmGroupRanges                    types.String `tfsdk:"asm_group_ranges"`
+	BootstrapConf                     types.String `tfsdk:"bootstrap_conf"`
+	BootstrapEnable                   types.Bool   `tfsdk:"bootstrap_enable"`
+	BootstrapMultisubnet              types.String `tfsdk:"bootstrap_multisubnet"`
+	BootstrapMultisubnetInternal      types.String `tfsdk:"bootstrap_multisubnet_internal"`
+	BrfieldDebugFlag                  types.String `tfsdk:"brfield_debug_flag"`
+	CdpEnable                         types.Bool   `tfsdk:"cdp_enable"`
+	Deploy                            types.Bool   `tfsdk:"deploy"`
+	DeploymentFreeze                  types.Bool   `tfsdk:"deployment_freeze"`
+	DeploymentStatus                  types.String `tfsdk:"deployment_status"`
+	DhcpEnable                        types.Bool   `tfsdk:"dhcp_enable"`
+	DhcpEnd                           types.String `tfsdk:"dhcp_end"`
+	DhcpEndInternal                   types.String `tfsdk:"dhcp_end_internal"`
+	DhcpIpv6Enable                    types.String `tfsdk:"dhcp_ipv6_enable"`
+	DhcpIpv6EnableInternal            types.String `tfsdk:"dhcp_ipv6_enable_internal"`
+	DhcpStart                         types.String `tfsdk:"dhcp_start"`
+	DhcpStartInternal                 types.String `tfsdk:"dhcp_start_internal"`
+	DnsServerIpList                   types.String `tfsdk:"dns_server_ip_list"`
+	DnsServerVrf                      types.String `tfsdk:"dns_server_vrf"`
+	EnableAaa                         types.Bool   `tfsdk:"enable_aaa"`
+	EnableAgent                       types.Bool   `tfsdk:"enable_agent"`
+	EnableAsm                         types.Bool   `tfsdk:"enable_asm"`
+	EnableNbmPassive                  types.Bool   `tfsdk:"enable_nbm_passive"`
+	EnableNbmPassivePrev              types.Bool   `tfsdk:"enable_nbm_passive_prev"`
+	EnableNxapi                       types.Bool   `tfsdk:"enable_nxapi"`
+	EnableNxapiHttp                   types.Bool   `tfsdk:"enable_nxapi_http"`
+	EnableRtIntfStats                 types.Bool   `tfsdk:"enable_rt_intf_stats"`
+	ExtFabricType                     types.String `tfsdk:"ext_fabric_type"`
+	ExtraConfIntraLinks               types.String `tfsdk:"extra_conf_intra_links"`
+	ExtraConfLeaf                     types.String `tfsdk:"extra_conf_leaf"`
+	ExtraConfSpine                    types.String `tfsdk:"extra_conf_spine"`
+	FabricInterfaceType               types.String `tfsdk:"fabric_interface_type"`
+	FabricMtu                         types.Int64  `tfsdk:"fabric_mtu"`
+	FabricMtuPrev                     types.Int64  `tfsdk:"fabric_mtu_prev"`
+	FabricName                        types.String `tfsdk:"fabric_name"`
+	FabricTechnology                  types.String `tfsdk:"fabric_technology"`
+	FabricType                        types.String `tfsdk:"fabric_type"`
+	FeaturePtp                        types.Bool   `tfsdk:"feature_ptp"`
+	FeaturePtpInternal                types.Bool   `tfsdk:"feature_ptp_internal"`
+	Ff                                types.String `tfsdk:"ff"`
+	GrfieldDebugFlag                  types.String `tfsdk:"grfield_debug_flag"`
+	Id                                types.String `tfsdk:"id"`
+	InterfaceEthernetDefaultPolicy    types.String `tfsdk:"interface_ethernet_default_policy"`
+	InterfaceLoopbackDefaultPolicy    types.String `tfsdk:"interface_loopback_default_policy"`
+	InterfacePortChannelDefaultPolicy types.String `tfsdk:"interface_port_channel_default_policy"`
+	InterfaceVlanDefaultPolicy        types.String `tfsdk:"interface_vlan_default_policy"`
+	IntfStatLoadInterval              types.Int64  `tfsdk:"intf_stat_load_interval"`
+	IsisAuthEnable                    types.Bool   `tfsdk:"isis_auth_enable"`
+	IsisAuthKey                       types.String `tfsdk:"isis_auth_key"`
+	IsisAuthKeychainKeyId             types.Int64  `tfsdk:"isis_auth_keychain_key_id"`
+	IsisAuthKeychainName              types.String `tfsdk:"isis_auth_keychain_name"`
+	IsisLevel                         types.String `tfsdk:"isis_level"`
+	IsisP2pEnable                     types.Bool   `tfsdk:"isis_p2p_enable"`
+	L2HostIntfMtu                     types.Int64  `tfsdk:"l2_host_intf_mtu"`
+	L2HostIntfMtuPrev                 types.Int64  `tfsdk:"l2_host_intf_mtu_prev"`
+	LinkStateRouting                  types.String `tfsdk:"link_state_routing"`
+	LinkStateRoutingTag               types.String `tfsdk:"link_state_routing_tag"`
+	LinkStateRoutingTagPrev           types.String `tfsdk:"link_state_routing_tag_prev"`
+	Loopback0IpRange                  types.String `tfsdk:"loopback0_ip_range"`
+	MgmtGw                            types.String `tfsdk:"mgmt_gw"`
+	MgmtGwInternal                    types.String `tfsdk:"mgmt_gw_internal"`
+	MgmtPrefix                        types.Int64  `tfsdk:"mgmt_prefix"`
+	MgmtPrefixInternal                types.Int64  `tfsdk:"mgmt_prefix_internal"`
+	MgmtV6prefix                      types.Int64  `tfsdk:"mgmt_v6prefix"`
+	MgmtV6prefixInternal              types.Int64  `tfsdk:"mgmt_v6prefix_internal"`
+	NtpServerIpList                   types.String `tfsdk:"ntp_server_ip_list"`
+	NtpServerVrf                      types.String `tfsdk:"ntp_server_vrf"`
+	NxapiHttpPort                     types.Int64  `tfsdk:"nxapi_http_port"`
+	NxapiHttpsPort                    types.Int64  `tfsdk:"nxapi_https_port"`
+	NxapiVrf                          types.String `tfsdk:"nxapi_vrf"`
+	OspfAreaId                        types.String `tfsdk:"ospf_area_id"`
+	OspfAuthEnable                    types.Bool   `tfsdk:"ospf_auth_enable"`
+	OspfAuthKey                       types.String `tfsdk:"ospf_auth_key"`
+	OspfAuthKeyId                     types.Int64  `tfsdk:"ospf_auth_key_id"`
+	PimHelloAuthEnable                types.Bool   `tfsdk:"pim_hello_auth_enable"`
+	PimHelloAuthKey                   types.String `tfsdk:"pim_hello_auth_key"`
+	PmEnable                          types.Bool   `tfsdk:"pm_enable"`
+	PmEnablePrev                      types.Bool   `tfsdk:"pm_enable_prev"`
+	PowerRedundancyMode               types.String `tfsdk:"power_redundancy_mode"`
+	PtpDomainId                       types.Int64  `tfsdk:"ptp_domain_id"`
+	PtpLbId                           types.Int64  `tfsdk:"ptp_lb_id"`
+	PtpProfile                        types.String `tfsdk:"ptp_profile"`
+	ReplicationMode                   types.String `tfsdk:"replication_mode"`
+	RoutingLbId                       types.Int64  `tfsdk:"routing_lb_id"`
+	RpIpRange                         types.String `tfsdk:"rp_ip_range"`
+	RpIpRangeInternal                 types.String `tfsdk:"rp_ip_range_internal"`
+	RpLbId                            types.Int64  `tfsdk:"rp_lb_id"`
+	SnmpServerHostTrap                types.Bool   `tfsdk:"snmp_server_host_trap"`
+	SpineCount                        types.Int64  `tfsdk:"spine_count"`
+	StaticUnderlayIpAlloc             types.Bool   `tfsdk:"static_underlay_ip_alloc"`
+	SubnetRange                       types.String `tfsdk:"subnet_range"`
+	SubnetTargetMask                  types.Int64  `tfsdk:"subnet_target_mask"`
+	SyslogServerIpList                types.String `tfsdk:"syslog_server_ip_list"`
+	SyslogServerVrf                   types.String `tfsdk:"syslog_server_vrf"`
+	SyslogSev                         types.String `tfsdk:"syslog_sev"`
+	UpgradeFromVersion                types.String `tfsdk:"upgrade_from_version"`
 }
