@@ -30,7 +30,6 @@ type NDFCFabricCommonModel struct {
 	DnsServerIpList                         string       `json:"DNS_SERVER_IP_LIST,omitempty"`
 	DnsServerVrf                            string       `json:"DNS_SERVER_VRF,omitempty"`
 	EnableAaa                               string       `json:"ENABLE_AAA,omitempty"`
-	EnableAsm                               string       `json:"ENABLE_ASM,omitempty"`
 	EsrOption                               string       `json:"ESR_OPTION,omitempty"`
 	EnableNbmPassive                        string       `json:"ENABLE_NBM_PASSIVE,omitempty"`
 	ExtraConfIntraLinks                     string       `json:"EXTRA_CONF_INTRA_LINKS,omitempty"`
@@ -217,7 +216,6 @@ type NDFCFabricCommonModel struct {
 	NetworkExtensionTemplate                string       `json:"network_extension_template,omitempty"`
 	VrfExtensionTemplate                    string       `json:"vrf_extension_template,omitempty"`
 	BgpRpAsn                                string       `json:"BGP_RP_ASN,omitempty"`
-	BgwRoutingTag                           *Int64Custom `json:"BGW_ROUTING_TAG,omitempty"`
 	BorderGwyConnections                    string       `json:"BORDER_GWY_CONNECTIONS,omitempty"`
 	CloudsecAlgorithm                       string       `json:"CLOUDSEC_ALGORITHM,omitempty"`
 	CloudsecAutoconfig                      string       `json:"CLOUDSEC_AUTOCONFIG,omitempty"`
@@ -369,4 +367,30 @@ type NDFCFabricCommonModel struct {
 	BootstrapEnablePrev                     string       `json:"BOOTSTRAP_ENABLE_PREV,omitempty"`
 	EnableNetflowPrev                       string       `json:"ENABLE_NETFLOW_PREV,omitempty"`
 	AllowNxcPrev                            string       `json:"ALLOW_NXC_PREV,omitempty"`
+	EnableNbmPassivePrev                    string       `json:"ENABLE_NBM_PASSIVE_PREV,omitempty"`
+	FabricTechnology                        string       `json:"FABRIC_TECHNOLOGY,omitempty"`
+	InterfaceEthernetDefaultPolicy          string       `json:"INTERFACE_ETHERNET_DEFAULT_POLICY,omitempty"`
+	InterfaceLoopbackDefaultPolicy          string       `json:"INTERFACE_LOOPBACK_DEFAULT_POLICY,omitempty"`
+	InterfacePortChannelDefaultPolicy       string       `json:"INTERFACE_PORT_CHANNEL_DEFAULT_POLICY,omitempty"`
+	InterfaceVlanDefaultPolicy              string       `json:"INTERFACE_VLAN_DEFAULT_POLICY,omitempty"`
+	RpIpRangeInternal                       string       `json:"RP_IP_RANGE_INTERNAL,omitempty"`
+	InbandEnablePrev                        string       `json:"INBAND_ENABLE_PREV,omitempty"`
+	EnableAsm                               string       `json:"ENABLE_ASM,omitempty"`
+	DomainNameInternal                      string       `json:"DOMAIN_NAME_INTERNAL,omitempty"`
+	PnpEnableInternal                       string       `json:"PNP_ENABLE_INTERNAL,omitempty"`
+	BgwRoutingTag                           *Int64Custom `json:"BGW_ROUTING_TAG,omitempty"`
+	DcnmId                                  string       `json:"DCNM_ID,omitempty"`
+	EnableTrmTrmv6                          string       `json:"ENABLE_TRM_TRMv6,omitempty"`
+	EnableTrmTrmv6Prev                      string       `json:"ENABLE_TRM_TRMv6_PREV,omitempty"`
+	Loopback100Ipv6Range                    string       `json:"LOOPBACK100_IPV6_RANGE,omitempty"`
+	BgwRoutingTagPrev                       string       `json:"BGW_ROUTING_TAG_PREV,omitempty"`
+	MsIfcBgpAuthKeyTypePrev                 *Int64Custom `json:"MS_IFC_BGP_AUTH_KEY_TYPE_PREV,omitempty"`
+	MsIfcBgpPasswordEnablePrev              string       `json:"MS_IFC_BGP_PASSWORD_ENABLE_PREV,omitempty"`
+	MsIfcBgpPasswordPrev                    string       `json:"MS_IFC_BGP_PASSWORD_PREV,omitempty"`
+	ParentOnemanageFabric                   string       `json:"PARENT_ONEMANAGE_FABRIC,omitempty"`
+	SgtIdRangePrev                          string       `json:"SGT_ID_RANGE_PREV,omitempty"`
+	SgtNamePrefixPrev                       string       `json:"SGT_NAME_PREFIX_PREV,omitempty"`
+	V6DciSubnetRange                        string       `json:"V6_DCI_SUBNET_RANGE,omitempty"`
+	V6DciSubnetTargetMask                   *Int64Custom `json:"V6_DCI_SUBNET_TARGET_MASK,omitempty"`
+	VxlanUnderlayIsV6                       string       `json:"VXLAN_UNDERLAY_IS_V6,omitempty"`
 }
