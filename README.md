@@ -32,12 +32,13 @@ To add dev overrides to use a the plugin under development
 or
 make testacc // Run everything
 ```
-* AT runs on actual NDFC environment     
-* The testbed settings are expected in a yaml file as seen in [`testing/testbed.yaml`](testing/testbed.yaml)
-* export `TESTBED_FILE` environment variable to indicate the testbed config to be used for AT
-* The provider settings can be overrided by following environment variables 
+
+* AT runs on actual NDFC environment
+- The testbed settings are expected in a yaml file as seen in [`testing/testbed.yaml`](testing/testbed.yaml)
+- export `TESTBED_FILE` environment variable to indicate the testbed config to be used for AT
+- The provider settings can be overrided by following environment variables
   `NDFC_URL`, `NDFC_USER`, `NDFC_PASSWORD`, `NDFC_DOMAIN`
-** The fabric names, switch serials etc in the config must match the NDFC being used 
+** The fabric names, switch serials etc in the config must match the NDFC being used
 
 ## Provider plugin Documentation
 
