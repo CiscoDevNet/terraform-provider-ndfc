@@ -54,7 +54,7 @@ type NDFCFabricModel struct {
 	CdpEnable                               string       `json:"CDP_ENABLE,omitempty"`
 	CoppPolicy                              string       `json:"COPP_POLICY,omitempty"`
 	DciSubnetRange                          string       `json:"DCI_SUBNET_RANGE,omitempty"`
-	DciSubnetTargetMask                     *int64       `json:"DCI_SUBNET_TARGET_MASK,omitempty"`
+	DciSubnetTargetMask                     *Int64Custom `json:"DCI_SUBNET_TARGET_MASK,omitempty"`
 	DefaultQueuingPolicyCloudscale          string       `json:"DEAFULT_QUEUING_POLICY_CLOUDSCALE,omitempty"`
 	DefaultQueuingPolicyOther               string       `json:"DEAFULT_QUEUING_POLICY_OTHER,omitempty"`
 	DefaultQueuingPolicyRSeries             string       `json:"DEAFULT_QUEUING_POLICY_R_SERIES,omitempty"`
@@ -613,8 +613,11 @@ func (v *FabricModel) SetModelData(jsonData *NDFCFabricModel) diag.Diagnostics {
 	}
 
 	if jsonData.DciSubnetTargetMask != nil {
-		v.DciSubnetTargetMask = types.Int64Value(*jsonData.DciSubnetTargetMask)
-
+		if jsonData.DciSubnetTargetMask.IsEmpty() {
+			v.DciSubnetTargetMask = types.Int64Null()
+		} else {
+			v.DciSubnetTargetMask = types.Int64Value(int64(*jsonData.DciSubnetTargetMask))
+		}
 	} else {
 		v.DciSubnetTargetMask = types.Int64Null()
 	}

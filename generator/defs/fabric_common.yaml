@@ -2808,6 +2808,7 @@ datasource:
         - model_name: DCI_SUBNET_TARGET_MASK
           tf_name: dci_subnet_target_mask
           type: Int64
+          handle_empty: true
           description: No description available
           computed: true
 
