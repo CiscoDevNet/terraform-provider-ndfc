@@ -76,7 +76,7 @@ func (f *NDFC) RscCreateFabric(ctx context.Context, dg *diag.Diagnostics, tf res
 
 	ret, _ := fapi.Get()
 	tflog.Debug(ctx, fmt.Sprintf("RscCreateFabric: response %s", ret))
-	if len(ret) != 0 {
+	if len(ret) > 0 && string(ret) != "[]" && string(ret) != "" {
 		tflog.Error(ctx, "RscCreateFabric: Fabric already exists")
 		dg.AddError("Fabric already exists", fmt.Sprintf("Fabric %s already exists", model.FabricName))
 		return
@@ -224,7 +224,9 @@ func (f *NDFC) DSGetFabric(ctx context.Context, dg *diag.Diagnostics, fabricName
 	if err != nil {
 		dg.AddError("Get failed", err.Error())
 		return nil
-
+	} else if string(res) == "[]" || len(res) == 0 {
+		dg.AddError("Fabric not found", "Fabric not found")
+		return nil
 	} else {
 		tflog.Info(ctx, "Url:"+f.url+" Read success ")
 		tflog.Info(ctx, string(res))
