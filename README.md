@@ -3,8 +3,7 @@
 ## Requirements
 
 - [Terraform](https://www.terraform.io/downloads.html) >= 1.0
-- [Go](https://golang.org/doc/install) >= 1.19
-
+- [Go](https://golang.org/doc/install) >= 1.23
 
 ## Installing The Provider
 
@@ -15,15 +14,15 @@
 ```shell
 go install
 ```
+
 The provider should be available in `$GOPATH/bin`
 
 ## Using the provider
 
 For using the locally compiled provider:
-Refer https://developer.hashicorp.com/terraform/cli/config/config-file   
-Section: Development Overrides for Provider Developers    
-To add dev overrides to use a the plugin under development    
-
+Refer <https://developer.hashicorp.com/terraform/cli/config/config-file>
+Section: Development Overrides for Provider Developers
+To add dev overrides to use a the plugin under development
 
 ## Acceptance Tests
 
@@ -33,22 +32,24 @@ To add dev overrides to use a the plugin under development
 or
 make testacc // Run everything
 ```
-* AT runs on actual NDFC environment     
-* The testbed settings are expected in a yaml file as seen in [`testing/testbed.yaml`](testing/testbed.yaml)
-* export `TESTBED_FILE` environment variable to indicate the testbed config to be used for AT
-* The provider settings can be overrided by following environment variables 
-  `NDFC_URL`, `NDFC_USER`, `NDFC_PASSWORD`, `NDFC_DOMAIN`
-** The fabric names, switch serials etc in the config must match the NDFC being used 
+
+* AT runs on actual NDFC environment
+- The testbed settings are expected in a yaml file as seen in [`testing/testbed.yaml`](testing/testbed.yaml)
+- export `TESTBED_FILE` environment variable to indicate the testbed config to be used for AT
+- The provider settings can be overrided by following environment variables
+  `NDFC_HOST`, `NDFC_USER`, `NDFC_PASSWORD`, `NDFC_DOMAIN`
+** The fabric names, switch serials etc in the config must match the NDFC being used
 
 ## Provider plugin Documentation
-[Provider](docs/index.md)   
-[Resources](docs/resources)    
-[Datasources](docs/data-sources)     
+
+[Provider](docs/index.md)
+[Resources](docs/resources)
+[Datasources](docs/data-sources)
 
 ## Sample Workflow
 
-Following is a sample integrated config that creates a new fabric and adds a switch into it.     
-Save this to a `config.tf` file, modify the paramters according to the NDFC in use       
+Following is a sample integrated config that creates a new fabric and adds a switch into it.
+Save this to a `config.tf` file, modify the paramters according to the NDFC in use
 
 ```
 terraform {
