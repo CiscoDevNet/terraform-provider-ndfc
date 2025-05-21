@@ -32,52 +32,52 @@ func InterfacesDataSourceSchema(ctx context.Context) schema.Schema {
 				NestedObject: schema.NestedAttributeObject{
 					Attributes: map[string]schema.Attribute{
 						"admin_status": schema.StringAttribute{
-							Optional:            true,
+							Computed:            true,
 							Description:         "Admin status of the interface",
 							MarkdownDescription: "Admin status of the interface",
 						},
 						"allowed_vlans": schema.StringAttribute{
-							Optional:            true,
+							Computed:            true,
 							Description:         "Allowed vlans for the ethernet interface",
 							MarkdownDescription: "Allowed vlans for the ethernet interface",
 						},
 						"deployment_status": schema.StringAttribute{
-							Optional:            true,
+							Computed:            true,
 							Description:         "Deployment status of the interface",
 							MarkdownDescription: "Deployment status of the interface",
 						},
 						"description": schema.StringAttribute{
-							Optional:            true,
+							Computed:            true,
 							Description:         "Description of the interface",
 							MarkdownDescription: "Description of the interface",
 						},
 						"fabric_name": schema.StringAttribute{
-							Optional:            true,
+							Computed:            true,
 							Description:         "Name of the fabric",
 							MarkdownDescription: "Name of the fabric",
 						},
 						"interface_index": schema.Int64Attribute{
-							Optional:            true,
+							Computed:            true,
 							Description:         "Index of the interface",
 							MarkdownDescription: "Index of the interface",
 						},
 						"interface_name": schema.StringAttribute{
-							Optional:            true,
+							Computed:            true,
 							Description:         "Name of the Interface. Example: `Ethernet1/3`",
 							MarkdownDescription: "Name of the Interface. Example: `Ethernet1/3`",
 						},
 						"interface_type": schema.StringAttribute{
-							Optional:            true,
+							Computed:            true,
 							Description:         "Type of interface. Examples: `ethernet`, `port-channel`",
 							MarkdownDescription: "Type of interface. Examples: `ethernet`, `port-channel`",
 						},
 						"ipv4_address": schema.StringAttribute{
-							Optional:            true,
+							Computed:            true,
 							Description:         "IPv4 address",
 							MarkdownDescription: "IPv4 address",
 						},
 						"is_physical": schema.BoolAttribute{
-							Optional:            true,
+							Computed:            true,
 							Description:         "Is the interface physical",
 							MarkdownDescription: "Is the interface physical",
 						},
@@ -87,42 +87,42 @@ func InterfacesDataSourceSchema(ctx context.Context) schema.Schema {
 							MarkdownDescription: "Mode of the interface",
 						},
 						"native_vlan_id": schema.Int64Attribute{
-							Optional:            true,
+							Computed:            true,
 							Description:         "Native VLAN ID",
 							MarkdownDescription: "Native VLAN ID",
 						},
 						"oper_status": schema.StringAttribute{
-							Optional:            true,
+							Computed:            true,
 							Description:         "Operational status of the interface",
 							MarkdownDescription: "Operational status of the interface",
 						},
 						"oper_status_cause": schema.StringAttribute{
-							Optional:            true,
+							Computed:            true,
 							Description:         "Cause of the operational status",
 							MarkdownDescription: "Cause of the operational status",
 						},
 						"policy_name": schema.StringAttribute{
-							Optional:            true,
+							Computed:            true,
 							Description:         "Name of the policy",
 							MarkdownDescription: "Name of the policy",
 						},
 						"speed": schema.StringAttribute{
-							Optional:            true,
+							Computed:            true,
 							Description:         "Speed of the interface",
 							MarkdownDescription: "Speed of the interface",
 						},
 						"switch_dbid": schema.Int64Attribute{
-							Optional:            true,
+							Computed:            true,
 							Description:         "Switch database ID",
 							MarkdownDescription: "Switch database ID",
 						},
 						"switch_name": schema.StringAttribute{
-							Optional:            true,
+							Computed:            true,
 							Description:         "Name of the system",
 							MarkdownDescription: "Name of the system",
 						},
 						"vrf": schema.StringAttribute{
-							Optional:            true,
+							Computed:            true,
 							Description:         "VRF name",
 							MarkdownDescription: "VRF name",
 						},

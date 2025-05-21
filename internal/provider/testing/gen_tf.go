@@ -37,7 +37,7 @@ const tfProviderConfig = `
 provider "ndfc" {
 	username = "{{.User}}"
 	password = "{{.Password}}"
-	host     = "{{.Host}}"
+	url     = "{{.Host}}"
 	insecure = {{.Insecure}}
 }
 `
@@ -438,6 +438,53 @@ func GetTFIntegrated(ts string, rsList []string, attrs map[string]interface{}, r
 	return tfConfig.String()
 }
 
+/*
+func GetTFDataSourceIntegrated(ts string, rsList []string, attrs map[string]interface{}) string {
+
+		switches := attrs["switches"].([]string)
+		fabricName := attrs["fabric"].(string)
+
+
+		//user := attrs["user"].(string)
+		//password := attrs["password"].(string)
+
+		// Read data-source.tf from each item in rsList
+		//rscTfList := make([]TerraformConfig, len(rsList))
+
+		tfConfig := new(bytes.Buffer)
+
+		exampleFolder := os.Getenv("GOPATH") + "/src/terraform-provider-ndfc/examples/data-sources"
+		for _, rs := range rsList {
+			tt := TerraformConfig{}
+			rsTFContent, err := os.ReadFile(fmt.Sprintf("%s/%s/data-source.tf", exampleFolder, rs))
+			if err != nil {
+				panic(err)
+			}
+			tt.AddContent(rsTFContent)
+			switch rs {
+			case "ndfc_fabric":
+				tt.ModifyAttributeValue("fabric_name", fabricName)
+
+			case "ndfc_vrfs":
+				tt.ModifyAttributeValue("fabric_name", fabricName)
+
+			case "ndfc_networks":
+				tt.ModifyAttributeValue("fabric_name", fabricName)
+
+			case "ndfc_interfaces":
+				tt.ModifyAttributeValue("serial_number", switches[0])
+			}
+			_, err = tt.File.WriteTo(tfConfig)
+			if err != nil {
+				panic(err)
+			}
+			//tfConfig.Write(tt.File.Bytes())
+			tfConfig.Write([]byte("\n\n"))
+		}
+		WriteConfigToFile(ts, tfConfig)
+		return tfConfig.String()
+	}
+*/
 func WriteConfigToFile(ts string, tfConfig *bytes.Buffer) {
 	if tmpDir == "" {
 		ct := time.Now()

@@ -3,12 +3,12 @@
 page_title: "ndfc_fabric_msite_ext_net Resource - terraform-provider-ndfc"
 subcategory: ""
 description: |-
-  Resource to configure an Multi-Site Network Fabric
+  Resource to configure an Multi-Site Network Fabric. Only creation/updation/deletion of the fabric is supported, resources on top of the fabric are not supported yet.
 ---
 
 # ndfc_fabric_msite_ext_net (Resource)
 
-Resource to configure an Multi-Site Network Fabric
+Resource to configure an Multi-Site Network Fabric. Only creation/updation/deletion of the fabric is supported, resources on top of the fabric are not supported yet.
 
 ## Example Usage
 
@@ -27,10 +27,53 @@ resource "ndfc_fabric_msite_ext_net" "test_resource_fabric_msite_ext_net_1" {
   inband_mgmt           = false
   is_read_only          = true
   mpls_handoff          = false
-  netflow_exporter_list = jsonencode({ "NETFLOW_EXPORTER_LIST" : [{ "EXPORTER_NAME" : "Test2", "IP" : "10.1.1.1", "VRF" : "", "SRC_IF_NAME" : "eth1/1", "UDP_PORT" : "800" }] })
-  netflow_monitor_list  = jsonencode({ "NETFLOW_MONITOR_LIST" : [{ "MONITOR_NAME" : "Test", "RECORD_NAME" : "Test1", "EXPORTER1" : "Test2", "EXPORTER2" : "" }] })
-  netflow_record_list   = jsonencode({ "NETFLOW_RECORD_LIST" : [{ "RECORD_NAME" : "Test1", "RECORD_TEMPLATE" : "netflow_ipv4_record", "LAYER2_RECORD" : "false" }] })
-  netflow_sampler_list  = jsonencode({ "NETFLOW_SAMPLER_LIST" : [{ "SAMPLER_NAME" : "Test1", "NUM_SAMPLES" : 12, "SAMPLING_RATE" : 10 }] })
+  netflow_exporter_list = jsonencode(
+    {
+      "NETFLOW_EXPORTER_LIST" : [
+        {
+          "EXPORTER_NAME" : "Test2",
+          "IP" : "10.1.1.1",
+          "VRF" : "",
+          "SRC_IF_NAME" : "eth1/1",
+          "UDP_PORT" : "800"
+        }
+      ]
+    }
+  )
+  netflow_monitor_list = jsonencode(
+    {
+      "NETFLOW_MONITOR_LIST" : [
+        {
+          "MONITOR_NAME" : "Test",
+          "RECORD_NAME" : "Test1",
+          "EXPORTER1" : "Test2",
+          "EXPORTER2" : ""
+        }
+      ]
+    }
+  )
+  netflow_record_list = jsonencode(
+    {
+      "NETFLOW_RECORD_LIST" : [
+        {
+          "RECORD_NAME" : "Test1",
+          "RECORD_TEMPLATE" : "netflow_ipv4_record",
+          "LAYER2_RECORD" : "false"
+        }
+      ]
+    }
+  )
+  netflow_sampler_list = jsonencode(
+    {
+      "NETFLOW_SAMPLER_LIST" : [
+        {
+          "SAMPLER_NAME" : "Test1",
+          "NUM_SAMPLES" : 12,
+          "SAMPLING_RATE" : 10
+        }
+      ]
+    }
+  )
   nxapi_https_port      = 443
   nxapi_http_port       = 80
   pm_enable             = false
@@ -46,58 +89,92 @@ resource "ndfc_fabric_msite_ext_net" "test_resource_fabric_msite_ext_net_1" {
 
 ### Required
 
-- `bgp_as` (String) 1-4294967295 | 1-65535.0-65535 It is a good practice to have a unique ASN for each Fabric.
+- `bgp_as` (String) 1-4294967295 | 1-65535.0-65535. It is a good practice to have a unique ASN for each Fabric.
 - `deploy` (Boolean) This flag does configuration save and deploy
-- `fabric_name` (String) Fabric name to be created, updated or deleted (Max Size 64).
+- `fabric_name` (String) Fabric name to be created, updated or deleted.
 
 ### Optional
 
 - `aaa_remote_ip_enabled` (Boolean) Enable only, when IP Authorization is enabled in the AAA Server
 - `aaa_server_conf` (String) AAA Configurations
+- `allow_nxc` (Boolean) Allow onboarding of this fabric to Nexus Cloud
 - `bootstrap_conf` (String) Additional CLIs required during device bootup/login e.g. AAA/Radius
 - `bootstrap_conf_xe` (String) Additional CLIs required during device bootup/login e.g. AAA/Radius
-- `bootstrap_enable` (Boolean) Automatic IP Assignment For POAP
-- `bootstrap_multisubnet` (String) lines with # prefix are ignored here
+- `bootstrap_enable` (Boolean) Automatic IP Assignment For POAP (For NX-OS and IOS XE (Cat9K) Switches Only)
+- `bootstrap_multisubnet` (String) "DHCPv4 Multi Subnet Scope - lines with # prefix are ignored here"
 - `cdp_enable` (Boolean) Enable CDP on management interface
+- `dci_subnet_range` (String) Address range to assign P2P DCI Links
+- `dci_subnet_target_mask` (Number) Target Mask for Subnet Range (Min:8, Max:31)
+- `deployment_freeze` (Boolean) Disable all deployments in this fabric
+- `deployment_status` (String) This fields shows the actual status of the deployment. It can be one of the following: Deployment pending Deployment successful
 - `dhcp_enable` (Boolean) Automatic IP Assignment For POAP From Local DHCP Server
 - `dhcp_end` (String) End Address For Switch POAP
-- `dhcp_ipv6_enable` (String) No description available
+- `dhcp_ipv6_enable` (String) DHCP Version
 - `dhcp_start` (String) Start Address For Switch POAP
 - `domain_name` (String) Domain name for DHCP server PnP block
 - `enable_aaa` (Boolean) Include AAA configs from Advanced tab during device bootup
 - `enable_netflow` (Boolean) Enable Netflow on VTEPs
 - `enable_nxapi` (Boolean) Enable HTTPS NX-API
-- `enable_nxapi_http` (Boolean) No description available
-- `enable_realtime_backup` (Boolean) Backup hourly only if there is any config deployment since last backup
+- `enable_nxapi_http` (Boolean) Enable HTTP NX-API
+- `enable_real_time_backup` (Boolean) Backup hourly only if there is any config deployment since last backup
+- `enable_rt_intf_stats` (Boolean) Valid for NX-OS only
 - `enable_scheduled_backup` (Boolean) Backup at the specified time
+- `ext_fabric_type` (String) External Fabric Type
 - `fabric_freeform` (String) Additional supported CLIs for all same OS (e.g. all NxOS or IOS-XE, etc) switches
-- `feature_ptp` (Boolean) No description available
+- `feature_ptp` (Boolean) Enable Precision Time Protocol (PTP)
+- `ff` (String) Template Family
 - `inband_enable` (Boolean) Enable POAP over Inband Interface (Pre-req: Inband Mgmt Knob should be Enabled)
 - `inband_mgmt` (Boolean) Import switches with inband connectivity
 - `intf_stat_load_interval` (Number) Time in seconds
 - `is_read_only` (Boolean) If enabled, fabric is only monitored. No configuration will be deployed
+- `loopback0_ip_range` (String) Underlay Routing Loopback IP Range
 - `mgmt_gw` (String) Default Gateway For Management VRF On The Switch
-- `mgmt_prefix` (Number) No description available
-- `mgmt_v6prefix` (Number) No description available
-- `mpls_handoff` (Boolean) No description available
-- `mpls_lb_id` (Number) No description available
+- `mgmt_prefix` (Number) Switch Mgmt IP Subnet Prefix
+- `mgmt_v6prefix` (Number) Switch Mgmt IPv6 Subnet Prefix (Min:64, Max:126)
+- `mpls_handoff` (Boolean) Enable MPLS Handoff
+- `mpls_lb_id` (Number) (Min:0, Max:1023)
 - `mpls_loopback_ip_range` (String) MPLS Loopback IP Address Range
 - `netflow_exporter_list` (String) One or Multiple Netflow Exporters
 - `netflow_monitor_list` (String) One or Multiple Netflow Monitors
 - `netflow_record_list` (String) One or Multiple Netflow Records
 - `netflow_sampler_list` (String) One or multiple netflow Samplers. Applicable to N7K only
-- `nxapi_http_port` (Number) No description available
-- `nxapi_https_port` (Number) No description available
-- `pm_enable` (Boolean) No description available
+- `nxapi_http_port` (Number) NX-API HTTP Port Number
+- `nxapi_https_port` (Number) NX-API HTTPS Port Number
+- `nxc_dest_vrf` (String) VRF to be used to reach Nexus Cloud, enter 'management' for management VRF and 'default' for default VRF
+- `nxc_proxy_port` (Number) Proxy port number, default is 8080
+- `nxc_proxy_server` (String) IPv4 or IPv6 address, or DNS name of the proxy server
+- `nxc_src_intf` (String) Source interface for communication to Nexus Cloud, mandatory if Destination VRF is not management
+- `overwrite_global_nxc` (Boolean) If enabled, Fabric NxCloud Settings will be used
+- `pm_enable` (Boolean) Enable Performance Monitoring (For NX-OS and IOS XE Switches Only)
 - `pnp_enable` (Boolean) Enable Plug n Play (Automatic IP Assignment) for Cat9K switches
 - `power_redundancy_mode` (String) Default Power Supply Mode For Bootstrapped NX-OS Switches
 - `ptp_domain_id` (Number) Multiple Independent PTP Clocking Subdomains on a Single Network
-- `ptp_lb_id` (Number) No description available
+- `ptp_lb_id` (Number) (Min:0, Max:1023)
 - `scheduled_time` (String) Time (UTC) in 24hr format. (00:00 to 23:59)
 - `snmp_server_host_trap` (Boolean) Configure NDFC as a receiver for SNMP traps
-- `subinterface_range` (String) Per Border Dot1q Range For VRF Lite Connectivity
+- `subinterface_range` (String) Per Border Dot1q Range For VRF Lite Connectivity (Min:2, Max:4093)
 
 ### Read-Only
 
-- `deployment_status` (String) This fields shows the actual status of the deployment. It can be one of the following: Deployment pending Deployment successful
+- `allow_nxc_prev` (Boolean) Previous state of Allow onboarding of this fabric to Nexus Cloud
+- `bootstrap_multisubnet_internal` (String) Internal Bootstrap Multi Subnet Scope
+- `dhcp_end_internal` (String) Internal DHCP End Address
+- `dhcp_ipv6_enable_internal` (String) Internal DHCP IPv6 Enable
+- `dhcp_start_internal` (String) Internal DHCP Start Address
+- `domain_name_internal` (String) Internal Domain Name
+- `enable_netflow_prev` (Boolean) Previous state of Enable Netflow on VTEPs
+- `fabric_type` (String) Fabric Type
+- `feature_ptp_internal` (Boolean) Internal Feature PTP
 - `id` (String) Terraform unique Id for the fabric resource
+- `inband_enable_prev` (Boolean) Previous state of Enable POAP over Inband Interface
+- `inband_mgmt_prev` (Boolean) Previous state of Inband Management
+- `mgmt_gw_internal` (String) Internal Management Gateway
+- `mgmt_prefix_internal` (Number) Internal Management Prefix
+- `mgmt_v6prefix_internal` (Number) Internal Management IPv6 Prefix
+- `mso_connectivity_deployed` (String) MSO Connectivity Deployed
+- `mso_controler_id` (String) MSO Controller ID
+- `mso_site_group_name` (String) MSO Site Group Name
+- `mso_site_id` (String) MSO Site ID
+- `pm_enable_prev` (Boolean) Previous state of Enable Performance Monitoring
+- `pnp_enable_internal` (Boolean) Internal PnP Enable
+- `premso_parent_fabric` (String) Pre-MSO Parent Fabric

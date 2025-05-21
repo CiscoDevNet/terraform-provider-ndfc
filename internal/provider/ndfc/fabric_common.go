@@ -12,6 +12,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"log"
 	"terraform-provider-ndfc/internal/provider/datasources/datasource_fabric"
 	"terraform-provider-ndfc/internal/provider/ndfc/api"
 	"terraform-provider-ndfc/internal/provider/resources/resource_fabric_common"
@@ -22,8 +23,7 @@ import (
 )
 
 const (
-	DataSourceFabric         = "fabric_data_source"
-	ResourceFabrics          = "fabrics"
+	ResourceFabrics          = "fabric"
 	ResourceVxlanEvpnFabric  = "fabric_vxlan_evpn"
 	ResourceVxlanMsdFabric   = "fabric_vxlan_msd"
 	ResourceLanClassicFabric = "fabric_lan_classic"
@@ -82,10 +82,10 @@ func (f *NDFC) RscCreateFabric(ctx context.Context, dg *diag.Diagnostics, tf res
 		return
 	}
 
-	_, err := fapi.Post(payload)
+	resp, err := fapi.Post(payload)
 	if err != nil {
 		tflog.Error(ctx, "RscCreateFabric: POST failed with payload %s", map[string]interface{}{"Payload": payload})
-		dg.AddError("Failed to create fabric", fmt.Sprintf("Error: %q", err.Error()))
+		dg.AddError("Failed to create fabric", fmt.Sprintf("Error: %q Response :%s", err.Error(), resp.String()))
 		return
 	}
 
@@ -216,9 +216,10 @@ func (f *NDFC) GetFabricName(ctx context.Context, serialNumber string) string {
 	return FabricNamePayload.FabricName
 
 }
-func (f *NDFC) DSGetFabricBulk(ctx context.Context, dg *diag.Diagnostics) *datasource_fabric.FabricModel {
+func (f *NDFC) DSGetFabric(ctx context.Context, dg *diag.Diagnostics, fabricName string) *datasource_fabric.FabricModel {
 	tflog.Debug(ctx, "DSGetFabricBulk entry")
 	fapi := api.NewFabricAPI(f.GetLock(ResourceFabrics), &f.apiClient)
+	fapi.FabricName = fabricName
 	res, err := fapi.Get()
 	if err != nil {
 		dg.AddError("Get failed", err.Error())
@@ -228,24 +229,23 @@ func (f *NDFC) DSGetFabricBulk(ctx context.Context, dg *diag.Diagnostics) *datas
 		tflog.Info(ctx, "Url:"+f.url+" Read success ")
 		tflog.Info(ctx, string(res))
 	}
-	ndFabric := datasource_fabric.NDFCFabricModel{}
-	err = json.Unmarshal(res, &ndFabric.Fabrics)
+	ndFabric := datasource_fabric.NDFCFabricDataSourceModel{}
+	log.Printf("[DEBUG] DSGetFabric: res %v", string(res))
+	err = json.Unmarshal(res, &ndFabric)
 	if err != nil {
 		dg.AddError("datasource_fabric: unmarshal failed ", err.Error())
 		return nil
 	} else {
 		tflog.Debug(ctx, "datasource_fabric: Unmarshal OK")
 	}
-	if len(ndFabric.Fabrics) > 0 {
-		tflog.Debug(ctx, fmt.Sprintf("datasource_fabric: Retrieved %d fabrics", len(ndFabric.Fabrics)))
-	}
+	log.Printf("[DEBUG] DSGetFabric: ndFabric %v", ndFabric)
 	data := new(datasource_fabric.FabricModel)
-	d := data.SetModelData(&ndFabric)
+	d := data.SetModelData(&ndFabric.NvPairs)
 	if d != nil {
 		*dg = d
 		return nil
 	} else {
-		tflog.Debug(ctx, "datasource_vrf_bulk: SetModelData OK")
+		tflog.Debug(ctx, fmt.Sprintf("DSGetFabric: SetModelData OK for fabric %s", data.FabricName.ValueString()))
 	}
 	return data
 }

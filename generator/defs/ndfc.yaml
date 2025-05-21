@@ -5,32 +5,32 @@ provider:
     - model_name: username
       tf_name: username
       type: String
-      mandatory: true 
-      description: NDFC Login credentials - user
+      mandatory: true
+      description: NDFC Login credentials - user.  Enviroment variable `NDFC_USER` can be used to override the provider configuration.
     - model_name: password
       sensitive: true
       tf_name: password
       type: String
-      mandatory: true 
-      description: NDFC Login credentials - password
+      mandatory: true
+      description: NDFC Login credentials - password. Enviroment variable `NDFC_PASSWORD` can be used to override the provider configuration.
     - model_name: domain
       tf_name: domain
       type: String
-      mandatory: false 
-      description: NDFC Login credentials - domain
+      mandatory: false
+      description: NDFC Login credentials - domain. Enviroment variable `NDFC_DOMAIN` can be used to override the provider configuration.
     - model_name: host
-      tf_name: host
+      tf_name: url
       type: String
-      mandatory: true 
-      description: NDFC Login credentials - host
+      mandatory: true
+      description: URL to connect to NDFC - Enviroment variable `NDFC_URL` can be used to override the provider configuration.
     - model_name: insecure
       tf_name: insecure
       type: Bool
-      mandatory: true 
-      description: NDFC Login  - ignore certificate issues
+      default_value: false
+      description: Controls whether ND server's certificate chain and host name is verified. This can also be set as the `NDFC_INSECURE` (true or false) environment variable.
     - model_name: timeout
       tf_name: timeout
       type: Int64
       min_int: 1
       default_value: 1000
-      description: NDFC HTTP request timeout - timeout
+      description: NDFC HTTP request timeout - timeout. Enviroment variable `NDFC_TIMEOUT` can be used to override the provider configuration.

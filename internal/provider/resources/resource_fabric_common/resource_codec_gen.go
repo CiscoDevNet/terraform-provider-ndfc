@@ -30,7 +30,7 @@ type NDFCFabricCommonModel struct {
 	DnsServerIpList                         string       `json:"DNS_SERVER_IP_LIST,omitempty"`
 	DnsServerVrf                            string       `json:"DNS_SERVER_VRF,omitempty"`
 	EnableAaa                               string       `json:"ENABLE_AAA,omitempty"`
-	EnableAsm                               string       `json:"ENABLE_ASM,omitempty"`
+	EsrOption                               string       `json:"ESR_OPTION,omitempty"`
 	EnableNbmPassive                        string       `json:"ENABLE_NBM_PASSIVE,omitempty"`
 	ExtraConfIntraLinks                     string       `json:"EXTRA_CONF_INTRA_LINKS,omitempty"`
 	ExtraConfLeaf                           string       `json:"EXTRA_CONF_LEAF,omitempty"`
@@ -80,6 +80,7 @@ type NDFCFabricCommonModel struct {
 	EnableNetflow                           string       `json:"ENABLE_NETFLOW,omitempty"`
 	EnableNxapi                             string       `json:"ENABLE_NXAPI,omitempty"`
 	EnableNxapiHttp                         string       `json:"ENABLE_NXAPI_HTTP,omitempty"`
+	EnableRtIntfStats                       string       `json:"ENABLE_RT_INTF_STATS,omitempty"`
 	FabricFreeform                          string       `json:"FABRIC_FREEFORM,omitempty"`
 	InbandEnable                            string       `json:"INBAND_ENABLE,omitempty"`
 	InbandMgmt                              string       `json:"INBAND_MGMT,omitempty"`
@@ -97,7 +98,7 @@ type NDFCFabricCommonModel struct {
 	NxapiHttpPort                           *Int64Custom `json:"NXAPI_HTTP_PORT,omitempty"`
 	PnpEnable                               string       `json:"PNP_ENABLE,omitempty"`
 	SubinterfaceRange                       string       `json:"SUBINTERFACE_RANGE,omitempty"`
-	EnableRealtimeBackup                    string       `json:"enableRealTimeBackup,omitempty"`
+	EnableRealTimeBackup                    string       `json:"enableRealTimeBackup,omitempty"`
 	EnableScheduledBackup                   string       `json:"enableScheduledBackup,omitempty"`
 	ScheduledTime                           string       `json:"scheduledTime,omitempty"`
 	AdvertisePipBgp                         string       `json:"ADVERTISE_PIP_BGP,omitempty"`
@@ -215,7 +216,6 @@ type NDFCFabricCommonModel struct {
 	NetworkExtensionTemplate                string       `json:"network_extension_template,omitempty"`
 	VrfExtensionTemplate                    string       `json:"vrf_extension_template,omitempty"`
 	BgpRpAsn                                string       `json:"BGP_RP_ASN,omitempty"`
-	BgwRoutingTag                           *Int64Custom `json:"BGW_ROUTING_TAG,omitempty"`
 	BorderGwyConnections                    string       `json:"BORDER_GWY_CONNECTIONS,omitempty"`
 	CloudsecAlgorithm                       string       `json:"CLOUDSEC_ALGORITHM,omitempty"`
 	CloudsecAutoconfig                      string       `json:"CLOUDSEC_AUTOCONFIG,omitempty"`
@@ -238,4 +238,159 @@ type NDFCFabricCommonModel struct {
 	TorAutoDeploy                           string       `json:"TOR_AUTO_DEPLOY,omitempty"`
 	Deploy                                  bool         `json:"-"`
 	DeploymentStatus                        string       `json:"-"`
+	Ipv6MulticastGroupSubnet                string       `json:"IPv6_MULTICAST_GROUP_SUBNET,omitempty"`
+	EnableTrmv6                             string       `json:"ENABLE_TRMv6,omitempty"`
+	L3vniIpv6McastGroup                     string       `json:"L3VNI_IPv6_MCAST_GROUP,omitempty"`
+	MvpnVriIdRange                          string       `json:"MVPN_VRI_ID_RANGE,omitempty"`
+	EnableVriIdRealloc                      string       `json:"ENABLE_VRI_ID_REALLOC,omitempty"`
+	EnableAggAccIdRange                     string       `json:"ENABLE_AGG_ACC_ID_RANGE,omitempty"`
+	AggAccVpcPoIdRange                      string       `json:"AGG_ACC_VPC_PO_ID_RANGE,omitempty"`
+	IsisAreaNum                             string       `json:"ISIS_AREA_NUM,omitempty"`
+	EnableSgt                               string       `json:"ENABLE_SGT,omitempty"`
+	SgtNamePrefix                           string       `json:"SGT_NAME_PREFIX,omitempty"`
+	SgtIdRange                              string       `json:"SGT_ID_RANGE,omitempty"`
+	SgtPreprovision                         string       `json:"SGT_PREPROVISION,omitempty"`
+	EnableDciMacsec                         string       `json:"ENABLE_DCI_MACSEC,omitempty"`
+	EnableQkd                               string       `json:"ENABLE_QKD,omitempty"`
+	AllowL3vniNoVlan                        string       `json:"ALLOW_L3VNI_NO_VLAN,omitempty"`
+	EnableL3vniNoVlan                       string       `json:"ENABLE_L3VNI_NO_VLAN,omitempty"`
+	MplsIsisAreaNum                         string       `json:"MPLS_ISIS_AREA_NUM,omitempty"`
+	EnableAiMlQosPolicy                     string       `json:"ENABLE_AI_ML_QOS_POLICY,omitempty"`
+	AiMlQosPolicy                           string       `json:"AI_ML_QOS_POLICY,omitempty"`
+	PfcWatchInt                             *Int64Custom `json:"PFC_WATCH_INT,omitempty"`
+	Ipv6AnycastRpIpRange                    string       `json:"IPv6_ANYCAST_RP_IP_RANGE,omitempty"`
+	KmeServerIp                             string       `json:"KME_SERVER_IP,omitempty"`
+	KmeServerPort                           *Int64Custom `json:"KME_SERVER_PORT,omitempty"`
+	TrustpointLabel                         string       `json:"TRUSTPOINT_LABEL,omitempty"`
+	IgnoreCert                              string       `json:"IGNORE_CERT,omitempty"`
+	DeploymentFreeze                        string       `json:"DEPLOYMENT_FREEZE,omitempty"`
+	QkdProfileName                          string       `json:"QKD_PROFILE_NAME,omitempty"`
+	PerVrfLoopbackAutoProvisionV6           string       `json:"PER_VRF_LOOPBACK_AUTO_PROVISION_V6,omitempty"`
+	PerVrfLoopbackIpRangeV6                 string       `json:"PER_VRF_LOOPBACK_IP_RANGE_V6,omitempty"`
+	PtpVlanId                               *Int64Custom `json:"PTP_VLAN_ID,omitempty"`
+	AllowNxc                                string       `json:"ALLOW_NXC,omitempty"`
+	OverwriteGlobalNxc                      string       `json:"OVERWRITE_GLOBAL_NXC,omitempty"`
+	NxcDestVrf                              string       `json:"NXC_DEST_VRF,omitempty"`
+	NxcSrcIntf                              string       `json:"NXC_SRC_INTF,omitempty"`
+	NxcProxyServer                          string       `json:"NXC_PROXY_SERVER,omitempty"`
+	NxcProxyPort                            *Int64Custom `json:"NXC_PROXY_PORT,omitempty"`
+	VpcDelayRestoreTime                     *Int64Custom `json:"VPC_DELAY_RESTORE_TIME,omitempty"`
+	FabricType                              string       `json:"FABRIC_TYPE,omitempty"`
+	ExtFabricType                           string       `json:"EXT_FABRIC_TYPE,omitempty"`
+	EnableAgent                             string       `json:"ENABLE_AGENT,omitempty"`
+	AgentIntf                               string       `json:"AGENT_INTF,omitempty"`
+	SspineAddDelDebugFlag                   string       `json:"SSPINE_ADD_DEL_DEBUG_FLAG,omitempty"`
+	BrfieldDebugFlag                        string       `json:"BRFIELD_DEBUG_FLAG,omitempty"`
+	ActiveMigration                         string       `json:"ACTIVE_MIGRATION,omitempty"`
+	Ff                                      string       `json:"FF,omitempty"`
+	BgpAsPrev                               string       `json:"BGP_AS_PREV,omitempty"`
+	UnderlayIsV6Prev                        string       `json:"UNDERLAY_IS_V6_PREV,omitempty"`
+	PmEnablePrev                            string       `json:"PM_ENABLE_PREV,omitempty"`
+	EnableFabricVpcDomainIdPrev             string       `json:"ENABLE_FABRIC_VPC_DOMAIN_ID_PREV,omitempty"`
+	OverlayModePrev                         string       `json:"OVERLAY_MODE_PREV,omitempty"`
+	AllowL3vniNoVlanPrev                    string       `json:"ALLOW_L3VNI_NO_VLAN_PREV,omitempty"`
+	EnablePvlanPrev                         string       `json:"ENABLE_PVLAN_PREV,omitempty"`
+	AutoUniqueVrfLiteIpPrefixPrev           string       `json:"AUTO_UNIQUE_VRF_LITE_IP_PREFIX_PREV,omitempty"`
+	PerVrfLoopbackAutoProvisionPrev         string       `json:"PER_VRF_LOOPBACK_AUTO_PROVISION_PREV,omitempty"`
+	PerVrfLoopbackAutoProvisionV6Prev       string       `json:"PER_VRF_LOOPBACK_AUTO_PROVISION_V6_PREV,omitempty"`
+	MsoSiteId                               string       `json:"MSO_SITE_ID,omitempty"`
+	MsoControlerId                          string       `json:"MSO_CONTROLER_ID,omitempty"`
+	MsoSiteGroupName                        string       `json:"MSO_SITE_GROUP_NAME,omitempty"`
+	PremsoParentFabric                      string       `json:"PREMSO_PARENT_FABRIC,omitempty"`
+	MsoConnectivityDeployed                 string       `json:"MSO_CONNECTIVITY_DEPLOYED,omitempty"`
+	AnycastRpIpRangeInternal                string       `json:"ANYCAST_RP_IP_RANGE_INTERNAL,omitempty"`
+	Ipv6AnycastRpIpRangeInternal            string       `json:"IPv6_ANYCAST_RP_IP_RANGE_INTERNAL,omitempty"`
+	DhcpStartInternal                       string       `json:"DHCP_START_INTERNAL,omitempty"`
+	DhcpEndInternal                         string       `json:"DHCP_END_INTERNAL,omitempty"`
+	MgmtGwInternal                          string       `json:"MGMT_GW_INTERNAL,omitempty"`
+	MgmtPrefixInternal                      *Int64Custom `json:"MGMT_PREFIX_INTERNAL,omitempty"`
+	BootstrapMultisubnetInternal            string       `json:"BOOTSTRAP_MULTISUBNET_INTERNAL,omitempty"`
+	MgmtV6prefixInternal                    *Int64Custom `json:"MGMT_V6PREFIX_INTERNAL,omitempty"`
+	DhcpIpv6EnableInternal                  string       `json:"DHCP_IPV6_ENABLE_INTERNAL,omitempty"`
+	UnnumDhcpStartInternal                  string       `json:"UNNUM_DHCP_START_INTERNAL,omitempty"`
+	UnnumDhcpEndInternal                    string       `json:"UNNUM_DHCP_END_INTERNAL,omitempty"`
+	EnableEvpn                              string       `json:"ENABLE_EVPN,omitempty"`
+	FeaturePtpInternal                      string       `json:"FEATURE_PTP_INTERNAL,omitempty"`
+	SspineCount                             *Int64Custom `json:"SSPINE_COUNT,omitempty"`
+	SpineCount                              *Int64Custom `json:"SPINE_COUNT,omitempty"`
+	AbstractFeatureLeaf                     string       `json:"abstract_feature_leaf,omitempty"`
+	AbstractFeatureSpine                    string       `json:"abstract_feature_spine,omitempty"`
+	AbstractDhcp                            string       `json:"abstract_dhcp,omitempty"`
+	AbstractMulticast                       string       `json:"abstract_multicast,omitempty"`
+	AbstractAnycastRp                       string       `json:"abstract_anycast_rp,omitempty"`
+	AbstractLoopbackInterface               string       `json:"abstract_loopback_interface,omitempty"`
+	AbstractIsis                            string       `json:"abstract_isis,omitempty"`
+	AbstractOspf                            string       `json:"abstract_ospf,omitempty"`
+	AbstractVpcDomain                       string       `json:"abstract_vpc_domain,omitempty"`
+	AbstractVlanInterface                   string       `json:"abstract_vlan_interface,omitempty"`
+	AbstractIsisInterface                   string       `json:"abstract_isis_interface,omitempty"`
+	AbstractOspfInterface                   string       `json:"abstract_ospf_interface,omitempty"`
+	AbstractPimInterface                    string       `json:"abstract_pim_interface,omitempty"`
+	AbstractRouteMap                        string       `json:"abstract_route_map,omitempty"`
+	AbstractBgp                             string       `json:"abstract_bgp,omitempty"`
+	AbstractBgpRr                           string       `json:"abstract_bgp_rr,omitempty"`
+	AbstractBgpNeighbor                     string       `json:"abstract_bgp_neighbor,omitempty"`
+	AbstractExtraConfigLeaf                 string       `json:"abstract_extra_config_leaf,omitempty"`
+	AbstractExtraConfigSpine                string       `json:"abstract_extra_config_spine,omitempty"`
+	AbstractExtraConfigTor                  string       `json:"abstract_extra_config_tor,omitempty"`
+	AbstractExtraConfigBootstrap            string       `json:"abstract_extra_config_bootstrap,omitempty"`
+	TempAnycastGateway                      string       `json:"temp_anycast_gateway,omitempty"`
+	TempVpcDomainMgmt                       string       `json:"temp_vpc_domain_mgmt,omitempty"`
+	TempVpcPeerLink                         string       `json:"temp_vpc_peer_link,omitempty"`
+	AbstractRoutedHost                      string       `json:"abstract_routed_host,omitempty"`
+	UpgradeFromVersion                      string       `json:"UPGRADE_FROM_VERSION,omitempty"`
+	TopdownConfigRmTracking                 string       `json:"TOPDOWN_CONFIG_RM_TRACKING,omitempty"`
+	SiteIdPolicyId                          *Int64Custom `json:"SITE_ID_POLICY_ID,omitempty"`
+	FabricVpcDomainIdPrev                   *Int64Custom `json:"FABRIC_VPC_DOMAIN_ID_PREV,omitempty"`
+	LinkStateRoutingTagPrev                 string       `json:"LINK_STATE_ROUTING_TAG_PREV,omitempty"`
+	BfdEnablePrev                           string       `json:"BFD_ENABLE_PREV,omitempty"`
+	EnableSgtPrev                           string       `json:"ENABLE_SGT_PREV,omitempty"`
+	SgtPreprovisionPrev                     string       `json:"SGT_PREPROVISION_PREV,omitempty"`
+	SgtPreprovRecalcStatus                  string       `json:"SGT_PREPROV_RECALC_STATUS,omitempty"`
+	SgtRecalcStatus                         string       `json:"SGT_RECALC_STATUS,omitempty"`
+	SgtOperStatus                           string       `json:"SGT_OPER_STATUS,omitempty"`
+	EnableMacsecPrev                        string       `json:"ENABLE_MACSEC_PREV,omitempty"`
+	EnableDciMacsecPrev                     string       `json:"ENABLE_DCI_MACSEC_PREV,omitempty"`
+	DciMacsecFallbackKeyString              string       `json:"DCI_MACSEC_FALLBACK_KEY_STRING,omitempty"`
+	DciMacsecFallbackAlgorithm              string       `json:"DCI_MACSEC_FALLBACK_ALGORITHM,omitempty"`
+	DciMacsecAlgorithm                      string       `json:"DCI_MACSEC_ALGORITHM,omitempty"`
+	DciMacsecKeyString                      string       `json:"DCI_MACSEC_KEY_STRING,omitempty"`
+	DciMacsecCipherSuite                    string       `json:"DCI_MACSEC_CIPHER_SUITE,omitempty"`
+	QkdProfileNamePrev                      string       `json:"QKD_PROFILE_NAME_PREV,omitempty"`
+	FabricMtuPrev                           *Int64Custom `json:"FABRIC_MTU_PREV,omitempty"`
+	L2HostIntfMtuPrev                       *Int64Custom `json:"L2_HOST_INTF_MTU_PREV,omitempty"`
+	MplsIsisAreaNumPrev                     string       `json:"MPLS_ISIS_AREA_NUM_PREV,omitempty"`
+	IsisAreaNumPrev                         string       `json:"ISIS_AREA_NUM_PREV,omitempty"`
+	EnableAiMlQosPolicyFlap                 string       `json:"ENABLE_AI_ML_QOS_POLICY_FLAP,omitempty"`
+	PfcWatchIntPrev                         *Int64Custom `json:"PFC_WATCH_INT_PREV,omitempty"`
+	InbandMgmtPrev                          string       `json:"INBAND_MGMT_PREV,omitempty"`
+	BootstrapEnablePrev                     string       `json:"BOOTSTRAP_ENABLE_PREV,omitempty"`
+	EnableNetflowPrev                       string       `json:"ENABLE_NETFLOW_PREV,omitempty"`
+	AllowNxcPrev                            string       `json:"ALLOW_NXC_PREV,omitempty"`
+	EnableNbmPassivePrev                    string       `json:"ENABLE_NBM_PASSIVE_PREV,omitempty"`
+	FabricTechnology                        string       `json:"FABRIC_TECHNOLOGY,omitempty"`
+	InterfaceEthernetDefaultPolicy          string       `json:"INTERFACE_ETHERNET_DEFAULT_POLICY,omitempty"`
+	InterfaceLoopbackDefaultPolicy          string       `json:"INTERFACE_LOOPBACK_DEFAULT_POLICY,omitempty"`
+	InterfacePortChannelDefaultPolicy       string       `json:"INTERFACE_PORT_CHANNEL_DEFAULT_POLICY,omitempty"`
+	InterfaceVlanDefaultPolicy              string       `json:"INTERFACE_VLAN_DEFAULT_POLICY,omitempty"`
+	RpIpRangeInternal                       string       `json:"RP_IP_RANGE_INTERNAL,omitempty"`
+	InbandEnablePrev                        string       `json:"INBAND_ENABLE_PREV,omitempty"`
+	EnableAsm                               string       `json:"ENABLE_ASM,omitempty"`
+	DomainNameInternal                      string       `json:"DOMAIN_NAME_INTERNAL,omitempty"`
+	PnpEnableInternal                       string       `json:"PNP_ENABLE_INTERNAL,omitempty"`
+	BgwRoutingTag                           *Int64Custom `json:"BGW_ROUTING_TAG,omitempty"`
+	DcnmId                                  string       `json:"DCNM_ID,omitempty"`
+	EnableTrmTrmv6                          string       `json:"ENABLE_TRM_TRMv6,omitempty"`
+	EnableTrmTrmv6Prev                      string       `json:"ENABLE_TRM_TRMv6_PREV,omitempty"`
+	Loopback100Ipv6Range                    string       `json:"LOOPBACK100_IPV6_RANGE,omitempty"`
+	BgwRoutingTagPrev                       string       `json:"BGW_ROUTING_TAG_PREV,omitempty"`
+	MsIfcBgpAuthKeyTypePrev                 *Int64Custom `json:"MS_IFC_BGP_AUTH_KEY_TYPE_PREV,omitempty"`
+	MsIfcBgpPasswordEnablePrev              string       `json:"MS_IFC_BGP_PASSWORD_ENABLE_PREV,omitempty"`
+	MsIfcBgpPasswordPrev                    string       `json:"MS_IFC_BGP_PASSWORD_PREV,omitempty"`
+	ParentOnemanageFabric                   string       `json:"PARENT_ONEMANAGE_FABRIC,omitempty"`
+	SgtIdRangePrev                          string       `json:"SGT_ID_RANGE_PREV,omitempty"`
+	SgtNamePrefixPrev                       string       `json:"SGT_NAME_PREFIX_PREV,omitempty"`
+	V6DciSubnetRange                        string       `json:"V6_DCI_SUBNET_RANGE,omitempty"`
+	V6DciSubnetTargetMask                   *Int64Custom `json:"V6_DCI_SUBNET_TARGET_MASK,omitempty"`
+	VxlanUnderlayIsV6                       string       `json:"VXLAN_UNDERLAY_IS_V6,omitempty"`
 }

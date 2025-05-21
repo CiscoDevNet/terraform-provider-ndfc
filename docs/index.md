@@ -19,7 +19,7 @@ provider "ndfc" {
   # Configuration options
   username = "***"
   password = "***"
-  host     = "https://testnd.cisco.com"
+  url     = "https://testnd.cisco.com"
   insecure = true
 }
 ```
@@ -31,14 +31,14 @@ username/password can also be supplied as environment variables `NDFC_USERNAME` 
 
 ### Required
 
-- `host` (String) NDFC Login credentials - host
-- `insecure` (Boolean) NDFC Login  - ignore certificate issues
-- `password` (String, Sensitive) NDFC Login credentials - password
-- `username` (String) NDFC Login credentials - user
+- `password` (String, Sensitive) NDFC Login credentials - password. Enviroment variable `NDFC_PASSWORD` can be used to override the provider configuration.
+- `url` (String) URL to connect to NDFC - Enviroment variable `NDFC_URL` can be used to override the provider configuration.
+- `username` (String) NDFC Login credentials - user.  Enviroment variable `NDFC_USER` can be used to override the provider configuration.
 
 ### Optional
 
-- `domain` (String) NDFC Login credentials - domain
-- `timeout` (Number) NDFC HTTP request timeout - timeout
+- `domain` (String) NDFC Login credentials - domain. Enviroment variable `NDFC_DOMAIN` can be used to override the provider configuration.
+- `insecure` (Boolean) Controls whether ND server's certificate chain and host name is verified. This can also be set as the `NDFC_INSECURE` (true or false) environment variable.
+- `timeout` (Number) NDFC HTTP request timeout - timeout. Enviroment variable `NDFC_TIMEOUT` can be used to override the provider configuration.
 
 

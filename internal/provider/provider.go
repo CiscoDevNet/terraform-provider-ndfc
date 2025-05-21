@@ -55,7 +55,7 @@ func (p *ndfcProvider) Configure(ctx context.Context, req provider.ConfigureRequ
 		return
 	}
 
-	ctx = tflog.SetField(ctx, "ndfc_host", config.Host.ValueString())
+	ctx = tflog.SetField(ctx, "ndfc_url", config.Url.ValueString())
 	ctx = tflog.SetField(ctx, "ndfc_username", config.Username.ValueString())
 	ctx = tflog.SetField(ctx, "ndfc_password", config.Password.ValueString())
 	ctx = tflog.SetField(ctx, "ndfc_domain", config.Domain.ValueString())
@@ -82,13 +82,24 @@ func (p *ndfcProvider) Configure(ctx context.Context, req provider.ConfigureRequ
 
 	tflog.Debug(ctx, "Creating NDFC client")
 
-	host := os.Getenv("NDFC_HOST")
+	host := os.Getenv("NDFC_URL")
 	domain := os.Getenv("NDFC_DOMAIN")
 	user := os.Getenv("NDFC_USER")
 	password := os.Getenv("NDFC_PASSWORD")
-
+	insecure := os.Getenv("NDFC_INSECURE")
+	if insecure != "" {
+		boolValue, err := strconv.ParseBool(insecure)
+		if err != nil {
+			resp.Diagnostics.AddError(
+				"Invalid input",
+				"A boolean value must be provided for NDFC_INSECURE",
+			)
+			return
+		}
+		config.Insecure = types.BoolValue(boolValue)
+	}
 	if host == "" {
-		host = config.Host.ValueString()
+		host = config.Url.ValueString()
 	}
 	if domain == "" {
 		domain = config.Domain.ValueString()

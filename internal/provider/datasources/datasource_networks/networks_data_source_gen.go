@@ -27,7 +27,7 @@ func NetworksDataSourceSchema(ctx context.Context) schema.Schema {
 				NestedObject: schema.NestedAttributeObject{
 					Attributes: map[string]schema.Attribute{
 						"arp_suppression": schema.BoolAttribute{
-							Optional:            true,
+							Computed:            true,
 							Description:         "ARP suppression is only supported if SVI is present when Layer-2-Only is not enabled. NX-OS Specific.",
 							MarkdownDescription: "ARP suppression is only supported if SVI is present when Layer-2-Only is not enabled. NX-OS Specific.",
 						},
@@ -45,24 +45,22 @@ func NetworksDataSourceSchema(ctx context.Context) schema.Schema {
 										MarkdownDescription: "The state of the attachment",
 									},
 									"display_name": schema.StringAttribute{
-										Optional:            true,
 										Computed:            true,
 										Description:         "The name of the switch",
 										MarkdownDescription: "The name of the switch",
 									},
 									"freeform_config": schema.StringAttribute{
-										Optional:            true,
+										Computed:            true,
 										Description:         "This field covers any configuration not included in overlay templates which is needed as part of this VRF attachment",
 										MarkdownDescription: "This field covers any configuration not included in overlay templates which is needed as part of this VRF attachment",
 									},
 									"instance_values": schema.StringAttribute{
-										Optional:            true,
 										Computed:            true,
 										Description:         "Instance values",
 										MarkdownDescription: "Instance values",
 									},
 									"serial_number": schema.StringAttribute{
-										Optional:            true,
+										Computed:            true,
 										Description:         "Serial number of a switch",
 										MarkdownDescription: "Serial number of a switch",
 									},
@@ -73,20 +71,17 @@ func NetworksDataSourceSchema(ctx context.Context) schema.Schema {
 									},
 									"switch_ports": schema.SetAttribute{
 										ElementType:         types.StringType,
-										Optional:            true,
 										Computed:            true,
 										Description:         "List of switch ports",
 										MarkdownDescription: "List of switch ports",
 									},
 									"tor_ports": schema.SetAttribute{
 										ElementType:         types.StringType,
-										Optional:            true,
 										Computed:            true,
 										Description:         "List of TOR ports",
 										MarkdownDescription: "List of TOR ports",
 									},
 									"vlan": schema.Int64Attribute{
-										Optional:            true,
 										Computed:            true,
 										Description:         "VLAN ID",
 										MarkdownDescription: "VLAN ID",
@@ -98,12 +93,12 @@ func NetworksDataSourceSchema(ctx context.Context) schema.Schema {
 									},
 								},
 							},
-							Optional:            true,
+							Computed:            true,
 							Description:         "List of switches attached to the network",
 							MarkdownDescription: "List of switches attached to the network",
 						},
 						"dhcp_relay_loopback_id": schema.Int64Attribute{
-							Optional:            true,
+							Computed:            true,
 							Description:         "Loopback ID for DHCP Relay interface",
 							MarkdownDescription: "Loopback ID for DHCP Relay interface",
 						},
@@ -127,81 +122,77 @@ func NetworksDataSourceSchema(ctx context.Context) schema.Schema {
 									},
 								},
 							},
-							Optional:            true,
+							Computed:            true,
 							Description:         "List of DHCP relay servers",
 							MarkdownDescription: "List of DHCP relay servers",
 						},
 						"display_name": schema.StringAttribute{
-							Optional:            true,
 							Computed:            true,
 							Description:         "Customized name of the network. By default, it will be same as the network name",
 							MarkdownDescription: "Customized name of the network. By default, it will be same as the network name",
 						},
 						"gateway_ipv4_address": schema.StringAttribute{
-							Optional:            true,
+							Computed:            true,
 							Description:         "Gateway IPv4 address, for example `192.0.2.1/24`",
 							MarkdownDescription: "Gateway IPv4 address, for example `192.0.2.1/24`",
 						},
 						"gateway_ipv6_address": schema.StringAttribute{
-							Optional:            true,
+							Computed:            true,
 							Description:         "Gateway IPv6 addresses, for example `2001:db8::1/64,2001:db9::1/64`",
 							MarkdownDescription: "Gateway IPv6 addresses, for example `2001:db8::1/64,2001:db9::1/64`",
 						},
 						"igmp_version": schema.StringAttribute{
-							Optional:            true,
 							Computed:            true,
 							Description:         "IGMP version",
 							MarkdownDescription: "IGMP version",
 						},
 						"ingress_replication": schema.BoolAttribute{
-							Optional:            true,
+							Computed:            true,
 							Description:         "Ingress replication flag. Read-only per network, Fabric-wide setting.",
 							MarkdownDescription: "Ingress replication flag. Read-only per network, Fabric-wide setting.",
 						},
 						"interface_description": schema.StringAttribute{
-							Optional:            true,
+							Computed:            true,
 							Description:         "Interface description",
 							MarkdownDescription: "Interface description",
 						},
 						"l3_gatway_border": schema.BoolAttribute{
-							Optional:            true,
+							Computed:            true,
 							Description:         "Enable L3 Gateway on Border",
 							MarkdownDescription: "Enable L3 Gateway on Border",
 						},
 						"layer2_only": schema.BoolAttribute{
-							Optional:            true,
+							Computed:            true,
 							Description:         "Layer-2 only flag",
 							MarkdownDescription: "Layer-2 only flag",
 						},
 						"mtu": schema.Int64Attribute{
-							Optional:            true,
+							Computed:            true,
 							Description:         "MTU for L3 interface",
 							MarkdownDescription: "MTU for L3 interface",
 						},
 						"multicast_group": schema.StringAttribute{
-							Optional:            true,
 							Computed:            true,
 							Description:         "Multicast group address",
 							MarkdownDescription: "Multicast group address",
 						},
 						"netflow": schema.BoolAttribute{
-							Optional:            true,
+							Computed:            true,
 							Description:         "Netflow enable flag. Netflow is supported only if it is enabled on fabric. For NX-OS only.",
 							MarkdownDescription: "Netflow enable flag. Netflow is supported only if it is enabled on fabric. For NX-OS only.",
 						},
 						"network_extension_template": schema.StringAttribute{
-							Optional:            true,
+							Computed:            true,
 							Description:         "The name of the network extension template. Applicable to Switch(es) with role Border",
 							MarkdownDescription: "The name of the network extension template. Applicable to Switch(es) with role Border",
 						},
 						"network_id": schema.Int64Attribute{
-							Optional:            true,
 							Computed:            true,
 							Description:         "VNI ID of the network",
 							MarkdownDescription: "VNI ID of the network",
 						},
 						"network_name": schema.StringAttribute{
-							Required:            true,
+							Computed:            true,
 							Description:         "The name of the network",
 							MarkdownDescription: "The name of the network",
 						},
@@ -211,79 +202,77 @@ func NetworksDataSourceSchema(ctx context.Context) schema.Schema {
 							MarkdownDescription: "Network status",
 						},
 						"network_template": schema.StringAttribute{
-							Optional:            true,
+							Computed:            true,
 							Description:         "The name of the network template. This is only applicable for leaf switches",
 							MarkdownDescription: "The name of the network template. This is only applicable for leaf switches",
 						},
 						"network_type": schema.StringAttribute{
-							Optional:            true,
+							Computed:            true,
 							Description:         "Network Type",
 							MarkdownDescription: "Network Type",
 						},
 						"primary_network_id": schema.Int64Attribute{
-							Optional:            true,
 							Computed:            true,
 							Description:         "Primary network VNI ID. This is applicable only when PVLAN is enabled in fabric.",
 							MarkdownDescription: "Primary network VNI ID. This is applicable only when PVLAN is enabled in fabric.",
 						},
 						"route_target_both": schema.BoolAttribute{
-							Optional:            true,
+							Computed:            true,
 							Description:         "L2 VNI Route-Target Both Enable. NX-OS specific.",
 							MarkdownDescription: "L2 VNI Route-Target Both Enable. NX-OS specific.",
 						},
 						"routing_tag": schema.Int64Attribute{
-							Optional:            true,
+							Computed:            true,
 							Description:         "Routing tag",
 							MarkdownDescription: "Routing tag",
 						},
 						"secondary_gateway_1": schema.StringAttribute{
-							Optional:            true,
+							Computed:            true,
 							Description:         "IPv4 Secondary GW1",
 							MarkdownDescription: "IPv4 Secondary GW1",
 						},
 						"secondary_gateway_2": schema.StringAttribute{
-							Optional:            true,
+							Computed:            true,
 							Description:         "IPv4 Secondary GW2",
 							MarkdownDescription: "IPv4 Secondary GW2",
 						},
 						"secondary_gateway_3": schema.StringAttribute{
-							Optional:            true,
+							Computed:            true,
 							Description:         "IPv4 Secondary GW3",
 							MarkdownDescription: "IPv4 Secondary GW3",
 						},
 						"secondary_gateway_4": schema.StringAttribute{
-							Optional:            true,
+							Computed:            true,
 							Description:         "IPv4 Secondary GW4",
 							MarkdownDescription: "IPv4 Secondary GW4",
 						},
 						"svi_netflow_monitor": schema.StringAttribute{
-							Optional:            true,
+							Computed:            true,
 							Description:         "Interface Vlan Netflow Monitor. Applicable only if 'Layer 2 Only' is not enabled. Provide monitor name defined in fabric setting for Layer 3 Record. For NX-OS only.",
 							MarkdownDescription: "Interface Vlan Netflow Monitor. Applicable only if 'Layer 2 Only' is not enabled. Provide monitor name defined in fabric setting for Layer 3 Record. For NX-OS only.",
 						},
 						"trm": schema.BoolAttribute{
-							Optional:            true,
+							Computed:            true,
 							Description:         "Enable Tenant Routed Multicast",
 							MarkdownDescription: "Enable Tenant Routed Multicast",
 						},
 						"vlan_id": schema.Int64Attribute{
-							Optional:            true,
 							Computed:            true,
 							Description:         "VLAN ID",
 							MarkdownDescription: "VLAN ID",
 						},
 						"vlan_name": schema.StringAttribute{
-							Optional:            true,
+							Computed:            true,
 							Description:         "Vlan name. If > 32 chars, enable 'system vlan long-name' for NX-OS, disable VTPv1 and VTPv2 or switch to VTPv3 for IOS XE.",
 							MarkdownDescription: "Vlan name. If > 32 chars, enable 'system vlan long-name' for NX-OS, disable VTPv1 and VTPv2 or switch to VTPv3 for IOS XE.",
 						},
 						"vlan_netflow_monitor": schema.StringAttribute{
-							Optional:            true,
+							Computed:            true,
 							Description:         "Vlan Netflow Monitor. Provide monitor name defined in fabric setting for Layer 3 Record. For NX-OS only",
 							MarkdownDescription: "Vlan Netflow Monitor. Provide monitor name defined in fabric setting for Layer 3 Record. For NX-OS only",
 						},
 						"vrf_name": schema.StringAttribute{
-							Optional:            true,
+							Computed:            true,
 							Description:         "The name of the vrf",
 							MarkdownDescription: "The name of the vrf",
 						},
@@ -294,7 +283,7 @@ func NetworksDataSourceSchema(ctx context.Context) schema.Schema {
 						},
 					},
 				},
-				Optional:            true,
+				Computed:            true,
 				Description:         "List of Networks",
 				MarkdownDescription: "List of Networks",
 			},
@@ -3219,11 +3208,19 @@ func (v AttachmentsValue) String() string {
 func (v AttachmentsValue) ToObjectValue(ctx context.Context) (basetypes.ObjectValue, diag.Diagnostics) {
 	var diags diag.Diagnostics
 
-	switchPortsVal, d := types.SetValue(types.StringType, v.SwitchPorts.Elements())
+	var switchPortsVal basetypes.SetValue
+	switch {
+	case v.SwitchPorts.IsUnknown():
+		switchPortsVal = types.SetUnknown(types.StringType)
+	case v.SwitchPorts.IsNull():
+		switchPortsVal = types.SetNull(types.StringType)
+	default:
+		var d diag.Diagnostics
+		switchPortsVal, d = types.SetValue(types.StringType, v.SwitchPorts.Elements())
+		diags.Append(d...)
+	}
 
-	diags.Append(d...)
-
-	if d.HasError() {
+	if diags.HasError() {
 		return types.ObjectUnknown(map[string]attr.Type{
 			"attach_state":    basetypes.StringType{},
 			"attached":        basetypes.BoolType{},
@@ -3242,11 +3239,19 @@ func (v AttachmentsValue) ToObjectValue(ctx context.Context) (basetypes.ObjectVa
 		}), diags
 	}
 
-	torPortsVal, d := types.SetValue(types.StringType, v.TorPorts.Elements())
+	var torPortsVal basetypes.SetValue
+	switch {
+	case v.TorPorts.IsUnknown():
+		torPortsVal = types.SetUnknown(types.StringType)
+	case v.TorPorts.IsNull():
+		torPortsVal = types.SetNull(types.StringType)
+	default:
+		var d diag.Diagnostics
+		torPortsVal, d = types.SetValue(types.StringType, v.TorPorts.Elements())
+		diags.Append(d...)
+	}
 
-	diags.Append(d...)
-
-	if d.HasError() {
+	if diags.HasError() {
 		return types.ObjectUnknown(map[string]attr.Type{
 			"attach_state":    basetypes.StringType{},
 			"attached":        basetypes.BoolType{},

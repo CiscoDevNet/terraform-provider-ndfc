@@ -26,11 +26,15 @@ func FabricLanClassicModelHelperStateCheck(RscName string, c resource_fabric_com
 	}
 	if c.AaaRemoteIpEnabled != "" {
 		ret = append(ret, resource.TestCheckResourceAttr(RscName, attrPath.AtName("aaa_remote_ip_enabled").String(), c.AaaRemoteIpEnabled))
-	} else {
-		ret = append(ret, resource.TestCheckResourceAttr(RscName, attrPath.AtName("aaa_remote_ip_enabled").String(), "false"))
 	}
 	if c.AaaServerConf != "" {
 		ret = append(ret, resource.TestCheckResourceAttr(RscName, attrPath.AtName("aaa_server_conf").String(), c.AaaServerConf))
+	}
+	if c.AllowNxc != "" {
+		ret = append(ret, resource.TestCheckResourceAttr(RscName, attrPath.AtName("allow_nxc").String(), c.AllowNxc))
+	}
+	if c.AllowNxcPrev != "" {
+		ret = append(ret, resource.TestCheckResourceAttr(RscName, attrPath.AtName("allow_nxc_prev").String(), c.AllowNxcPrev))
 	}
 	if c.BootstrapConf != "" {
 		ret = append(ret, resource.TestCheckResourceAttr(RscName, attrPath.AtName("bootstrap_conf").String(), c.BootstrapConf))
@@ -40,80 +44,123 @@ func FabricLanClassicModelHelperStateCheck(RscName string, c resource_fabric_com
 	}
 	if c.BootstrapMultisubnet != "" {
 		ret = append(ret, resource.TestCheckResourceAttr(RscName, attrPath.AtName("bootstrap_multisubnet").String(), c.BootstrapMultisubnet))
-	} else {
-		ret = append(ret, resource.TestCheckResourceAttr(RscName, attrPath.AtName("bootstrap_multisubnet").String(), "#Scope_Start_IP, Scope_End_IP, Scope_Default_Gateway, Scope_Subnet_Prefix"))
+	}
+	if c.BootstrapMultisubnetInternal != "" {
+		ret = append(ret, resource.TestCheckResourceAttr(RscName, attrPath.AtName("bootstrap_multisubnet_internal").String(), c.BootstrapMultisubnetInternal))
 	}
 	if c.CdpEnable != "" {
 		ret = append(ret, resource.TestCheckResourceAttr(RscName, attrPath.AtName("cdp_enable").String(), c.CdpEnable))
-	} else {
-		ret = append(ret, resource.TestCheckResourceAttr(RscName, attrPath.AtName("cdp_enable").String(), "false"))
+	}
+	if c.DciSubnetRange != "" {
+		ret = append(ret, resource.TestCheckResourceAttr(RscName, attrPath.AtName("dci_subnet_range").String(), c.DciSubnetRange))
+	}
+	if c.DciSubnetTargetMask != nil {
+		ret = append(ret, resource.TestCheckResourceAttr(RscName, attrPath.AtName("dci_subnet_target_mask").String(), strconv.Itoa(int(*c.DciSubnetTargetMask))))
+	}
+	if c.DeploymentFreeze != "" {
+		ret = append(ret, resource.TestCheckResourceAttr(RscName, attrPath.AtName("deployment_freeze").String(), c.DeploymentFreeze))
 	}
 	if c.DhcpEnable != "" {
 		ret = append(ret, resource.TestCheckResourceAttr(RscName, attrPath.AtName("dhcp_enable").String(), c.DhcpEnable))
-	} else {
-		ret = append(ret, resource.TestCheckResourceAttr(RscName, attrPath.AtName("dhcp_enable").String(), "false"))
 	}
 	if c.DhcpEnd != "" {
 		ret = append(ret, resource.TestCheckResourceAttr(RscName, attrPath.AtName("dhcp_end").String(), c.DhcpEnd))
 	}
+	if c.DhcpEndInternal != "" {
+		ret = append(ret, resource.TestCheckResourceAttr(RscName, attrPath.AtName("dhcp_end_internal").String(), c.DhcpEndInternal))
+	}
 	if c.DhcpIpv6Enable != "" {
 		ret = append(ret, resource.TestCheckResourceAttr(RscName, attrPath.AtName("dhcp_ipv6_enable").String(), c.DhcpIpv6Enable))
 	}
+	if c.DhcpIpv6EnableInternal != "" {
+		ret = append(ret, resource.TestCheckResourceAttr(RscName, attrPath.AtName("dhcp_ipv6_enable_internal").String(), c.DhcpIpv6EnableInternal))
+	}
 	if c.DhcpStart != "" {
 		ret = append(ret, resource.TestCheckResourceAttr(RscName, attrPath.AtName("dhcp_start").String(), c.DhcpStart))
+	}
+	if c.DhcpStartInternal != "" {
+		ret = append(ret, resource.TestCheckResourceAttr(RscName, attrPath.AtName("dhcp_start_internal").String(), c.DhcpStartInternal))
 	}
 	if c.EnableAaa != "" {
 		ret = append(ret, resource.TestCheckResourceAttr(RscName, attrPath.AtName("enable_aaa").String(), c.EnableAaa))
 	}
 	if c.EnableNetflow != "" {
 		ret = append(ret, resource.TestCheckResourceAttr(RscName, attrPath.AtName("enable_netflow").String(), c.EnableNetflow))
-	} else {
-		ret = append(ret, resource.TestCheckResourceAttr(RscName, attrPath.AtName("enable_netflow").String(), "false"))
+	}
+	if c.EnableNetflowPrev != "" {
+		ret = append(ret, resource.TestCheckResourceAttr(RscName, attrPath.AtName("enable_netflow_prev").String(), c.EnableNetflowPrev))
 	}
 	if c.EnableNxapi != "" {
 		ret = append(ret, resource.TestCheckResourceAttr(RscName, attrPath.AtName("enable_nxapi").String(), c.EnableNxapi))
-	} else {
-		ret = append(ret, resource.TestCheckResourceAttr(RscName, attrPath.AtName("enable_nxapi").String(), "false"))
 	}
 	if c.EnableNxapiHttp != "" {
 		ret = append(ret, resource.TestCheckResourceAttr(RscName, attrPath.AtName("enable_nxapi_http").String(), c.EnableNxapiHttp))
-	} else {
-		ret = append(ret, resource.TestCheckResourceAttr(RscName, attrPath.AtName("enable_nxapi_http").String(), "false"))
+	}
+	if c.EnableRtIntfStats != "" {
+		ret = append(ret, resource.TestCheckResourceAttr(RscName, attrPath.AtName("enable_rt_intf_stats").String(), c.EnableRtIntfStats))
+	}
+	if c.ExtFabricType != "" {
+		ret = append(ret, resource.TestCheckResourceAttr(RscName, attrPath.AtName("ext_fabric_type").String(), c.ExtFabricType))
 	}
 	if c.FabricFreeform != "" {
 		ret = append(ret, resource.TestCheckResourceAttr(RscName, attrPath.AtName("fabric_freeform").String(), c.FabricFreeform))
 	}
+	if c.FabricTechnology != "" {
+		ret = append(ret, resource.TestCheckResourceAttr(RscName, attrPath.AtName("fabric_technology").String(), c.FabricTechnology))
+	}
+	if c.FabricType != "" {
+		ret = append(ret, resource.TestCheckResourceAttr(RscName, attrPath.AtName("fabric_type").String(), c.FabricType))
+	}
 	if c.FeaturePtp != "" {
 		ret = append(ret, resource.TestCheckResourceAttr(RscName, attrPath.AtName("feature_ptp").String(), c.FeaturePtp))
-	} else {
-		ret = append(ret, resource.TestCheckResourceAttr(RscName, attrPath.AtName("feature_ptp").String(), "false"))
+	}
+	if c.FeaturePtpInternal != "" {
+		ret = append(ret, resource.TestCheckResourceAttr(RscName, attrPath.AtName("feature_ptp_internal").String(), c.FeaturePtpInternal))
+	}
+	if c.Ff != "" {
+		ret = append(ret, resource.TestCheckResourceAttr(RscName, attrPath.AtName("ff").String(), c.Ff))
 	}
 	if c.InbandEnable != "" {
 		ret = append(ret, resource.TestCheckResourceAttr(RscName, attrPath.AtName("inband_enable").String(), c.InbandEnable))
 	}
+	if c.InbandEnablePrev != "" {
+		ret = append(ret, resource.TestCheckResourceAttr(RscName, attrPath.AtName("inband_enable_prev").String(), c.InbandEnablePrev))
+	}
 	if c.InbandMgmt != "" {
 		ret = append(ret, resource.TestCheckResourceAttr(RscName, attrPath.AtName("inband_mgmt").String(), c.InbandMgmt))
-	} else {
-		ret = append(ret, resource.TestCheckResourceAttr(RscName, attrPath.AtName("inband_mgmt").String(), "false"))
+	}
+	if c.InbandMgmtPrev != "" {
+		ret = append(ret, resource.TestCheckResourceAttr(RscName, attrPath.AtName("inband_mgmt_prev").String(), c.InbandMgmtPrev))
+	}
+	if c.IntfStatLoadInterval != nil {
+		ret = append(ret, resource.TestCheckResourceAttr(RscName, attrPath.AtName("intf_stat_load_interval").String(), strconv.Itoa(int(*c.IntfStatLoadInterval))))
 	}
 	if c.IsReadOnly != "" {
 		ret = append(ret, resource.TestCheckResourceAttr(RscName, attrPath.AtName("is_read_only").String(), c.IsReadOnly))
-	} else {
-		ret = append(ret, resource.TestCheckResourceAttr(RscName, attrPath.AtName("is_read_only").String(), "true"))
+	}
+	if c.Loopback0IpRange != "" {
+		ret = append(ret, resource.TestCheckResourceAttr(RscName, attrPath.AtName("loopback0_ip_range").String(), c.Loopback0IpRange))
 	}
 	if c.MgmtGw != "" {
 		ret = append(ret, resource.TestCheckResourceAttr(RscName, attrPath.AtName("mgmt_gw").String(), c.MgmtGw))
 	}
+	if c.MgmtGwInternal != "" {
+		ret = append(ret, resource.TestCheckResourceAttr(RscName, attrPath.AtName("mgmt_gw_internal").String(), c.MgmtGwInternal))
+	}
 	if c.MgmtPrefix != nil {
 		ret = append(ret, resource.TestCheckResourceAttr(RscName, attrPath.AtName("mgmt_prefix").String(), strconv.Itoa(int(*c.MgmtPrefix))))
+	}
+	if c.MgmtPrefixInternal != nil {
+		ret = append(ret, resource.TestCheckResourceAttr(RscName, attrPath.AtName("mgmt_prefix_internal").String(), strconv.Itoa(int(*c.MgmtPrefixInternal))))
 	}
 	if c.MgmtV6prefix != nil {
 		ret = append(ret, resource.TestCheckResourceAttr(RscName, attrPath.AtName("mgmt_v6prefix").String(), strconv.Itoa(int(*c.MgmtV6prefix))))
 	}
+	if c.MgmtV6prefixInternal != nil {
+		ret = append(ret, resource.TestCheckResourceAttr(RscName, attrPath.AtName("mgmt_v6prefix_internal").String(), strconv.Itoa(int(*c.MgmtV6prefixInternal))))
+	}
 	if c.MplsHandoff != "" {
 		ret = append(ret, resource.TestCheckResourceAttr(RscName, attrPath.AtName("mpls_handoff").String(), c.MplsHandoff))
-	} else {
-		ret = append(ret, resource.TestCheckResourceAttr(RscName, attrPath.AtName("mpls_handoff").String(), "false"))
 	}
 	if c.MplsLbId != nil {
 		ret = append(ret, resource.TestCheckResourceAttr(RscName, attrPath.AtName("mpls_lb_id").String(), strconv.Itoa(int(*c.MplsLbId))))
@@ -135,23 +182,33 @@ func FabricLanClassicModelHelperStateCheck(RscName string, c resource_fabric_com
 	}
 	if c.NxapiHttpsPort != nil {
 		ret = append(ret, resource.TestCheckResourceAttr(RscName, attrPath.AtName("nxapi_https_port").String(), strconv.Itoa(int(*c.NxapiHttpsPort))))
-	} else {
-		ret = append(ret, resource.TestCheckResourceAttr(RscName, attrPath.AtName("nxapi_https_port").String(), "443"))
 	}
 	if c.NxapiHttpPort != nil {
 		ret = append(ret, resource.TestCheckResourceAttr(RscName, attrPath.AtName("nxapi_http_port").String(), strconv.Itoa(int(*c.NxapiHttpPort))))
-	} else {
-		ret = append(ret, resource.TestCheckResourceAttr(RscName, attrPath.AtName("nxapi_http_port").String(), "80"))
+	}
+	if c.NxcDestVrf != "" {
+		ret = append(ret, resource.TestCheckResourceAttr(RscName, attrPath.AtName("nxc_dest_vrf").String(), c.NxcDestVrf))
+	}
+	if c.NxcProxyPort != nil {
+		ret = append(ret, resource.TestCheckResourceAttr(RscName, attrPath.AtName("nxc_proxy_port").String(), strconv.Itoa(int(*c.NxcProxyPort))))
+	}
+	if c.NxcProxyServer != "" {
+		ret = append(ret, resource.TestCheckResourceAttr(RscName, attrPath.AtName("nxc_proxy_server").String(), c.NxcProxyServer))
+	}
+	if c.NxcSrcIntf != "" {
+		ret = append(ret, resource.TestCheckResourceAttr(RscName, attrPath.AtName("nxc_src_intf").String(), c.NxcSrcIntf))
+	}
+	if c.OverwriteGlobalNxc != "" {
+		ret = append(ret, resource.TestCheckResourceAttr(RscName, attrPath.AtName("overwrite_global_nxc").String(), c.OverwriteGlobalNxc))
 	}
 	if c.PmEnable != "" {
 		ret = append(ret, resource.TestCheckResourceAttr(RscName, attrPath.AtName("pm_enable").String(), c.PmEnable))
-	} else {
-		ret = append(ret, resource.TestCheckResourceAttr(RscName, attrPath.AtName("pm_enable").String(), "false"))
+	}
+	if c.PmEnablePrev != "" {
+		ret = append(ret, resource.TestCheckResourceAttr(RscName, attrPath.AtName("pm_enable_prev").String(), c.PmEnablePrev))
 	}
 	if c.PowerRedundancyMode != "" {
 		ret = append(ret, resource.TestCheckResourceAttr(RscName, attrPath.AtName("power_redundancy_mode").String(), c.PowerRedundancyMode))
-	} else {
-		ret = append(ret, resource.TestCheckResourceAttr(RscName, attrPath.AtName("power_redundancy_mode").String(), "ps-redundant"))
 	}
 	if c.PtpDomainId != nil {
 		ret = append(ret, resource.TestCheckResourceAttr(RscName, attrPath.AtName("ptp_domain_id").String(), strconv.Itoa(int(*c.PtpDomainId))))
@@ -161,23 +218,15 @@ func FabricLanClassicModelHelperStateCheck(RscName string, c resource_fabric_com
 	}
 	if c.SnmpServerHostTrap != "" {
 		ret = append(ret, resource.TestCheckResourceAttr(RscName, attrPath.AtName("snmp_server_host_trap").String(), c.SnmpServerHostTrap))
-	} else {
-		ret = append(ret, resource.TestCheckResourceAttr(RscName, attrPath.AtName("snmp_server_host_trap").String(), "true"))
 	}
 	if c.SubinterfaceRange != "" {
 		ret = append(ret, resource.TestCheckResourceAttr(RscName, attrPath.AtName("subinterface_range").String(), c.SubinterfaceRange))
-	} else {
-		ret = append(ret, resource.TestCheckResourceAttr(RscName, attrPath.AtName("subinterface_range").String(), "2-511"))
 	}
-	if c.EnableRealtimeBackup != "" {
-		ret = append(ret, resource.TestCheckResourceAttr(RscName, attrPath.AtName("enable_realtime_backup").String(), c.EnableRealtimeBackup))
-	} else {
-		ret = append(ret, resource.TestCheckResourceAttr(RscName, attrPath.AtName("enable_realtime_backup").String(), "false"))
+	if c.EnableRealTimeBackup != "" {
+		ret = append(ret, resource.TestCheckResourceAttr(RscName, attrPath.AtName("enable_real_time_backup").String(), c.EnableRealTimeBackup))
 	}
 	if c.EnableScheduledBackup != "" {
 		ret = append(ret, resource.TestCheckResourceAttr(RscName, attrPath.AtName("enable_scheduled_backup").String(), c.EnableScheduledBackup))
-	} else {
-		ret = append(ret, resource.TestCheckResourceAttr(RscName, attrPath.AtName("enable_scheduled_backup").String(), "false"))
 	}
 	if c.ScheduledTime != "" {
 		ret = append(ret, resource.TestCheckResourceAttr(RscName, attrPath.AtName("scheduled_time").String(), c.ScheduledTime))

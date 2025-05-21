@@ -43,6 +43,19 @@ func (v *FabricIpfmModel) SetModelData(jsonData *resource_fabric_common.NDFCFabr
 		v.AaaServerConf = types.StringNull()
 	}
 
+	if jsonData.ActiveMigration != "" {
+		x, _ := strconv.ParseBool(jsonData.ActiveMigration)
+		v.ActiveMigration = types.BoolValue(x)
+	} else {
+		v.ActiveMigration = types.BoolNull()
+	}
+
+	if jsonData.AgentIntf != "" {
+		v.AgentIntf = types.StringValue(jsonData.AgentIntf)
+	} else {
+		v.AgentIntf = types.StringNull()
+	}
+
 	if jsonData.AsmGroupRanges != "" {
 		v.AsmGroupRanges = types.StringValue(jsonData.AsmGroupRanges)
 	} else {
@@ -68,11 +81,30 @@ func (v *FabricIpfmModel) SetModelData(jsonData *resource_fabric_common.NDFCFabr
 		v.BootstrapMultisubnet = types.StringNull()
 	}
 
+	if jsonData.BootstrapMultisubnetInternal != "" {
+		v.BootstrapMultisubnetInternal = types.StringValue(jsonData.BootstrapMultisubnetInternal)
+	} else {
+		v.BootstrapMultisubnetInternal = types.StringNull()
+	}
+
+	if jsonData.BrfieldDebugFlag != "" {
+		v.BrfieldDebugFlag = types.StringValue(jsonData.BrfieldDebugFlag)
+	} else {
+		v.BrfieldDebugFlag = types.StringNull()
+	}
+
 	if jsonData.CdpEnable != "" {
 		x, _ := strconv.ParseBool(jsonData.CdpEnable)
 		v.CdpEnable = types.BoolValue(x)
 	} else {
 		v.CdpEnable = types.BoolNull()
+	}
+
+	if jsonData.DeploymentFreeze != "" {
+		x, _ := strconv.ParseBool(jsonData.DeploymentFreeze)
+		v.DeploymentFreeze = types.BoolValue(x)
+	} else {
+		v.DeploymentFreeze = types.BoolNull()
 	}
 
 	if jsonData.DhcpEnable != "" {
@@ -88,16 +120,34 @@ func (v *FabricIpfmModel) SetModelData(jsonData *resource_fabric_common.NDFCFabr
 		v.DhcpEnd = types.StringNull()
 	}
 
+	if jsonData.DhcpEndInternal != "" {
+		v.DhcpEndInternal = types.StringValue(jsonData.DhcpEndInternal)
+	} else {
+		v.DhcpEndInternal = types.StringNull()
+	}
+
 	if jsonData.DhcpIpv6Enable != "" {
 		v.DhcpIpv6Enable = types.StringValue(jsonData.DhcpIpv6Enable)
 	} else {
 		v.DhcpIpv6Enable = types.StringNull()
 	}
 
+	if jsonData.DhcpIpv6EnableInternal != "" {
+		v.DhcpIpv6EnableInternal = types.StringValue(jsonData.DhcpIpv6EnableInternal)
+	} else {
+		v.DhcpIpv6EnableInternal = types.StringNull()
+	}
+
 	if jsonData.DhcpStart != "" {
 		v.DhcpStart = types.StringValue(jsonData.DhcpStart)
 	} else {
 		v.DhcpStart = types.StringNull()
+	}
+
+	if jsonData.DhcpStartInternal != "" {
+		v.DhcpStartInternal = types.StringValue(jsonData.DhcpStartInternal)
+	} else {
+		v.DhcpStartInternal = types.StringNull()
 	}
 
 	if jsonData.DnsServerIpList != "" {
@@ -119,6 +169,13 @@ func (v *FabricIpfmModel) SetModelData(jsonData *resource_fabric_common.NDFCFabr
 		v.EnableAaa = types.BoolNull()
 	}
 
+	if jsonData.EnableAgent != "" {
+		x, _ := strconv.ParseBool(jsonData.EnableAgent)
+		v.EnableAgent = types.BoolValue(x)
+	} else {
+		v.EnableAgent = types.BoolNull()
+	}
+
 	if jsonData.EnableAsm != "" {
 		x, _ := strconv.ParseBool(jsonData.EnableAsm)
 		v.EnableAsm = types.BoolValue(x)
@@ -131,6 +188,34 @@ func (v *FabricIpfmModel) SetModelData(jsonData *resource_fabric_common.NDFCFabr
 		v.EnableNbmPassive = types.BoolValue(x)
 	} else {
 		v.EnableNbmPassive = types.BoolNull()
+	}
+
+	if jsonData.EnableNbmPassivePrev != "" {
+		x, _ := strconv.ParseBool(jsonData.EnableNbmPassivePrev)
+		v.EnableNbmPassivePrev = types.BoolValue(x)
+	} else {
+		v.EnableNbmPassivePrev = types.BoolNull()
+	}
+
+	if jsonData.EnableNxapi != "" {
+		x, _ := strconv.ParseBool(jsonData.EnableNxapi)
+		v.EnableNxapi = types.BoolValue(x)
+	} else {
+		v.EnableNxapi = types.BoolNull()
+	}
+
+	if jsonData.EnableNxapiHttp != "" {
+		x, _ := strconv.ParseBool(jsonData.EnableNxapiHttp)
+		v.EnableNxapiHttp = types.BoolValue(x)
+	} else {
+		v.EnableNxapiHttp = types.BoolNull()
+	}
+
+	if jsonData.EnableRtIntfStats != "" {
+		x, _ := strconv.ParseBool(jsonData.EnableRtIntfStats)
+		v.EnableRtIntfStats = types.BoolValue(x)
+	} else {
+		v.EnableRtIntfStats = types.BoolNull()
 	}
 
 	if jsonData.ExtraConfIntraLinks != "" {
@@ -151,6 +236,12 @@ func (v *FabricIpfmModel) SetModelData(jsonData *resource_fabric_common.NDFCFabr
 		v.ExtraConfSpine = types.StringNull()
 	}
 
+	if jsonData.ExtFabricType != "" {
+		v.ExtFabricType = types.StringValue(jsonData.ExtFabricType)
+	} else {
+		v.ExtFabricType = types.StringNull()
+	}
+
 	if jsonData.FabricInterfaceType != "" {
 		v.FabricInterfaceType = types.StringValue(jsonData.FabricInterfaceType)
 	} else {
@@ -167,11 +258,86 @@ func (v *FabricIpfmModel) SetModelData(jsonData *resource_fabric_common.NDFCFabr
 		v.FabricMtu = types.Int64Null()
 	}
 
+	if jsonData.FabricMtuPrev != nil {
+		if jsonData.FabricMtuPrev.IsEmpty() {
+			v.FabricMtuPrev = types.Int64Null()
+		} else {
+			v.FabricMtuPrev = types.Int64Value(int64(*jsonData.FabricMtuPrev))
+		}
+	} else {
+		v.FabricMtuPrev = types.Int64Null()
+	}
+
+	if jsonData.FabricTechnology != "" {
+		v.FabricTechnology = types.StringValue(jsonData.FabricTechnology)
+	} else {
+		v.FabricTechnology = types.StringNull()
+	}
+
+	if jsonData.FabricType != "" {
+		v.FabricType = types.StringValue(jsonData.FabricType)
+	} else {
+		v.FabricType = types.StringNull()
+	}
+
 	if jsonData.FeaturePtp != "" {
 		x, _ := strconv.ParseBool(jsonData.FeaturePtp)
 		v.FeaturePtp = types.BoolValue(x)
 	} else {
 		v.FeaturePtp = types.BoolNull()
+	}
+
+	if jsonData.FeaturePtpInternal != "" {
+		x, _ := strconv.ParseBool(jsonData.FeaturePtpInternal)
+		v.FeaturePtpInternal = types.BoolValue(x)
+	} else {
+		v.FeaturePtpInternal = types.BoolNull()
+	}
+
+	if jsonData.Ff != "" {
+		v.Ff = types.StringValue(jsonData.Ff)
+	} else {
+		v.Ff = types.StringNull()
+	}
+
+	if jsonData.GrfieldDebugFlag != "" {
+		v.GrfieldDebugFlag = types.StringValue(jsonData.GrfieldDebugFlag)
+	} else {
+		v.GrfieldDebugFlag = types.StringNull()
+	}
+
+	if jsonData.InterfaceEthernetDefaultPolicy != "" {
+		v.InterfaceEthernetDefaultPolicy = types.StringValue(jsonData.InterfaceEthernetDefaultPolicy)
+	} else {
+		v.InterfaceEthernetDefaultPolicy = types.StringNull()
+	}
+
+	if jsonData.InterfaceLoopbackDefaultPolicy != "" {
+		v.InterfaceLoopbackDefaultPolicy = types.StringValue(jsonData.InterfaceLoopbackDefaultPolicy)
+	} else {
+		v.InterfaceLoopbackDefaultPolicy = types.StringNull()
+	}
+
+	if jsonData.InterfacePortChannelDefaultPolicy != "" {
+		v.InterfacePortChannelDefaultPolicy = types.StringValue(jsonData.InterfacePortChannelDefaultPolicy)
+	} else {
+		v.InterfacePortChannelDefaultPolicy = types.StringNull()
+	}
+
+	if jsonData.InterfaceVlanDefaultPolicy != "" {
+		v.InterfaceVlanDefaultPolicy = types.StringValue(jsonData.InterfaceVlanDefaultPolicy)
+	} else {
+		v.InterfaceVlanDefaultPolicy = types.StringNull()
+	}
+
+	if jsonData.IntfStatLoadInterval != nil {
+		if jsonData.IntfStatLoadInterval.IsEmpty() {
+			v.IntfStatLoadInterval = types.Int64Null()
+		} else {
+			v.IntfStatLoadInterval = types.Int64Value(int64(*jsonData.IntfStatLoadInterval))
+		}
+	} else {
+		v.IntfStatLoadInterval = types.Int64Null()
 	}
 
 	if jsonData.IsisAuthEnable != "" {
@@ -226,6 +392,16 @@ func (v *FabricIpfmModel) SetModelData(jsonData *resource_fabric_common.NDFCFabr
 		v.L2HostIntfMtu = types.Int64Null()
 	}
 
+	if jsonData.L2HostIntfMtuPrev != nil {
+		if jsonData.L2HostIntfMtuPrev.IsEmpty() {
+			v.L2HostIntfMtuPrev = types.Int64Null()
+		} else {
+			v.L2HostIntfMtuPrev = types.Int64Value(int64(*jsonData.L2HostIntfMtuPrev))
+		}
+	} else {
+		v.L2HostIntfMtuPrev = types.Int64Null()
+	}
+
 	if jsonData.LinkStateRouting != "" {
 		v.LinkStateRouting = types.StringValue(jsonData.LinkStateRouting)
 	} else {
@@ -236,6 +412,12 @@ func (v *FabricIpfmModel) SetModelData(jsonData *resource_fabric_common.NDFCFabr
 		v.LinkStateRoutingTag = types.StringValue(jsonData.LinkStateRoutingTag)
 	} else {
 		v.LinkStateRoutingTag = types.StringNull()
+	}
+
+	if jsonData.LinkStateRoutingTagPrev != "" {
+		v.LinkStateRoutingTagPrev = types.StringValue(jsonData.LinkStateRoutingTagPrev)
+	} else {
+		v.LinkStateRoutingTagPrev = types.StringNull()
 	}
 
 	if jsonData.Loopback0IpRange != "" {
@@ -250,6 +432,12 @@ func (v *FabricIpfmModel) SetModelData(jsonData *resource_fabric_common.NDFCFabr
 		v.MgmtGw = types.StringNull()
 	}
 
+	if jsonData.MgmtGwInternal != "" {
+		v.MgmtGwInternal = types.StringValue(jsonData.MgmtGwInternal)
+	} else {
+		v.MgmtGwInternal = types.StringNull()
+	}
+
 	if jsonData.MgmtPrefix != nil {
 		if jsonData.MgmtPrefix.IsEmpty() {
 			v.MgmtPrefix = types.Int64Null()
@@ -258,6 +446,36 @@ func (v *FabricIpfmModel) SetModelData(jsonData *resource_fabric_common.NDFCFabr
 		}
 	} else {
 		v.MgmtPrefix = types.Int64Null()
+	}
+
+	if jsonData.MgmtPrefixInternal != nil {
+		if jsonData.MgmtPrefixInternal.IsEmpty() {
+			v.MgmtPrefixInternal = types.Int64Null()
+		} else {
+			v.MgmtPrefixInternal = types.Int64Value(int64(*jsonData.MgmtPrefixInternal))
+		}
+	} else {
+		v.MgmtPrefixInternal = types.Int64Null()
+	}
+
+	if jsonData.MgmtV6prefix != nil {
+		if jsonData.MgmtV6prefix.IsEmpty() {
+			v.MgmtV6prefix = types.Int64Null()
+		} else {
+			v.MgmtV6prefix = types.Int64Value(int64(*jsonData.MgmtV6prefix))
+		}
+	} else {
+		v.MgmtV6prefix = types.Int64Null()
+	}
+
+	if jsonData.MgmtV6prefixInternal != nil {
+		if jsonData.MgmtV6prefixInternal.IsEmpty() {
+			v.MgmtV6prefixInternal = types.Int64Null()
+		} else {
+			v.MgmtV6prefixInternal = types.Int64Value(int64(*jsonData.MgmtV6prefixInternal))
+		}
+	} else {
+		v.MgmtV6prefixInternal = types.Int64Null()
 	}
 
 	if jsonData.NtpServerIpList != "" {
@@ -270,6 +488,26 @@ func (v *FabricIpfmModel) SetModelData(jsonData *resource_fabric_common.NDFCFabr
 		v.NtpServerVrf = types.StringValue(jsonData.NtpServerVrf)
 	} else {
 		v.NtpServerVrf = types.StringNull()
+	}
+
+	if jsonData.NxapiHttpsPort != nil {
+		if jsonData.NxapiHttpsPort.IsEmpty() {
+			v.NxapiHttpsPort = types.Int64Null()
+		} else {
+			v.NxapiHttpsPort = types.Int64Value(int64(*jsonData.NxapiHttpsPort))
+		}
+	} else {
+		v.NxapiHttpsPort = types.Int64Null()
+	}
+
+	if jsonData.NxapiHttpPort != nil {
+		if jsonData.NxapiHttpPort.IsEmpty() {
+			v.NxapiHttpPort = types.Int64Null()
+		} else {
+			v.NxapiHttpPort = types.Int64Value(int64(*jsonData.NxapiHttpPort))
+		}
+	} else {
+		v.NxapiHttpPort = types.Int64Null()
 	}
 
 	if jsonData.NxapiVrf != "" {
@@ -327,6 +565,13 @@ func (v *FabricIpfmModel) SetModelData(jsonData *resource_fabric_common.NDFCFabr
 		v.PmEnable = types.BoolNull()
 	}
 
+	if jsonData.PmEnablePrev != "" {
+		x, _ := strconv.ParseBool(jsonData.PmEnablePrev)
+		v.PmEnablePrev = types.BoolValue(x)
+	} else {
+		v.PmEnablePrev = types.BoolNull()
+	}
+
 	if jsonData.PowerRedundancyMode != "" {
 		v.PowerRedundancyMode = types.StringValue(jsonData.PowerRedundancyMode)
 	} else {
@@ -359,6 +604,12 @@ func (v *FabricIpfmModel) SetModelData(jsonData *resource_fabric_common.NDFCFabr
 		v.PtpProfile = types.StringNull()
 	}
 
+	if jsonData.ReplicationMode != "" {
+		v.ReplicationMode = types.StringValue(jsonData.ReplicationMode)
+	} else {
+		v.ReplicationMode = types.StringNull()
+	}
+
 	if jsonData.RoutingLbId != nil {
 		if jsonData.RoutingLbId.IsEmpty() {
 			v.RoutingLbId = types.Int64Null()
@@ -373,6 +624,12 @@ func (v *FabricIpfmModel) SetModelData(jsonData *resource_fabric_common.NDFCFabr
 		v.RpIpRange = types.StringValue(jsonData.RpIpRange)
 	} else {
 		v.RpIpRange = types.StringNull()
+	}
+
+	if jsonData.RpIpRangeInternal != "" {
+		v.RpIpRangeInternal = types.StringValue(jsonData.RpIpRangeInternal)
+	} else {
+		v.RpIpRangeInternal = types.StringNull()
 	}
 
 	if jsonData.RpLbId != nil {
@@ -390,6 +647,16 @@ func (v *FabricIpfmModel) SetModelData(jsonData *resource_fabric_common.NDFCFabr
 		v.SnmpServerHostTrap = types.BoolValue(x)
 	} else {
 		v.SnmpServerHostTrap = types.BoolNull()
+	}
+
+	if jsonData.SpineCount != nil {
+		if jsonData.SpineCount.IsEmpty() {
+			v.SpineCount = types.Int64Null()
+		} else {
+			v.SpineCount = types.Int64Value(int64(*jsonData.SpineCount))
+		}
+	} else {
+		v.SpineCount = types.Int64Null()
 	}
 
 	if jsonData.StaticUnderlayIpAlloc != "" {
@@ -433,6 +700,78 @@ func (v *FabricIpfmModel) SetModelData(jsonData *resource_fabric_common.NDFCFabr
 		v.SyslogSev = types.StringNull()
 	}
 
+	if jsonData.UpgradeFromVersion != "" {
+		v.UpgradeFromVersion = types.StringValue(jsonData.UpgradeFromVersion)
+	} else {
+		v.UpgradeFromVersion = types.StringNull()
+	}
+
+	if jsonData.AbstractDhcp != "" {
+		v.AbstractDhcp = types.StringValue(jsonData.AbstractDhcp)
+	} else {
+		v.AbstractDhcp = types.StringNull()
+	}
+
+	if jsonData.AbstractExtraConfigBootstrap != "" {
+		v.AbstractExtraConfigBootstrap = types.StringValue(jsonData.AbstractExtraConfigBootstrap)
+	} else {
+		v.AbstractExtraConfigBootstrap = types.StringNull()
+	}
+
+	if jsonData.AbstractExtraConfigLeaf != "" {
+		v.AbstractExtraConfigLeaf = types.StringValue(jsonData.AbstractExtraConfigLeaf)
+	} else {
+		v.AbstractExtraConfigLeaf = types.StringNull()
+	}
+
+	if jsonData.AbstractExtraConfigSpine != "" {
+		v.AbstractExtraConfigSpine = types.StringValue(jsonData.AbstractExtraConfigSpine)
+	} else {
+		v.AbstractExtraConfigSpine = types.StringNull()
+	}
+
+	if jsonData.AbstractIsis != "" {
+		v.AbstractIsis = types.StringValue(jsonData.AbstractIsis)
+	} else {
+		v.AbstractIsis = types.StringNull()
+	}
+
+	if jsonData.AbstractIsisInterface != "" {
+		v.AbstractIsisInterface = types.StringValue(jsonData.AbstractIsisInterface)
+	} else {
+		v.AbstractIsisInterface = types.StringNull()
+	}
+
+	if jsonData.AbstractLoopbackInterface != "" {
+		v.AbstractLoopbackInterface = types.StringValue(jsonData.AbstractLoopbackInterface)
+	} else {
+		v.AbstractLoopbackInterface = types.StringNull()
+	}
+
+	if jsonData.AbstractOspf != "" {
+		v.AbstractOspf = types.StringValue(jsonData.AbstractOspf)
+	} else {
+		v.AbstractOspf = types.StringNull()
+	}
+
+	if jsonData.AbstractOspfInterface != "" {
+		v.AbstractOspfInterface = types.StringValue(jsonData.AbstractOspfInterface)
+	} else {
+		v.AbstractOspfInterface = types.StringNull()
+	}
+
+	if jsonData.AbstractPimInterface != "" {
+		v.AbstractPimInterface = types.StringValue(jsonData.AbstractPimInterface)
+	} else {
+		v.AbstractPimInterface = types.StringNull()
+	}
+
+	if jsonData.AbstractRoutedHost != "" {
+		v.AbstractRoutedHost = types.StringValue(jsonData.AbstractRoutedHost)
+	} else {
+		v.AbstractRoutedHost = types.StringNull()
+	}
+
 	v.Deploy = types.BoolValue(jsonData.Deploy)
 	if jsonData.DeploymentStatus != "" {
 		v.DeploymentStatus = types.StringValue(jsonData.DeploymentStatus)
@@ -466,6 +805,18 @@ func (v FabricIpfmModel) GetModelData() *resource_fabric_common.NDFCFabricCommon
 		data.AaaServerConf = ""
 	}
 
+	if !v.ActiveMigration.IsNull() && !v.ActiveMigration.IsUnknown() {
+		data.ActiveMigration = strconv.FormatBool(v.ActiveMigration.ValueBool())
+	} else {
+		data.ActiveMigration = ""
+	}
+
+	if !v.AgentIntf.IsNull() && !v.AgentIntf.IsUnknown() {
+		data.AgentIntf = v.AgentIntf.ValueString()
+	} else {
+		data.AgentIntf = ""
+	}
+
 	if !v.AsmGroupRanges.IsNull() && !v.AsmGroupRanges.IsUnknown() {
 		data.AsmGroupRanges = v.AsmGroupRanges.ValueString()
 	} else {
@@ -490,10 +841,22 @@ func (v FabricIpfmModel) GetModelData() *resource_fabric_common.NDFCFabricCommon
 		data.BootstrapMultisubnet = ""
 	}
 
+	if !v.BrfieldDebugFlag.IsNull() && !v.BrfieldDebugFlag.IsUnknown() {
+		data.BrfieldDebugFlag = v.BrfieldDebugFlag.ValueString()
+	} else {
+		data.BrfieldDebugFlag = ""
+	}
+
 	if !v.CdpEnable.IsNull() && !v.CdpEnable.IsUnknown() {
 		data.CdpEnable = strconv.FormatBool(v.CdpEnable.ValueBool())
 	} else {
 		data.CdpEnable = ""
+	}
+
+	if !v.DeploymentFreeze.IsNull() && !v.DeploymentFreeze.IsUnknown() {
+		data.DeploymentFreeze = strconv.FormatBool(v.DeploymentFreeze.ValueBool())
+	} else {
+		data.DeploymentFreeze = ""
 	}
 
 	if !v.DhcpEnable.IsNull() && !v.DhcpEnable.IsUnknown() {
@@ -538,6 +901,12 @@ func (v FabricIpfmModel) GetModelData() *resource_fabric_common.NDFCFabricCommon
 		data.EnableAaa = ""
 	}
 
+	if !v.EnableAgent.IsNull() && !v.EnableAgent.IsUnknown() {
+		data.EnableAgent = strconv.FormatBool(v.EnableAgent.ValueBool())
+	} else {
+		data.EnableAgent = ""
+	}
+
 	if !v.EnableAsm.IsNull() && !v.EnableAsm.IsUnknown() {
 		data.EnableAsm = strconv.FormatBool(v.EnableAsm.ValueBool())
 	} else {
@@ -548,6 +917,24 @@ func (v FabricIpfmModel) GetModelData() *resource_fabric_common.NDFCFabricCommon
 		data.EnableNbmPassive = strconv.FormatBool(v.EnableNbmPassive.ValueBool())
 	} else {
 		data.EnableNbmPassive = ""
+	}
+
+	if !v.EnableNxapi.IsNull() && !v.EnableNxapi.IsUnknown() {
+		data.EnableNxapi = strconv.FormatBool(v.EnableNxapi.ValueBool())
+	} else {
+		data.EnableNxapi = ""
+	}
+
+	if !v.EnableNxapiHttp.IsNull() && !v.EnableNxapiHttp.IsUnknown() {
+		data.EnableNxapiHttp = strconv.FormatBool(v.EnableNxapiHttp.ValueBool())
+	} else {
+		data.EnableNxapiHttp = ""
+	}
+
+	if !v.EnableRtIntfStats.IsNull() && !v.EnableRtIntfStats.IsUnknown() {
+		data.EnableRtIntfStats = strconv.FormatBool(v.EnableRtIntfStats.ValueBool())
+	} else {
+		data.EnableRtIntfStats = ""
 	}
 
 	if !v.ExtraConfIntraLinks.IsNull() && !v.ExtraConfIntraLinks.IsUnknown() {
@@ -568,10 +955,10 @@ func (v FabricIpfmModel) GetModelData() *resource_fabric_common.NDFCFabricCommon
 		data.ExtraConfSpine = ""
 	}
 
-	if !v.FabricInterfaceType.IsNull() && !v.FabricInterfaceType.IsUnknown() {
-		data.FabricInterfaceType = v.FabricInterfaceType.ValueString()
+	if !v.ExtFabricType.IsNull() && !v.ExtFabricType.IsUnknown() {
+		data.ExtFabricType = v.ExtFabricType.ValueString()
 	} else {
-		data.FabricInterfaceType = ""
+		data.ExtFabricType = ""
 	}
 
 	if !v.FabricMtu.IsNull() && !v.FabricMtu.IsUnknown() {
@@ -585,6 +972,25 @@ func (v FabricIpfmModel) GetModelData() *resource_fabric_common.NDFCFabricCommon
 		data.FeaturePtp = strconv.FormatBool(v.FeaturePtp.ValueBool())
 	} else {
 		data.FeaturePtp = ""
+	}
+
+	if !v.Ff.IsNull() && !v.Ff.IsUnknown() {
+		data.Ff = v.Ff.ValueString()
+	} else {
+		data.Ff = ""
+	}
+
+	if !v.GrfieldDebugFlag.IsNull() && !v.GrfieldDebugFlag.IsUnknown() {
+		data.GrfieldDebugFlag = v.GrfieldDebugFlag.ValueString()
+	} else {
+		data.GrfieldDebugFlag = ""
+	}
+
+	if !v.IntfStatLoadInterval.IsNull() && !v.IntfStatLoadInterval.IsUnknown() {
+		data.IntfStatLoadInterval = new(Int64Custom)
+		*data.IntfStatLoadInterval = Int64Custom(v.IntfStatLoadInterval.ValueInt64())
+	} else {
+		data.IntfStatLoadInterval = nil
 	}
 
 	if !v.IsisAuthEnable.IsNull() && !v.IsisAuthEnable.IsUnknown() {
@@ -674,6 +1080,20 @@ func (v FabricIpfmModel) GetModelData() *resource_fabric_common.NDFCFabricCommon
 		data.NtpServerVrf = ""
 	}
 
+	if !v.NxapiHttpsPort.IsNull() && !v.NxapiHttpsPort.IsUnknown() {
+		data.NxapiHttpsPort = new(Int64Custom)
+		*data.NxapiHttpsPort = Int64Custom(v.NxapiHttpsPort.ValueInt64())
+	} else {
+		data.NxapiHttpsPort = nil
+	}
+
+	if !v.NxapiHttpPort.IsNull() && !v.NxapiHttpPort.IsUnknown() {
+		data.NxapiHttpPort = new(Int64Custom)
+		*data.NxapiHttpPort = Int64Custom(v.NxapiHttpPort.ValueInt64())
+	} else {
+		data.NxapiHttpPort = nil
+	}
+
 	if !v.NxapiVrf.IsNull() && !v.NxapiVrf.IsUnknown() {
 		data.NxapiVrf = v.NxapiVrf.ValueString()
 	} else {
@@ -747,6 +1167,12 @@ func (v FabricIpfmModel) GetModelData() *resource_fabric_common.NDFCFabricCommon
 		data.PtpProfile = v.PtpProfile.ValueString()
 	} else {
 		data.PtpProfile = ""
+	}
+
+	if !v.ReplicationMode.IsNull() && !v.ReplicationMode.IsUnknown() {
+		data.ReplicationMode = v.ReplicationMode.ValueString()
+	} else {
+		data.ReplicationMode = ""
 	}
 
 	if !v.RoutingLbId.IsNull() && !v.RoutingLbId.IsUnknown() {

@@ -1,363 +1,844 @@
+---
 resource:
-  name: fabric_ipfm
-  doc_category: Fabric
-  generate_tf_resource: true
-  parent_package: resource_fabric_common
-  parent_model: fabric_common
-  description: Resource to configure and manage IP Fabric Media
-  attributes:
-    - model_name: id
-      tf_name: id
-      description: Terraform unique Id for the fabric resource
-      type: String
-      id: true
-      computed: true
-      payload_hide: true
-    - model_name: FABRIC_NAME
-      tf_name: fabric_name
-      description: 'Fabric name to be created, updated or deleted (Max Size 64).'
-      type: String
-      example: IP_FABRIC_MEDIA
-      mandatory: true
-      tf_requires_replace: true
-    - model_name: AAA_REMOTE_IP_ENABLED
-      tf_name: aaa_remote_ip_enabled
-      description: Enable only when IP Authorization is enabled in the AAA Server
-      default_value: false
-      type: Bool
-      example: false
-    - model_name: AAA_SERVER_CONF
-      tf_name: aaa_server_conf
-      description: AAA Configurations
-      type: String
-    - model_name: ASM_GROUP_RANGES
-      tf_name: asm_group_ranges
-      description: >-
-        ASM group ranges with prefixes (len:4-32) example: 239.1.1.0/25, max 20
-        ranges. Enabling SPT-Threshold Infinity to prevent switchover to
-        source-tree.
-      type: String
-    - model_name: BOOTSTRAP_CONF
-      tf_name: bootstrap_conf
-      description: Additional CLIs required during device bootup/login e.g. AAA/Radius
-      type: String
-    - model_name: BOOTSTRAP_ENABLE
-      tf_name: bootstrap_enable
-      description: Automatic IP Assignment For POAP
-      default_value: false
-      type: Bool
-      example: false
-    - model_name: BOOTSTRAP_MULTISUBNET
-      tf_name: bootstrap_multisubnet
-      description: 'lines with # prefix are ignored here'
-      default_value: >-
-        #Scope_Start_IP, Scope_End_IP, Scope_Default_Gateway,
-        Scope_Subnet_Prefix
-      type: String
-      example: >-
-        #Scope_Start_IP, Scope_End_IP, Scope_Default_Gateway,
-        Scope_Subnet_Prefix
-    - model_name: CDP_ENABLE
-      tf_name: cdp_enable
-      description: Enable CDP on management interface
-      default_value: false
-      type: Bool
-      example: false
-    - model_name: DHCP_ENABLE
-      tf_name: dhcp_enable
-      description: Automatic IP Assignment For POAP From Local DHCP Server
-      default_value: false
-      type: Bool
-      example: false
-    - model_name: DHCP_END
-      tf_name: dhcp_end
-      description: End Address For Switch Out-of-Band POAP
-      type: String
-    - model_name: DHCP_IPV6_ENABLE
-      tf_name: dhcp_ipv6_enable
-      description: No description available
-      type: String
-      validator: OneOf("DHCPv4")
-    - model_name: DHCP_START
-      tf_name: dhcp_start
-      description: Start Address For Switch Out-of-Band POAP
-      type: String
-    - model_name: DNS_SERVER_IP_LIST
-      tf_name: dns_server_ip_list
-      description: Comma separated list of IP Addresses (v4/v6)
-      type: String
-    - model_name: DNS_SERVER_VRF
-      tf_name: dns_server_vrf
-      description: >-
-        One VRF for all DNS servers or a comma separated list of VRFs, one per
-        DNS server
-      type: String
-    - model_name: ENABLE_AAA
-      tf_name: enable_aaa
-      description: Include AAA configs from Manageability tab during device bootup
-      default_value: false
-      type: Bool
-      example: false
-    - model_name: ENABLE_ASM
-      tf_name: enable_asm
-      description: 'Enable groups with receivers sending (*,G) joins'
-      default_value: false
-      type: Bool
-      example: false
-    - model_name: ENABLE_NBM_PASSIVE
-      tf_name: enable_nbm_passive
-      description: Enable NBM mode to pim-passive for default VRF
-      default_value: false
-      type: Bool
-      example: false
-    - model_name: EXTRA_CONF_INTRA_LINKS
-      tf_name: extra_conf_intra_links
-      description: Additional CLIs For All Intra-Fabric Links
-      type: String
-    - model_name: EXTRA_CONF_LEAF
-      tf_name: extra_conf_leaf
-      description: >-
-        Additional CLIs For All Leafs and Tier2 Leafs As Captured From Show
-        Running Configuration
-      type: String
-    - model_name: EXTRA_CONF_SPINE
-      tf_name: extra_conf_spine
-      description: >-
-        Additional CLIs For All Spines As Captured From Show Running
-        Configuration
-      type: String
-    - model_name: FABRIC_INTERFACE_TYPE
-      tf_name: fabric_interface_type
-      description: Only Numbered(Point-to-Point) is supported
-      default_value: p2p
-      type: String
-      validator: OneOf("p2p")
-      example: p2p
-    - model_name: FABRIC_MTU
-      tf_name: fabric_mtu
-      description: Must be an even number
-      default_value: 9216
-      type: Int64
-      handle_empty: true
-      example: 9216
-    - model_name: FEATURE_PTP
-      tf_name: feature_ptp
-      description: No description available
-      default_value: false
-      type: Bool
-      example: false
-    - model_name: ISIS_AUTH_ENABLE
-      tf_name: isis_auth_enable
-      description: No description available
-      default_value: false
-      type: Bool
-      example: false
-    - model_name: ISIS_AUTH_KEY
-      tf_name: isis_auth_key
-      description: Cisco Type 7 Encrypted
-      type: String
-    - model_name: ISIS_AUTH_KEYCHAIN_KEY_ID
-      tf_name: isis_auth_keychain_key_id
-      description: No description available
-      type: Int64
-      handle_empty: true
-    - model_name: ISIS_AUTH_KEYCHAIN_NAME
-      tf_name: isis_auth_keychain_name
-      description: No description available
-      type: String
-    - model_name: ISIS_LEVEL
-      tf_name: isis_level
-      description: 'Supported IS types: level-1, level-2'
-      default_value: level-2
-      type: String
-      validator: 'OneOf("level-1", "level-2")'
-      example: level-2
-    - model_name: ISIS_P2P_ENABLE
-      tf_name: isis_p2p_enable
-      description: >-
-        This will enable network point-to-point on fabric interfaces which are
-        numbered
-      type: Bool
-    - model_name: L2_HOST_INTF_MTU
-      tf_name: l2_host_intf_mtu
-      description: Must be an even number
-      default_value: 9216
-      type: Int64
-      handle_empty: true
-      example: 9216
-    - model_name: LINK_STATE_ROUTING
-      tf_name: link_state_routing
-      description: Used for Spine-Leaf Connectivity
-      default_value: ospf
-      type: String
-      validator: 'OneOf("ospf", "is-is")'
-      example: ospf
-    - model_name: LINK_STATE_ROUTING_TAG
-      tf_name: link_state_routing_tag
-      description: Routing process tag for the fabric
-      default_value: '1'
-      type: String
-      example: '1'
-    - model_name: LOOPBACK0_IP_RANGE
-      tf_name: loopback0_ip_range
-      description: Routing Loopback IP Address Range
-      default_value: 10.2.0.0/22
-      type: String
-      example: 10.2.0.0/22
-    - model_name: MGMT_GW
-      tf_name: mgmt_gw
-      description: Default Gateway For Management VRF On The Switch
-      type: String
-    - model_name: MGMT_PREFIX
-      tf_name: mgmt_prefix
-      description: No description available
-      type: Int64
-      handle_empty: true
-    - model_name: NTP_SERVER_IP_LIST
-      tf_name: ntp_server_ip_list
-      description: Comma separated list of IP Addresses (v4/v6)
-      type: String
-    - model_name: NTP_SERVER_VRF
-      tf_name: ntp_server_vrf
-      description: >-
-        One VRF for all NTP servers or a comma separated list of VRFs, one per
-        NTP server
-      type: String
-    - model_name: NXAPI_VRF
-      tf_name: nxapi_vrf
-      description: VRF used for NX-API communication
-      default_value: management
-      type: String
-      validator: 'OneOf("management", "default")'
-      example: management
-    - model_name: OSPF_AREA_ID
-      tf_name: ospf_area_id
-      description: OSPF Area Id in IP address format
-      default_value: 0.0.0.0
-      type: String
-      example: 0.0.0.0
-    - model_name: OSPF_AUTH_ENABLE
-      tf_name: ospf_auth_enable
-      description: No description available
-      default_value: false
-      type: Bool
-      example: false
-    - model_name: OSPF_AUTH_KEY
-      tf_name: ospf_auth_key
-      description: 3DES Encrypted
-      type: String
-    - model_name: OSPF_AUTH_KEY_ID
-      tf_name: ospf_auth_key_id
-      description: No description available
-      type: Int64
-      handle_empty: true
-    - model_name: PIM_HELLO_AUTH_ENABLE
-      tf_name: pim_hello_auth_enable
-      description: No description available
-      default_value: false
-      type: Bool
-      example: false
-    - model_name: PIM_HELLO_AUTH_KEY
-      tf_name: pim_hello_auth_key
-      description: 3DES Encrypted
-      type: String
-    - model_name: PM_ENABLE
-      tf_name: pm_enable
-      description: No description available
-      default_value: false
-      type: Bool
-      example: false
-    - model_name: POWER_REDUNDANCY_MODE
-      tf_name: power_redundancy_mode
-      description: Default power supply mode for the fabric
-      default_value: ps-redundant
-      type: String
-      validator: 'OneOf("ps-redundant", "combined", "insrc-redundant")'
-      example: ps-redundant
-    - model_name: PTP_DOMAIN_ID
-      tf_name: ptp_domain_id
-      description: Multiple Independent PTP Clocking Subdomains on a Single Network
-      type: Int64
-      handle_empty: true
-    - model_name: PTP_LB_ID
-      tf_name: ptp_lb_id
-      description: No description available
-      type: Int64
-      handle_empty: true
-    - model_name: PTP_PROFILE
-      tf_name: ptp_profile
-      description: Enabled on ISL links only
-      type: String
-      validator: 'OneOf("IEEE-1588v2", "SMPTE-2059-2", "AES67-2015")'
-    - model_name: ROUTING_LB_ID
-      tf_name: routing_lb_id
-      description: No description available
-      default_value: 0
-      type: Int64
-      handle_empty: true
-      example: 0
-    - model_name: RP_IP_RANGE
-      tf_name: rp_ip_range
-      description: RP Loopback IP Address Range
-      type: String
-    - model_name: RP_LB_ID
-      tf_name: rp_lb_id
-      description: No description available
-      type: Int64
-      handle_empty: true
-    - model_name: SNMP_SERVER_HOST_TRAP
-      tf_name: snmp_server_host_trap
-      description: Configure NDFC as a receiver for SNMP traps
-      default_value: true
-      type: Bool
-      example: true
-    - model_name: STATIC_UNDERLAY_IP_ALLOC
-      tf_name: static_underlay_ip_alloc
-      description: Checking this will disable Dynamic Fabric IP Address Allocations
-      default_value: false
-      type: Bool
-      example: false
-    - model_name: SUBNET_RANGE
-      tf_name: subnet_range
-      description: Address range to assign Numbered IPs
-      default_value: 10.4.0.0/16
-      type: String
-      example: 10.4.0.0/16
-    - model_name: SUBNET_TARGET_MASK
-      tf_name: subnet_target_mask
-      description: Mask for Fabric Subnet IP Range
-      default_value: 30
-      type: Int64
-      handle_empty: true
-      validator: 'OneOf(30, 31)'
-      example: 30
-    - model_name: SYSLOG_SERVER_IP_LIST
-      tf_name: syslog_server_ip_list
-      description: Comma separated list of IP Addresses (v4/v6)
-      type: String
-    - model_name: SYSLOG_SERVER_VRF
-      tf_name: syslog_server_vrf
-      description: >-
-        One VRF for all Syslog servers or a comma separated list of VRFs, one
-        per Syslog server
-      type: String
-    - model_name: SYSLOG_SEV
-      tf_name: syslog_sev
-      description: 'Comma separated list of Syslog severity values, one per Syslog server'
-      type: String
-    - model_name: deploy
-      tf_name: deploy
-      description: This flag does configuration save and deploy
-      type: Bool
-      mandatory: true
-      ndfc_type: bool
-      example: false
-      payload_hide: true
-    - model_name: deployment_status
-      tf_name: deployment_status
-      description: >-
-        This fields shows the actual status of the deployment. It can be one of
-        the following: Deployment pending Deployment successful
-      type: String
-      computed: true
-      payload_hide: true
+    name: fabric_ipfm
+    doc_category: Fabric
+    generate_tf_resource: true
+    parent_package: resource_fabric_common
+    parent_model: fabric_common
+    description: >-  
+        Resource to configure and manage IP Fabric Media. 
+        Only creation/updation/deletion of the fabric is supported,
+        resources on top of the fabric are not supported yet.
+    attributes:
+        - model_name: id
+          tf_name: id
+          description: Terraform unique Id for the ipfm fabric resource
+          type: String
+          id: true
+          computed: true
+          payload_hide: true
+
+        - model_name: FABRIC_NAME
+          tf_name: fabric_name
+          description: 'Fabric name to be created, updated or deleted.'
+          type: String
+          example: IP_FABRIC_MEDIA
+          mandatory: true
+          tf_requires_replace: true
+
+        - model_name: AAA_REMOTE_IP_ENABLED
+          tf_name: aaa_remote_ip_enabled
+          description: Enable only, when IP Authorization is enabled in the AAA \
+            Server
+          type: Bool
+          example: false
+          optional: true
+          computed: true
+
+        - model_name: AAA_SERVER_CONF
+          tf_name: aaa_server_conf
+          description: AAA Configurations
+          type: String
+          optional: true
+          computed: true
+
+        - model_name: ACTIVE_MIGRATION
+          tf_name: active_migration
+          description: Active Migration
+          type: Bool
+          optional: true
+          computed: true
+
+        - model_name: AGENT_INTF
+          tf_name: agent_intf
+          description: Interface to connect to Agent
+          type: String
+          optional: true
+          computed: true
+          validator: OneOf("eth0", "eth1")
+
+        - model_name: ASM_GROUP_RANGES
+          tf_name: asm_group_ranges
+          description: >-
+            ASM group ranges with prefixes (len:4-32) example: 239.1.1.0/25,
+            max 20 ranges. Enabling SPT-Threshold Infinity to prevent switchover
+            to source-tree.
+          type: String
+          optional: true
+          computed: true
+
+        - model_name: BOOTSTRAP_CONF
+          tf_name: bootstrap_conf
+          description: Additional CLIs required during device bootup/login e.g.
+            AAA/Radius
+          type: String
+          optional: true
+          computed: true
+
+        - model_name: BOOTSTRAP_ENABLE
+          tf_name: bootstrap_enable
+          description: Automatic IP Assignment For POAP
+          type: Bool
+          example: false
+          optional: true
+          computed: true
+
+        - model_name: BOOTSTRAP_MULTISUBNET
+          tf_name: bootstrap_multisubnet
+          description: "DHCPv4 Multi Subnet Scope - lines with # prefix are ignored here"
+          type: String
+          example: >-
+            #Scope_Start_IP, Scope_End_IP, Scope_Default_Gateway,
+            Scope_Subnet_Prefix
+          optional: true
+          computed: true
+
+        - model_name: BOOTSTRAP_MULTISUBNET_INTERNAL
+          tf_name: bootstrap_multisubnet_internal
+          description: Internal Bootstrap Multi Subnet Scope
+          type: String
+          computed: true
+
+        - model_name: BRFIELD_DEBUG_FLAG
+          tf_name: brfield_debug_flag
+          description: !!! Only for brf debugging purpose !!!
+          type: String
+          optional: true
+          computed: true
+          validator: OneOf("Enable", "Disable")
+
+        - model_name: CDP_ENABLE
+          tf_name: cdp_enable
+          description: Enable CDP on management interface
+          type: Bool
+          example: false
+          optional: true
+          computed: true
+
+        - model_name: DEPLOYMENT_FREEZE
+          tf_name: deployment_freeze
+          description: Disable all deployments in this fabric
+          type: Bool
+          optional: true
+          computed: true
+
+        - model_name: DHCP_ENABLE
+          tf_name: dhcp_enable
+          description: Automatic IP Assignment For POAP From Local DHCP Server
+          type: Bool
+          example: false
+          optional: true
+          computed: true
+
+        - model_name: DHCP_END
+          tf_name: dhcp_end
+          description: End Address For Switch Out-of-Band POAP
+          type: String
+          optional: true
+          computed: true
+
+        - model_name: DHCP_END_INTERNAL
+          tf_name: dhcp_end_internal
+          description: Internal DHCP End Address
+          type: String
+          computed: true
+
+        - model_name: DHCP_IPV6_ENABLE
+          tf_name: dhcp_ipv6_enable
+          description: No description available
+          type: String
+          validator: OneOf("DHCPv4")
+          optional: true
+          computed: true
+
+        - model_name: DHCP_IPV6_ENABLE_INTERNAL
+          tf_name: dhcp_ipv6_enable_internal
+          description: Internal DHCP IPv6 Enable
+          type: String
+          computed: true
+
+        - model_name: DHCP_START
+          tf_name: dhcp_start
+          description: Start Address For Switch Out-of-Band POAP
+          type: String
+          optional: true
+          computed: true
+
+        - model_name: DHCP_START_INTERNAL
+          tf_name: dhcp_start_internal
+          description: Internal DHCP Start Address
+          type: String
+          computed: true
+
+        - model_name: DNS_SERVER_IP_LIST
+          tf_name: dns_server_ip_list
+          description: Comma separated list of IP Addresses (v4/v6)
+          type: String
+          optional: true
+          computed: true
+
+        - model_name: DNS_SERVER_VRF
+          tf_name: dns_server_vrf
+          description: >-
+            One VRF for all DNS servers or a comma separated list of VRFs, one
+            per DNS server
+          type: String
+          optional: true
+          computed: true
+
+        - model_name: ENABLE_AAA
+          tf_name: enable_aaa
+          description: Include AAA configs from Manageability tab during device
+            bootup
+          type: Bool
+          example: false
+          optional: true
+          computed: true
+
+        - model_name: ENABLE_AGENT
+          tf_name: enable_agent
+          description: Enable Agent (development purpose only)
+          type: Bool
+          optional: true
+          computed: true
+
+        - model_name: ENABLE_ASM
+          tf_name: enable_asm
+          description: Enable groups with receivers sending (*,G) joins
+          type: Bool
+          example: false
+          optional: true
+          computed: true
+
+        - model_name: ENABLE_NBM_PASSIVE
+          tf_name: enable_nbm_passive
+          description: Enable NBM mode to pim-passive for default VRF
+          type: Bool
+          example: false
+          optional: true
+          computed: true
+
+        - model_name: ENABLE_NBM_PASSIVE_PREV
+          tf_name: enable_nbm_passive_prev
+          description: Previous state of Enable NBM Passive Mode
+          type: Bool
+          computed: true
+
+        - model_name: ENABLE_NXAPI
+          tf_name: enable_nxapi
+          description: Enable HTTPS NX-API
+          type: Bool
+          optional: true
+          computed: true
+
+        - model_name: ENABLE_NXAPI_HTTP
+          tf_name: enable_nxapi_http
+          description: Enable HTTP NX-API
+          type: Bool
+          optional: true
+          computed: true
+
+        - model_name: ENABLE_RT_INTF_STATS
+          tf_name: enable_rt_intf_stats
+          description: Valid for NX-OS only
+          type: Bool
+          optional: true
+          computed: true
+
+        - model_name: EXTRA_CONF_INTRA_LINKS
+          tf_name: extra_conf_intra_links
+          description: Additional CLIs For All Intra-Fabric Links
+          type: String
+          optional: true
+          computed: true
+
+        - model_name: EXTRA_CONF_LEAF
+          tf_name: extra_conf_leaf
+          description: >-
+            Additional CLIs For All Leafs and Tier2 Leafs As Captured From Show
+            Running Configuration
+          type: String
+          optional: true
+          computed: true
+
+        - model_name: EXTRA_CONF_SPINE
+          tf_name: extra_conf_spine
+          description: >-
+            Additional CLIs For All Spines As Captured From Show Running
+            Configuration
+          type: String
+          optional: true
+          computed: true
+
+        - model_name: EXT_FABRIC_TYPE
+          tf_name: ext_fabric_type
+          description: External Fabric Type
+          type: String
+          optional: true
+          computed: true
+
+        - model_name: FABRIC_INTERFACE_TYPE
+          tf_name: fabric_interface_type
+          description: Only Numbered(Point-to-Point) is supported
+          type: String
+          computed: true
+          validator: OneOf("p2p")
+
+        - model_name: FABRIC_MTU
+          tf_name: fabric_mtu
+          description: Must be an even number
+          type: Int64
+          handle_empty: true
+          example: 9216
+          optional: true
+          computed: true
+
+        - model_name: FABRIC_MTU_PREV
+          tf_name: fabric_mtu_prev
+          description: Previous state of Fabric MTU
+          type: Int64
+          handle_empty: true
+          computed: true
+
+        - model_name: FABRIC_TECHNOLOGY
+          tf_name: fabric_technology
+          description: Fabric Technology
+          type: String
+          computed: true
+
+        - model_name: FABRIC_TYPE
+          tf_name: fabric_type
+          description: Fabric Type
+          type: String
+          computed: true
+
+        - model_name: FEATURE_PTP
+          tf_name: feature_ptp
+          description: Enable Precision Time Protocol (PTP)
+          type: Bool
+          example: false
+          optional: true
+          computed: true
+
+        - model_name: FEATURE_PTP_INTERNAL
+          tf_name: feature_ptp_internal
+          description: Internal Feature PTP
+          type: Bool
+          computed: true
+
+        - model_name: FF
+          tf_name: ff
+          description: Template Family
+          type: String
+          optional: true
+          computed: true
+
+        - model_name: GRFIELD_DEBUG_FLAG
+          tf_name: grfield_debug_flag
+          description: Enable to clean switch configuration without reload when
+            PreserveConfig=no
+          type: String
+          optional: true
+          computed: true
+          validator: OneOf("Enable", "Disable")
+
+        - model_name: INTERFACE_ETHERNET_DEFAULT_POLICY
+          tf_name: interface_ethernet_default_policy
+          description: Default policy for Ethernet interface of spine/leaf/
+            tier2-leaf switches
+          type: String
+          computed: true
+
+        - model_name: INTERFACE_LOOPBACK_DEFAULT_POLICY
+          tf_name: interface_loopback_default_policy
+          description: Loopback Interface Default Policy
+          type: String
+          computed: true
+
+        - model_name: INTERFACE_PORT_CHANNEL_DEFAULT_POLICY
+          tf_name: interface_port_channel_default_policy
+          description: Port Channel Interface Default Policy
+          type: String
+          computed: true
+
+        - model_name: INTERFACE_VLAN_DEFAULT_POLICY
+          tf_name: interface_vlan_default_policy
+          description: VLAN Interface Default Policy
+          type: String
+          computed: true
+
+        - model_name: INTF_STAT_LOAD_INTERVAL
+          tf_name: intf_stat_load_interval
+          description: Time in seconds (Min:5, Max:300)
+          type: Int64
+          handle_empty: true
+          optional: true
+          computed: true
+
+        - model_name: ISIS_AUTH_ENABLE
+          tf_name: isis_auth_enable
+          description: Enable IS-IS Authentication
+          type: Bool
+          example: false
+          optional: true
+          computed: true
+
+        - model_name: ISIS_AUTH_KEY
+          tf_name: isis_auth_key
+          description: Cisco Type 7 Encrypted
+          type: String
+          optional: true
+          computed: true
+
+        - model_name: ISIS_AUTH_KEYCHAIN_KEY_ID
+          tf_name: isis_auth_keychain_key_id
+          description: IS-IS Authentication Key ID (Min:0, Max:65535)
+          type: Int64
+          handle_empty: true
+          optional: true
+          computed: true
+
+        - model_name: ISIS_AUTH_KEYCHAIN_NAME
+          tf_name: isis_auth_keychain_name
+          description: IS-IS Authentication Keychain Name
+          type: String
+          optional: true
+          computed: true
+
+        - model_name: ISIS_LEVEL
+          tf_name: isis_level
+          description: "Supported IS types: level-1, level-2"
+          type: String
+          validator: 'OneOf("level-1", "level-2")'
+          example: level-2
+          optional: true
+          computed: true
+
+        - model_name: ISIS_P2P_ENABLE
+          tf_name: isis_p2p_enable
+          description: >-
+            This will enable network point-to-point on fabric interfaces which
+            are numbered
+          type: Bool
+          optional: true
+          computed: true
+
+        - model_name: L2_HOST_INTF_MTU
+          tf_name: l2_host_intf_mtu
+          description: Must be an even number
+          type: Int64
+          handle_empty: true
+          example: 9216
+          optional: true
+          computed: true
+
+        - model_name: L2_HOST_INTF_MTU_PREV
+          tf_name: l2_host_intf_mtu_prev
+          description: Previous state of Layer 2 Host Interface MTU
+          type: Int64
+          handle_empty: true
+          computed: true
+
+        - model_name: LINK_STATE_ROUTING
+          tf_name: link_state_routing
+          description: Used for Spine-Leaf Connectivity
+          type: String
+          validator: 'OneOf("ospf", "is-is")'
+          example: ospf
+          optional: true
+          computed: true
+
+        - model_name: LINK_STATE_ROUTING_TAG
+          tf_name: link_state_routing_tag
+          description: Routing process tag for the fabric
+          type: String
+          example: '1'
+          optional: true
+          computed: true
+
+        - model_name: LINK_STATE_ROUTING_TAG_PREV
+          tf_name: link_state_routing_tag_prev
+          description: Previous state of Link State Routing Tag
+          type: String
+          computed: true
+
+        - model_name: LOOPBACK0_IP_RANGE
+          tf_name: loopback0_ip_range
+          description: Routing Loopback IP Address Range
+          type: String
+          example: 10.2.0.0/22
+          optional: true
+          computed: true
+
+        - model_name: MGMT_GW
+          tf_name: mgmt_gw
+          description: Default Gateway For Management VRF On The Switch
+          type: String
+          optional: true
+          computed: true
+
+        - model_name: MGMT_GW_INTERNAL
+          tf_name: mgmt_gw_internal
+          description: Internal Management Gateway
+          type: String
+          computed: true
+
+        - model_name: MGMT_PREFIX
+          tf_name: mgmt_prefix
+          description: Switch Mgmt IP Subnet Prefix (Min:8, Max:30)
+          type: Int64
+          handle_empty: true
+          optional: true
+          computed: true
+
+        - model_name: MGMT_PREFIX_INTERNAL
+          tf_name: mgmt_prefix_internal
+          description: Internal Management Prefix
+          type: Int64
+          handle_empty: true
+          computed: true
+
+        - model_name: MGMT_V6PREFIX
+          tf_name: mgmt_v6prefix
+          description: Switch Mgmt IPv6 Subnet Prefix (Min:64, Max:126)
+          type: Int64
+          handle_empty: true
+          computed: true
+
+        - model_name: MGMT_V6PREFIX_INTERNAL
+          tf_name: mgmt_v6prefix_internal
+          description: Internal Management IPv6 Prefix
+          type: Int64
+          handle_empty: true
+          computed: true
+
+        - model_name: NTP_SERVER_IP_LIST
+          tf_name: ntp_server_ip_list
+          description: Comma separated list of IP Addresses (v4/v6)
+          type: String
+          optional: true
+          computed: true
+
+        - model_name: NTP_SERVER_VRF
+          tf_name: ntp_server_vrf
+          description: >-
+            One VRF for all NTP servers or a comma separated list of VRFs, one
+            per NTP server
+          type: String
+          optional: true
+          computed: true
+
+        - model_name: NXAPI_HTTPS_PORT
+          tf_name: nxapi_https_port
+          description: NX-API HTTPS Port Number
+          type: Int64
+          handle_empty: true
+          optional: true
+          computed: true
+
+        - model_name: NXAPI_HTTP_PORT
+          tf_name: nxapi_http_port
+          description: NX-API HTTP Port Number
+          type: Int64
+          handle_empty: true
+          optional: true
+          computed: true
+
+        - model_name: NXAPI_VRF
+          tf_name: nxapi_vrf
+          description: VRF used for NX-API communication
+          type: String
+          validator: 'OneOf("management", "default")'
+          example: management
+          optional: true
+          computed: true
+
+        - model_name: OSPF_AREA_ID
+          tf_name: ospf_area_id
+          description: OSPF Area Id in IP address format
+          type: String
+          example: 0.0.0.0
+          optional: true
+          computed: true
+
+        - model_name: OSPF_AUTH_ENABLE
+          tf_name: ospf_auth_enable
+          description: Enable OSPF Authentication
+          type: Bool
+          example: false
+          optional: true
+          computed: true
+
+        - model_name: OSPF_AUTH_KEY
+          tf_name: ospf_auth_key
+          description: 3DES Encrypted
+          type: String
+          optional: true
+          computed: true
+
+        - model_name: OSPF_AUTH_KEY_ID
+          tf_name: ospf_auth_key_id
+          description: No description available
+          type: Int64
+          handle_empty: true
+          optional: true
+          computed: true
+
+        - model_name: PIM_HELLO_AUTH_ENABLE
+          tf_name: pim_hello_auth_enable
+          description: Enable PIM Hello Authentication
+          type: Bool
+          example: false
+          optional: true
+          computed: true
+
+        - model_name: PIM_HELLO_AUTH_KEY
+          tf_name: pim_hello_auth_key
+          description: 3DES Encrypted
+          type: String
+          optional: true
+          computed: true
+
+        - model_name: PM_ENABLE
+          tf_name: pm_enable
+          description: Enable Performance Monitoring
+          type: Bool
+          example: false
+          optional: true
+          computed: true
+
+        - model_name: PM_ENABLE_PREV
+          tf_name: pm_enable_prev
+          description: Previous state of Enable Performance Monitoring
+          type: Bool
+          computed: true
+
+        - model_name: POWER_REDUNDANCY_MODE
+          tf_name: power_redundancy_mode
+          description: Default power supply mode for the fabric
+          type: String
+          validator: 'OneOf("ps-redundant", "combined", "insrc-redundant")'
+          example: ps-redundant
+          optional: true
+          computed: true
+
+        - model_name: PTP_DOMAIN_ID
+          tf_name: ptp_domain_id
+          description: >-
+            Multiple Independent PTP Clocking Subdomains on a Single Network
+            (Min:0, Max:127)
+          type: Int64
+          handle_empty: true
+          optional: true
+          computed: true
+
+        - model_name: PTP_LB_ID
+          tf_name: ptp_lb_id
+          description: No description available
+          type: Int64
+          handle_empty: true
+          optional: true
+          computed: true
+
+        - model_name: PTP_PROFILE
+          tf_name: ptp_profile
+          description: Enabled on ISL links only
+          type: String
+          validator: 'OneOf("IEEE-1588v2", "SMPTE-2059-2", "AES67-2015")'
+          optional: true
+          computed: true
+
+        - model_name: REPLICATION_MODE
+          tf_name: replication_mode
+          description: Replication Mode
+          type: String
+          optional: true
+          computed: true
+          validator: OneOf("Multicast")
+
+        - model_name: ROUTING_LB_ID
+          tf_name: routing_lb_id
+          description: No description available
+          type: Int64
+          handle_empty: true
+          example: 0
+          optional: true
+          computed: true
+
+        - model_name: RP_IP_RANGE
+          tf_name: rp_ip_range
+          description: RP Loopback IP Address Range
+          type: String
+          optional: true
+          computed: true
+
+        - model_name: RP_IP_RANGE_INTERNAL
+          tf_name: rp_ip_range_internal
+          description: Internal RP IP Range
+          type: String
+          computed: true
+
+        - model_name: RP_LB_ID
+          tf_name: rp_lb_id
+          description: No description available
+          type: Int64
+          handle_empty: true
+          optional: true
+          computed: true
+
+        - model_name: SNMP_SERVER_HOST_TRAP
+          tf_name: snmp_server_host_trap
+          description: Configure NDFC as a receiver for SNMP traps
+          type: Bool
+          example: true
+          optional: true
+          computed: true
+
+        - model_name: SPINE_COUNT
+          tf_name: spine_count
+          description: Spine Count
+          type: Int64
+          handle_empty: true
+          computed: true
+
+        - model_name: STATIC_UNDERLAY_IP_ALLOC
+          tf_name: static_underlay_ip_alloc
+          description: Checking this will disable Dynamic Fabric IP Address
+            Allocations
+          type: Bool
+          example: false
+          optional: true
+          computed: true
+
+        - model_name: SUBNET_RANGE
+          tf_name: subnet_range
+          description: Address range to assign Numbered IPs
+          type: String
+          example: 10.4.0.0/16
+          optional: true
+          computed: true
+
+        - model_name: SUBNET_TARGET_MASK
+          tf_name: subnet_target_mask
+          description: Mask for Fabric Subnet IP Range
+          type: Int64
+          handle_empty: true
+          validator: 'OneOf(30, 31)'
+          example: 30
+          optional: true
+          computed: true
+
+        - model_name: SYSLOG_SERVER_IP_LIST
+          tf_name: syslog_server_ip_list
+          description: Comma separated list of IP Addresses (v4/v6)
+          type: String
+          optional: true
+          computed: true
+
+        - model_name: SYSLOG_SERVER_VRF
+          tf_name: syslog_server_vrf
+          description: >-
+            One VRF for all Syslog servers or a comma separated list of VRFs,
+            one per Syslog server
+          type: String
+          optional: true
+          computed: true
+
+        - model_name: SYSLOG_SEV
+          tf_name: syslog_sev
+          description: >-
+            Comma separated list of Syslog severity values, one per Syslog
+            server (Min:0, Max:7)
+          type: String
+          optional: true
+          computed: true
+
+        - model_name: UPGRADE_FROM_VERSION
+          tf_name: upgrade_from_version
+          description: Upgrade From Version
+          type: String
+          computed: true
+
+        - model_name: abstract_dhcp
+          tf_name: abstract_dhcp
+          description: DHCP Configuration
+          type: String
+          computed: true
+
+        - model_name: abstract_extra_config_bootstrap
+          tf_name: abstract_extra_config_bootstrap
+          description: Add Extra Configuration for Bootstrap
+          type: String
+          computed: true
+
+        - model_name: abstract_extra_config_leaf
+          tf_name: abstract_extra_config_leaf
+          description: Add Extra Configuration for Leaf
+          type: String
+          computed: true
+
+        - model_name: abstract_extra_config_spine
+          tf_name: abstract_extra_config_spine
+          description: Add Extra Configuration for Spine
+          type: String
+          computed: true
+
+        - model_name: abstract_isis
+          tf_name: abstract_isis
+          description: ISIS Network Configuration
+          type: String
+          computed: true
+
+        - model_name: abstract_isis_interface
+          tf_name: abstract_isis_interface
+          description: ISIS Interface Configuration
+          type: String
+          computed: true
+
+        - model_name: abstract_loopback_interface
+          tf_name: abstract_loopback_interface
+          description: Primary Loopback Interface Configuration
+          type: String
+          computed: true
+
+        - model_name: abstract_ospf
+          tf_name: abstract_ospf
+          description: OSPF Network Configuration
+          type: String
+          computed: true
+
+        - model_name: abstract_ospf_interface
+          tf_name: abstract_ospf_interface
+          description: OSPF Interface Configuration
+          type: String
+          computed: true
+
+        - model_name: abstract_pim_interface
+          tf_name: abstract_pim_interface
+          description: PIM Interface Configuration
+          type: String
+          computed: true
+
+        - model_name: abstract_routed_host
+          tf_name: abstract_routed_host
+          description: L3 Port Configuration
+          type: String
+          computed: true
+
+        - model_name: deploy
+          tf_name: deploy
+          description: This flag does configuration save and deploy
+          type: Bool
+          mandatory: true
+          ndfc_type: bool
+          example: false
+          payload_hide: true
+
+        - model_name: deployment_status
+          tf_name: deployment_status
+          description: >-
+            This fields shows the actual status of the deployment. It can be one
+            of the following: Deployment pending Deployment successful
+          type: String
+          computed: true
+          payload_hide: true
