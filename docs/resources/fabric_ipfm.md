@@ -3,12 +3,12 @@
 page_title: "ndfc_fabric_ipfm Resource - terraform-provider-ndfc"
 subcategory: ""
 description: |-
-  Resource to configure and manage IP Fabric Media.  Only creation/updation/deletion of the fabric is supported, resources on top of the fabric are not supported yet.
+  Resource to configure and manage IP Fabric Media. Only creation/updation/deletion of the fabric is supported, resources on top of the fabric are not supported yet.
 ---
 
 # ndfc_fabric_ipfm (Resource)
 
-Resource to configure and manage IP Fabric Media.  Only creation/updation/deletion of the fabric is supported, resources on top of the fabric are not supported yet.
+Resource to configure and manage IP Fabric Media. Only creation/updation/deletion of the fabric is supported, resources on top of the fabric are not supported yet.
 
 ## Example Usage
 
