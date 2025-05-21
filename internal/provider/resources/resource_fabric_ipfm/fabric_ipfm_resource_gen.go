@@ -684,8 +684,8 @@ func FabricIpfmResourceSchema(ctx context.Context) schema.Schema {
 				MarkdownDescription: "Upgrade From Version",
 			},
 		},
-		Description:         "Resource to configure and manage IP Fabric Media.  Only creation/updation/deletion of the fabric is supported, resources on top of the fabric are not supported yet.",
-		MarkdownDescription: "Resource to configure and manage IP Fabric Media.  Only creation/updation/deletion of the fabric is supported, resources on top of the fabric are not supported yet.",
+		Description:         "Resource to configure and manage IP Fabric Media. Only creation/updation/deletion of the fabric is supported, resources on top of the fabric are not supported yet.",
+		MarkdownDescription: "Resource to configure and manage IP Fabric Media. Only creation/updation/deletion of the fabric is supported, resources on top of the fabric are not supported yet.",
 	}
 }
 

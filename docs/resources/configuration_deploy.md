@@ -3,12 +3,12 @@
 page_title: "ndfc_configuration_deploy Resource - terraform-provider-ndfc"
 subcategory: ""
 description: |-
-  
+  This resource allows configuration deployment operations across specified switches or all switches in an NDFC-managed fabric.
 ---
 
 # ndfc_configuration_deploy (Resource)
 
-
+This resource allows configuration deployment operations across specified switches or all switches in an NDFC-managed fabric.
 
 ## Example Usage
 
@@ -31,9 +31,9 @@ resource "ndfc_configuration_deploy" "test_resource_configuration_deploy_1" {
 ### Optional
 
 - `config_save` (Boolean) Save the configuration
-- `serial_numbers` (Set of String) Value 'ALL' if all switches in the fabric are to be deployed, or a list of serial numbers of the switches to be deployed
+- `serial_numbers` (Set of String) Value 'ALL' if all switches in the fabric are to be deployed, or a list of serial numbers of the switches to be deployed.
 - `trigger_deploy_on_update` (Boolean) Default set to false, config deploy will be only triggered on create of resource. If set to true in resource update, the configurations are deployed to the switches and the flag will be toggled back to false after the deployment is completed, when terraform refresh is performed. Terraform plan will always show in-place update for this field when set to true.
 
 ### Read-Only
 
-- `id` (String) The Terraform Unique Identifier for the Inventory Devices resource
+- `id` (String) The Terraform Unique Identifier for the Inventory Devices resource.
