@@ -32,8 +32,8 @@ func ConfigurationDeployResourceSchema(ctx context.Context) schema.Schema {
 			},
 			"id": schema.StringAttribute{
 				Computed:            true,
-				Description:         "The Terraform Unique Identifier for the Inventory Devices resource",
-				MarkdownDescription: "The Terraform Unique Identifier for the Inventory Devices resource",
+				Description:         "The Terraform Unique Identifier for the Inventory Devices resource.",
+				MarkdownDescription: "The Terraform Unique Identifier for the Inventory Devices resource.",
 				PlanModifiers: []planmodifier.String{
 					stringplanmodifier.UseStateForUnknown(),
 				},
@@ -41,8 +41,8 @@ func ConfigurationDeployResourceSchema(ctx context.Context) schema.Schema {
 			"serial_numbers": schema.SetAttribute{
 				ElementType:         types.StringType,
 				Optional:            true,
-				Description:         "Value 'ALL' if all switches in the fabric are to be deployed, or a list of serial numbers of the switches to be deployed",
-				MarkdownDescription: "Value 'ALL' if all switches in the fabric are to be deployed, or a list of serial numbers of the switches to be deployed",
+				Description:         "Value 'ALL' if all switches in the fabric are to be deployed, or a list of serial numbers of the switches to be deployed.",
+				MarkdownDescription: "Value 'ALL' if all switches in the fabric are to be deployed, or a list of serial numbers of the switches to be deployed.",
 			},
 			"trigger_deploy_on_update": schema.BoolAttribute{
 				Optional:            true,
@@ -52,6 +52,8 @@ func ConfigurationDeployResourceSchema(ctx context.Context) schema.Schema {
 				Default:             booldefault.StaticBool(false),
 			},
 		},
+		Description:         "This resource allows configuration deployment operations across specified switches or all switches in an NDFC-managed fabric.",
+		MarkdownDescription: "This resource allows configuration deployment operations across specified switches or all switches in an NDFC-managed fabric.",
 	}
 }
 

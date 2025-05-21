@@ -5,8 +5,8 @@ resource:
     generate_tf_resource: true
     parent_package: resource_fabric_common
     parent_model: fabric_common
-    description: >-  
-        Resource to configure and manage IP Fabric Media. 
+    description: >-
+        Resource to configure and manage IP Fabric Media.
         Only creation/updation/deletion of the fabric is supported,
         resources on top of the fabric are not supported yet.
     attributes:
