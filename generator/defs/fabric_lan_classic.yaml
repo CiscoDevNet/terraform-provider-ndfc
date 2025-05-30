@@ -5,6 +5,10 @@ resource:
     generate_tf_resource: true
     parent_package: resource_fabric_common
     parent_model: fabric_common
+    import_id:
+        - "TF_FABRIC_LAN_CLASSIC"
+    import_desc:
+        - "Name of the fabric you would want to import for this resource"
     description: >-
         Resource to configure and manage a LAN Classic Fabric.
         Only creation/updation/deletion of the fabric is supported,

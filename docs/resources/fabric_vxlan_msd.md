@@ -118,3 +118,13 @@ resource "ndfc_fabric_vxlan_msd" "test_resource_fabric_vxlan_msd_1" {
 - `sgt_preprov_recalc_status` (String) Recalculation status for Security Groups Pre-provision
 - `sgt_preprovision_prev` (Boolean) Previous state of Security Groups Pre-provision
 - `sgt_recalc_status` (String) Recalculation status for Security Groups
+
+## Import
+
+Import is supported using the following syntax:
+
+```shell
+# Format of ID used for import:
+# Name of the fabric you would want to import for this resource
+terraform import ndfc_fabric_vxlan_msd.test_resource_fabric_vxlan_msd TF_FABRIC_VXLAN_MSD
+```
