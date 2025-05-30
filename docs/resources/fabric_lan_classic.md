@@ -169,3 +169,13 @@ resource "ndfc_fabric_lan_classic" "test_resource_fabric_lan_classic_1" {
 - `mgmt_v6prefix` (Number) Switch Mgmt IPv6 Subnet Prefix (Min:64, Max:126)
 - `mgmt_v6prefix_internal` (Number) Internal Management IPv6 Prefix
 - `pm_enable_prev` (Boolean) Previous state of Enable Performance Monitoring
+
+## Import
+
+Import is supported using the following syntax:
+
+```shell
+# Format of ID used for import:
+# Name of the fabric you would want to import for this resource
+terraform import ndfc_fabric_lan_classic.test_resource_fabric_lan_classic TF_FABRIC_LAN_CLASSIC
+```

@@ -486,3 +486,13 @@ resource "ndfc_fabric_vxlan_evpn" "test_resource_fabric_vxlan_evpn_1" {
 - `unnum_dhcp_end_internal` (String) Internal Unnumbered DHCP End Address
 - `unnum_dhcp_start_internal` (String) Internal Unnumbered DHCP Start Address
 - `upgrade_from_version` (String) Upgrade from Version
+
+## Import
+
+Import is supported using the following syntax:
+
+```shell
+# Format of ID used for import:
+# Name of the fabric you would want to import for this resource
+terraform import ndfc_fabric_vxlan_evpn.test_resource_fabric_vxlan_evpn TF_FABRIC_VXLAN_EVPN
+```
