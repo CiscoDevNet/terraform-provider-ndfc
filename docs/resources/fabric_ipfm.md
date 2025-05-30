@@ -168,3 +168,13 @@ resource "ndfc_fabric_ipfm" "test_resource_fabric_ipfm_1" {
 - `rp_ip_range_internal` (String) Internal RP IP Range
 - `spine_count` (Number) Spine Count
 - `upgrade_from_version` (String) Upgrade From Version
+
+## Import
+
+Import is supported using the following syntax:
+
+```shell
+# Format of ID used for import:
+# Name of the fabric you would want to import for this resource
+terraform import ndfc_fabric_ipfm.test_resource_fabric_ipfm IP_FABRIC_MEDIA
+```
