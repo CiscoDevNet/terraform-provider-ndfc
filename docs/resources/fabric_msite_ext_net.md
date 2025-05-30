@@ -178,3 +178,13 @@ resource "ndfc_fabric_msite_ext_net" "test_resource_fabric_msite_ext_net_1" {
 - `pm_enable_prev` (Boolean) Previous state of Enable Performance Monitoring
 - `pnp_enable_internal` (Boolean) Internal PnP Enable
 - `premso_parent_fabric` (String) Pre-MSO Parent Fabric
+
+## Import
+
+Import is supported using the following syntax:
+
+```shell
+# Format of ID used for import:
+# Name of the fabric you would want to import for this resource
+terraform import ndfc_fabric_msite_ext_net.test_resource_fabric_msite_ext_net TF_FABRIC_MSITE_EXT_NET
+```
