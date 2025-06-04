@@ -53,24 +53,33 @@ func TestAccVPCPairResourceCreateVpcPair(t *testing.T) {
 		PreCheck:                 func() { testAccPreCheck(t, "vpc_pair") },
 		ProtoV6ProviderFactories: testAccProtoV6ProviderFactories,
 		Steps: []resource.TestStep{
-
-			{ // Create vpc pair and check resource state
+			{
 				Config: func() string {
 					tName := fmt.Sprintf("%s_%d", t.Name(), 1)
 					helper.GenerateVpcPairResource(&vpcPairRsc, helper.GetConfig("vpc_pair").NDFC.VpcPair, false, true)
-					helper.GetTFConfigWithSingleResource(tName, *x, []interface{}{vpcPairRsc}, &tf_config)
+					helper.GetTFConfigWithSingleResource(tName, *x, []any{vpcPairRsc}, &tf_config)
 					return *tf_config
 				}(),
-				Check: resource.ComposeTestCheckFunc(VpcPairModelHelperStateCheck("ndfc_vpc_pair.test_vpc_pair", *vpcPairRsc, path.Empty())...),
+				Check: func() resource.TestCheckFunc {
+					funcs1 := VpcPairModelHelperStateCheck("ndfc_vpc_pair.test_vpc_pair_1", *vpcPairRsc, path.Empty())
+					//funcs2 := VpcPairModelHelperStateCheck("ndfc_vpc_pair.test_vpc_pair_2", *vpcPairRsc, path.Empty())
+					//allFuncs := append(funcs1, funcs2...)
+					return resource.ComposeTestCheckFunc(funcs1...)
+				}(),
 			},
-			{ // create with virtual link true
+			{
 				Config: func() string {
 					tName := fmt.Sprintf("%s_%d", t.Name(), 1)
 					helper.GenerateVpcPairResource(&vpcPairRsc, helper.GetConfig("vpc_pair").NDFC.VpcPair, true, true)
-					helper.GetTFConfigWithSingleResource(tName, *x, []interface{}{vpcPairRsc}, &tf_config)
+					helper.GetTFConfigWithSingleResource(tName, *x, []any{vpcPairRsc}, &tf_config)
 					return *tf_config
 				}(),
-				Check:       resource.ComposeTestCheckFunc(VpcPairModelHelperStateCheck("ndfc_vpc_pair.test_vpc_pair", *vpcPairRsc, path.Empty())...),
+				Check: func() resource.TestCheckFunc {
+					funcs1 := VpcPairModelHelperStateCheck("ndfc_vpc_pair.test_vpc_pair_1", *vpcPairRsc, path.Empty())
+					// funcs2 := VpcPairModelHelperStateCheck("ndfc_vpc_pair.test_vpc_pair_2", *vpcPairRsc, path.Empty())
+					//allFuncs := append(funcs1, funcs2...)
+					return resource.ComposeTestCheckFunc(funcs1...)
+				}(),
 				ExpectError: regexp.MustCompile(".*doesn't support Virtual Fabric.*"),
 			},
 		},
