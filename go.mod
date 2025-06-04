@@ -1,8 +1,8 @@
 module terraform-provider-ndfc
 
-go 1.23.0
+go 1.23.6
 
-toolchain go1.23.6
+toolchain go1.24.2
 
 require (
 	github.com/hashicorp/hcl/v2 v2.23.0
@@ -12,7 +12,7 @@ require (
 	github.com/hashicorp/terraform-plugin-log v0.9.0
 	github.com/hashicorp/terraform-plugin-testing v1.12.0
 	github.com/looplab/fsm v1.0.2
-	github.com/netascode/go-nd v0.1.2
+	github.com/netascode/go-nd v0.1.3
 	github.com/stretchr/testify v1.10.0
 	github.com/tidwall/gjson v1.18.0
 	github.com/zclconf/go-cty v1.16.2
