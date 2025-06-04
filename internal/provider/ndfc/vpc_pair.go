@@ -26,7 +26,7 @@ import (
 )
 
 const ResourceVpcPair = "vpc_pair"
-const ErrVpcPairNotFound = "vPC Pair data not found"
+const ErrVpcPairNotInFabric = "vPC Pair is not present in the fabric"
 
 func (c *NDFC) RscReadVpcPair(ctx context.Context, resp *resource.ReadResponse, tf *resource_vpc_pair.VpcPairModel) error {
 
@@ -43,7 +43,7 @@ func (c *NDFC) RscReadVpcPair(ctx context.Context, resp *resource.ReadResponse, 
 	if vpcPairModel == nil {
 		tflog.Error(ctx, "RscGetVpcPair: Failed to get vPC Pair")
 		resp.Diagnostics.AddError("Failed to get vPC Pair", "vPC Pair data empty in NDFC")
-		err = fmt.Errorf("%s", ErrVpcPairNotFound)
+		err = fmt.Errorf("%s", ErrVpcPairNotInFabric)
 		return err
 	}
 	// Fill NDFC output data to terraform model
@@ -78,9 +78,17 @@ func (c *NDFC) RscDeleteVpcPair(ctx context.Context, dg *diag.Diagnostics, tf *r
 	// Check if the vPC Pair is deleted after some giving time
 	time.Sleep(3 * time.Second)
 	vpcPairModel, err = c.rscGetVpcPair(ctx, tf)
-	if err != nil {
-		tflog.Error(ctx, "RscDeleteVpcPair: Failed to get vPC Pair after delete")
-		dg.AddError("Failed to get vPC Pair after delete", fmt.Sprintf("Error %v", err))
+	/*Check what error is thrown by the API.
+	* The vPC pair API get returns all vPC pairs in the system if it does not match the given ID.
+	* We need to check if the vPC pair was deleted by scanning through the list and
+	* verifying if the given serial numbers are removed.
+	* Now, if it is not present, we return an error as ErrVpcPairNotInFabric.
+	* Therefore, in the case below, we need to check if the error is not
+	* ErrVpcPairNotInFabric for positive case, which indicates that the vPC pair is deleted.
+	*/
+	if err != nil && err.Error() != ErrVpcPairNotInFabric {
+		tflog.Error(ctx, "RscDeleteVpcPair: Failed to get vPC Pair data after delete")
+		dg.AddError("Failed to get vPC Pair data after delete", fmt.Sprintf("Error %v", err))
 		return
 	}
 	if vpcPairModel != nil {
@@ -226,18 +234,18 @@ func (c *NDFC) rscGetVpcPair(ctx context.Context, tf *resource_vpc_pair.VpcPairM
 	api := api.NewVpcPairAPI(c.GetLock(ResourceVpcPair), &c.apiClient)
 	api.VpcPairID = tf.GetModelData().SerialNumbers[0]
 
-	payload, erro := api.Get()
+	payload, err := api.Get()
 	modellist := []resource_vpc_pair.NDFCVpcPairModel{}
 
-	if erro == nil && (string(payload) == "[]" || payload == nil) {
+	if err == nil && (string(payload) == "[]" || payload == nil) {
 		tflog.Debug(ctx, "RscGetVpcPair: No vPC Pair data present in NDFC")
 		return nil, nil
-	} else if erro != nil {
+	} else if err != nil {
 		tflog.Debug(ctx, "RscGetVpcPair: Failed to get vPC Pair")
-		return nil, erro
+		return nil, err
 	}
 	log.Printf("[TRACE] vPC pair data: %v %v", string(payload), api.VpcPairID)
-	err := json.Unmarshal(payload, &modellist)
+	err = json.Unmarshal(payload, &modellist)
 	if err != nil {
 		tflog.Error(ctx, "RscGetVpcPair: Failed to unmarshal vPC Pair data")
 		err = fmt.Errorf("failed to unmarshal vPC Pair data")
@@ -245,7 +253,7 @@ func (c *NDFC) rscGetVpcPair(ctx context.Context, tf *resource_vpc_pair.VpcPairM
 	}
 	vpcPairModel := rscValidateVpcPair(ctx, tf, modellist)
 	if vpcPairModel == nil {
-		err = fmt.Errorf("%s", ErrVpcPairNotFound)
+		err = fmt.Errorf("%s", ErrVpcPairNotInFabric)
 		return nil, err
 	}
 	return vpcPairModel, nil

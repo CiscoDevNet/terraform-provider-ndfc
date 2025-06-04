@@ -1,13 +1,32 @@
 {{define "NDFC_VPCPAIR_RSC"}}
-resource "ndfc_{{.RscType}}" "{{.RscName}}" {
+resource "ndfc_{{.RscType}}" "{{.RscName}}_1" {
     {{ with .VpcPair }}
         serial_numbers =  [
-        {{- range .SerialNumbers }}
-            "{{.}}",
+        {{- $start := 0 }}
+        {{- $end := 1 }}
+        {{- range $index, $element := .SerialNumbers }}
+            {{- if and (ge $index $start) (le $index $end) }}
+            "{{$element}}",
+            {{- end }}
         {{- end}}
         ]
         use_virtual_peerlink  = {{deref_bool .UseVirtualPeerlink}}
         deploy = {{.Deploy}}
     {{end}}
 }
+#resource "ndfc_{{.RscType}}" "{{.RscName}}_2" {
+#    {{ with .VpcPair }}
+#        serial_numbers =  [
+#        {{- $start := 2 }}
+#        {{- $end := 3 }}
+#        {{- range $index, $element := .SerialNumbers }}
+#            {{- if and (ge $index $start) (le $index $end) }}
+#            "{{$element}}",
+#            {{- end }}
+#        {{- end}}
+#        ]
+#        use_virtual_peerlink  = {{deref_bool .UseVirtualPeerlink}}
+#        deploy = {{.Deploy}}
+#    {{end}}
+#}
 {{end}}
