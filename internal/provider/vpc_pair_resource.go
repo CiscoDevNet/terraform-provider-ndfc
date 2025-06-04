@@ -96,8 +96,14 @@ func (r *vpcPairResource) Read(ctx context.Context, req resource.ReadRequest, re
 	unique_id := data.Id.ValueString()
 	tflog.Info(ctx, fmt.Sprintf("Incoming ID %s", unique_id))
 	err := r.client.RscReadVpcPair(ctx, resp, &data)
-
-	if err != nil && err.Error() == ndfc.ErrVpcPairNotFound {
+	/*Check what error is thrown by the API.
+	* The vPC pair API get returns all vPC pairs in the system if it does not match the given ID.
+	* We need to check if the vPC pair was deleted by scanning through the list and
+	* verifying if the given serial numbers are removed.
+	* Now, if it is not present, we return an error as ErrVpcPairNotInFabric.
+	* Therefore, in the below case if err is ErrVpcPairNotInFabric, we need to recreate the vPC pair.
+	*/
+	if err != nil && err.Error() == ndfc.ErrVpcPairNotInFabric {
 		// make diags error empty because vPC pair is not present in NDFC,
 		// it needs to be recreated.
 		tflog.Debug(ctx, "vPC Pair is not present in NDFC")
