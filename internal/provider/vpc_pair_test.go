@@ -53,12 +53,20 @@ func TestAccVPCPairResourceCreateVpcPair(t *testing.T) {
 		PreCheck:                 func() { testAccPreCheck(t, "vpc_pair") },
 		ProtoV6ProviderFactories: testAccProtoV6ProviderFactories,
 		Steps: []resource.TestStep{
-
-			{ // Create vpc pair and check resource state
+			{ // Create vpc pair and check resource state for first 2 serials
 				Config: func() string {
 					tName := fmt.Sprintf("%s_%d", t.Name(), 1)
-					helper.GenerateVpcPairResource(&vpcPairRsc, helper.GetConfig("vpc_pair").NDFC.VpcPair, false, true)
-					helper.GetTFConfigWithSingleResource(tName, *x, []interface{}{vpcPairRsc}, &tf_config)
+					helper.GenerateVpcPairResource(&vpcPairRsc, helper.GetConfig("vpc_pair").NDFC.VpcPair[:2], false, true)
+					helper.GetTFConfigWithSingleResource(tName, *x, []any{vpcPairRsc}, &tf_config)
+					return *tf_config
+				}(),
+				Check: resource.ComposeTestCheckFunc(VpcPairModelHelperStateCheck("ndfc_vpc_pair.test_vpc_pair", *vpcPairRsc, path.Empty())...),
+			},
+			{ // Create vpc pair and check resource state for next 2 serials
+				Config: func() string {
+					tName := fmt.Sprintf("%s_%d", t.Name(), 1)
+					helper.GenerateVpcPairResource(&vpcPairRsc, helper.GetConfig("vpc_pair").NDFC.VpcPair[2:], false, true)
+					helper.GetTFConfigWithSingleResource(tName, *x, []any{vpcPairRsc}, &tf_config)
 					return *tf_config
 				}(),
 				Check: resource.ComposeTestCheckFunc(VpcPairModelHelperStateCheck("ndfc_vpc_pair.test_vpc_pair", *vpcPairRsc, path.Empty())...),
@@ -67,7 +75,7 @@ func TestAccVPCPairResourceCreateVpcPair(t *testing.T) {
 				Config: func() string {
 					tName := fmt.Sprintf("%s_%d", t.Name(), 1)
 					helper.GenerateVpcPairResource(&vpcPairRsc, helper.GetConfig("vpc_pair").NDFC.VpcPair, true, true)
-					helper.GetTFConfigWithSingleResource(tName, *x, []interface{}{vpcPairRsc}, &tf_config)
+					helper.GetTFConfigWithSingleResource(tName, *x, []any{vpcPairRsc}, &tf_config)
 					return *tf_config
 				}(),
 				Check:       resource.ComposeTestCheckFunc(VpcPairModelHelperStateCheck("ndfc_vpc_pair.test_vpc_pair", *vpcPairRsc, path.Empty())...),

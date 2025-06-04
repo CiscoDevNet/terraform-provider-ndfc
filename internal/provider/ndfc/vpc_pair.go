@@ -78,9 +78,9 @@ func (c *NDFC) RscDeleteVpcPair(ctx context.Context, dg *diag.Diagnostics, tf *r
 	// Check if the vPC Pair is deleted after some giving time
 	time.Sleep(3 * time.Second)
 	vpcPairModel, err = c.rscGetVpcPair(ctx, tf)
-	if err != nil {
-		tflog.Error(ctx, "RscDeleteVpcPair: Failed to get vPC Pair after delete")
-		dg.AddError("Failed to get vPC Pair after delete", fmt.Sprintf("Error %v", err))
+	if err != nil && err.Error() != ErrVpcPairNotFound {
+		tflog.Error(ctx, "RscDeleteVpcPair: Failed to get vPC Pair data after delete")
+		dg.AddError("Failed to get vPC Pair data after delete", fmt.Sprintf("Error %v", err))
 		return
 	}
 	if vpcPairModel != nil {
@@ -226,18 +226,18 @@ func (c *NDFC) rscGetVpcPair(ctx context.Context, tf *resource_vpc_pair.VpcPairM
 	api := api.NewVpcPairAPI(c.GetLock(ResourceVpcPair), &c.apiClient)
 	api.VpcPairID = tf.GetModelData().SerialNumbers[0]
 
-	payload, erro := api.Get()
+	payload, err := api.Get()
 	modellist := []resource_vpc_pair.NDFCVpcPairModel{}
 
-	if erro == nil && (string(payload) == "[]" || payload == nil) {
+	if err == nil && (string(payload) == "[]" || payload == nil) {
 		tflog.Debug(ctx, "RscGetVpcPair: No vPC Pair data present in NDFC")
 		return nil, nil
-	} else if erro != nil {
+	} else if err != nil {
 		tflog.Debug(ctx, "RscGetVpcPair: Failed to get vPC Pair")
-		return nil, erro
+		return nil, err
 	}
 	log.Printf("[TRACE] vPC pair data: %v %v", string(payload), api.VpcPairID)
-	err := json.Unmarshal(payload, &modellist)
+	err = json.Unmarshal(payload, &modellist)
 	if err != nil {
 		tflog.Error(ctx, "RscGetVpcPair: Failed to unmarshal vPC Pair data")
 		err = fmt.Errorf("failed to unmarshal vPC Pair data")
