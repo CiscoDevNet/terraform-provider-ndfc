@@ -98,14 +98,14 @@ func (c *NDFC) checkDeployStatus(ctx context.Context, diags *diag.Diagnostics, f
 
 	// Config Preview refreshes the config status of switches in the fabric
 	payload, err := previewApi.Get()
-	if err != nil || len(payload) == 0 || string(payload) == "[]" {
+	if len(payload) == 0 || string(payload) == "[]" || err != nil {
 		diags.AddError("Deploy failed", "Configuration preview failed")
 		return nil
 	}
 
 	// Get the current config status of switches in the fabric
 	payload, err = c.GetSwitchesInFabric(ctx, fabricName)
-	if err != nil || len(payload) == 0 || string(payload) == "[]" {
+	if len(payload) == 0 || string(payload) == "[]" || err != nil {
 		diags.AddError("Deploy failed", "Failed to get switches in fabric")
 		return nil
 	}
@@ -118,32 +118,35 @@ func (c *NDFC) checkDeployStatus(ctx context.Context, diags *diag.Diagnostics, f
 
 	if len(serialNumbers) > 0 {
 		tflog.Debug(ctx, fmt.Sprintf("Switches out of sync: %v", serialNumbers))
-		tflog.Debug(ctx, fmt.Sprintf("Switches in sync: %v", response.SerialNumMap))
+		tflog.Debug(ctx, fmt.Sprintf("Current Switch status: %v", response.SerialNumMap))
 		for _, serialNumber := range serialNumbers {
 			if response.SerialNumMap[serialNumber].Status == inSync {
 				// Delete serial number from outOfSync
-				log.Printf("Switch %s is in sync - remove from list", serialNumber)
+				log.Printf("Switch %s is in sync", serialNumber)
 			} else if response.SerialNumMap[serialNumber].Status == failed {
 				diags.AddError("Deploy failed", fmt.Sprintf("Deploy failed for serial number %s", serialNumber))
 				tflog.Error(ctx, fmt.Sprintf("Deploy failed for serial number %s", serialNumber))
 				return nil
 
-			} else if response.SerialNumMap[serialNumber].Status == outOfSync {
-				log.Printf("Switch %s is out of sync", serialNumber)
-				// Add serial number from outOfSync
+			} else {
+				log.Printf("Switch %s is in status %s", serialNumber, response.SerialNumMap[serialNumber].Status)
+				// Switch status is not inSync or failed, could be pending or outOfSync
 				ooList = append(ooList, serialNumber)
 			}
 		}
 	} else {
 		for serialNumber, entry := range response.SerialNumMap {
-			if entry.Status == outOfSync {
-				// Add serial number from outOfSync
-				log.Printf("Switch %s is out of sync", serialNumber)
-				ooList = append(ooList, serialNumber)
-			} else if entry.Status == failed {
+			if entry.Status == failed {
 				tflog.Error(ctx, fmt.Sprintf("Deploy failed for serial number %s", serialNumber))
 				diags.AddError("Deploy failed", fmt.Sprintf("Deploy failed for serial number %s", serialNumber))
 				return nil
+			} else if entry.Status == inSync {
+				// Switch is in sync
+				log.Printf("Switch %s is in sync", serialNumber)
+			} else {
+				// Switch status is not inSync or failed, could be pending or outOfSync
+				log.Printf("Switch %s is in status %s", serialNumber, response.SerialNumMap[serialNumber].Status)
+				ooList = append(ooList, serialNumber)
 			}
 		}
 	}
