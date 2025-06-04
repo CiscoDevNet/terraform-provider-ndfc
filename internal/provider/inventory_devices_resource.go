@@ -257,7 +257,7 @@ func (r *InventoryDevicesResource) Create(ctx context.Context, req resource.Crea
 
 	deployAndSave(ctx, r.client, &resp.Diagnostics, &planData)
 	if resp.Diagnostics.HasError() {
-		tflog.Debug(ctx, "Create failed, deleting devices from inventory")
+		tflog.Debug(ctx, "Save and Deploy failed, deleting devices from inventory")
 		deleteDevicesFromInventory(ctx, r.client, &resp.Diagnostics, &planData)
 		return
 	}

@@ -97,7 +97,7 @@ func (r *vpcPairResource) Read(ctx context.Context, req resource.ReadRequest, re
 	tflog.Info(ctx, fmt.Sprintf("Incoming ID %s", unique_id))
 	err := r.client.RscReadVpcPair(ctx, resp, &data)
 
-	if err != nil && err.Error() == ndfc.ErrVpcPairNotFound {
+	if err != nil && err.Error() == ndfc.ErrVpcPairNotInFabric {
 		// make diags error empty because vPC pair is not present in NDFC,
 		// it needs to be recreated.
 		tflog.Debug(ctx, "vPC Pair is not present in NDFC")
