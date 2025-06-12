@@ -46,23 +46,29 @@ func (c *NDFC) RscCreateTemplate(ctx context.Context, dg *diag.Diagnostics, in *
 
 func (c *NDFC) RscGetTemplate(ctx context.Context, dg *diag.Diagnostics, tmplName string, outModel *resource_template.TemplateModel) {
 	// Create API call
+	out := c.getTemplateContent(ctx, dg, tmplName)
+	if out == nil {
+		return
+	}
+	outModel.SetModelData(out)
+}
 
+func (c *NDFC) getTemplateContent(ctx context.Context, dg *diag.Diagnostics, tmplName string) *resource_template.NDFCTemplateModel {
 	tmplApi := api.NewTemplateAPI(c.GetLock(ResourceTemplate), &c.apiClient)
 	tmplApi.SetTemplateName(tmplName)
 	res, err := tmplApi.Get()
 	if err != nil {
 		dg.AddError("Error getting template", err.Error())
-		return
+		return nil
 	}
 	log.Println("Response: ", string(res))
 
 	var out resource_template.NDFCTemplateModel
 	if err := json.Unmarshal(res, &out); err != nil {
 		dg.AddError("Error unmarshalling template model", err.Error())
-		return
+		return nil
 	}
-
-	outModel.SetModelData(&out)
+	return &out
 }
 
 func (c *NDFC) RscValidateTemplateContent(ctx context.Context, dg *diag.Diagnostics, content string) {
