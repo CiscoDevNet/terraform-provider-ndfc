@@ -12,7 +12,7 @@ require (
 	github.com/hashicorp/terraform-plugin-log v0.9.0
 	github.com/hashicorp/terraform-plugin-testing v1.12.0
 	github.com/looplab/fsm v1.0.2
-	github.com/netascode/go-nd v0.1.2
+	github.com/netascode/go-nd v0.1.3-0.20250416140607-262009fdb4bb
 	github.com/stretchr/testify v1.10.0
 	github.com/tidwall/gjson v1.18.0
 	github.com/zclconf/go-cty v1.16.2

@@ -1,0 +1,40 @@
+{{/* 
+resource "ndfc_links" "test_links_1" {
+  template_name         = "int_intra_fabric_num_link"
+  source_fabric         = "CML"
+  destination_fabric    = "CML"
+  source_device         = "9QBCTIN0FMY"
+  destination_device    = "9TQYTJSZ1VJ"
+  source_interface      = "Ethernet1/1"
+  destination_interface = "Ethernet1/1"
+  deploy                = false
+  link_parameters = {
+    "PEER1_IP"    = "1.1.1.1"
+    "PEER2_IP"    = "1.1.1.2"
+    "ADMIN_STATE" = "true"
+    "MTU"         = "9216"
+    "SPEED"       = "Auto"
+  }
+}
+*/}}
+
+{{define "NDFC_LINKS_RSC"}}
+resource "ndfc_{{.RscType}}" "{{.RscName}}" {
+    {{ with .Links }}
+        template_name         = "{{.TemplateName}}"
+        source_fabric         = "{{.SourceFabric}}"
+        destination_fabric    = "{{.DestinationFabric}}"
+        source_device         = "{{.SourceDevice}}"
+        destination_device    = "{{.DestinationDevice}}"
+        source_interface      = "{{.SourceInterface}}"
+        destination_interface = "{{.DestinationInterface}}"
+        {{if .SourceSwitchName}}source_switch_name    = "{{.SourceSwitchName}}"{{end}}
+        {{if .DestinationSwitchName}}destination_switch_name = "{{.DestinationSwitchName}}"{{end}}
+        link_parameters = {
+        {{- range $key, $value := .LinkParameters }}
+            "{{$key}}" = "{{$value}}"
+        {{- end}}
+        }
+    {{end}}
+}
+{{end}}

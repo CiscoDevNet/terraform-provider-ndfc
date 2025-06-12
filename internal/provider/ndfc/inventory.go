@@ -10,8 +10,11 @@ package ndfc
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
+	"log"
 	"strings"
+	"terraform-provider-ndfc/internal/provider/resources/resource_configuration_deploy"
 
 	"github.com/netascode/go-nd"
 
@@ -148,4 +151,54 @@ func (c NDFC) GetDeviceRole(ctx context.Context, diags *diag.Diagnostics, serial
 		diags.AddError("Get Device Role Failed", err.Error())
 	}
 	return res
+}
+
+// GetDeviceName retrieves the switch name given the fabric name and switch serial number
+func (c *NDFC) GetDeviceName(ctx context.Context, fabricName, serialNumber string) (string, error) {
+	log.Printf("Getting device name for fabric: %s, serialNumber: %s", fabricName, serialNumber)
+
+	var response resource_configuration_deploy.SwitchStatusDB
+
+	payload, err := c.GetSwitchesInFabric(ctx, fabricName)
+	if err != nil || len(payload) == 0 || string(payload) == "[]" {
+		return "", fmt.Errorf("failed to get switches in fabric")
+	}
+
+	err = json.Unmarshal(payload, &response)
+	if err != nil {
+		return "", fmt.Errorf("failed to unmarshal switches in fabric")
+	}
+
+	sw, ok := response.SerialNumMap[serialNumber]
+	if !ok {
+		return "", fmt.Errorf("failed to find switch with serial number %s in fabric %s", serialNumber, fabricName)
+	}
+	return sw.SwitchName, nil
+	/*
+		// Build URL for the config-preview API
+		url := fmt.Sprintf("/lan-fabric/rest/control/fabrics/%s/config-preview/%s?showBrief=true", fabricName, serialNumber)
+
+		// Make the API call
+		response, err := c.apiClient.Get(url)
+		if err != nil {
+			log.Printf("Error getting device details: %s", err)
+			return "", err
+		}
+
+		// Parse the response to get the switch name
+		if !response.IsArray() {
+			return "", fmt.Errorf("unexpected response format from API, expected array")
+		}
+
+		// Extract the switchName from the first array element
+		switchName := response.Get("0.switchName").String()
+		if switchName == "" {
+			return "", fmt.Errorf("could not find switch name for switchId %s in fabric %s", switchId, fabricName)
+		}
+
+		log.Printf("Found device name: %s for switchId: %s in fabric: %s", switchName, switchId, fabricName)
+
+
+		return response.SerialNumMap[serialNumber].SwitchName, nil
+	*/
 }

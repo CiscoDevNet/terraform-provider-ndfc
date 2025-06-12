@@ -15,6 +15,7 @@ import (
 	"os"
 	"strings"
 	"terraform-provider-ndfc/internal/provider/resources/resource_interface_common"
+	"terraform-provider-ndfc/internal/provider/resources/resource_links"
 	"terraform-provider-ndfc/internal/provider/resources/resource_networks"
 	"terraform-provider-ndfc/internal/provider/resources/resource_policy"
 	"terraform-provider-ndfc/internal/provider/resources/resource_vpc_pair"
@@ -226,6 +227,16 @@ func GetTFConfigWithSingleResource(tt string, cfg map[string]string, rscs []inte
 			}
 		}
 
+		linksRsc, ok := rsc.(*resource_links.NDFCLinksModel)
+		if ok {
+			args["Links"] = linksRsc
+			args["RscName"] = rsNames[i]
+			args["RscType"] = "links"
+			err = t.ExecuteTemplate(&output, "NDFC_LINKS_RSC", args)
+			if err != nil {
+				panic(err)
+			}
+		}
 	}
 	//log.Println(output.String())
 	*x = output.String()
