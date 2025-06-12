@@ -180,5 +180,6 @@ func (p *ndfcProvider) Resources(ctx context.Context) []func() resource.Resource
 		NewFabricVxlanEvpnResource,
 		NewFabricVxlanMsdResource,
 		NewFabricIpfmResource,
+		NewLinksResource,
 	}
 }

@@ -1,0 +1,202 @@
+---
+resource:
+  name: links
+  doc_category: Fabric
+  generate_tf_resource: true
+  description: "This resource allows you to configure and manage links between switches in NDFC"
+  import_id:
+    - "link_uuid"
+  import_desc:
+    - "link_uuid"
+  attributes:
+    - model_name: link_uuid
+      tf_name: link_uuid
+      type: String
+      description: "Link UUID"
+      computed: true
+      use_state: true
+      payload_hide: true
+    - model_name: sourceFabric
+      tf_name: source_fabric
+      type: String
+      description: "Source fabric name"
+      example: "CML1"
+      mandatory: true
+      tf_requires_replace: true
+
+    - model_name: destinationFabric
+      tf_name: destination_fabric
+      type: String
+      description: "Destination fabric name"
+      example: "CML2"
+      mandatory: true
+      tf_requires_replace: true
+
+    - model_name: sourceDevice
+      tf_name: source_device
+      type: String
+      description: "Source device serial number"
+      example: "SERIAL_1"
+      mandatory: true
+      tf_requires_replace: true
+    
+    - model_name: destinationDevice
+      tf_name: destination_device
+      type: String
+      description: "Destination device serial number"
+      example: "SERIAL_2"
+      mandatory: true
+      tf_requires_replace: true
+
+    - model_name: sourceInterface
+      tf_name: source_interface
+      type: String
+      description: "Source interface name"
+      example: "Ethernet1/1"
+      mandatory: true
+      tf_requires_replace: true
+
+    - model_name: destinationInterface
+      tf_name: destination_interface
+      type: String
+      description: "Destination interface name"
+      example: "Ethernet1/1"
+      mandatory: true
+      tf_requires_replace: true
+      validator: 'RegexMatches(regexp.MustCompile(`^(Ethernet|eth|port-channel|loopback|vlan|mgmt|port-channel-sub)\d+(/\d+)*$`), "Must be a valid interface name")'
+    - model_name: templateName
+      tf_name: template_name
+      type: String
+      description: "Template name to use for the link"
+      example: "ext_fabric_setup"
+      mandatory: true
+      tf_requires_replace: true
+
+    - model_name: nvPairs
+      tf_name: link_parameters
+      type: "Map:String"
+      description: "Link configuration parameters as key-value pairs"
+      example: |
+        {
+          # Basic Parameters
+          "asn" = "65001"
+          "NEIGHBOR_ASN" = "65002"
+          "IP_MASK" = "192.168.1.1/24"
+          "NEIGHBOR_IP" = "192.168.1.2"
+          "IPV6_MASK" = "2001:db8::1/64"
+          "IPV6_NEIGHBOR" = "2001:db8::2"
+          
+          # Interface Parameters
+          "MTU" = "9216"
+          "DOT1Q_ID" = "2"
+          "PEER1_DESC" = "Link to remote site A"
+          "PEER2_DESC" = "Link to remote site B"
+          
+          # VRF Parameters
+          "AUTO_VRF_LITE_FLAG" = "false"
+          "DEFAULT_VRF_FLAG" = "false"
+          "SYMMETRIC_DEFAULT_VRF_FLAG" = "false"
+          "DEFAULT_VRF_REDIS_BGP_RMAP" = "extcon-rmap-filter"
+          "DEFAULT_VRF_BGP_AUTH_KEY_TYPE" = "3"
+          "ENABLE_DCI_TRACKING" = "false"
+          "VRF_LITE_JYTHON_TEMPLATE" = "Ext_VRF_Lite_Jython"
+          
+          # Advanced Parameters
+          "PEER1_CONF" = "no shutdown"
+          "PEER2_CONF" = "no shutdown"
+          "PEER_VRF_NAME" = "default"
+          "DEFAULT_VRF_PEER_VRF_NAME" = "default"
+        }
+    - model_name: link_params_computed
+      tf_name: link_params_computed
+      type: "Map:String"
+      description: "Extra parameters computed by NDFC or defaulted from template"
+      computed: true
+      payload_hide: true
+    - model_name: sourceSwitchName
+      tf_name: source_switch_name
+      type: String
+      description: "Source switch name"
+      computed: true
+    - model_name: destinationSwitchName
+      tf_name: destination_switch_name
+      type: String
+      description: "Destination switch name"
+      computed: true
+    - model_name: link_dbid
+      tf_name: link_dbid
+      type: String
+      description: "Link database ID"
+      computed: true
+      tf_hide: true
+    - model_name: is_present
+      tf_name: is_present
+      type: Bool
+      description: "Whether the link is present"
+      computed: true
+    - model_name: link_type
+      tf_name: link_type
+      type: String
+      description: "Type of link"
+      computed: true
+    - model_name: is_discovered
+      tf_name: is_discovered
+      type: Bool
+      description: "Whether the link is discovered"
+      computed: true
+    # These parameters are now part of the link_parameters map
+
+    # ASN parameters are now part of the link_parameters map
+    # DOT1Q_ID is now part of the link_parameters map
+
+datasource:
+  name: links
+  generate_tf_resource: true
+  description: "Data source for NDFC links"
+  attributes:
+    - model_name: id
+      tf_name: id
+      type: String
+      description: "Unique identifier for the data source"
+      example: "1"
+      computed: true
+      id: true
+    - model_name: link_uuid
+      tf_name: link_uuid
+      type: String
+      description: "Link UUID to retrieve details for"
+      example: "LINK-UUID-1206000"
+      computed: true
+    - model_name: sourceFabric
+      tf_name: source_fabric
+      type: String
+      description: "Source fabric name"
+      example: "CML"
+      mandatory: false
+      optional: true
+    - model_name: destinationFabric
+      tf_name: destination_fabric
+      type: String
+      description: "Destination fabric name"
+      example: "muralidm_evpn_vxlan"
+      mandatory: false
+      optional: true
+    - model_name: sourceDevice
+      tf_name: source_device
+      type: String
+      description: "Source device serial number"
+      example: "9CQ9P9E782H"
+      mandatory: false
+      optional: true
+    - model_name: destinationDevice
+      tf_name: destination_device
+      type: String
+      description: "Destination device serial number"
+      example: "9SFRKD0M6AS"
+      mandatory: false
+      optional: true
+    - model_name: links
+      tf_name: links
+      type: List
+      description: "List of links"
+      computed: true
