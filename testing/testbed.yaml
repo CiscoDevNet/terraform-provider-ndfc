@@ -6,6 +6,8 @@ ndfc:
   insecure: true
   fabric: CML
   switches:
+    - "9CQ9P9E782H"
+    - "9Q34PHYLDB5"
     - "9TQYTJSZ1VJ"
     - "9QBCTIN0FMY"
   #VRFs/Networks created during the tests will have below prefix
@@ -38,3 +40,13 @@ ndfc:
     vpc_pair:
       - "9H6LWDOJEL5"
       - "9UP5BEPM31C"
+  
+  links:
+    src_fabric: CML
+    dst_fabric: muralidm_evpn_vxlan
+    src_device: 9CQ9P9E782H
+    dst_device: 9SFRKD0M6AS
+    src_interface: Ethernet1/1
+    dst_interface: Ethernet1/1
+
+
