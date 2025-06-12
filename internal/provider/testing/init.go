@@ -25,6 +25,15 @@ type InventoryDevice struct {
 	Role   string `yaml:"role"`
 }
 
+type Links struct {
+	SrcFabric    string `yaml:"src_fabric"`
+	DstFabric    string `yaml:"dst_fabric"`
+	SrcDevice    string `yaml:"src_device"`
+	DstDevice    string `yaml:"dst_device"`
+	SrcInterface string `yaml:"src_interface"`
+	DstInterface string `yaml:"dst_interface"`
+}
+
 type InventoryDevices []InventoryDevice
 type IntegratedConfig struct {
 	Fabric    string           `yaml:"fabric"`
@@ -62,6 +71,7 @@ type NDFCConfig struct {
 	NetPrefix         string           `yaml:"net_prefix"`
 	VpcPair           []string         `yaml:"vpc_pair"`
 	Integration       IntegratedConfig `yaml:"integration_test"`
+	Link              Links            `yaml:"links"`
 	mockPort          int
 	mockServerStarted bool
 	mockConfigFile    string
