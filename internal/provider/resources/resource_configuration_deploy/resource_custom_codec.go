@@ -13,6 +13,7 @@ type SwitchStatusDB struct {
 type SwitchStatus struct {
 	SerialNumber string `json:"serialNumber"`
 	Status       string `json:"ccStatus"`
+	SwitchName   string `json:"logicalName"`
 }
 
 func (m *SwitchStatusDB) UnmarshalJSON(data []byte) error {
