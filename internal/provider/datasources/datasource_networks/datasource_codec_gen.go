@@ -46,19 +46,19 @@ type NDFCNetworksValue struct {
 type NDFCAttachmentsValues []NDFCAttachmentsValue
 
 type NDFCAttachmentsValue struct {
-	SerialNumber   string       `json:"serialNumber,omitempty"`
-	SwitchSerialNo string       `json:"switchSerialNo,omitempty"`
-	SwitchName     string       `json:"switchName,omitempty"`
-	DisplayName    string       `json:"displayName,omitempty"`
-	Vlan           *Int64Custom `json:"vlan,omitempty"`
-	VlanId         *Int64Custom `json:"vlanId,omitempty"`
-	AttachState    string       `json:"lanAttachState,omitempty"`
-	Attached       *bool        `json:"isLanAttached,omitempty"`
-	FreeformConfig string       `json:"freeformconfig,omitempty"`
-	SwitchPorts    CSVString    `json:"switchPorts,omitempty"`
-	PortNames      string       `json:"portNames,omitempty"`
-	TorPorts       CSVString    `json:"torPorts,omitempty"`
-	InstanceValues string       `json:"instanceValues,omitempty"`
+	SerialNumber   string            `json:"serialNumber,omitempty"`
+	SwitchSerialNo string            `json:"switchSerialNo,omitempty"`
+	SwitchName     string            `json:"switchName,omitempty"`
+	DisplayName    string            `json:"displayName,omitempty"`
+	Vlan           *Int64Custom      `json:"vlan,omitempty"`
+	VlanId         *Int64Custom      `json:"vlanId,omitempty"`
+	AttachState    string            `json:"lanAttachState,omitempty"`
+	Attached       *bool             `json:"isLanAttached,omitempty"`
+	FreeformConfig string            `json:"freeformconfig,omitempty"`
+	SwitchPorts    CSVString         `json:"switchPorts,omitempty"`
+	PortNames      string            `json:"portNames,omitempty"`
+	TorPorts       CSVString         `json:"torPorts,omitempty"`
+	InstanceValues map[string]string `json:"instanceValues,omitempty"`
 }
 
 type NDFCNetworkTemplateConfigValue struct {
@@ -522,10 +522,20 @@ func (v *AttachmentsValue) SetValue(jsonData *NDFCAttachmentsValue) diag.Diagnos
 			return err
 		}
 	}
-	if jsonData.InstanceValues != "" {
-		v.InstanceValues = types.StringValue(jsonData.InstanceValues)
+
+	if len(jsonData.InstanceValues) == 0 {
+		log.Printf("v.InstanceValues is empty")
+		v.InstanceValues = types.MapNull(types.StringType)
 	} else {
-		v.InstanceValues = types.StringNull()
+		mapData := make(map[string]attr.Value)
+		for key, item := range jsonData.InstanceValues {
+			mapData[key] = types.StringValue(item)
+		}
+		v.InstanceValues, err = types.MapValue(types.StringType, mapData)
+		if err != nil {
+			log.Printf("Error in converting map[string]string to  Map")
+			return err
+		}
 	}
 
 	return err
