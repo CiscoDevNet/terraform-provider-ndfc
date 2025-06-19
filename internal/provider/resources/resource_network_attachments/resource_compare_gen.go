@@ -66,10 +66,6 @@ func (v NDFCAttachmentsValue) DeepEqual(c NDFCAttachmentsValue) int {
 			return PortListUpdate
 		}
 	}
-	if v.InstanceValues != c.InstanceValues {
-		log.Printf("v.InstanceValues=%v, c.InstanceValues=%v", v.InstanceValues, c.InstanceValues)
-		return RequiresUpdate
-	}
 
 	if cf {
 		return ControlFlagUpdate
@@ -169,19 +165,20 @@ func (v *NDFCAttachmentsValue) CreatePlan(c NDFCAttachmentsValue, cf *bool) int 
 		}
 	}
 
-	if v.InstanceValues != "" {
-
-		if v.InstanceValues != c.InstanceValues {
-			log.Printf("Update: v.InstanceValues=%v, c.InstanceValues=%v", v.InstanceValues, c.InstanceValues)
-			if action == ActionNone || action == RequiresUpdate {
-				action = RequiresUpdate
-			}
+	if len(v.InstanceValues) != len(c.InstanceValues) {
+		log.Printf("Update: len(v.InstanceValues)=%d, len(c.InstanceValues)=%d", len(v.InstanceValues), len(c.InstanceValues))
+		return RequiresUpdate
+	}
+	for kk, vv := range v.InstanceValues {
+		cc, ok := c.InstanceValues[kk]
+		if !ok {
+			log.Printf("Update: v.InstanceValues[%s]=%s, c.InstanceValues[%s]=nil", kk, vv, kk)
+			return RequiresUpdate
 		}
-
-	} else {
-		//v empty, fill with c
-		log.Printf("Copy from state: v.InstanceValues=%v, c.InstanceValues=%v", v.InstanceValues, c.InstanceValues)
-		v.InstanceValues = c.InstanceValues
+		if vv != cc {
+			log.Printf("Update: v.InstanceValues[%s]=%s, c.InstanceValues[%s]=%s", kk, vv, kk, cc)
+			return RequiresUpdate
+		}
 	}
 
 	return action

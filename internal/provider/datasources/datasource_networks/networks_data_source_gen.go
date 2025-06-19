@@ -54,7 +54,8 @@ func NetworksDataSourceSchema(ctx context.Context) schema.Schema {
 										Description:         "This field covers any configuration not included in overlay templates which is needed as part of this VRF attachment",
 										MarkdownDescription: "This field covers any configuration not included in overlay templates which is needed as part of this VRF attachment",
 									},
-									"instance_values": schema.StringAttribute{
+									"instance_values": schema.MapAttribute{
+										ElementType:         types.StringType,
 										Computed:            true,
 										Description:         "Instance values",
 										MarkdownDescription: "Instance values",
@@ -2612,12 +2613,12 @@ func (t AttachmentsType) ValueFromObject(ctx context.Context, in basetypes.Objec
 		return nil, diags
 	}
 
-	instanceValuesVal, ok := instanceValuesAttribute.(basetypes.StringValue)
+	instanceValuesVal, ok := instanceValuesAttribute.(basetypes.MapValue)
 
 	if !ok {
 		diags.AddError(
 			"Attribute Wrong Type",
-			fmt.Sprintf(`instance_values expected to be basetypes.StringValue, was: %T`, instanceValuesAttribute))
+			fmt.Sprintf(`instance_values expected to be basetypes.MapValue, was: %T`, instanceValuesAttribute))
 	}
 
 	serialNumberAttribute, ok := attributes["serial_number"]
@@ -2874,12 +2875,12 @@ func NewAttachmentsValue(attributeTypes map[string]attr.Type, attributes map[str
 		return NewAttachmentsValueUnknown(), diags
 	}
 
-	instanceValuesVal, ok := instanceValuesAttribute.(basetypes.StringValue)
+	instanceValuesVal, ok := instanceValuesAttribute.(basetypes.MapValue)
 
 	if !ok {
 		diags.AddError(
 			"Attribute Wrong Type",
-			fmt.Sprintf(`instance_values expected to be basetypes.StringValue, was: %T`, instanceValuesAttribute))
+			fmt.Sprintf(`instance_values expected to be basetypes.MapValue, was: %T`, instanceValuesAttribute))
 	}
 
 	serialNumberAttribute, ok := attributes["serial_number"]
@@ -3063,7 +3064,7 @@ type AttachmentsValue struct {
 	Attached       basetypes.BoolValue   `tfsdk:"attached"`
 	DisplayName    basetypes.StringValue `tfsdk:"display_name"`
 	FreeformConfig basetypes.StringValue `tfsdk:"freeform_config"`
-	InstanceValues basetypes.StringValue `tfsdk:"instance_values"`
+	InstanceValues basetypes.MapValue    `tfsdk:"instance_values"`
 	SerialNumber   basetypes.StringValue `tfsdk:"serial_number"`
 	SwitchName     basetypes.StringValue `tfsdk:"switch_name"`
 	SwitchPorts    basetypes.SetValue    `tfsdk:"switch_ports"`
@@ -3082,7 +3083,9 @@ func (v AttachmentsValue) ToTerraformValue(ctx context.Context) (tftypes.Value, 
 	attrTypes["attached"] = basetypes.BoolType{}.TerraformType(ctx)
 	attrTypes["display_name"] = basetypes.StringType{}.TerraformType(ctx)
 	attrTypes["freeform_config"] = basetypes.StringType{}.TerraformType(ctx)
-	attrTypes["instance_values"] = basetypes.StringType{}.TerraformType(ctx)
+	attrTypes["instance_values"] = basetypes.MapType{
+		ElemType: types.StringType,
+	}.TerraformType(ctx)
 	attrTypes["serial_number"] = basetypes.StringType{}.TerraformType(ctx)
 	attrTypes["switch_name"] = basetypes.StringType{}.TerraformType(ctx)
 	attrTypes["switch_ports"] = basetypes.SetType{
@@ -3208,6 +3211,39 @@ func (v AttachmentsValue) String() string {
 func (v AttachmentsValue) ToObjectValue(ctx context.Context) (basetypes.ObjectValue, diag.Diagnostics) {
 	var diags diag.Diagnostics
 
+	var instanceValuesVal basetypes.MapValue
+	switch {
+	case v.InstanceValues.IsUnknown():
+		instanceValuesVal = types.MapUnknown(types.StringType)
+	case v.InstanceValues.IsNull():
+		instanceValuesVal = types.MapNull(types.StringType)
+	default:
+		var d diag.Diagnostics
+		instanceValuesVal, d = types.MapValue(types.StringType, v.InstanceValues.Elements())
+		diags.Append(d...)
+	}
+
+	if diags.HasError() {
+		return types.ObjectUnknown(map[string]attr.Type{
+			"attach_state":    basetypes.StringType{},
+			"attached":        basetypes.BoolType{},
+			"display_name":    basetypes.StringType{},
+			"freeform_config": basetypes.StringType{},
+			"instance_values": basetypes.MapType{
+				ElemType: types.StringType,
+			},
+			"serial_number": basetypes.StringType{},
+			"switch_name":   basetypes.StringType{},
+			"switch_ports": basetypes.SetType{
+				ElemType: types.StringType,
+			},
+			"tor_ports": basetypes.SetType{
+				ElemType: types.StringType,
+			},
+			"vlan": basetypes.Int64Type{},
+		}), diags
+	}
+
 	var switchPortsVal basetypes.SetValue
 	switch {
 	case v.SwitchPorts.IsUnknown():
@@ -3226,9 +3262,11 @@ func (v AttachmentsValue) ToObjectValue(ctx context.Context) (basetypes.ObjectVa
 			"attached":        basetypes.BoolType{},
 			"display_name":    basetypes.StringType{},
 			"freeform_config": basetypes.StringType{},
-			"instance_values": basetypes.StringType{},
-			"serial_number":   basetypes.StringType{},
-			"switch_name":     basetypes.StringType{},
+			"instance_values": basetypes.MapType{
+				ElemType: types.StringType,
+			},
+			"serial_number": basetypes.StringType{},
+			"switch_name":   basetypes.StringType{},
 			"switch_ports": basetypes.SetType{
 				ElemType: types.StringType,
 			},
@@ -3257,9 +3295,11 @@ func (v AttachmentsValue) ToObjectValue(ctx context.Context) (basetypes.ObjectVa
 			"attached":        basetypes.BoolType{},
 			"display_name":    basetypes.StringType{},
 			"freeform_config": basetypes.StringType{},
-			"instance_values": basetypes.StringType{},
-			"serial_number":   basetypes.StringType{},
-			"switch_name":     basetypes.StringType{},
+			"instance_values": basetypes.MapType{
+				ElemType: types.StringType,
+			},
+			"serial_number": basetypes.StringType{},
+			"switch_name":   basetypes.StringType{},
 			"switch_ports": basetypes.SetType{
 				ElemType: types.StringType,
 			},
@@ -3275,9 +3315,11 @@ func (v AttachmentsValue) ToObjectValue(ctx context.Context) (basetypes.ObjectVa
 		"attached":        basetypes.BoolType{},
 		"display_name":    basetypes.StringType{},
 		"freeform_config": basetypes.StringType{},
-		"instance_values": basetypes.StringType{},
-		"serial_number":   basetypes.StringType{},
-		"switch_name":     basetypes.StringType{},
+		"instance_values": basetypes.MapType{
+			ElemType: types.StringType,
+		},
+		"serial_number": basetypes.StringType{},
+		"switch_name":   basetypes.StringType{},
 		"switch_ports": basetypes.SetType{
 			ElemType: types.StringType,
 		},
@@ -3302,7 +3344,7 @@ func (v AttachmentsValue) ToObjectValue(ctx context.Context) (basetypes.ObjectVa
 			"attached":        v.Attached,
 			"display_name":    v.DisplayName,
 			"freeform_config": v.FreeformConfig,
-			"instance_values": v.InstanceValues,
+			"instance_values": instanceValuesVal,
 			"serial_number":   v.SerialNumber,
 			"switch_name":     v.SwitchName,
 			"switch_ports":    switchPortsVal,
@@ -3385,9 +3427,11 @@ func (v AttachmentsValue) AttributeTypes(ctx context.Context) map[string]attr.Ty
 		"attached":        basetypes.BoolType{},
 		"display_name":    basetypes.StringType{},
 		"freeform_config": basetypes.StringType{},
-		"instance_values": basetypes.StringType{},
-		"serial_number":   basetypes.StringType{},
-		"switch_name":     basetypes.StringType{},
+		"instance_values": basetypes.MapType{
+			ElemType: types.StringType,
+		},
+		"serial_number": basetypes.StringType{},
+		"switch_name":   basetypes.StringType{},
 		"switch_ports": basetypes.SetType{
 			ElemType: types.StringType,
 		},

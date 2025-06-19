@@ -130,7 +130,7 @@ Optional:
 - `deploy_this_attachment` (Boolean) If set to `true`, deploys this attachment. This cannot be set to `true` if `deploy_all_attachments` at resource level is set to `true` or `deploy_attachments` in the corresponding `network` is set to `true`
 - `display_name` (String) The name of the switch
 - `freeform_config` (String) This field covers any configuration not included in overlay templates which is needed as part of this VRF attachment
-- `instance_values` (String) Instance values
+- `instance_values` (Map of String) Instance values
 - `switch_ports` (Set of String) List of switch ports
 - `tor_ports` (Set of String) List of TOR ports
 - `vlan` (Number) VLAN ID
