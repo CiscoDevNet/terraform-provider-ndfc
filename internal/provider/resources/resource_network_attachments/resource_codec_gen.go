@@ -24,25 +24,25 @@ type NDFCNetworkAttachmentsValue struct {
 }
 
 type NDFCAttachmentsValue struct {
-	FilterThisValue      bool         `json:"-"`
-	Id                   *int64       `json:"-"`
-	FabricName           string       `json:"fabric,omitempty"`
-	NetworkName          string       `json:"networkName,omitempty"`
-	SerialNumber         string       `json:"serialNumber,omitempty"`
-	SwitchSerialNo       string       `json:"switchSerialNo,omitempty"`
-	SwitchName           string       `json:"switchName,omitempty"`
-	DisplayName          string       `json:"displayName,omitempty"`
-	Vlan                 *Int64Custom `json:"vlan,omitempty"`
-	VlanId               *Int64Custom `json:"vlanId,omitempty"`
-	Deployment           string       `json:"deployment,omitempty"`
-	AttachState          string       `json:"lanAttachState,omitempty"`
-	Attached             *bool        `json:"isLanAttached,omitempty"`
-	FreeformConfig       string       `json:"freeformconfig,omitempty"`
-	DeployThisAttachment bool         `json:"-"`
-	SwitchPorts          CSVString    `json:"switchPorts,omitempty"`
-	DetachSwitchPorts    CSVString    `json:"detachSwitchPorts,omitempty"`
-	PortNames            string       `json:"portNames,omitempty"`
-	TorPorts             CSVString    `json:"torPorts,omitempty"`
-	InstanceValues       string       `json:"instanceValues,omitempty"`
-	UpdateAction         uint16       `json:"-"`
+	FilterThisValue      bool              `json:"-"`
+	Id                   *int64            `json:"-"`
+	FabricName           string            `json:"fabric,omitempty"`
+	NetworkName          string            `json:"networkName,omitempty"`
+	SerialNumber         string            `json:"serialNumber,omitempty"`
+	SwitchSerialNo       string            `json:"switchSerialNo,omitempty"`
+	SwitchName           string            `json:"switchName,omitempty"`
+	DisplayName          string            `json:"displayName,omitempty"`
+	Vlan                 *Int64Custom      `json:"vlan,omitempty"`
+	VlanId               *Int64Custom      `json:"vlanId,omitempty"`
+	Deployment           string            `json:"deployment,omitempty"`
+	AttachState          string            `json:"lanAttachState,omitempty"`
+	Attached             *bool             `json:"isLanAttached,omitempty"`
+	FreeformConfig       string            `json:"freeformconfig,omitempty"`
+	DeployThisAttachment bool              `json:"-"`
+	SwitchPorts          CSVString         `json:"switchPorts,omitempty"`
+	DetachSwitchPorts    CSVString         `json:"detachSwitchPorts,omitempty"`
+	PortNames            string            `json:"portNames,omitempty"`
+	TorPorts             CSVString         `json:"torPorts,omitempty"`
+	InstanceValues       map[string]string `json:"instanceValues,omitempty"`
+	UpdateAction         uint16            `json:"-"`
 }
