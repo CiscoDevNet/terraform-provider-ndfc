@@ -56,10 +56,6 @@ func AttachmentsValueHelperStateCheck(RscName string, c resource_network_attachm
 		ret = append(ret, resource.TestCheckResourceAttr(RscName, attrPath.AtName("deploy_this_attachment").String(), "false"))
 	}
 
-	if c.InstanceValues != "" {
-		ret = append(ret, resource.TestCheckResourceAttr(RscName, attrPath.AtName("instance_values").String(), c.InstanceValues))
-	}
-
 	return ret
 }
 

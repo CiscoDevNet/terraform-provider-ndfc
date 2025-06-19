@@ -78,7 +78,7 @@ Read-Only:
 - `attached` (Boolean) The state of the attachment
 - `display_name` (String) The name of the switch
 - `freeform_config` (String) This field covers any configuration not included in overlay templates which is needed as part of this VRF attachment
-- `instance_values` (String) Instance values
+- `instance_values` (Map of String) Instance values
 - `serial_number` (String) Serial number of a switch
 - `switch_name` (String) The name of the switch
 - `switch_ports` (Set of String) List of switch ports

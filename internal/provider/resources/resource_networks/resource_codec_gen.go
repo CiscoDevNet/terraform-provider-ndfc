@@ -540,10 +540,20 @@ func (v *AttachmentsValue) SetValue(jsonData *resource_network_attachments.NDFCA
 			return err
 		}
 	}
-	if jsonData.InstanceValues != "" {
-		v.InstanceValues = types.StringValue(jsonData.InstanceValues)
+
+	if len(jsonData.InstanceValues) == 0 {
+		log.Printf("v.InstanceValues is empty")
+		v.InstanceValues = types.MapNull(types.StringType)
 	} else {
-		v.InstanceValues = types.StringNull()
+		mapData := make(map[string]attr.Value)
+		for key, item := range jsonData.InstanceValues {
+			mapData[key] = types.StringValue(item)
+		}
+		v.InstanceValues, err = types.MapValue(types.StringType, mapData)
+		if err != nil {
+			log.Printf("Error in converting map[string]string to  Map")
+			return err
+		}
 	}
 
 	return err
@@ -942,12 +952,18 @@ func (v NetworksModel) GetModelData() *NDFCNetworksModel {
 						copy(data2.TorPorts, listStringData)
 					}
 
-					// instance_values | String| []| false
+					// instance_values | Map:String| []| false
 					if !ele2.InstanceValues.IsNull() && !ele2.InstanceValues.IsUnknown() {
 
-						data2.InstanceValues = ele2.InstanceValues.ValueString()
-					} else {
-						data2.InstanceValues = ""
+						mapStringData := make(map[string]string, len(ele2.InstanceValues.Elements()))
+						dg := ele2.InstanceValues.ElementsAs(context.Background(), &mapStringData, false)
+						if dg.HasError() {
+							panic(dg.Errors())
+						}
+						data2.InstanceValues = make(map[string]string, len(mapStringData))
+						for k, v := range mapStringData {
+							data2.InstanceValues[k] = v
+						}
 					}
 
 					// update_action | BitMask| []| true

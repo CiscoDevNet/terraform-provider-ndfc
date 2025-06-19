@@ -11,6 +11,7 @@
 package types
 
 import (
+	"encoding/json"
 	"strconv"
 	"strings"
 )
@@ -39,7 +40,6 @@ func (i *CSVString) UnmarshalJSON(data []byte) error {
 		ss = ssUn
 	}
 	*i = strings.Split(ss, ",")
-
 	return nil
 }
 
@@ -47,6 +47,41 @@ func (i CSVString) MarshalJSON() ([]byte, error) {
 	res := ""
 	res = strings.Join(i, ",")
 	return []byte(strconv.Quote(res)), nil
+
+}
+
+type CustomMapString map[string]string
+
+func (i *CustomMapString) UnmarshalJSON(data []byte) error {
+	if string(data) == "" || string(data) == "\"\"" {
+		*i = make(CustomMapString, 0)
+		return nil
+	}
+	ss := string(data)
+	ssUn, err := strconv.Unquote(ss)
+	if err == nil {
+		// Quote removed
+		ss = ssUn
+	}
+	// If that fails, try to unmarshal directly as a map
+	var m map[string]string
+	if err := json.Unmarshal([]byte(ss), &m); err != nil {
+		return err
+	}
+	*i = m
+
+	return nil
+}
+
+func (i CustomMapString) MarshalJSON() ([]byte, error) {
+	if i == nil {
+		return []byte("\"\""), nil
+	}
+	b, err := json.Marshal(map[string]string(i))
+	if err != nil {
+		return nil, err
+	}
+	return []byte(strconv.Quote(string(b))), nil
 
 }
 

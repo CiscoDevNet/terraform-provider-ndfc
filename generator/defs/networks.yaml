@@ -551,7 +551,8 @@ datasource:
               example: "[Ethernet1/1, Ethernet1/2]"
             - model_name: instanceValues
               tf_name: instance_values
-              type: String
+              type: Map:String
+              ndfc_type: customMap
               optional: false
               computed: true
               description: Instance values
