@@ -13,6 +13,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"log"
+	"strings"
 	"terraform-provider-ndfc/internal/provider/ndfc/api"
 	"terraform-provider-ndfc/internal/provider/resources/resource_configuration_deploy"
 	"time"
@@ -156,4 +157,116 @@ func (c *NDFC) checkDeployStatus(ctx context.Context, diags *diag.Diagnostics, f
 	}
 	tflog.Debug(ctx, fmt.Sprintf("List of Switches that are out of sync: {%v}", ooList))
 	return ooList
+}
+
+// GetDeploymentHistory retrieves the deployment history for a specific fabric
+// If serialNumber is provided, it will filter the results to that specific switch
+// Returns DeployResponses and error if any
+func (c *NDFC) GetDeploymentHistory(ctx context.Context, fabricName string, serialNumber []string) (resource_configuration_deploy.DeployResponses, error) {
+	// URL for deployment history API
+
+	configDeployAPI := api.NewConfigDeploymentAPI(c.GetLock(ResourceConfigDeploy), &c.apiClient)
+	configDeployAPI.History = true
+	configDeployAPI.FabricName = fabricName
+	configDeployAPI.SerialNumbers = serialNumber
+
+	// Make the API request
+	res, err := configDeployAPI.Get()
+	if err != nil {
+		tflog.Error(ctx, "Failed to retrieve deployment history", map[string]interface{}{
+			"error":  err.Error(),
+			"fabric": fabricName,
+		})
+		return nil, fmt.Errorf("failed to retrieve deployment history for fabric %s: %v", fabricName, err)
+	}
+
+	// Check for empty response
+	if len(res) == 0 || string(res) == "[]" {
+		tflog.Warn(ctx, "No deployment history found", map[string]interface{}{
+			"fabric": fabricName,
+		})
+		return resource_configuration_deploy.DeployResponses{}, nil
+	}
+
+	// Parse the response
+	var deployResponses resource_configuration_deploy.DeployResponses
+	err = json.Unmarshal(res, &deployResponses)
+	if err != nil {
+		tflog.Error(ctx, "Failed to parse deployment history", map[string]interface{}{
+			"error":  err.Error(),
+			"fabric": fabricName,
+		})
+		return nil, fmt.Errorf("failed to parse deployment history: %v", err)
+	}
+	return deployResponses, nil
+}
+
+// GetDeploymentHistoryWithFilters provides more detailed filtering options for deployment history
+func (c *NDFC) GetDeploymentHistoryWithFilters(ctx context.Context, fabricName string, serialNumber []string, status, user, startTime, endTime string) (resource_configuration_deploy.DeployResponses, error) {
+	// Get all deployment history first
+	allResponses, err := c.GetDeploymentHistory(ctx, fabricName, serialNumber)
+	if err != nil {
+		return nil, err
+	}
+
+	// No need to filter further if we have no responses or only filtering by serial number
+	if len(allResponses) == 0 || (status == "" && user == "" && startTime == "" && endTime == "") {
+		return allResponses, nil
+	}
+
+	// Parse time bounds if provided
+	var startTimeParsed, endTimeParsed time.Time
+	var startTimeErr, endTimeErr error
+
+	if startTime != "" {
+		startTimeParsed, startTimeErr = time.Parse("2006-01-02 15:04:05", startTime)
+		if startTimeErr != nil {
+			return nil, fmt.Errorf("invalid start time format (expected 'YYYY-MM-DD HH:MM:SS'): %v", startTimeErr)
+		}
+	}
+
+	if endTime != "" {
+		endTimeParsed, endTimeErr = time.Parse("2006-01-02 15:04:05", endTime)
+		if endTimeErr != nil {
+			return nil, fmt.Errorf("invalid end time format (expected 'YYYY-MM-DD HH:MM:SS'): %v", endTimeErr)
+		}
+	}
+
+	// Apply filters
+	var filteredResponses resource_configuration_deploy.DeployResponses
+
+	for _, resp := range allResponses {
+		// Filter by status
+		if status != "" && !strings.EqualFold(resp.Status, status) {
+			continue
+		}
+
+		// Filter by user
+		if user != "" && !strings.EqualFold(resp.User, user) {
+			continue
+		}
+
+		// Filter by time range
+		if startTime != "" || endTime != "" {
+			submittedTime, err := resp.GetSubmittedTime()
+			if err != nil {
+				continue // Skip entries with unparseable time formats
+			}
+
+			// Check if before start time
+			if startTime != "" && submittedTime.Before(startTimeParsed) {
+				continue
+			}
+
+			// Check if after end time
+			if endTime != "" && submittedTime.After(endTimeParsed) {
+				continue
+			}
+		}
+
+		// Passed all filters
+		filteredResponses = append(filteredResponses, resp)
+	}
+
+	return filteredResponses, nil
 }
