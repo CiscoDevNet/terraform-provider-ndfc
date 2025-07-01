@@ -132,6 +132,9 @@ func GetTFConfigWithSingleResource(tt string, cfg map[string]string, rscs []inte
 			}
 			return *a
 		},
+		"trimSuffix": func(s, suffix string) string {
+			return strings.TrimSuffix(s, suffix)
+		},
 	}
 
 	root_path, _ := os.Getwd()
@@ -393,7 +396,7 @@ func GetTFIntegrated(ts string, rsList []string, attrs map[string]interface{}, r
 			tt.ModifyMapKey("attachments", "SWITCH_SERIAL_NO", switches[0])
 
 		case "ndfc_policy":
-			tt.ModifyAttributeValue("device_serial_number", switches[0])
+			tt.ModifyAttributeValue("serial_numbers", []string{switches[0]})
 			if !rsDeploy {
 				tt.ModifyAttributeValue("deploy", false)
 			}

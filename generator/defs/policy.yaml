@@ -66,6 +66,7 @@ resource:
       type: String
       description: "Source of the policy"
       example: "CLI"
+      include_empty: true
     - model_name: priority
       tf_name: priority
       type: Int64
@@ -73,12 +74,15 @@ resource:
       default_value: 500
       example: 500
     - model_name: serialNumber
-      tf_name: device_serial_number
-      type: String
-      description: "Serial number of the device"
+      tf_name: serial_numbers
+      type: List:String
       mandatory: true
-      tf_requires_replace: true
-      example: FDO245206N5
+      description: "Serial numbers of the device. Use only one device for policy. Multiple devices can be in the list if this is a  policygroup"
+      example: "[\"FDO245206N5\", \"FDO245206N6\"]"
+      tf_requires_replace_if_key: is_policy_group
+      tf_requires_replace_if_value: false
+      tf_requires_replace_if_type: bool
+      ndfc_type: csv
     - model_name: nvPairs
       tf_name: policy_parameters
       type: "Map:String"
@@ -99,5 +103,18 @@ resource:
       ndfc_type: bool
       description: "Deleted policy"
       tf_hide: true
+  
+    - model_name: generatedConfig
+      tf_name: generated_config
+      type: String
+      description: "Generated configuration"
+      computed: true
+    
+    - model_name: computed_parameters
+      tf_name: computed_parameters
+      type: "Map:String"
+      description: "List of name value pairs not set in config, but returned by NDFC"
+      computed: true
+      
      
 
