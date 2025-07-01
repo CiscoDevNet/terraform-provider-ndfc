@@ -11,6 +11,7 @@ package provider
 
 import (
 	"fmt"
+	"regexp"
 	"strings"
 	"terraform-provider-ndfc/internal/provider/ndfc"
 	"terraform-provider-ndfc/internal/provider/resources/resource_policy"
@@ -61,15 +62,15 @@ func TestAccPolicyResource(t *testing.T) {
 
 					/*
 						resource "ndfc_policy" "test_resource_policy_1" {
-							is_policy_group      = false
-							deploy               = true
-							entity_name          = "Switch"
-							entity_type          = "SWITCH"
-							description          = "Policy for switch"
-							template_name        = "TelemetryDst_EF"
-							source               = "CLI"
-							priority             = 500
-							device_serial_number = "FDO245206N5"
+							is_policy_group = false
+							deploy          = true
+							entity_name     = "Switch"
+							entity_type     = "SWITCH"
+							description     = "Policy for switch"
+							template_name   = "TelemetryDst_EF"
+							source          = "CLI"
+							priority        = 500
+							serial_numbers  = ["FDO245206N5"]
 							policy_parameters = {
 							  DSTGRP = "501"
 							  IPADDR = "5.5.5.6"
@@ -86,7 +87,7 @@ func TestAccPolicyResource(t *testing.T) {
 					policyResource.Source = "CLI"
 					policyResource.Priority = new(int64)
 					*policyResource.Priority = 500
-					policyResource.DeviceSerialNumber = helper.GetConfig("policy").NDFC.Switches[0]
+					policyResource.SerialNumbers = []string{helper.GetConfig("policy").NDFC.Switches[0]}
 					policyResource.PolicyParameters = map[string]string{
 						"DSTGRP": "501",
 						"IPADDR": "5.5.5.6",
@@ -179,7 +180,7 @@ func TestAccPolicyResourceVrfLite(t *testing.T) {
 					policyResource.Source = "CLI"
 					policyResource.Priority = new(int64)
 					*policyResource.Priority = 500
-					policyResource.DeviceSerialNumber = helper.GetConfig("policy").NDFC.Switches[0]
+					policyResource.SerialNumbers = []string{helper.GetConfig("policy").NDFC.Switches[0]}
 					policyResource.PolicyParameters = map[string]string{
 						"IF_NAME":       "vlan100",
 						"DOT1Q_ID":      "2001",
@@ -290,7 +291,7 @@ func TestAccPolicyResourceVrfLiteRouted(t *testing.T) {
 					policyResource.Source = "CLI"
 					policyResource.Priority = new(int64)
 					*policyResource.Priority = 500
-					policyResource.DeviceSerialNumber = helper.GetConfig("policy").NDFC.Switches[1]
+					policyResource.SerialNumbers = []string{helper.GetConfig("policy").NDFC.Switches[0]}
 					policyResource.PolicyParameters = map[string]string{
 						"IF_NAME":            "ethernet1/22",
 						"VRF_NAME":           "default",
@@ -647,184 +648,184 @@ func TestAccPolicyResourceMultiple(t *testing.T) {
 	// Create a new instance of the NDFC client
 	policyResources := []*resource_policy.NDFCPolicyModel{
 		{
-			Deploy:             true,
-			EntityName:         "Switch",
-			EntityType:         "SWITCH",
-			Description:        "Policy for alias",
-			TemplateName:       "switch_freeform",
-			Source:             "CLI",
-			Priority:           new(int64),
-			DeviceSerialNumber: helper.GetConfig("policy").NDFC.Switches[0],
-			PolicyParameters:   map[string]string{"CONF": "cli alias name wr copy run start"},
-			Deleted:            new(bool),
+			Deploy:           true,
+			EntityName:       "Switch",
+			EntityType:       "SWITCH",
+			Description:      "Policy for alias",
+			TemplateName:     "switch_freeform",
+			Source:           "CLI",
+			Priority:         new(int64),
+			SerialNumbers:    []string{helper.GetConfig("policy").NDFC.Switches[0]},
+			PolicyParameters: map[string]string{"CONF": "cli alias name wr copy run start"},
+			Deleted:          new(bool),
 		},
 		{
-			Deploy:             true,
-			EntityName:         "Switch",
-			EntityType:         "SWITCH",
-			Description:        "Policy for banner",
-			TemplateName:       "banner",
-			Source:             "CLI",
-			Priority:           new(int64),
-			DeviceSerialNumber: helper.GetConfig("policy").NDFC.Switches[0],
-			PolicyParameters:   map[string]string{"BANNER": "VXLAN as Code Banner", "BANNERDELIMITER": "_", "TYPE": "motd"},
-			Deleted:            new(bool),
+			Deploy:           true,
+			EntityName:       "Switch",
+			EntityType:       "SWITCH",
+			Description:      "Policy for banner",
+			TemplateName:     "banner",
+			Source:           "CLI",
+			Priority:         new(int64),
+			SerialNumbers:    []string{helper.GetConfig("policy").NDFC.Switches[0]},
+			PolicyParameters: map[string]string{"BANNER": "VXLAN as Code Banner", "BANNERDELIMITER": "_", "TYPE": "motd"},
+			Deleted:          new(bool),
 		},
 		{
-			Deploy:             true,
-			EntityName:         "Switch",
-			EntityType:         "SWITCH",
-			Description:        "Policy for iBGP_ISN1_ISN3",
-			TemplateName:       "vrf_lite_ibgp",
-			Source:             "CLI",
-			Priority:           new(int64),
-			DeviceSerialNumber: helper.GetConfig("policy").NDFC.Switches[0],
-			PolicyParameters:   map[string]string{"vrfName": "default", "BGP_ASN": "29500", "NEIGHBOR_IP": "100.65.0.3", "bgpPassword": "9125d59c18a9b015", "bgpPasswordKeyType": "3"},
-			Deleted:            new(bool),
+			Deploy:           true,
+			EntityName:       "Switch",
+			EntityType:       "SWITCH",
+			Description:      "Policy for iBGP_ISN1_ISN3",
+			TemplateName:     "vrf_lite_ibgp",
+			Source:           "CLI",
+			Priority:         new(int64),
+			SerialNumbers:    []string{helper.GetConfig("policy").NDFC.Switches[0]},
+			PolicyParameters: map[string]string{"vrfName": "default", "BGP_ASN": "29500", "NEIGHBOR_IP": "100.65.0.3", "bgpPassword": "9125d59c18a9b015", "bgpPasswordKeyType": "3"},
+			Deleted:          new(bool),
 		},
 		{
-			Deploy:             true,
-			EntityName:         "Switch",
-			EntityType:         "SWITCH",
-			Description:        "Policy for iBGP_ISN1_ISN2",
-			TemplateName:       "vrf_lite_ibgp",
-			Source:             "CLI",
-			Priority:           new(int64),
-			DeviceSerialNumber: helper.GetConfig("policy").NDFC.Switches[0],
-			PolicyParameters:   map[string]string{"vrfName": "default", "BGP_ASN": "29500", "NEIGHBOR_IP": "100.65.0.5", "bgpPassword": "9125d59c18a9b015", "bgpPasswordKeyType": "3"},
-			Deleted:            new(bool),
+			Deploy:           true,
+			EntityName:       "Switch",
+			EntityType:       "SWITCH",
+			Description:      "Policy for iBGP_ISN1_ISN2",
+			TemplateName:     "vrf_lite_ibgp",
+			Source:           "CLI",
+			Priority:         new(int64),
+			SerialNumbers:    []string{helper.GetConfig("policy").NDFC.Switches[0]},
+			PolicyParameters: map[string]string{"vrfName": "default", "BGP_ASN": "29500", "NEIGHBOR_IP": "100.65.0.5", "bgpPassword": "9125d59c18a9b015", "bgpPasswordKeyType": "3"},
+			Deleted:          new(bool),
 		},
 		{
-			Deploy:             true,
-			EntityName:         "Switch",
-			EntityType:         "SWITCH",
-			Description:        "Policy for iBGP_ISN1_ISN4",
-			TemplateName:       "vrf_lite_ibgp",
-			Source:             "CLI",
-			Priority:           new(int64),
-			DeviceSerialNumber: helper.GetConfig("policy").NDFC.Switches[0],
-			PolicyParameters:   map[string]string{"vrfName": "default", "BGP_ASN": "29500", "NEIGHBOR_IP": "100.65.0.9", "bgpPassword": "9125d59c18a9b015", "bgpPasswordKeyType": "3"},
-			Deleted:            new(bool),
+			Deploy:           true,
+			EntityName:       "Switch",
+			EntityType:       "SWITCH",
+			Description:      "Policy for iBGP_ISN1_ISN4",
+			TemplateName:     "vrf_lite_ibgp",
+			Source:           "CLI",
+			Priority:         new(int64),
+			SerialNumbers:    []string{helper.GetConfig("policy").NDFC.Switches[0]},
+			PolicyParameters: map[string]string{"vrfName": "default", "BGP_ASN": "29500", "NEIGHBOR_IP": "100.65.0.9", "bgpPassword": "9125d59c18a9b015", "bgpPasswordKeyType": "3"},
+			Deleted:          new(bool),
 		},
 		{
-			Deploy:             true,
-			EntityName:         "Switch",
-			EntityType:         "SWITCH",
-			Description:        "Policy for iBGP_ISN2_ISN3",
-			TemplateName:       "vrf_lite_ibgp",
-			Source:             "CLI",
-			Priority:           new(int64),
-			DeviceSerialNumber: helper.GetConfig("policy").NDFC.Switches[0],
-			PolicyParameters:   map[string]string{"vrfName": "default", "BGP_ASN": "29500", "NEIGHBOR_IP": "100.65.0.1", "bgpPassword": "9125d59c18a9b015", "bgpPasswordKeyType": "3"},
-			Deleted:            new(bool),
+			Deploy:           true,
+			EntityName:       "Switch",
+			EntityType:       "SWITCH",
+			Description:      "Policy for iBGP_ISN2_ISN3",
+			TemplateName:     "vrf_lite_ibgp",
+			Source:           "CLI",
+			Priority:         new(int64),
+			SerialNumbers:    []string{helper.GetConfig("policy").NDFC.Switches[0]},
+			PolicyParameters: map[string]string{"vrfName": "default", "BGP_ASN": "29500", "NEIGHBOR_IP": "100.65.0.1", "bgpPassword": "9125d59c18a9b015", "bgpPasswordKeyType": "3"},
+			Deleted:          new(bool),
 		},
 		{
-			Deploy:             true,
-			EntityName:         "Switch",
-			EntityType:         "SWITCH",
-			Description:        "Policy for iBGP_ISN2_ISN1",
-			TemplateName:       "vrf_lite_ibgp",
-			Source:             "CLI",
-			Priority:           new(int64),
-			DeviceSerialNumber: helper.GetConfig("policy").NDFC.Switches[0],
-			PolicyParameters:   map[string]string{"vrfName": "default", "BGP_ASN": "29500", "NEIGHBOR_IP": "100.65.0.4", "bgpPassword": "9125d59c18a9b015", "bgpPasswordKeyType": "3"},
-			Deleted:            new(bool),
+			Deploy:           true,
+			EntityName:       "Switch",
+			EntityType:       "SWITCH",
+			Description:      "Policy for iBGP_ISN2_ISN1",
+			TemplateName:     "vrf_lite_ibgp",
+			Source:           "CLI",
+			Priority:         new(int64),
+			SerialNumbers:    []string{helper.GetConfig("policy").NDFC.Switches[0]},
+			PolicyParameters: map[string]string{"vrfName": "default", "BGP_ASN": "29500", "NEIGHBOR_IP": "100.65.0.4", "bgpPassword": "9125d59c18a9b015", "bgpPasswordKeyType": "3"},
+			Deleted:          new(bool),
 		},
 		{
-			Deploy:             true,
-			EntityName:         "Switch",
-			EntityType:         "SWITCH",
-			Description:        "Policy for iBGP_ISN2_ISN4",
-			TemplateName:       "vrf_lite_ibgp",
-			Source:             "CLI",
-			Priority:           new(int64),
-			DeviceSerialNumber: helper.GetConfig("policy").NDFC.Switches[0],
-			PolicyParameters:   map[string]string{"vrfName": "default", "BGP_ASN": "29500", "NEIGHBOR_IP": "100.65.0.7", "bgpPassword": "9125d59c18a9b015", "bgpPasswordKeyType": "3"},
-			Deleted:            new(bool),
+			Deploy:           true,
+			EntityName:       "Switch",
+			EntityType:       "SWITCH",
+			Description:      "Policy for iBGP_ISN2_ISN4",
+			TemplateName:     "vrf_lite_ibgp",
+			Source:           "CLI",
+			Priority:         new(int64),
+			SerialNumbers:    []string{helper.GetConfig("policy").NDFC.Switches[0]},
+			PolicyParameters: map[string]string{"vrfName": "default", "BGP_ASN": "29500", "NEIGHBOR_IP": "100.65.0.7", "bgpPassword": "9125d59c18a9b015", "bgpPasswordKeyType": "3"},
+			Deleted:          new(bool),
 		},
 		{
-			Deploy:             true,
-			EntityName:         "Switch",
-			EntityType:         "SWITCH",
-			Description:        "Policy for iBGP_ISN3_ISN1",
-			TemplateName:       "vrf_lite_ibgp",
-			Source:             "CLI",
-			Priority:           new(int64),
-			DeviceSerialNumber: helper.GetConfig("policy").NDFC.Switches[0],
-			PolicyParameters:   map[string]string{"vrfName": "default", "BGP_ASN": "29500", "NEIGHBOR_IP": "100.65.0.2", "bgpPassword": "9125d59c18a9b015", "bgpPasswordKeyType": "3"},
-			Deleted:            new(bool),
+			Deploy:           true,
+			EntityName:       "Switch",
+			EntityType:       "SWITCH",
+			Description:      "Policy for iBGP_ISN3_ISN1",
+			TemplateName:     "vrf_lite_ibgp",
+			Source:           "CLI",
+			Priority:         new(int64),
+			SerialNumbers:    []string{helper.GetConfig("policy").NDFC.Switches[0]},
+			PolicyParameters: map[string]string{"vrfName": "default", "BGP_ASN": "29500", "NEIGHBOR_IP": "100.65.0.2", "bgpPassword": "9125d59c18a9b015", "bgpPasswordKeyType": "3"},
+			Deleted:          new(bool),
 		},
 		{
-			Deploy:             true,
-			EntityName:         "Switch",
-			EntityType:         "SWITCH",
-			Description:        "Policy for iBGP_ISN3_ISN2",
-			TemplateName:       "vrf_lite_ibgp",
-			Source:             "CLI",
-			Priority:           new(int64),
-			DeviceSerialNumber: helper.GetConfig("policy").NDFC.Switches[0],
-			PolicyParameters:   map[string]string{"vrfName": "default", "BGP_ASN": "29500", "NEIGHBOR_IP": "100.65.0.0", "bgpPassword": "9125d59c18a9b015", "bgpPasswordKeyType": "3"},
-			Deleted:            new(bool),
+			Deploy:           true,
+			EntityName:       "Switch",
+			EntityType:       "SWITCH",
+			Description:      "Policy for iBGP_ISN3_ISN2",
+			TemplateName:     "vrf_lite_ibgp",
+			Source:           "CLI",
+			Priority:         new(int64),
+			SerialNumbers:    []string{helper.GetConfig("policy").NDFC.Switches[0]},
+			PolicyParameters: map[string]string{"vrfName": "default", "BGP_ASN": "29500", "NEIGHBOR_IP": "100.65.0.0", "bgpPassword": "9125d59c18a9b015", "bgpPasswordKeyType": "3"},
+			Deleted:          new(bool),
 		},
 		{
-			Deploy:             true,
-			EntityName:         "Switch",
-			EntityType:         "SWITCH",
-			Description:        "Policy for iBGP_ISN3_ISN4",
-			TemplateName:       "vrf_lite_ibgp",
-			Source:             "CLI",
-			Priority:           new(int64),
-			DeviceSerialNumber: helper.GetConfig("policy").NDFC.Switches[0],
-			PolicyParameters:   map[string]string{"vrfName": "default", "BGP_ASN": "29500", "NEIGHBOR_IP": "100.65.0.10", "bgpPassword": "9125d59c18a9b015", "bgpPasswordKeyType": "3"},
-			Deleted:            new(bool),
+			Deploy:           true,
+			EntityName:       "Switch",
+			EntityType:       "SWITCH",
+			Description:      "Policy for iBGP_ISN3_ISN4",
+			TemplateName:     "vrf_lite_ibgp",
+			Source:           "CLI",
+			Priority:         new(int64),
+			SerialNumbers:    []string{helper.GetConfig("policy").NDFC.Switches[0]},
+			PolicyParameters: map[string]string{"vrfName": "default", "BGP_ASN": "29500", "NEIGHBOR_IP": "100.65.0.10", "bgpPassword": "9125d59c18a9b015", "bgpPasswordKeyType": "3"},
+			Deleted:          new(bool),
 		},
 		{
-			Deploy:             true,
-			EntityName:         "Switch",
-			EntityType:         "SWITCH",
-			Description:        "Policy for eBGP_ISN3_MPLS_PE",
-			TemplateName:       "External_VRF_Lite_eBGP",
-			Source:             "CLI",
-			Priority:           new(int64),
-			DeviceSerialNumber: helper.GetConfig("policy").NDFC.Switches[0],
-			PolicyParameters:   map[string]string{"vrfName": "default", "vrf_description": "To MPLS-PE1", "asn": "29500", "NEIGHBOR_ASN": "65111", "NEIGHBOR_IP": "100.65.0.13", "bgpPassword": "9125d59c18a9b015", "bgpPasswordKeyType": "3"},
-			Deleted:            new(bool),
+			Deploy:           true,
+			EntityName:       "Switch",
+			EntityType:       "SWITCH",
+			Description:      "Policy for eBGP_ISN3_MPLS_PE",
+			TemplateName:     "External_VRF_Lite_eBGP",
+			Source:           "CLI",
+			Priority:         new(int64),
+			SerialNumbers:    []string{helper.GetConfig("policy").NDFC.Switches[0]},
+			PolicyParameters: map[string]string{"vrfName": "default", "vrf_description": "To MPLS-PE1", "asn": "29500", "NEIGHBOR_ASN": "65111", "NEIGHBOR_IP": "100.65.0.13", "bgpPassword": "9125d59c18a9b015", "bgpPasswordKeyType": "3"},
+			Deleted:          new(bool),
 		},
 		{
-			Deploy:             true,
-			EntityName:         "Switch",
-			EntityType:         "SWITCH",
-			Description:        "Policy for iBGP_ISN4_ISN1",
-			TemplateName:       "vrf_lite_ibgp",
-			Source:             "CLI",
-			Priority:           new(int64),
-			DeviceSerialNumber: helper.GetConfig("policy").NDFC.Switches[0],
-			PolicyParameters:   map[string]string{"vrfName": "default", "BGP_ASN": "29500", "NEIGHBOR_IP": "100.65.0.6", "bgpPassword": "9125d59c18a9b015", "bgpPasswordKeyType": "3"},
-			Deleted:            new(bool),
+			Deploy:           true,
+			EntityName:       "Switch",
+			EntityType:       "SWITCH",
+			Description:      "Policy for iBGP_ISN4_ISN1",
+			TemplateName:     "vrf_lite_ibgp",
+			Source:           "CLI",
+			Priority:         new(int64),
+			SerialNumbers:    []string{helper.GetConfig("policy").NDFC.Switches[0]},
+			PolicyParameters: map[string]string{"vrfName": "default", "BGP_ASN": "29500", "NEIGHBOR_IP": "100.65.0.6", "bgpPassword": "9125d59c18a9b015", "bgpPasswordKeyType": "3"},
+			Deleted:          new(bool),
 		},
 		{
-			Deploy:             true,
-			EntityName:         "Switch",
-			EntityType:         "SWITCH",
-			Description:        "Policy for iBGP_ISN4_ISN2",
-			TemplateName:       "vrf_lite_ibgp",
-			Source:             "CLI",
-			Priority:           new(int64),
-			DeviceSerialNumber: helper.GetConfig("policy").NDFC.Switches[0],
-			PolicyParameters:   map[string]string{"vrfName": "default", "BGP_ASN": "29500", "NEIGHBOR_IP": "100.65.0.8", "bgpPassword": "9125d59c18a9b015", "bgpPasswordKeyType": "3"},
-			Deleted:            new(bool),
+			Deploy:           true,
+			EntityName:       "Switch",
+			EntityType:       "SWITCH",
+			Description:      "Policy for iBGP_ISN4_ISN2",
+			TemplateName:     "vrf_lite_ibgp",
+			Source:           "CLI",
+			Priority:         new(int64),
+			SerialNumbers:    []string{helper.GetConfig("policy").NDFC.Switches[0]},
+			PolicyParameters: map[string]string{"vrfName": "default", "BGP_ASN": "29500", "NEIGHBOR_IP": "100.65.0.8", "bgpPassword": "9125d59c18a9b015", "bgpPasswordKeyType": "3"},
+			Deleted:          new(bool),
 		},
 		{
-			Deploy:             true,
-			EntityName:         "Switch",
-			EntityType:         "SWITCH",
-			Description:        "Policy for iBGP_ISN4_ISN3",
-			TemplateName:       "vrf_lite_ibgp",
-			Source:             "CLI",
-			Priority:           new(int64),
-			DeviceSerialNumber: helper.GetConfig("policy").NDFC.Switches[0],
-			PolicyParameters:   map[string]string{"vrfName": "default", "BGP_ASN": "29500", "NEIGHBOR_IP": "100.65.0.11", "bgpPassword": "9125d59c18a9b015", "bgpPasswordKeyType": "3"},
-			Deleted:            new(bool),
+			Deploy:           true,
+			EntityName:       "Switch",
+			EntityType:       "SWITCH",
+			Description:      "Policy for iBGP_ISN4_ISN3",
+			TemplateName:     "vrf_lite_ibgp",
+			Source:           "CLI",
+			Priority:         new(int64),
+			SerialNumbers:    []string{helper.GetConfig("policy").NDFC.Switches[0]},
+			PolicyParameters: map[string]string{"vrfName": "default", "BGP_ASN": "29500", "NEIGHBOR_IP": "100.65.0.11", "bgpPassword": "9125d59c18a9b015", "bgpPasswordKeyType": "3"},
+			Deleted:          new(bool),
 		},
 	}
 	policyRsArr := []interface{}{}
@@ -864,4 +865,156 @@ func TestAccPolicyResourceMultiple(t *testing.T) {
 			},
 		},
 	})
+}
+
+// TestAccPolicyGroupBGP tests the policy group functionality with BGP configuration
+func TestAccPolicyGroupBGP(t *testing.T) {
+	// Skip if not running acceptance tests
+	if testing.Short() {
+		t.Skip("skipping acceptance test")
+	}
+
+	// Initialize test configuration
+	x := &map[string]string{
+		"RscType":  ndfc.ResourcePolicy,
+		"RscName":  "policy_group_bgp_test",
+		"User":     helper.GetConfig("policy").NDFC.User,
+		"Password": helper.GetConfig("policy").NDFC.Password,
+		"Host":     helper.GetConfig("policy").NDFC.URL,
+		"Insecure": helper.GetConfig("policy").NDFC.Insecure,
+	}
+
+	tf_config := new(string)
+	*tf_config = `provider "ndfc" {
+		host     = "https://"
+		username = "admin"
+		password = "admin!@#"
+		domain   = "example.com"
+		insecure = true
+		}`
+
+	stepCount := new(int)
+	*stepCount = 0
+
+	// Get test switches from config
+	testSwitches := helper.GetConfig("policy").NDFC.Switches
+	if len(testSwitches) < 2 {
+		t.Fatal("At least 2 switches are required for policy group testing")
+	}
+	// Use the first two switches for this test
+	serialNumbers := testSwitches[:2]
+
+	// Create policy group resource structure based on provided payload
+	policyGroup := new(resource_policy.NDFCPolicyModel)
+	policyGroup.PolicyId = "" // Ensure this is initialized
+	policyGroup.IsPolicyGroup = true
+	policyGroup.Deploy = true
+	policyGroup.EntityName = "SWITCH"
+	policyGroup.EntityType = "SWITCH"
+	policyGroup.Description = ""
+	policyGroup.TemplateName = "base_bgp"
+	policyGroup.Source = ""
+	policyGroup.Priority = new(int64)
+	*policyGroup.Priority = 500
+	policyGroup.SerialNumbers = serialNumbers
+	policyGroup.PolicyParameters = map[string]string{
+		"BGP_AS":      "56777",
+		"LOOPBACK_IP": "1.1.1.1",
+	}
+	policyGroup.Deleted = new(bool)
+	*policyGroup.Deleted = false
+
+	resource.Test(t, resource.TestCase{
+		PreCheck:                 func() { testAccPreCheck(t, "policy") },
+		ProtoV6ProviderFactories: testAccProtoV6ProviderFactories,
+		Steps: []resource.TestStep{
+			// Create a policy group with BGP configuration
+			{
+				Config: func() string {
+					*stepCount++
+					tName := fmt.Sprintf("%s_%d", t.Name(), *stepCount)
+					// Generate Terraform configuration using helper
+					// GetTFConfigWithSingleResource expects a **string
+					outPtr := &tf_config
+					helper.GetTFConfigWithSingleResource(tName, *x, []interface{}{policyGroup}, outPtr)
+					return *tf_config
+				}(),
+				// This case would fail
+				ExpectError: regexp.MustCompile(".*Error: Failed to deploy policy.*"),
+			},
+		},
+	})
+}
+
+func TestAccPolicyGroupVRFRouteTracking(t *testing.T) {
+	x := &map[string]string{
+		"RscType":  ndfc.ResourcePolicy,
+		"RscName":  "vrf_route_tracking_policy",
+		"User":     helper.GetConfig("policy").NDFC.User,
+		"Password": helper.GetConfig("policy").NDFC.Password,
+		"Host":     helper.GetConfig("policy").NDFC.URL,
+		"Insecure": helper.GetConfig("policy").NDFC.Insecure,
+	}
+
+	tf_config := new(string)
+	*tf_config = `provider "ndfc" {
+		host     = "https://"
+		username = "admin"
+		password = "admin!@#"
+		domain   = "example.com"
+		insecure = true
+		}
+		resource ndfc_vrfs "net_test" {
+			fabric_name = "dummy"
+		}`
+
+	stepCount := new(int)
+	*stepCount = 0
+
+	// Create a new instance of the NDFC client
+	policyResource := new(resource_policy.NDFCPolicyModel)
+	resource.Test(t, resource.TestCase{
+		PreCheck:                 func() { testAccPreCheck(t, "policy") },
+		ProtoV6ProviderFactories: testAccProtoV6ProviderFactories,
+		Steps: []resource.TestStep{
+			{
+				// Create a new VRF route tracking policy group
+				Config: func() string {
+					*stepCount++
+					tName := fmt.Sprintf("%s_%d", t.Name(), *stepCount)
+
+					policyResource.IsPolicyGroup = true
+					policyResource.Deploy = true
+					policyResource.EntityName = "SWITCH"
+					policyResource.EntityType = "SWITCH"
+					policyResource.Description = "VRF route tracking policy group"
+					policyResource.TemplateName = "vrf_route_tracking"
+					policyResource.Source = "template"
+					policyResource.Priority = new(int64)
+					*policyResource.Priority = 500
+					policyResource.SerialNumbers = []string{helper.GetConfig("policy").NDFC.Switches[0]}
+					policyResource.PolicyParameters = map[string]string{
+						"VRF_NAME":               "default",
+						"IP_PREFIX":              "34.1.1.0/24",
+						"OBJECT_TRACKING_NUMBER": "10",
+					}
+					policyResource.Deleted = new(bool)
+					*policyResource.Deleted = false
+
+					helper.GetTFConfigWithSingleResource(tName, *x, []interface{}{policyResource}, &tf_config)
+					return *tf_config
+				}(),
+				Check: resource.ComposeTestCheckFunc(PolicyModelHelperStateCheck("ndfc_policy.vrf_route_tracking_policy", *policyResource, path.Empty())...),
+			},
+			{
+				Config: func() string {
+					*stepCount++
+					tName := fmt.Sprintf("%s_%d", t.Name(), *stepCount)
+					policyResource.SerialNumbers = []string{helper.GetConfig("policy").NDFC.Switches[0], helper.GetConfig("policy").NDFC.Switches[1]}
+					helper.GetTFConfigWithSingleResource(tName, *x, []interface{}{policyResource}, &tf_config)
+					return *tf_config
+				}(),
+				Check: resource.ComposeTestCheckFunc(PolicyModelHelperStateCheck("ndfc_policy.vrf_route_tracking_policy", *policyResource, path.Empty())...),
+			},
+		}})
 }
