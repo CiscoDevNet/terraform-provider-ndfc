@@ -30,7 +30,15 @@ resource "ndfc_{{.RscType}}" "{{.RscName}}" {
         template_name        = "{{.TemplateName}}"
         source               = "{{.Source}}"
         priority             = {{.Priority}}
-        device_serial_number = "{{.DeviceSerialNumber}}"
+        {{ if .IsPolicyGroup }}
+        serial_numbers       = [
+        {{range .SerialNumbers}}
+           "{{.}}",
+        {{end}}
+        ]
+        {{ else }}
+        serial_numbers = ["{{index .SerialNumbers 0}}"]
+        {{end}}
         policy_parameters = {
         {{- range $key, $value := .PolicyParameters }}
             {{$key}} = "{{$value}}"
