@@ -14,15 +14,15 @@ Resource to configure policies on a switch
 
 ```terraform
 resource "ndfc_policy" "test_resource_policy_1" {
-  is_policy_group      = false
-  deploy               = true
-  entity_name          = "Switch"
-  entity_type          = "SWITCH"
-  description          = "Policy for switch"
-  template_name        = "TelemetryDst_EF"
-  source               = "CLI"
-  priority             = 500
-  device_serial_number = "FDO245206N5"
+  is_policy_group = false
+  deploy          = true
+  entity_name     = "Switch"
+  entity_type     = "SWITCH"
+  description     = "Policy for switch"
+  template_name   = "TelemetryDst_EF"
+  source          = "CLI"
+  priority        = 500
+  serial_numbers  = ["FDO245206N5", "FDO245206N6"]
   policy_parameters = {
     DSTGRP = "501"
     IPADDR = "5.5.5.6"
@@ -37,9 +37,9 @@ resource "ndfc_policy" "test_resource_policy_1" {
 
 ### Required
 
-- `device_serial_number` (String) Serial number of the device
 - `entity_name` (String) Policy Name
 - `entity_type` (String) Type of the entity
+- `serial_numbers` (Set of String) Serial numbers of the device. Use only one device for policy. Multiple devices can be in the list if this is a  policygroup
 - `template_name` (String) Name of the template
 
 ### Optional
@@ -54,6 +54,8 @@ resource "ndfc_policy" "test_resource_policy_1" {
 ### Read-Only
 
 - `auto_generated` (Boolean) Auto generated policy
+- `computed_parameters` (Map of String) List of name value pairs not set in config, but returned by NDFC
+- `generated_config` (String) Generated configuration
 - `id` (Number) ID of the policy
 - `policy_id` (String) Policy ID
 
