@@ -15,6 +15,7 @@ import (
 	"os"
 	"strings"
 	"terraform-provider-ndfc/internal/provider/resources/resource_interface_common"
+	"terraform-provider-ndfc/internal/provider/resources/resource_links"
 	"terraform-provider-ndfc/internal/provider/resources/resource_networks"
 	"terraform-provider-ndfc/internal/provider/resources/resource_policy"
 	"terraform-provider-ndfc/internal/provider/resources/resource_vpc_pair"
@@ -131,6 +132,9 @@ func GetTFConfigWithSingleResource(tt string, cfg map[string]string, rscs []inte
 			}
 			return *a
 		},
+		"trimSuffix": func(s, suffix string) string {
+			return strings.TrimSuffix(s, suffix)
+		},
 	}
 
 	root_path, _ := os.Getwd()
@@ -226,6 +230,16 @@ func GetTFConfigWithSingleResource(tt string, cfg map[string]string, rscs []inte
 			}
 		}
 
+		linksRsc, ok := rsc.(*resource_links.NDFCLinksModel)
+		if ok {
+			args["Links"] = linksRsc
+			args["RscName"] = rsNames[i]
+			args["RscType"] = "links"
+			err = t.ExecuteTemplate(&output, "NDFC_LINKS_RSC", args)
+			if err != nil {
+				panic(err)
+			}
+		}
 	}
 	//log.Println(output.String())
 	*x = output.String()
@@ -382,7 +396,7 @@ func GetTFIntegrated(ts string, rsList []string, attrs map[string]interface{}, r
 			tt.ModifyMapKey("attachments", "SWITCH_SERIAL_NO", switches[0])
 
 		case "ndfc_policy":
-			tt.ModifyAttributeValue("device_serial_number", switches[0])
+			tt.ModifyAttributeValue("serial_numbers", []string{switches[0]})
 			if !rsDeploy {
 				tt.ModifyAttributeValue("deploy", false)
 			}

@@ -23,5 +23,6 @@ files:
   - fabric_vxlan_evpn.yaml
   - fabric_vxlan_msd.yaml
   - fabric_msite_ext_net.yaml
+  - links.yaml
 
 

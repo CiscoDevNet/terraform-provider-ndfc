@@ -22,6 +22,7 @@ type ConfigDeploymentAPI struct {
 	SerialNumbers []string
 	Deploy        bool
 	Preview       bool
+	History       bool
 	FabricName    string
 }
 
@@ -34,6 +35,8 @@ const UrlGetFabricErrors = "/lan-fabric/rest/control/fabrics/%s/errors"
 const UrlGetGlobalConfigPreview = "/lan-fabric/rest/control/fabrics/%s/config-preview/%s"
 const UrlGetConfigPreview = "/lan-fabric/rest/control/fabrics/%s/config-preview"
 
+const UrlGetDeploymentHistory = "/lan-fabric/rest/config/delivery/deployerHistoryByFabric/%s?serialNumber=%s&sort=%s"
+
 func (c *ConfigDeploymentAPI) GetLock() *sync.Mutex {
 	return c.mutex
 }
@@ -44,6 +47,8 @@ func (c *ConfigDeploymentAPI) GetUrl() string {
 			return fmt.Sprintf(UrlGetGlobalConfigPreview, c.FabricName, strings.Join(c.SerialNumbers, ","))
 		}
 		return fmt.Sprintf(UrlGetConfigPreview, c.FabricName)
+	} else if c.History {
+		return fmt.Sprintf(UrlGetDeploymentHistory, c.FabricName, strings.Join(c.SerialNumbers, ","), "completedTime%3ADES")
 	} else {
 		return fmt.Sprintf(UrlGetFabricErrors, c.FabricName)
 	}

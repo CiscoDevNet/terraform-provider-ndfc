@@ -13,6 +13,7 @@ import (
 	"log"
 	"strings"
 	"sync"
+	"time"
 
 	"github.com/netascode/go-nd"
 
@@ -33,6 +34,8 @@ type NDFCAPI interface {
 type NDFCAPICommon struct {
 	NDFCAPI
 	LockedForDeploy bool
+	DeployStartTime time.Time
+	DeployEndTime   time.Time
 	client          *nd.Client
 }
 
@@ -136,6 +139,8 @@ func (c NDFCAPICommon) Delete() (gjson.Result, error) {
 	c.NDFCAPI.GetLock().Lock()
 	defer c.NDFCAPI.GetLock().Unlock()
 	qp := c.NDFCAPI.GetDeleteQP()
+	log.Printf("Delete URL: %s\n", c.NDFCAPI.DeleteUrl())
+	log.Printf("Delete Query Parameters: %v\n", qp)
 	var res nd.Res
 	var err error
 	if qp != nil {
@@ -183,7 +188,6 @@ func (c NDFCAPICommon) DeployPost(payload []byte) (gjson.Result, error) {
 	} else {
 		log.Printf("Deploy write lock is already acquired for %s", c.NDFCAPI.RscName())
 	}
-
 	log.Printf("Deploy Post URL: %s\n", c.NDFCAPI.PostUrl())
 	lock := c.NDFCAPI.GetLock()
 	lock.Lock()
