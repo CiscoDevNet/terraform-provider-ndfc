@@ -161,7 +161,7 @@ resource:
               ndfc_type: csv
             - model_name: instanceValues
               tf_name: instance_values
-              type: String
+              type: Map:String
               optional: true
               computed: true
               description: Instance values
