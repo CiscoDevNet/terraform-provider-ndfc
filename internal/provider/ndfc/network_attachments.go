@@ -28,7 +28,7 @@ func (c *NDFC) RscGetNetworkAttachments(ctx context.Context, nw *resource_networ
 		tflog.Error(ctx, "RscGetNetworkAttachments: Error getting network attachments", map[string]interface{}{"Err": err})
 		return err
 	}
-	c.createVpcPairMap(ctx, nw.FabricName)
+
 	nw.FillAttachmentsFromPayload(nwAttachPayload)
 
 	for netName, nwEntry := range nw.Networks {

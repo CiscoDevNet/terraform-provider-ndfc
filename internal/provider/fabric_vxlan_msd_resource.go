@@ -14,9 +14,11 @@ import (
 	"terraform-provider-ndfc/internal/provider/ndfc"
 	"terraform-provider-ndfc/internal/provider/resources/resource_fabric_vxlan_msd"
 
+	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/types"
+	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
 	"github.com/hashicorp/terraform-plugin-log/tflog"
 )
 
@@ -67,12 +69,20 @@ func (r *fabricVxlanMsdResource) Create(ctx context.Context, req resource.Create
 	if r.client == nil {
 		panic("Client is nil")
 	}
-	// Create API call logic
+	// Values are not updated part of NDFC payload get, save them and set them back
 	deploy := data.Deploy.ValueBool()
-	r.client.RscCreateFabric(ctx, &resp.Diagnostics, &data, ndfc.ResourceVxlanMsdType)
+	// There is no fabric deploy for MSD fabric
+	data.Deploy = types.BoolValue(false)
+	childFabrics := data.ChildFabrics
+	r.client.RscCreateFabric(ctx, &resp.Diagnostics, &data)
+
+	// Setting back the values that are not updated by NDFC
+	data.ChildFabrics = childFabrics
 	data.Deploy = types.BoolValue(deploy)
 	data.Id = data.FabricName
+
 	tflog.Debug(ctx, "data.Id = "+data.Id.ValueString())
+
 	if deploy {
 		if resp.Diagnostics.HasError() || resp.Diagnostics.WarningsCount() > 0 {
 			data.DeploymentStatus = types.StringValue("Deployment pending")
@@ -86,7 +96,12 @@ func (r *fabricVxlanMsdResource) Create(ctx context.Context, req resource.Create
 		tflog.Error(ctx, "Create Fabric Failed")
 		return
 	}
-
+	r.client.AddChildFabricsToMsd(ctx, &resp.Diagnostics, &data)
+	// Get and set back the child fabrics to make sure they are correctly added in NDFC
+	data.ChildFabrics = r.GetChildFabrics(ctx, &resp.Diagnostics, data.FabricName.ValueString())
+	if resp.Diagnostics.HasError() {
+		return
+	}
 	// Save updated data into Terraform state
 	resp.Diagnostics.Append(resp.State.Set(ctx, data)...)
 }
@@ -106,13 +121,18 @@ func (r *fabricVxlanMsdResource) Read(ctx context.Context, req resource.ReadRequ
 		resp.State.RemoveResource(ctx)
 		return
 	}
-	unique_id := data.Id.ValueString()
-	tflog.Info(ctx, fmt.Sprintf("Incoming ID %s", unique_id))
+	id := data.Id.ValueString()
+	tflog.Info(ctx, fmt.Sprintf("Incoming ID %s", id))
 	deploy := data.Deploy.ValueBool()
 
-	r.client.RscReadFabric(ctx, &resp.Diagnostics, &data, ndfc.ResourceVxlanMsdType)
+	r.client.RscReadFabric(ctx, &resp.Diagnostics, &data, data.FabricName.ValueString())
 	data.Deploy = types.BoolValue(deploy)
 	data.Id = data.FabricName
+	data.ChildFabrics = r.GetChildFabrics(ctx, &resp.Diagnostics, data.FabricName.ValueString())
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
 	tflog.Debug(ctx, "data.FabricName = "+data.FabricName.ValueString())
 	if data.FabricName.IsNull() || data.FabricName.IsUnknown() {
 		// make diags error empty because fabric is not present in NDFC,
@@ -142,9 +162,18 @@ func (r *fabricVxlanMsdResource) Update(ctx context.Context, req resource.Update
 	}
 	// Create API call logic
 	deploy := planData.Deploy.ValueBool()
-	r.client.RscUpdateFabric(ctx, &resp.Diagnostics, &planData, ndfc.ResourceVxlanMsdType)
+	// There is no fabric deploy for MSD fabric
+	planData.Deploy = types.BoolValue(false)
+	childFabrics := planData.ChildFabrics
+
+	r.client.RscUpdateFabric(ctx, &resp.Diagnostics, &planData)
 	planData.Deploy = types.BoolValue(deploy)
 	planData.Id = planData.FabricName
+	planData.ChildFabrics = childFabrics
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
 	if deploy {
 		if resp.Diagnostics.HasError() || resp.Diagnostics.WarningsCount() > 0 {
 			planData.DeploymentStatus = types.StringValue("Deployment pending")
@@ -158,9 +187,14 @@ func (r *fabricVxlanMsdResource) Update(ctx context.Context, req resource.Update
 		tflog.Error(ctx, "Update Fabric Failed")
 		return
 	}
-	unique_id := planData.Id.ValueString()
-	tflog.Info(ctx, fmt.Sprintf("Update Fabric Success %s", unique_id))
-
+	id := planData.Id.ValueString()
+	tflog.Info(ctx, fmt.Sprintf("Update Fabric Success %s", id))
+	r.client.UpdateChildFabricsToMsd(ctx, &resp.Diagnostics, &planData, &stateData)
+	// Get and set back the child fabrics to make sure they are correctly added in NDFC
+	planData.ChildFabrics = r.GetChildFabrics(ctx, &resp.Diagnostics, planData.FabricName.ValueString())
+	if resp.Diagnostics.HasError() {
+		return
+	}
 	resp.Diagnostics.Append(resp.State.Set(ctx, &planData)...)
 }
 
@@ -177,7 +211,21 @@ func (r *fabricVxlanMsdResource) Delete(ctx context.Context, req resource.Delete
 		resp.State.RemoveResource(ctx)
 		return
 	}
-	r.client.RscDeleteFabric(ctx, &resp.Diagnostics, &data, ndfc.ResourceVxlanMsdType)
+	tflog.Debug(ctx, fmt.Sprintf("Delete data = %+v", data))
+	r.client.RemoveChildFabricsFromMsd(ctx, &resp.Diagnostics, &data)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+	// Check child fabrics are removed from NDFC
+	data.ChildFabrics = r.GetChildFabrics(ctx, &resp.Diagnostics, data.FabricName.ValueString())
+	if resp.Diagnostics.HasError() {
+		return
+	}
+	if len(data.ChildFabrics.Elements()) > 0 {
+		resp.Diagnostics.AddError("Failed to delete child fabrics", fmt.Sprintf("Child fabrics %v are not deleted", data.ChildFabrics.Elements()))
+		return
+	}
+	r.client.RscDeleteFabric(ctx, &resp.Diagnostics, data.FabricName.ValueString())
 	if resp.Diagnostics.HasError() {
 		tflog.Error(ctx, "Delete Fabric Failed")
 		return
@@ -194,11 +242,36 @@ func (r *fabricVxlanMsdResource) ImportState(ctx context.Context, req resource.I
 		return
 	}
 	data.FabricName = types.StringValue(req.ID)
-	r.client.RscImportFabric(ctx, &resp.Diagnostics, &data, ndfc.ResourceVxlanMsdType)
+	r.client.RscImportFabric(ctx, &resp.Diagnostics, &data, req.ID)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+	data.ChildFabrics = r.GetChildFabrics(ctx, &resp.Diagnostics, data.FabricName.ValueString())
 	if resp.Diagnostics.HasError() {
 		return
 	}
 	data.Id = types.StringValue(req.ID)
 	resp.Diagnostics.Append(resp.State.Set(ctx, data)...)
+}
 
+func (r *fabricVxlanMsdResource) GetChildFabrics(ctx context.Context, dg *diag.Diagnostics, fname string) basetypes.SetValue {
+	var ChildFabrics basetypes.SetValue
+
+	childFabrics := r.client.GetMsdChildFabricAssociations(ctx, dg, fname)
+	tflog.Debug(ctx, fmt.Sprintf("Child fabrics part of %s = %+v", fname, childFabrics))
+
+	listData := make([]attr.Value, len(childFabrics))
+	for i, item := range childFabrics {
+		listData[i] = types.StringValue(item)
+	}
+
+	if len(listData) == 0 {
+		return types.SetNull(types.StringType)
+	} else {
+		ChildFabrics, *dg = types.SetValue(types.StringType, listData)
+		if dg.HasError() {
+			return types.SetNull(types.StringType)
+		}
+		return ChildFabrics
+	}
 }

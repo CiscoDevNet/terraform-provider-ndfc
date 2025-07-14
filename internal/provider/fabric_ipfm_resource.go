@@ -69,7 +69,7 @@ func (r *fabricIpfmResource) Create(ctx context.Context, req resource.CreateRequ
 	}
 	// Create API call logic
 	deploy := data.Deploy.ValueBool()
-	r.client.RscCreateFabric(ctx, &resp.Diagnostics, &data, ndfc.ResourceIpfmFabricType)
+	r.client.RscCreateFabric(ctx, &resp.Diagnostics, &data)
 	data.Deploy = types.BoolValue(deploy)
 	data.Id = data.FabricName
 	tflog.Debug(ctx, "data.Id = "+data.Id.ValueString())
@@ -106,10 +106,10 @@ func (r *fabricIpfmResource) Read(ctx context.Context, req resource.ReadRequest,
 		resp.State.RemoveResource(ctx)
 		return
 	}
-	unique_id := data.Id.ValueString()
-	tflog.Info(ctx, fmt.Sprintf("Incoming ID %s", unique_id))
+	id := data.Id.ValueString()
+	tflog.Info(ctx, fmt.Sprintf("Incoming ID %s", id))
 	deploy := data.Deploy.ValueBool()
-	r.client.RscReadFabric(ctx, &resp.Diagnostics, &data, ndfc.ResourceIpfmFabricType)
+	r.client.RscReadFabric(ctx, &resp.Diagnostics, &data, data.FabricName.ValueString())
 	data.Deploy = types.BoolValue(deploy)
 	data.Id = data.FabricName
 	tflog.Debug(ctx, "data.FabricName = "+data.FabricName.ValueString())
@@ -142,15 +142,15 @@ func (r *fabricIpfmResource) Update(ctx context.Context, req resource.UpdateRequ
 	}
 	// Create API call logic
 	deploy := planData.Deploy.ValueBool()
-	r.client.RscUpdateFabric(ctx, &resp.Diagnostics, &planData, ndfc.ResourceIpfmFabricType)
+	r.client.RscUpdateFabric(ctx, &resp.Diagnostics, &planData)
 	planData.Deploy = types.BoolValue(deploy)
 	planData.Id = planData.FabricName
 	if resp.Diagnostics.HasError() {
 		tflog.Error(ctx, "Update Fabric Failed")
 		return
 	}
-	unique_id := planData.Id.ValueString()
-	tflog.Info(ctx, fmt.Sprintf("Update Fabric Success %s", unique_id))
+	id := planData.Id.ValueString()
+	tflog.Info(ctx, fmt.Sprintf("Update Fabric Success %s", id))
 	if deploy {
 		if resp.Diagnostics.HasError() || resp.Diagnostics.WarningsCount() > 0 {
 			planData.DeploymentStatus = types.StringValue("Deployment pending")
@@ -176,7 +176,7 @@ func (r *fabricIpfmResource) Delete(ctx context.Context, req resource.DeleteRequ
 		resp.State.RemoveResource(ctx)
 		return
 	}
-	r.client.RscDeleteFabric(ctx, &resp.Diagnostics, &data, ndfc.ResourceIpfmFabricType)
+	r.client.RscDeleteFabric(ctx, &resp.Diagnostics, data.FabricName.ValueString())
 	if resp.Diagnostics.HasError() {
 		tflog.Error(ctx, "Delete Fabric Failed")
 		return
@@ -193,7 +193,7 @@ func (r *fabricIpfmResource) ImportState(ctx context.Context, req resource.Impor
 		return
 	}
 	data.FabricName = types.StringValue(req.ID)
-	r.client.RscImportFabric(ctx, &resp.Diagnostics, &data, ndfc.ResourceIpfmFabricType)
+	r.client.RscImportFabric(ctx, &resp.Diagnostics, &data, req.ID)
 	if resp.Diagnostics.HasError() {
 		return
 	}

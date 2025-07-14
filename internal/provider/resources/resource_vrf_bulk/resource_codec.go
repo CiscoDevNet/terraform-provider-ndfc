@@ -88,8 +88,11 @@ func (v NDFCVrfsValue) GetAttachmentValues(filters uint16, attach string) []rva.
 	log.Printf("GetAttachmentValues: %s %s", v.VrfName, v.FabricName)
 	update := func(a *rva.NDFCAttachListValue, serial string) {
 		log.Printf("GetAttachmentValues: update %s %s", v.VrfName, v.FabricName)
-		a.FabricName = v.FabricName
+		if a.Fabric == "" {
+			a.Fabric = v.FabricName
+		}
 		a.VrfName = v.VrfName
+		log.Printf("GetAttachmentValues: update %s %s", a.VrfName, a.Fabric)
 		a.SerialNumber = serial
 		if a.Vlan == nil {
 			a.Vlan = new(Int64Custom)
@@ -194,9 +197,11 @@ func (v *NDFCVrfBulkModel) FillAttachPayloadFromModel(delFlag bool) *rva.NDFCVrf
 		}
 		for attachKey, attachEntry := range vrfEntry.AttachList {
 			attachEntry.SerialNumber = attachKey
-			attachEntry.FabricName = v.FabricName
+			if attachEntry.Fabric == "" {
+				attachEntry.Fabric = v.FabricName
+			}
 			attachEntry.VrfName = vrfName
-
+			log.Printf("AttachEntry vrfname %s FabricName %s", vrfName, attachEntry.Fabric)
 			if attachEntry.DeployThisAttachment {
 				payload.DepMap[vrfName] = append(payload.DepMap[vrfName], attachKey)
 			}

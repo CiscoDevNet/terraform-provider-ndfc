@@ -99,18 +99,12 @@ func VrfsValueHelperStateCheck(RscName string, c resource_vrf_bulk.NDFCVrfsValue
 	}
 	if c.VrfTemplateConfig.Trm != "" {
 		ret = append(ret, resource.TestCheckResourceAttr(RscName, attrPath.AtName("trm").String(), c.VrfTemplateConfig.Trm))
-	} else {
-		ret = append(ret, resource.TestCheckResourceAttr(RscName, attrPath.AtName("trm").String(), "false"))
 	}
 	if c.VrfTemplateConfig.NoRp != "" {
 		ret = append(ret, resource.TestCheckResourceAttr(RscName, attrPath.AtName("no_rp").String(), c.VrfTemplateConfig.NoRp))
-	} else {
-		ret = append(ret, resource.TestCheckResourceAttr(RscName, attrPath.AtName("no_rp").String(), "false"))
 	}
 	if c.VrfTemplateConfig.RpExternal != "" {
 		ret = append(ret, resource.TestCheckResourceAttr(RscName, attrPath.AtName("rp_external").String(), c.VrfTemplateConfig.RpExternal))
-	} else {
-		ret = append(ret, resource.TestCheckResourceAttr(RscName, attrPath.AtName("rp_external").String(), "false"))
 	}
 	if c.VrfTemplateConfig.RpAddress != "" {
 		ret = append(ret, resource.TestCheckResourceAttr(RscName, attrPath.AtName("rp_address").String(), c.VrfTemplateConfig.RpAddress))
@@ -126,28 +120,18 @@ func VrfsValueHelperStateCheck(RscName string, c resource_vrf_bulk.NDFCVrfsValue
 	}
 	if c.VrfTemplateConfig.MvpnInterAs != "" {
 		ret = append(ret, resource.TestCheckResourceAttr(RscName, attrPath.AtName("mvpn_inter_as").String(), c.VrfTemplateConfig.MvpnInterAs))
-	} else {
-		ret = append(ret, resource.TestCheckResourceAttr(RscName, attrPath.AtName("mvpn_inter_as").String(), "false"))
 	}
 	if c.VrfTemplateConfig.TrmBgwMsite != "" {
 		ret = append(ret, resource.TestCheckResourceAttr(RscName, attrPath.AtName("trm_bgw_msite").String(), c.VrfTemplateConfig.TrmBgwMsite))
-	} else {
-		ret = append(ret, resource.TestCheckResourceAttr(RscName, attrPath.AtName("trm_bgw_msite").String(), "false"))
 	}
 	if c.VrfTemplateConfig.AdvertiseHostRoutes != "" {
 		ret = append(ret, resource.TestCheckResourceAttr(RscName, attrPath.AtName("advertise_host_routes").String(), c.VrfTemplateConfig.AdvertiseHostRoutes))
-	} else {
-		ret = append(ret, resource.TestCheckResourceAttr(RscName, attrPath.AtName("advertise_host_routes").String(), "false"))
 	}
 	if c.VrfTemplateConfig.AdvertiseDefaultRoute != "" {
 		ret = append(ret, resource.TestCheckResourceAttr(RscName, attrPath.AtName("advertise_default_route").String(), c.VrfTemplateConfig.AdvertiseDefaultRoute))
-	} else {
-		ret = append(ret, resource.TestCheckResourceAttr(RscName, attrPath.AtName("advertise_default_route").String(), "true"))
 	}
 	if c.VrfTemplateConfig.ConfigureStaticDefaultRoute != "" {
 		ret = append(ret, resource.TestCheckResourceAttr(RscName, attrPath.AtName("configure_static_default_route").String(), c.VrfTemplateConfig.ConfigureStaticDefaultRoute))
-	} else {
-		ret = append(ret, resource.TestCheckResourceAttr(RscName, attrPath.AtName("configure_static_default_route").String(), "true"))
 	}
 	if c.VrfTemplateConfig.BgpPassword != "" {
 		ret = append(ret, resource.TestCheckResourceAttr(RscName, attrPath.AtName("bgp_password").String(), c.VrfTemplateConfig.BgpPassword))
@@ -157,8 +141,6 @@ func VrfsValueHelperStateCheck(RscName string, c resource_vrf_bulk.NDFCVrfsValue
 	}
 	if c.VrfTemplateConfig.Netflow != "" {
 		ret = append(ret, resource.TestCheckResourceAttr(RscName, attrPath.AtName("netflow").String(), c.VrfTemplateConfig.Netflow))
-	} else {
-		ret = append(ret, resource.TestCheckResourceAttr(RscName, attrPath.AtName("netflow").String(), "false"))
 	}
 	if c.VrfTemplateConfig.NetflowMonitor != "" {
 		ret = append(ret, resource.TestCheckResourceAttr(RscName, attrPath.AtName("netflow_monitor").String(), c.VrfTemplateConfig.NetflowMonitor))

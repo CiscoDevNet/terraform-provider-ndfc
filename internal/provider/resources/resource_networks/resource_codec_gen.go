@@ -454,6 +454,14 @@ func (v *AttachmentsValue) SetValue(jsonData *resource_network_attachments.NDFCA
 	var err diag.Diagnostics
 	err = nil
 
+	if jsonData.Fabric != "" {
+		v.Fabric = types.StringValue(jsonData.Fabric)
+	} else if jsonData.FabricName != "" {
+		v.Fabric = types.StringValue(jsonData.FabricName)
+	} else {
+		v.Fabric = types.StringNull()
+	}
+
 	if jsonData.SwitchName != "" {
 		v.SwitchName = types.StringValue(jsonData.SwitchName)
 	} else {
@@ -878,7 +886,14 @@ func (v NetworksModel) GetModelData() *NDFCNetworksModel {
 
 					// filter_this_value | Bool| []| true
 					// id | Int64| []| true
-					// fabric_name | String| []| true
+					// fabric | String| []| false
+					if !ele2.Fabric.IsNull() && !ele2.Fabric.IsUnknown() {
+
+						data2.Fabric = ele2.Fabric.ValueString()
+					} else {
+						data2.Fabric = ""
+					}
+
 					// network_name | String| []| true
 					// serial_number | String| []| true
 					// switch_name | String| []| false

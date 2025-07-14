@@ -46,12 +46,12 @@ resource:
               sort: true
               payload_hide: true
             - model_name: fabric
-              tf_name: fabric_name
+              tf_name: fabric
               type: String
-              id: false
-              mandatory: false
+              optional: true
+              computed: true
+              unmarshal_tag: fabricName
               description: The name of the fabric
-              tf_hide: true
             - model_name: networkName
               tf_name: network_name
               type: String
