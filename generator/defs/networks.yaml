@@ -230,9 +230,10 @@ resource:
         ndfc_nested: [networkTemplateConfig]
         tf_name: ingress_replication
         type: Bool
-        default_value: false
-        description: Ingress replication flag. Read-only per network, Fabric-wide setting.
+        optional: true
+        computed: true
         example: false
+        description: Ingress replication flag. Read-only per network, Fabric-wide setting.
       - &mcastGroup
         model_name: mcastGroup
         ndfc_nested: [networkTemplateConfig]
@@ -299,7 +300,8 @@ resource:
         ndfc_nested: [networkTemplateConfig]
         tf_name: netflow
         type: Bool
-        default_value: false
+        optional: true
+        computed: true
         description: Netflow enable flag. Netflow is supported only if it is enabled on fabric. For NX-OS only.
         example: false
       - &sviNetflowMonitor
@@ -321,7 +323,8 @@ resource:
         ndfc_nested: [networkTemplateConfig]
         tf_name: l3_gatway_border
         type: Bool
-        default_value: false
+        optional: true
+        computed: true
         description: Enable L3 Gateway on Border
         example: true
       - &igmpVerion

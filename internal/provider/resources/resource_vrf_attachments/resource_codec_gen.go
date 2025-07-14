@@ -15,7 +15,7 @@ import (
 )
 
 type NDFCVrfAttachmentsModel struct {
-	FabricName           string                             `json:"fabric,omitempty"`
+	Fabric               string                             `json:"fabric,omitempty"`
 	DeployAllAttachments bool                               `json:"-"`
 	VrfAttachments       map[string]NDFCVrfAttachmentsValue `json:"attachments,omitempty"`
 }
@@ -31,7 +31,8 @@ type NDFCVrfAttachmentsValue struct {
 type NDFCAttachListValue struct {
 	FilterThisValue      bool                    `json:"-"`
 	Id                   *int64                  `json:"-"`
-	FabricName           string                  `json:"fabric,omitempty"`
+	Fabric               string                  `json:"fabric,omitempty"`
+	FabricName           string                  `json:"fabricName,omitempty"`
 	VrfName              string                  `json:"vrfName,omitempty"`
 	SerialNumber         string                  `json:"serialNumber,omitempty"`
 	SwitchSerialNo       string                  `json:"switchSerialNo,omitempty"`

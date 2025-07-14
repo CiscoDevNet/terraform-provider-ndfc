@@ -18,6 +18,7 @@ resource "ndfc_fabric_vxlan_msd" "test_resource_fabric_vxlan_msd_1" {
   anycast_gw_mac             = "2020.0000.00aa"
   bgw_routing_tag            = 54321
   border_gwy_connections     = "Manual"
+  child_fabrics              = ["TF_FABRIC_VXLAN_1", "TF_FABRIC_VXLAN_2"]
   cloudsec_autoconfig        = false
   dci_subnet_range           = "10.10.1.0/24"
   dci_subnet_target_mask     = 30
@@ -52,6 +53,7 @@ resource "ndfc_fabric_vxlan_msd" "test_resource_fabric_vxlan_msd_1" {
 - `bgp_rp_asn` (String) 1-4294967295 | 1-65535[.0-65535], e.g. 65000, 65001
 - `bgw_routing_tag` (Number) Routing tag associated with IP address of loopback and DCI interfaces
 - `border_gwy_connections` (String) Manual, Auto Overlay EVPN Peering to Route Servers, Auto Overlay EVPN Direct Peering to Border Gateways
+- `child_fabrics` (Set of String) Add child fabrics to the MSD fabric
 - `cloudsec_algorithm` (String) CloudSec Cryptographic Algorithm
 - `cloudsec_autoconfig` (Boolean) Auto Config CloudSec on Border Gateways
 - `cloudsec_enforcement` (String) If set to 'strict', data across site must be encrypted.

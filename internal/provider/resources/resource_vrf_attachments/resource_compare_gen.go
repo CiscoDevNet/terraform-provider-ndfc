@@ -17,6 +17,10 @@ import (
 
 func (v NDFCAttachListValue) DeepEqual(c NDFCAttachListValue) int {
 	cf := false
+	if v.Fabric != c.Fabric {
+		log.Printf("v.Fabric=%v, c.Fabric=%v", v.Fabric, c.Fabric)
+		return RequiresUpdate
+	}
 
 	if !v.Vlan.IsEmpty() && !c.Vlan.IsEmpty() {
 		if *v.Vlan != *c.Vlan {
@@ -89,6 +93,21 @@ func (v NDFCVrfAttachmentsValue) DeepEqual(c NDFCVrfAttachmentsValue) int {
 
 func (v *NDFCAttachListValue) CreatePlan(c NDFCAttachListValue, cf *bool) int {
 	action := ActionNone
+
+	if v.Fabric != "" {
+
+		if v.Fabric != c.Fabric {
+			log.Printf("Update: v.Fabric=%v, c.Fabric=%v", v.Fabric, c.Fabric)
+			if action == ActionNone || action == RequiresUpdate {
+				action = RequiresUpdate
+			}
+		}
+
+	} else {
+		//v empty, fill with c
+		log.Printf("Copy from state: v.Fabric=%v, c.Fabric=%v", v.Fabric, c.Fabric)
+		v.Fabric = c.Fabric
+	}
 
 	if !v.Vlan.IsEmpty() && !c.Vlan.IsEmpty() {
 		if *v.Vlan != *c.Vlan {
