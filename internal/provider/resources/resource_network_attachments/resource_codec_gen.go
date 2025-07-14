@@ -26,7 +26,8 @@ type NDFCNetworkAttachmentsValue struct {
 type NDFCAttachmentsValue struct {
 	FilterThisValue      bool         `json:"-"`
 	Id                   *int64       `json:"-"`
-	FabricName           string       `json:"fabric,omitempty"`
+	Fabric               string       `json:"fabric,omitempty"`
+	FabricName           string       `json:"fabricName,omitempty"`
 	NetworkName          string       `json:"networkName,omitempty"`
 	SerialNumber         string       `json:"serialNumber,omitempty"`
 	SwitchSerialNo       string       `json:"switchSerialNo,omitempty"`

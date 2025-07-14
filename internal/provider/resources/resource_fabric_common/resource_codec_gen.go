@@ -126,6 +126,7 @@ type NDFCFabricCommonModel struct {
 	BgpLbId                                 *Int64Custom `json:"BGP_LB_ID,omitempty"`
 	BrownfieldNetworkNameFormat             string       `json:"BROWNFIELD_NETWORK_NAME_FORMAT,omitempty"`
 	BrownfieldSkipOverlayNetworkAttachments string       `json:"BROWNFIELD_SKIP_OVERLAY_NETWORK_ATTACHMENTS,omitempty"`
+	ChildFabrics                            []string     `json:"-"`
 	CoppPolicy                              string       `json:"COPP_POLICY,omitempty"`
 	DciSubnetRange                          string       `json:"DCI_SUBNET_RANGE,omitempty"`
 	DciSubnetTargetMask                     *Int64Custom `json:"DCI_SUBNET_TARGET_MASK,omitempty"`

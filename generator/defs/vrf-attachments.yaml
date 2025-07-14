@@ -12,13 +12,9 @@ resource:
       computed: true
     - &fabricName
       model_name: fabric
-      tf_name: fabric_name
+      tf_name: fabric
       type: String
-      id: false
-      mandatory: true
       description: The name of the fabric
-      example: myFabric
-      tf_requires_replace: true
     - &deploy
       model_name: deployAllAttachments
       tf_name: deploy_all_attachments
@@ -77,8 +73,9 @@ resource:
               sort: true
               payload_hide: true
             - <<: *fabricName
-              mandatory: false
-              tf_hide: true
+              optional: true
+              computed: true
+              unmarshal_tag: fabricName
             - <<: *vrfName
               mandatory: false
               tf_hide: true

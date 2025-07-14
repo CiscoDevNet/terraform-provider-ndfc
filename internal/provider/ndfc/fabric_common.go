@@ -36,17 +36,23 @@ const (
 	ResourceVxlanMsdType     = "MSD_Fabric"
 )
 
-func (f *NDFC) RscReadFabric(ctx context.Context, dg *diag.Diagnostics, tf resource_fabric_common.FabricModel, fType string) {
+func (f *NDFC) RscReadFabric(ctx context.Context, dg *diag.Diagnostics, tf resource_fabric_common.FabricModel, fname string) {
+
 	tflog.Info(ctx, "Read Fabric")
 	var nvPairsModel resource_fabric_common.NdfcFabricPayload
-	model := tf.GetModelData()
-	fapi, _ := f.RscGetFabricApiDetails(ctx, dg, model, fType)
+	fapi := api.NewFabricAPI(f.GetLock(ResourceFabrics), &f.apiClient)
 	if dg.HasError() {
 		return
 	}
 
+	ftype := tf.GetFabricType()
+	tflog.Debug(ctx, fmt.Sprintf("RscReadFabric: ftype %s", ftype))
+	tflog.Debug(ctx, fmt.Sprintf("RscReadFabric: fname %s", fname))
+	fapi.FabricType = ftype
+	fapi.FabricName = fname
+
 	payload, err := fapi.Get()
-	if len(payload) == 0 {
+	if len(payload) == 0 || string(payload) == "[]" {
 		if err == nil {
 			err = fmt.Errorf("fabric not found in NDFC")
 		}
@@ -66,10 +72,12 @@ func (f *NDFC) RscReadFabric(ctx context.Context, dg *diag.Diagnostics, tf resou
 	tf.SetModelData(&nvPairsModel.NdfcFabricNvPairs)
 }
 
-func (f *NDFC) RscCreateFabric(ctx context.Context, dg *diag.Diagnostics, tf resource_fabric_common.FabricModel, fType string) {
+func (f *NDFC) RscCreateFabric(ctx context.Context, dg *diag.Diagnostics, tf resource_fabric_common.FabricModel) {
+
 	tflog.Info(ctx, "Create Fabric")
 	model := tf.GetModelData()
-	fapi, payload := f.RscGetFabricApiDetails(ctx, dg, model, fType)
+	ftype := tf.GetFabricType()
+	fapi, payload := f.RscGetFabricApiDetails(ctx, dg, model, ftype)
 	if dg.HasError() {
 		return
 	}
@@ -84,7 +92,7 @@ func (f *NDFC) RscCreateFabric(ctx context.Context, dg *diag.Diagnostics, tf res
 
 	resp, err := fapi.Post(payload)
 	if err != nil {
-		tflog.Error(ctx, "RscCreateFabric: POST failed with payload %s", map[string]interface{}{"Payload": payload})
+		tflog.Error(ctx, "RscCreateFabric: POST failed with payload %s", map[string]any{"Payload": payload})
 		dg.AddError("Failed to create fabric", fmt.Sprintf("Error: %q Response :%s", err.Error(), resp.String()))
 		return
 	}
@@ -93,35 +101,39 @@ func (f *NDFC) RscCreateFabric(ctx context.Context, dg *diag.Diagnostics, tf res
 		err = fmt.Errorf("no switches found in the fabric for deployment")
 		dg.AddWarning("Fabric created but not deployed", fmt.Sprintf("Reason: %q", err.Error()))
 	}
-	f.RscReadFabric(ctx, dg, tf, fType)
+	f.RscReadFabric(ctx, dg, tf, model.FabricName)
 
 }
-func (f *NDFC) RscUpdateFabric(ctx context.Context, dg *diag.Diagnostics, tf resource_fabric_common.FabricModel, fType string) {
+func (f *NDFC) RscUpdateFabric(ctx context.Context, dg *diag.Diagnostics, tf resource_fabric_common.FabricModel) {
+
 	tflog.Info(ctx, "Update Fabric")
+	ftype := tf.GetFabricType()
 	model := tf.GetModelData()
-	fabricName := model.FabricName
+	fname := model.FabricName
 	deploy := model.Deploy
-	fapi, payload := f.RscGetFabricApiDetails(ctx, dg, model, fType)
+
+	fapi, payload := f.RscGetFabricApiDetails(ctx, dg, model, ftype)
 	if dg.HasError() {
 		return
 	}
 
 	res, err := fapi.Put(payload)
 	if err != nil {
-		tflog.Error(ctx, "RscUpdateFabric: PUT failed with payload %s", map[string]interface{}{"Payload": payload})
+		tflog.Error(ctx, "RscUpdateFabric: PUT failed with payload %s", map[string]any{"Payload": payload})
 		dg.AddError("Failed to update fabric", fmt.Sprintf("Error: %q %q", err.Error(), res.String()))
 		return
 	}
-	f.RscDeployFabric(ctx, dg, fabricName, deploy)
+	f.RscDeployFabric(ctx, dg, fname, deploy)
 	if dg.HasError() {
 		return
 	}
-	f.RscReadFabric(ctx, dg, tf, fType)
+	f.RscReadFabric(ctx, dg, tf, fname)
 }
-func (f *NDFC) RscDeleteFabric(ctx context.Context, dg *diag.Diagnostics, tf resource_fabric_common.FabricModel, fType string) {
+func (f *NDFC) RscDeleteFabric(ctx context.Context, dg *diag.Diagnostics, fname string) {
+
 	tflog.Info(ctx, "Delete Fabric")
-	model := tf.GetModelData()
-	fapi, _ := f.RscGetFabricApiDetails(ctx, dg, model, fType)
+	fapi := api.NewFabricAPI(f.GetLock(ResourceFabrics), &f.apiClient)
+	fapi.FabricName = fname
 	if dg.HasError() {
 		tflog.Error(ctx, "RscDeleteFabric: Failed to get fabric api details")
 		return
@@ -130,7 +142,7 @@ func (f *NDFC) RscDeleteFabric(ctx context.Context, dg *diag.Diagnostics, tf res
 	/* Check if switches are present in the fabric before deleting the fabric
 	   and throw an error if switches are present */
 
-	payload, err := f.GetSwitchesInFabric(ctx, model.FabricName)
+	payload, err := f.GetSwitchesInFabric(ctx, fname)
 	tflog.Debug(ctx, fmt.Sprintf("RscDeployFabric: payload %s", string(payload)))
 	if !(len(payload) == 0 || string(payload) == "[]") {
 		if err == nil {
@@ -155,18 +167,19 @@ func (f *NDFC) RscDeleteFabric(ctx context.Context, dg *diag.Diagnostics, tf res
 		/* Fabric is deleted. */
 		return
 	} else {
-		dg.AddError("Fabric delete failed", fmt.Sprintf("Fabric %s is not deleted", model.FabricName))
+		dg.AddError("Fabric delete failed", fmt.Sprintf("Fabric %s is not deleted", fname))
 	}
 }
-func (f NDFC) RscImportFabric(ctx context.Context, dg *diag.Diagnostics, tf resource_fabric_common.FabricModel, fType string) {
+func (f NDFC) RscImportFabric(ctx context.Context, dg *diag.Diagnostics, tf resource_fabric_common.FabricModel, fname string) {
 	tflog.Info(ctx, "Import  Fabric")
-	f.RscReadFabric(ctx, dg, tf, fType)
+	f.RscReadFabric(ctx, dg, tf, fname)
+
 }
 
-func (f NDFC) RscGetFabricApiDetails(ctx context.Context, dg *diag.Diagnostics, model *resource_fabric_common.NDFCFabricCommonModel, fType string) (*api.FabricAPI, []byte) {
+func (f NDFC) RscGetFabricApiDetails(ctx context.Context, dg *diag.Diagnostics, model *resource_fabric_common.NDFCFabricCommonModel, ftype string) (*api.FabricAPI, []byte) {
 	tflog.Info(ctx, "Retrieve payload and fabric api object")
 	fapi := api.NewFabricAPI(f.GetLock(ResourceFabrics), &f.apiClient)
-	fapi.FabricType = fType
+	fapi.FabricType = ftype
 	fapi.FabricName = model.FabricName
 	payload, err := json.Marshal(model)
 	if err != nil {
@@ -176,9 +189,9 @@ func (f NDFC) RscGetFabricApiDetails(ctx context.Context, dg *diag.Diagnostics, 
 	}
 	return fapi, payload
 }
-func (f *NDFC) RscDeployFabric(ctx context.Context, dg *diag.Diagnostics, fabricName string, deploy bool) {
+func (f *NDFC) RscDeployFabric(ctx context.Context, dg *diag.Diagnostics, fname string, deploy bool) {
 	if deploy {
-		payload, err := f.GetSwitchesInFabric(ctx, fabricName)
+		payload, err := f.GetSwitchesInFabric(ctx, fname)
 		tflog.Debug(ctx, fmt.Sprintf("RscDeployFabric: payload %s", string(payload)))
 		if len(payload) == 0 || string(payload) == "[]" {
 			if err == nil {
@@ -188,15 +201,15 @@ func (f *NDFC) RscDeployFabric(ctx context.Context, dg *diag.Diagnostics, fabric
 			dg.AddWarning("Fabric not deployed", fmt.Sprintf("Reason: %q", err.Error()))
 			return
 		}
-		f.RecalculateAndDeploy(ctx, dg, fabricName, true, deploy, nil)
+		f.RecalculateAndDeploy(ctx, dg, fname, true, deploy, nil)
 		if dg.HasError() {
 			return
 		}
 	}
 }
-func (f *NDFC) GetSwitchesInFabric(ctx context.Context, fabricName string) ([]byte, error) {
+func (f *NDFC) GetSwitchesInFabric(ctx context.Context, fname string) ([]byte, error) {
 	fapi := api.NewFabricAPI(f.GetLock(ResourceFabrics), &f.apiClient)
-	fapi.FabricName = fabricName
+	fapi.FabricName = fname
 	fapi.GetSwitchesInFabric = true
 	return fapi.Get()
 }
@@ -216,10 +229,28 @@ func (f *NDFC) GetFabricName(ctx context.Context, serialNumber string) string {
 	return FabricNamePayload.FabricName
 
 }
-func (f *NDFC) DSGetFabric(ctx context.Context, dg *diag.Diagnostics, fabricName string) *datasource_fabric.FabricModel {
+func (c NDFC) GetFabricTemplateType(ctx context.Context, dg *diag.Diagnostics, fname string) string {
+	var nvPairsModel resource_fabric_common.NdfcFabricPayload
+	fapi := api.NewFabricAPI(c.GetLock(ResourceFabrics), &c.apiClient)
+	fapi.FabricName = fname
+	payload, err := fapi.Get()
+	if len(payload) == 0 {
+		tflog.Error(ctx, "Error while getting fabric template type ", map[string]any{"Err": err})
+		dg.AddError("Failed to read fabric template type", err.Error())
+		return ""
+	}
+	err = json.Unmarshal(payload, &nvPairsModel)
+	if err != nil {
+		tflog.Error(ctx, "Error while unmarshalling fabric template type ", map[string]any{"Err": err})
+		dg.AddError("Failed to unmarshal fabric template type", err.Error())
+	}
+
+	return nvPairsModel.FabricType
+}
+func (f *NDFC) DSGetFabric(ctx context.Context, dg *diag.Diagnostics, fname string) *datasource_fabric.FabricModel {
 	tflog.Debug(ctx, "DSGetFabricBulk entry")
 	fapi := api.NewFabricAPI(f.GetLock(ResourceFabrics), &f.apiClient)
-	fapi.FabricName = fabricName
+	fapi.FabricName = fname
 	res, err := fapi.Get()
 	if err != nil {
 		dg.AddError("Get failed", err.Error())

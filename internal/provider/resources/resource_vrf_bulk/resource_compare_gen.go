@@ -137,17 +137,29 @@ func (v NDFCVrfsValue) DeepEqual(c NDFCVrfsValue) int {
 		log.Printf("v.VrfTemplateConfig.Ipv6LinkLocal=%s, c.VrfTemplateConfig.Ipv6LinkLocal=%s", v.VrfTemplateConfig.Ipv6LinkLocal, c.VrfTemplateConfig.Ipv6LinkLocal)
 		return RequiresUpdate
 	}
-	if v.VrfTemplateConfig.Trm != c.VrfTemplateConfig.Trm {
-		log.Printf("v.VrfTemplateConfig.Trm=%s, c.VrfTemplateConfig.Trm=%s", v.VrfTemplateConfig.Trm, c.VrfTemplateConfig.Trm)
-		return RequiresUpdate
+	if v.VrfTemplateConfig.Trm != "" {
+		if v.VrfTemplateConfig.Trm != c.VrfTemplateConfig.Trm {
+			log.Printf("v.VrfTemplateConfig.Trm=%s, c.VrfTemplateConfig.Trm=%s", v.VrfTemplateConfig.Trm, c.VrfTemplateConfig.Trm)
+			return RequiresUpdate
+		}
+	} else {
+		log.Printf("Skipping - v.VrfTemplateConfig.Trm=%s, c.VrfTemplateConfig.Trm=%s", v.VrfTemplateConfig.Trm, c.VrfTemplateConfig.Trm)
 	}
-	if v.VrfTemplateConfig.NoRp != c.VrfTemplateConfig.NoRp {
-		log.Printf("v.VrfTemplateConfig.NoRp=%s, c.VrfTemplateConfig.NoRp=%s", v.VrfTemplateConfig.NoRp, c.VrfTemplateConfig.NoRp)
-		return RequiresUpdate
+	if v.VrfTemplateConfig.NoRp != "" {
+		if v.VrfTemplateConfig.NoRp != c.VrfTemplateConfig.NoRp {
+			log.Printf("v.VrfTemplateConfig.NoRp=%s, c.VrfTemplateConfig.NoRp=%s", v.VrfTemplateConfig.NoRp, c.VrfTemplateConfig.NoRp)
+			return RequiresUpdate
+		}
+	} else {
+		log.Printf("Skipping - v.VrfTemplateConfig.NoRp=%s, c.VrfTemplateConfig.NoRp=%s", v.VrfTemplateConfig.NoRp, c.VrfTemplateConfig.NoRp)
 	}
-	if v.VrfTemplateConfig.RpExternal != c.VrfTemplateConfig.RpExternal {
-		log.Printf("v.VrfTemplateConfig.RpExternal=%s, c.VrfTemplateConfig.RpExternal=%s", v.VrfTemplateConfig.RpExternal, c.VrfTemplateConfig.RpExternal)
-		return RequiresUpdate
+	if v.VrfTemplateConfig.RpExternal != "" {
+		if v.VrfTemplateConfig.RpExternal != c.VrfTemplateConfig.RpExternal {
+			log.Printf("v.VrfTemplateConfig.RpExternal=%s, c.VrfTemplateConfig.RpExternal=%s", v.VrfTemplateConfig.RpExternal, c.VrfTemplateConfig.RpExternal)
+			return RequiresUpdate
+		}
+	} else {
+		log.Printf("Skipping - v.VrfTemplateConfig.RpExternal=%s, c.VrfTemplateConfig.RpExternal=%s", v.VrfTemplateConfig.RpExternal, c.VrfTemplateConfig.RpExternal)
 	}
 	if v.VrfTemplateConfig.RpAddress != c.VrfTemplateConfig.RpAddress {
 		log.Printf("v.VrfTemplateConfig.RpAddress=%s, c.VrfTemplateConfig.RpAddress=%s", v.VrfTemplateConfig.RpAddress, c.VrfTemplateConfig.RpAddress)
@@ -176,25 +188,45 @@ func (v NDFCVrfsValue) DeepEqual(c NDFCVrfsValue) int {
 		log.Printf("v.VrfTemplateConfig.OverlayMulticastGroups=%s, c.VrfTemplateConfig.OverlayMulticastGroups=%s", v.VrfTemplateConfig.OverlayMulticastGroups, c.VrfTemplateConfig.OverlayMulticastGroups)
 		return RequiresUpdate
 	}
-	if v.VrfTemplateConfig.MvpnInterAs != c.VrfTemplateConfig.MvpnInterAs {
-		log.Printf("v.VrfTemplateConfig.MvpnInterAs=%s, c.VrfTemplateConfig.MvpnInterAs=%s", v.VrfTemplateConfig.MvpnInterAs, c.VrfTemplateConfig.MvpnInterAs)
-		return RequiresUpdate
+	if v.VrfTemplateConfig.MvpnInterAs != "" {
+		if v.VrfTemplateConfig.MvpnInterAs != c.VrfTemplateConfig.MvpnInterAs {
+			log.Printf("v.VrfTemplateConfig.MvpnInterAs=%s, c.VrfTemplateConfig.MvpnInterAs=%s", v.VrfTemplateConfig.MvpnInterAs, c.VrfTemplateConfig.MvpnInterAs)
+			return RequiresUpdate
+		}
+	} else {
+		log.Printf("Skipping - v.VrfTemplateConfig.MvpnInterAs=%s, c.VrfTemplateConfig.MvpnInterAs=%s", v.VrfTemplateConfig.MvpnInterAs, c.VrfTemplateConfig.MvpnInterAs)
 	}
-	if v.VrfTemplateConfig.TrmBgwMsite != c.VrfTemplateConfig.TrmBgwMsite {
-		log.Printf("v.VrfTemplateConfig.TrmBgwMsite=%s, c.VrfTemplateConfig.TrmBgwMsite=%s", v.VrfTemplateConfig.TrmBgwMsite, c.VrfTemplateConfig.TrmBgwMsite)
-		return RequiresUpdate
+	if v.VrfTemplateConfig.TrmBgwMsite != "" {
+		if v.VrfTemplateConfig.TrmBgwMsite != c.VrfTemplateConfig.TrmBgwMsite {
+			log.Printf("v.VrfTemplateConfig.TrmBgwMsite=%s, c.VrfTemplateConfig.TrmBgwMsite=%s", v.VrfTemplateConfig.TrmBgwMsite, c.VrfTemplateConfig.TrmBgwMsite)
+			return RequiresUpdate
+		}
+	} else {
+		log.Printf("Skipping - v.VrfTemplateConfig.TrmBgwMsite=%s, c.VrfTemplateConfig.TrmBgwMsite=%s", v.VrfTemplateConfig.TrmBgwMsite, c.VrfTemplateConfig.TrmBgwMsite)
 	}
-	if v.VrfTemplateConfig.AdvertiseHostRoutes != c.VrfTemplateConfig.AdvertiseHostRoutes {
-		log.Printf("v.VrfTemplateConfig.AdvertiseHostRoutes=%s, c.VrfTemplateConfig.AdvertiseHostRoutes=%s", v.VrfTemplateConfig.AdvertiseHostRoutes, c.VrfTemplateConfig.AdvertiseHostRoutes)
-		return RequiresUpdate
+	if v.VrfTemplateConfig.AdvertiseHostRoutes != "" {
+		if v.VrfTemplateConfig.AdvertiseHostRoutes != c.VrfTemplateConfig.AdvertiseHostRoutes {
+			log.Printf("v.VrfTemplateConfig.AdvertiseHostRoutes=%s, c.VrfTemplateConfig.AdvertiseHostRoutes=%s", v.VrfTemplateConfig.AdvertiseHostRoutes, c.VrfTemplateConfig.AdvertiseHostRoutes)
+			return RequiresUpdate
+		}
+	} else {
+		log.Printf("Skipping - v.VrfTemplateConfig.AdvertiseHostRoutes=%s, c.VrfTemplateConfig.AdvertiseHostRoutes=%s", v.VrfTemplateConfig.AdvertiseHostRoutes, c.VrfTemplateConfig.AdvertiseHostRoutes)
 	}
-	if v.VrfTemplateConfig.AdvertiseDefaultRoute != c.VrfTemplateConfig.AdvertiseDefaultRoute {
-		log.Printf("v.VrfTemplateConfig.AdvertiseDefaultRoute=%s, c.VrfTemplateConfig.AdvertiseDefaultRoute=%s", v.VrfTemplateConfig.AdvertiseDefaultRoute, c.VrfTemplateConfig.AdvertiseDefaultRoute)
-		return RequiresUpdate
+	if v.VrfTemplateConfig.AdvertiseDefaultRoute != "" {
+		if v.VrfTemplateConfig.AdvertiseDefaultRoute != c.VrfTemplateConfig.AdvertiseDefaultRoute {
+			log.Printf("v.VrfTemplateConfig.AdvertiseDefaultRoute=%s, c.VrfTemplateConfig.AdvertiseDefaultRoute=%s", v.VrfTemplateConfig.AdvertiseDefaultRoute, c.VrfTemplateConfig.AdvertiseDefaultRoute)
+			return RequiresUpdate
+		}
+	} else {
+		log.Printf("Skipping - v.VrfTemplateConfig.AdvertiseDefaultRoute=%s, c.VrfTemplateConfig.AdvertiseDefaultRoute=%s", v.VrfTemplateConfig.AdvertiseDefaultRoute, c.VrfTemplateConfig.AdvertiseDefaultRoute)
 	}
-	if v.VrfTemplateConfig.ConfigureStaticDefaultRoute != c.VrfTemplateConfig.ConfigureStaticDefaultRoute {
-		log.Printf("v.VrfTemplateConfig.ConfigureStaticDefaultRoute=%s, c.VrfTemplateConfig.ConfigureStaticDefaultRoute=%s", v.VrfTemplateConfig.ConfigureStaticDefaultRoute, c.VrfTemplateConfig.ConfigureStaticDefaultRoute)
-		return RequiresUpdate
+	if v.VrfTemplateConfig.ConfigureStaticDefaultRoute != "" {
+		if v.VrfTemplateConfig.ConfigureStaticDefaultRoute != c.VrfTemplateConfig.ConfigureStaticDefaultRoute {
+			log.Printf("v.VrfTemplateConfig.ConfigureStaticDefaultRoute=%s, c.VrfTemplateConfig.ConfigureStaticDefaultRoute=%s", v.VrfTemplateConfig.ConfigureStaticDefaultRoute, c.VrfTemplateConfig.ConfigureStaticDefaultRoute)
+			return RequiresUpdate
+		}
+	} else {
+		log.Printf("Skipping - v.VrfTemplateConfig.ConfigureStaticDefaultRoute=%s, c.VrfTemplateConfig.ConfigureStaticDefaultRoute=%s", v.VrfTemplateConfig.ConfigureStaticDefaultRoute, c.VrfTemplateConfig.ConfigureStaticDefaultRoute)
 	}
 	if v.VrfTemplateConfig.BgpPassword != c.VrfTemplateConfig.BgpPassword {
 		log.Printf("v.VrfTemplateConfig.BgpPassword=%s, c.VrfTemplateConfig.BgpPassword=%s", v.VrfTemplateConfig.BgpPassword, c.VrfTemplateConfig.BgpPassword)
@@ -204,9 +236,13 @@ func (v NDFCVrfsValue) DeepEqual(c NDFCVrfsValue) int {
 		log.Printf("v.VrfTemplateConfig.BgpPasswordType=%s, c.VrfTemplateConfig.BgpPasswordType=%s", v.VrfTemplateConfig.BgpPasswordType, c.VrfTemplateConfig.BgpPasswordType)
 		return RequiresUpdate
 	}
-	if v.VrfTemplateConfig.Netflow != c.VrfTemplateConfig.Netflow {
-		log.Printf("v.VrfTemplateConfig.Netflow=%s, c.VrfTemplateConfig.Netflow=%s", v.VrfTemplateConfig.Netflow, c.VrfTemplateConfig.Netflow)
-		return RequiresUpdate
+	if v.VrfTemplateConfig.Netflow != "" {
+		if v.VrfTemplateConfig.Netflow != c.VrfTemplateConfig.Netflow {
+			log.Printf("v.VrfTemplateConfig.Netflow=%s, c.VrfTemplateConfig.Netflow=%s", v.VrfTemplateConfig.Netflow, c.VrfTemplateConfig.Netflow)
+			return RequiresUpdate
+		}
+	} else {
+		log.Printf("Skipping - v.VrfTemplateConfig.Netflow=%s, c.VrfTemplateConfig.Netflow=%s", v.VrfTemplateConfig.Netflow, c.VrfTemplateConfig.Netflow)
 	}
 	if v.VrfTemplateConfig.NetflowMonitor != c.VrfTemplateConfig.NetflowMonitor {
 		log.Printf("v.VrfTemplateConfig.NetflowMonitor=%s, c.VrfTemplateConfig.NetflowMonitor=%s", v.VrfTemplateConfig.NetflowMonitor, c.VrfTemplateConfig.NetflowMonitor)

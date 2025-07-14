@@ -148,7 +148,7 @@ func (c NDFC) networksUpdate(ctx context.Context, dg *diag.Diagnostics, updateRs
 			dg.AddError(fmt.Sprintf("Resource %s, Unmarshal failed", payload.Networks[i].NetworkName), fmt.Sprintf("Error %v, response %s", err, res.Str))
 			return
 		}
-		if ValuesDeeplyEqual != rsNewValue.DeepEqual(payload.Networks[i]) {
+		if ValuesDeeplyEqual != payload.Networks[i].DeepEqual(rsNewValue) {
 			tflog.Error(ctx, "Mismatch in data retrieved after PUT - add to retry list")
 			retryIndices = append(retryIndices, i)
 			continue

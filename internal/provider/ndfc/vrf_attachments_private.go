@@ -124,9 +124,11 @@ func (c NDFC) updateVRFAttachmentAction(ctx context.Context, plan *resource_vrf_
 	}
 
 	for serial, planAttach := range plan.AttachList {
-		tflog.Debug(ctx, fmt.Sprintf("compareAttachments: Attachment %s/%s in plan", plan.VrfName, serial))
+		tflog.Debug(ctx, fmt.Sprintf("compareAttachments: Attachment %s/%s in plan fabric %s", plan.VrfName, serial, plan.FabricName))
 		planAttach.SerialNumber = serial
-		planAttach.FabricName = plan.FabricName
+		if planAttach.Fabric == "" {
+			planAttach.Fabric = plan.FabricName
+		}
 		planAttach.VrfName = plan.VrfName
 		planAttach.UpdateAction = NoChange
 		controlFlag := NoChange
@@ -209,10 +211,6 @@ func (c NDFC) diffVrfAttachments(ctx context.Context, planData *resource_vrf_bul
 
 	tflog.Debug(ctx, "diffVrfAttachments: Entering")
 	//ID, _ := c.VrfAttachmentsCreateID(planData)
-	vaUpdate := new(resource_vrf_bulk.NDFCVrfBulkModel)
-	vaUpdate.Vrfs = make(map[string]resource_vrf_bulk.NDFCVrfsValue)
-	vaUpdate.FabricName = planData.FabricName
-
 	vaUpdatePayload := new(rva.NDFCVrfAttachmentsPayloads)
 	vaUpdatePayload.FabricName = planData.FabricName
 

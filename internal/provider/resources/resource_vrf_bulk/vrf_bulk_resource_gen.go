@@ -52,14 +52,12 @@ func VrfBulkResourceSchema(ctx context.Context) schema.Schema {
 							Computed:            true,
 							Description:         "Flag to Control Advertisement of Default Route Internally",
 							MarkdownDescription: "Flag to Control Advertisement of Default Route Internally",
-							Default:             booldefault.StaticBool(true),
 						},
 						"advertise_host_routes": schema.BoolAttribute{
 							Optional:            true,
 							Computed:            true,
 							Description:         "Flag to Control Advertisement of /32 and /128 Routes to Edge Routers",
 							MarkdownDescription: "Flag to Control Advertisement of /32 and /128 Routes to Edge Routers",
-							Default:             booldefault.StaticBool(false),
 						},
 						"attach_list": schema.MapNestedAttribute{
 							NestedObject: schema.NestedAttributeObject{
@@ -80,6 +78,12 @@ func VrfBulkResourceSchema(ctx context.Context) schema.Schema {
 										Description:         "If set to `true`, does a deployment of the attachment. This parameter cannot be set to `true` if  `deploy_all_attachments` in the resource is set or `deploy_attachment` in the corresponding `vrf` is set",
 										MarkdownDescription: "If set to `true`, does a deployment of the attachment. This parameter cannot be set to `true` if  `deploy_all_attachments` in the resource is set or `deploy_attachment` in the corresponding `vrf` is set",
 										Default:             booldefault.StaticBool(false),
+									},
+									"fabric": schema.StringAttribute{
+										Optional:            true,
+										Computed:            true,
+										Description:         "The name of the fabric",
+										MarkdownDescription: "The name of the fabric",
 									},
 									"freeform_config": schema.StringAttribute{
 										Optional:            true,
@@ -141,7 +145,6 @@ func VrfBulkResourceSchema(ctx context.Context) schema.Schema {
 							Computed:            true,
 							Description:         "Flag to Control Static Default Route Configuration",
 							MarkdownDescription: "Flag to Control Static Default Route Configuration",
-							Default:             booldefault.StaticBool(true),
 						},
 						"deploy_attachments": schema.BoolAttribute{
 							Optional:            true,
@@ -202,14 +205,12 @@ func VrfBulkResourceSchema(ctx context.Context) schema.Schema {
 							Computed:            true,
 							Description:         "Use the inter-as keyword for the MVPN address family routes to cross the BGP autonomous system (AS) boundaries, applicable when TRM is enabled. IOS XE Specific",
 							MarkdownDescription: "Use the inter-as keyword for the MVPN address family routes to cross the BGP autonomous system (AS) boundaries, applicable when TRM is enabled. IOS XE Specific",
-							Default:             booldefault.StaticBool(false),
 						},
 						"netflow": schema.BoolAttribute{
 							Optional:            true,
 							Computed:            true,
 							Description:         "For netflow on VRF-LITE Sub-interface. Supported only if netflow is enabled on fabric. For NX-OS only",
 							MarkdownDescription: "For netflow on VRF-LITE Sub-interface. Supported only if netflow is enabled on fabric. For NX-OS only",
-							Default:             booldefault.StaticBool(false),
 						},
 						"netflow_monitor": schema.StringAttribute{
 							Optional:            true,
@@ -221,7 +222,6 @@ func VrfBulkResourceSchema(ctx context.Context) schema.Schema {
 							Computed:            true,
 							Description:         "There is no RP as only SSM is used",
 							MarkdownDescription: "There is no RP as only SSM is used",
-							Default:             booldefault.StaticBool(false),
 						},
 						"overlay_multicast_groups": schema.StringAttribute{
 							Optional:            true,
@@ -285,7 +285,6 @@ func VrfBulkResourceSchema(ctx context.Context) schema.Schema {
 							Computed:            true,
 							Description:         "Is RP external to the fabric",
 							MarkdownDescription: "Is RP external to the fabric",
-							Default:             booldefault.StaticBool(false),
 						},
 						"rp_loopback_id": schema.Int64Attribute{
 							Optional:            true,
@@ -297,14 +296,12 @@ func VrfBulkResourceSchema(ctx context.Context) schema.Schema {
 							Computed:            true,
 							Description:         "Enable Tenant Routed Multicast",
 							MarkdownDescription: "Enable Tenant Routed Multicast",
-							Default:             booldefault.StaticBool(false),
 						},
 						"trm_bgw_msite": schema.BoolAttribute{
 							Optional:            true,
 							Computed:            true,
 							Description:         "Enable TRM on Border Gateway Multisite",
 							MarkdownDescription: "Enable TRM on Border Gateway Multisite",
-							Default:             booldefault.StaticBool(false),
 						},
 						"underlay_multicast_address": schema.StringAttribute{
 							Optional:            true,
@@ -3020,6 +3017,24 @@ func (t AttachListType) ValueFromObject(ctx context.Context, in basetypes.Object
 			fmt.Sprintf(`deploy_this_attachment expected to be basetypes.BoolValue, was: %T`, deployThisAttachmentAttribute))
 	}
 
+	fabricAttribute, ok := attributes["fabric"]
+
+	if !ok {
+		diags.AddError(
+			"Attribute Missing",
+			`fabric is missing from object`)
+
+		return nil, diags
+	}
+
+	fabricVal, ok := fabricAttribute.(basetypes.StringValue)
+
+	if !ok {
+		diags.AddError(
+			"Attribute Wrong Type",
+			fmt.Sprintf(`fabric expected to be basetypes.StringValue, was: %T`, fabricAttribute))
+	}
+
 	freeformConfigAttribute, ok := attributes["freeform_config"]
 
 	if !ok {
@@ -3136,6 +3151,7 @@ func (t AttachListType) ValueFromObject(ctx context.Context, in basetypes.Object
 		AttachState:          attachStateVal,
 		Attached:             attachedVal,
 		DeployThisAttachment: deployThisAttachmentVal,
+		Fabric:               fabricVal,
 		FreeformConfig:       freeformConfigVal,
 		LoopbackId:           loopbackIdVal,
 		LoopbackIpv4:         loopbackIpv4Val,
@@ -3263,6 +3279,24 @@ func NewAttachListValue(attributeTypes map[string]attr.Type, attributes map[stri
 			fmt.Sprintf(`deploy_this_attachment expected to be basetypes.BoolValue, was: %T`, deployThisAttachmentAttribute))
 	}
 
+	fabricAttribute, ok := attributes["fabric"]
+
+	if !ok {
+		diags.AddError(
+			"Attribute Missing",
+			`fabric is missing from object`)
+
+		return NewAttachListValueUnknown(), diags
+	}
+
+	fabricVal, ok := fabricAttribute.(basetypes.StringValue)
+
+	if !ok {
+		diags.AddError(
+			"Attribute Wrong Type",
+			fmt.Sprintf(`fabric expected to be basetypes.StringValue, was: %T`, fabricAttribute))
+	}
+
 	freeformConfigAttribute, ok := attributes["freeform_config"]
 
 	if !ok {
@@ -3379,6 +3413,7 @@ func NewAttachListValue(attributeTypes map[string]attr.Type, attributes map[stri
 		AttachState:          attachStateVal,
 		Attached:             attachedVal,
 		DeployThisAttachment: deployThisAttachmentVal,
+		Fabric:               fabricVal,
 		FreeformConfig:       freeformConfigVal,
 		LoopbackId:           loopbackIdVal,
 		LoopbackIpv4:         loopbackIpv4Val,
@@ -3460,6 +3495,7 @@ type AttachListValue struct {
 	AttachState          basetypes.StringValue `tfsdk:"attach_state"`
 	Attached             basetypes.BoolValue   `tfsdk:"attached"`
 	DeployThisAttachment basetypes.BoolValue   `tfsdk:"deploy_this_attachment"`
+	Fabric               basetypes.StringValue `tfsdk:"fabric"`
 	FreeformConfig       basetypes.StringValue `tfsdk:"freeform_config"`
 	LoopbackId           basetypes.Int64Value  `tfsdk:"loopback_id"`
 	LoopbackIpv4         basetypes.StringValue `tfsdk:"loopback_ipv4"`
@@ -3470,7 +3506,7 @@ type AttachListValue struct {
 }
 
 func (v AttachListValue) ToTerraformValue(ctx context.Context) (tftypes.Value, error) {
-	attrTypes := make(map[string]tftypes.Type, 9)
+	attrTypes := make(map[string]tftypes.Type, 10)
 
 	var val tftypes.Value
 	var err error
@@ -3478,6 +3514,7 @@ func (v AttachListValue) ToTerraformValue(ctx context.Context) (tftypes.Value, e
 	attrTypes["attach_state"] = basetypes.StringType{}.TerraformType(ctx)
 	attrTypes["attached"] = basetypes.BoolType{}.TerraformType(ctx)
 	attrTypes["deploy_this_attachment"] = basetypes.BoolType{}.TerraformType(ctx)
+	attrTypes["fabric"] = basetypes.StringType{}.TerraformType(ctx)
 	attrTypes["freeform_config"] = basetypes.StringType{}.TerraformType(ctx)
 	attrTypes["loopback_id"] = basetypes.Int64Type{}.TerraformType(ctx)
 	attrTypes["loopback_ipv4"] = basetypes.StringType{}.TerraformType(ctx)
@@ -3489,7 +3526,7 @@ func (v AttachListValue) ToTerraformValue(ctx context.Context) (tftypes.Value, e
 
 	switch v.state {
 	case attr.ValueStateKnown:
-		vals := make(map[string]tftypes.Value, 9)
+		vals := make(map[string]tftypes.Value, 10)
 
 		val, err = v.AttachState.ToTerraformValue(ctx)
 
@@ -3514,6 +3551,14 @@ func (v AttachListValue) ToTerraformValue(ctx context.Context) (tftypes.Value, e
 		}
 
 		vals["deploy_this_attachment"] = val
+
+		val, err = v.Fabric.ToTerraformValue(ctx)
+
+		if err != nil {
+			return tftypes.NewValue(objectType, tftypes.UnknownValue), err
+		}
+
+		vals["fabric"] = val
 
 		val, err = v.FreeformConfig.ToTerraformValue(ctx)
 
@@ -3596,6 +3641,7 @@ func (v AttachListValue) ToObjectValue(ctx context.Context) (basetypes.ObjectVal
 		"attach_state":           basetypes.StringType{},
 		"attached":               basetypes.BoolType{},
 		"deploy_this_attachment": basetypes.BoolType{},
+		"fabric":                 basetypes.StringType{},
 		"freeform_config":        basetypes.StringType{},
 		"loopback_id":            basetypes.Int64Type{},
 		"loopback_ipv4":          basetypes.StringType{},
@@ -3618,6 +3664,7 @@ func (v AttachListValue) ToObjectValue(ctx context.Context) (basetypes.ObjectVal
 			"attach_state":           v.AttachState,
 			"attached":               v.Attached,
 			"deploy_this_attachment": v.DeployThisAttachment,
+			"fabric":                 v.Fabric,
 			"freeform_config":        v.FreeformConfig,
 			"loopback_id":            v.LoopbackId,
 			"loopback_ipv4":          v.LoopbackIpv4,
@@ -3653,6 +3700,10 @@ func (v AttachListValue) Equal(o attr.Value) bool {
 	}
 
 	if !v.DeployThisAttachment.Equal(other.DeployThisAttachment) {
+		return false
+	}
+
+	if !v.Fabric.Equal(other.Fabric) {
 		return false
 	}
 
@@ -3696,6 +3747,7 @@ func (v AttachListValue) AttributeTypes(ctx context.Context) map[string]attr.Typ
 		"attach_state":           basetypes.StringType{},
 		"attached":               basetypes.BoolType{},
 		"deploy_this_attachment": basetypes.BoolType{},
+		"fabric":                 basetypes.StringType{},
 		"freeform_config":        basetypes.StringType{},
 		"loopback_id":            basetypes.Int64Type{},
 		"loopback_ipv4":          basetypes.StringType{},
