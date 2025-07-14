@@ -68,7 +68,7 @@ func (r *fabricLanClassicResource) Create(ctx context.Context, req resource.Crea
 		panic("Client is nil")
 	}
 	deploy := planData.Deploy.ValueBool()
-	r.client.RscCreateFabric(ctx, &resp.Diagnostics, &planData, ndfc.ResourceLanClassicType)
+	r.client.RscCreateFabric(ctx, &resp.Diagnostics, &planData)
 	planData.Deploy = types.BoolValue(deploy)
 	planData.Id = planData.FabricName
 	tflog.Debug(ctx, "data.Id = "+planData.Id.ValueString())
@@ -105,10 +105,10 @@ func (r *fabricLanClassicResource) Read(ctx context.Context, req resource.ReadRe
 		resp.State.RemoveResource(ctx)
 		return
 	}
-	unique_id := data.Id.ValueString()
-	tflog.Info(ctx, fmt.Sprintf("Incoming ID %s", unique_id))
+	id := data.Id.ValueString()
+	tflog.Info(ctx, fmt.Sprintf("Incoming ID %s", id))
 	deploy := data.Deploy.ValueBool()
-	r.client.RscReadFabric(ctx, &resp.Diagnostics, &data, ndfc.ResourceLanClassicType)
+	r.client.RscReadFabric(ctx, &resp.Diagnostics, &data, data.FabricName.ValueString())
 	data.Deploy = types.BoolValue(deploy)
 	data.Id = data.FabricName
 	tflog.Debug(ctx, "data.FabricName = "+data.FabricName.ValueString())
@@ -140,7 +140,7 @@ func (r *fabricLanClassicResource) Update(ctx context.Context, req resource.Upda
 	}
 	// Create API call logic
 	deploy := planData.Deploy.ValueBool()
-	r.client.RscUpdateFabric(ctx, &resp.Diagnostics, &planData, ndfc.ResourceLanClassicType)
+	r.client.RscUpdateFabric(ctx, &resp.Diagnostics, &planData)
 	planData.Deploy = types.BoolValue(deploy)
 	planData.Id = planData.FabricName
 	if deploy {
@@ -156,8 +156,8 @@ func (r *fabricLanClassicResource) Update(ctx context.Context, req resource.Upda
 		tflog.Error(ctx, "Update Fabric Failed")
 		return
 	}
-	unique_id := planData.Id.ValueString()
-	tflog.Info(ctx, fmt.Sprintf("Update Fabric Success %s", unique_id))
+	id := planData.Id.ValueString()
+	tflog.Info(ctx, fmt.Sprintf("Update Fabric Success %s", id))
 
 	resp.Diagnostics.Append(resp.State.Set(ctx, &planData)...)
 }
@@ -175,7 +175,7 @@ func (r *fabricLanClassicResource) Delete(ctx context.Context, req resource.Dele
 		resp.State.RemoveResource(ctx)
 		return
 	}
-	r.client.RscDeleteFabric(ctx, &resp.Diagnostics, &stateData, ndfc.ResourceLanClassicType)
+	r.client.RscDeleteFabric(ctx, &resp.Diagnostics, stateData.FabricName.ValueString())
 	if resp.Diagnostics.HasError() {
 		tflog.Error(ctx, "Delete Fabric Failed")
 		return
@@ -191,7 +191,7 @@ func (r *fabricLanClassicResource) ImportState(ctx context.Context, req resource
 		return
 	}
 	data.FabricName = types.StringValue(req.ID)
-	r.client.RscImportFabric(ctx, &resp.Diagnostics, &data, ndfc.ResourceLanClassicType)
+	r.client.RscImportFabric(ctx, &resp.Diagnostics, &data, req.ID)
 	if resp.Diagnostics.HasError() {
 		return
 	}

@@ -39,7 +39,6 @@ func (i *CSVString) UnmarshalJSON(data []byte) error {
 		ss = ssUn
 	}
 	*i = strings.Split(ss, ",")
-
 	return nil
 }
 

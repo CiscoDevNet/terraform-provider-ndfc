@@ -76,7 +76,7 @@ resource:
         default_value: Default_VRF_Universal
         example: Default_VRF_Universal
       - &vrfExtensionTemplate
-        model_name: vrfExtensionTemplate  
+        model_name: vrfExtensionTemplate
         tf_name: vrf_extension_template
         type: String
         description: The name of the VRF extension template
@@ -202,14 +202,16 @@ resource:
         ndfc_nested: [vrfTemplateConfig]
         tf_name: trm
         type: Bool
-        default_value: false
+        optional: true
+        computed: true
         description: Enable Tenant Routed Multicast
       - &isRPAbsent
         model_name: isRPAbsent
         ndfc_nested: [vrfTemplateConfig]
         tf_name: no_rp
         type: Bool
-        default_value: false
+        optional: true
+        computed: true
         description: There is no RP as only SSM is used
         example: false
       - &isRPExternal
@@ -217,7 +219,8 @@ resource:
         ndfc_nested: [vrfTemplateConfig]
         tf_name: rp_external
         type: Bool
-        default_value: false
+        optional: true
+        computed: true
         description: Is RP external to the fabric
         example: true
       - &rpAddress
@@ -253,7 +256,8 @@ resource:
         ndfc_nested: [vrfTemplateConfig]
         tf_name: mvpn_inter_as
         type: Bool
-        default_value: false
+        optional: true
+        computed: true
         description: Use the inter-as keyword for the MVPN address family routes to cross the BGP autonomous system (AS) boundaries, applicable when TRM is enabled. IOS XE Specific
         example: false
       - &trmBGWMSiteEnabled
@@ -261,7 +265,8 @@ resource:
         ndfc_nested: [vrfTemplateConfig]
         tf_name: trm_bgw_msite
         type: Bool
-        default_value: false
+        optional: true
+        computed: true
         description: Enable TRM on Border Gateway Multisite
         example: true
       - &advertiseHostRouteFlag
@@ -269,7 +274,8 @@ resource:
         ndfc_nested: [vrfTemplateConfig]
         tf_name: advertise_host_routes
         type: Bool
-        default_value: false
+        optional: true
+        computed: true
         description: Flag to Control Advertisement of /32 and /128 Routes to Edge Routers
         example: true
       - &advertiseDefaultRouteFlag
@@ -277,7 +283,8 @@ resource:
         ndfc_nested: [vrfTemplateConfig]
         tf_name: advertise_default_route
         type: Bool
-        default_value: true
+        optional: true
+        computed: true
         description: Flag to Control Advertisement of Default Route Internally
         example: false
       - &configureStaticDefaultRouteFlag
@@ -285,7 +292,8 @@ resource:
         ndfc_nested: [vrfTemplateConfig]
         tf_name: configure_static_default_route
         type: Bool
-        default_value: true
+        optional: true
+        computed: true
         description: Flag to Control Static Default Route Configuration
         example: false
       - &bgpPassword
@@ -309,7 +317,8 @@ resource:
         ndfc_nested: [vrfTemplateConfig]
         tf_name: netflow
         type: Bool
-        default_value: false
+        optional: true
+        computed: true
         description: For netflow on VRF-LITE Sub-interface. Supported only if netflow is enabled on fabric. For NX-OS only
         example: false
       - &NETFLOW_MONITOR

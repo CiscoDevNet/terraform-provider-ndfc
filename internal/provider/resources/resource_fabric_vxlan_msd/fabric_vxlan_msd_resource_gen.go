@@ -49,6 +49,12 @@ func FabricVxlanMsdResourceSchema(ctx context.Context) schema.Schema {
 					stringvalidator.OneOf("Manual", "Centralized_To_Route_Server", "Direct_To_BGWS"),
 				},
 			},
+			"child_fabrics": schema.SetAttribute{
+				ElementType:         types.StringType,
+				Optional:            true,
+				Description:         "Add child fabrics to the MSD fabric",
+				MarkdownDescription: "Add child fabrics to the MSD fabric",
+			},
 			"cloudsec_algorithm": schema.StringAttribute{
 				Optional:            true,
 				Computed:            true,
@@ -453,6 +459,7 @@ type FabricVxlanMsdModel struct {
 	BgwRoutingTag              types.Int64  `tfsdk:"bgw_routing_tag"`
 	BgwRoutingTagPrev          types.String `tfsdk:"bgw_routing_tag_prev"`
 	BorderGwyConnections       types.String `tfsdk:"border_gwy_connections"`
+	ChildFabrics               types.Set    `tfsdk:"child_fabrics"`
 	CloudsecAlgorithm          types.String `tfsdk:"cloudsec_algorithm"`
 	CloudsecAutoconfig         types.Bool   `tfsdk:"cloudsec_autoconfig"`
 	CloudsecEnforcement        types.String `tfsdk:"cloudsec_enforcement"`

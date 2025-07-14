@@ -31,6 +31,10 @@ func NetworkAttachmentsModelHelperStateCheck(RscName string, c resource_network_
 func AttachmentsValueHelperStateCheck(RscName string, c resource_network_attachments.NDFCAttachmentsValue, attrPath path.Path) []resource.TestCheckFunc {
 	ret := []resource.TestCheckFunc{}
 
+	if c.Fabric != "" {
+		ret = append(ret, resource.TestCheckResourceAttr(RscName, attrPath.AtName("fabric").String(), c.Fabric))
+	}
+
 	if c.SwitchName != "" {
 		ret = append(ret, resource.TestCheckResourceAttr(RscName, attrPath.AtName("switch_name").String(), c.SwitchName))
 	}

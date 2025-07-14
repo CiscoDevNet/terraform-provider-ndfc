@@ -11,9 +11,12 @@
 package resource_fabric_vxlan_msd
 
 import (
+	"context"
+	"log"
 	"strconv"
 	. "terraform-provider-ndfc/internal/provider/types"
 
+	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 
@@ -64,6 +67,24 @@ func (v *FabricVxlanMsdModel) SetModelData(jsonData *resource_fabric_common.NDFC
 		v.BorderGwyConnections = types.StringNull()
 	}
 
+	if len(jsonData.ChildFabrics) == 0 {
+		log.Printf("v.ChildFabrics is empty")
+		v.ChildFabrics, err = types.SetValue(types.StringType, []attr.Value{})
+		if err != nil {
+			log.Printf("Error in converting []string to  List %v", err)
+			return err
+		}
+	} else {
+		listData := make([]attr.Value, len(jsonData.ChildFabrics))
+		for i, item := range jsonData.ChildFabrics {
+			listData[i] = types.StringValue(item)
+		}
+		v.ChildFabrics, err = types.SetValue(types.StringType, listData)
+		if err != nil {
+			log.Printf("Error in converting []string to  List")
+			return err
+		}
+	}
 	if jsonData.CloudsecAlgorithm != "" {
 		v.CloudsecAlgorithm = types.StringValue(jsonData.CloudsecAlgorithm)
 	} else {
@@ -517,6 +538,16 @@ func (v FabricVxlanMsdModel) GetModelData() *resource_fabric_common.NDFCFabricCo
 		data.BorderGwyConnections = v.BorderGwyConnections.ValueString()
 	} else {
 		data.BorderGwyConnections = ""
+	}
+
+	if !v.ChildFabrics.IsNull() && !v.ChildFabrics.IsUnknown() {
+		listStringData := make([]string, len(v.ChildFabrics.Elements()))
+		dg := v.ChildFabrics.ElementsAs(context.Background(), &listStringData, false)
+		if dg.HasError() {
+			panic(dg.Errors())
+		}
+		data.ChildFabrics = make([]string, len(listStringData))
+		copy(data.ChildFabrics, listStringData)
 	}
 
 	if !v.CloudsecAlgorithm.IsNull() && !v.CloudsecAlgorithm.IsUnknown() {
