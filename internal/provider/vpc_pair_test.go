@@ -61,7 +61,7 @@ func TestAccVPCPairResourceCreateVpcPair(t *testing.T) {
 					return *tf_config
 				}(),
 				Check: func() resource.TestCheckFunc {
-					funcs1 := VpcPairModelHelperStateCheck("ndfc_vpc_pair.test_vpc_pair_1", *vpcPairRsc, path.Empty())
+					funcs1 := VpcPairModelHelperStateCheck("ndfc_vpc_pair.test_vpc_pair", *vpcPairRsc, path.Empty())
 					//funcs2 := VpcPairModelHelperStateCheck("ndfc_vpc_pair.test_vpc_pair_2", *vpcPairRsc, path.Empty())
 					//allFuncs := append(funcs1, funcs2...)
 					return resource.ComposeTestCheckFunc(funcs1...)
@@ -75,7 +75,7 @@ func TestAccVPCPairResourceCreateVpcPair(t *testing.T) {
 					return *tf_config
 				}(),
 				Check: func() resource.TestCheckFunc {
-					funcs1 := VpcPairModelHelperStateCheck("ndfc_vpc_pair.test_vpc_pair_1", *vpcPairRsc, path.Empty())
+					funcs1 := VpcPairModelHelperStateCheck("ndfc_vpc_pair.test_vpc_pair", *vpcPairRsc, path.Empty())
 					// funcs2 := VpcPairModelHelperStateCheck("ndfc_vpc_pair.test_vpc_pair_2", *vpcPairRsc, path.Empty())
 					//allFuncs := append(funcs1, funcs2...)
 					return resource.ComposeTestCheckFunc(funcs1...)

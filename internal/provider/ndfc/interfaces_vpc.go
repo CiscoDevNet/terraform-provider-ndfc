@@ -39,26 +39,59 @@ func (i *NDFCVPCInterface) CreateInterface(ctx context.Context, diags *diag.Diag
 	i.createInterface(ctx, diags, &intfPayload)
 }
 
-func (i *NDFCVPCInterface) DeleteInterface(ctx context.Context, dg *diag.Diagnostics,
+func (i *NDFCVPCInterface) DeleteInterface(ctx context.Context, dg *diag.Diagnostics, id string,
 	inData *resource_interface_common.NDFCInterfaceCommonModel) {
 
-	tflog.Debug(ctx, "NDFCVPCInterface: Deleting interfaces")
+	tflog.Debug(ctx, fmt.Sprintf("NDFCVPCInterface: Deleting interfaces policy %s", inData.Policy))
 	if len(inData.Interfaces) <= 0 {
 		tflog.Debug(ctx, "No interfaces to delete")
 		return
 	}
-
 	// DELETE and Deploy uses similar payload
 	intfPayload := resource_interface_common.NDFCInterfacesDeploy{}
-
-	//ifDeployPayload := resource_interface_common.NDFCInterfacesDeploy{}
-	interfaces := i.GetInterface(ctx, dg, inData.SerialNumber, inData.Policy)
-	for _, intf := range interfaces {
-		intfPayload = append(intfPayload, resource_interface_common.NDFCInterfaceDeploy{IfName: intf.InterfaceName,
-			SerialNumber: intf.SerialNumber})
-		tflog.Debug(ctx, fmt.Sprintf("NDFCVPCInterface: Deleting interface: %s:%s", intf.SerialNumber, intf.InterfaceName))
+	/*
+	 * For vPC interface, the serial number is of the format switch1~switch2
+	 * when a vPC interface is created, the serial number send in payload is switch1~switch2 as given in config
+	 * however NDFC can accept the config, but maintains the serial number in reverse order i.e switch2~switch1
+	 * In GET responses this reverse order is sent back by NDFC.
+	 * This causes inconsistency in TF and to avoid this, the order used in config is maintained in state.
+	 * As the APIs accept only the order maintained in NDFC, using the serial_number from state may fail
+	 * Hence, use the GET to retrieve the interfaces and take serial from the GET payload
+	 */
+	ifMap := ifIdToMap(id)
+	serialMap := make(map[string]bool)
+	if inData.SerialNumber == "" {
+		if len(ifMap) <= 0 {
+			tflog.Debug(ctx, "ID is empty - we may have to still delete any entries that are in inData")
+			// find all the unique serial numbers if global serial is not set
+			for _, intfToDel := range inData.Interfaces {
+				serialMap[intfToDel.SerialNumber] = true
+			}
+		} else {
+			for switchSerial := range ifMap {
+				serialMap[switchSerial] = true
+			}
+		}
+	} else {
+		serialMap[inData.SerialNumber] = true
 	}
 
+	// Do for each switch
+	for switchSerial := range serialMap {
+		interfaces := i.GetInterface(ctx, dg, switchSerial, inData.Policy)
+		// All the interfaces from the switch with the policy are returned
+		for _, intf := range interfaces {
+			// filter out interfaces that are in the resource
+			// Delete only that are part of the resource
+			for _, intfToDel := range inData.Interfaces {
+				if intf.InterfaceName == intfToDel.InterfaceName && intfToDel.SerialNumber == switchSerial {
+					intfPayload = append(intfPayload, resource_interface_common.NDFCInterfaceDeploy{IfName: intf.InterfaceName,
+						SerialNumber: intf.SerialNumber})
+					tflog.Debug(ctx, fmt.Sprintf("NDFCVPCInterface: Deleting interface: %s:%s", intf.SerialNumber, intf.InterfaceName))
+				}
+			}
+		}
+	}
 	i.deleteInterface(ctx, dg, &intfPayload)
 	if dg.HasError() {
 		tflog.Error(ctx, "Error deleting interfaces")

@@ -201,6 +201,11 @@ func GetTFConfigWithSingleResource(tt string, cfg map[string]string, rscs []inte
 		if ok {
 			args["Interface"] = ifRsc
 			args["RscName"] = rsNames[i]
+			vpc, ok := cfg["RscSubType"]
+			if ok && vpc == "vpc" {
+				args["depends"] = "resource.ndfc_vpc_pair." + rsNames[i-1]
+				args["RscSubType"] = "vpc"
+			}
 			args["RscType"] = "interface_" + cfg["RscSubType"]
 			err = t.ExecuteTemplate(&output, "NDFC_INT_RSC", args)
 			if err != nil {

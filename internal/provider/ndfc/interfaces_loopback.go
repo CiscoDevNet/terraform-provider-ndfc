@@ -40,7 +40,7 @@ func (i *NDFCLoopbackInterface) CreateInterface(ctx context.Context, diags *diag
 	i.createInterface(ctx, diags, &intfPayload)
 }
 
-func (i *NDFCLoopbackInterface) DeleteInterface(ctx context.Context, dg *diag.Diagnostics,
+func (i *NDFCLoopbackInterface) DeleteInterface(ctx context.Context, dg *diag.Diagnostics, id string,
 	inData *resource_interface_common.NDFCInterfaceCommonModel) {
 
 	tflog.Debug(ctx, "Deleting interfaces")
