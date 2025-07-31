@@ -43,7 +43,7 @@ func (i *NDFCPortChannelInterface) CreateInterface(ctx context.Context, diags *d
 	i.createInterface(ctx, diags, &intfPayload)
 }
 
-func (i *NDFCPortChannelInterface) DeleteInterface(ctx context.Context, dg *diag.Diagnostics,
+func (i *NDFCPortChannelInterface) DeleteInterface(ctx context.Context, dg *diag.Diagnostics, id string,
 	inData *resource_interface_common.NDFCInterfaceCommonModel) {
 
 	tflog.Debug(ctx, "NDFCPortChannelInterface: Deleting interfaces")
