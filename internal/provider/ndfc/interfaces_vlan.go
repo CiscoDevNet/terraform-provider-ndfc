@@ -38,7 +38,7 @@ func (i *NDFCVlanInterface) CreateInterface(ctx context.Context, diags *diag.Dia
 	i.createInterface(ctx, diags, &intfPayload)
 }
 
-func (i *NDFCVlanInterface) DeleteInterface(ctx context.Context, dg *diag.Diagnostics,
+func (i *NDFCVlanInterface) DeleteInterface(ctx context.Context, dg *diag.Diagnostics, id string,
 	inData *resource_interface_common.NDFCInterfaceCommonModel) {
 
 	tflog.Debug(ctx, "Deleting interfaces")
