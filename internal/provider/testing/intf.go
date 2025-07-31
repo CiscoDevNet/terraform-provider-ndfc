@@ -37,6 +37,9 @@ func GenerateIntfResource(intfObj **resource_interface_common.NDFCInterfaceCommo
 	case "portchannel":
 		intf.Policy = "int_port_channel_trunk_host"
 		ifPrefix = "port-channel"
+	case "vpc":
+		intf.Policy = "int_vpc_trunk_host"
+		ifPrefix = "vPC"
 	}
 	if globalSerial {
 		intf.SerialNumber = serials[0]
@@ -100,6 +103,15 @@ func GenerateIntfResource(intfObj **resource_interface_common.NDFCInterfaceCommo
 			ifTmp.NvPairs.MemberInterfaces = fmt.Sprintf("Ethernet1/%d,Ethernet1/%d", EthIntf+1, EthIntf+2)
 			ifTmp.NvPairs.CopyPoDescription = "true"
 			EthIntf += 2
+		} else if ifType == "vpc" {
+			ifTmp.NvPairs.Peer1MemberInterfaces = fmt.Sprintf("Ethernet1/%d", 10+intfNumber)
+			ifTmp.NvPairs.Peer2MemberInterfaces = fmt.Sprintf("Ethernet1/%d", 10+intfNumber)
+			ifTmp.NvPairs.Peer1PortChannelId = new(int64)
+			*ifTmp.NvPairs.Peer1PortChannelId = int64(150 + intfNumber)
+			ifTmp.NvPairs.Peer2PortChannelId = new(types.Int64Custom)
+			*ifTmp.NvPairs.Peer2PortChannelId = types.Int64Custom(150 + intfNumber)
+			ifTmp.NvPairs.PortchannelMode = "on"
+
 		}
 
 		intf.Interfaces[key] = *ifTmp

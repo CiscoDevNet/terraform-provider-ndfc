@@ -92,17 +92,26 @@ func (c NDFC) RscGetInterfaces(ctx context.Context, dg *diag.Diagnostics, in res
 				if ifList[i].NvPairs.FreeformConfig == " " {
 					ifList[i].NvPairs.FreeformConfig = ""
 				}
+				keyReversed := false
+				newSerialNumber := ""
 				key, ok := keyMap[ifList[i].SerialNumber+":"+ifList[i].InterfaceName]
 				if !ok {
+					/*
+						For vPC interface, the serial number is of the format switch1~switch2
+						when a vPC interface is created, the serial number send in payload is switch1~switch2 as given in config
+						however NDFC can accept the config, but maintains the serial number in reverse order i.e switch2~switch1
+						In GET responses this reverse order is sent back by NDFC.
+					*/
 					if strings.Contains(ifList[i].SerialNumber, "~") {
 						serialNumber := strings.Split(ifList[i].SerialNumber, "~")
-						newSerialNumber := serialNumber[1] + "~" + serialNumber[0]
+						newSerialNumber = serialNumber[1] + "~" + serialNumber[0]
 						key, ok = keyMap[newSerialNumber+":"+ifList[i].InterfaceName]
 						if !ok {
 							tflog.Error(ctx, fmt.Sprintf("Key not found: %s",
 								ifList[i].SerialNumber+":"+ifList[i].InterfaceName))
 							continue
 						}
+						keyReversed = true
 					} else {
 						tflog.Error(ctx, fmt.Sprintf("Key not found: %s",
 							ifList[i].SerialNumber+":"+ifList[i].InterfaceName))
@@ -115,6 +124,14 @@ func (c NDFC) RscGetInterfaces(ctx context.Context, dg *diag.Diagnostics, in res
 				// Set entry level to empty if resource level is set
 				if inData.SerialNumber != "" {
 					ifList[i].SerialNumber = ""
+				} else if keyReversed {
+					/*
+						Serial maintained by NDFC for vPC interfaces can be the reverse order of the serial number used in config
+						Sending the same back to TF flags as inconsistency in TF state
+						As the APIs accept only the order maintained in NDFC, using the serial_number from state may fail
+						Hence, use the GET to retrieve the interfaces and take serial from the GET payload
+					*/
+					ifList[i].SerialNumber = newSerialNumber
 				}
 				c.processCustomIfPolicy(ctx, &ifList[i], data.PolicyType, inData.Interfaces[key].CustomPolicyParameters)
 				data.Interfaces[key] = ifList[i]
@@ -183,6 +200,10 @@ func (c NDFC) RscCreateInterfaces(ctx context.Context, resp *resource.CreateResp
 	if dg.HasError() {
 		in.SetID("")
 		tflog.Error(ctx, "Error creating interfaces")
+		// Delete any partial creates
+		tflog.Debug(ctx, "Deleting any partial creates")
+		dg1 := &diag.Diagnostics{}
+		c.RscDeleteInterfaces(ctx, dg1, in)
 		return
 	}
 	if inData.Deploy {
@@ -222,7 +243,7 @@ func (c NDFC) RscUpdateInterfaces(ctx context.Context, dg *diag.Diagnostics, uni
 	//Delete any interfaces marked for delete
 	tflog.Debug(ctx, "Deleting interfaces marked for delete")
 	delIntf := actions["del"].(*resource_interface_common.NDFCInterfaceCommonModel)
-	ifObj.DeleteInterface(ctx, dg, delIntf)
+	ifObj.DeleteInterface(ctx, dg, unique_id, delIntf)
 	if dg.HasError() {
 		tflog.Error(ctx, "Error deleting interfaces")
 		return
@@ -282,7 +303,7 @@ func (c NDFC) RscDeleteInterfaces(ctx context.Context, dg *diag.Diagnostics, in 
 	c.IfPreProcess(inData)
 
 	ifObj := c.NewInterfaceObject(in.GetInterfaceType(), &c.apiClient, c.GetLock(ResourceInterfaces))
-	ifObj.DeleteInterface(ctx, dg, inData)
+	ifObj.DeleteInterface(ctx, dg, in.GetID(), inData)
 	if dg.HasError() {
 		tflog.Error(ctx, "Error deleting interfaces")
 		return

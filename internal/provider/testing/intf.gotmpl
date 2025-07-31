@@ -1,5 +1,8 @@
 {{define "NDFC_INT_RSC"}}
 resource "ndfc_{{.RscType}}" "{{.RscName}}" {
+{{- if eq .RscSubType "vpc"}}
+    depends_on = [{{.depends}}]
+{{end}}
 {{with .Interface}}
     policy = "{{.Policy}}"
     {{- if ne .SerialNumber "" }}
@@ -78,6 +81,24 @@ resource "ndfc_{{.RscType}}" "{{.RscName}}" {
             {{- end}}  
             {{- if ne $ifEntry.NvPairs.CopyPoDescription ""}}
             copy_po_description = "{{$ifEntry.NvPairs.CopyPoDescription}}"
+            {{- end}}
+            {{- if ne $ifEntry.NvPairs.Peer1MemberInterfaces ""}}
+            peer1_member_interfaces = "{{$ifEntry.NvPairs.Peer1MemberInterfaces}}"
+            {{- end}}
+            {{- if  $ifEntry.NvPairs.Peer1PortChannelId}}
+            peer1_port_channel_id = "{{$ifEntry.NvPairs.Peer1PortChannelId}}"
+            {{- end}}
+            {{- if ne $ifEntry.NvPairs.Peer2MemberInterfaces ""}}
+            peer2_member_interfaces = "{{$ifEntry.NvPairs.Peer2MemberInterfaces}}"
+            {{- end}}
+            {{- if ne (deref $ifEntry.NvPairs.Peer2PortChannelId) 0}}
+            peer2_port_channel_id = "{{$ifEntry.NvPairs.Peer2PortChannelId}}"
+            {{- end}}
+            {{- if ne $ifEntry.NvPairs.PortchannelMode ""}}
+            portchannel_mode = "{{$ifEntry.NvPairs.PortchannelMode}}"
+            {{- end}}
+            {{- if ne $ifEntry.SerialNumber ""}}
+            serial_number = "{{$ifEntry.SerialNumber}}"
             {{- end}}
         }
     {{- end}}

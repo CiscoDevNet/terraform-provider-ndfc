@@ -1,5 +1,5 @@
 {{define "NDFC_VPCPAIR_RSC"}}
-resource "ndfc_{{.RscType}}" "{{.RscName}}_1" {
+resource "ndfc_{{.RscType}}" "{{.RscName}}" {
     {{ with .VpcPair }}
         serial_numbers =  [
         {{- $start := 0 }}
