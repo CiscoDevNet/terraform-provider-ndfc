@@ -28,7 +28,7 @@ import (
 // Common Implementation - override for changing behaviour
 type NDFCInterface interface {
 	CreateInterface(ctx context.Context, diags *diag.Diagnostics, inData *resource_interface_common.NDFCInterfaceCommonModel)
-	DeleteInterface(ctx context.Context, diags *diag.Diagnostics, inData *resource_interface_common.NDFCInterfaceCommonModel)
+	DeleteInterface(ctx context.Context, diags *diag.Diagnostics, id string, inData *resource_interface_common.NDFCInterfaceCommonModel)
 	ModifyInterface(ctx context.Context, diags *diag.Diagnostics, inData *resource_interface_common.NDFCInterfaceCommonModel)
 	GetInterface(ctx context.Context, diags *diag.Diagnostics, serial string, policy string) []resource_interface_common.NDFCInterfacesValue
 	DeployInterface(ctx context.Context, diags *diag.Diagnostics, inData *resource_interface_common.NDFCInterfaceCommonModel)
@@ -98,7 +98,7 @@ func (i *NDFCInterfaceCommon) CreateInterface(ctx context.Context, dg *diag.Diag
 	log.Panicf("CreateInterface not implemented in common level")
 }
 
-func (i *NDFCInterfaceCommon) DeleteInterface(ctx context.Context, diags *diag.Diagnostics,
+func (i *NDFCInterfaceCommon) DeleteInterface(ctx context.Context, diags *diag.Diagnostics, id string,
 	inData *resource_interface_common.NDFCInterfaceCommonModel) {
 	log.Panicf("DeleteInterface not implemented in common level")
 }
