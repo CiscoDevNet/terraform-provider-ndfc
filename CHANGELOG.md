@@ -1,3 +1,15 @@
+## 0.2.0
+
+_Pre Release_
+### Added
+- New Resources
+    - `ndfc_links`
+    - `ndfc_rest_api`
+- New Data Sources
+    - `ndfc_rest_api`
+- Policy group support in `ndfc_policy` resource
+- Bug Fixes
+
 ## 0.1.0 
 
 _Pre Release_
