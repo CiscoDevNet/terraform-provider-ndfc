@@ -27,6 +27,7 @@ const inSync = "In-Sync"
 const failed = "Failed"
 const deployRetry = 5
 const deployRetryInterval = 10
+const maxErrorMessages = 5
 
 func (c NDFC) RecalculateAndDeploy(ctx context.Context, diags *diag.Diagnostics, fabricName string,
 	saveConfig bool, deployConfig bool, serialNumbers []string) {
@@ -75,15 +76,30 @@ func (c NDFC) deployConfiguration(ctx context.Context, diags *diag.Diagnostics, 
 		} else {
 			deployApi.SerialNumbers = serialNumbers
 		}
-		//deployApi.SetDeployLocked()
+
 		_, err = deployApi.DeployPost([]byte{})
 		if err != nil {
 			diags.AddError("Deploy failed", err.Error())
 			time.Sleep(deployRetryInterval * time.Second)
-			deployApi.Preview = false
-			res, _ := deployApi.Get()
-			// TODO determine which error should be returned
-			diags.AddError("Deploy Errors:", string(res))
+			resp, err := c.GetDeploymentHistory(ctx, fabricName, serialNumbers)
+			if err != nil {
+				diags.AddError("Failed to get deployment history", fmt.Sprintf("Error: %v", err))
+				return
+			}
+
+			if len(resp) > 0 {
+				var errorMessages []string
+				for index, deployResponse := range resp {
+					errorMessage := fmt.Sprintf("Switch %v: Status %s, error: %s", deployResponse.SerialNumber, deployResponse.Status, deployResponse.StatusDescription)
+					errorMessages = append(errorMessages, errorMessage)
+					if index == maxErrorMessages-1 {
+						break
+					}
+				}
+				numErrors := len(errorMessages)
+				errMsg := fmt.Sprintf("last %d error(s):\n%v", numErrors, strings.Join(errorMessages, "\n"))
+				diags.AddError("Deployment failed", errMsg)
+			}
 			return
 		}
 	}
@@ -91,26 +107,24 @@ func (c NDFC) deployConfiguration(ctx context.Context, diags *diag.Diagnostics, 
 }
 
 func (c *NDFC) checkDeployStatus(ctx context.Context, diags *diag.Diagnostics, fabricName string, serialNumbers []string) []string {
-	previewApi := api.NewConfigDeploymentAPI(c.GetLock(ResourceConfigDeploy), &c.apiClient)
-	previewApi.FabricName = fabricName
-	previewApi.Preview = true
 	var response resource_configuration_deploy.SwitchStatusDB
 
-	// Config Preview refreshes the config status of switches in the fabric
-	payload, err := previewApi.Get()
-	if len(payload) == 0 || string(payload) == "[]" || err != nil {
+	// Get configuration preview to refresh switch status.
+	// This is bug in NDFC sometimes the status is not updated
+	_, err := c.getConfigurationPreview(fabricName)
+	if err != nil {
 		diags.AddError("Deploy failed", "Configuration preview failed")
 		return nil
 	}
 
 	// Get the current config status of switches in the fabric
-	payload, err = c.GetSwitchesInFabric(ctx, fabricName)
-	if len(payload) == 0 || string(payload) == "[]" || err != nil {
+	switchesPayload, err := c.GetSwitchesInFabric(ctx, fabricName)
+	if len(switchesPayload) == 0 || string(switchesPayload) == "[]" || err != nil {
 		diags.AddError("Deploy failed", "Failed to get switches in fabric")
 		return nil
 	}
 
-	err = json.Unmarshal(payload, &response)
+	err = json.Unmarshal(switchesPayload, &response)
 	if err != nil {
 		diags.AddError("Deploy failed", err.Error())
 	}
@@ -199,6 +213,20 @@ func (c *NDFC) GetDeploymentHistory(ctx context.Context, fabricName string, seri
 		return nil, fmt.Errorf("failed to parse deployment history: %v", err)
 	}
 	return deployResponses, nil
+}
+
+// getConfigurationPreview retrieves the configuration preview for switches in a fabric
+func (c *NDFC) getConfigurationPreview(fabricName string) ([]byte, error) {
+	previewApi := api.NewConfigDeploymentAPI(c.GetLock(ResourceConfigDeploy), &c.apiClient)
+	previewApi.FabricName = fabricName
+	previewApi.Preview = true
+
+	// Config Preview refreshes the config status of switches in the fabric
+	payload, err := previewApi.Get()
+	if len(payload) == 0 || string(payload) == "[]" || err != nil {
+		return nil, fmt.Errorf("configuration preview failed")
+	}
+	return payload, nil
 }
 
 // GetDeploymentHistoryWithFilters provides more detailed filtering options for deployment history
