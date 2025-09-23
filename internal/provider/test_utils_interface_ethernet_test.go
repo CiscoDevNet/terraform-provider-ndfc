@@ -119,6 +119,61 @@ func InterfaceEthernetInterfacesValueHelperStateCheck(RscName string, c resource
 	if c.NvPairs.NativeVlan != nil {
 		ret = append(ret, resource.TestCheckResourceAttr(RscName, attrPath.AtName("native_vlan").String(), strconv.Itoa(int(*c.NvPairs.NativeVlan))))
 	}
+	if c.NvPairs.Vrf != "" {
+		ret = append(ret, resource.TestCheckResourceAttr(RscName, attrPath.AtName("vrf").String(), c.NvPairs.Vrf))
+	}
+	if c.NvPairs.Ipv4Address != "" {
+		ret = append(ret, resource.TestCheckResourceAttr(RscName, attrPath.AtName("ipv4_address").String(), c.NvPairs.Ipv4Address))
+	}
+	if c.NvPairs.Ipv4PrefixLength != "" {
+		ret = append(ret, resource.TestCheckResourceAttr(RscName, attrPath.AtName("ipv4_prefix_length").String(), c.NvPairs.Ipv4PrefixLength))
+	}
+	if c.NvPairs.RoutingTag != "" {
+		ret = append(ret, resource.TestCheckResourceAttr(RscName, attrPath.AtName("routing_tag").String(), c.NvPairs.RoutingTag))
+	}
+	if c.NvPairs.DisableIpRedirects != "" {
+		ret = append(ret, resource.TestCheckResourceAttr(RscName, attrPath.AtName("disable_ip_redirects").String(), c.NvPairs.DisableIpRedirects))
+	} else {
+		ret = append(ret, resource.TestCheckResourceAttr(RscName, attrPath.AtName("disable_ip_redirects").String(), "false"))
+	}
+	if c.NvPairs.EnablePimSparse != "" {
+		ret = append(ret, resource.TestCheckResourceAttr(RscName, attrPath.AtName("enable_pim_sparse").String(), c.NvPairs.EnablePimSparse))
+	} else {
+		ret = append(ret, resource.TestCheckResourceAttr(RscName, attrPath.AtName("enable_pim_sparse").String(), "false"))
+	}
+	if c.NvPairs.PimDrPriority != "" {
+		ret = append(ret, resource.TestCheckResourceAttr(RscName, attrPath.AtName("pim_dr_priority").String(), c.NvPairs.PimDrPriority))
+	} else {
+		ret = append(ret, resource.TestCheckResourceAttr(RscName, attrPath.AtName("pim_dr_priority").String(), "1"))
+	}
+	if c.NvPairs.EnablePfc != "" {
+		ret = append(ret, resource.TestCheckResourceAttr(RscName, attrPath.AtName("enable_pfc").String(), c.NvPairs.EnablePfc))
+	} else {
+		ret = append(ret, resource.TestCheckResourceAttr(RscName, attrPath.AtName("enable_pfc").String(), "false"))
+	}
+	if c.NvPairs.EnableQos != "" {
+		ret = append(ret, resource.TestCheckResourceAttr(RscName, attrPath.AtName("enable_qos").String(), c.NvPairs.EnableQos))
+	} else {
+		ret = append(ret, resource.TestCheckResourceAttr(RscName, attrPath.AtName("enable_qos").String(), "false"))
+	}
+	if c.NvPairs.QosPolicy != "" {
+		ret = append(ret, resource.TestCheckResourceAttr(RscName, attrPath.AtName("qos_policy").String(), c.NvPairs.QosPolicy))
+	}
+	if c.NvPairs.QueuingPolicy != "" {
+		ret = append(ret, resource.TestCheckResourceAttr(RscName, attrPath.AtName("queuing_policy").String(), c.NvPairs.QueuingPolicy))
+	}
+	if c.NvPairs.LinkStateRoutingProtocol != "" {
+		ret = append(ret, resource.TestCheckResourceAttr(RscName, attrPath.AtName("link_state_routing_protocol").String(), c.NvPairs.LinkStateRoutingProtocol))
+	}
+	if c.NvPairs.LinkStateRoutingTag != "" {
+		ret = append(ret, resource.TestCheckResourceAttr(RscName, attrPath.AtName("link_state_routing_tag").String(), c.NvPairs.LinkStateRoutingTag))
+	}
+	if c.NvPairs.Ipv6Address != "" {
+		ret = append(ret, resource.TestCheckResourceAttr(RscName, attrPath.AtName("ipv6_address").String(), c.NvPairs.Ipv6Address))
+	}
+	if c.NvPairs.Ipv6PrefixLength != "" {
+		ret = append(ret, resource.TestCheckResourceAttr(RscName, attrPath.AtName("ipv6_prefix_length").String(), c.NvPairs.Ipv6PrefixLength))
+	}
 	if c.DeploymentStatus != "" {
 		ret = append(ret, resource.TestCheckResourceAttr(RscName, attrPath.AtName("deployment_status").String(), c.DeploymentStatus))
 	}

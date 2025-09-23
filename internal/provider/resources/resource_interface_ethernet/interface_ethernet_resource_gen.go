@@ -90,6 +90,34 @@ func InterfaceEthernetResourceSchema(ctx context.Context) schema.Schema {
 								stringplanmodifier.UseStateForUnknown(),
 							},
 						},
+						"disable_ip_redirects": schema.BoolAttribute{
+							Optional:            true,
+							Computed:            true,
+							Description:         "Disable both IPv4/IPv6 redirects on the interface",
+							MarkdownDescription: "Disable both IPv4/IPv6 redirects on the interface",
+							Default:             booldefault.StaticBool(false),
+						},
+						"enable_pfc": schema.BoolAttribute{
+							Optional:            true,
+							Computed:            true,
+							Description:         "Enable priority flow control",
+							MarkdownDescription: "Enable priority flow control",
+							Default:             booldefault.StaticBool(false),
+						},
+						"enable_pim_sparse": schema.BoolAttribute{
+							Optional:            true,
+							Computed:            true,
+							Description:         "Enable PIM sparse-mode on the interface",
+							MarkdownDescription: "Enable PIM sparse-mode on the interface",
+							Default:             booldefault.StaticBool(false),
+						},
+						"enable_qos": schema.BoolAttribute{
+							Optional:            true,
+							Computed:            true,
+							Description:         "Enable to configure a QoS Policy for this interface. If AI/ML Queuing is enabled on the fabric, will use the QOS_CLASSIFICATION policy. Enter a custom policy below to override",
+							MarkdownDescription: "Enable to configure a QoS Policy for this interface. If AI/ML Queuing is enabled on the fabric, will use the QOS_CLASSIFICATION policy. Enter a custom policy below to override",
+							Default:             booldefault.StaticBool(false),
+						},
 						"freeform_config": schema.StringAttribute{
 							Optional:            true,
 							Description:         "Additional CLI config (if any) for the interface configuration",
@@ -105,15 +133,44 @@ func InterfaceEthernetResourceSchema(ctx context.Context) schema.Schema {
 							Description:         "Name of the Interface. Example: `Ethernet1/10`",
 							MarkdownDescription: "Name of the Interface. Example: `Ethernet1/10`",
 						},
+						"ipv4_address": schema.StringAttribute{
+							Optional:            true,
+							Description:         "IPv4 address of the interface",
+							MarkdownDescription: "IPv4 address of the interface",
+						},
+						"ipv4_prefix_length": schema.StringAttribute{
+							Optional:            true,
+							Description:         "IP netmask length used with the IP address (Min:1, Max:31)",
+							MarkdownDescription: "IP netmask length used with the IP address (Min:1, Max:31)",
+						},
+						"ipv6_address": schema.StringAttribute{
+							Optional:            true,
+							Description:         "IPv6 Address: IPv6 address of the Interface",
+							MarkdownDescription: "IPv6 Address: IPv6 address of the Interface",
+						},
+						"ipv6_prefix_length": schema.StringAttribute{
+							Optional:            true,
+							Description:         "IPv6 Prefix Length: Prefix length associated with IPv6 address (Min:64, Max:127)",
+							MarkdownDescription: "IPv6 Prefix Length: Prefix length associated with IPv6 address (Min:64, Max:127)",
+						},
+						"link_state_routing_protocol": schema.StringAttribute{
+							Optional:            true,
+							Computed:            true,
+							Description:         "Link-State Routing Protocol: Select link-state routing protocol - Applicable as per template used",
+							MarkdownDescription: "Link-State Routing Protocol: Select link-state routing protocol - Applicable as per template used",
+						},
+						"link_state_routing_tag": schema.StringAttribute{
+							Optional:            true,
+							Computed:            true,
+							Description:         "Link-State Routing Tag: Link-state routing protocol tag - Usage as per template used",
+							MarkdownDescription: "Link-State Routing Tag: Link-state routing protocol tag - Usage as per template used",
+						},
 						"mtu": schema.StringAttribute{
 							Optional:            true,
 							Computed:            true,
 							Description:         "MTU for the interface",
 							MarkdownDescription: "MTU for the interface",
-							Validators: []validator.String{
-								stringvalidator.OneOf("default", "jumbo"),
-							},
-							Default: stringdefault.StaticString("jumbo"),
+							Default:             stringdefault.StaticString("jumbo"),
 						},
 						"native_vlan": schema.Int64Attribute{
 							Optional:            true,
@@ -147,6 +204,13 @@ func InterfaceEthernetResourceSchema(ctx context.Context) schema.Schema {
 							MarkdownDescription: "If enabled, configure the interface as a vPC orphan port to be suspended by the secondary peer in vPC failures",
 							Default:             booldefault.StaticBool(false),
 						},
+						"pim_dr_priority": schema.StringAttribute{
+							Optional:            true,
+							Computed:            true,
+							Description:         "Configure priority for PIM DR election on the interface, default is 1",
+							MarkdownDescription: "Configure priority for PIM DR election on the interface, default is 1",
+							Default:             stringdefault.StaticString("1"),
+						},
 						"port_type_fast": schema.BoolAttribute{
 							Optional:            true,
 							Computed:            true,
@@ -160,6 +224,21 @@ func InterfaceEthernetResourceSchema(ctx context.Context) schema.Schema {
 							Description:         "Enable PTP",
 							MarkdownDescription: "Enable PTP",
 							Default:             booldefault.StaticBool(false),
+						},
+						"qos_policy": schema.StringAttribute{
+							Optional:            true,
+							Description:         "Custom QoS Policy must be defined previously",
+							MarkdownDescription: "Custom QoS Policy must be defined previously",
+						},
+						"queuing_policy": schema.StringAttribute{
+							Optional:            true,
+							Description:         "Queuing Policy must be defined previously",
+							MarkdownDescription: "Queuing Policy must be defined previously",
+						},
+						"routing_tag": schema.StringAttribute{
+							Optional:            true,
+							Description:         "Routing tag associated with interface IP",
+							MarkdownDescription: "Routing tag associated with interface IP",
 						},
 						"serial_number": schema.StringAttribute{
 							Optional:            true,
@@ -175,6 +254,11 @@ func InterfaceEthernetResourceSchema(ctx context.Context) schema.Schema {
 								stringvalidator.OneOf("Auto", "10Mb", "100Mb", "1Gb", "2.5Gb", "5Gb", "10Gb", "25Gb", "40Gb", "50Gb", "100Gb", "200Gb", "400Gb"),
 							},
 							Default: stringdefault.StaticString("Auto"),
+						},
+						"vrf": schema.StringAttribute{
+							Optional:            true,
+							Description:         "Interface VRF name, default VRF if not specified",
+							MarkdownDescription: "Interface VRF name, default VRF if not specified",
 						},
 					},
 					CustomType: InterfacesType{
@@ -366,6 +450,78 @@ func (t InterfacesType) ValueFromObject(ctx context.Context, in basetypes.Object
 			fmt.Sprintf(`deployment_status expected to be basetypes.StringValue, was: %T`, deploymentStatusAttribute))
 	}
 
+	disableIpRedirectsAttribute, ok := attributes["disable_ip_redirects"]
+
+	if !ok {
+		diags.AddError(
+			"Attribute Missing",
+			`disable_ip_redirects is missing from object`)
+
+		return nil, diags
+	}
+
+	disableIpRedirectsVal, ok := disableIpRedirectsAttribute.(basetypes.BoolValue)
+
+	if !ok {
+		diags.AddError(
+			"Attribute Wrong Type",
+			fmt.Sprintf(`disable_ip_redirects expected to be basetypes.BoolValue, was: %T`, disableIpRedirectsAttribute))
+	}
+
+	enablePfcAttribute, ok := attributes["enable_pfc"]
+
+	if !ok {
+		diags.AddError(
+			"Attribute Missing",
+			`enable_pfc is missing from object`)
+
+		return nil, diags
+	}
+
+	enablePfcVal, ok := enablePfcAttribute.(basetypes.BoolValue)
+
+	if !ok {
+		diags.AddError(
+			"Attribute Wrong Type",
+			fmt.Sprintf(`enable_pfc expected to be basetypes.BoolValue, was: %T`, enablePfcAttribute))
+	}
+
+	enablePimSparseAttribute, ok := attributes["enable_pim_sparse"]
+
+	if !ok {
+		diags.AddError(
+			"Attribute Missing",
+			`enable_pim_sparse is missing from object`)
+
+		return nil, diags
+	}
+
+	enablePimSparseVal, ok := enablePimSparseAttribute.(basetypes.BoolValue)
+
+	if !ok {
+		diags.AddError(
+			"Attribute Wrong Type",
+			fmt.Sprintf(`enable_pim_sparse expected to be basetypes.BoolValue, was: %T`, enablePimSparseAttribute))
+	}
+
+	enableQosAttribute, ok := attributes["enable_qos"]
+
+	if !ok {
+		diags.AddError(
+			"Attribute Missing",
+			`enable_qos is missing from object`)
+
+		return nil, diags
+	}
+
+	enableQosVal, ok := enableQosAttribute.(basetypes.BoolValue)
+
+	if !ok {
+		diags.AddError(
+			"Attribute Wrong Type",
+			fmt.Sprintf(`enable_qos expected to be basetypes.BoolValue, was: %T`, enableQosAttribute))
+	}
+
 	freeformConfigAttribute, ok := attributes["freeform_config"]
 
 	if !ok {
@@ -418,6 +574,114 @@ func (t InterfacesType) ValueFromObject(ctx context.Context, in basetypes.Object
 		diags.AddError(
 			"Attribute Wrong Type",
 			fmt.Sprintf(`interface_name expected to be basetypes.StringValue, was: %T`, interfaceNameAttribute))
+	}
+
+	ipv4AddressAttribute, ok := attributes["ipv4_address"]
+
+	if !ok {
+		diags.AddError(
+			"Attribute Missing",
+			`ipv4_address is missing from object`)
+
+		return nil, diags
+	}
+
+	ipv4AddressVal, ok := ipv4AddressAttribute.(basetypes.StringValue)
+
+	if !ok {
+		diags.AddError(
+			"Attribute Wrong Type",
+			fmt.Sprintf(`ipv4_address expected to be basetypes.StringValue, was: %T`, ipv4AddressAttribute))
+	}
+
+	ipv4PrefixLengthAttribute, ok := attributes["ipv4_prefix_length"]
+
+	if !ok {
+		diags.AddError(
+			"Attribute Missing",
+			`ipv4_prefix_length is missing from object`)
+
+		return nil, diags
+	}
+
+	ipv4PrefixLengthVal, ok := ipv4PrefixLengthAttribute.(basetypes.StringValue)
+
+	if !ok {
+		diags.AddError(
+			"Attribute Wrong Type",
+			fmt.Sprintf(`ipv4_prefix_length expected to be basetypes.StringValue, was: %T`, ipv4PrefixLengthAttribute))
+	}
+
+	ipv6AddressAttribute, ok := attributes["ipv6_address"]
+
+	if !ok {
+		diags.AddError(
+			"Attribute Missing",
+			`ipv6_address is missing from object`)
+
+		return nil, diags
+	}
+
+	ipv6AddressVal, ok := ipv6AddressAttribute.(basetypes.StringValue)
+
+	if !ok {
+		diags.AddError(
+			"Attribute Wrong Type",
+			fmt.Sprintf(`ipv6_address expected to be basetypes.StringValue, was: %T`, ipv6AddressAttribute))
+	}
+
+	ipv6PrefixLengthAttribute, ok := attributes["ipv6_prefix_length"]
+
+	if !ok {
+		diags.AddError(
+			"Attribute Missing",
+			`ipv6_prefix_length is missing from object`)
+
+		return nil, diags
+	}
+
+	ipv6PrefixLengthVal, ok := ipv6PrefixLengthAttribute.(basetypes.StringValue)
+
+	if !ok {
+		diags.AddError(
+			"Attribute Wrong Type",
+			fmt.Sprintf(`ipv6_prefix_length expected to be basetypes.StringValue, was: %T`, ipv6PrefixLengthAttribute))
+	}
+
+	linkStateRoutingProtocolAttribute, ok := attributes["link_state_routing_protocol"]
+
+	if !ok {
+		diags.AddError(
+			"Attribute Missing",
+			`link_state_routing_protocol is missing from object`)
+
+		return nil, diags
+	}
+
+	linkStateRoutingProtocolVal, ok := linkStateRoutingProtocolAttribute.(basetypes.StringValue)
+
+	if !ok {
+		diags.AddError(
+			"Attribute Wrong Type",
+			fmt.Sprintf(`link_state_routing_protocol expected to be basetypes.StringValue, was: %T`, linkStateRoutingProtocolAttribute))
+	}
+
+	linkStateRoutingTagAttribute, ok := attributes["link_state_routing_tag"]
+
+	if !ok {
+		diags.AddError(
+			"Attribute Missing",
+			`link_state_routing_tag is missing from object`)
+
+		return nil, diags
+	}
+
+	linkStateRoutingTagVal, ok := linkStateRoutingTagAttribute.(basetypes.StringValue)
+
+	if !ok {
+		diags.AddError(
+			"Attribute Wrong Type",
+			fmt.Sprintf(`link_state_routing_tag expected to be basetypes.StringValue, was: %T`, linkStateRoutingTagAttribute))
 	}
 
 	mtuAttribute, ok := attributes["mtu"]
@@ -528,6 +792,24 @@ func (t InterfacesType) ValueFromObject(ctx context.Context, in basetypes.Object
 			fmt.Sprintf(`orphan_port expected to be basetypes.BoolValue, was: %T`, orphanPortAttribute))
 	}
 
+	pimDrPriorityAttribute, ok := attributes["pim_dr_priority"]
+
+	if !ok {
+		diags.AddError(
+			"Attribute Missing",
+			`pim_dr_priority is missing from object`)
+
+		return nil, diags
+	}
+
+	pimDrPriorityVal, ok := pimDrPriorityAttribute.(basetypes.StringValue)
+
+	if !ok {
+		diags.AddError(
+			"Attribute Wrong Type",
+			fmt.Sprintf(`pim_dr_priority expected to be basetypes.StringValue, was: %T`, pimDrPriorityAttribute))
+	}
+
 	portTypeFastAttribute, ok := attributes["port_type_fast"]
 
 	if !ok {
@@ -562,6 +844,60 @@ func (t InterfacesType) ValueFromObject(ctx context.Context, in basetypes.Object
 		diags.AddError(
 			"Attribute Wrong Type",
 			fmt.Sprintf(`ptp expected to be basetypes.BoolValue, was: %T`, ptpAttribute))
+	}
+
+	qosPolicyAttribute, ok := attributes["qos_policy"]
+
+	if !ok {
+		diags.AddError(
+			"Attribute Missing",
+			`qos_policy is missing from object`)
+
+		return nil, diags
+	}
+
+	qosPolicyVal, ok := qosPolicyAttribute.(basetypes.StringValue)
+
+	if !ok {
+		diags.AddError(
+			"Attribute Wrong Type",
+			fmt.Sprintf(`qos_policy expected to be basetypes.StringValue, was: %T`, qosPolicyAttribute))
+	}
+
+	queuingPolicyAttribute, ok := attributes["queuing_policy"]
+
+	if !ok {
+		diags.AddError(
+			"Attribute Missing",
+			`queuing_policy is missing from object`)
+
+		return nil, diags
+	}
+
+	queuingPolicyVal, ok := queuingPolicyAttribute.(basetypes.StringValue)
+
+	if !ok {
+		diags.AddError(
+			"Attribute Wrong Type",
+			fmt.Sprintf(`queuing_policy expected to be basetypes.StringValue, was: %T`, queuingPolicyAttribute))
+	}
+
+	routingTagAttribute, ok := attributes["routing_tag"]
+
+	if !ok {
+		diags.AddError(
+			"Attribute Missing",
+			`routing_tag is missing from object`)
+
+		return nil, diags
+	}
+
+	routingTagVal, ok := routingTagAttribute.(basetypes.StringValue)
+
+	if !ok {
+		diags.AddError(
+			"Attribute Wrong Type",
+			fmt.Sprintf(`routing_tag expected to be basetypes.StringValue, was: %T`, routingTagAttribute))
 	}
 
 	serialNumberAttribute, ok := attributes["serial_number"]
@@ -600,31 +936,64 @@ func (t InterfacesType) ValueFromObject(ctx context.Context, in basetypes.Object
 			fmt.Sprintf(`speed expected to be basetypes.StringValue, was: %T`, speedAttribute))
 	}
 
+	vrfAttribute, ok := attributes["vrf"]
+
+	if !ok {
+		diags.AddError(
+			"Attribute Missing",
+			`vrf is missing from object`)
+
+		return nil, diags
+	}
+
+	vrfVal, ok := vrfAttribute.(basetypes.StringValue)
+
+	if !ok {
+		diags.AddError(
+			"Attribute Wrong Type",
+			fmt.Sprintf(`vrf expected to be basetypes.StringValue, was: %T`, vrfAttribute))
+	}
+
 	if diags.HasError() {
 		return nil, diags
 	}
 
 	return InterfacesValue{
-		AccessVlan:             accessVlanVal,
-		AdminState:             adminStateVal,
-		AllowedVlans:           allowedVlansVal,
-		BpduGuard:              bpduGuardVal,
-		CustomPolicyParameters: customPolicyParametersVal,
-		DeploymentStatus:       deploymentStatusVal,
-		FreeformConfig:         freeformConfigVal,
-		InterfaceDescription:   interfaceDescriptionVal,
-		InterfaceName:          interfaceNameVal,
-		Mtu:                    mtuVal,
-		NativeVlan:             nativeVlanVal,
-		Netflow:                netflowVal,
-		NetflowMonitor:         netflowMonitorVal,
-		NetflowSampler:         netflowSamplerVal,
-		OrphanPort:             orphanPortVal,
-		PortTypeFast:           portTypeFastVal,
-		Ptp:                    ptpVal,
-		SerialNumber:           serialNumberVal,
-		Speed:                  speedVal,
-		state:                  attr.ValueStateKnown,
+		AccessVlan:               accessVlanVal,
+		AdminState:               adminStateVal,
+		AllowedVlans:             allowedVlansVal,
+		BpduGuard:                bpduGuardVal,
+		CustomPolicyParameters:   customPolicyParametersVal,
+		DeploymentStatus:         deploymentStatusVal,
+		DisableIpRedirects:       disableIpRedirectsVal,
+		EnablePfc:                enablePfcVal,
+		EnablePimSparse:          enablePimSparseVal,
+		EnableQos:                enableQosVal,
+		FreeformConfig:           freeformConfigVal,
+		InterfaceDescription:     interfaceDescriptionVal,
+		InterfaceName:            interfaceNameVal,
+		Ipv4Address:              ipv4AddressVal,
+		Ipv4PrefixLength:         ipv4PrefixLengthVal,
+		Ipv6Address:              ipv6AddressVal,
+		Ipv6PrefixLength:         ipv6PrefixLengthVal,
+		LinkStateRoutingProtocol: linkStateRoutingProtocolVal,
+		LinkStateRoutingTag:      linkStateRoutingTagVal,
+		Mtu:                      mtuVal,
+		NativeVlan:               nativeVlanVal,
+		Netflow:                  netflowVal,
+		NetflowMonitor:           netflowMonitorVal,
+		NetflowSampler:           netflowSamplerVal,
+		OrphanPort:               orphanPortVal,
+		PimDrPriority:            pimDrPriorityVal,
+		PortTypeFast:             portTypeFastVal,
+		Ptp:                      ptpVal,
+		QosPolicy:                qosPolicyVal,
+		QueuingPolicy:            queuingPolicyVal,
+		RoutingTag:               routingTagVal,
+		SerialNumber:             serialNumberVal,
+		Speed:                    speedVal,
+		Vrf:                      vrfVal,
+		state:                    attr.ValueStateKnown,
 	}, diags
 }
 
@@ -799,6 +1168,78 @@ func NewInterfacesValue(attributeTypes map[string]attr.Type, attributes map[stri
 			fmt.Sprintf(`deployment_status expected to be basetypes.StringValue, was: %T`, deploymentStatusAttribute))
 	}
 
+	disableIpRedirectsAttribute, ok := attributes["disable_ip_redirects"]
+
+	if !ok {
+		diags.AddError(
+			"Attribute Missing",
+			`disable_ip_redirects is missing from object`)
+
+		return NewInterfacesValueUnknown(), diags
+	}
+
+	disableIpRedirectsVal, ok := disableIpRedirectsAttribute.(basetypes.BoolValue)
+
+	if !ok {
+		diags.AddError(
+			"Attribute Wrong Type",
+			fmt.Sprintf(`disable_ip_redirects expected to be basetypes.BoolValue, was: %T`, disableIpRedirectsAttribute))
+	}
+
+	enablePfcAttribute, ok := attributes["enable_pfc"]
+
+	if !ok {
+		diags.AddError(
+			"Attribute Missing",
+			`enable_pfc is missing from object`)
+
+		return NewInterfacesValueUnknown(), diags
+	}
+
+	enablePfcVal, ok := enablePfcAttribute.(basetypes.BoolValue)
+
+	if !ok {
+		diags.AddError(
+			"Attribute Wrong Type",
+			fmt.Sprintf(`enable_pfc expected to be basetypes.BoolValue, was: %T`, enablePfcAttribute))
+	}
+
+	enablePimSparseAttribute, ok := attributes["enable_pim_sparse"]
+
+	if !ok {
+		diags.AddError(
+			"Attribute Missing",
+			`enable_pim_sparse is missing from object`)
+
+		return NewInterfacesValueUnknown(), diags
+	}
+
+	enablePimSparseVal, ok := enablePimSparseAttribute.(basetypes.BoolValue)
+
+	if !ok {
+		diags.AddError(
+			"Attribute Wrong Type",
+			fmt.Sprintf(`enable_pim_sparse expected to be basetypes.BoolValue, was: %T`, enablePimSparseAttribute))
+	}
+
+	enableQosAttribute, ok := attributes["enable_qos"]
+
+	if !ok {
+		diags.AddError(
+			"Attribute Missing",
+			`enable_qos is missing from object`)
+
+		return NewInterfacesValueUnknown(), diags
+	}
+
+	enableQosVal, ok := enableQosAttribute.(basetypes.BoolValue)
+
+	if !ok {
+		diags.AddError(
+			"Attribute Wrong Type",
+			fmt.Sprintf(`enable_qos expected to be basetypes.BoolValue, was: %T`, enableQosAttribute))
+	}
+
 	freeformConfigAttribute, ok := attributes["freeform_config"]
 
 	if !ok {
@@ -851,6 +1292,114 @@ func NewInterfacesValue(attributeTypes map[string]attr.Type, attributes map[stri
 		diags.AddError(
 			"Attribute Wrong Type",
 			fmt.Sprintf(`interface_name expected to be basetypes.StringValue, was: %T`, interfaceNameAttribute))
+	}
+
+	ipv4AddressAttribute, ok := attributes["ipv4_address"]
+
+	if !ok {
+		diags.AddError(
+			"Attribute Missing",
+			`ipv4_address is missing from object`)
+
+		return NewInterfacesValueUnknown(), diags
+	}
+
+	ipv4AddressVal, ok := ipv4AddressAttribute.(basetypes.StringValue)
+
+	if !ok {
+		diags.AddError(
+			"Attribute Wrong Type",
+			fmt.Sprintf(`ipv4_address expected to be basetypes.StringValue, was: %T`, ipv4AddressAttribute))
+	}
+
+	ipv4PrefixLengthAttribute, ok := attributes["ipv4_prefix_length"]
+
+	if !ok {
+		diags.AddError(
+			"Attribute Missing",
+			`ipv4_prefix_length is missing from object`)
+
+		return NewInterfacesValueUnknown(), diags
+	}
+
+	ipv4PrefixLengthVal, ok := ipv4PrefixLengthAttribute.(basetypes.StringValue)
+
+	if !ok {
+		diags.AddError(
+			"Attribute Wrong Type",
+			fmt.Sprintf(`ipv4_prefix_length expected to be basetypes.StringValue, was: %T`, ipv4PrefixLengthAttribute))
+	}
+
+	ipv6AddressAttribute, ok := attributes["ipv6_address"]
+
+	if !ok {
+		diags.AddError(
+			"Attribute Missing",
+			`ipv6_address is missing from object`)
+
+		return NewInterfacesValueUnknown(), diags
+	}
+
+	ipv6AddressVal, ok := ipv6AddressAttribute.(basetypes.StringValue)
+
+	if !ok {
+		diags.AddError(
+			"Attribute Wrong Type",
+			fmt.Sprintf(`ipv6_address expected to be basetypes.StringValue, was: %T`, ipv6AddressAttribute))
+	}
+
+	ipv6PrefixLengthAttribute, ok := attributes["ipv6_prefix_length"]
+
+	if !ok {
+		diags.AddError(
+			"Attribute Missing",
+			`ipv6_prefix_length is missing from object`)
+
+		return NewInterfacesValueUnknown(), diags
+	}
+
+	ipv6PrefixLengthVal, ok := ipv6PrefixLengthAttribute.(basetypes.StringValue)
+
+	if !ok {
+		diags.AddError(
+			"Attribute Wrong Type",
+			fmt.Sprintf(`ipv6_prefix_length expected to be basetypes.StringValue, was: %T`, ipv6PrefixLengthAttribute))
+	}
+
+	linkStateRoutingProtocolAttribute, ok := attributes["link_state_routing_protocol"]
+
+	if !ok {
+		diags.AddError(
+			"Attribute Missing",
+			`link_state_routing_protocol is missing from object`)
+
+		return NewInterfacesValueUnknown(), diags
+	}
+
+	linkStateRoutingProtocolVal, ok := linkStateRoutingProtocolAttribute.(basetypes.StringValue)
+
+	if !ok {
+		diags.AddError(
+			"Attribute Wrong Type",
+			fmt.Sprintf(`link_state_routing_protocol expected to be basetypes.StringValue, was: %T`, linkStateRoutingProtocolAttribute))
+	}
+
+	linkStateRoutingTagAttribute, ok := attributes["link_state_routing_tag"]
+
+	if !ok {
+		diags.AddError(
+			"Attribute Missing",
+			`link_state_routing_tag is missing from object`)
+
+		return NewInterfacesValueUnknown(), diags
+	}
+
+	linkStateRoutingTagVal, ok := linkStateRoutingTagAttribute.(basetypes.StringValue)
+
+	if !ok {
+		diags.AddError(
+			"Attribute Wrong Type",
+			fmt.Sprintf(`link_state_routing_tag expected to be basetypes.StringValue, was: %T`, linkStateRoutingTagAttribute))
 	}
 
 	mtuAttribute, ok := attributes["mtu"]
@@ -961,6 +1510,24 @@ func NewInterfacesValue(attributeTypes map[string]attr.Type, attributes map[stri
 			fmt.Sprintf(`orphan_port expected to be basetypes.BoolValue, was: %T`, orphanPortAttribute))
 	}
 
+	pimDrPriorityAttribute, ok := attributes["pim_dr_priority"]
+
+	if !ok {
+		diags.AddError(
+			"Attribute Missing",
+			`pim_dr_priority is missing from object`)
+
+		return NewInterfacesValueUnknown(), diags
+	}
+
+	pimDrPriorityVal, ok := pimDrPriorityAttribute.(basetypes.StringValue)
+
+	if !ok {
+		diags.AddError(
+			"Attribute Wrong Type",
+			fmt.Sprintf(`pim_dr_priority expected to be basetypes.StringValue, was: %T`, pimDrPriorityAttribute))
+	}
+
 	portTypeFastAttribute, ok := attributes["port_type_fast"]
 
 	if !ok {
@@ -995,6 +1562,60 @@ func NewInterfacesValue(attributeTypes map[string]attr.Type, attributes map[stri
 		diags.AddError(
 			"Attribute Wrong Type",
 			fmt.Sprintf(`ptp expected to be basetypes.BoolValue, was: %T`, ptpAttribute))
+	}
+
+	qosPolicyAttribute, ok := attributes["qos_policy"]
+
+	if !ok {
+		diags.AddError(
+			"Attribute Missing",
+			`qos_policy is missing from object`)
+
+		return NewInterfacesValueUnknown(), diags
+	}
+
+	qosPolicyVal, ok := qosPolicyAttribute.(basetypes.StringValue)
+
+	if !ok {
+		diags.AddError(
+			"Attribute Wrong Type",
+			fmt.Sprintf(`qos_policy expected to be basetypes.StringValue, was: %T`, qosPolicyAttribute))
+	}
+
+	queuingPolicyAttribute, ok := attributes["queuing_policy"]
+
+	if !ok {
+		diags.AddError(
+			"Attribute Missing",
+			`queuing_policy is missing from object`)
+
+		return NewInterfacesValueUnknown(), diags
+	}
+
+	queuingPolicyVal, ok := queuingPolicyAttribute.(basetypes.StringValue)
+
+	if !ok {
+		diags.AddError(
+			"Attribute Wrong Type",
+			fmt.Sprintf(`queuing_policy expected to be basetypes.StringValue, was: %T`, queuingPolicyAttribute))
+	}
+
+	routingTagAttribute, ok := attributes["routing_tag"]
+
+	if !ok {
+		diags.AddError(
+			"Attribute Missing",
+			`routing_tag is missing from object`)
+
+		return NewInterfacesValueUnknown(), diags
+	}
+
+	routingTagVal, ok := routingTagAttribute.(basetypes.StringValue)
+
+	if !ok {
+		diags.AddError(
+			"Attribute Wrong Type",
+			fmt.Sprintf(`routing_tag expected to be basetypes.StringValue, was: %T`, routingTagAttribute))
 	}
 
 	serialNumberAttribute, ok := attributes["serial_number"]
@@ -1033,31 +1654,64 @@ func NewInterfacesValue(attributeTypes map[string]attr.Type, attributes map[stri
 			fmt.Sprintf(`speed expected to be basetypes.StringValue, was: %T`, speedAttribute))
 	}
 
+	vrfAttribute, ok := attributes["vrf"]
+
+	if !ok {
+		diags.AddError(
+			"Attribute Missing",
+			`vrf is missing from object`)
+
+		return NewInterfacesValueUnknown(), diags
+	}
+
+	vrfVal, ok := vrfAttribute.(basetypes.StringValue)
+
+	if !ok {
+		diags.AddError(
+			"Attribute Wrong Type",
+			fmt.Sprintf(`vrf expected to be basetypes.StringValue, was: %T`, vrfAttribute))
+	}
+
 	if diags.HasError() {
 		return NewInterfacesValueUnknown(), diags
 	}
 
 	return InterfacesValue{
-		AccessVlan:             accessVlanVal,
-		AdminState:             adminStateVal,
-		AllowedVlans:           allowedVlansVal,
-		BpduGuard:              bpduGuardVal,
-		CustomPolicyParameters: customPolicyParametersVal,
-		DeploymentStatus:       deploymentStatusVal,
-		FreeformConfig:         freeformConfigVal,
-		InterfaceDescription:   interfaceDescriptionVal,
-		InterfaceName:          interfaceNameVal,
-		Mtu:                    mtuVal,
-		NativeVlan:             nativeVlanVal,
-		Netflow:                netflowVal,
-		NetflowMonitor:         netflowMonitorVal,
-		NetflowSampler:         netflowSamplerVal,
-		OrphanPort:             orphanPortVal,
-		PortTypeFast:           portTypeFastVal,
-		Ptp:                    ptpVal,
-		SerialNumber:           serialNumberVal,
-		Speed:                  speedVal,
-		state:                  attr.ValueStateKnown,
+		AccessVlan:               accessVlanVal,
+		AdminState:               adminStateVal,
+		AllowedVlans:             allowedVlansVal,
+		BpduGuard:                bpduGuardVal,
+		CustomPolicyParameters:   customPolicyParametersVal,
+		DeploymentStatus:         deploymentStatusVal,
+		DisableIpRedirects:       disableIpRedirectsVal,
+		EnablePfc:                enablePfcVal,
+		EnablePimSparse:          enablePimSparseVal,
+		EnableQos:                enableQosVal,
+		FreeformConfig:           freeformConfigVal,
+		InterfaceDescription:     interfaceDescriptionVal,
+		InterfaceName:            interfaceNameVal,
+		Ipv4Address:              ipv4AddressVal,
+		Ipv4PrefixLength:         ipv4PrefixLengthVal,
+		Ipv6Address:              ipv6AddressVal,
+		Ipv6PrefixLength:         ipv6PrefixLengthVal,
+		LinkStateRoutingProtocol: linkStateRoutingProtocolVal,
+		LinkStateRoutingTag:      linkStateRoutingTagVal,
+		Mtu:                      mtuVal,
+		NativeVlan:               nativeVlanVal,
+		Netflow:                  netflowVal,
+		NetflowMonitor:           netflowMonitorVal,
+		NetflowSampler:           netflowSamplerVal,
+		OrphanPort:               orphanPortVal,
+		PimDrPriority:            pimDrPriorityVal,
+		PortTypeFast:             portTypeFastVal,
+		Ptp:                      ptpVal,
+		QosPolicy:                qosPolicyVal,
+		QueuingPolicy:            queuingPolicyVal,
+		RoutingTag:               routingTagVal,
+		SerialNumber:             serialNumberVal,
+		Speed:                    speedVal,
+		Vrf:                      vrfVal,
+		state:                    attr.ValueStateKnown,
 	}, diags
 }
 
@@ -1129,30 +1783,45 @@ func (t InterfacesType) ValueType(ctx context.Context) attr.Value {
 var _ basetypes.ObjectValuable = InterfacesValue{}
 
 type InterfacesValue struct {
-	AccessVlan             basetypes.Int64Value  `tfsdk:"access_vlan"`
-	AdminState             basetypes.BoolValue   `tfsdk:"admin_state"`
-	AllowedVlans           basetypes.StringValue `tfsdk:"allowed_vlans"`
-	BpduGuard              basetypes.StringValue `tfsdk:"bpdu_guard"`
-	CustomPolicyParameters basetypes.MapValue    `tfsdk:"custom_policy_parameters"`
-	DeploymentStatus       basetypes.StringValue `tfsdk:"deployment_status"`
-	FreeformConfig         basetypes.StringValue `tfsdk:"freeform_config"`
-	InterfaceDescription   basetypes.StringValue `tfsdk:"interface_description"`
-	InterfaceName          basetypes.StringValue `tfsdk:"interface_name"`
-	Mtu                    basetypes.StringValue `tfsdk:"mtu"`
-	NativeVlan             basetypes.Int64Value  `tfsdk:"native_vlan"`
-	Netflow                basetypes.BoolValue   `tfsdk:"netflow"`
-	NetflowMonitor         basetypes.StringValue `tfsdk:"netflow_monitor"`
-	NetflowSampler         basetypes.StringValue `tfsdk:"netflow_sampler"`
-	OrphanPort             basetypes.BoolValue   `tfsdk:"orphan_port"`
-	PortTypeFast           basetypes.BoolValue   `tfsdk:"port_type_fast"`
-	Ptp                    basetypes.BoolValue   `tfsdk:"ptp"`
-	SerialNumber           basetypes.StringValue `tfsdk:"serial_number"`
-	Speed                  basetypes.StringValue `tfsdk:"speed"`
-	state                  attr.ValueState
+	AccessVlan               basetypes.Int64Value  `tfsdk:"access_vlan"`
+	AdminState               basetypes.BoolValue   `tfsdk:"admin_state"`
+	AllowedVlans             basetypes.StringValue `tfsdk:"allowed_vlans"`
+	BpduGuard                basetypes.StringValue `tfsdk:"bpdu_guard"`
+	CustomPolicyParameters   basetypes.MapValue    `tfsdk:"custom_policy_parameters"`
+	DeploymentStatus         basetypes.StringValue `tfsdk:"deployment_status"`
+	DisableIpRedirects       basetypes.BoolValue   `tfsdk:"disable_ip_redirects"`
+	EnablePfc                basetypes.BoolValue   `tfsdk:"enable_pfc"`
+	EnablePimSparse          basetypes.BoolValue   `tfsdk:"enable_pim_sparse"`
+	EnableQos                basetypes.BoolValue   `tfsdk:"enable_qos"`
+	FreeformConfig           basetypes.StringValue `tfsdk:"freeform_config"`
+	InterfaceDescription     basetypes.StringValue `tfsdk:"interface_description"`
+	InterfaceName            basetypes.StringValue `tfsdk:"interface_name"`
+	Ipv4Address              basetypes.StringValue `tfsdk:"ipv4_address"`
+	Ipv4PrefixLength         basetypes.StringValue `tfsdk:"ipv4_prefix_length"`
+	Ipv6Address              basetypes.StringValue `tfsdk:"ipv6_address"`
+	Ipv6PrefixLength         basetypes.StringValue `tfsdk:"ipv6_prefix_length"`
+	LinkStateRoutingProtocol basetypes.StringValue `tfsdk:"link_state_routing_protocol"`
+	LinkStateRoutingTag      basetypes.StringValue `tfsdk:"link_state_routing_tag"`
+	Mtu                      basetypes.StringValue `tfsdk:"mtu"`
+	NativeVlan               basetypes.Int64Value  `tfsdk:"native_vlan"`
+	Netflow                  basetypes.BoolValue   `tfsdk:"netflow"`
+	NetflowMonitor           basetypes.StringValue `tfsdk:"netflow_monitor"`
+	NetflowSampler           basetypes.StringValue `tfsdk:"netflow_sampler"`
+	OrphanPort               basetypes.BoolValue   `tfsdk:"orphan_port"`
+	PimDrPriority            basetypes.StringValue `tfsdk:"pim_dr_priority"`
+	PortTypeFast             basetypes.BoolValue   `tfsdk:"port_type_fast"`
+	Ptp                      basetypes.BoolValue   `tfsdk:"ptp"`
+	QosPolicy                basetypes.StringValue `tfsdk:"qos_policy"`
+	QueuingPolicy            basetypes.StringValue `tfsdk:"queuing_policy"`
+	RoutingTag               basetypes.StringValue `tfsdk:"routing_tag"`
+	SerialNumber             basetypes.StringValue `tfsdk:"serial_number"`
+	Speed                    basetypes.StringValue `tfsdk:"speed"`
+	Vrf                      basetypes.StringValue `tfsdk:"vrf"`
+	state                    attr.ValueState
 }
 
 func (v InterfacesValue) ToTerraformValue(ctx context.Context) (tftypes.Value, error) {
-	attrTypes := make(map[string]tftypes.Type, 19)
+	attrTypes := make(map[string]tftypes.Type, 34)
 
 	var val tftypes.Value
 	var err error
@@ -1165,25 +1834,40 @@ func (v InterfacesValue) ToTerraformValue(ctx context.Context) (tftypes.Value, e
 		ElemType: types.StringType,
 	}.TerraformType(ctx)
 	attrTypes["deployment_status"] = basetypes.StringType{}.TerraformType(ctx)
+	attrTypes["disable_ip_redirects"] = basetypes.BoolType{}.TerraformType(ctx)
+	attrTypes["enable_pfc"] = basetypes.BoolType{}.TerraformType(ctx)
+	attrTypes["enable_pim_sparse"] = basetypes.BoolType{}.TerraformType(ctx)
+	attrTypes["enable_qos"] = basetypes.BoolType{}.TerraformType(ctx)
 	attrTypes["freeform_config"] = basetypes.StringType{}.TerraformType(ctx)
 	attrTypes["interface_description"] = basetypes.StringType{}.TerraformType(ctx)
 	attrTypes["interface_name"] = basetypes.StringType{}.TerraformType(ctx)
+	attrTypes["ipv4_address"] = basetypes.StringType{}.TerraformType(ctx)
+	attrTypes["ipv4_prefix_length"] = basetypes.StringType{}.TerraformType(ctx)
+	attrTypes["ipv6_address"] = basetypes.StringType{}.TerraformType(ctx)
+	attrTypes["ipv6_prefix_length"] = basetypes.StringType{}.TerraformType(ctx)
+	attrTypes["link_state_routing_protocol"] = basetypes.StringType{}.TerraformType(ctx)
+	attrTypes["link_state_routing_tag"] = basetypes.StringType{}.TerraformType(ctx)
 	attrTypes["mtu"] = basetypes.StringType{}.TerraformType(ctx)
 	attrTypes["native_vlan"] = basetypes.Int64Type{}.TerraformType(ctx)
 	attrTypes["netflow"] = basetypes.BoolType{}.TerraformType(ctx)
 	attrTypes["netflow_monitor"] = basetypes.StringType{}.TerraformType(ctx)
 	attrTypes["netflow_sampler"] = basetypes.StringType{}.TerraformType(ctx)
 	attrTypes["orphan_port"] = basetypes.BoolType{}.TerraformType(ctx)
+	attrTypes["pim_dr_priority"] = basetypes.StringType{}.TerraformType(ctx)
 	attrTypes["port_type_fast"] = basetypes.BoolType{}.TerraformType(ctx)
 	attrTypes["ptp"] = basetypes.BoolType{}.TerraformType(ctx)
+	attrTypes["qos_policy"] = basetypes.StringType{}.TerraformType(ctx)
+	attrTypes["queuing_policy"] = basetypes.StringType{}.TerraformType(ctx)
+	attrTypes["routing_tag"] = basetypes.StringType{}.TerraformType(ctx)
 	attrTypes["serial_number"] = basetypes.StringType{}.TerraformType(ctx)
 	attrTypes["speed"] = basetypes.StringType{}.TerraformType(ctx)
+	attrTypes["vrf"] = basetypes.StringType{}.TerraformType(ctx)
 
 	objectType := tftypes.Object{AttributeTypes: attrTypes}
 
 	switch v.state {
 	case attr.ValueStateKnown:
-		vals := make(map[string]tftypes.Value, 19)
+		vals := make(map[string]tftypes.Value, 34)
 
 		val, err = v.AccessVlan.ToTerraformValue(ctx)
 
@@ -1233,6 +1917,38 @@ func (v InterfacesValue) ToTerraformValue(ctx context.Context) (tftypes.Value, e
 
 		vals["deployment_status"] = val
 
+		val, err = v.DisableIpRedirects.ToTerraformValue(ctx)
+
+		if err != nil {
+			return tftypes.NewValue(objectType, tftypes.UnknownValue), err
+		}
+
+		vals["disable_ip_redirects"] = val
+
+		val, err = v.EnablePfc.ToTerraformValue(ctx)
+
+		if err != nil {
+			return tftypes.NewValue(objectType, tftypes.UnknownValue), err
+		}
+
+		vals["enable_pfc"] = val
+
+		val, err = v.EnablePimSparse.ToTerraformValue(ctx)
+
+		if err != nil {
+			return tftypes.NewValue(objectType, tftypes.UnknownValue), err
+		}
+
+		vals["enable_pim_sparse"] = val
+
+		val, err = v.EnableQos.ToTerraformValue(ctx)
+
+		if err != nil {
+			return tftypes.NewValue(objectType, tftypes.UnknownValue), err
+		}
+
+		vals["enable_qos"] = val
+
 		val, err = v.FreeformConfig.ToTerraformValue(ctx)
 
 		if err != nil {
@@ -1256,6 +1972,54 @@ func (v InterfacesValue) ToTerraformValue(ctx context.Context) (tftypes.Value, e
 		}
 
 		vals["interface_name"] = val
+
+		val, err = v.Ipv4Address.ToTerraformValue(ctx)
+
+		if err != nil {
+			return tftypes.NewValue(objectType, tftypes.UnknownValue), err
+		}
+
+		vals["ipv4_address"] = val
+
+		val, err = v.Ipv4PrefixLength.ToTerraformValue(ctx)
+
+		if err != nil {
+			return tftypes.NewValue(objectType, tftypes.UnknownValue), err
+		}
+
+		vals["ipv4_prefix_length"] = val
+
+		val, err = v.Ipv6Address.ToTerraformValue(ctx)
+
+		if err != nil {
+			return tftypes.NewValue(objectType, tftypes.UnknownValue), err
+		}
+
+		vals["ipv6_address"] = val
+
+		val, err = v.Ipv6PrefixLength.ToTerraformValue(ctx)
+
+		if err != nil {
+			return tftypes.NewValue(objectType, tftypes.UnknownValue), err
+		}
+
+		vals["ipv6_prefix_length"] = val
+
+		val, err = v.LinkStateRoutingProtocol.ToTerraformValue(ctx)
+
+		if err != nil {
+			return tftypes.NewValue(objectType, tftypes.UnknownValue), err
+		}
+
+		vals["link_state_routing_protocol"] = val
+
+		val, err = v.LinkStateRoutingTag.ToTerraformValue(ctx)
+
+		if err != nil {
+			return tftypes.NewValue(objectType, tftypes.UnknownValue), err
+		}
+
+		vals["link_state_routing_tag"] = val
 
 		val, err = v.Mtu.ToTerraformValue(ctx)
 
@@ -1305,6 +2069,14 @@ func (v InterfacesValue) ToTerraformValue(ctx context.Context) (tftypes.Value, e
 
 		vals["orphan_port"] = val
 
+		val, err = v.PimDrPriority.ToTerraformValue(ctx)
+
+		if err != nil {
+			return tftypes.NewValue(objectType, tftypes.UnknownValue), err
+		}
+
+		vals["pim_dr_priority"] = val
+
 		val, err = v.PortTypeFast.ToTerraformValue(ctx)
 
 		if err != nil {
@@ -1321,6 +2093,30 @@ func (v InterfacesValue) ToTerraformValue(ctx context.Context) (tftypes.Value, e
 
 		vals["ptp"] = val
 
+		val, err = v.QosPolicy.ToTerraformValue(ctx)
+
+		if err != nil {
+			return tftypes.NewValue(objectType, tftypes.UnknownValue), err
+		}
+
+		vals["qos_policy"] = val
+
+		val, err = v.QueuingPolicy.ToTerraformValue(ctx)
+
+		if err != nil {
+			return tftypes.NewValue(objectType, tftypes.UnknownValue), err
+		}
+
+		vals["queuing_policy"] = val
+
+		val, err = v.RoutingTag.ToTerraformValue(ctx)
+
+		if err != nil {
+			return tftypes.NewValue(objectType, tftypes.UnknownValue), err
+		}
+
+		vals["routing_tag"] = val
+
 		val, err = v.SerialNumber.ToTerraformValue(ctx)
 
 		if err != nil {
@@ -1336,6 +2132,14 @@ func (v InterfacesValue) ToTerraformValue(ctx context.Context) (tftypes.Value, e
 		}
 
 		vals["speed"] = val
+
+		val, err = v.Vrf.ToTerraformValue(ctx)
+
+		if err != nil {
+			return tftypes.NewValue(objectType, tftypes.UnknownValue), err
+		}
+
+		vals["vrf"] = val
 
 		if err := tftypes.ValidateValue(objectType, vals); err != nil {
 			return tftypes.NewValue(objectType, tftypes.UnknownValue), err
@@ -1387,20 +2191,35 @@ func (v InterfacesValue) ToObjectValue(ctx context.Context) (basetypes.ObjectVal
 			"custom_policy_parameters": basetypes.MapType{
 				ElemType: types.StringType,
 			},
-			"deployment_status":     basetypes.StringType{},
-			"freeform_config":       basetypes.StringType{},
-			"interface_description": basetypes.StringType{},
-			"interface_name":        basetypes.StringType{},
-			"mtu":                   basetypes.StringType{},
-			"native_vlan":           basetypes.Int64Type{},
-			"netflow":               basetypes.BoolType{},
-			"netflow_monitor":       basetypes.StringType{},
-			"netflow_sampler":       basetypes.StringType{},
-			"orphan_port":           basetypes.BoolType{},
-			"port_type_fast":        basetypes.BoolType{},
-			"ptp":                   basetypes.BoolType{},
-			"serial_number":         basetypes.StringType{},
-			"speed":                 basetypes.StringType{},
+			"deployment_status":           basetypes.StringType{},
+			"disable_ip_redirects":        basetypes.BoolType{},
+			"enable_pfc":                  basetypes.BoolType{},
+			"enable_pim_sparse":           basetypes.BoolType{},
+			"enable_qos":                  basetypes.BoolType{},
+			"freeform_config":             basetypes.StringType{},
+			"interface_description":       basetypes.StringType{},
+			"interface_name":              basetypes.StringType{},
+			"ipv4_address":                basetypes.StringType{},
+			"ipv4_prefix_length":          basetypes.StringType{},
+			"ipv6_address":                basetypes.StringType{},
+			"ipv6_prefix_length":          basetypes.StringType{},
+			"link_state_routing_protocol": basetypes.StringType{},
+			"link_state_routing_tag":      basetypes.StringType{},
+			"mtu":                         basetypes.StringType{},
+			"native_vlan":                 basetypes.Int64Type{},
+			"netflow":                     basetypes.BoolType{},
+			"netflow_monitor":             basetypes.StringType{},
+			"netflow_sampler":             basetypes.StringType{},
+			"orphan_port":                 basetypes.BoolType{},
+			"pim_dr_priority":             basetypes.StringType{},
+			"port_type_fast":              basetypes.BoolType{},
+			"ptp":                         basetypes.BoolType{},
+			"qos_policy":                  basetypes.StringType{},
+			"queuing_policy":              basetypes.StringType{},
+			"routing_tag":                 basetypes.StringType{},
+			"serial_number":               basetypes.StringType{},
+			"speed":                       basetypes.StringType{},
+			"vrf":                         basetypes.StringType{},
 		}), diags
 	}
 
@@ -1412,20 +2231,35 @@ func (v InterfacesValue) ToObjectValue(ctx context.Context) (basetypes.ObjectVal
 		"custom_policy_parameters": basetypes.MapType{
 			ElemType: types.StringType,
 		},
-		"deployment_status":     basetypes.StringType{},
-		"freeform_config":       basetypes.StringType{},
-		"interface_description": basetypes.StringType{},
-		"interface_name":        basetypes.StringType{},
-		"mtu":                   basetypes.StringType{},
-		"native_vlan":           basetypes.Int64Type{},
-		"netflow":               basetypes.BoolType{},
-		"netflow_monitor":       basetypes.StringType{},
-		"netflow_sampler":       basetypes.StringType{},
-		"orphan_port":           basetypes.BoolType{},
-		"port_type_fast":        basetypes.BoolType{},
-		"ptp":                   basetypes.BoolType{},
-		"serial_number":         basetypes.StringType{},
-		"speed":                 basetypes.StringType{},
+		"deployment_status":           basetypes.StringType{},
+		"disable_ip_redirects":        basetypes.BoolType{},
+		"enable_pfc":                  basetypes.BoolType{},
+		"enable_pim_sparse":           basetypes.BoolType{},
+		"enable_qos":                  basetypes.BoolType{},
+		"freeform_config":             basetypes.StringType{},
+		"interface_description":       basetypes.StringType{},
+		"interface_name":              basetypes.StringType{},
+		"ipv4_address":                basetypes.StringType{},
+		"ipv4_prefix_length":          basetypes.StringType{},
+		"ipv6_address":                basetypes.StringType{},
+		"ipv6_prefix_length":          basetypes.StringType{},
+		"link_state_routing_protocol": basetypes.StringType{},
+		"link_state_routing_tag":      basetypes.StringType{},
+		"mtu":                         basetypes.StringType{},
+		"native_vlan":                 basetypes.Int64Type{},
+		"netflow":                     basetypes.BoolType{},
+		"netflow_monitor":             basetypes.StringType{},
+		"netflow_sampler":             basetypes.StringType{},
+		"orphan_port":                 basetypes.BoolType{},
+		"pim_dr_priority":             basetypes.StringType{},
+		"port_type_fast":              basetypes.BoolType{},
+		"ptp":                         basetypes.BoolType{},
+		"qos_policy":                  basetypes.StringType{},
+		"queuing_policy":              basetypes.StringType{},
+		"routing_tag":                 basetypes.StringType{},
+		"serial_number":               basetypes.StringType{},
+		"speed":                       basetypes.StringType{},
+		"vrf":                         basetypes.StringType{},
 	}
 
 	if v.IsNull() {
@@ -1439,25 +2273,40 @@ func (v InterfacesValue) ToObjectValue(ctx context.Context) (basetypes.ObjectVal
 	objVal, diags := types.ObjectValue(
 		attributeTypes,
 		map[string]attr.Value{
-			"access_vlan":              v.AccessVlan,
-			"admin_state":              v.AdminState,
-			"allowed_vlans":            v.AllowedVlans,
-			"bpdu_guard":               v.BpduGuard,
-			"custom_policy_parameters": customPolicyParametersVal,
-			"deployment_status":        v.DeploymentStatus,
-			"freeform_config":          v.FreeformConfig,
-			"interface_description":    v.InterfaceDescription,
-			"interface_name":           v.InterfaceName,
-			"mtu":                      v.Mtu,
-			"native_vlan":              v.NativeVlan,
-			"netflow":                  v.Netflow,
-			"netflow_monitor":          v.NetflowMonitor,
-			"netflow_sampler":          v.NetflowSampler,
-			"orphan_port":              v.OrphanPort,
-			"port_type_fast":           v.PortTypeFast,
-			"ptp":                      v.Ptp,
-			"serial_number":            v.SerialNumber,
-			"speed":                    v.Speed,
+			"access_vlan":                 v.AccessVlan,
+			"admin_state":                 v.AdminState,
+			"allowed_vlans":               v.AllowedVlans,
+			"bpdu_guard":                  v.BpduGuard,
+			"custom_policy_parameters":    customPolicyParametersVal,
+			"deployment_status":           v.DeploymentStatus,
+			"disable_ip_redirects":        v.DisableIpRedirects,
+			"enable_pfc":                  v.EnablePfc,
+			"enable_pim_sparse":           v.EnablePimSparse,
+			"enable_qos":                  v.EnableQos,
+			"freeform_config":             v.FreeformConfig,
+			"interface_description":       v.InterfaceDescription,
+			"interface_name":              v.InterfaceName,
+			"ipv4_address":                v.Ipv4Address,
+			"ipv4_prefix_length":          v.Ipv4PrefixLength,
+			"ipv6_address":                v.Ipv6Address,
+			"ipv6_prefix_length":          v.Ipv6PrefixLength,
+			"link_state_routing_protocol": v.LinkStateRoutingProtocol,
+			"link_state_routing_tag":      v.LinkStateRoutingTag,
+			"mtu":                         v.Mtu,
+			"native_vlan":                 v.NativeVlan,
+			"netflow":                     v.Netflow,
+			"netflow_monitor":             v.NetflowMonitor,
+			"netflow_sampler":             v.NetflowSampler,
+			"orphan_port":                 v.OrphanPort,
+			"pim_dr_priority":             v.PimDrPriority,
+			"port_type_fast":              v.PortTypeFast,
+			"ptp":                         v.Ptp,
+			"qos_policy":                  v.QosPolicy,
+			"queuing_policy":              v.QueuingPolicy,
+			"routing_tag":                 v.RoutingTag,
+			"serial_number":               v.SerialNumber,
+			"speed":                       v.Speed,
+			"vrf":                         v.Vrf,
 		})
 
 	return objVal, diags
@@ -1502,6 +2351,22 @@ func (v InterfacesValue) Equal(o attr.Value) bool {
 		return false
 	}
 
+	if !v.DisableIpRedirects.Equal(other.DisableIpRedirects) {
+		return false
+	}
+
+	if !v.EnablePfc.Equal(other.EnablePfc) {
+		return false
+	}
+
+	if !v.EnablePimSparse.Equal(other.EnablePimSparse) {
+		return false
+	}
+
+	if !v.EnableQos.Equal(other.EnableQos) {
+		return false
+	}
+
 	if !v.FreeformConfig.Equal(other.FreeformConfig) {
 		return false
 	}
@@ -1511,6 +2376,30 @@ func (v InterfacesValue) Equal(o attr.Value) bool {
 	}
 
 	if !v.InterfaceName.Equal(other.InterfaceName) {
+		return false
+	}
+
+	if !v.Ipv4Address.Equal(other.Ipv4Address) {
+		return false
+	}
+
+	if !v.Ipv4PrefixLength.Equal(other.Ipv4PrefixLength) {
+		return false
+	}
+
+	if !v.Ipv6Address.Equal(other.Ipv6Address) {
+		return false
+	}
+
+	if !v.Ipv6PrefixLength.Equal(other.Ipv6PrefixLength) {
+		return false
+	}
+
+	if !v.LinkStateRoutingProtocol.Equal(other.LinkStateRoutingProtocol) {
+		return false
+	}
+
+	if !v.LinkStateRoutingTag.Equal(other.LinkStateRoutingTag) {
 		return false
 	}
 
@@ -1538,6 +2427,10 @@ func (v InterfacesValue) Equal(o attr.Value) bool {
 		return false
 	}
 
+	if !v.PimDrPriority.Equal(other.PimDrPriority) {
+		return false
+	}
+
 	if !v.PortTypeFast.Equal(other.PortTypeFast) {
 		return false
 	}
@@ -1546,11 +2439,27 @@ func (v InterfacesValue) Equal(o attr.Value) bool {
 		return false
 	}
 
+	if !v.QosPolicy.Equal(other.QosPolicy) {
+		return false
+	}
+
+	if !v.QueuingPolicy.Equal(other.QueuingPolicy) {
+		return false
+	}
+
+	if !v.RoutingTag.Equal(other.RoutingTag) {
+		return false
+	}
+
 	if !v.SerialNumber.Equal(other.SerialNumber) {
 		return false
 	}
 
 	if !v.Speed.Equal(other.Speed) {
+		return false
+	}
+
+	if !v.Vrf.Equal(other.Vrf) {
 		return false
 	}
 
@@ -1574,19 +2483,34 @@ func (v InterfacesValue) AttributeTypes(ctx context.Context) map[string]attr.Typ
 		"custom_policy_parameters": basetypes.MapType{
 			ElemType: types.StringType,
 		},
-		"deployment_status":     basetypes.StringType{},
-		"freeform_config":       basetypes.StringType{},
-		"interface_description": basetypes.StringType{},
-		"interface_name":        basetypes.StringType{},
-		"mtu":                   basetypes.StringType{},
-		"native_vlan":           basetypes.Int64Type{},
-		"netflow":               basetypes.BoolType{},
-		"netflow_monitor":       basetypes.StringType{},
-		"netflow_sampler":       basetypes.StringType{},
-		"orphan_port":           basetypes.BoolType{},
-		"port_type_fast":        basetypes.BoolType{},
-		"ptp":                   basetypes.BoolType{},
-		"serial_number":         basetypes.StringType{},
-		"speed":                 basetypes.StringType{},
+		"deployment_status":           basetypes.StringType{},
+		"disable_ip_redirects":        basetypes.BoolType{},
+		"enable_pfc":                  basetypes.BoolType{},
+		"enable_pim_sparse":           basetypes.BoolType{},
+		"enable_qos":                  basetypes.BoolType{},
+		"freeform_config":             basetypes.StringType{},
+		"interface_description":       basetypes.StringType{},
+		"interface_name":              basetypes.StringType{},
+		"ipv4_address":                basetypes.StringType{},
+		"ipv4_prefix_length":          basetypes.StringType{},
+		"ipv6_address":                basetypes.StringType{},
+		"ipv6_prefix_length":          basetypes.StringType{},
+		"link_state_routing_protocol": basetypes.StringType{},
+		"link_state_routing_tag":      basetypes.StringType{},
+		"mtu":                         basetypes.StringType{},
+		"native_vlan":                 basetypes.Int64Type{},
+		"netflow":                     basetypes.BoolType{},
+		"netflow_monitor":             basetypes.StringType{},
+		"netflow_sampler":             basetypes.StringType{},
+		"orphan_port":                 basetypes.BoolType{},
+		"pim_dr_priority":             basetypes.StringType{},
+		"port_type_fast":              basetypes.BoolType{},
+		"ptp":                         basetypes.BoolType{},
+		"qos_policy":                  basetypes.StringType{},
+		"queuing_policy":              basetypes.StringType{},
+		"routing_tag":                 basetypes.StringType{},
+		"serial_number":               basetypes.StringType{},
+		"speed":                       basetypes.StringType{},
+		"vrf":                         basetypes.StringType{},
 	}
 }
