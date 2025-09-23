@@ -298,3 +298,99 @@ func TestAccInterfaceEthernetResourceCombinedUpdate(t *testing.T) {
 	})
 
 }
+
+func TestAccInterfaceEthernetResourceIntRoutedHostTemplate(t *testing.T) {
+
+	x := &map[string]string{
+		"RscType":    "ndfc_interface_ethernet",
+		"RscSubType": "ethernet",
+		"RscName":    "test_ethernet",
+		"User":       helper.GetConfig("ethernet").NDFC.User,
+		"Password":   helper.GetConfig("ethernet").NDFC.Password,
+		"Host":       helper.GetConfig("ethernet").NDFC.URL,
+		"Insecure":   helper.GetConfig("ethernet").NDFC.Insecure,
+	}
+
+	tf_config := new(string)
+	*tf_config = `provider "ndfc" {
+		host     = "https://"
+		username = "admin"
+		password = "admin!@#"
+		domain   = "example.com"
+		insecure = true
+		}
+		resource ndfc_vrf_bulk "net_test" {
+			fabric_name = "dummy"
+		}`
+
+	intfRsc := new(resource_interface_common.NDFCInterfaceCommonModel)
+	stepCount := new(int)
+	*stepCount = 0
+
+	resource.Test(t, resource.TestCase{
+
+		ProtoV6ProviderFactories: testAccProtoV6ProviderFactories,
+		Steps: []resource.TestStep{
+			{
+				Config: func() string {
+					*stepCount++
+					tName := fmt.Sprintf("%s_%d", t.Name(), *stepCount)
+					helper.GenerateIntfResource(&intfRsc, 1, 1, "ethernet:int_routed_host", true, helper.GetConfig("ethernet").NDFC.Switches, true, false)
+					(*x)["RscType"] = "ndfc_interface_ethernet"
+					(*x)["RscName"] = "routed_host_intf_test"
+					helper.GetTFConfigWithSingleResource(tName, *x, []interface{}{intfRsc}, &tf_config)
+					return *tf_config
+				}(),
+				Check: resource.ComposeTestCheckFunc(InterfaceEthernetModelHelperStateCheck("ndfc_interface_ethernet.routed_host_intf_test", *intfRsc, path.Empty())...),
+			},
+		},
+	})
+}
+
+func TestAccInterfaceEthernetResourceEplRoutedHostTemplate(t *testing.T) {
+
+	x := &map[string]string{
+		"RscType":    "ndfc_interface_ethernet",
+		"RscSubType": "ethernet",
+		"RscName":    "test_ethernet",
+		"User":       helper.GetConfig("ethernet").NDFC.User,
+		"Password":   helper.GetConfig("ethernet").NDFC.Password,
+		"Host":       helper.GetConfig("ethernet").NDFC.URL,
+		"Insecure":   helper.GetConfig("ethernet").NDFC.Insecure,
+	}
+
+	tf_config := new(string)
+	*tf_config = `provider "ndfc" {
+		host     = "https://"
+		username = "admin"
+		password = "admin!@#"
+		domain   = "example.com"
+		insecure = true
+		}
+		resource ndfc_vrf_bulk "net_test" {
+			fabric_name = "dummy"
+		}`
+
+	intfRsc := new(resource_interface_common.NDFCInterfaceCommonModel)
+	stepCount := new(int)
+	*stepCount = 0
+
+	resource.Test(t, resource.TestCase{
+		PreCheck:                 func() { testAccPreCheck(t, rsType) },
+		ProtoV6ProviderFactories: testAccProtoV6ProviderFactories,
+		Steps: []resource.TestStep{
+			{
+				Config: func() string {
+					*stepCount++
+					tName := fmt.Sprintf("%s_%d", t.Name(), *stepCount)
+					helper.GenerateIntfResource(&intfRsc, 1, 1, "ethernet:epl_routed_intf", true, helper.GetConfig("ethernet").NDFC.Switches, true, false)
+					(*x)["RscType"] = "ndfc_interface_ethernet"
+					(*x)["RscName"] = "epl_routed_host_intf_test"
+					helper.GetTFConfigWithSingleResource(tName, *x, []interface{}{intfRsc}, &tf_config)
+					return *tf_config
+				}(),
+				Check: resource.ComposeTestCheckFunc(InterfaceEthernetModelHelperStateCheck("ndfc_interface_ethernet.epl_routed_host_intf_test", *intfRsc, path.Empty())...),
+			},
+		},
+	})
+}

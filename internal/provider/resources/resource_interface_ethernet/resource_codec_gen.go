@@ -197,6 +197,100 @@ func (v *InterfacesValue) SetValue(jsonData *resource_interface_common.NDFCInter
 		v.NativeVlan = types.Int64Null()
 	}
 
+	if jsonData.NvPairs.Vrf != "" {
+		v.Vrf = types.StringValue(jsonData.NvPairs.Vrf)
+	} else {
+		v.Vrf = types.StringNull()
+	}
+
+	if jsonData.NvPairs.Ipv4Address != "" {
+		v.Ipv4Address = types.StringValue(jsonData.NvPairs.Ipv4Address)
+	} else {
+		v.Ipv4Address = types.StringNull()
+	}
+
+	if jsonData.NvPairs.Ipv4PrefixLength != "" {
+		v.Ipv4PrefixLength = types.StringValue(jsonData.NvPairs.Ipv4PrefixLength)
+	} else {
+		v.Ipv4PrefixLength = types.StringNull()
+	}
+
+	if jsonData.NvPairs.RoutingTag != "" {
+		v.RoutingTag = types.StringValue(jsonData.NvPairs.RoutingTag)
+	} else {
+		v.RoutingTag = types.StringNull()
+	}
+
+	if jsonData.NvPairs.DisableIpRedirects != "" {
+		x, _ := strconv.ParseBool(jsonData.NvPairs.DisableIpRedirects)
+		v.DisableIpRedirects = types.BoolValue(x)
+	} else {
+		v.DisableIpRedirects = types.BoolNull()
+	}
+
+	if jsonData.NvPairs.EnablePimSparse != "" {
+		x, _ := strconv.ParseBool(jsonData.NvPairs.EnablePimSparse)
+		v.EnablePimSparse = types.BoolValue(x)
+	} else {
+		v.EnablePimSparse = types.BoolNull()
+	}
+
+	if jsonData.NvPairs.PimDrPriority != "" {
+		v.PimDrPriority = types.StringValue(jsonData.NvPairs.PimDrPriority)
+	} else {
+		v.PimDrPriority = types.StringNull()
+	}
+
+	if jsonData.NvPairs.EnablePfc != "" {
+		x, _ := strconv.ParseBool(jsonData.NvPairs.EnablePfc)
+		v.EnablePfc = types.BoolValue(x)
+	} else {
+		v.EnablePfc = types.BoolNull()
+	}
+
+	if jsonData.NvPairs.EnableQos != "" {
+		x, _ := strconv.ParseBool(jsonData.NvPairs.EnableQos)
+		v.EnableQos = types.BoolValue(x)
+	} else {
+		v.EnableQos = types.BoolNull()
+	}
+
+	if jsonData.NvPairs.QosPolicy != "" {
+		v.QosPolicy = types.StringValue(jsonData.NvPairs.QosPolicy)
+	} else {
+		v.QosPolicy = types.StringNull()
+	}
+
+	if jsonData.NvPairs.QueuingPolicy != "" {
+		v.QueuingPolicy = types.StringValue(jsonData.NvPairs.QueuingPolicy)
+	} else {
+		v.QueuingPolicy = types.StringNull()
+	}
+
+	if jsonData.NvPairs.LinkStateRoutingProtocol != "" {
+		v.LinkStateRoutingProtocol = types.StringValue(jsonData.NvPairs.LinkStateRoutingProtocol)
+	} else {
+		v.LinkStateRoutingProtocol = types.StringNull()
+	}
+
+	if jsonData.NvPairs.LinkStateRoutingTag != "" {
+		v.LinkStateRoutingTag = types.StringValue(jsonData.NvPairs.LinkStateRoutingTag)
+	} else {
+		v.LinkStateRoutingTag = types.StringNull()
+	}
+
+	if jsonData.NvPairs.Ipv6Address != "" {
+		v.Ipv6Address = types.StringValue(jsonData.NvPairs.Ipv6Address)
+	} else {
+		v.Ipv6Address = types.StringNull()
+	}
+
+	if jsonData.NvPairs.Ipv6PrefixLength != "" {
+		v.Ipv6PrefixLength = types.StringValue(jsonData.NvPairs.Ipv6PrefixLength)
+	} else {
+		v.Ipv6PrefixLength = types.StringNull()
+	}
+
 	if jsonData.DeploymentStatus != "" {
 		v.DeploymentStatus = types.StringValue(jsonData.DeploymentStatus)
 	} else {
@@ -399,6 +493,126 @@ func (v InterfaceEthernetModel) GetModelData() *resource_interface_common.NDFCIn
 				data1.NvPairs.NativeVlan = nil
 			}
 
+			// vrf | String| [nvPairs]| false
+			if !ele1.Vrf.IsNull() && !ele1.Vrf.IsUnknown() {
+				//-----inline nested----
+				data1.NvPairs.Vrf = ele1.Vrf.ValueString()
+			} else {
+				data1.NvPairs.Vrf = ""
+			}
+
+			// ipv4_address | String| [nvPairs]| false
+			if !ele1.Ipv4Address.IsNull() && !ele1.Ipv4Address.IsUnknown() {
+				//-----inline nested----
+				data1.NvPairs.Ipv4Address = ele1.Ipv4Address.ValueString()
+			} else {
+				data1.NvPairs.Ipv4Address = ""
+			}
+
+			// ipv4_prefix_length | String| [nvPairs]| false
+			if !ele1.Ipv4PrefixLength.IsNull() && !ele1.Ipv4PrefixLength.IsUnknown() {
+				//-----inline nested----
+				data1.NvPairs.Ipv4PrefixLength = ele1.Ipv4PrefixLength.ValueString()
+			} else {
+				data1.NvPairs.Ipv4PrefixLength = ""
+			}
+
+			// routing_tag | String| [nvPairs]| false
+			if !ele1.RoutingTag.IsNull() && !ele1.RoutingTag.IsUnknown() {
+				//-----inline nested----
+				data1.NvPairs.RoutingTag = ele1.RoutingTag.ValueString()
+			} else {
+				data1.NvPairs.RoutingTag = ""
+			}
+
+			// disable_ip_redirects | Bool| [nvPairs]| false
+			if !ele1.DisableIpRedirects.IsNull() && !ele1.DisableIpRedirects.IsUnknown() {
+				//-----inline nested----
+				data1.NvPairs.DisableIpRedirects = strconv.FormatBool(ele1.DisableIpRedirects.ValueBool())
+			} else {
+				data1.NvPairs.DisableIpRedirects = ""
+			}
+
+			// enable_pim_sparse | Bool| [nvPairs]| false
+			if !ele1.EnablePimSparse.IsNull() && !ele1.EnablePimSparse.IsUnknown() {
+				//-----inline nested----
+				data1.NvPairs.EnablePimSparse = strconv.FormatBool(ele1.EnablePimSparse.ValueBool())
+			} else {
+				data1.NvPairs.EnablePimSparse = ""
+			}
+
+			// pim_dr_priority | String| [nvPairs]| false
+			if !ele1.PimDrPriority.IsNull() && !ele1.PimDrPriority.IsUnknown() {
+				//-----inline nested----
+				data1.NvPairs.PimDrPriority = ele1.PimDrPriority.ValueString()
+			} else {
+				data1.NvPairs.PimDrPriority = ""
+			}
+
+			// enable_pfc | Bool| [nvPairs]| false
+			if !ele1.EnablePfc.IsNull() && !ele1.EnablePfc.IsUnknown() {
+				//-----inline nested----
+				data1.NvPairs.EnablePfc = strconv.FormatBool(ele1.EnablePfc.ValueBool())
+			} else {
+				data1.NvPairs.EnablePfc = ""
+			}
+
+			// enable_qos | Bool| [nvPairs]| false
+			if !ele1.EnableQos.IsNull() && !ele1.EnableQos.IsUnknown() {
+				//-----inline nested----
+				data1.NvPairs.EnableQos = strconv.FormatBool(ele1.EnableQos.ValueBool())
+			} else {
+				data1.NvPairs.EnableQos = ""
+			}
+
+			// qos_policy | String| [nvPairs]| false
+			if !ele1.QosPolicy.IsNull() && !ele1.QosPolicy.IsUnknown() {
+				//-----inline nested----
+				data1.NvPairs.QosPolicy = ele1.QosPolicy.ValueString()
+			} else {
+				data1.NvPairs.QosPolicy = ""
+			}
+
+			// queuing_policy | String| [nvPairs]| false
+			if !ele1.QueuingPolicy.IsNull() && !ele1.QueuingPolicy.IsUnknown() {
+				//-----inline nested----
+				data1.NvPairs.QueuingPolicy = ele1.QueuingPolicy.ValueString()
+			} else {
+				data1.NvPairs.QueuingPolicy = ""
+			}
+
+			// link_state_routing_protocol | String| [nvPairs]| false
+			if !ele1.LinkStateRoutingProtocol.IsNull() && !ele1.LinkStateRoutingProtocol.IsUnknown() {
+				//-----inline nested----
+				data1.NvPairs.LinkStateRoutingProtocol = ele1.LinkStateRoutingProtocol.ValueString()
+			} else {
+				data1.NvPairs.LinkStateRoutingProtocol = ""
+			}
+
+			// link_state_routing_tag | String| [nvPairs]| false
+			if !ele1.LinkStateRoutingTag.IsNull() && !ele1.LinkStateRoutingTag.IsUnknown() {
+				//-----inline nested----
+				data1.NvPairs.LinkStateRoutingTag = ele1.LinkStateRoutingTag.ValueString()
+			} else {
+				data1.NvPairs.LinkStateRoutingTag = ""
+			}
+
+			// ipv6_address | String| [nvPairs]| false
+			if !ele1.Ipv6Address.IsNull() && !ele1.Ipv6Address.IsUnknown() {
+				//-----inline nested----
+				data1.NvPairs.Ipv6Address = ele1.Ipv6Address.ValueString()
+			} else {
+				data1.NvPairs.Ipv6Address = ""
+			}
+
+			// ipv6_prefix_length | String| [nvPairs]| false
+			if !ele1.Ipv6PrefixLength.IsNull() && !ele1.Ipv6PrefixLength.IsUnknown() {
+				//-----inline nested----
+				data1.NvPairs.Ipv6PrefixLength = ele1.Ipv6PrefixLength.ValueString()
+			} else {
+				data1.NvPairs.Ipv6PrefixLength = ""
+			}
+
 			// deployment_status | String| []| false
 			// custom_policy_parameters | Map:String| []| false
 			if !ele1.CustomPolicyParameters.IsNull() && !ele1.CustomPolicyParameters.IsUnknown() {
@@ -474,6 +688,26 @@ func (v *InterfacesValue) SetDefaultValues() {
 
 	if v.AllowedVlans.IsNull() || v.AllowedVlans.IsUnknown() {
 		v.AllowedVlans = types.StringValue("none")
+	}
+
+	if v.DisableIpRedirects.IsNull() || v.DisableIpRedirects.IsUnknown() {
+		v.DisableIpRedirects = types.BoolValue(false)
+	}
+
+	if v.EnablePimSparse.IsNull() || v.EnablePimSparse.IsUnknown() {
+		v.EnablePimSparse = types.BoolValue(false)
+	}
+
+	if v.PimDrPriority.IsNull() || v.PimDrPriority.IsUnknown() {
+		v.PimDrPriority = types.StringValue("1")
+	}
+
+	if v.EnablePfc.IsNull() || v.EnablePfc.IsUnknown() {
+		v.EnablePfc = types.BoolValue(false)
+	}
+
+	if v.EnableQos.IsNull() || v.EnableQos.IsUnknown() {
+		v.EnableQos = types.BoolValue(false)
 	}
 
 }

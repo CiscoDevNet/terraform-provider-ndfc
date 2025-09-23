@@ -289,6 +289,7 @@ func (i *NDFCInterfaceCommon) DsGetInterfaceDetails(ctx context.Context, diags *
 	log.Printf("Response=%s", string(res))
 	err = json.Unmarshal((res), &inData.Interfaces)
 	if err != nil {
+		log.Printf("Error unmarshalling data: %s", err.Error())
 		diags.AddError("Error unmarshalling data", err.Error())
 		return
 	}

@@ -36,6 +36,8 @@ resource "ndfc_interface_ethernet" "test_resource_interface_ethernet_1" {
       netflow_sampler       = "SAMPLER1"
       allowed_vlans         = "10-20"
       native_vlan           = 1
+      enable_pfc            = false
+      enable_qos            = false
     }
   }
 
@@ -83,16 +85,30 @@ Optional:
 - `allowed_vlans` (String) Allowed vlans for the ethernet interface. Allowed values are `none`, `all` or VLAN ranges (1-200,500-2000,3000)
 - `bpdu_guard` (String) Enable spanning-tree bpduguard: true='enable', false='disable', no='return to default settings'
 - `custom_policy_parameters` (Map of String) Custom policy parameters
+- `disable_ip_redirects` (Boolean) Disable both IPv4/IPv6 redirects on the interface
+- `enable_pfc` (Boolean) Enable priority flow control
+- `enable_pim_sparse` (Boolean) Enable PIM sparse-mode on the interface
+- `enable_qos` (Boolean) Enable to configure a QoS Policy for this interface. If AI/ML Queuing is enabled on the fabric, will use the QOS_CLASSIFICATION policy. Enter a custom policy below to override
 - `freeform_config` (String) Additional CLI config (if any) for the interface configuration
 - `interface_description` (String) Interface description
+- `ipv4_address` (String) IPv4 address of the interface
+- `ipv4_prefix_length` (String) IP netmask length used with the IP address (Min:1, Max:31)
+- `ipv6_address` (String) IPv6 Address: IPv6 address of the Interface
+- `ipv6_prefix_length` (String) IPv6 Prefix Length: Prefix length associated with IPv6 address (Min:64, Max:127)
+- `link_state_routing_protocol` (String) Link-State Routing Protocol: Select link-state routing protocol - Applicable as per template used
+- `link_state_routing_tag` (String) Link-State Routing Tag: Link-state routing protocol tag - Usage as per template used
 - `mtu` (String) MTU for the interface
 - `native_vlan` (Number) Set native VLAN for the interface
 - `netflow` (Boolean) Netflow is supported only if it is enabled on fabric
 - `netflow_monitor` (String) Provide the Layer 2 Monitor Name
 - `netflow_sampler` (String) Netflow sampler name, applicable to N7K only
 - `orphan_port` (Boolean) If enabled, configure the interface as a vPC orphan port to be suspended by the secondary peer in vPC failures
+- `pim_dr_priority` (String) Configure priority for PIM DR election on the interface, default is 1
 - `port_type_fast` (Boolean) Enable spanning-tree edge port behavior
 - `ptp` (Boolean) Enable PTP
+- `qos_policy` (String) Custom QoS Policy must be defined previously
+- `queuing_policy` (String) Queuing Policy must be defined previously
+- `routing_tag` (String) Routing tag associated with interface IP
 - `serial_number` (String) Serial number of switch to configure. This field cannot be specified if `serial_number` is specified in the common block
 - `speed` (String) "Interface speed. Should be one of the following:
   * `Auto`
@@ -108,6 +124,7 @@ Optional:
   * `100Gb`
   * `200Gb`
   * `400Gb`"
+- `vrf` (String) Interface VRF name, default VRF if not specified
 
 Read-Only:
 
@@ -116,6 +133,8 @@ Read-Only:
 ## Import
 
 Import is supported using the following syntax:
+
+The [`terraform import` command](https://developer.hashicorp.com/terraform/cli/commands/import) can be used, for example:
 
 ```shell
 # Format of ID used for import:

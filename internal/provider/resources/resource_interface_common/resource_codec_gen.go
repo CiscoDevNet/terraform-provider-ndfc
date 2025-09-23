@@ -87,4 +87,13 @@ type NDFCNvPairsValue struct {
 	Peer2MemberInterfaces     string       `json:"PEER2_MEMBER_INTERFACES,omitempty"`
 	Peer1PortChannelId        *int64       `json:"PEER1_PCID,string,omitempty"`
 	Peer2PortChannelId        *Int64Custom `json:"PEER2_PCID,string,omitempty"`
+	EnablePimSparse           string       `json:"ENABLE_PIM_SPARSE,omitempty"`
+	PimDrPriority             string       `json:"PIM_DR_PRIORITY,omitempty"`
+	EnablePfc                 string       `json:"ENABLE_PFC,omitempty"`
+	EnableQos                 string       `json:"ENABLE_QOS,omitempty"`
+	QosPolicy                 string       `json:"QOS_POLICY,omitempty"`
+	QueuingPolicy             string       `json:"QUEUING_POLICY,omitempty"`
+	LinkStateRoutingProtocol  string       `json:"LINK_STATE_ROUTING,omitempty"`
+	LinkStateRoutingTag       string       `json:"LINK_STATE_ROUTING_TAG,omitempty"`
+	Ipv6PrefixLength          string       `json:"IPv6_PREFIX,omitempty"`
 }
