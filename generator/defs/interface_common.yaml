@@ -121,8 +121,8 @@ resource:
         ndfc_nested: [nvPairs]
         tf_name: ipv6_address
         type: String
-        description: IPv6 address
-        example:
+        description: "IPv6 Address: IPv6 address of the Interface"
+        example: "2001:db8::1"
       - model_name: ROUTE_MAP_TAG
         ndfc_nested: [nvPairs]
         tf_name: route_map_tag
@@ -483,6 +483,81 @@ resource:
         optional: true
         computed: true
         requires_replace: true
+
+      - model_name: ENABLE_PIM_SPARSE
+        ndfc_nested: [nvPairs]
+        tf_name: enable_pim_sparse
+        type: Bool
+        default_value: false
+        description: "Enable PIM Sparse-mode on the interface"
+        example: true
+
+      - model_name: PIM_DR_PRIORITY
+        ndfc_nested: [nvPairs]
+        tf_name: pim_dr_priority
+        type: String
+        default_value: 1
+        description: "PIM DR Priority: Configure priority for PIM DR election on the interface (1-4294967295), default is 1"
+        example: 100
+
+      - model_name: ENABLE_PFC
+        ndfc_nested: [nvPairs]
+        tf_name: enable_pfc
+        type: Bool
+        default_value: false
+        description: "Enable priority flow control on the interface"
+        example: true
+
+      - model_name: ENABLE_QOS
+        ndfc_nested: [nvPairs]
+        tf_name: enable_qos
+        type: Bool
+        default_value: false
+        description: "Enable QoS Configuration: Configure a QoS Policy for this interface. If AI/ML Queuing is enabled on the fabric, will use the QOS_CLASSIFICATION policy"
+        example: true
+
+      - model_name: QOS_POLICY
+        ndfc_nested: [nvPairs]
+        tf_name: qos_policy
+        type: String
+        description: "Custom QoS Policy: Must be defined previously"
+        example: "CUSTOM_QOS"
+        default_value: ""
+
+      - model_name: QUEUING_POLICY
+        ndfc_nested: [nvPairs]
+        tf_name: queuing_policy
+        type: String
+        description: "Custom Queuing Policy: Must be defined previously"
+        example: "CUSTOM_QUEUE"
+        default_value: ""
+
+      - model_name: LINK_STATE_ROUTING
+        ndfc_nested: [nvPairs]
+        tf_name: link_state_routing_protocol
+        type: String
+        enum_values: [ospf, is-is]
+        computed: true
+        optional: true
+        description: "Link-State Routing Protocol: Select link-state routing protocol"
+        example: "ospf"
+
+      - model_name: LINK_STATE_ROUTING_TAG
+        ndfc_nested: [nvPairs]
+        tf_name: link_state_routing_tag
+        type: String
+        computed: true
+        optional: true
+        description: "Link-State Routing Tag: Link-state routing protocol tag"
+        example: "UNDERLAY"
+
+      - model_name: IPv6_PREFIX
+        ndfc_nested: [nvPairs]
+        tf_name: ipv6_prefix_length
+        type: String
+        description: "IPv6 Prefix Length: Prefix length associated with IPv6 address (Min:64, Max:127)"
+        example: "64"
+
       - model_name: deployment_status
         tf_name: deployment_status
         type: String

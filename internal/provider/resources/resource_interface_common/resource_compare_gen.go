@@ -318,6 +318,50 @@ func (v NDFCInterfacesValue) DeepEqual(c NDFCInterfacesValue) int {
 			return RequiresReplace
 		}
 	}
+	if v.NvPairs.EnablePimSparse != c.NvPairs.EnablePimSparse {
+		log.Printf("v.NvPairs.EnablePimSparse=%s, c.NvPairs.EnablePimSparse=%s", v.NvPairs.EnablePimSparse, c.NvPairs.EnablePimSparse)
+		return RequiresUpdate
+	}
+	if v.NvPairs.PimDrPriority != c.NvPairs.PimDrPriority {
+		log.Printf("v.NvPairs.PimDrPriority=%s, c.NvPairs.PimDrPriority=%s", v.NvPairs.PimDrPriority, c.NvPairs.PimDrPriority)
+		return RequiresUpdate
+	}
+	if v.NvPairs.EnablePfc != c.NvPairs.EnablePfc {
+		log.Printf("v.NvPairs.EnablePfc=%s, c.NvPairs.EnablePfc=%s", v.NvPairs.EnablePfc, c.NvPairs.EnablePfc)
+		return RequiresUpdate
+	}
+	if v.NvPairs.EnableQos != c.NvPairs.EnableQos {
+		log.Printf("v.NvPairs.EnableQos=%s, c.NvPairs.EnableQos=%s", v.NvPairs.EnableQos, c.NvPairs.EnableQos)
+		return RequiresUpdate
+	}
+	if v.NvPairs.QosPolicy != c.NvPairs.QosPolicy {
+		log.Printf("v.NvPairs.QosPolicy=%s, c.NvPairs.QosPolicy=%s", v.NvPairs.QosPolicy, c.NvPairs.QosPolicy)
+		return RequiresUpdate
+	}
+	if v.NvPairs.QueuingPolicy != c.NvPairs.QueuingPolicy {
+		log.Printf("v.NvPairs.QueuingPolicy=%s, c.NvPairs.QueuingPolicy=%s", v.NvPairs.QueuingPolicy, c.NvPairs.QueuingPolicy)
+		return RequiresUpdate
+	}
+	if v.NvPairs.LinkStateRoutingProtocol != "" {
+		if v.NvPairs.LinkStateRoutingProtocol != c.NvPairs.LinkStateRoutingProtocol {
+			log.Printf("v.NvPairs.LinkStateRoutingProtocol=%s, c.NvPairs.LinkStateRoutingProtocol=%s", v.NvPairs.LinkStateRoutingProtocol, c.NvPairs.LinkStateRoutingProtocol)
+			return RequiresUpdate
+		}
+	} else {
+		log.Printf("Skipping - v.NvPairs.LinkStateRoutingProtocol=%s, c.NvPairs.LinkStateRoutingProtocol=%s", v.NvPairs.LinkStateRoutingProtocol, c.NvPairs.LinkStateRoutingProtocol)
+	}
+	if v.NvPairs.LinkStateRoutingTag != "" {
+		if v.NvPairs.LinkStateRoutingTag != c.NvPairs.LinkStateRoutingTag {
+			log.Printf("v.NvPairs.LinkStateRoutingTag=%s, c.NvPairs.LinkStateRoutingTag=%s", v.NvPairs.LinkStateRoutingTag, c.NvPairs.LinkStateRoutingTag)
+			return RequiresUpdate
+		}
+	} else {
+		log.Printf("Skipping - v.NvPairs.LinkStateRoutingTag=%s, c.NvPairs.LinkStateRoutingTag=%s", v.NvPairs.LinkStateRoutingTag, c.NvPairs.LinkStateRoutingTag)
+	}
+	if v.NvPairs.Ipv6PrefixLength != c.NvPairs.Ipv6PrefixLength {
+		log.Printf("v.NvPairs.Ipv6PrefixLength=%s, c.NvPairs.Ipv6PrefixLength=%s", v.NvPairs.Ipv6PrefixLength, c.NvPairs.Ipv6PrefixLength)
+		return RequiresUpdate
+	}
 
 	if cf {
 		return ControlFlagUpdate
@@ -999,6 +1043,105 @@ func (v *NDFCInterfacesValue) CreatePlan(c NDFCInterfacesValue, cf *bool) int {
 		log.Printf("Copy from State: c.NvPairs.Peer2PortChannelId=%v", *c.NvPairs.Peer2PortChannelId)
 		v.NvPairs.Peer2PortChannelId = new(Int64Custom)
 		*v.NvPairs.Peer2PortChannelId = *c.NvPairs.Peer2PortChannelId
+	}
+
+	if v.NvPairs.EnablePimSparse != c.NvPairs.EnablePimSparse {
+		log.Printf("Update: v.NvPairs.EnablePimSparse=%v, c.NvPairs.EnablePimSparse=%v", v.NvPairs.EnablePimSparse, c.NvPairs.EnablePimSparse)
+		if action == ActionNone || action == RequiresUpdate {
+			action = RequiresUpdate
+		}
+	}
+
+	if v.NvPairs.PimDrPriority != "" {
+		if v.NvPairs.PimDrPriority != c.NvPairs.PimDrPriority {
+			log.Printf("Update: v.NvPairs.PimDrPriority=%v, c.NvPairs.PimDrPriority=%v", v.NvPairs.PimDrPriority, c.NvPairs.PimDrPriority)
+			if action == ActionNone || action == RequiresUpdate {
+				action = RequiresUpdate
+			}
+		}
+	} else {
+		//v empty, fill with c
+		log.Printf("Copy from state: v.NvPairs.PimDrPriority=%v, c.NvPairs.PimDrPriority=%v", v.NvPairs.PimDrPriority, c.NvPairs.PimDrPriority)
+		v.NvPairs.PimDrPriority = c.NvPairs.PimDrPriority
+	}
+
+	if v.NvPairs.EnablePfc != c.NvPairs.EnablePfc {
+		log.Printf("Update: v.NvPairs.EnablePfc=%v, c.NvPairs.EnablePfc=%v", v.NvPairs.EnablePfc, c.NvPairs.EnablePfc)
+		if action == ActionNone || action == RequiresUpdate {
+			action = RequiresUpdate
+		}
+	}
+
+	if v.NvPairs.EnableQos != c.NvPairs.EnableQos {
+		log.Printf("Update: v.NvPairs.EnableQos=%v, c.NvPairs.EnableQos=%v", v.NvPairs.EnableQos, c.NvPairs.EnableQos)
+		if action == ActionNone || action == RequiresUpdate {
+			action = RequiresUpdate
+		}
+	}
+
+	if v.NvPairs.QosPolicy != "" {
+		if v.NvPairs.QosPolicy != c.NvPairs.QosPolicy {
+			log.Printf("Update: v.NvPairs.QosPolicy=%v, c.NvPairs.QosPolicy=%v", v.NvPairs.QosPolicy, c.NvPairs.QosPolicy)
+			if action == ActionNone || action == RequiresUpdate {
+				action = RequiresUpdate
+			}
+		}
+	} else {
+		//v empty, fill with c
+		log.Printf("Copy from state: v.NvPairs.QosPolicy=%v, c.NvPairs.QosPolicy=%v", v.NvPairs.QosPolicy, c.NvPairs.QosPolicy)
+		v.NvPairs.QosPolicy = c.NvPairs.QosPolicy
+	}
+
+	if v.NvPairs.QueuingPolicy != "" {
+		if v.NvPairs.QueuingPolicy != c.NvPairs.QueuingPolicy {
+			log.Printf("Update: v.NvPairs.QueuingPolicy=%v, c.NvPairs.QueuingPolicy=%v", v.NvPairs.QueuingPolicy, c.NvPairs.QueuingPolicy)
+			if action == ActionNone || action == RequiresUpdate {
+				action = RequiresUpdate
+			}
+		}
+	} else {
+		//v empty, fill with c
+		log.Printf("Copy from state: v.NvPairs.QueuingPolicy=%v, c.NvPairs.QueuingPolicy=%v", v.NvPairs.QueuingPolicy, c.NvPairs.QueuingPolicy)
+		v.NvPairs.QueuingPolicy = c.NvPairs.QueuingPolicy
+	}
+
+	if v.NvPairs.LinkStateRoutingProtocol != "" {
+		if v.NvPairs.LinkStateRoutingProtocol != c.NvPairs.LinkStateRoutingProtocol {
+			log.Printf("Update: v.NvPairs.LinkStateRoutingProtocol=%v, c.NvPairs.LinkStateRoutingProtocol=%v", v.NvPairs.LinkStateRoutingProtocol, c.NvPairs.LinkStateRoutingProtocol)
+			if action == ActionNone || action == RequiresUpdate {
+				action = RequiresUpdate
+			}
+		}
+	} else {
+		//v empty, fill with c
+		log.Printf("Copy from state: v.NvPairs.LinkStateRoutingProtocol=%v, c.NvPairs.LinkStateRoutingProtocol=%v", v.NvPairs.LinkStateRoutingProtocol, c.NvPairs.LinkStateRoutingProtocol)
+		v.NvPairs.LinkStateRoutingProtocol = c.NvPairs.LinkStateRoutingProtocol
+	}
+
+	if v.NvPairs.LinkStateRoutingTag != "" {
+		if v.NvPairs.LinkStateRoutingTag != c.NvPairs.LinkStateRoutingTag {
+			log.Printf("Update: v.NvPairs.LinkStateRoutingTag=%v, c.NvPairs.LinkStateRoutingTag=%v", v.NvPairs.LinkStateRoutingTag, c.NvPairs.LinkStateRoutingTag)
+			if action == ActionNone || action == RequiresUpdate {
+				action = RequiresUpdate
+			}
+		}
+	} else {
+		//v empty, fill with c
+		log.Printf("Copy from state: v.NvPairs.LinkStateRoutingTag=%v, c.NvPairs.LinkStateRoutingTag=%v", v.NvPairs.LinkStateRoutingTag, c.NvPairs.LinkStateRoutingTag)
+		v.NvPairs.LinkStateRoutingTag = c.NvPairs.LinkStateRoutingTag
+	}
+
+	if v.NvPairs.Ipv6PrefixLength != "" {
+		if v.NvPairs.Ipv6PrefixLength != c.NvPairs.Ipv6PrefixLength {
+			log.Printf("Update: v.NvPairs.Ipv6PrefixLength=%v, c.NvPairs.Ipv6PrefixLength=%v", v.NvPairs.Ipv6PrefixLength, c.NvPairs.Ipv6PrefixLength)
+			if action == ActionNone || action == RequiresUpdate {
+				action = RequiresUpdate
+			}
+		}
+	} else {
+		//v empty, fill with c
+		log.Printf("Copy from state: v.NvPairs.Ipv6PrefixLength=%v, c.NvPairs.Ipv6PrefixLength=%v", v.NvPairs.Ipv6PrefixLength, c.NvPairs.Ipv6PrefixLength)
+		v.NvPairs.Ipv6PrefixLength = c.NvPairs.Ipv6PrefixLength
 	}
 
 	if len(v.CustomPolicyParameters) != len(c.CustomPolicyParameters) {
