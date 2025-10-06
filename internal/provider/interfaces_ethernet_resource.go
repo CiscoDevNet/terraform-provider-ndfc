@@ -318,7 +318,13 @@ func (r interfaceEthernetResource) ModifyPlan(ctx context.Context, req resource.
 				}
 			}
 		}
-
+		if v.Mtu.ValueString() == "jumbo" {
+			if configData.Policy.ValueString() == "int_routed_host" {
+				v.Mtu = types.StringValue("9216")
+			} else if configData.Policy.ValueString() == "epl_routed_host" {
+				v.Mtu = types.StringValue("1500")
+			}
+		}
 		elements1[k] = v
 		log.Printf("[DEBUG] interface_ethernet.ModfyPlan:  - Setting plan %s=%s", k, v.InterfaceName.ValueString())
 	}

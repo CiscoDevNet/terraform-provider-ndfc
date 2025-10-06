@@ -24,6 +24,8 @@ resource "ndfc_interface_ethernet" "test_resource_interface_ethernet_1" {
       native_vlan           = 1
       enable_pfc            = false
       enable_qos            = false
+      cdp_enable            = false
+      enable_monitor        = false
     }
   }
 
