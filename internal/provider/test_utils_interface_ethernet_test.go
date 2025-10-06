@@ -46,6 +46,30 @@ func InterfaceEthernetModelHelperStateCheck(RscName string, c resource_interface
 	return ret
 }
 
+func InterfacesPVlanMappingListValueHelperStateCheck(RscName string, c resource_interface_common.NDFCPVlanMappingListValue, attrPath path.Path) []resource.TestCheckFunc {
+	ret := []resource.TestCheckFunc{}
+
+	if c.SVlan != "" {
+		ret = append(ret, resource.TestCheckResourceAttr(RscName, attrPath.AtName("s_vlan").String(), c.SVlan))
+	}
+	if c.PVlan != "" {
+		ret = append(ret, resource.TestCheckResourceAttr(RscName, attrPath.AtName("p_vlan").String(), c.PVlan))
+	}
+	return ret
+}
+
+func InterfacesPVlanAssocListValueHelperStateCheck(RscName string, c resource_interface_common.NDFCPVlanAssocListValue, attrPath path.Path) []resource.TestCheckFunc {
+	ret := []resource.TestCheckFunc{}
+
+	if c.SVlan != "" {
+		ret = append(ret, resource.TestCheckResourceAttr(RscName, attrPath.AtName("s_vlan").String(), c.SVlan))
+	}
+	if c.PVlan != "" {
+		ret = append(ret, resource.TestCheckResourceAttr(RscName, attrPath.AtName("p_vlan").String(), c.PVlan))
+	}
+	return ret
+}
+
 func InterfaceEthernetInterfacesValueHelperStateCheck(RscName string, c resource_interface_common.NDFCInterfacesValue, attrPath path.Path) []resource.TestCheckFunc {
 	ret := []resource.TestCheckFunc{}
 
@@ -168,11 +192,54 @@ func InterfaceEthernetInterfacesValueHelperStateCheck(RscName string, c resource
 	if c.NvPairs.LinkStateRoutingTag != "" {
 		ret = append(ret, resource.TestCheckResourceAttr(RscName, attrPath.AtName("link_state_routing_tag").String(), c.NvPairs.LinkStateRoutingTag))
 	}
-	if c.NvPairs.Ipv6Address != "" {
-		ret = append(ret, resource.TestCheckResourceAttr(RscName, attrPath.AtName("ipv6_address").String(), c.NvPairs.Ipv6Address))
+	if c.NvPairs.Ipv6Addr != "" {
+		ret = append(ret, resource.TestCheckResourceAttr(RscName, attrPath.AtName("ipv6_addr").String(), c.NvPairs.Ipv6Addr))
 	}
 	if c.NvPairs.Ipv6PrefixLength != "" {
 		ret = append(ret, resource.TestCheckResourceAttr(RscName, attrPath.AtName("ipv6_prefix_length").String(), c.NvPairs.Ipv6PrefixLength))
+	}
+	if c.NvPairs.CdpEnable != "" {
+		ret = append(ret, resource.TestCheckResourceAttr(RscName, attrPath.AtName("cdp_enable").String(), c.NvPairs.CdpEnable))
+	} else {
+		ret = append(ret, resource.TestCheckResourceAttr(RscName, attrPath.AtName("cdp_enable").String(), "false"))
+	}
+	if c.NvPairs.PortDuplexMode != "" {
+		ret = append(ret, resource.TestCheckResourceAttr(RscName, attrPath.AtName("port_duplex_mode").String(), c.NvPairs.PortDuplexMode))
+	} else {
+		ret = append(ret, resource.TestCheckResourceAttr(RscName, attrPath.AtName("port_duplex_mode").String(), "auto"))
+	}
+	if c.NvPairs.EnableMonitor != "" {
+		ret = append(ret, resource.TestCheckResourceAttr(RscName, attrPath.AtName("enable_monitor").String(), c.NvPairs.EnableMonitor))
+	} else {
+		ret = append(ret, resource.TestCheckResourceAttr(RscName, attrPath.AtName("enable_monitor").String(), "false"))
+	}
+	if c.NvPairs.PvlanMode != "" {
+		ret = append(ret, resource.TestCheckResourceAttr(RscName, attrPath.AtName("pvlan_mode").String(), c.NvPairs.PvlanMode))
+	} else {
+		ret = append(ret, resource.TestCheckResourceAttr(RscName, attrPath.AtName("pvlan_mode").String(), "host"))
+	}
+	if c.NvPairs.PvlanAllowedVlans != "" {
+		ret = append(ret, resource.TestCheckResourceAttr(RscName, attrPath.AtName("pvlan_allowed_vlans").String(), c.NvPairs.PvlanAllowedVlans))
+	}
+	if c.NvPairs.PvlanNativeVlan != "" {
+		ret = append(ret, resource.TestCheckResourceAttr(RscName, attrPath.AtName("pvlan_native_vlan").String(), c.NvPairs.PvlanNativeVlan))
+	}
+	if c.NvPairs.IgForFex != "" {
+		ret = append(ret, resource.TestCheckResourceAttr(RscName, attrPath.AtName("ig_for_fex").String(), c.NvPairs.IgForFex))
+	}
+	if c.NvPairs.AutoNegotiate != "" {
+		ret = append(ret, resource.TestCheckResourceAttr(RscName, attrPath.AtName("auto_negotiate").String(), c.NvPairs.AutoNegotiate))
+	} else {
+		ret = append(ret, resource.TestCheckResourceAttr(RscName, attrPath.AtName("auto_negotiate").String(), "on"))
+	}
+	if c.NvPairs.PathCost != nil {
+		ret = append(ret, resource.TestCheckResourceAttr(RscName, attrPath.AtName("path_cost").String(), strconv.Itoa(int(*c.NvPairs.PathCost))))
+	}
+	if c.NvPairs.GuardMode != "" {
+		ret = append(ret, resource.TestCheckResourceAttr(RscName, attrPath.AtName("guard_mode").String(), c.NvPairs.GuardMode))
+	}
+	if c.NvPairs.Ttag != "" {
+		ret = append(ret, resource.TestCheckResourceAttr(RscName, attrPath.AtName("ttag").String(), c.NvPairs.Ttag))
 	}
 	if c.DeploymentStatus != "" {
 		ret = append(ret, resource.TestCheckResourceAttr(RscName, attrPath.AtName("deployment_status").String(), c.DeploymentStatus))

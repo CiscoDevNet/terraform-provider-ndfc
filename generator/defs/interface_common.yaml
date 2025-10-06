@@ -551,12 +551,136 @@ resource:
         description: "Link-State Routing Tag: Link-state routing protocol tag"
         example: "UNDERLAY"
 
+      - model_name: IPv6
+        ndfc_nested: [nvPairs]
+        tf_name: ipv6_addr
+        type: String
+        description: "IPv6 Address: IPv6 address of the Interface"
+
       - model_name: IPv6_PREFIX
         ndfc_nested: [nvPairs]
         tf_name: ipv6_prefix_length
         type: String
         description: "IPv6 Prefix Length: Prefix length associated with IPv6 address (Min:64, Max:127)"
         example: "64"
+
+      - model_name: CDP_ENABLE
+        ndfc_nested: [nvPairs]
+        tf_name: cdp_enable
+        type: Bool
+        default_value: false
+        description: "Enable CDP on the interface"
+        example: false
+      
+      - model_name: PORT_DUPLEX_MODE
+        ndfc_nested: [nvPairs]
+        tf_name: port_duplex_mode
+        type: String
+        default_value: "auto"
+        validator: OneOf("auto", "full", "half")
+        enum_values: [auto, full, half]
+        description: "Configure the port duplex mode"
+
+      - model_name: ENABLE_MONITOR
+        ndfc_nested: [nvPairs]
+        tf_name: enable_monitor
+        type: Bool
+        default_value: false
+        description: "Enable switchport monitor for SPAN / ERSPAN"
+        example: false
+      
+      - model_name: PVLAN_MODE
+        ndfc_nested: [nvPairs]
+        tf_name: pvlan_mode
+        type: String
+        default_value: "host"
+        validator: OneOf("promiscuous", "trunk promiscuous", "host", "trunk secondary")
+        enum_values: [promiscuous, "trunk promiscuous", host, "trunk secondary"]
+        description: "private-vlan mode"
+
+      - model_name: PVLAN_ALLOWED_VLANS
+        ndfc_nested: [nvPairs]
+        tf_name: pvlan_allowed_vlans
+        type: String
+        optional: true
+        description: "Allowed values: 'none', or vlan ranges (ex: 1-200,500-2000,3000)"
+
+      - model_name: PVLAN_NATIVE_VLAN
+        ndfc_nested: [nvPairs]
+        tf_name: pvlan_native_vlan
+        type: String
+        optional: true
+        description: "Native Vlan for private-vlan - valid values 1-4094"
+
+      - model_name: IG_FOR_FEX
+        ndfc_nested: [nvPairs]
+        tf_name: ig_for_fex
+        type: Bool
+        description: "Shared group for fex ports"
+      
+      - model_name: AUTO_NEG
+        ndfc_nested: [nvPairs]
+        tf_name: auto_negotiate
+        type: String
+        default_value: "on"
+        validator: OneOf("on", "off")
+        enum_values: [on, off]
+        description: "Auto Negotiate mode for speed"
+    
+      - model_name: PATH_COST
+        ndfc_nested: [nvPairs]
+        validator: IntRange(1, 200000000)
+        tf_name: path_cost
+        type: Int64
+        ndfc_type: string
+        description: "Spanning Tree Port Path Cost <1-200000000>"
+      
+      - model_name: GUARD_MODE
+        ndfc_nested: [nvPairs]
+        tf_name: guard_mode
+        type: String
+        validator: OneOf("root", "none", "loop", "no")
+        enum_values: [root, none, loop, no]
+        description: "Set spanning tree guard mode for the interface, select 'no' to delete the config"
+      
+      - model_name: TTAG
+        ndfc_nested: [nvPairs]
+        tf_name: ttag
+        type: Bool
+        description: "Enable Ttag/Ttag-strip"
+
+      
+      - model_name: MAPPING_LIST
+        ndfc_nested: [nvPairs]
+        tf_name: p_vlan_mapping_list
+        type: List
+        optional: true
+        description: "Private VLAN promiscuous mapping"
+        attributes:
+          - model_name: S_VLAN
+            tf_name: s_vlan
+            type: String
+            description: "SVlan Id"
+          - model_name: P_VLAN
+            tf_name: p_vlan
+            type: String
+            description: "P Vlan"
+      
+      - model_name: ASSOCIATION_LIST
+        ndfc_nested: [nvPairs]
+        tf_name: p_vlan_assoc_list
+        type: List
+        optional: true
+        description: "Private VLAN host association"
+        attributes:
+          - model_name: S_VLAN
+            tf_name: s_vlan
+            type: String
+            description: "SVlan Id"
+          - model_name: P_VLAN
+            tf_name: p_vlan
+            type: String
+            description: "P Vlan"
 
       - model_name: deployment_status
         tf_name: deployment_status
@@ -701,6 +825,7 @@ datasource:
           description: "Description of the interface"
           example: "alias1"
           computed: true
+      
         - model_name: complianceStatus
           tf_name: deployment_status
           type: String

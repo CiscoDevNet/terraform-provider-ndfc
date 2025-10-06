@@ -15,6 +15,40 @@ import (
 	. "terraform-provider-ndfc/internal/provider/types"
 )
 
+func (v NDFCPVlanMappingListValue) DeepEqual(c NDFCPVlanMappingListValue) int {
+	cf := false
+	if v.SVlan != c.SVlan {
+		log.Printf("v.SVlan=%v, c.SVlan=%v", v.SVlan, c.SVlan)
+		return RequiresUpdate
+	}
+	if v.PVlan != c.PVlan {
+		log.Printf("v.PVlan=%v, c.PVlan=%v", v.PVlan, c.PVlan)
+		return RequiresUpdate
+	}
+
+	if cf {
+		return ControlFlagUpdate
+	}
+	return ValuesDeeplyEqual
+}
+
+func (v NDFCPVlanAssocListValue) DeepEqual(c NDFCPVlanAssocListValue) int {
+	cf := false
+	if v.SVlan != c.SVlan {
+		log.Printf("v.SVlan=%v, c.SVlan=%v", v.SVlan, c.SVlan)
+		return RequiresUpdate
+	}
+	if v.PVlan != c.PVlan {
+		log.Printf("v.PVlan=%v, c.PVlan=%v", v.PVlan, c.PVlan)
+		return RequiresUpdate
+	}
+
+	if cf {
+		return ControlFlagUpdate
+	}
+	return ValuesDeeplyEqual
+}
+
 func (v NDFCInterfacesValue) DeepEqual(c NDFCInterfacesValue) int {
 	cf := false
 	if v.SerialNumber != c.SerialNumber {
@@ -358,15 +392,169 @@ func (v NDFCInterfacesValue) DeepEqual(c NDFCInterfacesValue) int {
 	} else {
 		log.Printf("Skipping - v.NvPairs.LinkStateRoutingTag=%s, c.NvPairs.LinkStateRoutingTag=%s", v.NvPairs.LinkStateRoutingTag, c.NvPairs.LinkStateRoutingTag)
 	}
+	if v.NvPairs.Ipv6Addr != c.NvPairs.Ipv6Addr {
+		log.Printf("v.NvPairs.Ipv6Addr=%s, c.NvPairs.Ipv6Addr=%s", v.NvPairs.Ipv6Addr, c.NvPairs.Ipv6Addr)
+		return RequiresUpdate
+	}
 	if v.NvPairs.Ipv6PrefixLength != c.NvPairs.Ipv6PrefixLength {
 		log.Printf("v.NvPairs.Ipv6PrefixLength=%s, c.NvPairs.Ipv6PrefixLength=%s", v.NvPairs.Ipv6PrefixLength, c.NvPairs.Ipv6PrefixLength)
 		return RequiresUpdate
+	}
+	if v.NvPairs.CdpEnable != c.NvPairs.CdpEnable {
+		log.Printf("v.NvPairs.CdpEnable=%s, c.NvPairs.CdpEnable=%s", v.NvPairs.CdpEnable, c.NvPairs.CdpEnable)
+		return RequiresUpdate
+	}
+	if v.NvPairs.PortDuplexMode != c.NvPairs.PortDuplexMode {
+		log.Printf("v.NvPairs.PortDuplexMode=%s, c.NvPairs.PortDuplexMode=%s", v.NvPairs.PortDuplexMode, c.NvPairs.PortDuplexMode)
+		return RequiresUpdate
+	}
+	if v.NvPairs.EnableMonitor != c.NvPairs.EnableMonitor {
+		log.Printf("v.NvPairs.EnableMonitor=%s, c.NvPairs.EnableMonitor=%s", v.NvPairs.EnableMonitor, c.NvPairs.EnableMonitor)
+		return RequiresUpdate
+	}
+	if v.NvPairs.PvlanMode != c.NvPairs.PvlanMode {
+		log.Printf("v.NvPairs.PvlanMode=%s, c.NvPairs.PvlanMode=%s", v.NvPairs.PvlanMode, c.NvPairs.PvlanMode)
+		return RequiresUpdate
+	}
+	if v.NvPairs.PvlanAllowedVlans != c.NvPairs.PvlanAllowedVlans {
+		log.Printf("v.NvPairs.PvlanAllowedVlans=%s, c.NvPairs.PvlanAllowedVlans=%s", v.NvPairs.PvlanAllowedVlans, c.NvPairs.PvlanAllowedVlans)
+		return RequiresUpdate
+	}
+	if v.NvPairs.PvlanNativeVlan != c.NvPairs.PvlanNativeVlan {
+		log.Printf("v.NvPairs.PvlanNativeVlan=%s, c.NvPairs.PvlanNativeVlan=%s", v.NvPairs.PvlanNativeVlan, c.NvPairs.PvlanNativeVlan)
+		return RequiresUpdate
+	}
+	if v.NvPairs.IgForFex != c.NvPairs.IgForFex {
+		log.Printf("v.NvPairs.IgForFex=%s, c.NvPairs.IgForFex=%s", v.NvPairs.IgForFex, c.NvPairs.IgForFex)
+		return RequiresUpdate
+	}
+	if v.NvPairs.AutoNegotiate != c.NvPairs.AutoNegotiate {
+		log.Printf("v.NvPairs.AutoNegotiate=%s, c.NvPairs.AutoNegotiate=%s", v.NvPairs.AutoNegotiate, c.NvPairs.AutoNegotiate)
+		return RequiresUpdate
+	}
+
+	if v.NvPairs.PathCost != nil && c.NvPairs.PathCost != nil {
+		if *v.NvPairs.PathCost != *c.NvPairs.PathCost {
+			log.Printf("v.NvPairs.PathCost=%v, c.NvPairs.PathCost=%v", *v.NvPairs.PathCost, *c.NvPairs.PathCost)
+			return RequiresUpdate
+		}
+	} else {
+		if v.NvPairs.PathCost != nil {
+			log.Printf("v.NvPairs.PathCost=%v", *v.NvPairs.PathCost)
+			return RequiresUpdate
+		} else if c.NvPairs.PathCost != nil {
+			log.Printf("c.NvPairs.PathCost=%v", *c.NvPairs.PathCost)
+			return RequiresUpdate
+		}
+	}
+
+	if v.NvPairs.GuardMode != c.NvPairs.GuardMode {
+		log.Printf("v.NvPairs.GuardMode=%s, c.NvPairs.GuardMode=%s", v.NvPairs.GuardMode, c.NvPairs.GuardMode)
+		return RequiresUpdate
+	}
+	if v.NvPairs.Ttag != c.NvPairs.Ttag {
+		log.Printf("v.NvPairs.Ttag=%s, c.NvPairs.Ttag=%s", v.NvPairs.Ttag, c.NvPairs.Ttag)
+		return RequiresUpdate
+	}
+
+	if len(v.NvPairs.PVlanMappingList) != len(c.NvPairs.PVlanMappingList) {
+		log.Printf("len(v.NvPairs.PVlanMappingList)=%d, len(c.NvPairs.PVlanMappingList)=%d", len(v.NvPairs.PVlanMappingList), len(c.NvPairs.PVlanMappingList))
+		return RequiresUpdate
+	}
+	for i := range v.NvPairs.PVlanMappingList {
+		retVal := v.NvPairs.PVlanMappingList[i].DeepEqual(c.NvPairs.PVlanMappingList[i])
+		if retVal != ValuesDeeplyEqual {
+			return retVal
+		}
+	}
+
+	if len(v.NvPairs.PVlanAssocList) != len(c.NvPairs.PVlanAssocList) {
+		log.Printf("len(v.NvPairs.PVlanAssocList)=%d, len(c.NvPairs.PVlanAssocList)=%d", len(v.NvPairs.PVlanAssocList), len(c.NvPairs.PVlanAssocList))
+		return RequiresUpdate
+	}
+	for i := range v.NvPairs.PVlanAssocList {
+		retVal := v.NvPairs.PVlanAssocList[i].DeepEqual(c.NvPairs.PVlanAssocList[i])
+		if retVal != ValuesDeeplyEqual {
+			return retVal
+		}
 	}
 
 	if cf {
 		return ControlFlagUpdate
 	}
 	return ValuesDeeplyEqual
+}
+
+func (v *NDFCPVlanMappingListValue) CreatePlan(c NDFCPVlanMappingListValue, cf *bool) int {
+	action := ActionNone
+
+	if v.SVlan != "" {
+
+		if v.SVlan != c.SVlan {
+			log.Printf("Update: v.SVlan=%v, c.SVlan=%v", v.SVlan, c.SVlan)
+			if action == ActionNone || action == RequiresUpdate {
+				action = RequiresUpdate
+			}
+		}
+
+	} else {
+		//v empty, fill with c
+		log.Printf("Copy from state: v.SVlan=%v, c.SVlan=%v", v.SVlan, c.SVlan)
+		v.SVlan = c.SVlan
+	}
+
+	if v.PVlan != "" {
+
+		if v.PVlan != c.PVlan {
+			log.Printf("Update: v.PVlan=%v, c.PVlan=%v", v.PVlan, c.PVlan)
+			if action == ActionNone || action == RequiresUpdate {
+				action = RequiresUpdate
+			}
+		}
+
+	} else {
+		//v empty, fill with c
+		log.Printf("Copy from state: v.PVlan=%v, c.PVlan=%v", v.PVlan, c.PVlan)
+		v.PVlan = c.PVlan
+	}
+
+	return action
+}
+
+func (v *NDFCPVlanAssocListValue) CreatePlan(c NDFCPVlanAssocListValue, cf *bool) int {
+	action := ActionNone
+
+	if v.SVlan != "" {
+
+		if v.SVlan != c.SVlan {
+			log.Printf("Update: v.SVlan=%v, c.SVlan=%v", v.SVlan, c.SVlan)
+			if action == ActionNone || action == RequiresUpdate {
+				action = RequiresUpdate
+			}
+		}
+
+	} else {
+		//v empty, fill with c
+		log.Printf("Copy from state: v.SVlan=%v, c.SVlan=%v", v.SVlan, c.SVlan)
+		v.SVlan = c.SVlan
+	}
+
+	if v.PVlan != "" {
+
+		if v.PVlan != c.PVlan {
+			log.Printf("Update: v.PVlan=%v, c.PVlan=%v", v.PVlan, c.PVlan)
+			if action == ActionNone || action == RequiresUpdate {
+				action = RequiresUpdate
+			}
+		}
+
+	} else {
+		//v empty, fill with c
+		log.Printf("Copy from state: v.PVlan=%v, c.PVlan=%v", v.PVlan, c.PVlan)
+		v.PVlan = c.PVlan
+	}
+
+	return action
 }
 
 func (v *NDFCInterfacesValue) CreatePlan(c NDFCInterfacesValue, cf *bool) int {
@@ -1131,6 +1319,19 @@ func (v *NDFCInterfacesValue) CreatePlan(c NDFCInterfacesValue, cf *bool) int {
 		v.NvPairs.LinkStateRoutingTag = c.NvPairs.LinkStateRoutingTag
 	}
 
+	if v.NvPairs.Ipv6Addr != "" {
+		if v.NvPairs.Ipv6Addr != c.NvPairs.Ipv6Addr {
+			log.Printf("Update: v.NvPairs.Ipv6Addr=%v, c.NvPairs.Ipv6Addr=%v", v.NvPairs.Ipv6Addr, c.NvPairs.Ipv6Addr)
+			if action == ActionNone || action == RequiresUpdate {
+				action = RequiresUpdate
+			}
+		}
+	} else {
+		//v empty, fill with c
+		log.Printf("Copy from state: v.NvPairs.Ipv6Addr=%v, c.NvPairs.Ipv6Addr=%v", v.NvPairs.Ipv6Addr, c.NvPairs.Ipv6Addr)
+		v.NvPairs.Ipv6Addr = c.NvPairs.Ipv6Addr
+	}
+
 	if v.NvPairs.Ipv6PrefixLength != "" {
 		if v.NvPairs.Ipv6PrefixLength != c.NvPairs.Ipv6PrefixLength {
 			log.Printf("Update: v.NvPairs.Ipv6PrefixLength=%v, c.NvPairs.Ipv6PrefixLength=%v", v.NvPairs.Ipv6PrefixLength, c.NvPairs.Ipv6PrefixLength)
@@ -1144,6 +1345,159 @@ func (v *NDFCInterfacesValue) CreatePlan(c NDFCInterfacesValue, cf *bool) int {
 		v.NvPairs.Ipv6PrefixLength = c.NvPairs.Ipv6PrefixLength
 	}
 
+	if v.NvPairs.CdpEnable != c.NvPairs.CdpEnable {
+		log.Printf("Update: v.NvPairs.CdpEnable=%v, c.NvPairs.CdpEnable=%v", v.NvPairs.CdpEnable, c.NvPairs.CdpEnable)
+		if action == ActionNone || action == RequiresUpdate {
+			action = RequiresUpdate
+		}
+	}
+
+	if v.NvPairs.PortDuplexMode != "" {
+		if v.NvPairs.PortDuplexMode != c.NvPairs.PortDuplexMode {
+			log.Printf("Update: v.NvPairs.PortDuplexMode=%v, c.NvPairs.PortDuplexMode=%v", v.NvPairs.PortDuplexMode, c.NvPairs.PortDuplexMode)
+			if action == ActionNone || action == RequiresUpdate {
+				action = RequiresUpdate
+			}
+		}
+	} else {
+		//v empty, fill with c
+		log.Printf("Copy from state: v.NvPairs.PortDuplexMode=%v, c.NvPairs.PortDuplexMode=%v", v.NvPairs.PortDuplexMode, c.NvPairs.PortDuplexMode)
+		v.NvPairs.PortDuplexMode = c.NvPairs.PortDuplexMode
+	}
+
+	if v.NvPairs.EnableMonitor != c.NvPairs.EnableMonitor {
+		log.Printf("Update: v.NvPairs.EnableMonitor=%v, c.NvPairs.EnableMonitor=%v", v.NvPairs.EnableMonitor, c.NvPairs.EnableMonitor)
+		if action == ActionNone || action == RequiresUpdate {
+			action = RequiresUpdate
+		}
+	}
+
+	if v.NvPairs.PvlanMode != "" {
+		if v.NvPairs.PvlanMode != c.NvPairs.PvlanMode {
+			log.Printf("Update: v.NvPairs.PvlanMode=%v, c.NvPairs.PvlanMode=%v", v.NvPairs.PvlanMode, c.NvPairs.PvlanMode)
+			if action == ActionNone || action == RequiresUpdate {
+				action = RequiresUpdate
+			}
+		}
+	} else {
+		//v empty, fill with c
+		log.Printf("Copy from state: v.NvPairs.PvlanMode=%v, c.NvPairs.PvlanMode=%v", v.NvPairs.PvlanMode, c.NvPairs.PvlanMode)
+		v.NvPairs.PvlanMode = c.NvPairs.PvlanMode
+	}
+
+	if v.NvPairs.PvlanAllowedVlans != "" {
+		if v.NvPairs.PvlanAllowedVlans != c.NvPairs.PvlanAllowedVlans {
+			log.Printf("Update: v.NvPairs.PvlanAllowedVlans=%v, c.NvPairs.PvlanAllowedVlans=%v", v.NvPairs.PvlanAllowedVlans, c.NvPairs.PvlanAllowedVlans)
+			if action == ActionNone || action == RequiresUpdate {
+				action = RequiresUpdate
+			}
+		}
+	} else {
+		//v empty, fill with c
+		log.Printf("Copy from state: v.NvPairs.PvlanAllowedVlans=%v, c.NvPairs.PvlanAllowedVlans=%v", v.NvPairs.PvlanAllowedVlans, c.NvPairs.PvlanAllowedVlans)
+		v.NvPairs.PvlanAllowedVlans = c.NvPairs.PvlanAllowedVlans
+	}
+
+	if v.NvPairs.PvlanNativeVlan != "" {
+		if v.NvPairs.PvlanNativeVlan != c.NvPairs.PvlanNativeVlan {
+			log.Printf("Update: v.NvPairs.PvlanNativeVlan=%v, c.NvPairs.PvlanNativeVlan=%v", v.NvPairs.PvlanNativeVlan, c.NvPairs.PvlanNativeVlan)
+			if action == ActionNone || action == RequiresUpdate {
+				action = RequiresUpdate
+			}
+		}
+	} else {
+		//v empty, fill with c
+		log.Printf("Copy from state: v.NvPairs.PvlanNativeVlan=%v, c.NvPairs.PvlanNativeVlan=%v", v.NvPairs.PvlanNativeVlan, c.NvPairs.PvlanNativeVlan)
+		v.NvPairs.PvlanNativeVlan = c.NvPairs.PvlanNativeVlan
+	}
+
+	if v.NvPairs.IgForFex != c.NvPairs.IgForFex {
+		log.Printf("Update: v.NvPairs.IgForFex=%v, c.NvPairs.IgForFex=%v", v.NvPairs.IgForFex, c.NvPairs.IgForFex)
+		if action == ActionNone || action == RequiresUpdate {
+			action = RequiresUpdate
+		}
+	}
+
+	if v.NvPairs.AutoNegotiate != "" {
+		if v.NvPairs.AutoNegotiate != c.NvPairs.AutoNegotiate {
+			log.Printf("Update: v.NvPairs.AutoNegotiate=%v, c.NvPairs.AutoNegotiate=%v", v.NvPairs.AutoNegotiate, c.NvPairs.AutoNegotiate)
+			if action == ActionNone || action == RequiresUpdate {
+				action = RequiresUpdate
+			}
+		}
+	} else {
+		//v empty, fill with c
+		log.Printf("Copy from state: v.NvPairs.AutoNegotiate=%v, c.NvPairs.AutoNegotiate=%v", v.NvPairs.AutoNegotiate, c.NvPairs.AutoNegotiate)
+		v.NvPairs.AutoNegotiate = c.NvPairs.AutoNegotiate
+	}
+
+	if v.NvPairs.PathCost != nil && c.NvPairs.PathCost != nil {
+		if *v.NvPairs.PathCost != *c.NvPairs.PathCost {
+			if action == ActionNone || action == RequiresUpdate {
+				action = RequiresUpdate
+			}
+			log.Printf("Update: v.NvPairs.PathCost=%v, c.NvPairs.PathCost=%v", *v.NvPairs.PathCost, *c.NvPairs.PathCost)
+		}
+	} else if v.NvPairs.PathCost != nil {
+		log.Printf("Update: v.NvPairs.PathCost=%v, c.NvPairs.PathCost=nil", *v.NvPairs.PathCost)
+		if action == ActionNone || action == RequiresUpdate {
+			action = RequiresUpdate
+		}
+	} else if c.NvPairs.PathCost != nil {
+		v.NvPairs.PathCost = new(int64)
+		log.Printf("Copy from state: v.NvPairs.PathCost=nil, c.NvPairs.PathCost=%v", *c.NvPairs.PathCost)
+		*v.NvPairs.PathCost = *c.NvPairs.PathCost
+	}
+
+	if v.NvPairs.GuardMode != "" {
+		if v.NvPairs.GuardMode != c.NvPairs.GuardMode {
+			log.Printf("Update: v.NvPairs.GuardMode=%v, c.NvPairs.GuardMode=%v", v.NvPairs.GuardMode, c.NvPairs.GuardMode)
+			if action == ActionNone || action == RequiresUpdate {
+				action = RequiresUpdate
+			}
+		}
+	} else {
+		//v empty, fill with c
+		log.Printf("Copy from state: v.NvPairs.GuardMode=%v, c.NvPairs.GuardMode=%v", v.NvPairs.GuardMode, c.NvPairs.GuardMode)
+		v.NvPairs.GuardMode = c.NvPairs.GuardMode
+	}
+
+	if v.NvPairs.Ttag != c.NvPairs.Ttag {
+		log.Printf("Update: v.NvPairs.Ttag=%v, c.NvPairs.Ttag=%v", v.NvPairs.Ttag, c.NvPairs.Ttag)
+		if action == ActionNone || action == RequiresUpdate {
+			action = RequiresUpdate
+		}
+	}
+
+	if len(v.NvPairs.PVlanMappingList) != len(c.NvPairs.PVlanMappingList) {
+		log.Printf("Update: len(v.NvPairs.PVlanMappingList)=%d, len(c.NvPairs.PVlanMappingList)=%d", len(v.NvPairs.PVlanMappingList), len(c.NvPairs.PVlanMappingList))
+		if action == ActionNone || action == RequiresUpdate {
+			action = RequiresUpdate
+		}
+	}
+	for i := range v.NvPairs.PVlanMappingList {
+		retVal := v.NvPairs.PVlanMappingList[i].CreatePlan(c.NvPairs.PVlanMappingList[i], cf)
+		if retVal != ActionNone {
+			if action == ActionNone || action == RequiresUpdate {
+				action = retVal
+			}
+		}
+	}
+
+	if len(v.NvPairs.PVlanAssocList) != len(c.NvPairs.PVlanAssocList) {
+		log.Printf("Update: len(v.NvPairs.PVlanAssocList)=%d, len(c.NvPairs.PVlanAssocList)=%d", len(v.NvPairs.PVlanAssocList), len(c.NvPairs.PVlanAssocList))
+		if action == ActionNone || action == RequiresUpdate {
+			action = RequiresUpdate
+		}
+	}
+	for i := range v.NvPairs.PVlanAssocList {
+		retVal := v.NvPairs.PVlanAssocList[i].CreatePlan(c.NvPairs.PVlanAssocList[i], cf)
+		if retVal != ActionNone {
+			if action == ActionNone || action == RequiresUpdate {
+				action = retVal
+			}
+		}
+	}
 	if len(v.CustomPolicyParameters) != len(c.CustomPolicyParameters) {
 		log.Printf("Update: len(v.CustomPolicyParameters)=%d, len(c.CustomPolicyParameters)=%d", len(v.CustomPolicyParameters), len(c.CustomPolicyParameters))
 		return RequiresUpdate
