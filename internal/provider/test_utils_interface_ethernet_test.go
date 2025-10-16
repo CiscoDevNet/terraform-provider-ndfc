@@ -73,6 +73,12 @@ func InterfacesPVlanAssocListValueHelperStateCheck(RscName string, c resource_in
 func InterfaceEthernetInterfacesValueHelperStateCheck(RscName string, c resource_interface_common.NDFCInterfacesValue, attrPath path.Path) []resource.TestCheckFunc {
 	ret := []resource.TestCheckFunc{}
 
+	if c.PortChannelPolicy != "" {
+		ret = append(ret, resource.TestCheckResourceAttr(RscName, attrPath.AtName("port_channel_policy").String(), c.PortChannelPolicy))
+	}
+	if c.NvPairs.PortChannelName != "" {
+		ret = append(ret, resource.TestCheckResourceAttr(RscName, attrPath.AtName("port_channel_name").String(), c.NvPairs.PortChannelName))
+	}
 	if c.SerialNumber != "" {
 		ret = append(ret, resource.TestCheckResourceAttr(RscName, attrPath.AtName("serial_number").String(), c.SerialNumber))
 	}

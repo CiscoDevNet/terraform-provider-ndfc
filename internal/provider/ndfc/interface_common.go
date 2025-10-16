@@ -33,6 +33,7 @@ type NDFCInterface interface {
 	GetInterface(ctx context.Context, diags *diag.Diagnostics, serial string, policy string) []resource_interface_common.NDFCInterfacesValue
 	DeployInterface(ctx context.Context, diags *diag.Diagnostics, inData *resource_interface_common.NDFCInterfaceCommonModel)
 	GetPayload(ctx context.Context, diags *diag.Diagnostics, inData *resource_interface_common.NDFCInterfacesPayload) ([]byte, error)
+	ModifyAttributesForTerraform(ctx context.Context, diags *diag.Diagnostics, toModel *resource_interface_common.NDFCInterfacesValue, plan *resource_interface_common.NDFCInterfacesValue)
 }
 
 type NDFCInterfaceCommon struct {
@@ -293,4 +294,10 @@ func (i *NDFCInterfaceCommon) DsGetInterfaceDetails(ctx context.Context, diags *
 		diags.AddError("Error unmarshalling data", err.Error())
 		return
 	}
+}
+
+// To make any Modifications before sending the data to Terraform
+func (i *NDFCInterfaceCommon) ModifyAttributesForTerraform(ctx context.Context, diags *diag.Diagnostics,
+	toModel *resource_interface_common.NDFCInterfacesValue, plan *resource_interface_common.NDFCInterfacesValue) {
+	// Do nothing
 }

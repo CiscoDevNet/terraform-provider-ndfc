@@ -29,6 +29,7 @@ type NDFCInterfacesValue struct {
 	InterfaceType          string            `json:"interfaceType,omitempty"`
 	DeploymentStatus       string            `json:"-"`
 	CustomPolicyParameters map[string]string `json:"-"`
+	PortChannelPolicy      string            `json:"-"`
 	NvPairs                NDFCNvPairsValue  `json:"nvPairs,omitempty"`
 }
 

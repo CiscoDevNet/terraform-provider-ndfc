@@ -304,6 +304,22 @@ func InterfaceEthernetResourceSchema(ctx context.Context) schema.Schema {
 							MarkdownDescription: "Configure priority for PIM DR election on the interface, default is 1",
 							Default:             stringdefault.StaticString("1"),
 						},
+						"port_channel_name": schema.StringAttribute{
+							Computed:            true,
+							Description:         "Internal parameter used to track portchannel membership",
+							MarkdownDescription: "Internal parameter used to track portchannel membership",
+							PlanModifiers: []planmodifier.String{
+								stringplanmodifier.UseStateForUnknown(),
+							},
+						},
+						"port_channel_policy": schema.StringAttribute{
+							Computed:            true,
+							Description:         "Internal parameter used to track portchannel membership",
+							MarkdownDescription: "Internal parameter used to track portchannel membership",
+							PlanModifiers: []planmodifier.String{
+								stringplanmodifier.UseStateForUnknown(),
+							},
+						},
 						"port_duplex_mode": schema.StringAttribute{
 							Optional:            true,
 							Computed:            true,
@@ -1082,6 +1098,42 @@ func (t InterfacesType) ValueFromObject(ctx context.Context, in basetypes.Object
 			fmt.Sprintf(`pim_dr_priority expected to be basetypes.StringValue, was: %T`, pimDrPriorityAttribute))
 	}
 
+	portChannelNameAttribute, ok := attributes["port_channel_name"]
+
+	if !ok {
+		diags.AddError(
+			"Attribute Missing",
+			`port_channel_name is missing from object`)
+
+		return nil, diags
+	}
+
+	portChannelNameVal, ok := portChannelNameAttribute.(basetypes.StringValue)
+
+	if !ok {
+		diags.AddError(
+			"Attribute Wrong Type",
+			fmt.Sprintf(`port_channel_name expected to be basetypes.StringValue, was: %T`, portChannelNameAttribute))
+	}
+
+	portChannelPolicyAttribute, ok := attributes["port_channel_policy"]
+
+	if !ok {
+		diags.AddError(
+			"Attribute Missing",
+			`port_channel_policy is missing from object`)
+
+		return nil, diags
+	}
+
+	portChannelPolicyVal, ok := portChannelPolicyAttribute.(basetypes.StringValue)
+
+	if !ok {
+		diags.AddError(
+			"Attribute Wrong Type",
+			fmt.Sprintf(`port_channel_policy expected to be basetypes.StringValue, was: %T`, portChannelPolicyAttribute))
+	}
+
 	portDuplexModeAttribute, ok := attributes["port_duplex_mode"]
 
 	if !ok {
@@ -1355,6 +1407,8 @@ func (t InterfacesType) ValueFromObject(ctx context.Context, in basetypes.Object
 		PVlanMappingList:         pVlanMappingListVal,
 		PathCost:                 pathCostVal,
 		PimDrPriority:            pimDrPriorityVal,
+		PortChannelName:          portChannelNameVal,
+		PortChannelPolicy:        portChannelPolicyVal,
 		PortDuplexMode:           portDuplexModeVal,
 		PortTypeFast:             portTypeFastVal,
 		Ptp:                      ptpVal,
@@ -2047,6 +2101,42 @@ func NewInterfacesValue(attributeTypes map[string]attr.Type, attributes map[stri
 			fmt.Sprintf(`pim_dr_priority expected to be basetypes.StringValue, was: %T`, pimDrPriorityAttribute))
 	}
 
+	portChannelNameAttribute, ok := attributes["port_channel_name"]
+
+	if !ok {
+		diags.AddError(
+			"Attribute Missing",
+			`port_channel_name is missing from object`)
+
+		return NewInterfacesValueUnknown(), diags
+	}
+
+	portChannelNameVal, ok := portChannelNameAttribute.(basetypes.StringValue)
+
+	if !ok {
+		diags.AddError(
+			"Attribute Wrong Type",
+			fmt.Sprintf(`port_channel_name expected to be basetypes.StringValue, was: %T`, portChannelNameAttribute))
+	}
+
+	portChannelPolicyAttribute, ok := attributes["port_channel_policy"]
+
+	if !ok {
+		diags.AddError(
+			"Attribute Missing",
+			`port_channel_policy is missing from object`)
+
+		return NewInterfacesValueUnknown(), diags
+	}
+
+	portChannelPolicyVal, ok := portChannelPolicyAttribute.(basetypes.StringValue)
+
+	if !ok {
+		diags.AddError(
+			"Attribute Wrong Type",
+			fmt.Sprintf(`port_channel_policy expected to be basetypes.StringValue, was: %T`, portChannelPolicyAttribute))
+	}
+
 	portDuplexModeAttribute, ok := attributes["port_duplex_mode"]
 
 	if !ok {
@@ -2320,6 +2410,8 @@ func NewInterfacesValue(attributeTypes map[string]attr.Type, attributes map[stri
 		PVlanMappingList:         pVlanMappingListVal,
 		PathCost:                 pathCostVal,
 		PimDrPriority:            pimDrPriorityVal,
+		PortChannelName:          portChannelNameVal,
+		PortChannelPolicy:        portChannelPolicyVal,
 		PortDuplexMode:           portDuplexModeVal,
 		PortTypeFast:             portTypeFastVal,
 		Ptp:                      ptpVal,
@@ -2439,6 +2531,8 @@ type InterfacesValue struct {
 	PVlanMappingList         basetypes.ListValue   `tfsdk:"p_vlan_mapping_list"`
 	PathCost                 basetypes.Int64Value  `tfsdk:"path_cost"`
 	PimDrPriority            basetypes.StringValue `tfsdk:"pim_dr_priority"`
+	PortChannelName          basetypes.StringValue `tfsdk:"port_channel_name"`
+	PortChannelPolicy        basetypes.StringValue `tfsdk:"port_channel_policy"`
 	PortDuplexMode           basetypes.StringValue `tfsdk:"port_duplex_mode"`
 	PortTypeFast             basetypes.BoolValue   `tfsdk:"port_type_fast"`
 	Ptp                      basetypes.BoolValue   `tfsdk:"ptp"`
@@ -2456,7 +2550,7 @@ type InterfacesValue struct {
 }
 
 func (v InterfacesValue) ToTerraformValue(ctx context.Context) (tftypes.Value, error) {
-	attrTypes := make(map[string]tftypes.Type, 47)
+	attrTypes := make(map[string]tftypes.Type, 49)
 
 	var val tftypes.Value
 	var err error
@@ -2501,6 +2595,8 @@ func (v InterfacesValue) ToTerraformValue(ctx context.Context) (tftypes.Value, e
 	}.TerraformType(ctx)
 	attrTypes["path_cost"] = basetypes.Int64Type{}.TerraformType(ctx)
 	attrTypes["pim_dr_priority"] = basetypes.StringType{}.TerraformType(ctx)
+	attrTypes["port_channel_name"] = basetypes.StringType{}.TerraformType(ctx)
+	attrTypes["port_channel_policy"] = basetypes.StringType{}.TerraformType(ctx)
 	attrTypes["port_duplex_mode"] = basetypes.StringType{}.TerraformType(ctx)
 	attrTypes["port_type_fast"] = basetypes.BoolType{}.TerraformType(ctx)
 	attrTypes["ptp"] = basetypes.BoolType{}.TerraformType(ctx)
@@ -2519,7 +2615,7 @@ func (v InterfacesValue) ToTerraformValue(ctx context.Context) (tftypes.Value, e
 
 	switch v.state {
 	case attr.ValueStateKnown:
-		vals := make(map[string]tftypes.Value, 47)
+		vals := make(map[string]tftypes.Value, 49)
 
 		val, err = v.AccessVlan.ToTerraformValue(ctx)
 
@@ -2793,6 +2889,22 @@ func (v InterfacesValue) ToTerraformValue(ctx context.Context) (tftypes.Value, e
 
 		vals["pim_dr_priority"] = val
 
+		val, err = v.PortChannelName.ToTerraformValue(ctx)
+
+		if err != nil {
+			return tftypes.NewValue(objectType, tftypes.UnknownValue), err
+		}
+
+		vals["port_channel_name"] = val
+
+		val, err = v.PortChannelPolicy.ToTerraformValue(ctx)
+
+		if err != nil {
+			return tftypes.NewValue(objectType, tftypes.UnknownValue), err
+		}
+
+		vals["port_channel_policy"] = val
+
 		val, err = v.PortDuplexMode.ToTerraformValue(ctx)
 
 		if err != nil {
@@ -3038,6 +3150,8 @@ func (v InterfacesValue) ToObjectValue(ctx context.Context) (basetypes.ObjectVal
 			},
 			"path_cost":           basetypes.Int64Type{},
 			"pim_dr_priority":     basetypes.StringType{},
+			"port_channel_name":   basetypes.StringType{},
+			"port_channel_policy": basetypes.StringType{},
 			"port_duplex_mode":    basetypes.StringType{},
 			"port_type_fast":      basetypes.BoolType{},
 			"ptp":                 basetypes.BoolType{},
@@ -3095,6 +3209,8 @@ func (v InterfacesValue) ToObjectValue(ctx context.Context) (basetypes.ObjectVal
 		},
 		"path_cost":           basetypes.Int64Type{},
 		"pim_dr_priority":     basetypes.StringType{},
+		"port_channel_name":   basetypes.StringType{},
+		"port_channel_policy": basetypes.StringType{},
 		"port_duplex_mode":    basetypes.StringType{},
 		"port_type_fast":      basetypes.BoolType{},
 		"ptp":                 basetypes.BoolType{},
@@ -3155,6 +3271,8 @@ func (v InterfacesValue) ToObjectValue(ctx context.Context) (basetypes.ObjectVal
 			"p_vlan_mapping_list":         pVlanMappingList,
 			"path_cost":                   v.PathCost,
 			"pim_dr_priority":             v.PimDrPriority,
+			"port_channel_name":           v.PortChannelName,
+			"port_channel_policy":         v.PortChannelPolicy,
 			"port_duplex_mode":            v.PortDuplexMode,
 			"port_type_fast":              v.PortTypeFast,
 			"ptp":                         v.Ptp,
@@ -3324,6 +3442,14 @@ func (v InterfacesValue) Equal(o attr.Value) bool {
 		return false
 	}
 
+	if !v.PortChannelName.Equal(other.PortChannelName) {
+		return false
+	}
+
+	if !v.PortChannelPolicy.Equal(other.PortChannelPolicy) {
+		return false
+	}
+
 	if !v.PortDuplexMode.Equal(other.PortDuplexMode) {
 		return false
 	}
@@ -3429,6 +3555,8 @@ func (v InterfacesValue) AttributeTypes(ctx context.Context) map[string]attr.Typ
 		},
 		"path_cost":           basetypes.Int64Type{},
 		"pim_dr_priority":     basetypes.StringType{},
+		"port_channel_name":   basetypes.StringType{},
+		"port_channel_policy": basetypes.StringType{},
 		"port_duplex_mode":    basetypes.StringType{},
 		"port_type_fast":      basetypes.BoolType{},
 		"ptp":                 basetypes.BoolType{},

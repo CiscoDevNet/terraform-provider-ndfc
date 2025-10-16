@@ -83,6 +83,20 @@ resource:
         type: Bool
         tf_hide: true
         payload_hide: true
+      - model_name: port_channel_policy
+        tf_name: port_channel_policy
+        type: String
+        use_state: true
+        computed: true
+        payload_hide: true
+        description: "Internal parameter used to track portchannel membership"
+      - model_name: PO_ID
+        tf_name: port_channel_name
+        type: String
+        use_state: true
+        ndfc_nested: [nvPairs]
+        computed: true
+        description: "Internal parameter used to track portchannel membership"
       - model_name: serialNumber
         tf_name: serial_number
         type: String
@@ -95,6 +109,7 @@ resource:
         example: Ethernet1/10
         mandatory: true
         requires_replace: true
+      
       - &ifType
         model_name: interfaceType
         tf_name: interface_type

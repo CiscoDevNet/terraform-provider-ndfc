@@ -695,6 +695,16 @@ resource:
         payload_hide: true
         description: Custom policy parameters
         example: "policy parameters"
+      
+      - model_name: port_channel_policy
+        tf_name: port_channel_policy
+        type: String
+        computed: true
+        payload_hide: true
+        use_state: true
+        description: "Internal parameter used to track portchannel membership"
+        example: false
+
 
 datasource:
   name: interfaces
