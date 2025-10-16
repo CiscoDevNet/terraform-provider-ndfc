@@ -80,6 +80,18 @@ func (v *InterfacesValue) SetValue(jsonData *resource_interface_common.NDFCInter
 	var err diag.Diagnostics
 	err = nil
 
+	if jsonData.PortChannelPolicy != "" {
+		v.PortChannelPolicy = types.StringValue(jsonData.PortChannelPolicy)
+	} else {
+		v.PortChannelPolicy = types.StringNull()
+	}
+
+	if jsonData.NvPairs.PortChannelName != "" {
+		v.PortChannelName = types.StringValue(jsonData.NvPairs.PortChannelName)
+	} else {
+		v.PortChannelName = types.StringNull()
+	}
+
 	if jsonData.SerialNumber != "" {
 		v.SerialNumber = types.StringValue(jsonData.SerialNumber)
 	} else {
@@ -498,6 +510,22 @@ func (v InterfaceEthernetModel) GetModelData() *resource_interface_common.NDFCIn
 		for k1, ele1 := range elements1 {
 			data1 := new(resource_interface_common.NDFCInterfacesValue)
 			// filter_this_value | Bool| []| true
+			// port_channel_policy | String| []| false
+			if !ele1.PortChannelPolicy.IsNull() && !ele1.PortChannelPolicy.IsUnknown() {
+
+				data1.PortChannelPolicy = ele1.PortChannelPolicy.ValueString()
+			} else {
+				data1.PortChannelPolicy = ""
+			}
+
+			// port_channel_name | String| [nvPairs]| false
+			if !ele1.PortChannelName.IsNull() && !ele1.PortChannelName.IsUnknown() {
+				//-----inline nested----
+				data1.NvPairs.PortChannelName = ele1.PortChannelName.ValueString()
+			} else {
+				data1.NvPairs.PortChannelName = ""
+			}
+
 			// serial_number | String| []| false
 			if !ele1.SerialNumber.IsNull() && !ele1.SerialNumber.IsUnknown() {
 
@@ -903,6 +931,13 @@ func (v InterfaceEthernetModel) GetModelData() *resource_interface_common.NDFCIn
 			}
 
 			// deployment_status | String| []| false
+			if !ele1.DeploymentStatus.IsNull() && !ele1.DeploymentStatus.IsUnknown() {
+
+				data1.DeploymentStatus = ele1.DeploymentStatus.ValueString()
+			} else {
+				data1.DeploymentStatus = ""
+			}
+
 			// custom_policy_parameters | Map:String| []| false
 			if !ele1.CustomPolicyParameters.IsNull() && !ele1.CustomPolicyParameters.IsUnknown() {
 

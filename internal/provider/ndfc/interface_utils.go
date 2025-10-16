@@ -175,6 +175,9 @@ func (c NDFC) ifDiff(ctx context.Context,
 			tflog.Debug(ctx, fmt.Sprintf("CreatePlan: Action: %v", action))
 			if action == types.RequiresUpdate {
 				tflog.Debug(ctx, fmt.Sprintf("Interface requires update: %s:%s", intf.SerialNumber, intf.InterfaceName))
+				if stateIntf.PortChannelPolicy != "" {
+					intf.PortChannelPolicy = stateIntf.PortChannelPolicy
+				}
 				updateIntf.Interfaces[k] = intf
 			} else if action == types.RequiresReplace {
 				tflog.Debug(ctx, fmt.Sprintf("Interface requires replace: %s:%s", intf.SerialNumber, intf.InterfaceName))
