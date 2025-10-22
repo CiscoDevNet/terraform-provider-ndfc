@@ -44,3 +44,86 @@ username, password, url, timeout, domain and insecure can also be supplied as en
 - `timeout` (Number) NDFC HTTP request timeout - timeout. Enviroment variable `NDFC_TIMEOUT` can be used to override the provider configuration.
 
 
+
+## General Guidelines
+
+### Order of operations (Dependencies)
+
+The NDFC provider resources must be created in a specific order to satisfy infrastructure dependencies. Use Terraform's `depends_on` meta-argument to enforce the correct ordering when implicit dependencies are not sufficient.
+
+#### Dependency Hierarchy
+
+The following hierarchy shows the order in which resources should be created:
+
+1. **`ndfc_fabric_vxlan_evpn`** - Create the fabric first
+   - This is the foundation for all other resources
+
+2. **`ndfc_inventory_devices`** - Add devices to the fabric
+   - Depends on: `ndfc_fabric_vxlan_evpn`
+
+3. **`ndfc_vpc_pair`** - Configure VPC pairs on devices
+   - Depends on: `ndfc_inventory_devices`
+
+4. **Interface and VRF resources** (parallel - all depend on VPC pair):
+   - **`ndfc_interface_ethernet`** - Depends on: `ndfc_vpc_pair`
+   - **`ndfc_interface_loopback`** - Depends on: `ndfc_vpc_pair`
+   - **`ndfc_interface_vlan`** - Depends on: `ndfc_vpc_pair`
+   - **`ndfc_vrfs`** - Depends on: `ndfc_vpc_pair`
+
+5. **`ndfc_interface_portchannel`** - Configure port-channel interfaces
+   - Depends on: `ndfc_interface_ethernet`
+   - Note that the ports that are to be part of port-channel must be created first, as a reverse order is not supported.
+
+6. **`ndfc_interface_vpc`** - Configure VPC interfaces
+   - Depends on: `ndfc_inventory_devices` and `ndfc_vpc_pair`
+   - Note that the ports that are to be part of VPC must be created first, as a reverse order is not supported.
+
+7. **`ndfc_networks`** - Create networks/VLANs
+   - Depends on: `ndfc_vrfs`
+
+8. **`ndfc_policy`** - Apply policies
+   - Depends on: `ndfc_networks`
+
+9. **`ndfc_configuration_deploy`** - Deploy configurations globally
+   - Should be the last resource when using global deployment
+   - Depends on all interface and network resources that need deployment
+
+#### Example with Explicit Dependencies
+
+```hcl
+resource "ndfc_fabric_vxlan_evpn" "example" {
+  fabric_name = "my-fabric"
+  # ... other attributes
+}
+
+resource "ndfc_inventory_devices" "example" {
+  fabric_name = ndfc_fabric_vxlan_evpn.example.fabric_name
+  # Implicit dependency through fabric_name reference
+  # ... other attributes
+}
+
+resource "ndfc_vpc_pair" "example" {
+  # ... other attributes
+  depends_on = [ndfc_inventory_devices.example]
+}
+
+resource "ndfc_vrfs" "example" {
+  fabric_name = ndfc_fabric_vxlan_evpn.example.fabric_name
+  # ... other attributes
+  depends_on = [ndfc_vpc_pair.example]
+}
+
+resource "ndfc_networks" "example" {
+  fabric_name = ndfc_fabric_vxlan_evpn.example.fabric_name
+  # ... other attributes
+  depends_on = [ndfc_vrfs.example]
+}
+
+resource "ndfc_policy" "example" {
+  # ... other attributes
+  depends_on = [ndfc_networks.example]
+}
+```
+
+**Note**: Some dependencies may be implicit through resource references (e.g., using `ndfc_fabric_vxlan_evpn.example.fabric_name`). However, explicit `depends_on` declarations are recommended when the dependency is not captured through attribute references.
+
