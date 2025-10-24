@@ -131,7 +131,10 @@ resource:
               payload_hide: true
               default_value: false
               ndfc_type: bool
-              description: If set to `true`, deploys this attachment. This cannot be set to `true` if `deploy_all_attachments` at resource level is set to `true` or `deploy_attachments` in the corresponding `network` is set to `true`
+              description: >
+                          If set to `true`, deploys this attachment.        
+                          This cannot be set to `true` if `deploy_all_attachments` at resource level is set to `true` or `deploy_attachments` in the corresponding `network` is set to `true`.        
+                          __Note: Changing value from `true` to `false`, to undo a deployment is not supported__      
               example: false
             - model_name: switchPorts
               tf_name: switch_ports

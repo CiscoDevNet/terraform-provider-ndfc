@@ -29,7 +29,10 @@ resource:
       type: Bool
       default_value: false
       payload_hide: true
-      description: If set to `true`, do a deployment of all attachments in this resource. This parameter cannot be `true` if either  `deploy_attachments` inside any `network` or `deploy_this_attachment` in any `attachments` is set to `true`
+      description: >
+                  If set to true, do a deployment of all attachments in this resource.     
+                  This parameter cannot be true if either  `deploy_attachments` inside any `network` or `deploy_this_attachment` in any `attachments` is set to true.        
+                  __Note: Changing value from `true` to `false`, to undo a deployment is not supported__     
       ndfc_type: bool
       example: true
     - model_name: networks
@@ -41,7 +44,7 @@ resource:
       filtered: true
       ndfc_type: List
       map_key: network_name
-      gen_backend: true
+      gen_backend: false
       example: NET1
       attributes:
       - model_name: filterThisValue
@@ -341,7 +344,11 @@ resource:
         type: Bool
         default_value: false
         payload_hide: true
-        description: If set to `true`, deploys all attachments in the network. This parameter cannot be `true` if `deploy_all_attachments` at resource level is set to `true` or `deploy_this_attachment` in any `attachments` is set to `true`
+        description: >
+                    If set to `true`, deploys all attachments in the network.     
+                    This parameter cannot be `true` if `deploy_all_attachments` at resource level is set to `true` or `deploy_this_attachment` in any `attachments` is set to `true`.     
+                    __Note: Changing value from `true` to `false`, to undo a deployment is not supported__
+
         ndfc_type: bool
         example: false
       - model_name: lanAttachList
