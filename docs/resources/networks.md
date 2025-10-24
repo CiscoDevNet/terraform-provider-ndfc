@@ -73,7 +73,7 @@ resource "ndfc_networks" "test_resource_networks_1" {
 
 ### Optional
 
-- `deploy_all_attachments` (Boolean) If set to `true`, do a deployment of all attachments in this resource. This parameter cannot be `true` if either  `deploy_attachments` inside any `network` or `deploy_this_attachment` in any `attachments` is set to `true`
+- `deploy_all_attachments` (Boolean) If set to true, do a deployment of all attachments in this resource.      This parameter cannot be true if either  `deploy_attachments` inside any `network` or `deploy_this_attachment` in any `attachments` is set to true.         __Note: Changing value from `true` to `false`, to undo a deployment is not supported__
 
 ### Read-Only
 
@@ -86,7 +86,7 @@ Optional:
 
 - `arp_suppression` (Boolean) ARP suppression is only supported if SVI is present when Layer-2-Only is not enabled. NX-OS Specific.
 - `attachments` (Attributes Map) List of switches attached to the net (see [below for nested schema](#nestedatt--networks--attachments))
-- `deploy_attachments` (Boolean) If set to `true`, deploys all attachments in the network. This parameter cannot be `true` if `deploy_all_attachments` at resource level is set to `true` or `deploy_this_attachment` in any `attachments` is set to `true`
+- `deploy_attachments` (Boolean) If set to `true`, deploys all attachments in the network.      This parameter cannot be `true` if `deploy_all_attachments` at resource level is set to `true` or `deploy_this_attachment` in any `attachments` is set to `true`.      __Note: Changing value from `true` to `false`, to undo a deployment is not supported__
 - `dhcp_relay_loopback_id` (Number) Loopback ID for DHCP Relay interface
 - `dhcp_relay_servers` (Attributes List) List of DHCP relay servers (see [below for nested schema](#nestedatt--networks--dhcp_relay_servers))
 - `display_name` (String) Customized name of the network. By default, it will be same as the network name
@@ -127,7 +127,7 @@ Read-Only:
 
 Optional:
 
-- `deploy_this_attachment` (Boolean) If set to `true`, deploys this attachment. This cannot be set to `true` if `deploy_all_attachments` at resource level is set to `true` or `deploy_attachments` in the corresponding `network` is set to `true`
+- `deploy_this_attachment` (Boolean) If set to `true`, deploys this attachment.         This cannot be set to `true` if `deploy_all_attachments` at resource level is set to `true` or `deploy_attachments` in the corresponding `network` is set to `true`.         __Note: Changing value from `true` to `false`, to undo a deployment is not supported__
 - `display_name` (String) The name of the switch
 - `fabric` (String) The name of the fabric
 - `freeform_config` (String) This field covers any configuration not included in overlay templates which is needed as part of this VRF attachment
@@ -154,6 +154,8 @@ Optional:
 ## Import
 
 Import is supported using the following syntax:
+
+The [`terraform import` command](https://developer.hashicorp.com/terraform/cli/commands/import) can be used, for example:
 
 ```shell
 # Format of ID used for import:
