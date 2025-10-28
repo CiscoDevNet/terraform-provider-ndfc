@@ -434,6 +434,11 @@ func (c NDFC) RscUpdateBulkVrf(ctx context.Context,
 	vrfBulkPlan *resource_vrf_bulk.VrfBulkModel,
 	vrfState *resource_vrf_bulk.VrfBulkModel, vrfConfig *resource_vrf_bulk.VrfBulkModel) {
 
+	c.validateVrfsUpdate(ctx, dg, vrfBulkPlan, vrfState)
+	if dg.HasError() {
+		return
+	}
+
 	actions := c.vrfBulkGetDiff(ctx, vrfBulkPlan, vrfState, vrfConfig)
 
 	// Validate the Diff
@@ -559,15 +564,18 @@ func (c NDFC) RscUpdateBulkVrf(ctx context.Context,
 func FillDeployMap(plan *resource_vrf_bulk.NDFCVrfBulkModel) map[string][]string {
 	depMap := make(map[string][]string)
 	if plan.DeployAllAttachments {
+		log.Printf("FillDeployMap: deploy_all_sttachments set")
 		depMap["global"] = append(depMap["global"], "all")
 	}
 
 	for i := range plan.Vrfs {
 		if plan.Vrfs[i].DeployAttachments {
+			log.Printf("FillDeployMap: deploy_attachments for VRF %s set", plan.Vrfs[i].VrfName)
 			depMap[plan.Vrfs[i].VrfName] = append(depMap[plan.Vrfs[i].VrfName], plan.Vrfs[i].VrfName)
 		}
 		for j := range plan.Vrfs[i].AttachList {
 			if plan.Vrfs[i].AttachList[j].DeployThisAttachment {
+				log.Printf("FillDeployMap: deploy_this_attachment for VRF %s, Serial Number %s set", plan.Vrfs[i].VrfName, plan.Vrfs[i].AttachList[j].SerialNumber)
 				//depKey := fmt.Sprintf("%s/%s", plan.Vrfs[i].VrfName, plan.Vrfs[i].AttachList[j].SerialNumber)
 				depKey := plan.Vrfs[i].VrfName
 				depMap[depKey] = append(depMap[depKey], plan.Vrfs[i].AttachList[j].SerialNumber)
