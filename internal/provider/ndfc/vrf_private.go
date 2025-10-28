@@ -198,6 +198,9 @@ func (c NDFC) vrfBulkGetDiff(ctx context.Context,
 			} else if updateAction == RequiresReplace {
 				//Case 2: attribute that cannot be modified in-place has changed - DELETE and Create
 				tflog.Info(ctx, fmt.Sprintf("%s Needs to be replaced - Delete and Add |%s|", sVrfName, vrf.VrfName))
+
+				// Updating action field in plan so that attachments are taken care
+				updateVrfUpdateActionFlag(&vrf, NewEntry)
 				//use the object in state for delete
 				delVrfs.Vrfs[vrf.VrfName] = sVrf
 				newVRFs.Vrfs[vrf.VrfName] = vrf
@@ -206,6 +209,8 @@ func (c NDFC) vrfBulkGetDiff(ctx context.Context,
 
 			} else {
 				//Case 3: attributes have changed - Do update
+				// mark the attachments for deploy - if config is true
+				updateVrfUpdateActionFlag(&vrf, Deploy)
 				putVRFs.Vrfs[vrf.VrfName] = vrf
 				tflog.Info(ctx, fmt.Sprintf("%s has changed", vrf.VrfName))
 			}
@@ -254,5 +259,56 @@ func (c NDFC) vrfBulkUpdate(ctx context.Context, dg *diag.Diagnostics, ndVRFs *r
 			return
 		}
 		tflog.Info(ctx, fmt.Sprintf("Update VRF %s Successful. Message %s", payload.Vrfs[i].VrfName, res.Str))
+	}
+}
+
+func (c NDFC) validateVrfsUpdate(ctx context.Context, dg *diag.Diagnostics, vrfBulkPlan *resource_vrf_bulk.VrfBulkModel, vrfState *resource_vrf_bulk.VrfBulkModel) {
+	plan := vrfBulkPlan.GetModelData()
+	state := vrfState.GetModelData()
+
+	if state.DeployAllAttachments && !plan.DeployAllAttachments {
+		dg.AddError("Deploy flag cannot be changed from true to false", "deploy_all_attachments cannot be changed from true to false")
+		return
+	}
+	if plan.DeployAllAttachments {
+		return
+	}
+
+	// Check if any deploy flags has changed from true to false
+	for vrf, v := range plan.Vrfs {
+		sVrf, ok := state.Vrfs[vrf]
+		if ok {
+			if !v.DeployAttachments && sVrf.DeployAttachments {
+				dg.AddError(fmt.Sprintf("VRF %s, Deploy flag changed from true to false", v.VrfName), "Deploy flag cannot be changed from true to false")
+				return
+			}
+		} else {
+			log.Printf("VRF %s not found in state", v.VrfName)
+			continue
+		}
+		if v.DeployAttachments {
+			continue
+		}
+
+		for serial, attach := range v.AttachList {
+			log.Printf("validateVrfsUpdate: Attachment %s Plan Deploy flag %t", serial, attach.DeployThisAttachment)
+			if sAttach, ok := sVrf.AttachList[serial]; ok {
+				log.Printf("validateVrfsUpdate: Attachment %s State Deploy flag %t", serial, sAttach.DeployThisAttachment)
+				if !attach.DeployThisAttachment && sAttach.DeployThisAttachment {
+					dg.AddError(fmt.Sprintf("VRF %s, Attachment %s Deploy flag changed from true to false", vrf, serial), "Deploy flag cannot be changed from true to false")
+					return
+				}
+			} else {
+				log.Printf("Attachment %s not found in state", serial)
+			}
+		}
+	}
+}
+
+func updateVrfUpdateActionFlag(planVrf *resource_vrf_bulk.NDFCVrfsValue, action uint16) {
+	for serial, attach := range planVrf.AttachList {
+		attach.UpdateAction = ActionNone
+		attach.UpdateAction |= action
+		planVrf.AttachList[serial] = attach
 	}
 }
