@@ -17,12 +17,21 @@ import (
 
 // FabricAPI is the API client for the vpc pair resource
 const (
-	UrlFabricGetAll         = "/lan-fabric/rest/control/fabrics"
-	urlPerFabric            = UrlFabricGetAll + "/%s"
-	urlFabricTemplate       = urlPerFabric + "/%s"
-	UrlSwitchesByFabric     = "/lan-fabric/rest/control/fabrics/%s/inventory/switchesByFabric"
-	urlFabricNameFromSerial = "/lan-fabric/rest/control/switches/%s/fabric-name"
+	UrlFabricGetAll              = "/lan-fabric/rest/control/fabrics"
+	urlPerFabric                 = UrlFabricGetAll + "/%s"
+	urlFabricTemplate            = urlPerFabric + "/%s"
+	UrlSwitchesByFabric          = "/lan-fabric/rest/control/fabrics/%s/inventory/switchesByFabric"
+	urlFabricNameFromSerial      = "/lan-fabric/rest/control/switches/%s/fabric-name"
+	urlAddChildFabricsToMsd      = "/lan-fabric/rest/control/fabrics/msdAdd"
+	urlRemoveChildFabricsFromMsd = "/lan-fabric/rest/control/fabrics/msdExit"
+	urlMsdAssociations           = "/lan-fabric/rest/control/fabrics/msd/fabric-associations"
 )
+
+const (
+	  MSD_OPERATION_ADD    = "add"
+	  MSD_OPERATION_REMOVE = "remove"
+	  MSD_OPERATION_GET    = "get"
+	)
 
 type FabricAPI struct {
 	NDFCAPICommon
@@ -31,6 +40,7 @@ type FabricAPI struct {
 	GetSwitchesInFabric bool
 	Serialnumber        string
 	FabricType          string
+	MsdOperation        string
 }
 
 func (c *FabricAPI) GetLock() *sync.Mutex {
@@ -46,15 +56,23 @@ func (c *FabricAPI) GetUrl() string {
 		} else {
 			return fmt.Sprintf(urlPerFabric, c.FabricName)
 		}
+	} else if c.MsdOperation == MSD_OPERATION_GET {
+		return urlMsdAssociations
 	} else {
 		return UrlFabricGetAll
 	}
 }
 
 func (c *FabricAPI) PostUrl() string {
-	return fmt.Sprintf(urlFabricTemplate, c.FabricName, c.FabricType)
+	switch c.MsdOperation {
+	case MSD_OPERATION_ADD:
+		return urlAddChildFabricsToMsd
+	case MSD_OPERATION_REMOVE:
+		return urlRemoveChildFabricsFromMsd
+	default:
+		return fmt.Sprintf(urlFabricTemplate, c.FabricName, c.FabricType)
+	}
 }
-
 func (c *FabricAPI) PutUrl() string {
 	return fmt.Sprintf(urlFabricTemplate, c.FabricName, c.FabricType)
 }

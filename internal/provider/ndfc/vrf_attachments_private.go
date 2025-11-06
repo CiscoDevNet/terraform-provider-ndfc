@@ -77,6 +77,9 @@ func (c NDFC) getVrfAttachments(ctx context.Context,
 
 	tflog.Debug(ctx, fmt.Sprintf("getVrfAttachments: Entering Id %s/{%v}", fabricName, vrfs))
 	// Get the VRF Attachments
+	if len(vrfs) == 0 {
+		return nil, nil
+	}
 	res, err := c.vrfAttachmentsGet(ctx, fabricName, vrfs)
 	if err != nil {
 		tflog.Error(ctx, fmt.Sprintf("getVrfAttachments: Error getting VRF Attachments %s", err.Error()))
@@ -109,84 +112,106 @@ on the attachment:
 Attachment level values are set in UpdateAction field, which is used to filter out the entries.
 */
 func (c NDFC) updateVRFAttachmentAction(ctx context.Context, plan *resource_vrf_bulk.NDFCVrfsValue,
-	state *resource_vrf_bulk.NDFCVrfsValue) uint16 {
+	state *resource_vrf_bulk.NDFCVrfsValue, globalDeploy bool) uint16 {
 
 	actionFlag := NoChange
 
 	if plan.DeployAttachments && !state.DeployAttachments {
-		tflog.Debug(ctx, fmt.Sprintf("compareAttachments: VRF %s, deployment flag changed from false to true", plan.VrfName))
+		//tflog.Debug(ctx, fmt.Sprintf("compareAttachments: VRF %s, deployment flag changed from false to true", plan.VrfName))
+		log.Printf("compareAttachments: VRF %s, deployment flag changed from false to true", plan.VrfName)
 		actionFlag |= DeployAll
 	} else if !plan.DeployAttachments && state.DeployAttachments {
-		tflog.Debug(ctx, fmt.Sprintf("compareAttachments: VRF %s, deployment flag changed from true to false", plan.VrfName))
+		//tflog.Debug(ctx, fmt.Sprintf("compareAttachments: VRF %s, deployment flag changed from true to false", plan.VrfName))
+		log.Printf("compareAttachments: VRF %s, deployment flag changed from true to false", plan.VrfName)
 		actionFlag |= UnDeployAll
 	} else {
-		tflog.Debug(ctx, fmt.Sprintf("compareAttachments: VRF %s, deployment flag unchanged", plan.VrfName))
+		//tflog.Debug(ctx, fmt.Sprintf("compareAttachments: VRF %s, deployment flag unchanged", plan.VrfName))
+		log.Printf("compareAttachments: VRF %s, deployment flag unchanged", plan.VrfName)
 	}
 
 	for serial, planAttach := range plan.AttachList {
-		tflog.Debug(ctx, fmt.Sprintf("compareAttachments: Attachment %s/%s in plan", plan.VrfName, serial))
-		planAttach.SerialNumber = serial
-		planAttach.FabricName = plan.FabricName
-		planAttach.VrfName = plan.VrfName
-		planAttach.UpdateAction = NoChange
+		//tflog.Debug(ctx, fmt.Sprintf("compareAttachments: Attachment %s/%s in plan fabric %s", plan.VrfName, serial, plan.FabricName))
+		log.Printf("compareAttachments: %x Attachment %s/%s in plan fabric %s", planAttach.UpdateAction, plan.VrfName, serial, plan.FabricName)
+
 		controlFlag := NoChange
+		planAttach.SerialNumber = serial
+		planAttach.VrfName = plan.VrfName
+		if planAttach.Fabric == "" {
+			planAttach.Fabric = plan.FabricName
+		}
+
+		if (planAttach.UpdateAction & Deploy) != 0 {
+			log.Printf("compareAttachments: vrf %s was modified; checking if attachment %s needs deploy", plan.VrfName, serial)
+			if globalDeploy || plan.DeployAttachments || planAttach.DeployThisAttachment {
+				// vrfDiff flags that vrf was modified and may need deployment
+				// deploy only if flag is true at any of the level
+				log.Printf("compareAttachments: vrf %s was modified; attachment %s needs deploy", plan.VrfName, serial)
+				controlFlag |= Deploy
+			}
+		}
+
+		if (planAttach.UpdateAction & NewEntry) != 0 {
+			log.Printf("compareAttachments: vrf %s was replaced; attachment %s needs to be added again", plan.VrfName, serial)
+			controlFlag |= NewEntry
+
+		}
 
 		//look for attachment in state
 		stateAttachment, found := state.AttachList[serial]
 		if !found {
 			//New attachment in plan
 			controlFlag |= NewEntry
-			tflog.Debug(ctx, fmt.Sprintf("compareAttachments: New attachment %s/%s in plan",
-				plan.VrfName, serial))
+			//tflog.Debug(ctx, fmt.Sprintf("compareAttachments: New attachment %s/%s in plan", plan.VrfName, serial))
+			log.Printf("compareAttachments: New attachment %s/%s in plan", plan.VrfName, serial)
 			planAttach.SerialNumber = serial
 			planAttach.Deployment = "true"
 			if planAttach.DeployThisAttachment || plan.DeployAttachments {
-				tflog.Debug(ctx, fmt.Sprintf("compareAttachments: Attachment %s/%s in plan needs deploy",
-					plan.VrfName, serial))
+				//tflog.Debug(ctx, fmt.Sprintf("compareAttachments: Attachment %s/%s in plan needs deploy", plan.VrfName, serial))
+				log.Printf("compareAttachments: Attachment %s/%s in plan needs deploy", plan.VrfName, serial)
 				controlFlag |= Deploy
 			}
 		} else {
 			stateAttachment.FilterThisValue = true
 			//Existing attachment in plan
-			tflog.Debug(ctx, fmt.Sprintf("compareAttachments: Existing attachment %s/%s in plan",
-				plan.VrfName, serial))
+			//tflog.Debug(ctx, fmt.Sprintf("compareAttachments: Existing attachment %s/%s in plan", plan.VrfName, serial))
+			log.Printf("compareAttachments: Existing attachment %s/%s in plan", plan.VrfName, serial)
 			//Check if parameters are different
 			retVal := planAttach.DeepEqual(stateAttachment)
 			log.Printf("compareAttachments: Attachment %s/%s  - DeepEqual %d", plan.VrfName, serial, retVal)
 			if retVal == ValuesDeeplyEqual {
-				tflog.Debug(ctx, fmt.Sprintf("compareAttachments: attachment %s/%s - unchanged",
-					plan.VrfName, serial))
+				//tflog.Debug(ctx, fmt.Sprintf("compareAttachments: attachment %s/%s - unchanged", plan.VrfName, serial))
+				log.Printf("compareAttachments: attachment %s/%s - unchanged", plan.VrfName, serial)
 
 			} else if retVal == ControlFlagUpdate {
 				//Control Flag Update
-				tflog.Debug(ctx, fmt.Sprintf("compareAttachments: Deploy flag changed in attachment %s/%s in plan",
-					plan.VrfName, serial))
+				//tflog.Debug(ctx, fmt.Sprintf("compareAttachments: Deploy flag changed in attachment %s/%s in plan", plan.VrfName, serial))
+				log.Printf("compareAttachments: Deploy flag changed in attachment %s/%s in plan", plan.VrfName, serial)
 				if stateAttachment.DeployThisAttachment && !planAttach.DeployThisAttachment {
 					//undeploy needed
-					tflog.Debug(ctx, fmt.Sprintf("compareAttachments: Attachment %s/%s in plan needs un-deploy",
-						plan.VrfName, serial))
+					//tflog.Debug(ctx, fmt.Sprintf("compareAttachments: Attachment %s/%s in plan needs un-deploy", plan.VrfName, serial))
+					log.Printf("compareAttachments: Attachment %s/%s in plan needs un-deploy", plan.VrfName, serial)
 					controlFlag |= UnDeploy
 				} else if !stateAttachment.DeployThisAttachment && planAttach.DeployThisAttachment {
 					//deploy needed
-					tflog.Debug(ctx, fmt.Sprintf("compareAttachments: Attachment %s/%s in plan needs deploy",
-						plan.VrfName, serial))
+					//tflog.Debug(ctx, fmt.Sprintf("compareAttachments: Attachment %s/%s in plan needs deploy", plan.VrfName, serial))
+					log.Printf("compareAttachments: Attachment %s/%s in plan needs deploy", plan.VrfName, serial)
 					controlFlag |= Deploy
 				}
 			} else {
 				//Modified attachment in plan list
-				tflog.Debug(ctx, fmt.Sprintf("compareAttachments: Modified attachment %s/%s in plan",
-					plan.VrfName, serial))
+				//tflog.Debug(ctx, fmt.Sprintf("compareAttachments: Modified attachment %s/%s in plan", plan.VrfName, serial))
+				log.Printf("compareAttachments: Modified attachment %s/%s in plan", plan.VrfName, serial)
 				controlFlag |= Update
 				planAttach.Deployment = "true"
 				if stateAttachment.DeployThisAttachment && !planAttach.DeployThisAttachment {
 					//undeploy needed
-					tflog.Debug(ctx, fmt.Sprintf("compareAttachments: Attachment %s/%s in plan needs un-deploy",
-						plan.VrfName, serial))
+					//tflog.Debug(ctx, fmt.Sprintf("compareAttachments: Attachment %s/%s in plan needs un-deploy", plan.VrfName, serial))
+					log.Printf("compareAttachments: Attachment %s/%s in plan needs un-deploy", plan.VrfName, serial)
 					controlFlag |= UnDeploy
 				} else if planAttach.DeployThisAttachment || plan.DeployAttachments {
 					//deploy needed
-					tflog.Debug(ctx, fmt.Sprintf("compareAttachments: Attachment %s/%s in plan needs deploy",
-						plan.VrfName, serial))
+					//tflog.Debug(ctx, fmt.Sprintf("compareAttachments: Attachment %s/%s in plan needs deploy", plan.VrfName, serial))
+					log.Printf("compareAttachments: Attachment %s/%s in plan needs deploy", plan.VrfName, serial)
 					controlFlag |= Deploy
 				}
 			}
@@ -198,7 +223,8 @@ func (c NDFC) updateVRFAttachmentAction(ctx context.Context, plan *resource_vrf_
 		plan.AttachList[serial] = planAttach
 		actionFlag |= controlFlag
 	}
-	tflog.Debug(ctx, fmt.Sprintf("compareAttachments: Actions %b", actionFlag))
+	//tflog.Debug(ctx, fmt.Sprintf("compareAttachments: Actions %b", actionFlag))
+	log.Printf("compareAttachments: Actions %b", actionFlag)
 	return actionFlag
 }
 
@@ -207,12 +233,9 @@ func (c NDFC) diffVrfAttachments(ctx context.Context, planData *resource_vrf_bul
 
 	action := make(map[string]*rva.NDFCVrfAttachmentsPayloads)
 
-	tflog.Debug(ctx, "diffVrfAttachments: Entering")
+	//tflog.Debug(ctx, "diffVrfAttachments: Entering")
+	log.Printf("diffVrfAttachments: Entering")
 	//ID, _ := c.VrfAttachmentsCreateID(planData)
-	vaUpdate := new(resource_vrf_bulk.NDFCVrfBulkModel)
-	vaUpdate.Vrfs = make(map[string]resource_vrf_bulk.NDFCVrfsValue)
-	vaUpdate.FabricName = planData.FabricName
-
 	vaUpdatePayload := new(rva.NDFCVrfAttachmentsPayloads)
 	vaUpdatePayload.FabricName = planData.FabricName
 
@@ -225,14 +248,17 @@ func (c NDFC) diffVrfAttachments(ctx context.Context, planData *resource_vrf_bul
 
 	if stateData.DeployAllAttachments && !planData.DeployAllAttachments {
 		//Global undeploy
-		tflog.Debug(ctx, "diffVrfAttachments: Global undeploy needed")
+		//tflog.Debug(ctx, "diffVrfAttachments: Global undeploy needed")
+		log.Printf("diffVrfAttachments: Global undeploy needed")
 		vaUnDeployPayload.GlobalUndeploy = true
 	} else if !stateData.DeployAllAttachments && planData.DeployAllAttachments {
 		//Global deploy
-		tflog.Debug(ctx, "diffVrfAttachments: Global deploy needed")
+		//tflog.Debug(ctx, "diffVrfAttachments: Global deploy needed")
+		log.Printf("diffVrfAttachments: Global deploy needed")
 		vaDeployPayload.GlobalDeploy = true
 	} else {
-		tflog.Debug(ctx, "diffVrfAttachments: Global deploy flag unchanged")
+		//tflog.Debug(ctx, "diffVrfAttachments: Global deploy flag unchanged")
+		log.Printf("diffVrfAttachments: Global deploy flag unchanged")
 		vaUnDeployPayload.GlobalDeploy = false
 		vaUnDeployPayload.GlobalUndeploy = false
 		vaDeployPayload.GlobalDeploy = false
@@ -243,10 +269,11 @@ func (c NDFC) diffVrfAttachments(ctx context.Context, planData *resource_vrf_bul
 		planVrf.VrfName = vrf
 		//Look for vrf in state
 		if sVrf, ok := stateData.Vrfs[vrf]; ok {
-			tflog.Debug(ctx, fmt.Sprintf("diffVrfAttachments: Existing VRF %s in plan", vrf))
+			//tflog.Debug(ctx, fmt.Sprintf("diffVrfAttachments: Existing VRF %s in plan", vrf))
+			log.Printf("diffVrfAttachments: Existing VRF %s in plan", vrf)
 			//found - now compare attachments
 			//Check if there are new attachments
-			action := c.updateVRFAttachmentAction(ctx, &planVrf, &sVrf)
+			action := c.updateVRFAttachmentAction(ctx, &planVrf, &sVrf, planData.DeployAllAttachments)
 			planData.Vrfs[vrf] = planVrf
 			stateData.Vrfs[vrf] = sVrf
 
@@ -284,7 +311,8 @@ func (c NDFC) diffVrfAttachments(ctx context.Context, planData *resource_vrf_bul
 
 		} else {
 			//New VRF entry in plan
-			tflog.Debug(ctx, fmt.Sprintf("diffVrfAttachments: New VRF %s in plan, not in state - must be new ", vrf))
+			//tflog.Debug(ctx, fmt.Sprintf("diffVrfAttachments: New VRF %s in plan, not in state - must be new ", vrf))
+			log.Printf("diffVrfAttachments: New VRF %s in plan, not in state - must be new", vrf)
 			//New VRF entry in plan - Get all attachments without any filtering
 			vaUpdatePayload.AddEntry(vrf, planVrf.GetAttachmentValues(0, "true"))
 			if planVrf.DeployAttachments {
@@ -292,6 +320,9 @@ func (c NDFC) diffVrfAttachments(ctx context.Context, planData *resource_vrf_bul
 			} else {
 				//Check each entry for deploy flag and mark the bitmask
 				for serial, attachEntry := range planVrf.AttachList {
+					attachEntry.SerialNumber = serial
+					attachEntry.VrfName = vrf
+					attachEntry.FabricName = planData.FabricName
 					if attachEntry.DeployThisAttachment {
 						attachEntry.UpdateAction |= Deploy
 						planVrf.AttachList[serial] = attachEntry
@@ -307,16 +338,20 @@ func (c NDFC) diffVrfAttachments(ctx context.Context, planData *resource_vrf_bul
 	for vrf, vrfEntry := range stateData.Vrfs {
 		vrfEntry.FabricName = stateData.FabricName
 		vrfEntry.VrfName = vrf
-
+		// Skip if VRF is planned to be deleted
+		// Deleted VRFs are not available in plan
+		if _, ok := planData.Vrfs[vrf]; !ok {
+			log.Printf("diffVrfAttachments: VRF %s is planned to be deleted - no need to do attach diff", vrf)
+			continue
+		}
 		for serial, attachEntry := range vrfEntry.AttachList {
 			if attachEntry.FilterThisValue {
 				//seen in plan
 				continue
 			}
 			//attachment not seen in plan - needs to be detached
-			tflog.Debug(ctx, fmt.Sprintf("diffVrfAttachments: To be Detached attachment %s/%s",
-				vrf,
-				serial))
+			//tflog.Debug(ctx, fmt.Sprintf("diffVrfAttachments: To be Detached attachment %s/%s", vrf, serial))
+			log.Printf("diffVrfAttachments: To be Detached attachment %s/%s", vrf, serial)
 			attachEntry.UpdateAction |= (Detach | Deploy)
 			vrfEntry.AttachList[serial] = attachEntry
 		}

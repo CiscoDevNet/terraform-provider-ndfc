@@ -61,11 +61,12 @@ func (c NDFC) RscGetInterfaces(ctx context.Context, dg *diag.Diagnostics, in res
 	data.PolicyType = inData.PolicyType
 	data.SerialNumber = inData.SerialNumber
 	data.Deploy = inData.Deploy
+	// Map the interfaces present into a map of switch serial number to list of interfaces
 	ifMap := ifIdToMap(ID)
-
+	// iterate the map and get the interfaces for each switch
 	for switchSerial, inList := range ifMap {
 		ifSearchMap := make(map[string]bool)
-		// Get interfaces for each switch
+		// Get interfaces for each switch with the policy
 		ifObj := c.NewInterfaceObject(in.GetInterfaceType(), &c.apiClient, c.GetLock(ResourceInterfaces))
 		ifList := ifObj.GetInterface(ctx, dg, switchSerial, data.Policy)
 		//c.processCustomIfPolicy(ctx, dg, &ifList, data.PolicyType)
@@ -75,6 +76,7 @@ func (c NDFC) RscGetInterfaces(ctx context.Context, dg *diag.Diagnostics, in res
 		dsIfModel.InterfaceTypes = c.NDFCIfType(in.GetInterfaceType())
 		dsIfModel.SerialNumber = switchSerial
 
+		// Get the deployment status of the interfaces
 		c.DsGetInterfaces(ctx, dg, &dsIfModel)
 		gotDeployStatus := true
 		if dg.HasError() {
@@ -83,12 +85,13 @@ func (c NDFC) RscGetInterfaces(ctx context.Context, dg *diag.Diagnostics, in res
 		}
 
 		for i := range inList {
+			// Add the entry to the search map
 			ifSearchMap[inList[i]] = true
 		}
 
 		for i := range ifList {
 			if _, ok := ifSearchMap[ifList[i].InterfaceName]; ok {
-
+				// This is an interface that we are tracking in the resource
 				if ifList[i].NvPairs.FreeformConfig == " " {
 					ifList[i].NvPairs.FreeformConfig = ""
 				}
@@ -120,6 +123,8 @@ func (c NDFC) RscGetInterfaces(ctx context.Context, dg *diag.Diagnostics, in res
 				}
 
 				log.Printf("Found entry: key %s entry %s:%s", key, ifList[i].SerialNumber, ifList[i].InterfaceName)
+				intf := inData.Interfaces[key]
+				ifObj.ModifyAttributesForTerraform(ctx, dg, &ifList[i], &intf)
 				// Serial at resource level and per entry level are mutually exclusive
 				// Set entry level to empty if resource level is set
 				if inData.SerialNumber != "" {
@@ -137,6 +142,7 @@ func (c NDFC) RscGetInterfaces(ctx context.Context, dg *diag.Diagnostics, in res
 				data.Interfaces[key] = ifList[i]
 				log.Printf("Add entry %s:%v", key, ifList[i])
 			} else {
+				// This entry is not managed by the resource - skip
 				log.Printf("Skip entry: %s", ifList[i].InterfaceName)
 			}
 		}

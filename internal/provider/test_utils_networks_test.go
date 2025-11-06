@@ -125,8 +125,6 @@ func NetworksValueHelperStateCheck(RscName string, c resource_networks.NDFCNetwo
 	}
 	if c.NetworkTemplateConfig.IngressReplication != "" {
 		ret = append(ret, resource.TestCheckResourceAttr(RscName, attrPath.AtName("ingress_replication").String(), c.NetworkTemplateConfig.IngressReplication))
-	} else {
-		ret = append(ret, resource.TestCheckResourceAttr(RscName, attrPath.AtName("ingress_replication").String(), "false"))
 	}
 	if c.NetworkTemplateConfig.MulticastGroup != "" {
 		ret = append(ret, resource.TestCheckResourceAttr(RscName, attrPath.AtName("multicast_group").String(), c.NetworkTemplateConfig.MulticastGroup))
@@ -149,8 +147,6 @@ func NetworksValueHelperStateCheck(RscName string, c resource_networks.NDFCNetwo
 	}
 	if c.NetworkTemplateConfig.Netflow != "" {
 		ret = append(ret, resource.TestCheckResourceAttr(RscName, attrPath.AtName("netflow").String(), c.NetworkTemplateConfig.Netflow))
-	} else {
-		ret = append(ret, resource.TestCheckResourceAttr(RscName, attrPath.AtName("netflow").String(), "false"))
 	}
 	if c.NetworkTemplateConfig.SviNetflowMonitor != "" {
 		ret = append(ret, resource.TestCheckResourceAttr(RscName, attrPath.AtName("svi_netflow_monitor").String(), c.NetworkTemplateConfig.SviNetflowMonitor))
@@ -160,8 +156,6 @@ func NetworksValueHelperStateCheck(RscName string, c resource_networks.NDFCNetwo
 	}
 	if c.NetworkTemplateConfig.L3GatwayBorder != "" {
 		ret = append(ret, resource.TestCheckResourceAttr(RscName, attrPath.AtName("l3_gatway_border").String(), c.NetworkTemplateConfig.L3GatwayBorder))
-	} else {
-		ret = append(ret, resource.TestCheckResourceAttr(RscName, attrPath.AtName("l3_gatway_border").String(), "false"))
 	}
 	if c.NetworkTemplateConfig.IgmpVersion != "" {
 		ret = append(ret, resource.TestCheckResourceAttr(RscName, attrPath.AtName("igmp_version").String(), c.NetworkTemplateConfig.IgmpVersion))

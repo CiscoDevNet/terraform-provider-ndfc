@@ -141,8 +141,7 @@ func (c NDFC) adjustLinksPayload(ctx context.Context, dg *diag.Diagnostics,
 			delete(out.LinkParameters, srcFabricField)
 		}
 	} else {
-		dg.AddError("Client Error", "Source Fabric Missing in payload")
-		return
+		tflog.Debug(ctx, "Source Fabric Missing in template")
 	}
 
 	dstFabricField := ndfcTmpl.GetFieldWithFlag("IsDestinationFabric")
@@ -152,8 +151,7 @@ func (c NDFC) adjustLinksPayload(ctx context.Context, dg *diag.Diagnostics,
 			delete(out.LinkParameters, dstFabricField)
 		}
 	} else {
-		dg.AddError("Client Error", "Destination Fabric Missing in payload")
-		return
+		tflog.Debug(ctx, "Destination Fabric Missing in template")
 	}
 
 	srcDeviceField := ndfcTmpl.GetFieldWithFlag("IsSourceDevice")
@@ -163,8 +161,7 @@ func (c NDFC) adjustLinksPayload(ctx context.Context, dg *diag.Diagnostics,
 			delete(out.LinkParameters, srcDeviceField)
 		}
 	} else {
-		dg.AddError("Client Error", "Source Device Missing in payload")
-		return
+		tflog.Debug(ctx, "Source Device Missing in template")
 	}
 
 	dstDeviceField := ndfcTmpl.GetFieldWithFlag("IsDestinationDevice")
@@ -174,8 +171,7 @@ func (c NDFC) adjustLinksPayload(ctx context.Context, dg *diag.Diagnostics,
 			delete(out.LinkParameters, dstDeviceField)
 		}
 	} else {
-		dg.AddError("Client Error", "Destination Device Missing in payload")
-		return
+		tflog.Debug(ctx, "Destination Device Missing in template")
 	}
 
 	srcInterfaceField := ndfcTmpl.GetFieldWithFlag("IsSourceInterface")
@@ -185,8 +181,7 @@ func (c NDFC) adjustLinksPayload(ctx context.Context, dg *diag.Diagnostics,
 			delete(out.LinkParameters, srcInterfaceField)
 		}
 	} else {
-		dg.AddError("Client Error", "Source Interface Missing in payload")
-		return
+		tflog.Debug(ctx, "Source Interface Missing in template")
 	}
 
 	dstInterfaceField := ndfcTmpl.GetFieldWithFlag("IsDestinationInterface")
@@ -196,8 +191,7 @@ func (c NDFC) adjustLinksPayload(ctx context.Context, dg *diag.Diagnostics,
 			delete(out.LinkParameters, dstInterfaceField)
 		}
 	} else {
-		dg.AddError("Client Error", "Destination Interface Missing in payload")
-		return
+		tflog.Debug(ctx, "Destination Interface Missing in template")
 	}
 
 	srcSwNameField := ndfcTmpl.GetFieldWithFlag("IsSourceSwitchName")
@@ -207,8 +201,7 @@ func (c NDFC) adjustLinksPayload(ctx context.Context, dg *diag.Diagnostics,
 			delete(out.LinkParameters, srcSwNameField)
 		}
 	} else {
-		dg.AddError("Client Error", "Source Switch Name Missing in payload")
-		return
+		tflog.Debug(ctx, "Source Switch Name Missing in template")
 	}
 
 	dstSwNameField := ndfcTmpl.GetFieldWithFlag("IsDestinationSwitchName")
@@ -218,8 +211,7 @@ func (c NDFC) adjustLinksPayload(ctx context.Context, dg *diag.Diagnostics,
 			delete(out.LinkParameters, dstSwNameField)
 		}
 	} else {
-		dg.AddError("Client Error", "Destination Switch Name Missing in payload")
-		return
+		tflog.Debug(ctx, "Destination Switch Name Missing in template")
 	}
 
 	// Fill UUID

@@ -21,8 +21,8 @@ import (
 func VrfAttachmentsModelHelperStateCheck(RscName string, c resource_vrf_attachments.NDFCVrfAttachmentsModel, attrPath path.Path) []resource.TestCheckFunc {
 	ret := []resource.TestCheckFunc{}
 
-	if c.FabricName != "" {
-		ret = append(ret, resource.TestCheckResourceAttr(RscName, attrPath.AtName("fabric_name").String(), c.FabricName))
+	if c.Fabric != "" {
+		ret = append(ret, resource.TestCheckResourceAttr(RscName, attrPath.AtName("fabric").String(), c.Fabric))
 	}
 	if c.DeployAllAttachments {
 		ret = append(ret, resource.TestCheckResourceAttr(RscName, attrPath.AtName("deploy_all_attachments").String(), "true"))
@@ -38,6 +38,10 @@ func VrfAttachmentsModelHelperStateCheck(RscName string, c resource_vrf_attachme
 
 func AttachListValueHelperStateCheck(RscName string, c resource_vrf_attachments.NDFCAttachListValue, attrPath path.Path) []resource.TestCheckFunc {
 	ret := []resource.TestCheckFunc{}
+
+	if c.Fabric != "" {
+		ret = append(ret, resource.TestCheckResourceAttr(RscName, attrPath.AtName("fabric").String(), c.Fabric))
+	}
 
 	if c.SwitchName != "" {
 		ret = append(ret, resource.TestCheckResourceAttr(RscName, attrPath.AtName("switch_name").String(), c.SwitchName))

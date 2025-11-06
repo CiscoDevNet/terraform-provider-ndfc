@@ -37,7 +37,9 @@ resource:
             * `int_pvlan_host`
             * `int_routed_host`
             * `int_shared_trunk_host`
-            * `int_trunk_classic`"
+            * `int_trunk_classic`
+            * `epl_routed_intf`
+            "
       example: int_access_host
     - model_name: policy_type
       tf_name: policy_type
@@ -81,6 +83,20 @@ resource:
         type: Bool
         tf_hide: true
         payload_hide: true
+      - model_name: port_channel_policy
+        tf_name: port_channel_policy
+        type: String
+        use_state: true
+        computed: true
+        payload_hide: true
+        description: "Internal parameter used to track portchannel membership"
+      - model_name: PO_ID
+        tf_name: port_channel_name
+        type: String
+        use_state: true
+        ndfc_nested: [nvPairs]
+        computed: true
+        description: "Internal parameter used to track portchannel membership"
       - model_name: serialNumber
         tf_name: serial_number
         type: String
@@ -93,6 +109,7 @@ resource:
         example: Ethernet1/10
         mandatory: true
         requires_replace: true
+      
       - &ifType
         model_name: interfaceType
         tf_name: interface_type
@@ -117,7 +134,6 @@ resource:
         ndfc_nested: [nvPairs]
         tf_name: admin_state
         type: Bool
-        model_type_string: true
         default_value: true
         description: Enable or disable the interface
         example: false
@@ -140,7 +156,6 @@ resource:
         ndfc_nested: [nvPairs]
         tf_name: port_type_fast
         type: Bool
-        model_type_string: true
         default_value: true
         description: Enable spanning-tree edge port behavior
         example: false
@@ -148,8 +163,7 @@ resource:
         ndfc_nested: [nvPairs]
         tf_name: mtu
         type: String
-        enum_values: [default,jumbo]
-        validator: OneOf("default", "jumbo")
+        enum_values: [default,jumbo, "576-9216"]
         default_value: jumbo
         description: MTU for the interface
         example: default
@@ -181,7 +195,6 @@ resource:
         tf_name: access_vlan
         type: Int64
         ndfc_type: string
-        model_type_string: true
         min_int: 1
         max_int: 4094
         validator: Between(1, 4094)
@@ -192,7 +205,6 @@ resource:
         ndfc_nested: [nvPairs]
         tf_name: orphan_port
         type: Bool
-        model_type_string: true
         default_value: false
         description: If enabled, configure the interface as a vPC orphan port to be suspended by the secondary peer in vPC failures
         example: false
@@ -200,7 +212,6 @@ resource:
         ndfc_nested: [nvPairs]
         tf_name: ptp
         type: Bool
-        model_type_string: true
         default_value: false
         description: Enable PTP
         example: false
@@ -208,7 +219,6 @@ resource:
         ndfc_nested: [nvPairs]
         tf_name: netflow
         type: Bool
-        model_type_string: true
         default_value: false
         description: Netflow is supported only if it is enabled on fabric
         example: false
@@ -239,7 +249,6 @@ resource:
         ndfc_nested: [nvPairs]
         tf_name: native_vlan
         type: Int64
-        model_type_string: true
         min_int: 1
         max_int: 4094
         ndfc_type: string
@@ -248,6 +257,232 @@ resource:
         exclude_test: true
         handle_empty: true
         validator: Between(1, 4094)
+
+      - model_name: INTF_VRF
+        ndfc_nested: [nvPairs]
+        tf_name: vrf
+        type: String
+        description: "Interface VRF name, default VRF if not specified"
+        min_length: 1
+        max_length: 32
+
+      - model_name: IP
+        ndfc_nested: [nvPairs]
+        tf_name: ipv4_address
+        type: String
+        description: "IPv4 address of the interface"
+
+      - model_name: PREFIX
+        ndfc_nested: [nvPairs]
+        tf_name: ipv4_prefix_length
+        type: String
+        description: "IP netmask length used with the IP address (Min:1, Max:31)"
+
+      - model_name: ROUTING_TAG
+        ndfc_nested: [nvPairs]
+        tf_name: routing_tag
+        type: String
+        description: "Routing tag associated with interface IP"
+
+      - model_name: DISABLE_IP_REDIRECTS
+        ndfc_nested: [nvPairs]
+        tf_name: disable_ip_redirects
+        type: Bool
+        default_value: false
+        description: "Disable both IPv4/IPv6 redirects on the interface"
+
+      - model_name: ENABLE_PIM_SPARSE
+        ndfc_nested: [nvPairs]
+        tf_name: enable_pim_sparse
+        type: Bool
+        default_value: false
+        description: "Enable PIM sparse-mode on the interface"
+
+      - model_name: PIM_DR_PRIORITY
+        ndfc_nested: [nvPairs]
+        tf_name: pim_dr_priority
+        type: String
+        default_value: 1
+        description: "Configure priority for PIM DR election on the interface, default is 1"
+
+      - model_name: ENABLE_PFC
+        ndfc_nested: [nvPairs]
+        tf_name: enable_pfc
+        type: Bool
+        default_value: false
+        description: "Enable priority flow control"
+        example: false
+
+      - model_name: ENABLE_QOS
+        ndfc_nested: [nvPairs]
+        tf_name: enable_qos
+        type: Bool
+        default_value: false
+        description: "Enable to configure a QoS Policy for this interface. If AI/ML Queuing is enabled on the fabric, will use the QOS_CLASSIFICATION policy. Enter a custom policy below to override"
+        example: false
+
+      - model_name: QOS_POLICY
+        ndfc_nested: [nvPairs]
+        tf_name: qos_policy
+        type: String
+        description: "Custom QoS Policy must be defined previously"
+
+      - model_name: QUEUING_POLICY
+        ndfc_nested: [nvPairs]
+        tf_name: queuing_policy
+        type: String
+        description: "Queuing Policy must be defined previously"
+
+      - model_name: LINK_STATE_ROUTING
+        ndfc_nested: [nvPairs]
+        tf_name: link_state_routing_protocol
+        type: String
+        computed: true
+        optional: true
+        enum_values: [ospf, is-is]
+        description: "Link-State Routing Protocol: Select link-state routing protocol - Applicable as per template used"
+
+      - model_name: LINK_STATE_ROUTING_TAG
+        ndfc_nested: [nvPairs]
+        tf_name: link_state_routing_tag
+        type: String
+        computed: true
+        optional: true
+        description: "Link-State Routing Tag: Link-state routing protocol tag - Usage as per template used"
+
+      - model_name: IPv6
+        ndfc_nested: [nvPairs]
+        tf_name: ipv6_addr
+        type: String
+        description: "IPv6 Address: IPv6 address of the Interface"
+        
+      - model_name: IPv6_PREFIX
+        ndfc_nested: [nvPairs]
+        tf_name: ipv6_prefix_length
+        type: String
+        description: "IPv6 Prefix Length: Prefix length associated with IPv6 address (Min:64, Max:127)"
+
+      - model_name: CDP_ENABLE
+        ndfc_nested: [nvPairs]
+        tf_name: cdp_enable
+        type: Bool
+        default_value: false
+        description: "Enable CDP on the interface"
+        example: false
+      
+      - model_name: PORT_DUPLEX_MODE
+        ndfc_nested: [nvPairs]
+        tf_name: port_duplex_mode
+        type: String
+        default_value: "auto"
+        validator: OneOf("auto", "full", "half")
+        enum_values: [auto, full, half]
+        description: "Configure the port duplex mode"
+
+      - model_name: ENABLE_MONITOR
+        ndfc_nested: [nvPairs]
+        tf_name: enable_monitor
+        type: Bool
+        default_value: false
+        description: "Enable switchport monitor for SPAN / ERSPAN"
+        example: false
+      
+      - model_name: PVLAN_MODE
+        ndfc_nested: [nvPairs]
+        tf_name: pvlan_mode
+        type: String
+        default_value: "host"
+        validator: OneOf("promiscuous", "trunk promiscuous", "host", "trunk secondary")
+        enum_values: [promiscuous, "trunk promiscuous", host, "trunk secondary"]
+        description: "private-vlan mode"
+
+      - model_name: PVLAN_ALLOWED_VLANS
+        ndfc_nested: [nvPairs]
+        tf_name: pvlan_allowed_vlans
+        type: String
+        optional: true
+        description: "Allowed values: 'none', or vlan ranges (ex: 1-200,500-2000,3000)"
+
+      - model_name: PVLAN_NATIVE_VLAN
+        ndfc_nested: [nvPairs]
+        tf_name: pvlan_native_vlan
+        type: String
+        optional: true
+        description: "Native Vlan for private-vlan - valid values 1-4094"
+
+      - model_name: IG_FOR_FEX
+        ndfc_nested: [nvPairs]
+        tf_name: ig_for_fex
+        type: Bool
+        description: "Shared group for fex ports"
+      
+      - model_name: AUTO_NEG
+        ndfc_nested: [nvPairs]
+        tf_name: auto_negotiate
+        type: String
+        default_value: "on"
+        validator: OneOf("on", "off")
+        enum_values: [on, off]
+        description: "Auto Negotiate mode for speed"
+    
+      - model_name: PATH_COST
+        ndfc_nested: [nvPairs]
+        validator: Between(1, 200000000)
+        tf_name: path_cost
+        type: Int64
+        ndfc_type: string
+        description: "Spanning Tree Port Path Cost <1-200000000>"
+      
+      - model_name: GUARD_MODE
+        ndfc_nested: [nvPairs]
+        tf_name: guard_mode
+        type: String
+        validator: OneOf("root", "none", "loop", "no")
+        enum_values: [root, none, loop, no]
+        description: "Set spanning tree guard mode for the interface, select 'no' to delete the config"
+      
+      - model_name: TTAG
+        ndfc_nested: [nvPairs]
+        tf_name: ttag
+        type: Bool
+        description: "Enable Ttag/Ttag-strip"
+      
+      - model_name: MAPPING_LIST
+        ndfc_nested: [nvPairs]
+        tf_name: p_vlan_mapping_list
+        type: List
+        optional: true
+        parent_package: resource_interface_common
+        parent_model: p_vlan_mapping_list
+        description: "Private VLAN promiscuous mapping"
+        attributes:
+          - model_name: S_VLAN
+            tf_name: s_vlan
+            type: String
+            description: "SVlan Id"
+          - model_name: P_VLAN
+            tf_name: p_vlan
+            type: String
+            description: "P Vlan"
+      
+      - model_name: ASSOCIATION_LIST
+        ndfc_nested: [nvPairs]
+        tf_name: p_vlan_assoc_list
+        type: List
+        optional: true
+        parent_package: resource_interface_common
+        parent_model: p_vlan_assoc_list
+        description: "Private VLAN host association"
+        attributes:
+          - model_name: S_VLAN
+            tf_name: s_vlan
+            type: String
+            description: "SVlan Id"
+          - model_name: P_VLAN
+            tf_name: p_vlan
+            type: String
+            description: "P Vlan"
+      
       - model_name: deployment_status
         tf_name: deployment_status
         type: String
@@ -256,6 +491,7 @@ resource:
         computed: true
         payload_hide: true
         use_state: true
+
       - model_name: customTemplateKV
         tf_name: custom_policy_parameters
         type: "Map:String"

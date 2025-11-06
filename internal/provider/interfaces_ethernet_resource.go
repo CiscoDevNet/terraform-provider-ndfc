@@ -279,6 +279,60 @@ func (r interfaceEthernetResource) ModifyPlan(ctx context.Context, req resource.
 		} else {
 			v.DeploymentStatus = types.StringUnknown()
 		}
+
+		/* Special handling for computed/optional */
+		if state_present {
+			// if state is present and these values are not in use, set them to null so that it does not impact the plan
+			// Add similar check to computed optional here - TODO auto generate this in default value setting
+			if ifEntry, ok := elementState[k]; ok {
+				if ifEntry.LinkStateRoutingProtocol.IsNull() || ifEntry.LinkStateRoutingProtocol.IsUnknown() {
+					log.Printf("[DEBUG] interface_ethernet.ModfyPlan:  - LinkStateRoutingProtocol in state is empty")
+					v.LinkStateRoutingProtocol = types.StringNull()
+				} else {
+					v.LinkStateRoutingProtocol = ifEntry.LinkStateRoutingProtocol
+				}
+				if ifEntry.LinkStateRoutingTag.IsNull() || ifEntry.LinkStateRoutingTag.IsUnknown() {
+					log.Printf("[DEBUG] interface_ethernet.ModfyPlan:  - LinkStateRoutingTag in state is empty")
+					v.LinkStateRoutingTag = types.StringNull()
+				} else {
+					v.LinkStateRoutingTag = ifEntry.LinkStateRoutingTag
+				}
+				if !ifEntry.PortChannelPolicy.IsNull() {
+					log.Printf("[DEBUG] interface_ethernet.ModfyPlan:  - PortChannelPolicy in state %s", elementState[k].PortChannelPolicy.ValueString())
+					v.PortChannelPolicy = ifEntry.PortChannelPolicy
+				}
+				if !ifEntry.PortChannelName.IsNull() {
+					log.Printf("[DEBUG] interface_ethernet.ModfyPlan:  - PortChannelName in state %s", elementState[k].PortChannelName.ValueString())
+					v.PortChannelName = ifEntry.PortChannelName
+				}
+			}
+		} else {
+			// first time setting, if its empty in plan, set it to unknown as NDFC may set something for certain policies
+			if configData.Policy.ValueString() == "epl_routed_intf" {
+				// Setting default to unknown as NDFC may set something for these policies
+				if v.LinkStateRoutingProtocol.IsNull() || v.LinkStateRoutingProtocol.IsUnknown() {
+					v.LinkStateRoutingProtocol = types.StringUnknown()
+				}
+				if v.LinkStateRoutingTag.IsNull() || v.LinkStateRoutingTag.IsUnknown() {
+					v.LinkStateRoutingTag = types.StringUnknown()
+				}
+			} else {
+				// if config is empty, set to NULL
+				if v.LinkStateRoutingProtocol.IsNull() || v.LinkStateRoutingProtocol.IsUnknown() {
+					v.LinkStateRoutingProtocol = types.StringNull()
+				}
+				if v.LinkStateRoutingTag.IsNull() || v.LinkStateRoutingTag.IsUnknown() {
+					v.LinkStateRoutingTag = types.StringNull()
+				}
+			}
+		}
+		if v.Mtu.ValueString() == "jumbo" {
+			if configData.Policy.ValueString() == "int_routed_host" {
+				v.Mtu = types.StringValue("9216")
+			} else if configData.Policy.ValueString() == "epl_routed_host" {
+				v.Mtu = types.StringValue("1500")
+			}
+		}
 		elements1[k] = v
 		log.Printf("[DEBUG] interface_ethernet.ModfyPlan:  - Setting plan %s=%s", k, v.InterfaceName.ValueString())
 	}

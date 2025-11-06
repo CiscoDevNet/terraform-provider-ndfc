@@ -155,13 +155,21 @@ func (v NDFCNetworksValue) DeepEqual(c NDFCNetworksValue) int {
 		log.Printf("v.NetworkTemplateConfig.ArpSuppression=%s, c.NetworkTemplateConfig.ArpSuppression=%s", v.NetworkTemplateConfig.ArpSuppression, c.NetworkTemplateConfig.ArpSuppression)
 		return RequiresUpdate
 	}
-	if v.NetworkTemplateConfig.IngressReplication != c.NetworkTemplateConfig.IngressReplication {
-		log.Printf("v.NetworkTemplateConfig.IngressReplication=%s, c.NetworkTemplateConfig.IngressReplication=%s", v.NetworkTemplateConfig.IngressReplication, c.NetworkTemplateConfig.IngressReplication)
-		return RequiresUpdate
+	if v.NetworkTemplateConfig.IngressReplication != "" {
+		if v.NetworkTemplateConfig.IngressReplication != c.NetworkTemplateConfig.IngressReplication {
+			log.Printf("v.NetworkTemplateConfig.IngressReplication=%s, c.NetworkTemplateConfig.IngressReplication=%s", v.NetworkTemplateConfig.IngressReplication, c.NetworkTemplateConfig.IngressReplication)
+			return RequiresUpdate
+		}
+	} else {
+		log.Printf("Skipping - v.NetworkTemplateConfig.IngressReplication=%s, c.NetworkTemplateConfig.IngressReplication=%s", v.NetworkTemplateConfig.IngressReplication, c.NetworkTemplateConfig.IngressReplication)
 	}
-	if v.NetworkTemplateConfig.MulticastGroup != c.NetworkTemplateConfig.MulticastGroup {
-		log.Printf("v.NetworkTemplateConfig.MulticastGroup=%s, c.NetworkTemplateConfig.MulticastGroup=%s", v.NetworkTemplateConfig.MulticastGroup, c.NetworkTemplateConfig.MulticastGroup)
-		return RequiresUpdate
+	if v.NetworkTemplateConfig.MulticastGroup != "" {
+		if v.NetworkTemplateConfig.MulticastGroup != c.NetworkTemplateConfig.MulticastGroup {
+			log.Printf("v.NetworkTemplateConfig.MulticastGroup=%s, c.NetworkTemplateConfig.MulticastGroup=%s", v.NetworkTemplateConfig.MulticastGroup, c.NetworkTemplateConfig.MulticastGroup)
+			return RequiresUpdate
+		}
+	} else {
+		log.Printf("Skipping - v.NetworkTemplateConfig.MulticastGroup=%s, c.NetworkTemplateConfig.MulticastGroup=%s", v.NetworkTemplateConfig.MulticastGroup, c.NetworkTemplateConfig.MulticastGroup)
 	}
 
 	if len(v.NetworkTemplateConfig.DhcpRelayServers) != len(c.NetworkTemplateConfig.DhcpRelayServers) {
@@ -211,9 +219,13 @@ func (v NDFCNetworksValue) DeepEqual(c NDFCNetworksValue) int {
 		log.Printf("v.NetworkTemplateConfig.RouteTargetBoth=%s, c.NetworkTemplateConfig.RouteTargetBoth=%s", v.NetworkTemplateConfig.RouteTargetBoth, c.NetworkTemplateConfig.RouteTargetBoth)
 		return RequiresUpdate
 	}
-	if v.NetworkTemplateConfig.Netflow != c.NetworkTemplateConfig.Netflow {
-		log.Printf("v.NetworkTemplateConfig.Netflow=%s, c.NetworkTemplateConfig.Netflow=%s", v.NetworkTemplateConfig.Netflow, c.NetworkTemplateConfig.Netflow)
-		return RequiresUpdate
+	if v.NetworkTemplateConfig.Netflow != "" {
+		if v.NetworkTemplateConfig.Netflow != c.NetworkTemplateConfig.Netflow {
+			log.Printf("v.NetworkTemplateConfig.Netflow=%s, c.NetworkTemplateConfig.Netflow=%s", v.NetworkTemplateConfig.Netflow, c.NetworkTemplateConfig.Netflow)
+			return RequiresUpdate
+		}
+	} else {
+		log.Printf("Skipping - v.NetworkTemplateConfig.Netflow=%s, c.NetworkTemplateConfig.Netflow=%s", v.NetworkTemplateConfig.Netflow, c.NetworkTemplateConfig.Netflow)
 	}
 	if v.NetworkTemplateConfig.SviNetflowMonitor != c.NetworkTemplateConfig.SviNetflowMonitor {
 		log.Printf("v.NetworkTemplateConfig.SviNetflowMonitor=%s, c.NetworkTemplateConfig.SviNetflowMonitor=%s", v.NetworkTemplateConfig.SviNetflowMonitor, c.NetworkTemplateConfig.SviNetflowMonitor)
@@ -223,13 +235,21 @@ func (v NDFCNetworksValue) DeepEqual(c NDFCNetworksValue) int {
 		log.Printf("v.NetworkTemplateConfig.VlanNetflowMonitor=%s, c.NetworkTemplateConfig.VlanNetflowMonitor=%s", v.NetworkTemplateConfig.VlanNetflowMonitor, c.NetworkTemplateConfig.VlanNetflowMonitor)
 		return RequiresUpdate
 	}
-	if v.NetworkTemplateConfig.L3GatwayBorder != c.NetworkTemplateConfig.L3GatwayBorder {
-		log.Printf("v.NetworkTemplateConfig.L3GatwayBorder=%s, c.NetworkTemplateConfig.L3GatwayBorder=%s", v.NetworkTemplateConfig.L3GatwayBorder, c.NetworkTemplateConfig.L3GatwayBorder)
-		return RequiresUpdate
+	if v.NetworkTemplateConfig.L3GatwayBorder != "" {
+		if v.NetworkTemplateConfig.L3GatwayBorder != c.NetworkTemplateConfig.L3GatwayBorder {
+			log.Printf("v.NetworkTemplateConfig.L3GatwayBorder=%s, c.NetworkTemplateConfig.L3GatwayBorder=%s", v.NetworkTemplateConfig.L3GatwayBorder, c.NetworkTemplateConfig.L3GatwayBorder)
+			return RequiresUpdate
+		}
+	} else {
+		log.Printf("Skipping - v.NetworkTemplateConfig.L3GatwayBorder=%s, c.NetworkTemplateConfig.L3GatwayBorder=%s", v.NetworkTemplateConfig.L3GatwayBorder, c.NetworkTemplateConfig.L3GatwayBorder)
 	}
-	if v.NetworkTemplateConfig.IgmpVersion != c.NetworkTemplateConfig.IgmpVersion {
-		log.Printf("v.NetworkTemplateConfig.IgmpVersion=%s, c.NetworkTemplateConfig.IgmpVersion=%s", v.NetworkTemplateConfig.IgmpVersion, c.NetworkTemplateConfig.IgmpVersion)
-		return RequiresUpdate
+	if v.NetworkTemplateConfig.IgmpVersion != "" {
+		if v.NetworkTemplateConfig.IgmpVersion != c.NetworkTemplateConfig.IgmpVersion {
+			log.Printf("v.NetworkTemplateConfig.IgmpVersion=%s, c.NetworkTemplateConfig.IgmpVersion=%s", v.NetworkTemplateConfig.IgmpVersion, c.NetworkTemplateConfig.IgmpVersion)
+			return RequiresUpdate
+		}
+	} else {
+		log.Printf("Skipping - v.NetworkTemplateConfig.IgmpVersion=%s, c.NetworkTemplateConfig.IgmpVersion=%s", v.NetworkTemplateConfig.IgmpVersion, c.NetworkTemplateConfig.IgmpVersion)
 	}
 	if v.DeployAttachments != c.DeployAttachments {
 		log.Printf("v.DeployAttachments=%v, c.DeployAttachments=%v", v.DeployAttachments, c.DeployAttachments)

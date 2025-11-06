@@ -17,6 +17,7 @@ import (
 type FabricModel interface {
 	GetModelData() *NDFCFabricCommonModel
 	SetModelData(*NDFCFabricCommonModel) diag.Diagnostics
+	GetFabricType() string
 }
 type NdfcFabricPayload struct {
 	FabricName        string                `json:"fabricName,omitempty"`
@@ -26,6 +27,19 @@ type NdfcFabricPayload struct {
 type NdfcFabricNamePayload struct {
 	FabricName string `json:"fabricName,omitempty"`
 }
+
+type NdfcMsdFabricPayload struct {
+	DstFabricName string `json:"destFabric,omitempty"`
+	SrcFabricName string `json:"sourceFabric,omitempty"`
+}
+
+type NdfcMsdFabricAssociations struct {
+	FabricName   string `json:"fabricName,omitempty"`
+	FabricType   string `json:"fabricType,omitempty"`
+	FabricState  string `json:"fabricState,omitempty"`
+	FabricParent string `json:"fabricParent,omitempty"`
+}
+
 type CustomNdfcFabricNamePayload NdfcFabricNamePayload
 type CustomNdfcFabricPayload NdfcFabricPayload
 

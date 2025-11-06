@@ -18,6 +18,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/path"
 
 	"terraform-provider-ndfc/internal/provider/ndfc"
+	rna "terraform-provider-ndfc/internal/provider/resources/resource_network_attachments"
 	"terraform-provider-ndfc/internal/provider/resources/resource_networks"
 	"terraform-provider-ndfc/internal/provider/resources/resource_vrf_bulk"
 	"terraform-provider-ndfc/internal/provider/types"
@@ -518,87 +519,643 @@ func TestAccNetworksResourceRscUpdateAndGlobalDeploy(t *testing.T) {
 }
 
 /*
-func TestAccNetwotksResourceGlobalDeployWithChanges(t *testing.T) {
+	func TestAccNetwotksResourceGlobalDeployWithChanges(t *testing.T) {
+		resource.Test(t, resource.TestCase{
+			PreCheck:                 func() { testAccPreCheck(t, "network") },
+			ProtoV6ProviderFactories: testAccProtoV6ProviderFactories,
+			Steps: []resource.TestStep{
+				{
+					Config: `
+					terraform {
+						required_providers {
+							ndfc = {
+							source = "registry.terraform.io/cisco/ndfc"
+							}
+						}
+					}
+
+
+					resource "ndfc_vrfs" "test_resource_vrf_bulk_1" {
+						fabric_name = "CML"
+						deploy_all_attachments = true
+						vrfs = {
+							"VRF1" = {
+								deploy_attachments = false
+								attach_list = {
+									"9FE076D8EJL" = {
+										serial_number          = "9FE076D8EJL"
+										deploy_this_attachment = false
+									}
+								}
+							}
+						}
+					}
+
+					resource "ndfc_networks" "test_resource_networks_1" {
+					    depends_on = [ndfc_vrfs.test_resource_vrf_bulk_1]
+						fabric_name            = "CML"
+						deploy_all_attachments = true
+						networks = {
+							"NET1" = {
+								display_name               = "NET1"
+								network_id                 = 30001
+								network_template           = "Default_Network_Universal"
+								network_extension_template = "Default_Network_Extension_Universal"
+								vrf_name                   = "VRF1"
+								primary_network_id         = 30000
+								network_type               = "Normal"
+								gateway_ipv4_address       = "192.0.2.1/24"
+								gateway_ipv6_address       = "2001:db8::1/64"
+								vlan_id                    = 1500
+								vlan_name                  = "VLAN2000"
+								layer2_only                = false
+								interface_description      = "My int description"
+								mtu                        = 9200
+								secondary_gateway_1        = "192.168.2.1/24"
+								secondary_gateway_2        = "192.168.3.1/24"
+								secondary_gateway_3        = "192.168.4.1/24"
+								secondary_gateway_4        = "192.168.5.1/24"
+								arp_suppression            = false
+								ingress_replication        = false
+								multicast_group            = "233.1.1.1"
+								dhcp_relay_loopback_id     = 134
+								routing_tag                = 100
+								trm                        = true
+								route_target_both          = true
+								netflow                    = false
+								svi_netflow_monitor        = "MON1"
+								vlan_netflow_monitor       = "MON1"
+								l3_gatway_border           = true
+								igmp_version               = "3"
+								deploy_attachments         = false
+								attachments = {
+									"9FE076D8EJL" = {
+										deploy_this_attachment = false
+									}
+								}
+							}
+						}
+					}`,
+					Check: resource.ComposeTestCheckFunc(resource.TestCheckResourceAttr("ndfc_networks.test_resource_networks_1", "fabric_name", "CML")),
+				},
+			},
+		})
+
+}
+*/
+func TestAccNetworksResourceAddRemoveNetworks(t *testing.T) {
+	x := &map[string]string{
+		"RscType":  ndfc.ResourceNetworks,
+		"RscName":  "network_test",
+		"User":     helper.GetConfig("network").NDFC.User,
+		"Password": helper.GetConfig("network").NDFC.Password,
+		"Host":     helper.GetConfig("network").NDFC.URL,
+		"Insecure": helper.GetConfig("network").NDFC.Insecure,
+	}
+
+	tf_config := new(string)
+	stepCount := new(int)
+	*stepCount = 0
+	networkRsc := new(resource_networks.NDFCNetworksModel)
+	vrfRsc := new(resource_vrf_bulk.NDFCVrfBulkModel)
+
 	resource.Test(t, resource.TestCase{
 		PreCheck:                 func() { testAccPreCheck(t, "network") },
 		ProtoV6ProviderFactories: testAccProtoV6ProviderFactories,
 		Steps: []resource.TestStep{
+			// Step 1: Create 3 networks with 2 attachments each
 			{
-				Config: `
-				terraform {
-					required_providers {
-						ndfc = {
-						source = "registry.terraform.io/cisco/ndfc"
-						}
-					}
-				}
-
-
-				resource "ndfc_vrfs" "test_resource_vrf_bulk_1" {
-					fabric_name = "CML"
-					deploy_all_attachments = true
-					vrfs = {
-						"VRF1" = {
-							deploy_attachments = false
-							attach_list = {
-								"9FE076D8EJL" = {
-									serial_number          = "9FE076D8EJL"
-									deploy_this_attachment = false
-								}
-							}
-						}
-					}
-				}
-
-				resource "ndfc_networks" "test_resource_networks_1" {
-				    depends_on = [ndfc_vrfs.test_resource_vrf_bulk_1]
-					fabric_name            = "CML"
-					deploy_all_attachments = true
-					networks = {
-						"NET1" = {
-							display_name               = "NET1"
-							network_id                 = 30001
-							network_template           = "Default_Network_Universal"
-							network_extension_template = "Default_Network_Extension_Universal"
-							vrf_name                   = "VRF1"
-							primary_network_id         = 30000
-							network_type               = "Normal"
-							gateway_ipv4_address       = "192.0.2.1/24"
-							gateway_ipv6_address       = "2001:db8::1/64"
-							vlan_id                    = 1500
-							vlan_name                  = "VLAN2000"
-							layer2_only                = false
-							interface_description      = "My int description"
-							mtu                        = 9200
-							secondary_gateway_1        = "192.168.2.1/24"
-							secondary_gateway_2        = "192.168.3.1/24"
-							secondary_gateway_3        = "192.168.4.1/24"
-							secondary_gateway_4        = "192.168.5.1/24"
-							arp_suppression            = false
-							ingress_replication        = false
-							multicast_group            = "233.1.1.1"
-							dhcp_relay_loopback_id     = 134
-							routing_tag                = 100
-							trm                        = true
-							route_target_both          = true
-							netflow                    = false
-							svi_netflow_monitor        = "MON1"
-							vlan_netflow_monitor       = "MON1"
-							l3_gatway_border           = true
-							igmp_version               = "3"
-							deploy_attachments         = false
-							attachments = {
-								"9FE076D8EJL" = {
-									deploy_this_attachment = false
-								}
-							}
-						}
-					}
-				}`,
-				Check: resource.ComposeTestCheckFunc(resource.TestCheckResourceAttr("ndfc_networks.test_resource_networks_1", "fabric_name", "CML")),
+				Config: func() string {
+					*stepCount++
+					tName := fmt.Sprintf("%s_%d", t.Name(), *stepCount)
+					helper.GenerateSingleVrfObject(&vrfRsc, helper.GetConfig("network").NDFC.VrfPrefix, helper.GetConfig("network").NDFC.Fabric, 1, false, false, false, helper.GetConfig("network").NDFC.Switches)
+					helper.GenerateNetworksObject(&networkRsc, helper.GetConfig("network").NDFC.Fabric,
+						3, false, false, false, helper.GetConfig("network").NDFC.VrfPrefix+"1", []string{helper.GetConfig("network").NDFC.Switches[0], helper.GetConfig("network").NDFC.Switches[1]})
+					(*x)["RscName"] = "vrf_test,network_test"
+					helper.GetTFConfigWithSingleResource(tName, *x, []interface{}{vrfRsc, networkRsc}, &tf_config)
+					return *tf_config
+				}(),
+				Check: resource.ComposeTestCheckFunc(NetworksModelHelperStateCheck("ndfc_networks.network_test", *networkRsc, path.Empty())...),
 			},
-		},
-	})
 
+			// Step 2: Remove the 3rd network entirely
+			{
+				Config: func() string {
+					*stepCount++
+					tName := fmt.Sprintf("%s_%d", t.Name(), *stepCount)
+					helper.DeleteNetworks(&networkRsc, 3, 3)
+					(*x)["RscName"] = "vrf_test,network_test"
+					helper.GetTFConfigWithSingleResource(tName, *x, []interface{}{vrfRsc, networkRsc}, &tf_config)
+					return *tf_config
+				}(),
+				Check: resource.ComposeTestCheckFunc(NetworksModelHelperStateCheck("ndfc_networks.network_test", *networkRsc, path.Empty())...),
+			},
+
+			// Step 3: Add the 3rd network back
+			{
+				Config: func() string {
+					*stepCount++
+					tName := fmt.Sprintf("%s_%d", t.Name(), *stepCount)
+					// Regenerate all 3 networks to add network 3 back
+					helper.GenerateNetworksObject(&networkRsc, helper.GetConfig("network").NDFC.Fabric,
+						3, false, false, false, helper.GetConfig("network").NDFC.VrfPrefix+"1", []string{helper.GetConfig("network").NDFC.Switches[0], helper.GetConfig("network").NDFC.Switches[1]})
+					(*x)["RscName"] = "vrf_test,network_test"
+					helper.GetTFConfigWithSingleResource(tName, *x, []interface{}{vrfRsc, networkRsc}, &tf_config)
+					return *tf_config
+				}(),
+				Check: resource.ComposeTestCheckFunc(NetworksModelHelperStateCheck("ndfc_networks.network_test", *networkRsc, path.Empty())...),
+			},
+
+			// Step 4: Remove the 1st network
+			{
+				Config: func() string {
+					*stepCount++
+					tName := fmt.Sprintf("%s_%d", t.Name(), *stepCount)
+					helper.DeleteNetworks(&networkRsc, 1, 1)
+					(*x)["RscName"] = "vrf_test,network_test"
+					helper.GetTFConfigWithSingleResource(tName, *x, []interface{}{vrfRsc, networkRsc}, &tf_config)
+					return *tf_config
+				}(),
+				Check: resource.ComposeTestCheckFunc(NetworksModelHelperStateCheck("ndfc_networks.network_test", *networkRsc, path.Empty())...),
+			},
+
+			// Step 5: Remove the 2nd network
+			{
+				Config: func() string {
+					*stepCount++
+					tName := fmt.Sprintf("%s_%d", t.Name(), *stepCount)
+					helper.DeleteNetworks(&networkRsc, 2, 2)
+					(*x)["RscName"] = "vrf_test,network_test"
+					helper.GetTFConfigWithSingleResource(tName, *x, []interface{}{vrfRsc, networkRsc}, &tf_config)
+					return *tf_config
+				}(),
+				Check: resource.ComposeTestCheckFunc(NetworksModelHelperStateCheck("ndfc_networks.network_test", *networkRsc, path.Empty())...),
+			},
+
+			// Step 6: Add both 1st and 2nd networks back
+			{
+				Config: func() string {
+					*stepCount++
+					tName := fmt.Sprintf("%s_%d", t.Name(), *stepCount)
+					// Regenerate all 3 networks to add networks 1 and 2 back
+					helper.GenerateNetworksObject(&networkRsc, helper.GetConfig("network").NDFC.Fabric,
+						3, false, false, false, helper.GetConfig("network").NDFC.VrfPrefix+"1", []string{helper.GetConfig("network").NDFC.Switches[0], helper.GetConfig("network").NDFC.Switches[1]})
+					(*x)["RscName"] = "vrf_test,network_test"
+					helper.GetTFConfigWithSingleResource(tName, *x, []interface{}{vrfRsc, networkRsc}, &tf_config)
+					return *tf_config
+				}(),
+				Check: resource.ComposeTestCheckFunc(NetworksModelHelperStateCheck("ndfc_networks.network_test", *networkRsc, path.Empty())...),
+			},
+
+			// Step 7: Remove networks 2 and 3
+			{
+				Config: func() string {
+					*stepCount++
+					tName := fmt.Sprintf("%s_%d", t.Name(), *stepCount)
+					helper.DeleteNetworks(&networkRsc, 2, 3)
+					(*x)["RscName"] = "vrf_test,network_test"
+					helper.GetTFConfigWithSingleResource(tName, *x, []interface{}{vrfRsc, networkRsc}, &tf_config)
+					return *tf_config
+				}(),
+				Check: resource.ComposeTestCheckFunc(NetworksModelHelperStateCheck("ndfc_networks.network_test", *networkRsc, path.Empty())...),
+			},
+		}},
+	)
 }
-*/
+
+func TestAccNetworksResourceAddRemoveNetworksWithDeploy(t *testing.T) {
+	x := &map[string]string{
+		"RscType":  ndfc.ResourceNetworks,
+		"RscName":  "network_test",
+		"User":     helper.GetConfig("network").NDFC.User,
+		"Password": helper.GetConfig("network").NDFC.Password,
+		"Host":     helper.GetConfig("network").NDFC.URL,
+		"Insecure": helper.GetConfig("network").NDFC.Insecure,
+	}
+
+	tf_config := new(string)
+	stepCount := new(int)
+	*stepCount = 0
+	networkRsc := new(resource_networks.NDFCNetworksModel)
+	vrfRsc := new(resource_vrf_bulk.NDFCVrfBulkModel)
+
+	resource.Test(t, resource.TestCase{
+		PreCheck:                 func() { testAccPreCheck(t, "network") },
+		ProtoV6ProviderFactories: testAccProtoV6ProviderFactories,
+		Steps: []resource.TestStep{
+			// Step 1: Create 3 networks with 2 attachments each (with deploy)
+			{
+				Config: func() string {
+					*stepCount++
+					tName := fmt.Sprintf("%s_%d", t.Name(), *stepCount)
+					helper.GenerateSingleVrfObject(&vrfRsc, helper.GetConfig("network").NDFC.VrfPrefix, helper.GetConfig("network").NDFC.Fabric, 1, false, false, false, helper.GetConfig("network").NDFC.Switches)
+					helper.GenerateNetworksObject(&networkRsc, helper.GetConfig("network").NDFC.Fabric,
+						3, false, false, true, helper.GetConfig("network").NDFC.VrfPrefix+"1", []string{helper.GetConfig("network").NDFC.Switches[0], helper.GetConfig("network").NDFC.Switches[1]})
+					(*x)["RscName"] = "vrf_test,network_test"
+					helper.GetTFConfigWithSingleResource(tName, *x, []interface{}{vrfRsc, networkRsc}, &tf_config)
+					return *tf_config
+				}(),
+				Check: resource.ComposeTestCheckFunc(NetworksModelHelperStateCheck("ndfc_networks.network_test", *networkRsc, path.Empty())...),
+			},
+
+			// Step 2: Remove the 3rd network entirely
+			{
+				Config: func() string {
+					*stepCount++
+					tName := fmt.Sprintf("%s_%d", t.Name(), *stepCount)
+					helper.DeleteNetworks(&networkRsc, 3, 3)
+					(*x)["RscName"] = "vrf_test,network_test"
+					helper.GetTFConfigWithSingleResource(tName, *x, []interface{}{vrfRsc, networkRsc}, &tf_config)
+					return *tf_config
+				}(),
+				Check: resource.ComposeTestCheckFunc(NetworksModelHelperStateCheck("ndfc_networks.network_test", *networkRsc, path.Empty())...),
+			},
+
+			// Step 3: Add the 3rd network back
+			{
+				Config: func() string {
+					*stepCount++
+					tName := fmt.Sprintf("%s_%d", t.Name(), *stepCount)
+					// Regenerate all 3 networks to add network 3 back
+					helper.GenerateNetworksObject(&networkRsc, helper.GetConfig("network").NDFC.Fabric,
+						3, false, false, true, helper.GetConfig("network").NDFC.VrfPrefix+"1", []string{helper.GetConfig("network").NDFC.Switches[0], helper.GetConfig("network").NDFC.Switches[1]})
+					(*x)["RscName"] = "vrf_test,network_test"
+					helper.GetTFConfigWithSingleResource(tName, *x, []interface{}{vrfRsc, networkRsc}, &tf_config)
+					return *tf_config
+				}(),
+				Check: resource.ComposeTestCheckFunc(NetworksModelHelperStateCheck("ndfc_networks.network_test", *networkRsc, path.Empty())...),
+			},
+
+			// Step 4: Remove the 1st network
+			{
+				Config: func() string {
+					*stepCount++
+					tName := fmt.Sprintf("%s_%d", t.Name(), *stepCount)
+					helper.DeleteNetworks(&networkRsc, 1, 1)
+					(*x)["RscName"] = "vrf_test,network_test"
+					helper.GetTFConfigWithSingleResource(tName, *x, []interface{}{vrfRsc, networkRsc}, &tf_config)
+					return *tf_config
+				}(),
+				Check: resource.ComposeTestCheckFunc(NetworksModelHelperStateCheck("ndfc_networks.network_test", *networkRsc, path.Empty())...),
+			},
+
+			// Step 5: Remove the 2nd network
+			{
+				Config: func() string {
+					*stepCount++
+					tName := fmt.Sprintf("%s_%d", t.Name(), *stepCount)
+					helper.DeleteNetworks(&networkRsc, 2, 2)
+					(*x)["RscName"] = "vrf_test,network_test"
+					helper.GetTFConfigWithSingleResource(tName, *x, []interface{}{vrfRsc, networkRsc}, &tf_config)
+					return *tf_config
+				}(),
+				Check: resource.ComposeTestCheckFunc(NetworksModelHelperStateCheck("ndfc_networks.network_test", *networkRsc, path.Empty())...),
+			},
+
+			// Step 6: Add both 1st and 2nd networks back
+			{
+				Config: func() string {
+					*stepCount++
+					tName := fmt.Sprintf("%s_%d", t.Name(), *stepCount)
+					// Regenerate all 3 networks to add networks 1 and 2 back
+					helper.GenerateNetworksObject(&networkRsc, helper.GetConfig("network").NDFC.Fabric,
+						3, false, false, true, helper.GetConfig("network").NDFC.VrfPrefix+"1", []string{helper.GetConfig("network").NDFC.Switches[0], helper.GetConfig("network").NDFC.Switches[1]})
+					(*x)["RscName"] = "vrf_test,network_test"
+					helper.GetTFConfigWithSingleResource(tName, *x, []interface{}{vrfRsc, networkRsc}, &tf_config)
+					return *tf_config
+				}(),
+				Check: resource.ComposeTestCheckFunc(NetworksModelHelperStateCheck("ndfc_networks.network_test", *networkRsc, path.Empty())...),
+			},
+
+			// Step 7: Remove networks 2 and 3
+			{
+				Config: func() string {
+					*stepCount++
+					tName := fmt.Sprintf("%s_%d", t.Name(), *stepCount)
+					helper.DeleteNetworks(&networkRsc, 2, 3)
+					(*x)["RscName"] = "vrf_test,network_test"
+					helper.GetTFConfigWithSingleResource(tName, *x, []interface{}{vrfRsc, networkRsc}, &tf_config)
+					return *tf_config
+				}(),
+				Check: resource.ComposeTestCheckFunc(NetworksModelHelperStateCheck("ndfc_networks.network_test", *networkRsc, path.Empty())...),
+			},
+		}},
+	)
+}
+
+func TestAccNetworksResourceAddRemoveNetworksWithNetDeployFlag(t *testing.T) {
+	x := &map[string]string{
+		"RscType":  ndfc.ResourceNetworks,
+		"RscName":  "network_test",
+		"User":     helper.GetConfig("network").NDFC.User,
+		"Password": helper.GetConfig("network").NDFC.Password,
+		"Host":     helper.GetConfig("network").NDFC.URL,
+		"Insecure": helper.GetConfig("network").NDFC.Insecure,
+	}
+
+	tf_config := new(string)
+	stepCount := new(int)
+	*stepCount = 0
+	networkRsc := new(resource_networks.NDFCNetworksModel)
+	vrfRsc := new(resource_vrf_bulk.NDFCVrfBulkModel)
+
+	resource.Test(t, resource.TestCase{
+		PreCheck:                 func() { testAccPreCheck(t, "network") },
+		ProtoV6ProviderFactories: testAccProtoV6ProviderFactories,
+		Steps: []resource.TestStep{
+			// Step 1: Create 3 networks with 2 attachments each (with network-level deploy)
+			{
+				Config: func() string {
+					*stepCount++
+					tName := fmt.Sprintf("%s_%d", t.Name(), *stepCount)
+					helper.GenerateSingleVrfObject(&vrfRsc, helper.GetConfig("network").NDFC.VrfPrefix, helper.GetConfig("network").NDFC.Fabric, 1, false, false, false, helper.GetConfig("network").NDFC.Switches)
+					helper.GenerateNetworksObject(&networkRsc, helper.GetConfig("network").NDFC.Fabric,
+						3, false, true, false, helper.GetConfig("network").NDFC.VrfPrefix+"1", []string{helper.GetConfig("network").NDFC.Switches[0], helper.GetConfig("network").NDFC.Switches[1]})
+					(*x)["RscName"] = "vrf_test,network_test"
+					helper.GetTFConfigWithSingleResource(tName, *x, []interface{}{vrfRsc, networkRsc}, &tf_config)
+					return *tf_config
+				}(),
+				Check: resource.ComposeTestCheckFunc(NetworksModelHelperStateCheck("ndfc_networks.network_test", *networkRsc, path.Empty())...),
+			},
+
+			// Step 4: Remove the 1st network
+			{
+				Config: func() string {
+					*stepCount++
+					tName := fmt.Sprintf("%s_%d", t.Name(), *stepCount)
+					helper.DeleteNetworks(&networkRsc, 1, 1)
+					(*x)["RscName"] = "vrf_test,network_test"
+					helper.GetTFConfigWithSingleResource(tName, *x, []interface{}{vrfRsc, networkRsc}, &tf_config)
+					return *tf_config
+				}(),
+				Check: resource.ComposeTestCheckFunc(NetworksModelHelperStateCheck("ndfc_networks.network_test", *networkRsc, path.Empty())...),
+			},
+
+			// Step 6: Add both 1st and 2nd networks back
+			{
+				Config: func() string {
+					*stepCount++
+					tName := fmt.Sprintf("%s_%d", t.Name(), *stepCount)
+					// Regenerate all 3 networks to add networks 1 and 2 back
+					helper.GenerateNetworksObject(&networkRsc, helper.GetConfig("network").NDFC.Fabric,
+						3, false, true, false, helper.GetConfig("network").NDFC.VrfPrefix+"1", []string{helper.GetConfig("network").NDFC.Switches[0], helper.GetConfig("network").NDFC.Switches[1]})
+					(*x)["RscName"] = "vrf_test,network_test"
+					helper.GetTFConfigWithSingleResource(tName, *x, []interface{}{vrfRsc, networkRsc}, &tf_config)
+					return *tf_config
+				}(),
+				Check: resource.ComposeTestCheckFunc(NetworksModelHelperStateCheck("ndfc_networks.network_test", *networkRsc, path.Empty())...),
+			},
+
+			// Step 7: Remove networks 2 and 3
+			{
+				Config: func() string {
+					*stepCount++
+					tName := fmt.Sprintf("%s_%d", t.Name(), *stepCount)
+					helper.DeleteNetworks(&networkRsc, 2, 3)
+					(*x)["RscName"] = "vrf_test,network_test"
+					helper.GetTFConfigWithSingleResource(tName, *x, []interface{}{vrfRsc, networkRsc}, &tf_config)
+					return *tf_config
+				}(),
+				Check: resource.ComposeTestCheckFunc(NetworksModelHelperStateCheck("ndfc_networks.network_test", *networkRsc, path.Empty())...),
+			},
+		}},
+	)
+}
+
+func TestAccNetworksResourceAddRemoveNetworksWithGlobalDeployFlag(t *testing.T) {
+	x := &map[string]string{
+		"RscType":  ndfc.ResourceNetworks,
+		"RscName":  "network_test",
+		"User":     helper.GetConfig("network").NDFC.User,
+		"Password": helper.GetConfig("network").NDFC.Password,
+		"Host":     helper.GetConfig("network").NDFC.URL,
+		"Insecure": helper.GetConfig("network").NDFC.Insecure,
+	}
+
+	tf_config := new(string)
+	stepCount := new(int)
+	*stepCount = 0
+	networkRsc := new(resource_networks.NDFCNetworksModel)
+	vrfRsc := new(resource_vrf_bulk.NDFCVrfBulkModel)
+
+	resource.Test(t, resource.TestCase{
+		PreCheck:                 func() { testAccPreCheck(t, "network") },
+		ProtoV6ProviderFactories: testAccProtoV6ProviderFactories,
+		Steps: []resource.TestStep{
+			// Step 1: Create 3 networks with 2 attachments each (with global deploy)
+			{
+				Config: func() string {
+					*stepCount++
+					tName := fmt.Sprintf("%s_%d", t.Name(), *stepCount)
+					helper.GenerateSingleVrfObject(&vrfRsc, helper.GetConfig("network").NDFC.VrfPrefix, helper.GetConfig("network").NDFC.Fabric, 1, false, false, false, helper.GetConfig("network").NDFC.Switches)
+					helper.GenerateNetworksObject(&networkRsc, helper.GetConfig("network").NDFC.Fabric,
+						3, true, false, false, helper.GetConfig("network").NDFC.VrfPrefix+"1", []string{helper.GetConfig("network").NDFC.Switches[0], helper.GetConfig("network").NDFC.Switches[1]})
+					(*x)["RscName"] = "vrf_test,network_test"
+					helper.GetTFConfigWithSingleResource(tName, *x, []interface{}{vrfRsc, networkRsc}, &tf_config)
+					return *tf_config
+				}(),
+				Check: resource.ComposeTestCheckFunc(NetworksModelHelperStateCheck("ndfc_networks.network_test", *networkRsc, path.Empty())...),
+			},
+
+			// Step 4: Remove the 1st network
+			{
+				Config: func() string {
+					*stepCount++
+					tName := fmt.Sprintf("%s_%d", t.Name(), *stepCount)
+					helper.DeleteNetworks(&networkRsc, 1, 1)
+					(*x)["RscName"] = "vrf_test,network_test"
+					helper.GetTFConfigWithSingleResource(tName, *x, []interface{}{vrfRsc, networkRsc}, &tf_config)
+					return *tf_config
+				}(),
+				Check: resource.ComposeTestCheckFunc(NetworksModelHelperStateCheck("ndfc_networks.network_test", *networkRsc, path.Empty())...),
+			},
+
+			// Step 6: Add both 1st and 2nd networks back
+			{
+				Config: func() string {
+					*stepCount++
+					tName := fmt.Sprintf("%s_%d", t.Name(), *stepCount)
+					// Regenerate all 3 networks to add networks 1 and 2 back
+					helper.GenerateNetworksObject(&networkRsc, helper.GetConfig("network").NDFC.Fabric,
+						3, true, false, false, helper.GetConfig("network").NDFC.VrfPrefix+"1", []string{helper.GetConfig("network").NDFC.Switches[0], helper.GetConfig("network").NDFC.Switches[1]})
+					(*x)["RscName"] = "vrf_test,network_test"
+					helper.GetTFConfigWithSingleResource(tName, *x, []interface{}{vrfRsc, networkRsc}, &tf_config)
+					return *tf_config
+				}(),
+				Check: resource.ComposeTestCheckFunc(NetworksModelHelperStateCheck("ndfc_networks.network_test", *networkRsc, path.Empty())...),
+			},
+
+			// Step 7: Remove networks 2 and 3
+			{
+				Config: func() string {
+					*stepCount++
+					tName := fmt.Sprintf("%s_%d", t.Name(), *stepCount)
+					helper.DeleteNetworks(&networkRsc, 2, 3)
+					(*x)["RscName"] = "vrf_test,network_test"
+					helper.GetTFConfigWithSingleResource(tName, *x, []interface{}{vrfRsc, networkRsc}, &tf_config)
+					return *tf_config
+				}(),
+				Check: resource.ComposeTestCheckFunc(NetworksModelHelperStateCheck("ndfc_networks.network_test", *networkRsc, path.Empty())...),
+			},
+		}},
+	)
+}
+
+func TestAccNetworksResourceAddRemoveNetworksComboDeploy(t *testing.T) {
+	x := &map[string]string{
+		"RscType":  ndfc.ResourceNetworks,
+		"RscName":  "network_test",
+		"User":     helper.GetConfig("network").NDFC.User,
+		"Password": helper.GetConfig("network").NDFC.Password,
+		"Host":     helper.GetConfig("network").NDFC.URL,
+		"Insecure": helper.GetConfig("network").NDFC.Insecure,
+	}
+
+	tf_config := new(string)
+	stepCount := new(int)
+	*stepCount = 0
+	networkRsc := new(resource_networks.NDFCNetworksModel)
+	vrfRsc := new(resource_vrf_bulk.NDFCVrfBulkModel)
+
+	resource.Test(t, resource.TestCase{
+		PreCheck:                 func() { testAccPreCheck(t, "network") },
+		ProtoV6ProviderFactories: testAccProtoV6ProviderFactories,
+		Steps: []resource.TestStep{
+			// Step 1: Create 3 networks with 2 attachments each (deploy OFF)
+			{
+				Config: func() string {
+					*stepCount++
+					tName := fmt.Sprintf("%s_%d", t.Name(), *stepCount)
+					helper.GenerateSingleVrfObject(&vrfRsc, helper.GetConfig("network").NDFC.VrfPrefix, helper.GetConfig("network").NDFC.Fabric, 1, false, false, false, helper.GetConfig("network").NDFC.Switches)
+					helper.GenerateNetworksObject(&networkRsc, helper.GetConfig("network").NDFC.Fabric,
+						3, false, false, false, helper.GetConfig("network").NDFC.VrfPrefix+"1", []string{helper.GetConfig("network").NDFC.Switches[0], helper.GetConfig("network").NDFC.Switches[1]})
+					(*x)["RscName"] = "vrf_test,network_test"
+					helper.GetTFConfigWithSingleResource(tName, *x, []interface{}{vrfRsc, networkRsc}, &tf_config)
+					return *tf_config
+				}(),
+				Check: resource.ComposeTestCheckFunc(NetworksModelHelperStateCheck("ndfc_networks.network_test", *networkRsc, path.Empty())...),
+			},
+
+			// Step 2: Delete network 3, deploy remaining ones using deploy_this_attachment
+			{
+				Config: func() string {
+					*stepCount++
+					tName := fmt.Sprintf("%s_%d", t.Name(), *stepCount)
+					helper.DeleteNetworks(&networkRsc, 3, 3)
+					// Turn on deploy_this_attachment for networks 1 and 2
+					for i := 1; i <= 2; i++ {
+						nwName := helper.GetConfig("network").NDFC.NetPrefix + fmt.Sprintf("%d", i)
+						if nw, ok := networkRsc.Networks[nwName]; ok {
+							for serial, attach := range nw.Attachments {
+								attach.DeployThisAttachment = true
+								nw.Attachments[serial] = attach
+							}
+							networkRsc.Networks[nwName] = nw
+						}
+					}
+					(*x)["RscName"] = "vrf_test,network_test"
+					helper.GetTFConfigWithSingleResource(tName, *x, []interface{}{vrfRsc, networkRsc}, &tf_config)
+					return *tf_config
+				}(),
+				Check: resource.ComposeTestCheckFunc(NetworksModelHelperStateCheck("ndfc_networks.network_test", *networkRsc, path.Empty())...),
+			},
+
+			// Step 3: Add network 3 back with deploy OFF
+			{
+				Config: func() string {
+					*stepCount++
+					tName := fmt.Sprintf("%s_%d", t.Name(), *stepCount)
+					// Regenerate all 3 networks - networks 1,2 keep deploy=true from step 2
+					helper.GenerateNetworksObject(&networkRsc, helper.GetConfig("network").NDFC.Fabric,
+						3, false, false, false, helper.GetConfig("network").NDFC.VrfPrefix+"1", []string{helper.GetConfig("network").NDFC.Switches[0], helper.GetConfig("network").NDFC.Switches[1]})
+					// Restore deploy_this_attachment=true for networks 1 and 2
+					for i := 1; i <= 2; i++ {
+						nwName := helper.GetConfig("network").NDFC.NetPrefix + fmt.Sprintf("%d", i)
+						if nw, ok := networkRsc.Networks[nwName]; ok {
+							for serial, attach := range nw.Attachments {
+								attach.DeployThisAttachment = true
+								nw.Attachments[serial] = attach
+							}
+							networkRsc.Networks[nwName] = nw
+						}
+					}
+					(*x)["RscName"] = "vrf_test,network_test"
+					helper.GetTFConfigWithSingleResource(tName, *x, []interface{}{vrfRsc, networkRsc}, &tf_config)
+					return *tf_config
+				}(),
+				Check: resource.ComposeTestCheckFunc(NetworksModelHelperStateCheck("ndfc_networks.network_test", *networkRsc, path.Empty())...),
+			},
+
+			// Step 4: Turn on deploy flag for network 3
+			{
+				Config: func() string {
+					*stepCount++
+					tName := fmt.Sprintf("%s_%d", t.Name(), *stepCount)
+					// Turn on deploy_this_attachment for network 3
+					nwName := helper.GetConfig("network").NDFC.NetPrefix + "3"
+					if nw, ok := networkRsc.Networks[nwName]; ok {
+						for serial, attach := range nw.Attachments {
+							attach.DeployThisAttachment = true
+							nw.Attachments[serial] = attach
+						}
+						networkRsc.Networks[nwName] = nw
+					}
+					(*x)["RscName"] = "vrf_test,network_test"
+					helper.GetTFConfigWithSingleResource(tName, *x, []interface{}{vrfRsc, networkRsc}, &tf_config)
+					return *tf_config
+				}(),
+				Check: resource.ComposeTestCheckFunc(NetworksModelHelperStateCheck("ndfc_networks.network_test", *networkRsc, path.Empty())...),
+			},
+
+			// Step 5: Remove attachments from network 3
+			{
+				Config: func() string {
+					*stepCount++
+					tName := fmt.Sprintf("%s_%d", t.Name(), *stepCount)
+					helper.NetAttachmentsMod(&networkRsc, 3, 3, nil, "", nil)
+					(*x)["RscName"] = "vrf_test,network_test"
+					helper.GetTFConfigWithSingleResource(tName, *x, []interface{}{vrfRsc, networkRsc}, &tf_config)
+					return *tf_config
+				}(),
+				Check: resource.ComposeTestCheckFunc(NetworksModelHelperStateCheck("ndfc_networks.network_test", *networkRsc, path.Empty())...),
+			},
+
+			// Step 6: Add attachments back to network 3 with deploy=true
+			{
+				Config: func() string {
+					*stepCount++
+					tName := fmt.Sprintf("%s_%d", t.Name(), *stepCount)
+					// Add attachments back
+					nwName := helper.GetConfig("network").NDFC.NetPrefix + "3"
+					if nw, ok := networkRsc.Networks[nwName]; ok {
+						nw.Attachments = make(map[string]rna.NDFCAttachmentsValue)
+						for _, serial := range []string{helper.GetConfig("network").NDFC.Switches[0], helper.GetConfig("network").NDFC.Switches[1]} {
+							attach := rna.NDFCAttachmentsValue{}
+							attach.SerialNumber = serial
+							attach.DeployThisAttachment = true
+							nw.Attachments[serial] = attach
+						}
+						networkRsc.Networks[nwName] = nw
+					}
+					(*x)["RscName"] = "vrf_test,network_test"
+					helper.GetTFConfigWithSingleResource(tName, *x, []interface{}{vrfRsc, networkRsc}, &tf_config)
+					return *tf_config
+				}(),
+				Check: resource.ComposeTestCheckFunc(NetworksModelHelperStateCheck("ndfc_networks.network_test", *networkRsc, path.Empty())...),
+			},
+
+			// Step 7: Remove networks 2 and 3
+			{
+				Config: func() string {
+					*stepCount++
+					tName := fmt.Sprintf("%s_%d", t.Name(), *stepCount)
+					helper.DeleteNetworks(&networkRsc, 2, 3)
+					(*x)["RscName"] = "vrf_test,network_test"
+					helper.GetTFConfigWithSingleResource(tName, *x, []interface{}{vrfRsc, networkRsc}, &tf_config)
+					return *tf_config
+				}(),
+				Check: resource.ComposeTestCheckFunc(NetworksModelHelperStateCheck("ndfc_networks.network_test", *networkRsc, path.Empty())...),
+			},
+		}},
+	)
+}

@@ -139,6 +139,7 @@ Read-Only:
 Optional:
 
 - `deploy_this_attachment` (Boolean) If set to `true`, does a deployment of the attachment. This parameter cannot be set to `true` if  `deploy_all_attachments` in the resource is set or `deploy_attachment` in the corresponding `vrf` is set
+- `fabric` (String) The name of the fabric
 - `freeform_config` (String) This field covers any configuration not included in overlay templates which is needed as part of this VRF attachment
 - `loopback_id` (Number) Override loopback ID
 - `loopback_ipv4` (String) Override loopback IPv4 address

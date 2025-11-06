@@ -20,7 +20,7 @@ import (
 func (c *NDFCVrfAttachmentsModel) HelperStateCheck(RscName string, attrPath path.Path) []resource.TestCheckFunc {
 	ret := []resource.TestCheckFunc{
 
-		resource.TestCheckResourceAttr(RscName, attrPath.AtName("fabric_name").String(), c.FabricName),
+		resource.TestCheckResourceAttr(RscName, attrPath.AtName("fabric_name").String(), c.Fabric),
 	}
 	for key, value := range c.VrfAttachments {
 		attrNewPath := attrPath.AtMapKey(key)

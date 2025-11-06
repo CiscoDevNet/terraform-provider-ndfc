@@ -11,39 +11,7 @@ Manages interface ethernet configuration
 
 ## Example Usage
 
-```hcl
-resource "ndfc_interface_ethernet" "test_resource_interface_ethernet_1" {
-  policy        = "int_access_host"
-  policy_type   = "system"
-  deploy        = true
-  serial_number = "9DBYO6WQJ46"
-  interfaces = {
-    "Ethernet1/10" = {
-      interface_name        = "Ethernet1/10"
-      freeform_config       = "delay 200"
-      admin_state           = false
-      interface_description = "My interface description"
-      bpdu_guard            = "true"
-      port_type_fast        = false
-      mtu                   = "default"
-      speed                 = "Auto"
-      access_vlan           = 500
-      orphan_port           = false
-      ptp                   = false
-      netflow               = false
-      netflow_monitor       = "MON1"
-      netflow_sampler       = "SAMPLER1"
-      allowed_vlans         = "10-20"
-      native_vlan           = 1
-      enable_pfc            = false
-      enable_qos            = false
-      cdp_enable            = false
-      enable_monitor        = false
-    }
-  }
-
-}
-```
+{{codefile "hcl" .ExampleFile }}
 
 ## Parameters
 
@@ -246,10 +214,4 @@ The following parameters are supported when using the `int_trunk_host` policy:
 
 Import is supported using the following syntax:
 
-```shell
-# Format of ID used for import:
-# if_policy:serial_number[comma seperated list of interfaces]
-# if_policy:serial_number
-terraform import ndfc_interface_ethernet.test_resource_interface_ethernet int_trunk_host:FDO245206N5[Ethernet1/1,Ethernet1/2],9990IQNFEZ6[Ethernet1/3,Ethernet1/2]
-terraform import ndfc_interface_ethernet.test_resource_interface_ethernet int_access_host:FDO245206N5
-```
+{{codefile "shell" .ImportFile }}

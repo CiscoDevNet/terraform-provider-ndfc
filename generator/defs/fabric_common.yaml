@@ -769,6 +769,15 @@ resource:
           optional: true
           type: Bool
 
+        - model_name: child_fabrics
+          tf_name: child_fabrics
+          description: "Add child fabrics to the MSD fabric"
+          type: List:String
+          example: "[\"TF_FABRIC_VXLAN_1\", \"TF_FABRIC_VXLAN_2\"]"
+          ndfc_type: set
+          payload_hide: true
+          optional: true
+
         - model_name: COPP_POLICY
           tf_name: copp_policy
           description: Fabric Wide CoPP Policy. Customized CoPP policy should be provided

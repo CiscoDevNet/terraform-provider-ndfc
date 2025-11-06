@@ -66,6 +66,16 @@ func InterfaceEthernetResourceSchema(ctx context.Context) schema.Schema {
 							MarkdownDescription: "Allowed vlans for the ethernet interface. Allowed values are `none`, `all` or VLAN ranges (1-200,500-2000,3000)",
 							Default:             stringdefault.StaticString("none"),
 						},
+						"auto_negotiate": schema.StringAttribute{
+							Optional:            true,
+							Computed:            true,
+							Description:         "Auto Negotiate mode for speed",
+							MarkdownDescription: "Auto Negotiate mode for speed",
+							Validators: []validator.String{
+								stringvalidator.OneOf("on", "off"),
+							},
+							Default: stringdefault.StaticString("on"),
+						},
 						"bpdu_guard": schema.StringAttribute{
 							Optional:            true,
 							Computed:            true,
@@ -75,6 +85,13 @@ func InterfaceEthernetResourceSchema(ctx context.Context) schema.Schema {
 								stringvalidator.OneOf("true", "false", "no"),
 							},
 							Default: stringdefault.StaticString("true"),
+						},
+						"cdp_enable": schema.BoolAttribute{
+							Optional:            true,
+							Computed:            true,
+							Description:         "Enable CDP on the interface",
+							MarkdownDescription: "Enable CDP on the interface",
+							Default:             booldefault.StaticBool(false),
 						},
 						"custom_policy_parameters": schema.MapAttribute{
 							ElementType:         types.StringType,
@@ -90,10 +107,58 @@ func InterfaceEthernetResourceSchema(ctx context.Context) schema.Schema {
 								stringplanmodifier.UseStateForUnknown(),
 							},
 						},
+						"disable_ip_redirects": schema.BoolAttribute{
+							Optional:            true,
+							Computed:            true,
+							Description:         "Disable both IPv4/IPv6 redirects on the interface",
+							MarkdownDescription: "Disable both IPv4/IPv6 redirects on the interface",
+							Default:             booldefault.StaticBool(false),
+						},
+						"enable_monitor": schema.BoolAttribute{
+							Optional:            true,
+							Computed:            true,
+							Description:         "Enable switchport monitor for SPAN / ERSPAN",
+							MarkdownDescription: "Enable switchport monitor for SPAN / ERSPAN",
+							Default:             booldefault.StaticBool(false),
+						},
+						"enable_pfc": schema.BoolAttribute{
+							Optional:            true,
+							Computed:            true,
+							Description:         "Enable priority flow control",
+							MarkdownDescription: "Enable priority flow control",
+							Default:             booldefault.StaticBool(false),
+						},
+						"enable_pim_sparse": schema.BoolAttribute{
+							Optional:            true,
+							Computed:            true,
+							Description:         "Enable PIM sparse-mode on the interface",
+							MarkdownDescription: "Enable PIM sparse-mode on the interface",
+							Default:             booldefault.StaticBool(false),
+						},
+						"enable_qos": schema.BoolAttribute{
+							Optional:            true,
+							Computed:            true,
+							Description:         "Enable to configure a QoS Policy for this interface. If AI/ML Queuing is enabled on the fabric, will use the QOS_CLASSIFICATION policy. Enter a custom policy below to override",
+							MarkdownDescription: "Enable to configure a QoS Policy for this interface. If AI/ML Queuing is enabled on the fabric, will use the QOS_CLASSIFICATION policy. Enter a custom policy below to override",
+							Default:             booldefault.StaticBool(false),
+						},
 						"freeform_config": schema.StringAttribute{
 							Optional:            true,
 							Description:         "Additional CLI config (if any) for the interface configuration",
 							MarkdownDescription: "Additional CLI config (if any) for the interface configuration",
+						},
+						"guard_mode": schema.StringAttribute{
+							Optional:            true,
+							Description:         "Set spanning tree guard mode for the interface, select 'no' to delete the config",
+							MarkdownDescription: "Set spanning tree guard mode for the interface, select 'no' to delete the config",
+							Validators: []validator.String{
+								stringvalidator.OneOf("root", "none", "loop", "no"),
+							},
+						},
+						"ig_for_fex": schema.BoolAttribute{
+							Optional:            true,
+							Description:         "Shared group for fex ports",
+							MarkdownDescription: "Shared group for fex ports",
 						},
 						"interface_description": schema.StringAttribute{
 							Optional:            true,
@@ -105,15 +170,44 @@ func InterfaceEthernetResourceSchema(ctx context.Context) schema.Schema {
 							Description:         "Name of the Interface. Example: `Ethernet1/10`",
 							MarkdownDescription: "Name of the Interface. Example: `Ethernet1/10`",
 						},
+						"ipv4_address": schema.StringAttribute{
+							Optional:            true,
+							Description:         "IPv4 address of the interface",
+							MarkdownDescription: "IPv4 address of the interface",
+						},
+						"ipv4_prefix_length": schema.StringAttribute{
+							Optional:            true,
+							Description:         "IP netmask length used with the IP address (Min:1, Max:31)",
+							MarkdownDescription: "IP netmask length used with the IP address (Min:1, Max:31)",
+						},
+						"ipv6_addr": schema.StringAttribute{
+							Optional:            true,
+							Description:         "IPv6 Address: IPv6 address of the Interface",
+							MarkdownDescription: "IPv6 Address: IPv6 address of the Interface",
+						},
+						"ipv6_prefix_length": schema.StringAttribute{
+							Optional:            true,
+							Description:         "IPv6 Prefix Length: Prefix length associated with IPv6 address (Min:64, Max:127)",
+							MarkdownDescription: "IPv6 Prefix Length: Prefix length associated with IPv6 address (Min:64, Max:127)",
+						},
+						"link_state_routing_protocol": schema.StringAttribute{
+							Optional:            true,
+							Computed:            true,
+							Description:         "Link-State Routing Protocol: Select link-state routing protocol - Applicable as per template used",
+							MarkdownDescription: "Link-State Routing Protocol: Select link-state routing protocol - Applicable as per template used",
+						},
+						"link_state_routing_tag": schema.StringAttribute{
+							Optional:            true,
+							Computed:            true,
+							Description:         "Link-State Routing Tag: Link-state routing protocol tag - Usage as per template used",
+							MarkdownDescription: "Link-State Routing Tag: Link-state routing protocol tag - Usage as per template used",
+						},
 						"mtu": schema.StringAttribute{
 							Optional:            true,
 							Computed:            true,
 							Description:         "MTU for the interface",
 							MarkdownDescription: "MTU for the interface",
-							Validators: []validator.String{
-								stringvalidator.OneOf("default", "jumbo"),
-							},
-							Default: stringdefault.StaticString("jumbo"),
+							Default:             stringdefault.StaticString("jumbo"),
 						},
 						"native_vlan": schema.Int64Attribute{
 							Optional:            true,
@@ -147,6 +241,95 @@ func InterfaceEthernetResourceSchema(ctx context.Context) schema.Schema {
 							MarkdownDescription: "If enabled, configure the interface as a vPC orphan port to be suspended by the secondary peer in vPC failures",
 							Default:             booldefault.StaticBool(false),
 						},
+						"p_vlan_assoc_list": schema.ListNestedAttribute{
+							NestedObject: schema.NestedAttributeObject{
+								Attributes: map[string]schema.Attribute{
+									"p_vlan": schema.StringAttribute{
+										Optional:            true,
+										Description:         "P Vlan",
+										MarkdownDescription: "P Vlan",
+									},
+									"s_vlan": schema.StringAttribute{
+										Optional:            true,
+										Description:         "SVlan Id",
+										MarkdownDescription: "SVlan Id",
+									},
+								},
+								CustomType: PVlanAssocListType{
+									ObjectType: types.ObjectType{
+										AttrTypes: PVlanAssocListValue{}.AttributeTypes(ctx),
+									},
+								},
+							},
+							Optional:            true,
+							Description:         "Private VLAN host association",
+							MarkdownDescription: "Private VLAN host association",
+						},
+						"p_vlan_mapping_list": schema.ListNestedAttribute{
+							NestedObject: schema.NestedAttributeObject{
+								Attributes: map[string]schema.Attribute{
+									"p_vlan": schema.StringAttribute{
+										Optional:            true,
+										Description:         "P Vlan",
+										MarkdownDescription: "P Vlan",
+									},
+									"s_vlan": schema.StringAttribute{
+										Optional:            true,
+										Description:         "SVlan Id",
+										MarkdownDescription: "SVlan Id",
+									},
+								},
+								CustomType: PVlanMappingListType{
+									ObjectType: types.ObjectType{
+										AttrTypes: PVlanMappingListValue{}.AttributeTypes(ctx),
+									},
+								},
+							},
+							Optional:            true,
+							Description:         "Private VLAN promiscuous mapping",
+							MarkdownDescription: "Private VLAN promiscuous mapping",
+						},
+						"path_cost": schema.Int64Attribute{
+							Optional:            true,
+							Description:         "Spanning Tree Port Path Cost <1-200000000>",
+							MarkdownDescription: "Spanning Tree Port Path Cost <1-200000000>",
+							Validators: []validator.Int64{
+								int64validator.Between(1, 200000000),
+							},
+						},
+						"pim_dr_priority": schema.StringAttribute{
+							Optional:            true,
+							Computed:            true,
+							Description:         "Configure priority for PIM DR election on the interface, default is 1",
+							MarkdownDescription: "Configure priority for PIM DR election on the interface, default is 1",
+							Default:             stringdefault.StaticString("1"),
+						},
+						"port_channel_name": schema.StringAttribute{
+							Computed:            true,
+							Description:         "Internal parameter used to track portchannel membership",
+							MarkdownDescription: "Internal parameter used to track portchannel membership",
+							PlanModifiers: []planmodifier.String{
+								stringplanmodifier.UseStateForUnknown(),
+							},
+						},
+						"port_channel_policy": schema.StringAttribute{
+							Computed:            true,
+							Description:         "Internal parameter used to track portchannel membership",
+							MarkdownDescription: "Internal parameter used to track portchannel membership",
+							PlanModifiers: []planmodifier.String{
+								stringplanmodifier.UseStateForUnknown(),
+							},
+						},
+						"port_duplex_mode": schema.StringAttribute{
+							Optional:            true,
+							Computed:            true,
+							Description:         "Configure the port duplex mode",
+							MarkdownDescription: "Configure the port duplex mode",
+							Validators: []validator.String{
+								stringvalidator.OneOf("auto", "full", "half"),
+							},
+							Default: stringdefault.StaticString("auto"),
+						},
 						"port_type_fast": schema.BoolAttribute{
 							Optional:            true,
 							Computed:            true,
@@ -160,6 +343,41 @@ func InterfaceEthernetResourceSchema(ctx context.Context) schema.Schema {
 							Description:         "Enable PTP",
 							MarkdownDescription: "Enable PTP",
 							Default:             booldefault.StaticBool(false),
+						},
+						"pvlan_allowed_vlans": schema.StringAttribute{
+							Optional:            true,
+							Description:         "Allowed values: 'none', or vlan ranges (ex: 1-200,500-2000,3000)",
+							MarkdownDescription: "Allowed values: 'none', or vlan ranges (ex: 1-200,500-2000,3000)",
+						},
+						"pvlan_mode": schema.StringAttribute{
+							Optional:            true,
+							Computed:            true,
+							Description:         "private-vlan mode",
+							MarkdownDescription: "private-vlan mode",
+							Validators: []validator.String{
+								stringvalidator.OneOf("promiscuous", "trunk promiscuous", "host", "trunk secondary"),
+							},
+							Default: stringdefault.StaticString("host"),
+						},
+						"pvlan_native_vlan": schema.StringAttribute{
+							Optional:            true,
+							Description:         "Native Vlan for private-vlan - valid values 1-4094",
+							MarkdownDescription: "Native Vlan for private-vlan - valid values 1-4094",
+						},
+						"qos_policy": schema.StringAttribute{
+							Optional:            true,
+							Description:         "Custom QoS Policy must be defined previously",
+							MarkdownDescription: "Custom QoS Policy must be defined previously",
+						},
+						"queuing_policy": schema.StringAttribute{
+							Optional:            true,
+							Description:         "Queuing Policy must be defined previously",
+							MarkdownDescription: "Queuing Policy must be defined previously",
+						},
+						"routing_tag": schema.StringAttribute{
+							Optional:            true,
+							Description:         "Routing tag associated with interface IP",
+							MarkdownDescription: "Routing tag associated with interface IP",
 						},
 						"serial_number": schema.StringAttribute{
 							Optional:            true,
@@ -176,6 +394,16 @@ func InterfaceEthernetResourceSchema(ctx context.Context) schema.Schema {
 							},
 							Default: stringdefault.StaticString("Auto"),
 						},
+						"ttag": schema.BoolAttribute{
+							Optional:            true,
+							Description:         "Enable Ttag/Ttag-strip",
+							MarkdownDescription: "Enable Ttag/Ttag-strip",
+						},
+						"vrf": schema.StringAttribute{
+							Optional:            true,
+							Description:         "Interface VRF name, default VRF if not specified",
+							MarkdownDescription: "Interface VRF name, default VRF if not specified",
+						},
 					},
 					CustomType: InterfacesType{
 						ObjectType: types.ObjectType{
@@ -190,8 +418,8 @@ func InterfaceEthernetResourceSchema(ctx context.Context) schema.Schema {
 			"policy": schema.StringAttribute{
 				Optional:            true,
 				Computed:            true,
-				Description:         "\"Policy to be used for the interface. \n  Supported policies: \n  * `int_trunk_host`\n  * `int_access_host`\n  * `int_dot1q_tunnel_host`\n  * `int_monitor_ethernet`\n  * `int_pvlan_host`\n  * `int_routed_host`\n  * `int_shared_trunk_host`\n  * `int_trunk_classic`\"\n",
-				MarkdownDescription: "\"Policy to be used for the interface. \n  Supported policies: \n  * `int_trunk_host`\n  * `int_access_host`\n  * `int_dot1q_tunnel_host`\n  * `int_monitor_ethernet`\n  * `int_pvlan_host`\n  * `int_routed_host`\n  * `int_shared_trunk_host`\n  * `int_trunk_classic`\"\n",
+				Description:         "\"Policy to be used for the interface. \n  Supported policies: \n  * `int_trunk_host`\n  * `int_access_host`\n  * `int_dot1q_tunnel_host`\n  * `int_monitor_ethernet`\n  * `int_pvlan_host`\n  * `int_routed_host`\n  * `int_shared_trunk_host`\n  * `int_trunk_classic`\n  * `epl_routed_intf`\n  \"\n",
+				MarkdownDescription: "\"Policy to be used for the interface. \n  Supported policies: \n  * `int_trunk_host`\n  * `int_access_host`\n  * `int_dot1q_tunnel_host`\n  * `int_monitor_ethernet`\n  * `int_pvlan_host`\n  * `int_routed_host`\n  * `int_shared_trunk_host`\n  * `int_trunk_classic`\n  * `epl_routed_intf`\n  \"\n",
 				PlanModifiers: []planmodifier.String{
 					stringplanmodifier.RequiresReplace(),
 				},
@@ -312,6 +540,24 @@ func (t InterfacesType) ValueFromObject(ctx context.Context, in basetypes.Object
 			fmt.Sprintf(`allowed_vlans expected to be basetypes.StringValue, was: %T`, allowedVlansAttribute))
 	}
 
+	autoNegotiateAttribute, ok := attributes["auto_negotiate"]
+
+	if !ok {
+		diags.AddError(
+			"Attribute Missing",
+			`auto_negotiate is missing from object`)
+
+		return nil, diags
+	}
+
+	autoNegotiateVal, ok := autoNegotiateAttribute.(basetypes.StringValue)
+
+	if !ok {
+		diags.AddError(
+			"Attribute Wrong Type",
+			fmt.Sprintf(`auto_negotiate expected to be basetypes.StringValue, was: %T`, autoNegotiateAttribute))
+	}
+
 	bpduGuardAttribute, ok := attributes["bpdu_guard"]
 
 	if !ok {
@@ -328,6 +574,24 @@ func (t InterfacesType) ValueFromObject(ctx context.Context, in basetypes.Object
 		diags.AddError(
 			"Attribute Wrong Type",
 			fmt.Sprintf(`bpdu_guard expected to be basetypes.StringValue, was: %T`, bpduGuardAttribute))
+	}
+
+	cdpEnableAttribute, ok := attributes["cdp_enable"]
+
+	if !ok {
+		diags.AddError(
+			"Attribute Missing",
+			`cdp_enable is missing from object`)
+
+		return nil, diags
+	}
+
+	cdpEnableVal, ok := cdpEnableAttribute.(basetypes.BoolValue)
+
+	if !ok {
+		diags.AddError(
+			"Attribute Wrong Type",
+			fmt.Sprintf(`cdp_enable expected to be basetypes.BoolValue, was: %T`, cdpEnableAttribute))
 	}
 
 	customPolicyParametersAttribute, ok := attributes["custom_policy_parameters"]
@@ -366,6 +630,96 @@ func (t InterfacesType) ValueFromObject(ctx context.Context, in basetypes.Object
 			fmt.Sprintf(`deployment_status expected to be basetypes.StringValue, was: %T`, deploymentStatusAttribute))
 	}
 
+	disableIpRedirectsAttribute, ok := attributes["disable_ip_redirects"]
+
+	if !ok {
+		diags.AddError(
+			"Attribute Missing",
+			`disable_ip_redirects is missing from object`)
+
+		return nil, diags
+	}
+
+	disableIpRedirectsVal, ok := disableIpRedirectsAttribute.(basetypes.BoolValue)
+
+	if !ok {
+		diags.AddError(
+			"Attribute Wrong Type",
+			fmt.Sprintf(`disable_ip_redirects expected to be basetypes.BoolValue, was: %T`, disableIpRedirectsAttribute))
+	}
+
+	enableMonitorAttribute, ok := attributes["enable_monitor"]
+
+	if !ok {
+		diags.AddError(
+			"Attribute Missing",
+			`enable_monitor is missing from object`)
+
+		return nil, diags
+	}
+
+	enableMonitorVal, ok := enableMonitorAttribute.(basetypes.BoolValue)
+
+	if !ok {
+		diags.AddError(
+			"Attribute Wrong Type",
+			fmt.Sprintf(`enable_monitor expected to be basetypes.BoolValue, was: %T`, enableMonitorAttribute))
+	}
+
+	enablePfcAttribute, ok := attributes["enable_pfc"]
+
+	if !ok {
+		diags.AddError(
+			"Attribute Missing",
+			`enable_pfc is missing from object`)
+
+		return nil, diags
+	}
+
+	enablePfcVal, ok := enablePfcAttribute.(basetypes.BoolValue)
+
+	if !ok {
+		diags.AddError(
+			"Attribute Wrong Type",
+			fmt.Sprintf(`enable_pfc expected to be basetypes.BoolValue, was: %T`, enablePfcAttribute))
+	}
+
+	enablePimSparseAttribute, ok := attributes["enable_pim_sparse"]
+
+	if !ok {
+		diags.AddError(
+			"Attribute Missing",
+			`enable_pim_sparse is missing from object`)
+
+		return nil, diags
+	}
+
+	enablePimSparseVal, ok := enablePimSparseAttribute.(basetypes.BoolValue)
+
+	if !ok {
+		diags.AddError(
+			"Attribute Wrong Type",
+			fmt.Sprintf(`enable_pim_sparse expected to be basetypes.BoolValue, was: %T`, enablePimSparseAttribute))
+	}
+
+	enableQosAttribute, ok := attributes["enable_qos"]
+
+	if !ok {
+		diags.AddError(
+			"Attribute Missing",
+			`enable_qos is missing from object`)
+
+		return nil, diags
+	}
+
+	enableQosVal, ok := enableQosAttribute.(basetypes.BoolValue)
+
+	if !ok {
+		diags.AddError(
+			"Attribute Wrong Type",
+			fmt.Sprintf(`enable_qos expected to be basetypes.BoolValue, was: %T`, enableQosAttribute))
+	}
+
 	freeformConfigAttribute, ok := attributes["freeform_config"]
 
 	if !ok {
@@ -382,6 +736,42 @@ func (t InterfacesType) ValueFromObject(ctx context.Context, in basetypes.Object
 		diags.AddError(
 			"Attribute Wrong Type",
 			fmt.Sprintf(`freeform_config expected to be basetypes.StringValue, was: %T`, freeformConfigAttribute))
+	}
+
+	guardModeAttribute, ok := attributes["guard_mode"]
+
+	if !ok {
+		diags.AddError(
+			"Attribute Missing",
+			`guard_mode is missing from object`)
+
+		return nil, diags
+	}
+
+	guardModeVal, ok := guardModeAttribute.(basetypes.StringValue)
+
+	if !ok {
+		diags.AddError(
+			"Attribute Wrong Type",
+			fmt.Sprintf(`guard_mode expected to be basetypes.StringValue, was: %T`, guardModeAttribute))
+	}
+
+	igForFexAttribute, ok := attributes["ig_for_fex"]
+
+	if !ok {
+		diags.AddError(
+			"Attribute Missing",
+			`ig_for_fex is missing from object`)
+
+		return nil, diags
+	}
+
+	igForFexVal, ok := igForFexAttribute.(basetypes.BoolValue)
+
+	if !ok {
+		diags.AddError(
+			"Attribute Wrong Type",
+			fmt.Sprintf(`ig_for_fex expected to be basetypes.BoolValue, was: %T`, igForFexAttribute))
 	}
 
 	interfaceDescriptionAttribute, ok := attributes["interface_description"]
@@ -418,6 +808,114 @@ func (t InterfacesType) ValueFromObject(ctx context.Context, in basetypes.Object
 		diags.AddError(
 			"Attribute Wrong Type",
 			fmt.Sprintf(`interface_name expected to be basetypes.StringValue, was: %T`, interfaceNameAttribute))
+	}
+
+	ipv4AddressAttribute, ok := attributes["ipv4_address"]
+
+	if !ok {
+		diags.AddError(
+			"Attribute Missing",
+			`ipv4_address is missing from object`)
+
+		return nil, diags
+	}
+
+	ipv4AddressVal, ok := ipv4AddressAttribute.(basetypes.StringValue)
+
+	if !ok {
+		diags.AddError(
+			"Attribute Wrong Type",
+			fmt.Sprintf(`ipv4_address expected to be basetypes.StringValue, was: %T`, ipv4AddressAttribute))
+	}
+
+	ipv4PrefixLengthAttribute, ok := attributes["ipv4_prefix_length"]
+
+	if !ok {
+		diags.AddError(
+			"Attribute Missing",
+			`ipv4_prefix_length is missing from object`)
+
+		return nil, diags
+	}
+
+	ipv4PrefixLengthVal, ok := ipv4PrefixLengthAttribute.(basetypes.StringValue)
+
+	if !ok {
+		diags.AddError(
+			"Attribute Wrong Type",
+			fmt.Sprintf(`ipv4_prefix_length expected to be basetypes.StringValue, was: %T`, ipv4PrefixLengthAttribute))
+	}
+
+	ipv6AddrAttribute, ok := attributes["ipv6_addr"]
+
+	if !ok {
+		diags.AddError(
+			"Attribute Missing",
+			`ipv6_addr is missing from object`)
+
+		return nil, diags
+	}
+
+	ipv6AddrVal, ok := ipv6AddrAttribute.(basetypes.StringValue)
+
+	if !ok {
+		diags.AddError(
+			"Attribute Wrong Type",
+			fmt.Sprintf(`ipv6_addr expected to be basetypes.StringValue, was: %T`, ipv6AddrAttribute))
+	}
+
+	ipv6PrefixLengthAttribute, ok := attributes["ipv6_prefix_length"]
+
+	if !ok {
+		diags.AddError(
+			"Attribute Missing",
+			`ipv6_prefix_length is missing from object`)
+
+		return nil, diags
+	}
+
+	ipv6PrefixLengthVal, ok := ipv6PrefixLengthAttribute.(basetypes.StringValue)
+
+	if !ok {
+		diags.AddError(
+			"Attribute Wrong Type",
+			fmt.Sprintf(`ipv6_prefix_length expected to be basetypes.StringValue, was: %T`, ipv6PrefixLengthAttribute))
+	}
+
+	linkStateRoutingProtocolAttribute, ok := attributes["link_state_routing_protocol"]
+
+	if !ok {
+		diags.AddError(
+			"Attribute Missing",
+			`link_state_routing_protocol is missing from object`)
+
+		return nil, diags
+	}
+
+	linkStateRoutingProtocolVal, ok := linkStateRoutingProtocolAttribute.(basetypes.StringValue)
+
+	if !ok {
+		diags.AddError(
+			"Attribute Wrong Type",
+			fmt.Sprintf(`link_state_routing_protocol expected to be basetypes.StringValue, was: %T`, linkStateRoutingProtocolAttribute))
+	}
+
+	linkStateRoutingTagAttribute, ok := attributes["link_state_routing_tag"]
+
+	if !ok {
+		diags.AddError(
+			"Attribute Missing",
+			`link_state_routing_tag is missing from object`)
+
+		return nil, diags
+	}
+
+	linkStateRoutingTagVal, ok := linkStateRoutingTagAttribute.(basetypes.StringValue)
+
+	if !ok {
+		diags.AddError(
+			"Attribute Wrong Type",
+			fmt.Sprintf(`link_state_routing_tag expected to be basetypes.StringValue, was: %T`, linkStateRoutingTagAttribute))
 	}
 
 	mtuAttribute, ok := attributes["mtu"]
@@ -528,6 +1026,132 @@ func (t InterfacesType) ValueFromObject(ctx context.Context, in basetypes.Object
 			fmt.Sprintf(`orphan_port expected to be basetypes.BoolValue, was: %T`, orphanPortAttribute))
 	}
 
+	pVlanAssocListAttribute, ok := attributes["p_vlan_assoc_list"]
+
+	if !ok {
+		diags.AddError(
+			"Attribute Missing",
+			`p_vlan_assoc_list is missing from object`)
+
+		return nil, diags
+	}
+
+	pVlanAssocListVal, ok := pVlanAssocListAttribute.(basetypes.ListValue)
+
+	if !ok {
+		diags.AddError(
+			"Attribute Wrong Type",
+			fmt.Sprintf(`p_vlan_assoc_list expected to be basetypes.ListValue, was: %T`, pVlanAssocListAttribute))
+	}
+
+	pVlanMappingListAttribute, ok := attributes["p_vlan_mapping_list"]
+
+	if !ok {
+		diags.AddError(
+			"Attribute Missing",
+			`p_vlan_mapping_list is missing from object`)
+
+		return nil, diags
+	}
+
+	pVlanMappingListVal, ok := pVlanMappingListAttribute.(basetypes.ListValue)
+
+	if !ok {
+		diags.AddError(
+			"Attribute Wrong Type",
+			fmt.Sprintf(`p_vlan_mapping_list expected to be basetypes.ListValue, was: %T`, pVlanMappingListAttribute))
+	}
+
+	pathCostAttribute, ok := attributes["path_cost"]
+
+	if !ok {
+		diags.AddError(
+			"Attribute Missing",
+			`path_cost is missing from object`)
+
+		return nil, diags
+	}
+
+	pathCostVal, ok := pathCostAttribute.(basetypes.Int64Value)
+
+	if !ok {
+		diags.AddError(
+			"Attribute Wrong Type",
+			fmt.Sprintf(`path_cost expected to be basetypes.Int64Value, was: %T`, pathCostAttribute))
+	}
+
+	pimDrPriorityAttribute, ok := attributes["pim_dr_priority"]
+
+	if !ok {
+		diags.AddError(
+			"Attribute Missing",
+			`pim_dr_priority is missing from object`)
+
+		return nil, diags
+	}
+
+	pimDrPriorityVal, ok := pimDrPriorityAttribute.(basetypes.StringValue)
+
+	if !ok {
+		diags.AddError(
+			"Attribute Wrong Type",
+			fmt.Sprintf(`pim_dr_priority expected to be basetypes.StringValue, was: %T`, pimDrPriorityAttribute))
+	}
+
+	portChannelNameAttribute, ok := attributes["port_channel_name"]
+
+	if !ok {
+		diags.AddError(
+			"Attribute Missing",
+			`port_channel_name is missing from object`)
+
+		return nil, diags
+	}
+
+	portChannelNameVal, ok := portChannelNameAttribute.(basetypes.StringValue)
+
+	if !ok {
+		diags.AddError(
+			"Attribute Wrong Type",
+			fmt.Sprintf(`port_channel_name expected to be basetypes.StringValue, was: %T`, portChannelNameAttribute))
+	}
+
+	portChannelPolicyAttribute, ok := attributes["port_channel_policy"]
+
+	if !ok {
+		diags.AddError(
+			"Attribute Missing",
+			`port_channel_policy is missing from object`)
+
+		return nil, diags
+	}
+
+	portChannelPolicyVal, ok := portChannelPolicyAttribute.(basetypes.StringValue)
+
+	if !ok {
+		diags.AddError(
+			"Attribute Wrong Type",
+			fmt.Sprintf(`port_channel_policy expected to be basetypes.StringValue, was: %T`, portChannelPolicyAttribute))
+	}
+
+	portDuplexModeAttribute, ok := attributes["port_duplex_mode"]
+
+	if !ok {
+		diags.AddError(
+			"Attribute Missing",
+			`port_duplex_mode is missing from object`)
+
+		return nil, diags
+	}
+
+	portDuplexModeVal, ok := portDuplexModeAttribute.(basetypes.StringValue)
+
+	if !ok {
+		diags.AddError(
+			"Attribute Wrong Type",
+			fmt.Sprintf(`port_duplex_mode expected to be basetypes.StringValue, was: %T`, portDuplexModeAttribute))
+	}
+
 	portTypeFastAttribute, ok := attributes["port_type_fast"]
 
 	if !ok {
@@ -562,6 +1186,114 @@ func (t InterfacesType) ValueFromObject(ctx context.Context, in basetypes.Object
 		diags.AddError(
 			"Attribute Wrong Type",
 			fmt.Sprintf(`ptp expected to be basetypes.BoolValue, was: %T`, ptpAttribute))
+	}
+
+	pvlanAllowedVlansAttribute, ok := attributes["pvlan_allowed_vlans"]
+
+	if !ok {
+		diags.AddError(
+			"Attribute Missing",
+			`pvlan_allowed_vlans is missing from object`)
+
+		return nil, diags
+	}
+
+	pvlanAllowedVlansVal, ok := pvlanAllowedVlansAttribute.(basetypes.StringValue)
+
+	if !ok {
+		diags.AddError(
+			"Attribute Wrong Type",
+			fmt.Sprintf(`pvlan_allowed_vlans expected to be basetypes.StringValue, was: %T`, pvlanAllowedVlansAttribute))
+	}
+
+	pvlanModeAttribute, ok := attributes["pvlan_mode"]
+
+	if !ok {
+		diags.AddError(
+			"Attribute Missing",
+			`pvlan_mode is missing from object`)
+
+		return nil, diags
+	}
+
+	pvlanModeVal, ok := pvlanModeAttribute.(basetypes.StringValue)
+
+	if !ok {
+		diags.AddError(
+			"Attribute Wrong Type",
+			fmt.Sprintf(`pvlan_mode expected to be basetypes.StringValue, was: %T`, pvlanModeAttribute))
+	}
+
+	pvlanNativeVlanAttribute, ok := attributes["pvlan_native_vlan"]
+
+	if !ok {
+		diags.AddError(
+			"Attribute Missing",
+			`pvlan_native_vlan is missing from object`)
+
+		return nil, diags
+	}
+
+	pvlanNativeVlanVal, ok := pvlanNativeVlanAttribute.(basetypes.StringValue)
+
+	if !ok {
+		diags.AddError(
+			"Attribute Wrong Type",
+			fmt.Sprintf(`pvlan_native_vlan expected to be basetypes.StringValue, was: %T`, pvlanNativeVlanAttribute))
+	}
+
+	qosPolicyAttribute, ok := attributes["qos_policy"]
+
+	if !ok {
+		diags.AddError(
+			"Attribute Missing",
+			`qos_policy is missing from object`)
+
+		return nil, diags
+	}
+
+	qosPolicyVal, ok := qosPolicyAttribute.(basetypes.StringValue)
+
+	if !ok {
+		diags.AddError(
+			"Attribute Wrong Type",
+			fmt.Sprintf(`qos_policy expected to be basetypes.StringValue, was: %T`, qosPolicyAttribute))
+	}
+
+	queuingPolicyAttribute, ok := attributes["queuing_policy"]
+
+	if !ok {
+		diags.AddError(
+			"Attribute Missing",
+			`queuing_policy is missing from object`)
+
+		return nil, diags
+	}
+
+	queuingPolicyVal, ok := queuingPolicyAttribute.(basetypes.StringValue)
+
+	if !ok {
+		diags.AddError(
+			"Attribute Wrong Type",
+			fmt.Sprintf(`queuing_policy expected to be basetypes.StringValue, was: %T`, queuingPolicyAttribute))
+	}
+
+	routingTagAttribute, ok := attributes["routing_tag"]
+
+	if !ok {
+		diags.AddError(
+			"Attribute Missing",
+			`routing_tag is missing from object`)
+
+		return nil, diags
+	}
+
+	routingTagVal, ok := routingTagAttribute.(basetypes.StringValue)
+
+	if !ok {
+		diags.AddError(
+			"Attribute Wrong Type",
+			fmt.Sprintf(`routing_tag expected to be basetypes.StringValue, was: %T`, routingTagAttribute))
 	}
 
 	serialNumberAttribute, ok := attributes["serial_number"]
@@ -600,31 +1332,97 @@ func (t InterfacesType) ValueFromObject(ctx context.Context, in basetypes.Object
 			fmt.Sprintf(`speed expected to be basetypes.StringValue, was: %T`, speedAttribute))
 	}
 
+	ttagAttribute, ok := attributes["ttag"]
+
+	if !ok {
+		diags.AddError(
+			"Attribute Missing",
+			`ttag is missing from object`)
+
+		return nil, diags
+	}
+
+	ttagVal, ok := ttagAttribute.(basetypes.BoolValue)
+
+	if !ok {
+		diags.AddError(
+			"Attribute Wrong Type",
+			fmt.Sprintf(`ttag expected to be basetypes.BoolValue, was: %T`, ttagAttribute))
+	}
+
+	vrfAttribute, ok := attributes["vrf"]
+
+	if !ok {
+		diags.AddError(
+			"Attribute Missing",
+			`vrf is missing from object`)
+
+		return nil, diags
+	}
+
+	vrfVal, ok := vrfAttribute.(basetypes.StringValue)
+
+	if !ok {
+		diags.AddError(
+			"Attribute Wrong Type",
+			fmt.Sprintf(`vrf expected to be basetypes.StringValue, was: %T`, vrfAttribute))
+	}
+
 	if diags.HasError() {
 		return nil, diags
 	}
 
 	return InterfacesValue{
-		AccessVlan:             accessVlanVal,
-		AdminState:             adminStateVal,
-		AllowedVlans:           allowedVlansVal,
-		BpduGuard:              bpduGuardVal,
-		CustomPolicyParameters: customPolicyParametersVal,
-		DeploymentStatus:       deploymentStatusVal,
-		FreeformConfig:         freeformConfigVal,
-		InterfaceDescription:   interfaceDescriptionVal,
-		InterfaceName:          interfaceNameVal,
-		Mtu:                    mtuVal,
-		NativeVlan:             nativeVlanVal,
-		Netflow:                netflowVal,
-		NetflowMonitor:         netflowMonitorVal,
-		NetflowSampler:         netflowSamplerVal,
-		OrphanPort:             orphanPortVal,
-		PortTypeFast:           portTypeFastVal,
-		Ptp:                    ptpVal,
-		SerialNumber:           serialNumberVal,
-		Speed:                  speedVal,
-		state:                  attr.ValueStateKnown,
+		AccessVlan:               accessVlanVal,
+		AdminState:               adminStateVal,
+		AllowedVlans:             allowedVlansVal,
+		AutoNegotiate:            autoNegotiateVal,
+		BpduGuard:                bpduGuardVal,
+		CdpEnable:                cdpEnableVal,
+		CustomPolicyParameters:   customPolicyParametersVal,
+		DeploymentStatus:         deploymentStatusVal,
+		DisableIpRedirects:       disableIpRedirectsVal,
+		EnableMonitor:            enableMonitorVal,
+		EnablePfc:                enablePfcVal,
+		EnablePimSparse:          enablePimSparseVal,
+		EnableQos:                enableQosVal,
+		FreeformConfig:           freeformConfigVal,
+		GuardMode:                guardModeVal,
+		IgForFex:                 igForFexVal,
+		InterfaceDescription:     interfaceDescriptionVal,
+		InterfaceName:            interfaceNameVal,
+		Ipv4Address:              ipv4AddressVal,
+		Ipv4PrefixLength:         ipv4PrefixLengthVal,
+		Ipv6Addr:                 ipv6AddrVal,
+		Ipv6PrefixLength:         ipv6PrefixLengthVal,
+		LinkStateRoutingProtocol: linkStateRoutingProtocolVal,
+		LinkStateRoutingTag:      linkStateRoutingTagVal,
+		Mtu:                      mtuVal,
+		NativeVlan:               nativeVlanVal,
+		Netflow:                  netflowVal,
+		NetflowMonitor:           netflowMonitorVal,
+		NetflowSampler:           netflowSamplerVal,
+		OrphanPort:               orphanPortVal,
+		PVlanAssocList:           pVlanAssocListVal,
+		PVlanMappingList:         pVlanMappingListVal,
+		PathCost:                 pathCostVal,
+		PimDrPriority:            pimDrPriorityVal,
+		PortChannelName:          portChannelNameVal,
+		PortChannelPolicy:        portChannelPolicyVal,
+		PortDuplexMode:           portDuplexModeVal,
+		PortTypeFast:             portTypeFastVal,
+		Ptp:                      ptpVal,
+		PvlanAllowedVlans:        pvlanAllowedVlansVal,
+		PvlanMode:                pvlanModeVal,
+		PvlanNativeVlan:          pvlanNativeVlanVal,
+		QosPolicy:                qosPolicyVal,
+		QueuingPolicy:            queuingPolicyVal,
+		RoutingTag:               routingTagVal,
+		SerialNumber:             serialNumberVal,
+		Speed:                    speedVal,
+		Ttag:                     ttagVal,
+		Vrf:                      vrfVal,
+		state:                    attr.ValueStateKnown,
 	}, diags
 }
 
@@ -745,6 +1543,24 @@ func NewInterfacesValue(attributeTypes map[string]attr.Type, attributes map[stri
 			fmt.Sprintf(`allowed_vlans expected to be basetypes.StringValue, was: %T`, allowedVlansAttribute))
 	}
 
+	autoNegotiateAttribute, ok := attributes["auto_negotiate"]
+
+	if !ok {
+		diags.AddError(
+			"Attribute Missing",
+			`auto_negotiate is missing from object`)
+
+		return NewInterfacesValueUnknown(), diags
+	}
+
+	autoNegotiateVal, ok := autoNegotiateAttribute.(basetypes.StringValue)
+
+	if !ok {
+		diags.AddError(
+			"Attribute Wrong Type",
+			fmt.Sprintf(`auto_negotiate expected to be basetypes.StringValue, was: %T`, autoNegotiateAttribute))
+	}
+
 	bpduGuardAttribute, ok := attributes["bpdu_guard"]
 
 	if !ok {
@@ -761,6 +1577,24 @@ func NewInterfacesValue(attributeTypes map[string]attr.Type, attributes map[stri
 		diags.AddError(
 			"Attribute Wrong Type",
 			fmt.Sprintf(`bpdu_guard expected to be basetypes.StringValue, was: %T`, bpduGuardAttribute))
+	}
+
+	cdpEnableAttribute, ok := attributes["cdp_enable"]
+
+	if !ok {
+		diags.AddError(
+			"Attribute Missing",
+			`cdp_enable is missing from object`)
+
+		return NewInterfacesValueUnknown(), diags
+	}
+
+	cdpEnableVal, ok := cdpEnableAttribute.(basetypes.BoolValue)
+
+	if !ok {
+		diags.AddError(
+			"Attribute Wrong Type",
+			fmt.Sprintf(`cdp_enable expected to be basetypes.BoolValue, was: %T`, cdpEnableAttribute))
 	}
 
 	customPolicyParametersAttribute, ok := attributes["custom_policy_parameters"]
@@ -799,6 +1633,96 @@ func NewInterfacesValue(attributeTypes map[string]attr.Type, attributes map[stri
 			fmt.Sprintf(`deployment_status expected to be basetypes.StringValue, was: %T`, deploymentStatusAttribute))
 	}
 
+	disableIpRedirectsAttribute, ok := attributes["disable_ip_redirects"]
+
+	if !ok {
+		diags.AddError(
+			"Attribute Missing",
+			`disable_ip_redirects is missing from object`)
+
+		return NewInterfacesValueUnknown(), diags
+	}
+
+	disableIpRedirectsVal, ok := disableIpRedirectsAttribute.(basetypes.BoolValue)
+
+	if !ok {
+		diags.AddError(
+			"Attribute Wrong Type",
+			fmt.Sprintf(`disable_ip_redirects expected to be basetypes.BoolValue, was: %T`, disableIpRedirectsAttribute))
+	}
+
+	enableMonitorAttribute, ok := attributes["enable_monitor"]
+
+	if !ok {
+		diags.AddError(
+			"Attribute Missing",
+			`enable_monitor is missing from object`)
+
+		return NewInterfacesValueUnknown(), diags
+	}
+
+	enableMonitorVal, ok := enableMonitorAttribute.(basetypes.BoolValue)
+
+	if !ok {
+		diags.AddError(
+			"Attribute Wrong Type",
+			fmt.Sprintf(`enable_monitor expected to be basetypes.BoolValue, was: %T`, enableMonitorAttribute))
+	}
+
+	enablePfcAttribute, ok := attributes["enable_pfc"]
+
+	if !ok {
+		diags.AddError(
+			"Attribute Missing",
+			`enable_pfc is missing from object`)
+
+		return NewInterfacesValueUnknown(), diags
+	}
+
+	enablePfcVal, ok := enablePfcAttribute.(basetypes.BoolValue)
+
+	if !ok {
+		diags.AddError(
+			"Attribute Wrong Type",
+			fmt.Sprintf(`enable_pfc expected to be basetypes.BoolValue, was: %T`, enablePfcAttribute))
+	}
+
+	enablePimSparseAttribute, ok := attributes["enable_pim_sparse"]
+
+	if !ok {
+		diags.AddError(
+			"Attribute Missing",
+			`enable_pim_sparse is missing from object`)
+
+		return NewInterfacesValueUnknown(), diags
+	}
+
+	enablePimSparseVal, ok := enablePimSparseAttribute.(basetypes.BoolValue)
+
+	if !ok {
+		diags.AddError(
+			"Attribute Wrong Type",
+			fmt.Sprintf(`enable_pim_sparse expected to be basetypes.BoolValue, was: %T`, enablePimSparseAttribute))
+	}
+
+	enableQosAttribute, ok := attributes["enable_qos"]
+
+	if !ok {
+		diags.AddError(
+			"Attribute Missing",
+			`enable_qos is missing from object`)
+
+		return NewInterfacesValueUnknown(), diags
+	}
+
+	enableQosVal, ok := enableQosAttribute.(basetypes.BoolValue)
+
+	if !ok {
+		diags.AddError(
+			"Attribute Wrong Type",
+			fmt.Sprintf(`enable_qos expected to be basetypes.BoolValue, was: %T`, enableQosAttribute))
+	}
+
 	freeformConfigAttribute, ok := attributes["freeform_config"]
 
 	if !ok {
@@ -815,6 +1739,42 @@ func NewInterfacesValue(attributeTypes map[string]attr.Type, attributes map[stri
 		diags.AddError(
 			"Attribute Wrong Type",
 			fmt.Sprintf(`freeform_config expected to be basetypes.StringValue, was: %T`, freeformConfigAttribute))
+	}
+
+	guardModeAttribute, ok := attributes["guard_mode"]
+
+	if !ok {
+		diags.AddError(
+			"Attribute Missing",
+			`guard_mode is missing from object`)
+
+		return NewInterfacesValueUnknown(), diags
+	}
+
+	guardModeVal, ok := guardModeAttribute.(basetypes.StringValue)
+
+	if !ok {
+		diags.AddError(
+			"Attribute Wrong Type",
+			fmt.Sprintf(`guard_mode expected to be basetypes.StringValue, was: %T`, guardModeAttribute))
+	}
+
+	igForFexAttribute, ok := attributes["ig_for_fex"]
+
+	if !ok {
+		diags.AddError(
+			"Attribute Missing",
+			`ig_for_fex is missing from object`)
+
+		return NewInterfacesValueUnknown(), diags
+	}
+
+	igForFexVal, ok := igForFexAttribute.(basetypes.BoolValue)
+
+	if !ok {
+		diags.AddError(
+			"Attribute Wrong Type",
+			fmt.Sprintf(`ig_for_fex expected to be basetypes.BoolValue, was: %T`, igForFexAttribute))
 	}
 
 	interfaceDescriptionAttribute, ok := attributes["interface_description"]
@@ -851,6 +1811,114 @@ func NewInterfacesValue(attributeTypes map[string]attr.Type, attributes map[stri
 		diags.AddError(
 			"Attribute Wrong Type",
 			fmt.Sprintf(`interface_name expected to be basetypes.StringValue, was: %T`, interfaceNameAttribute))
+	}
+
+	ipv4AddressAttribute, ok := attributes["ipv4_address"]
+
+	if !ok {
+		diags.AddError(
+			"Attribute Missing",
+			`ipv4_address is missing from object`)
+
+		return NewInterfacesValueUnknown(), diags
+	}
+
+	ipv4AddressVal, ok := ipv4AddressAttribute.(basetypes.StringValue)
+
+	if !ok {
+		diags.AddError(
+			"Attribute Wrong Type",
+			fmt.Sprintf(`ipv4_address expected to be basetypes.StringValue, was: %T`, ipv4AddressAttribute))
+	}
+
+	ipv4PrefixLengthAttribute, ok := attributes["ipv4_prefix_length"]
+
+	if !ok {
+		diags.AddError(
+			"Attribute Missing",
+			`ipv4_prefix_length is missing from object`)
+
+		return NewInterfacesValueUnknown(), diags
+	}
+
+	ipv4PrefixLengthVal, ok := ipv4PrefixLengthAttribute.(basetypes.StringValue)
+
+	if !ok {
+		diags.AddError(
+			"Attribute Wrong Type",
+			fmt.Sprintf(`ipv4_prefix_length expected to be basetypes.StringValue, was: %T`, ipv4PrefixLengthAttribute))
+	}
+
+	ipv6AddrAttribute, ok := attributes["ipv6_addr"]
+
+	if !ok {
+		diags.AddError(
+			"Attribute Missing",
+			`ipv6_addr is missing from object`)
+
+		return NewInterfacesValueUnknown(), diags
+	}
+
+	ipv6AddrVal, ok := ipv6AddrAttribute.(basetypes.StringValue)
+
+	if !ok {
+		diags.AddError(
+			"Attribute Wrong Type",
+			fmt.Sprintf(`ipv6_addr expected to be basetypes.StringValue, was: %T`, ipv6AddrAttribute))
+	}
+
+	ipv6PrefixLengthAttribute, ok := attributes["ipv6_prefix_length"]
+
+	if !ok {
+		diags.AddError(
+			"Attribute Missing",
+			`ipv6_prefix_length is missing from object`)
+
+		return NewInterfacesValueUnknown(), diags
+	}
+
+	ipv6PrefixLengthVal, ok := ipv6PrefixLengthAttribute.(basetypes.StringValue)
+
+	if !ok {
+		diags.AddError(
+			"Attribute Wrong Type",
+			fmt.Sprintf(`ipv6_prefix_length expected to be basetypes.StringValue, was: %T`, ipv6PrefixLengthAttribute))
+	}
+
+	linkStateRoutingProtocolAttribute, ok := attributes["link_state_routing_protocol"]
+
+	if !ok {
+		diags.AddError(
+			"Attribute Missing",
+			`link_state_routing_protocol is missing from object`)
+
+		return NewInterfacesValueUnknown(), diags
+	}
+
+	linkStateRoutingProtocolVal, ok := linkStateRoutingProtocolAttribute.(basetypes.StringValue)
+
+	if !ok {
+		diags.AddError(
+			"Attribute Wrong Type",
+			fmt.Sprintf(`link_state_routing_protocol expected to be basetypes.StringValue, was: %T`, linkStateRoutingProtocolAttribute))
+	}
+
+	linkStateRoutingTagAttribute, ok := attributes["link_state_routing_tag"]
+
+	if !ok {
+		diags.AddError(
+			"Attribute Missing",
+			`link_state_routing_tag is missing from object`)
+
+		return NewInterfacesValueUnknown(), diags
+	}
+
+	linkStateRoutingTagVal, ok := linkStateRoutingTagAttribute.(basetypes.StringValue)
+
+	if !ok {
+		diags.AddError(
+			"Attribute Wrong Type",
+			fmt.Sprintf(`link_state_routing_tag expected to be basetypes.StringValue, was: %T`, linkStateRoutingTagAttribute))
 	}
 
 	mtuAttribute, ok := attributes["mtu"]
@@ -961,6 +2029,132 @@ func NewInterfacesValue(attributeTypes map[string]attr.Type, attributes map[stri
 			fmt.Sprintf(`orphan_port expected to be basetypes.BoolValue, was: %T`, orphanPortAttribute))
 	}
 
+	pVlanAssocListAttribute, ok := attributes["p_vlan_assoc_list"]
+
+	if !ok {
+		diags.AddError(
+			"Attribute Missing",
+			`p_vlan_assoc_list is missing from object`)
+
+		return NewInterfacesValueUnknown(), diags
+	}
+
+	pVlanAssocListVal, ok := pVlanAssocListAttribute.(basetypes.ListValue)
+
+	if !ok {
+		diags.AddError(
+			"Attribute Wrong Type",
+			fmt.Sprintf(`p_vlan_assoc_list expected to be basetypes.ListValue, was: %T`, pVlanAssocListAttribute))
+	}
+
+	pVlanMappingListAttribute, ok := attributes["p_vlan_mapping_list"]
+
+	if !ok {
+		diags.AddError(
+			"Attribute Missing",
+			`p_vlan_mapping_list is missing from object`)
+
+		return NewInterfacesValueUnknown(), diags
+	}
+
+	pVlanMappingListVal, ok := pVlanMappingListAttribute.(basetypes.ListValue)
+
+	if !ok {
+		diags.AddError(
+			"Attribute Wrong Type",
+			fmt.Sprintf(`p_vlan_mapping_list expected to be basetypes.ListValue, was: %T`, pVlanMappingListAttribute))
+	}
+
+	pathCostAttribute, ok := attributes["path_cost"]
+
+	if !ok {
+		diags.AddError(
+			"Attribute Missing",
+			`path_cost is missing from object`)
+
+		return NewInterfacesValueUnknown(), diags
+	}
+
+	pathCostVal, ok := pathCostAttribute.(basetypes.Int64Value)
+
+	if !ok {
+		diags.AddError(
+			"Attribute Wrong Type",
+			fmt.Sprintf(`path_cost expected to be basetypes.Int64Value, was: %T`, pathCostAttribute))
+	}
+
+	pimDrPriorityAttribute, ok := attributes["pim_dr_priority"]
+
+	if !ok {
+		diags.AddError(
+			"Attribute Missing",
+			`pim_dr_priority is missing from object`)
+
+		return NewInterfacesValueUnknown(), diags
+	}
+
+	pimDrPriorityVal, ok := pimDrPriorityAttribute.(basetypes.StringValue)
+
+	if !ok {
+		diags.AddError(
+			"Attribute Wrong Type",
+			fmt.Sprintf(`pim_dr_priority expected to be basetypes.StringValue, was: %T`, pimDrPriorityAttribute))
+	}
+
+	portChannelNameAttribute, ok := attributes["port_channel_name"]
+
+	if !ok {
+		diags.AddError(
+			"Attribute Missing",
+			`port_channel_name is missing from object`)
+
+		return NewInterfacesValueUnknown(), diags
+	}
+
+	portChannelNameVal, ok := portChannelNameAttribute.(basetypes.StringValue)
+
+	if !ok {
+		diags.AddError(
+			"Attribute Wrong Type",
+			fmt.Sprintf(`port_channel_name expected to be basetypes.StringValue, was: %T`, portChannelNameAttribute))
+	}
+
+	portChannelPolicyAttribute, ok := attributes["port_channel_policy"]
+
+	if !ok {
+		diags.AddError(
+			"Attribute Missing",
+			`port_channel_policy is missing from object`)
+
+		return NewInterfacesValueUnknown(), diags
+	}
+
+	portChannelPolicyVal, ok := portChannelPolicyAttribute.(basetypes.StringValue)
+
+	if !ok {
+		diags.AddError(
+			"Attribute Wrong Type",
+			fmt.Sprintf(`port_channel_policy expected to be basetypes.StringValue, was: %T`, portChannelPolicyAttribute))
+	}
+
+	portDuplexModeAttribute, ok := attributes["port_duplex_mode"]
+
+	if !ok {
+		diags.AddError(
+			"Attribute Missing",
+			`port_duplex_mode is missing from object`)
+
+		return NewInterfacesValueUnknown(), diags
+	}
+
+	portDuplexModeVal, ok := portDuplexModeAttribute.(basetypes.StringValue)
+
+	if !ok {
+		diags.AddError(
+			"Attribute Wrong Type",
+			fmt.Sprintf(`port_duplex_mode expected to be basetypes.StringValue, was: %T`, portDuplexModeAttribute))
+	}
+
 	portTypeFastAttribute, ok := attributes["port_type_fast"]
 
 	if !ok {
@@ -995,6 +2189,114 @@ func NewInterfacesValue(attributeTypes map[string]attr.Type, attributes map[stri
 		diags.AddError(
 			"Attribute Wrong Type",
 			fmt.Sprintf(`ptp expected to be basetypes.BoolValue, was: %T`, ptpAttribute))
+	}
+
+	pvlanAllowedVlansAttribute, ok := attributes["pvlan_allowed_vlans"]
+
+	if !ok {
+		diags.AddError(
+			"Attribute Missing",
+			`pvlan_allowed_vlans is missing from object`)
+
+		return NewInterfacesValueUnknown(), diags
+	}
+
+	pvlanAllowedVlansVal, ok := pvlanAllowedVlansAttribute.(basetypes.StringValue)
+
+	if !ok {
+		diags.AddError(
+			"Attribute Wrong Type",
+			fmt.Sprintf(`pvlan_allowed_vlans expected to be basetypes.StringValue, was: %T`, pvlanAllowedVlansAttribute))
+	}
+
+	pvlanModeAttribute, ok := attributes["pvlan_mode"]
+
+	if !ok {
+		diags.AddError(
+			"Attribute Missing",
+			`pvlan_mode is missing from object`)
+
+		return NewInterfacesValueUnknown(), diags
+	}
+
+	pvlanModeVal, ok := pvlanModeAttribute.(basetypes.StringValue)
+
+	if !ok {
+		diags.AddError(
+			"Attribute Wrong Type",
+			fmt.Sprintf(`pvlan_mode expected to be basetypes.StringValue, was: %T`, pvlanModeAttribute))
+	}
+
+	pvlanNativeVlanAttribute, ok := attributes["pvlan_native_vlan"]
+
+	if !ok {
+		diags.AddError(
+			"Attribute Missing",
+			`pvlan_native_vlan is missing from object`)
+
+		return NewInterfacesValueUnknown(), diags
+	}
+
+	pvlanNativeVlanVal, ok := pvlanNativeVlanAttribute.(basetypes.StringValue)
+
+	if !ok {
+		diags.AddError(
+			"Attribute Wrong Type",
+			fmt.Sprintf(`pvlan_native_vlan expected to be basetypes.StringValue, was: %T`, pvlanNativeVlanAttribute))
+	}
+
+	qosPolicyAttribute, ok := attributes["qos_policy"]
+
+	if !ok {
+		diags.AddError(
+			"Attribute Missing",
+			`qos_policy is missing from object`)
+
+		return NewInterfacesValueUnknown(), diags
+	}
+
+	qosPolicyVal, ok := qosPolicyAttribute.(basetypes.StringValue)
+
+	if !ok {
+		diags.AddError(
+			"Attribute Wrong Type",
+			fmt.Sprintf(`qos_policy expected to be basetypes.StringValue, was: %T`, qosPolicyAttribute))
+	}
+
+	queuingPolicyAttribute, ok := attributes["queuing_policy"]
+
+	if !ok {
+		diags.AddError(
+			"Attribute Missing",
+			`queuing_policy is missing from object`)
+
+		return NewInterfacesValueUnknown(), diags
+	}
+
+	queuingPolicyVal, ok := queuingPolicyAttribute.(basetypes.StringValue)
+
+	if !ok {
+		diags.AddError(
+			"Attribute Wrong Type",
+			fmt.Sprintf(`queuing_policy expected to be basetypes.StringValue, was: %T`, queuingPolicyAttribute))
+	}
+
+	routingTagAttribute, ok := attributes["routing_tag"]
+
+	if !ok {
+		diags.AddError(
+			"Attribute Missing",
+			`routing_tag is missing from object`)
+
+		return NewInterfacesValueUnknown(), diags
+	}
+
+	routingTagVal, ok := routingTagAttribute.(basetypes.StringValue)
+
+	if !ok {
+		diags.AddError(
+			"Attribute Wrong Type",
+			fmt.Sprintf(`routing_tag expected to be basetypes.StringValue, was: %T`, routingTagAttribute))
 	}
 
 	serialNumberAttribute, ok := attributes["serial_number"]
@@ -1033,31 +2335,97 @@ func NewInterfacesValue(attributeTypes map[string]attr.Type, attributes map[stri
 			fmt.Sprintf(`speed expected to be basetypes.StringValue, was: %T`, speedAttribute))
 	}
 
+	ttagAttribute, ok := attributes["ttag"]
+
+	if !ok {
+		diags.AddError(
+			"Attribute Missing",
+			`ttag is missing from object`)
+
+		return NewInterfacesValueUnknown(), diags
+	}
+
+	ttagVal, ok := ttagAttribute.(basetypes.BoolValue)
+
+	if !ok {
+		diags.AddError(
+			"Attribute Wrong Type",
+			fmt.Sprintf(`ttag expected to be basetypes.BoolValue, was: %T`, ttagAttribute))
+	}
+
+	vrfAttribute, ok := attributes["vrf"]
+
+	if !ok {
+		diags.AddError(
+			"Attribute Missing",
+			`vrf is missing from object`)
+
+		return NewInterfacesValueUnknown(), diags
+	}
+
+	vrfVal, ok := vrfAttribute.(basetypes.StringValue)
+
+	if !ok {
+		diags.AddError(
+			"Attribute Wrong Type",
+			fmt.Sprintf(`vrf expected to be basetypes.StringValue, was: %T`, vrfAttribute))
+	}
+
 	if diags.HasError() {
 		return NewInterfacesValueUnknown(), diags
 	}
 
 	return InterfacesValue{
-		AccessVlan:             accessVlanVal,
-		AdminState:             adminStateVal,
-		AllowedVlans:           allowedVlansVal,
-		BpduGuard:              bpduGuardVal,
-		CustomPolicyParameters: customPolicyParametersVal,
-		DeploymentStatus:       deploymentStatusVal,
-		FreeformConfig:         freeformConfigVal,
-		InterfaceDescription:   interfaceDescriptionVal,
-		InterfaceName:          interfaceNameVal,
-		Mtu:                    mtuVal,
-		NativeVlan:             nativeVlanVal,
-		Netflow:                netflowVal,
-		NetflowMonitor:         netflowMonitorVal,
-		NetflowSampler:         netflowSamplerVal,
-		OrphanPort:             orphanPortVal,
-		PortTypeFast:           portTypeFastVal,
-		Ptp:                    ptpVal,
-		SerialNumber:           serialNumberVal,
-		Speed:                  speedVal,
-		state:                  attr.ValueStateKnown,
+		AccessVlan:               accessVlanVal,
+		AdminState:               adminStateVal,
+		AllowedVlans:             allowedVlansVal,
+		AutoNegotiate:            autoNegotiateVal,
+		BpduGuard:                bpduGuardVal,
+		CdpEnable:                cdpEnableVal,
+		CustomPolicyParameters:   customPolicyParametersVal,
+		DeploymentStatus:         deploymentStatusVal,
+		DisableIpRedirects:       disableIpRedirectsVal,
+		EnableMonitor:            enableMonitorVal,
+		EnablePfc:                enablePfcVal,
+		EnablePimSparse:          enablePimSparseVal,
+		EnableQos:                enableQosVal,
+		FreeformConfig:           freeformConfigVal,
+		GuardMode:                guardModeVal,
+		IgForFex:                 igForFexVal,
+		InterfaceDescription:     interfaceDescriptionVal,
+		InterfaceName:            interfaceNameVal,
+		Ipv4Address:              ipv4AddressVal,
+		Ipv4PrefixLength:         ipv4PrefixLengthVal,
+		Ipv6Addr:                 ipv6AddrVal,
+		Ipv6PrefixLength:         ipv6PrefixLengthVal,
+		LinkStateRoutingProtocol: linkStateRoutingProtocolVal,
+		LinkStateRoutingTag:      linkStateRoutingTagVal,
+		Mtu:                      mtuVal,
+		NativeVlan:               nativeVlanVal,
+		Netflow:                  netflowVal,
+		NetflowMonitor:           netflowMonitorVal,
+		NetflowSampler:           netflowSamplerVal,
+		OrphanPort:               orphanPortVal,
+		PVlanAssocList:           pVlanAssocListVal,
+		PVlanMappingList:         pVlanMappingListVal,
+		PathCost:                 pathCostVal,
+		PimDrPriority:            pimDrPriorityVal,
+		PortChannelName:          portChannelNameVal,
+		PortChannelPolicy:        portChannelPolicyVal,
+		PortDuplexMode:           portDuplexModeVal,
+		PortTypeFast:             portTypeFastVal,
+		Ptp:                      ptpVal,
+		PvlanAllowedVlans:        pvlanAllowedVlansVal,
+		PvlanMode:                pvlanModeVal,
+		PvlanNativeVlan:          pvlanNativeVlanVal,
+		QosPolicy:                qosPolicyVal,
+		QueuingPolicy:            queuingPolicyVal,
+		RoutingTag:               routingTagVal,
+		SerialNumber:             serialNumberVal,
+		Speed:                    speedVal,
+		Ttag:                     ttagVal,
+		Vrf:                      vrfVal,
+		state:                    attr.ValueStateKnown,
 	}, diags
 }
 
@@ -1129,30 +2497,60 @@ func (t InterfacesType) ValueType(ctx context.Context) attr.Value {
 var _ basetypes.ObjectValuable = InterfacesValue{}
 
 type InterfacesValue struct {
-	AccessVlan             basetypes.Int64Value  `tfsdk:"access_vlan"`
-	AdminState             basetypes.BoolValue   `tfsdk:"admin_state"`
-	AllowedVlans           basetypes.StringValue `tfsdk:"allowed_vlans"`
-	BpduGuard              basetypes.StringValue `tfsdk:"bpdu_guard"`
-	CustomPolicyParameters basetypes.MapValue    `tfsdk:"custom_policy_parameters"`
-	DeploymentStatus       basetypes.StringValue `tfsdk:"deployment_status"`
-	FreeformConfig         basetypes.StringValue `tfsdk:"freeform_config"`
-	InterfaceDescription   basetypes.StringValue `tfsdk:"interface_description"`
-	InterfaceName          basetypes.StringValue `tfsdk:"interface_name"`
-	Mtu                    basetypes.StringValue `tfsdk:"mtu"`
-	NativeVlan             basetypes.Int64Value  `tfsdk:"native_vlan"`
-	Netflow                basetypes.BoolValue   `tfsdk:"netflow"`
-	NetflowMonitor         basetypes.StringValue `tfsdk:"netflow_monitor"`
-	NetflowSampler         basetypes.StringValue `tfsdk:"netflow_sampler"`
-	OrphanPort             basetypes.BoolValue   `tfsdk:"orphan_port"`
-	PortTypeFast           basetypes.BoolValue   `tfsdk:"port_type_fast"`
-	Ptp                    basetypes.BoolValue   `tfsdk:"ptp"`
-	SerialNumber           basetypes.StringValue `tfsdk:"serial_number"`
-	Speed                  basetypes.StringValue `tfsdk:"speed"`
-	state                  attr.ValueState
+	AccessVlan               basetypes.Int64Value  `tfsdk:"access_vlan"`
+	AdminState               basetypes.BoolValue   `tfsdk:"admin_state"`
+	AllowedVlans             basetypes.StringValue `tfsdk:"allowed_vlans"`
+	AutoNegotiate            basetypes.StringValue `tfsdk:"auto_negotiate"`
+	BpduGuard                basetypes.StringValue `tfsdk:"bpdu_guard"`
+	CdpEnable                basetypes.BoolValue   `tfsdk:"cdp_enable"`
+	CustomPolicyParameters   basetypes.MapValue    `tfsdk:"custom_policy_parameters"`
+	DeploymentStatus         basetypes.StringValue `tfsdk:"deployment_status"`
+	DisableIpRedirects       basetypes.BoolValue   `tfsdk:"disable_ip_redirects"`
+	EnableMonitor            basetypes.BoolValue   `tfsdk:"enable_monitor"`
+	EnablePfc                basetypes.BoolValue   `tfsdk:"enable_pfc"`
+	EnablePimSparse          basetypes.BoolValue   `tfsdk:"enable_pim_sparse"`
+	EnableQos                basetypes.BoolValue   `tfsdk:"enable_qos"`
+	FreeformConfig           basetypes.StringValue `tfsdk:"freeform_config"`
+	GuardMode                basetypes.StringValue `tfsdk:"guard_mode"`
+	IgForFex                 basetypes.BoolValue   `tfsdk:"ig_for_fex"`
+	InterfaceDescription     basetypes.StringValue `tfsdk:"interface_description"`
+	InterfaceName            basetypes.StringValue `tfsdk:"interface_name"`
+	Ipv4Address              basetypes.StringValue `tfsdk:"ipv4_address"`
+	Ipv4PrefixLength         basetypes.StringValue `tfsdk:"ipv4_prefix_length"`
+	Ipv6Addr                 basetypes.StringValue `tfsdk:"ipv6_addr"`
+	Ipv6PrefixLength         basetypes.StringValue `tfsdk:"ipv6_prefix_length"`
+	LinkStateRoutingProtocol basetypes.StringValue `tfsdk:"link_state_routing_protocol"`
+	LinkStateRoutingTag      basetypes.StringValue `tfsdk:"link_state_routing_tag"`
+	Mtu                      basetypes.StringValue `tfsdk:"mtu"`
+	NativeVlan               basetypes.Int64Value  `tfsdk:"native_vlan"`
+	Netflow                  basetypes.BoolValue   `tfsdk:"netflow"`
+	NetflowMonitor           basetypes.StringValue `tfsdk:"netflow_monitor"`
+	NetflowSampler           basetypes.StringValue `tfsdk:"netflow_sampler"`
+	OrphanPort               basetypes.BoolValue   `tfsdk:"orphan_port"`
+	PVlanAssocList           basetypes.ListValue   `tfsdk:"p_vlan_assoc_list"`
+	PVlanMappingList         basetypes.ListValue   `tfsdk:"p_vlan_mapping_list"`
+	PathCost                 basetypes.Int64Value  `tfsdk:"path_cost"`
+	PimDrPriority            basetypes.StringValue `tfsdk:"pim_dr_priority"`
+	PortChannelName          basetypes.StringValue `tfsdk:"port_channel_name"`
+	PortChannelPolicy        basetypes.StringValue `tfsdk:"port_channel_policy"`
+	PortDuplexMode           basetypes.StringValue `tfsdk:"port_duplex_mode"`
+	PortTypeFast             basetypes.BoolValue   `tfsdk:"port_type_fast"`
+	Ptp                      basetypes.BoolValue   `tfsdk:"ptp"`
+	PvlanAllowedVlans        basetypes.StringValue `tfsdk:"pvlan_allowed_vlans"`
+	PvlanMode                basetypes.StringValue `tfsdk:"pvlan_mode"`
+	PvlanNativeVlan          basetypes.StringValue `tfsdk:"pvlan_native_vlan"`
+	QosPolicy                basetypes.StringValue `tfsdk:"qos_policy"`
+	QueuingPolicy            basetypes.StringValue `tfsdk:"queuing_policy"`
+	RoutingTag               basetypes.StringValue `tfsdk:"routing_tag"`
+	SerialNumber             basetypes.StringValue `tfsdk:"serial_number"`
+	Speed                    basetypes.StringValue `tfsdk:"speed"`
+	Ttag                     basetypes.BoolValue   `tfsdk:"ttag"`
+	Vrf                      basetypes.StringValue `tfsdk:"vrf"`
+	state                    attr.ValueState
 }
 
 func (v InterfacesValue) ToTerraformValue(ctx context.Context) (tftypes.Value, error) {
-	attrTypes := make(map[string]tftypes.Type, 19)
+	attrTypes := make(map[string]tftypes.Type, 49)
 
 	var val tftypes.Value
 	var err error
@@ -1160,30 +2558,64 @@ func (v InterfacesValue) ToTerraformValue(ctx context.Context) (tftypes.Value, e
 	attrTypes["access_vlan"] = basetypes.Int64Type{}.TerraformType(ctx)
 	attrTypes["admin_state"] = basetypes.BoolType{}.TerraformType(ctx)
 	attrTypes["allowed_vlans"] = basetypes.StringType{}.TerraformType(ctx)
+	attrTypes["auto_negotiate"] = basetypes.StringType{}.TerraformType(ctx)
 	attrTypes["bpdu_guard"] = basetypes.StringType{}.TerraformType(ctx)
+	attrTypes["cdp_enable"] = basetypes.BoolType{}.TerraformType(ctx)
 	attrTypes["custom_policy_parameters"] = basetypes.MapType{
 		ElemType: types.StringType,
 	}.TerraformType(ctx)
 	attrTypes["deployment_status"] = basetypes.StringType{}.TerraformType(ctx)
+	attrTypes["disable_ip_redirects"] = basetypes.BoolType{}.TerraformType(ctx)
+	attrTypes["enable_monitor"] = basetypes.BoolType{}.TerraformType(ctx)
+	attrTypes["enable_pfc"] = basetypes.BoolType{}.TerraformType(ctx)
+	attrTypes["enable_pim_sparse"] = basetypes.BoolType{}.TerraformType(ctx)
+	attrTypes["enable_qos"] = basetypes.BoolType{}.TerraformType(ctx)
 	attrTypes["freeform_config"] = basetypes.StringType{}.TerraformType(ctx)
+	attrTypes["guard_mode"] = basetypes.StringType{}.TerraformType(ctx)
+	attrTypes["ig_for_fex"] = basetypes.BoolType{}.TerraformType(ctx)
 	attrTypes["interface_description"] = basetypes.StringType{}.TerraformType(ctx)
 	attrTypes["interface_name"] = basetypes.StringType{}.TerraformType(ctx)
+	attrTypes["ipv4_address"] = basetypes.StringType{}.TerraformType(ctx)
+	attrTypes["ipv4_prefix_length"] = basetypes.StringType{}.TerraformType(ctx)
+	attrTypes["ipv6_addr"] = basetypes.StringType{}.TerraformType(ctx)
+	attrTypes["ipv6_prefix_length"] = basetypes.StringType{}.TerraformType(ctx)
+	attrTypes["link_state_routing_protocol"] = basetypes.StringType{}.TerraformType(ctx)
+	attrTypes["link_state_routing_tag"] = basetypes.StringType{}.TerraformType(ctx)
 	attrTypes["mtu"] = basetypes.StringType{}.TerraformType(ctx)
 	attrTypes["native_vlan"] = basetypes.Int64Type{}.TerraformType(ctx)
 	attrTypes["netflow"] = basetypes.BoolType{}.TerraformType(ctx)
 	attrTypes["netflow_monitor"] = basetypes.StringType{}.TerraformType(ctx)
 	attrTypes["netflow_sampler"] = basetypes.StringType{}.TerraformType(ctx)
 	attrTypes["orphan_port"] = basetypes.BoolType{}.TerraformType(ctx)
+	attrTypes["p_vlan_assoc_list"] = basetypes.ListType{
+		ElemType: PVlanAssocListValue{}.Type(ctx),
+	}.TerraformType(ctx)
+	attrTypes["p_vlan_mapping_list"] = basetypes.ListType{
+		ElemType: PVlanMappingListValue{}.Type(ctx),
+	}.TerraformType(ctx)
+	attrTypes["path_cost"] = basetypes.Int64Type{}.TerraformType(ctx)
+	attrTypes["pim_dr_priority"] = basetypes.StringType{}.TerraformType(ctx)
+	attrTypes["port_channel_name"] = basetypes.StringType{}.TerraformType(ctx)
+	attrTypes["port_channel_policy"] = basetypes.StringType{}.TerraformType(ctx)
+	attrTypes["port_duplex_mode"] = basetypes.StringType{}.TerraformType(ctx)
 	attrTypes["port_type_fast"] = basetypes.BoolType{}.TerraformType(ctx)
 	attrTypes["ptp"] = basetypes.BoolType{}.TerraformType(ctx)
+	attrTypes["pvlan_allowed_vlans"] = basetypes.StringType{}.TerraformType(ctx)
+	attrTypes["pvlan_mode"] = basetypes.StringType{}.TerraformType(ctx)
+	attrTypes["pvlan_native_vlan"] = basetypes.StringType{}.TerraformType(ctx)
+	attrTypes["qos_policy"] = basetypes.StringType{}.TerraformType(ctx)
+	attrTypes["queuing_policy"] = basetypes.StringType{}.TerraformType(ctx)
+	attrTypes["routing_tag"] = basetypes.StringType{}.TerraformType(ctx)
 	attrTypes["serial_number"] = basetypes.StringType{}.TerraformType(ctx)
 	attrTypes["speed"] = basetypes.StringType{}.TerraformType(ctx)
+	attrTypes["ttag"] = basetypes.BoolType{}.TerraformType(ctx)
+	attrTypes["vrf"] = basetypes.StringType{}.TerraformType(ctx)
 
 	objectType := tftypes.Object{AttributeTypes: attrTypes}
 
 	switch v.state {
 	case attr.ValueStateKnown:
-		vals := make(map[string]tftypes.Value, 19)
+		vals := make(map[string]tftypes.Value, 49)
 
 		val, err = v.AccessVlan.ToTerraformValue(ctx)
 
@@ -1209,6 +2641,14 @@ func (v InterfacesValue) ToTerraformValue(ctx context.Context) (tftypes.Value, e
 
 		vals["allowed_vlans"] = val
 
+		val, err = v.AutoNegotiate.ToTerraformValue(ctx)
+
+		if err != nil {
+			return tftypes.NewValue(objectType, tftypes.UnknownValue), err
+		}
+
+		vals["auto_negotiate"] = val
+
 		val, err = v.BpduGuard.ToTerraformValue(ctx)
 
 		if err != nil {
@@ -1216,6 +2656,14 @@ func (v InterfacesValue) ToTerraformValue(ctx context.Context) (tftypes.Value, e
 		}
 
 		vals["bpdu_guard"] = val
+
+		val, err = v.CdpEnable.ToTerraformValue(ctx)
+
+		if err != nil {
+			return tftypes.NewValue(objectType, tftypes.UnknownValue), err
+		}
+
+		vals["cdp_enable"] = val
 
 		val, err = v.CustomPolicyParameters.ToTerraformValue(ctx)
 
@@ -1233,6 +2681,46 @@ func (v InterfacesValue) ToTerraformValue(ctx context.Context) (tftypes.Value, e
 
 		vals["deployment_status"] = val
 
+		val, err = v.DisableIpRedirects.ToTerraformValue(ctx)
+
+		if err != nil {
+			return tftypes.NewValue(objectType, tftypes.UnknownValue), err
+		}
+
+		vals["disable_ip_redirects"] = val
+
+		val, err = v.EnableMonitor.ToTerraformValue(ctx)
+
+		if err != nil {
+			return tftypes.NewValue(objectType, tftypes.UnknownValue), err
+		}
+
+		vals["enable_monitor"] = val
+
+		val, err = v.EnablePfc.ToTerraformValue(ctx)
+
+		if err != nil {
+			return tftypes.NewValue(objectType, tftypes.UnknownValue), err
+		}
+
+		vals["enable_pfc"] = val
+
+		val, err = v.EnablePimSparse.ToTerraformValue(ctx)
+
+		if err != nil {
+			return tftypes.NewValue(objectType, tftypes.UnknownValue), err
+		}
+
+		vals["enable_pim_sparse"] = val
+
+		val, err = v.EnableQos.ToTerraformValue(ctx)
+
+		if err != nil {
+			return tftypes.NewValue(objectType, tftypes.UnknownValue), err
+		}
+
+		vals["enable_qos"] = val
+
 		val, err = v.FreeformConfig.ToTerraformValue(ctx)
 
 		if err != nil {
@@ -1240,6 +2728,22 @@ func (v InterfacesValue) ToTerraformValue(ctx context.Context) (tftypes.Value, e
 		}
 
 		vals["freeform_config"] = val
+
+		val, err = v.GuardMode.ToTerraformValue(ctx)
+
+		if err != nil {
+			return tftypes.NewValue(objectType, tftypes.UnknownValue), err
+		}
+
+		vals["guard_mode"] = val
+
+		val, err = v.IgForFex.ToTerraformValue(ctx)
+
+		if err != nil {
+			return tftypes.NewValue(objectType, tftypes.UnknownValue), err
+		}
+
+		vals["ig_for_fex"] = val
 
 		val, err = v.InterfaceDescription.ToTerraformValue(ctx)
 
@@ -1256,6 +2760,54 @@ func (v InterfacesValue) ToTerraformValue(ctx context.Context) (tftypes.Value, e
 		}
 
 		vals["interface_name"] = val
+
+		val, err = v.Ipv4Address.ToTerraformValue(ctx)
+
+		if err != nil {
+			return tftypes.NewValue(objectType, tftypes.UnknownValue), err
+		}
+
+		vals["ipv4_address"] = val
+
+		val, err = v.Ipv4PrefixLength.ToTerraformValue(ctx)
+
+		if err != nil {
+			return tftypes.NewValue(objectType, tftypes.UnknownValue), err
+		}
+
+		vals["ipv4_prefix_length"] = val
+
+		val, err = v.Ipv6Addr.ToTerraformValue(ctx)
+
+		if err != nil {
+			return tftypes.NewValue(objectType, tftypes.UnknownValue), err
+		}
+
+		vals["ipv6_addr"] = val
+
+		val, err = v.Ipv6PrefixLength.ToTerraformValue(ctx)
+
+		if err != nil {
+			return tftypes.NewValue(objectType, tftypes.UnknownValue), err
+		}
+
+		vals["ipv6_prefix_length"] = val
+
+		val, err = v.LinkStateRoutingProtocol.ToTerraformValue(ctx)
+
+		if err != nil {
+			return tftypes.NewValue(objectType, tftypes.UnknownValue), err
+		}
+
+		vals["link_state_routing_protocol"] = val
+
+		val, err = v.LinkStateRoutingTag.ToTerraformValue(ctx)
+
+		if err != nil {
+			return tftypes.NewValue(objectType, tftypes.UnknownValue), err
+		}
+
+		vals["link_state_routing_tag"] = val
 
 		val, err = v.Mtu.ToTerraformValue(ctx)
 
@@ -1305,6 +2857,62 @@ func (v InterfacesValue) ToTerraformValue(ctx context.Context) (tftypes.Value, e
 
 		vals["orphan_port"] = val
 
+		val, err = v.PVlanAssocList.ToTerraformValue(ctx)
+
+		if err != nil {
+			return tftypes.NewValue(objectType, tftypes.UnknownValue), err
+		}
+
+		vals["p_vlan_assoc_list"] = val
+
+		val, err = v.PVlanMappingList.ToTerraformValue(ctx)
+
+		if err != nil {
+			return tftypes.NewValue(objectType, tftypes.UnknownValue), err
+		}
+
+		vals["p_vlan_mapping_list"] = val
+
+		val, err = v.PathCost.ToTerraformValue(ctx)
+
+		if err != nil {
+			return tftypes.NewValue(objectType, tftypes.UnknownValue), err
+		}
+
+		vals["path_cost"] = val
+
+		val, err = v.PimDrPriority.ToTerraformValue(ctx)
+
+		if err != nil {
+			return tftypes.NewValue(objectType, tftypes.UnknownValue), err
+		}
+
+		vals["pim_dr_priority"] = val
+
+		val, err = v.PortChannelName.ToTerraformValue(ctx)
+
+		if err != nil {
+			return tftypes.NewValue(objectType, tftypes.UnknownValue), err
+		}
+
+		vals["port_channel_name"] = val
+
+		val, err = v.PortChannelPolicy.ToTerraformValue(ctx)
+
+		if err != nil {
+			return tftypes.NewValue(objectType, tftypes.UnknownValue), err
+		}
+
+		vals["port_channel_policy"] = val
+
+		val, err = v.PortDuplexMode.ToTerraformValue(ctx)
+
+		if err != nil {
+			return tftypes.NewValue(objectType, tftypes.UnknownValue), err
+		}
+
+		vals["port_duplex_mode"] = val
+
 		val, err = v.PortTypeFast.ToTerraformValue(ctx)
 
 		if err != nil {
@@ -1321,6 +2929,54 @@ func (v InterfacesValue) ToTerraformValue(ctx context.Context) (tftypes.Value, e
 
 		vals["ptp"] = val
 
+		val, err = v.PvlanAllowedVlans.ToTerraformValue(ctx)
+
+		if err != nil {
+			return tftypes.NewValue(objectType, tftypes.UnknownValue), err
+		}
+
+		vals["pvlan_allowed_vlans"] = val
+
+		val, err = v.PvlanMode.ToTerraformValue(ctx)
+
+		if err != nil {
+			return tftypes.NewValue(objectType, tftypes.UnknownValue), err
+		}
+
+		vals["pvlan_mode"] = val
+
+		val, err = v.PvlanNativeVlan.ToTerraformValue(ctx)
+
+		if err != nil {
+			return tftypes.NewValue(objectType, tftypes.UnknownValue), err
+		}
+
+		vals["pvlan_native_vlan"] = val
+
+		val, err = v.QosPolicy.ToTerraformValue(ctx)
+
+		if err != nil {
+			return tftypes.NewValue(objectType, tftypes.UnknownValue), err
+		}
+
+		vals["qos_policy"] = val
+
+		val, err = v.QueuingPolicy.ToTerraformValue(ctx)
+
+		if err != nil {
+			return tftypes.NewValue(objectType, tftypes.UnknownValue), err
+		}
+
+		vals["queuing_policy"] = val
+
+		val, err = v.RoutingTag.ToTerraformValue(ctx)
+
+		if err != nil {
+			return tftypes.NewValue(objectType, tftypes.UnknownValue), err
+		}
+
+		vals["routing_tag"] = val
+
 		val, err = v.SerialNumber.ToTerraformValue(ctx)
 
 		if err != nil {
@@ -1336,6 +2992,22 @@ func (v InterfacesValue) ToTerraformValue(ctx context.Context) (tftypes.Value, e
 		}
 
 		vals["speed"] = val
+
+		val, err = v.Ttag.ToTerraformValue(ctx)
+
+		if err != nil {
+			return tftypes.NewValue(objectType, tftypes.UnknownValue), err
+		}
+
+		vals["ttag"] = val
+
+		val, err = v.Vrf.ToTerraformValue(ctx)
+
+		if err != nil {
+			return tftypes.NewValue(objectType, tftypes.UnknownValue), err
+		}
+
+		vals["vrf"] = val
 
 		if err := tftypes.ValidateValue(objectType, vals); err != nil {
 			return tftypes.NewValue(objectType, tftypes.UnknownValue), err
@@ -1366,6 +3038,64 @@ func (v InterfacesValue) String() string {
 func (v InterfacesValue) ToObjectValue(ctx context.Context) (basetypes.ObjectValue, diag.Diagnostics) {
 	var diags diag.Diagnostics
 
+	pVlanAssocList := types.ListValueMust(
+		PVlanAssocListType{
+			basetypes.ObjectType{
+				AttrTypes: PVlanAssocListValue{}.AttributeTypes(ctx),
+			},
+		},
+		v.PVlanAssocList.Elements(),
+	)
+
+	if v.PVlanAssocList.IsNull() {
+		pVlanAssocList = types.ListNull(
+			PVlanAssocListType{
+				basetypes.ObjectType{
+					AttrTypes: PVlanAssocListValue{}.AttributeTypes(ctx),
+				},
+			},
+		)
+	}
+
+	if v.PVlanAssocList.IsUnknown() {
+		pVlanAssocList = types.ListUnknown(
+			PVlanAssocListType{
+				basetypes.ObjectType{
+					AttrTypes: PVlanAssocListValue{}.AttributeTypes(ctx),
+				},
+			},
+		)
+	}
+
+	pVlanMappingList := types.ListValueMust(
+		PVlanMappingListType{
+			basetypes.ObjectType{
+				AttrTypes: PVlanMappingListValue{}.AttributeTypes(ctx),
+			},
+		},
+		v.PVlanMappingList.Elements(),
+	)
+
+	if v.PVlanMappingList.IsNull() {
+		pVlanMappingList = types.ListNull(
+			PVlanMappingListType{
+				basetypes.ObjectType{
+					AttrTypes: PVlanMappingListValue{}.AttributeTypes(ctx),
+				},
+			},
+		)
+	}
+
+	if v.PVlanMappingList.IsUnknown() {
+		pVlanMappingList = types.ListUnknown(
+			PVlanMappingListType{
+				basetypes.ObjectType{
+					AttrTypes: PVlanMappingListValue{}.AttributeTypes(ctx),
+				},
+			},
+		)
+	}
+
 	var customPolicyParametersVal basetypes.MapValue
 	switch {
 	case v.CustomPolicyParameters.IsUnknown():
@@ -1380,52 +3110,120 @@ func (v InterfacesValue) ToObjectValue(ctx context.Context) (basetypes.ObjectVal
 
 	if diags.HasError() {
 		return types.ObjectUnknown(map[string]attr.Type{
-			"access_vlan":   basetypes.Int64Type{},
-			"admin_state":   basetypes.BoolType{},
-			"allowed_vlans": basetypes.StringType{},
-			"bpdu_guard":    basetypes.StringType{},
+			"access_vlan":    basetypes.Int64Type{},
+			"admin_state":    basetypes.BoolType{},
+			"allowed_vlans":  basetypes.StringType{},
+			"auto_negotiate": basetypes.StringType{},
+			"bpdu_guard":     basetypes.StringType{},
+			"cdp_enable":     basetypes.BoolType{},
 			"custom_policy_parameters": basetypes.MapType{
 				ElemType: types.StringType,
 			},
-			"deployment_status":     basetypes.StringType{},
-			"freeform_config":       basetypes.StringType{},
-			"interface_description": basetypes.StringType{},
-			"interface_name":        basetypes.StringType{},
-			"mtu":                   basetypes.StringType{},
-			"native_vlan":           basetypes.Int64Type{},
-			"netflow":               basetypes.BoolType{},
-			"netflow_monitor":       basetypes.StringType{},
-			"netflow_sampler":       basetypes.StringType{},
-			"orphan_port":           basetypes.BoolType{},
-			"port_type_fast":        basetypes.BoolType{},
-			"ptp":                   basetypes.BoolType{},
-			"serial_number":         basetypes.StringType{},
-			"speed":                 basetypes.StringType{},
+			"deployment_status":           basetypes.StringType{},
+			"disable_ip_redirects":        basetypes.BoolType{},
+			"enable_monitor":              basetypes.BoolType{},
+			"enable_pfc":                  basetypes.BoolType{},
+			"enable_pim_sparse":           basetypes.BoolType{},
+			"enable_qos":                  basetypes.BoolType{},
+			"freeform_config":             basetypes.StringType{},
+			"guard_mode":                  basetypes.StringType{},
+			"ig_for_fex":                  basetypes.BoolType{},
+			"interface_description":       basetypes.StringType{},
+			"interface_name":              basetypes.StringType{},
+			"ipv4_address":                basetypes.StringType{},
+			"ipv4_prefix_length":          basetypes.StringType{},
+			"ipv6_addr":                   basetypes.StringType{},
+			"ipv6_prefix_length":          basetypes.StringType{},
+			"link_state_routing_protocol": basetypes.StringType{},
+			"link_state_routing_tag":      basetypes.StringType{},
+			"mtu":                         basetypes.StringType{},
+			"native_vlan":                 basetypes.Int64Type{},
+			"netflow":                     basetypes.BoolType{},
+			"netflow_monitor":             basetypes.StringType{},
+			"netflow_sampler":             basetypes.StringType{},
+			"orphan_port":                 basetypes.BoolType{},
+			"p_vlan_assoc_list": basetypes.ListType{
+				ElemType: PVlanAssocListValue{}.Type(ctx),
+			},
+			"p_vlan_mapping_list": basetypes.ListType{
+				ElemType: PVlanMappingListValue{}.Type(ctx),
+			},
+			"path_cost":           basetypes.Int64Type{},
+			"pim_dr_priority":     basetypes.StringType{},
+			"port_channel_name":   basetypes.StringType{},
+			"port_channel_policy": basetypes.StringType{},
+			"port_duplex_mode":    basetypes.StringType{},
+			"port_type_fast":      basetypes.BoolType{},
+			"ptp":                 basetypes.BoolType{},
+			"pvlan_allowed_vlans": basetypes.StringType{},
+			"pvlan_mode":          basetypes.StringType{},
+			"pvlan_native_vlan":   basetypes.StringType{},
+			"qos_policy":          basetypes.StringType{},
+			"queuing_policy":      basetypes.StringType{},
+			"routing_tag":         basetypes.StringType{},
+			"serial_number":       basetypes.StringType{},
+			"speed":               basetypes.StringType{},
+			"ttag":                basetypes.BoolType{},
+			"vrf":                 basetypes.StringType{},
 		}), diags
 	}
 
 	attributeTypes := map[string]attr.Type{
-		"access_vlan":   basetypes.Int64Type{},
-		"admin_state":   basetypes.BoolType{},
-		"allowed_vlans": basetypes.StringType{},
-		"bpdu_guard":    basetypes.StringType{},
+		"access_vlan":    basetypes.Int64Type{},
+		"admin_state":    basetypes.BoolType{},
+		"allowed_vlans":  basetypes.StringType{},
+		"auto_negotiate": basetypes.StringType{},
+		"bpdu_guard":     basetypes.StringType{},
+		"cdp_enable":     basetypes.BoolType{},
 		"custom_policy_parameters": basetypes.MapType{
 			ElemType: types.StringType,
 		},
-		"deployment_status":     basetypes.StringType{},
-		"freeform_config":       basetypes.StringType{},
-		"interface_description": basetypes.StringType{},
-		"interface_name":        basetypes.StringType{},
-		"mtu":                   basetypes.StringType{},
-		"native_vlan":           basetypes.Int64Type{},
-		"netflow":               basetypes.BoolType{},
-		"netflow_monitor":       basetypes.StringType{},
-		"netflow_sampler":       basetypes.StringType{},
-		"orphan_port":           basetypes.BoolType{},
-		"port_type_fast":        basetypes.BoolType{},
-		"ptp":                   basetypes.BoolType{},
-		"serial_number":         basetypes.StringType{},
-		"speed":                 basetypes.StringType{},
+		"deployment_status":           basetypes.StringType{},
+		"disable_ip_redirects":        basetypes.BoolType{},
+		"enable_monitor":              basetypes.BoolType{},
+		"enable_pfc":                  basetypes.BoolType{},
+		"enable_pim_sparse":           basetypes.BoolType{},
+		"enable_qos":                  basetypes.BoolType{},
+		"freeform_config":             basetypes.StringType{},
+		"guard_mode":                  basetypes.StringType{},
+		"ig_for_fex":                  basetypes.BoolType{},
+		"interface_description":       basetypes.StringType{},
+		"interface_name":              basetypes.StringType{},
+		"ipv4_address":                basetypes.StringType{},
+		"ipv4_prefix_length":          basetypes.StringType{},
+		"ipv6_addr":                   basetypes.StringType{},
+		"ipv6_prefix_length":          basetypes.StringType{},
+		"link_state_routing_protocol": basetypes.StringType{},
+		"link_state_routing_tag":      basetypes.StringType{},
+		"mtu":                         basetypes.StringType{},
+		"native_vlan":                 basetypes.Int64Type{},
+		"netflow":                     basetypes.BoolType{},
+		"netflow_monitor":             basetypes.StringType{},
+		"netflow_sampler":             basetypes.StringType{},
+		"orphan_port":                 basetypes.BoolType{},
+		"p_vlan_assoc_list": basetypes.ListType{
+			ElemType: PVlanAssocListValue{}.Type(ctx),
+		},
+		"p_vlan_mapping_list": basetypes.ListType{
+			ElemType: PVlanMappingListValue{}.Type(ctx),
+		},
+		"path_cost":           basetypes.Int64Type{},
+		"pim_dr_priority":     basetypes.StringType{},
+		"port_channel_name":   basetypes.StringType{},
+		"port_channel_policy": basetypes.StringType{},
+		"port_duplex_mode":    basetypes.StringType{},
+		"port_type_fast":      basetypes.BoolType{},
+		"ptp":                 basetypes.BoolType{},
+		"pvlan_allowed_vlans": basetypes.StringType{},
+		"pvlan_mode":          basetypes.StringType{},
+		"pvlan_native_vlan":   basetypes.StringType{},
+		"qos_policy":          basetypes.StringType{},
+		"queuing_policy":      basetypes.StringType{},
+		"routing_tag":         basetypes.StringType{},
+		"serial_number":       basetypes.StringType{},
+		"speed":               basetypes.StringType{},
+		"ttag":                basetypes.BoolType{},
+		"vrf":                 basetypes.StringType{},
 	}
 
 	if v.IsNull() {
@@ -1439,25 +3237,55 @@ func (v InterfacesValue) ToObjectValue(ctx context.Context) (basetypes.ObjectVal
 	objVal, diags := types.ObjectValue(
 		attributeTypes,
 		map[string]attr.Value{
-			"access_vlan":              v.AccessVlan,
-			"admin_state":              v.AdminState,
-			"allowed_vlans":            v.AllowedVlans,
-			"bpdu_guard":               v.BpduGuard,
-			"custom_policy_parameters": customPolicyParametersVal,
-			"deployment_status":        v.DeploymentStatus,
-			"freeform_config":          v.FreeformConfig,
-			"interface_description":    v.InterfaceDescription,
-			"interface_name":           v.InterfaceName,
-			"mtu":                      v.Mtu,
-			"native_vlan":              v.NativeVlan,
-			"netflow":                  v.Netflow,
-			"netflow_monitor":          v.NetflowMonitor,
-			"netflow_sampler":          v.NetflowSampler,
-			"orphan_port":              v.OrphanPort,
-			"port_type_fast":           v.PortTypeFast,
-			"ptp":                      v.Ptp,
-			"serial_number":            v.SerialNumber,
-			"speed":                    v.Speed,
+			"access_vlan":                 v.AccessVlan,
+			"admin_state":                 v.AdminState,
+			"allowed_vlans":               v.AllowedVlans,
+			"auto_negotiate":              v.AutoNegotiate,
+			"bpdu_guard":                  v.BpduGuard,
+			"cdp_enable":                  v.CdpEnable,
+			"custom_policy_parameters":    customPolicyParametersVal,
+			"deployment_status":           v.DeploymentStatus,
+			"disable_ip_redirects":        v.DisableIpRedirects,
+			"enable_monitor":              v.EnableMonitor,
+			"enable_pfc":                  v.EnablePfc,
+			"enable_pim_sparse":           v.EnablePimSparse,
+			"enable_qos":                  v.EnableQos,
+			"freeform_config":             v.FreeformConfig,
+			"guard_mode":                  v.GuardMode,
+			"ig_for_fex":                  v.IgForFex,
+			"interface_description":       v.InterfaceDescription,
+			"interface_name":              v.InterfaceName,
+			"ipv4_address":                v.Ipv4Address,
+			"ipv4_prefix_length":          v.Ipv4PrefixLength,
+			"ipv6_addr":                   v.Ipv6Addr,
+			"ipv6_prefix_length":          v.Ipv6PrefixLength,
+			"link_state_routing_protocol": v.LinkStateRoutingProtocol,
+			"link_state_routing_tag":      v.LinkStateRoutingTag,
+			"mtu":                         v.Mtu,
+			"native_vlan":                 v.NativeVlan,
+			"netflow":                     v.Netflow,
+			"netflow_monitor":             v.NetflowMonitor,
+			"netflow_sampler":             v.NetflowSampler,
+			"orphan_port":                 v.OrphanPort,
+			"p_vlan_assoc_list":           pVlanAssocList,
+			"p_vlan_mapping_list":         pVlanMappingList,
+			"path_cost":                   v.PathCost,
+			"pim_dr_priority":             v.PimDrPriority,
+			"port_channel_name":           v.PortChannelName,
+			"port_channel_policy":         v.PortChannelPolicy,
+			"port_duplex_mode":            v.PortDuplexMode,
+			"port_type_fast":              v.PortTypeFast,
+			"ptp":                         v.Ptp,
+			"pvlan_allowed_vlans":         v.PvlanAllowedVlans,
+			"pvlan_mode":                  v.PvlanMode,
+			"pvlan_native_vlan":           v.PvlanNativeVlan,
+			"qos_policy":                  v.QosPolicy,
+			"queuing_policy":              v.QueuingPolicy,
+			"routing_tag":                 v.RoutingTag,
+			"serial_number":               v.SerialNumber,
+			"speed":                       v.Speed,
+			"ttag":                        v.Ttag,
+			"vrf":                         v.Vrf,
 		})
 
 	return objVal, diags
@@ -1490,7 +3318,15 @@ func (v InterfacesValue) Equal(o attr.Value) bool {
 		return false
 	}
 
+	if !v.AutoNegotiate.Equal(other.AutoNegotiate) {
+		return false
+	}
+
 	if !v.BpduGuard.Equal(other.BpduGuard) {
+		return false
+	}
+
+	if !v.CdpEnable.Equal(other.CdpEnable) {
 		return false
 	}
 
@@ -1502,7 +3338,35 @@ func (v InterfacesValue) Equal(o attr.Value) bool {
 		return false
 	}
 
+	if !v.DisableIpRedirects.Equal(other.DisableIpRedirects) {
+		return false
+	}
+
+	if !v.EnableMonitor.Equal(other.EnableMonitor) {
+		return false
+	}
+
+	if !v.EnablePfc.Equal(other.EnablePfc) {
+		return false
+	}
+
+	if !v.EnablePimSparse.Equal(other.EnablePimSparse) {
+		return false
+	}
+
+	if !v.EnableQos.Equal(other.EnableQos) {
+		return false
+	}
+
 	if !v.FreeformConfig.Equal(other.FreeformConfig) {
+		return false
+	}
+
+	if !v.GuardMode.Equal(other.GuardMode) {
+		return false
+	}
+
+	if !v.IgForFex.Equal(other.IgForFex) {
 		return false
 	}
 
@@ -1511,6 +3375,30 @@ func (v InterfacesValue) Equal(o attr.Value) bool {
 	}
 
 	if !v.InterfaceName.Equal(other.InterfaceName) {
+		return false
+	}
+
+	if !v.Ipv4Address.Equal(other.Ipv4Address) {
+		return false
+	}
+
+	if !v.Ipv4PrefixLength.Equal(other.Ipv4PrefixLength) {
+		return false
+	}
+
+	if !v.Ipv6Addr.Equal(other.Ipv6Addr) {
+		return false
+	}
+
+	if !v.Ipv6PrefixLength.Equal(other.Ipv6PrefixLength) {
+		return false
+	}
+
+	if !v.LinkStateRoutingProtocol.Equal(other.LinkStateRoutingProtocol) {
+		return false
+	}
+
+	if !v.LinkStateRoutingTag.Equal(other.LinkStateRoutingTag) {
 		return false
 	}
 
@@ -1538,6 +3426,34 @@ func (v InterfacesValue) Equal(o attr.Value) bool {
 		return false
 	}
 
+	if !v.PVlanAssocList.Equal(other.PVlanAssocList) {
+		return false
+	}
+
+	if !v.PVlanMappingList.Equal(other.PVlanMappingList) {
+		return false
+	}
+
+	if !v.PathCost.Equal(other.PathCost) {
+		return false
+	}
+
+	if !v.PimDrPriority.Equal(other.PimDrPriority) {
+		return false
+	}
+
+	if !v.PortChannelName.Equal(other.PortChannelName) {
+		return false
+	}
+
+	if !v.PortChannelPolicy.Equal(other.PortChannelPolicy) {
+		return false
+	}
+
+	if !v.PortDuplexMode.Equal(other.PortDuplexMode) {
+		return false
+	}
+
 	if !v.PortTypeFast.Equal(other.PortTypeFast) {
 		return false
 	}
@@ -1546,11 +3462,43 @@ func (v InterfacesValue) Equal(o attr.Value) bool {
 		return false
 	}
 
+	if !v.PvlanAllowedVlans.Equal(other.PvlanAllowedVlans) {
+		return false
+	}
+
+	if !v.PvlanMode.Equal(other.PvlanMode) {
+		return false
+	}
+
+	if !v.PvlanNativeVlan.Equal(other.PvlanNativeVlan) {
+		return false
+	}
+
+	if !v.QosPolicy.Equal(other.QosPolicy) {
+		return false
+	}
+
+	if !v.QueuingPolicy.Equal(other.QueuingPolicy) {
+		return false
+	}
+
+	if !v.RoutingTag.Equal(other.RoutingTag) {
+		return false
+	}
+
 	if !v.SerialNumber.Equal(other.SerialNumber) {
 		return false
 	}
 
 	if !v.Speed.Equal(other.Speed) {
+		return false
+	}
+
+	if !v.Ttag.Equal(other.Ttag) {
+		return false
+	}
+
+	if !v.Vrf.Equal(other.Vrf) {
 		return false
 	}
 
@@ -1567,26 +3515,818 @@ func (v InterfacesValue) Type(ctx context.Context) attr.Type {
 
 func (v InterfacesValue) AttributeTypes(ctx context.Context) map[string]attr.Type {
 	return map[string]attr.Type{
-		"access_vlan":   basetypes.Int64Type{},
-		"admin_state":   basetypes.BoolType{},
-		"allowed_vlans": basetypes.StringType{},
-		"bpdu_guard":    basetypes.StringType{},
+		"access_vlan":    basetypes.Int64Type{},
+		"admin_state":    basetypes.BoolType{},
+		"allowed_vlans":  basetypes.StringType{},
+		"auto_negotiate": basetypes.StringType{},
+		"bpdu_guard":     basetypes.StringType{},
+		"cdp_enable":     basetypes.BoolType{},
 		"custom_policy_parameters": basetypes.MapType{
 			ElemType: types.StringType,
 		},
-		"deployment_status":     basetypes.StringType{},
-		"freeform_config":       basetypes.StringType{},
-		"interface_description": basetypes.StringType{},
-		"interface_name":        basetypes.StringType{},
-		"mtu":                   basetypes.StringType{},
-		"native_vlan":           basetypes.Int64Type{},
-		"netflow":               basetypes.BoolType{},
-		"netflow_monitor":       basetypes.StringType{},
-		"netflow_sampler":       basetypes.StringType{},
-		"orphan_port":           basetypes.BoolType{},
-		"port_type_fast":        basetypes.BoolType{},
-		"ptp":                   basetypes.BoolType{},
-		"serial_number":         basetypes.StringType{},
-		"speed":                 basetypes.StringType{},
+		"deployment_status":           basetypes.StringType{},
+		"disable_ip_redirects":        basetypes.BoolType{},
+		"enable_monitor":              basetypes.BoolType{},
+		"enable_pfc":                  basetypes.BoolType{},
+		"enable_pim_sparse":           basetypes.BoolType{},
+		"enable_qos":                  basetypes.BoolType{},
+		"freeform_config":             basetypes.StringType{},
+		"guard_mode":                  basetypes.StringType{},
+		"ig_for_fex":                  basetypes.BoolType{},
+		"interface_description":       basetypes.StringType{},
+		"interface_name":              basetypes.StringType{},
+		"ipv4_address":                basetypes.StringType{},
+		"ipv4_prefix_length":          basetypes.StringType{},
+		"ipv6_addr":                   basetypes.StringType{},
+		"ipv6_prefix_length":          basetypes.StringType{},
+		"link_state_routing_protocol": basetypes.StringType{},
+		"link_state_routing_tag":      basetypes.StringType{},
+		"mtu":                         basetypes.StringType{},
+		"native_vlan":                 basetypes.Int64Type{},
+		"netflow":                     basetypes.BoolType{},
+		"netflow_monitor":             basetypes.StringType{},
+		"netflow_sampler":             basetypes.StringType{},
+		"orphan_port":                 basetypes.BoolType{},
+		"p_vlan_assoc_list": basetypes.ListType{
+			ElemType: PVlanAssocListValue{}.Type(ctx),
+		},
+		"p_vlan_mapping_list": basetypes.ListType{
+			ElemType: PVlanMappingListValue{}.Type(ctx),
+		},
+		"path_cost":           basetypes.Int64Type{},
+		"pim_dr_priority":     basetypes.StringType{},
+		"port_channel_name":   basetypes.StringType{},
+		"port_channel_policy": basetypes.StringType{},
+		"port_duplex_mode":    basetypes.StringType{},
+		"port_type_fast":      basetypes.BoolType{},
+		"ptp":                 basetypes.BoolType{},
+		"pvlan_allowed_vlans": basetypes.StringType{},
+		"pvlan_mode":          basetypes.StringType{},
+		"pvlan_native_vlan":   basetypes.StringType{},
+		"qos_policy":          basetypes.StringType{},
+		"queuing_policy":      basetypes.StringType{},
+		"routing_tag":         basetypes.StringType{},
+		"serial_number":       basetypes.StringType{},
+		"speed":               basetypes.StringType{},
+		"ttag":                basetypes.BoolType{},
+		"vrf":                 basetypes.StringType{},
+	}
+}
+
+var _ basetypes.ObjectTypable = PVlanAssocListType{}
+
+type PVlanAssocListType struct {
+	basetypes.ObjectType
+}
+
+func (t PVlanAssocListType) Equal(o attr.Type) bool {
+	other, ok := o.(PVlanAssocListType)
+
+	if !ok {
+		return false
+	}
+
+	return t.ObjectType.Equal(other.ObjectType)
+}
+
+func (t PVlanAssocListType) String() string {
+	return "PVlanAssocListType"
+}
+
+func (t PVlanAssocListType) ValueFromObject(ctx context.Context, in basetypes.ObjectValue) (basetypes.ObjectValuable, diag.Diagnostics) {
+	var diags diag.Diagnostics
+
+	attributes := in.Attributes()
+
+	pVlanAttribute, ok := attributes["p_vlan"]
+
+	if !ok {
+		diags.AddError(
+			"Attribute Missing",
+			`p_vlan is missing from object`)
+
+		return nil, diags
+	}
+
+	pVlanVal, ok := pVlanAttribute.(basetypes.StringValue)
+
+	if !ok {
+		diags.AddError(
+			"Attribute Wrong Type",
+			fmt.Sprintf(`p_vlan expected to be basetypes.StringValue, was: %T`, pVlanAttribute))
+	}
+
+	sVlanAttribute, ok := attributes["s_vlan"]
+
+	if !ok {
+		diags.AddError(
+			"Attribute Missing",
+			`s_vlan is missing from object`)
+
+		return nil, diags
+	}
+
+	sVlanVal, ok := sVlanAttribute.(basetypes.StringValue)
+
+	if !ok {
+		diags.AddError(
+			"Attribute Wrong Type",
+			fmt.Sprintf(`s_vlan expected to be basetypes.StringValue, was: %T`, sVlanAttribute))
+	}
+
+	if diags.HasError() {
+		return nil, diags
+	}
+
+	return PVlanAssocListValue{
+		PVlan: pVlanVal,
+		SVlan: sVlanVal,
+		state: attr.ValueStateKnown,
+	}, diags
+}
+
+func NewPVlanAssocListValueNull() PVlanAssocListValue {
+	return PVlanAssocListValue{
+		state: attr.ValueStateNull,
+	}
+}
+
+func NewPVlanAssocListValueUnknown() PVlanAssocListValue {
+	return PVlanAssocListValue{
+		state: attr.ValueStateUnknown,
+	}
+}
+
+func NewPVlanAssocListValue(attributeTypes map[string]attr.Type, attributes map[string]attr.Value) (PVlanAssocListValue, diag.Diagnostics) {
+	var diags diag.Diagnostics
+
+	// Reference: https://github.com/hashicorp/terraform-plugin-framework/issues/521
+	ctx := context.Background()
+
+	for name, attributeType := range attributeTypes {
+		attribute, ok := attributes[name]
+
+		if !ok {
+			diags.AddError(
+				"Missing PVlanAssocListValue Attribute Value",
+				"While creating a PVlanAssocListValue value, a missing attribute value was detected. "+
+					"A PVlanAssocListValue must contain values for all attributes, even if null or unknown. "+
+					"This is always an issue with the provider and should be reported to the provider developers.\n\n"+
+					fmt.Sprintf("PVlanAssocListValue Attribute Name (%s) Expected Type: %s", name, attributeType.String()),
+			)
+
+			continue
+		}
+
+		if !attributeType.Equal(attribute.Type(ctx)) {
+			diags.AddError(
+				"Invalid PVlanAssocListValue Attribute Type",
+				"While creating a PVlanAssocListValue value, an invalid attribute value was detected. "+
+					"A PVlanAssocListValue must use a matching attribute type for the value. "+
+					"This is always an issue with the provider and should be reported to the provider developers.\n\n"+
+					fmt.Sprintf("PVlanAssocListValue Attribute Name (%s) Expected Type: %s\n", name, attributeType.String())+
+					fmt.Sprintf("PVlanAssocListValue Attribute Name (%s) Given Type: %s", name, attribute.Type(ctx)),
+			)
+		}
+	}
+
+	for name := range attributes {
+		_, ok := attributeTypes[name]
+
+		if !ok {
+			diags.AddError(
+				"Extra PVlanAssocListValue Attribute Value",
+				"While creating a PVlanAssocListValue value, an extra attribute value was detected. "+
+					"A PVlanAssocListValue must not contain values beyond the expected attribute types. "+
+					"This is always an issue with the provider and should be reported to the provider developers.\n\n"+
+					fmt.Sprintf("Extra PVlanAssocListValue Attribute Name: %s", name),
+			)
+		}
+	}
+
+	if diags.HasError() {
+		return NewPVlanAssocListValueUnknown(), diags
+	}
+
+	pVlanAttribute, ok := attributes["p_vlan"]
+
+	if !ok {
+		diags.AddError(
+			"Attribute Missing",
+			`p_vlan is missing from object`)
+
+		return NewPVlanAssocListValueUnknown(), diags
+	}
+
+	pVlanVal, ok := pVlanAttribute.(basetypes.StringValue)
+
+	if !ok {
+		diags.AddError(
+			"Attribute Wrong Type",
+			fmt.Sprintf(`p_vlan expected to be basetypes.StringValue, was: %T`, pVlanAttribute))
+	}
+
+	sVlanAttribute, ok := attributes["s_vlan"]
+
+	if !ok {
+		diags.AddError(
+			"Attribute Missing",
+			`s_vlan is missing from object`)
+
+		return NewPVlanAssocListValueUnknown(), diags
+	}
+
+	sVlanVal, ok := sVlanAttribute.(basetypes.StringValue)
+
+	if !ok {
+		diags.AddError(
+			"Attribute Wrong Type",
+			fmt.Sprintf(`s_vlan expected to be basetypes.StringValue, was: %T`, sVlanAttribute))
+	}
+
+	if diags.HasError() {
+		return NewPVlanAssocListValueUnknown(), diags
+	}
+
+	return PVlanAssocListValue{
+		PVlan: pVlanVal,
+		SVlan: sVlanVal,
+		state: attr.ValueStateKnown,
+	}, diags
+}
+
+func NewPVlanAssocListValueMust(attributeTypes map[string]attr.Type, attributes map[string]attr.Value) PVlanAssocListValue {
+	object, diags := NewPVlanAssocListValue(attributeTypes, attributes)
+
+	if diags.HasError() {
+		// This could potentially be added to the diag package.
+		diagsStrings := make([]string, 0, len(diags))
+
+		for _, diagnostic := range diags {
+			diagsStrings = append(diagsStrings, fmt.Sprintf(
+				"%s | %s | %s",
+				diagnostic.Severity(),
+				diagnostic.Summary(),
+				diagnostic.Detail()))
+		}
+
+		panic("NewPVlanAssocListValueMust received error(s): " + strings.Join(diagsStrings, "\n"))
+	}
+
+	return object
+}
+
+func (t PVlanAssocListType) ValueFromTerraform(ctx context.Context, in tftypes.Value) (attr.Value, error) {
+	if in.Type() == nil {
+		return NewPVlanAssocListValueNull(), nil
+	}
+
+	if !in.Type().Equal(t.TerraformType(ctx)) {
+		return nil, fmt.Errorf("expected %s, got %s", t.TerraformType(ctx), in.Type())
+	}
+
+	if !in.IsKnown() {
+		return NewPVlanAssocListValueUnknown(), nil
+	}
+
+	if in.IsNull() {
+		return NewPVlanAssocListValueNull(), nil
+	}
+
+	attributes := map[string]attr.Value{}
+
+	val := map[string]tftypes.Value{}
+
+	err := in.As(&val)
+
+	if err != nil {
+		return nil, err
+	}
+
+	for k, v := range val {
+		a, err := t.AttrTypes[k].ValueFromTerraform(ctx, v)
+
+		if err != nil {
+			return nil, err
+		}
+
+		attributes[k] = a
+	}
+
+	return NewPVlanAssocListValueMust(PVlanAssocListValue{}.AttributeTypes(ctx), attributes), nil
+}
+
+func (t PVlanAssocListType) ValueType(ctx context.Context) attr.Value {
+	return PVlanAssocListValue{}
+}
+
+var _ basetypes.ObjectValuable = PVlanAssocListValue{}
+
+type PVlanAssocListValue struct {
+	PVlan basetypes.StringValue `tfsdk:"p_vlan"`
+	SVlan basetypes.StringValue `tfsdk:"s_vlan"`
+	state attr.ValueState
+}
+
+func (v PVlanAssocListValue) ToTerraformValue(ctx context.Context) (tftypes.Value, error) {
+	attrTypes := make(map[string]tftypes.Type, 2)
+
+	var val tftypes.Value
+	var err error
+
+	attrTypes["p_vlan"] = basetypes.StringType{}.TerraformType(ctx)
+	attrTypes["s_vlan"] = basetypes.StringType{}.TerraformType(ctx)
+
+	objectType := tftypes.Object{AttributeTypes: attrTypes}
+
+	switch v.state {
+	case attr.ValueStateKnown:
+		vals := make(map[string]tftypes.Value, 2)
+
+		val, err = v.PVlan.ToTerraformValue(ctx)
+
+		if err != nil {
+			return tftypes.NewValue(objectType, tftypes.UnknownValue), err
+		}
+
+		vals["p_vlan"] = val
+
+		val, err = v.SVlan.ToTerraformValue(ctx)
+
+		if err != nil {
+			return tftypes.NewValue(objectType, tftypes.UnknownValue), err
+		}
+
+		vals["s_vlan"] = val
+
+		if err := tftypes.ValidateValue(objectType, vals); err != nil {
+			return tftypes.NewValue(objectType, tftypes.UnknownValue), err
+		}
+
+		return tftypes.NewValue(objectType, vals), nil
+	case attr.ValueStateNull:
+		return tftypes.NewValue(objectType, nil), nil
+	case attr.ValueStateUnknown:
+		return tftypes.NewValue(objectType, tftypes.UnknownValue), nil
+	default:
+		panic(fmt.Sprintf("unhandled Object state in ToTerraformValue: %s", v.state))
+	}
+}
+
+func (v PVlanAssocListValue) IsNull() bool {
+	return v.state == attr.ValueStateNull
+}
+
+func (v PVlanAssocListValue) IsUnknown() bool {
+	return v.state == attr.ValueStateUnknown
+}
+
+func (v PVlanAssocListValue) String() string {
+	return "PVlanAssocListValue"
+}
+
+func (v PVlanAssocListValue) ToObjectValue(ctx context.Context) (basetypes.ObjectValue, diag.Diagnostics) {
+	var diags diag.Diagnostics
+
+	attributeTypes := map[string]attr.Type{
+		"p_vlan": basetypes.StringType{},
+		"s_vlan": basetypes.StringType{},
+	}
+
+	if v.IsNull() {
+		return types.ObjectNull(attributeTypes), diags
+	}
+
+	if v.IsUnknown() {
+		return types.ObjectUnknown(attributeTypes), diags
+	}
+
+	objVal, diags := types.ObjectValue(
+		attributeTypes,
+		map[string]attr.Value{
+			"p_vlan": v.PVlan,
+			"s_vlan": v.SVlan,
+		})
+
+	return objVal, diags
+}
+
+func (v PVlanAssocListValue) Equal(o attr.Value) bool {
+	other, ok := o.(PVlanAssocListValue)
+
+	if !ok {
+		return false
+	}
+
+	if v.state != other.state {
+		return false
+	}
+
+	if v.state != attr.ValueStateKnown {
+		return true
+	}
+
+	if !v.PVlan.Equal(other.PVlan) {
+		return false
+	}
+
+	if !v.SVlan.Equal(other.SVlan) {
+		return false
+	}
+
+	return true
+}
+
+func (v PVlanAssocListValue) Type(ctx context.Context) attr.Type {
+	return PVlanAssocListType{
+		basetypes.ObjectType{
+			AttrTypes: v.AttributeTypes(ctx),
+		},
+	}
+}
+
+func (v PVlanAssocListValue) AttributeTypes(ctx context.Context) map[string]attr.Type {
+	return map[string]attr.Type{
+		"p_vlan": basetypes.StringType{},
+		"s_vlan": basetypes.StringType{},
+	}
+}
+
+var _ basetypes.ObjectTypable = PVlanMappingListType{}
+
+type PVlanMappingListType struct {
+	basetypes.ObjectType
+}
+
+func (t PVlanMappingListType) Equal(o attr.Type) bool {
+	other, ok := o.(PVlanMappingListType)
+
+	if !ok {
+		return false
+	}
+
+	return t.ObjectType.Equal(other.ObjectType)
+}
+
+func (t PVlanMappingListType) String() string {
+	return "PVlanMappingListType"
+}
+
+func (t PVlanMappingListType) ValueFromObject(ctx context.Context, in basetypes.ObjectValue) (basetypes.ObjectValuable, diag.Diagnostics) {
+	var diags diag.Diagnostics
+
+	attributes := in.Attributes()
+
+	pVlanAttribute, ok := attributes["p_vlan"]
+
+	if !ok {
+		diags.AddError(
+			"Attribute Missing",
+			`p_vlan is missing from object`)
+
+		return nil, diags
+	}
+
+	pVlanVal, ok := pVlanAttribute.(basetypes.StringValue)
+
+	if !ok {
+		diags.AddError(
+			"Attribute Wrong Type",
+			fmt.Sprintf(`p_vlan expected to be basetypes.StringValue, was: %T`, pVlanAttribute))
+	}
+
+	sVlanAttribute, ok := attributes["s_vlan"]
+
+	if !ok {
+		diags.AddError(
+			"Attribute Missing",
+			`s_vlan is missing from object`)
+
+		return nil, diags
+	}
+
+	sVlanVal, ok := sVlanAttribute.(basetypes.StringValue)
+
+	if !ok {
+		diags.AddError(
+			"Attribute Wrong Type",
+			fmt.Sprintf(`s_vlan expected to be basetypes.StringValue, was: %T`, sVlanAttribute))
+	}
+
+	if diags.HasError() {
+		return nil, diags
+	}
+
+	return PVlanMappingListValue{
+		PVlan: pVlanVal,
+		SVlan: sVlanVal,
+		state: attr.ValueStateKnown,
+	}, diags
+}
+
+func NewPVlanMappingListValueNull() PVlanMappingListValue {
+	return PVlanMappingListValue{
+		state: attr.ValueStateNull,
+	}
+}
+
+func NewPVlanMappingListValueUnknown() PVlanMappingListValue {
+	return PVlanMappingListValue{
+		state: attr.ValueStateUnknown,
+	}
+}
+
+func NewPVlanMappingListValue(attributeTypes map[string]attr.Type, attributes map[string]attr.Value) (PVlanMappingListValue, diag.Diagnostics) {
+	var diags diag.Diagnostics
+
+	// Reference: https://github.com/hashicorp/terraform-plugin-framework/issues/521
+	ctx := context.Background()
+
+	for name, attributeType := range attributeTypes {
+		attribute, ok := attributes[name]
+
+		if !ok {
+			diags.AddError(
+				"Missing PVlanMappingListValue Attribute Value",
+				"While creating a PVlanMappingListValue value, a missing attribute value was detected. "+
+					"A PVlanMappingListValue must contain values for all attributes, even if null or unknown. "+
+					"This is always an issue with the provider and should be reported to the provider developers.\n\n"+
+					fmt.Sprintf("PVlanMappingListValue Attribute Name (%s) Expected Type: %s", name, attributeType.String()),
+			)
+
+			continue
+		}
+
+		if !attributeType.Equal(attribute.Type(ctx)) {
+			diags.AddError(
+				"Invalid PVlanMappingListValue Attribute Type",
+				"While creating a PVlanMappingListValue value, an invalid attribute value was detected. "+
+					"A PVlanMappingListValue must use a matching attribute type for the value. "+
+					"This is always an issue with the provider and should be reported to the provider developers.\n\n"+
+					fmt.Sprintf("PVlanMappingListValue Attribute Name (%s) Expected Type: %s\n", name, attributeType.String())+
+					fmt.Sprintf("PVlanMappingListValue Attribute Name (%s) Given Type: %s", name, attribute.Type(ctx)),
+			)
+		}
+	}
+
+	for name := range attributes {
+		_, ok := attributeTypes[name]
+
+		if !ok {
+			diags.AddError(
+				"Extra PVlanMappingListValue Attribute Value",
+				"While creating a PVlanMappingListValue value, an extra attribute value was detected. "+
+					"A PVlanMappingListValue must not contain values beyond the expected attribute types. "+
+					"This is always an issue with the provider and should be reported to the provider developers.\n\n"+
+					fmt.Sprintf("Extra PVlanMappingListValue Attribute Name: %s", name),
+			)
+		}
+	}
+
+	if diags.HasError() {
+		return NewPVlanMappingListValueUnknown(), diags
+	}
+
+	pVlanAttribute, ok := attributes["p_vlan"]
+
+	if !ok {
+		diags.AddError(
+			"Attribute Missing",
+			`p_vlan is missing from object`)
+
+		return NewPVlanMappingListValueUnknown(), diags
+	}
+
+	pVlanVal, ok := pVlanAttribute.(basetypes.StringValue)
+
+	if !ok {
+		diags.AddError(
+			"Attribute Wrong Type",
+			fmt.Sprintf(`p_vlan expected to be basetypes.StringValue, was: %T`, pVlanAttribute))
+	}
+
+	sVlanAttribute, ok := attributes["s_vlan"]
+
+	if !ok {
+		diags.AddError(
+			"Attribute Missing",
+			`s_vlan is missing from object`)
+
+		return NewPVlanMappingListValueUnknown(), diags
+	}
+
+	sVlanVal, ok := sVlanAttribute.(basetypes.StringValue)
+
+	if !ok {
+		diags.AddError(
+			"Attribute Wrong Type",
+			fmt.Sprintf(`s_vlan expected to be basetypes.StringValue, was: %T`, sVlanAttribute))
+	}
+
+	if diags.HasError() {
+		return NewPVlanMappingListValueUnknown(), diags
+	}
+
+	return PVlanMappingListValue{
+		PVlan: pVlanVal,
+		SVlan: sVlanVal,
+		state: attr.ValueStateKnown,
+	}, diags
+}
+
+func NewPVlanMappingListValueMust(attributeTypes map[string]attr.Type, attributes map[string]attr.Value) PVlanMappingListValue {
+	object, diags := NewPVlanMappingListValue(attributeTypes, attributes)
+
+	if diags.HasError() {
+		// This could potentially be added to the diag package.
+		diagsStrings := make([]string, 0, len(diags))
+
+		for _, diagnostic := range diags {
+			diagsStrings = append(diagsStrings, fmt.Sprintf(
+				"%s | %s | %s",
+				diagnostic.Severity(),
+				diagnostic.Summary(),
+				diagnostic.Detail()))
+		}
+
+		panic("NewPVlanMappingListValueMust received error(s): " + strings.Join(diagsStrings, "\n"))
+	}
+
+	return object
+}
+
+func (t PVlanMappingListType) ValueFromTerraform(ctx context.Context, in tftypes.Value) (attr.Value, error) {
+	if in.Type() == nil {
+		return NewPVlanMappingListValueNull(), nil
+	}
+
+	if !in.Type().Equal(t.TerraformType(ctx)) {
+		return nil, fmt.Errorf("expected %s, got %s", t.TerraformType(ctx), in.Type())
+	}
+
+	if !in.IsKnown() {
+		return NewPVlanMappingListValueUnknown(), nil
+	}
+
+	if in.IsNull() {
+		return NewPVlanMappingListValueNull(), nil
+	}
+
+	attributes := map[string]attr.Value{}
+
+	val := map[string]tftypes.Value{}
+
+	err := in.As(&val)
+
+	if err != nil {
+		return nil, err
+	}
+
+	for k, v := range val {
+		a, err := t.AttrTypes[k].ValueFromTerraform(ctx, v)
+
+		if err != nil {
+			return nil, err
+		}
+
+		attributes[k] = a
+	}
+
+	return NewPVlanMappingListValueMust(PVlanMappingListValue{}.AttributeTypes(ctx), attributes), nil
+}
+
+func (t PVlanMappingListType) ValueType(ctx context.Context) attr.Value {
+	return PVlanMappingListValue{}
+}
+
+var _ basetypes.ObjectValuable = PVlanMappingListValue{}
+
+type PVlanMappingListValue struct {
+	PVlan basetypes.StringValue `tfsdk:"p_vlan"`
+	SVlan basetypes.StringValue `tfsdk:"s_vlan"`
+	state attr.ValueState
+}
+
+func (v PVlanMappingListValue) ToTerraformValue(ctx context.Context) (tftypes.Value, error) {
+	attrTypes := make(map[string]tftypes.Type, 2)
+
+	var val tftypes.Value
+	var err error
+
+	attrTypes["p_vlan"] = basetypes.StringType{}.TerraformType(ctx)
+	attrTypes["s_vlan"] = basetypes.StringType{}.TerraformType(ctx)
+
+	objectType := tftypes.Object{AttributeTypes: attrTypes}
+
+	switch v.state {
+	case attr.ValueStateKnown:
+		vals := make(map[string]tftypes.Value, 2)
+
+		val, err = v.PVlan.ToTerraformValue(ctx)
+
+		if err != nil {
+			return tftypes.NewValue(objectType, tftypes.UnknownValue), err
+		}
+
+		vals["p_vlan"] = val
+
+		val, err = v.SVlan.ToTerraformValue(ctx)
+
+		if err != nil {
+			return tftypes.NewValue(objectType, tftypes.UnknownValue), err
+		}
+
+		vals["s_vlan"] = val
+
+		if err := tftypes.ValidateValue(objectType, vals); err != nil {
+			return tftypes.NewValue(objectType, tftypes.UnknownValue), err
+		}
+
+		return tftypes.NewValue(objectType, vals), nil
+	case attr.ValueStateNull:
+		return tftypes.NewValue(objectType, nil), nil
+	case attr.ValueStateUnknown:
+		return tftypes.NewValue(objectType, tftypes.UnknownValue), nil
+	default:
+		panic(fmt.Sprintf("unhandled Object state in ToTerraformValue: %s", v.state))
+	}
+}
+
+func (v PVlanMappingListValue) IsNull() bool {
+	return v.state == attr.ValueStateNull
+}
+
+func (v PVlanMappingListValue) IsUnknown() bool {
+	return v.state == attr.ValueStateUnknown
+}
+
+func (v PVlanMappingListValue) String() string {
+	return "PVlanMappingListValue"
+}
+
+func (v PVlanMappingListValue) ToObjectValue(ctx context.Context) (basetypes.ObjectValue, diag.Diagnostics) {
+	var diags diag.Diagnostics
+
+	attributeTypes := map[string]attr.Type{
+		"p_vlan": basetypes.StringType{},
+		"s_vlan": basetypes.StringType{},
+	}
+
+	if v.IsNull() {
+		return types.ObjectNull(attributeTypes), diags
+	}
+
+	if v.IsUnknown() {
+		return types.ObjectUnknown(attributeTypes), diags
+	}
+
+	objVal, diags := types.ObjectValue(
+		attributeTypes,
+		map[string]attr.Value{
+			"p_vlan": v.PVlan,
+			"s_vlan": v.SVlan,
+		})
+
+	return objVal, diags
+}
+
+func (v PVlanMappingListValue) Equal(o attr.Value) bool {
+	other, ok := o.(PVlanMappingListValue)
+
+	if !ok {
+		return false
+	}
+
+	if v.state != other.state {
+		return false
+	}
+
+	if v.state != attr.ValueStateKnown {
+		return true
+	}
+
+	if !v.PVlan.Equal(other.PVlan) {
+		return false
+	}
+
+	if !v.SVlan.Equal(other.SVlan) {
+		return false
+	}
+
+	return true
+}
+
+func (v PVlanMappingListValue) Type(ctx context.Context) attr.Type {
+	return PVlanMappingListType{
+		basetypes.ObjectType{
+			AttrTypes: v.AttributeTypes(ctx),
+		},
+	}
+}
+
+func (v PVlanMappingListValue) AttributeTypes(ctx context.Context) map[string]attr.Type {
+	return map[string]attr.Type{
+		"p_vlan": basetypes.StringType{},
+		"s_vlan": basetypes.StringType{},
 	}
 }
