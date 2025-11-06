@@ -95,6 +95,10 @@ func (c NDFC) RscGetVrfAttachments(ctx context.Context, dg *diag.Diagnostics, vr
 		return err
 	}
 
+	if res == nil {
+		tflog.Info(ctx, "RscGetVrfAttachments: No VRF Attachments found")
+		return nil
+	}
 	vaPayload := rva.NDFCVrfAttachmentsPayloads{}
 
 	err = json.Unmarshal(res, &vaPayload.VrfAttachments)

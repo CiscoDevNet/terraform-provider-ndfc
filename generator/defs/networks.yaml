@@ -29,7 +29,10 @@ resource:
       type: Bool
       default_value: false
       payload_hide: true
-      description: If set to `true`, do a deployment of all attachments in this resource. This parameter cannot be `true` if either  `deploy_attachments` inside any `network` or `deploy_this_attachment` in any `attachments` is set to `true`
+      description: >
+                  If set to true, do a deployment of all attachments in this resource.     
+                  This parameter cannot be true if either  `deploy_attachments` inside any `network` or `deploy_this_attachment` in any `attachments` is set to true.        
+                  __Note: Changing value from `true` to `false`, to undo a deployment is not supported__     
       ndfc_type: bool
       example: true
     - model_name: networks
@@ -41,7 +44,7 @@ resource:
       filtered: true
       ndfc_type: List
       map_key: network_name
-      gen_backend: true
+      gen_backend: false
       example: NET1
       attributes:
       - model_name: filterThisValue
@@ -230,9 +233,10 @@ resource:
         ndfc_nested: [networkTemplateConfig]
         tf_name: ingress_replication
         type: Bool
-        default_value: false
-        description: Ingress replication flag. Read-only per network, Fabric-wide setting.
+        optional: true
+        computed: true
         example: false
+        description: Ingress replication flag. Read-only per network, Fabric-wide setting.
       - &mcastGroup
         model_name: mcastGroup
         ndfc_nested: [networkTemplateConfig]
@@ -299,7 +303,8 @@ resource:
         ndfc_nested: [networkTemplateConfig]
         tf_name: netflow
         type: Bool
-        default_value: false
+        optional: true
+        computed: true
         description: Netflow enable flag. Netflow is supported only if it is enabled on fabric. For NX-OS only.
         example: false
       - &sviNetflowMonitor
@@ -321,7 +326,8 @@ resource:
         ndfc_nested: [networkTemplateConfig]
         tf_name: l3_gatway_border
         type: Bool
-        default_value: false
+        optional: true
+        computed: true
         description: Enable L3 Gateway on Border
         example: true
       - &igmpVerion
@@ -338,7 +344,11 @@ resource:
         type: Bool
         default_value: false
         payload_hide: true
-        description: If set to `true`, deploys all attachments in the network. This parameter cannot be `true` if `deploy_all_attachments` at resource level is set to `true` or `deploy_this_attachment` in any `attachments` is set to `true`
+        description: >
+                    If set to `true`, deploys all attachments in the network.     
+                    This parameter cannot be `true` if `deploy_all_attachments` at resource level is set to `true` or `deploy_this_attachment` in any `attachments` is set to `true`.     
+                    __Note: Changing value from `true` to `false`, to undo a deployment is not supported__
+
         ndfc_type: bool
         example: false
       - model_name: lanAttachList

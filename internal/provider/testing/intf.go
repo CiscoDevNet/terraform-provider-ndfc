@@ -10,6 +10,7 @@ package testing
 
 import (
 	"fmt"
+	"strings"
 	"terraform-provider-ndfc/internal/provider/resources/resource_interface_common"
 	"terraform-provider-ndfc/internal/provider/types"
 )
@@ -23,22 +24,43 @@ func GenerateIntfResource(intfObj **resource_interface_common.NDFCInterfaceCommo
 		//intf := new(resource_interface_common.NDFCInterfaceCommonModel)
 		intf.Interfaces = make(map[string]resource_interface_common.NDFCInterfacesValue)
 	}
+	policy := ""
+	// check if ifType has policy information also in format ethernet:policy
+	if strings.Contains(ifType, ":") {
+		splitIf := strings.Split(ifType, ":")
+		ifType = splitIf[0]
+		policy = splitIf[1]
+	}
+	if policy != "" {
+		intf.Policy = policy
+	}
+
 	ifPrefix := ""
 	switch ifType {
 	case "ethernet":
-		intf.Policy = "int_trunk_host"
+		if intf.Policy == "" {
+			intf.Policy = "int_trunk_host"
+		}
 		ifPrefix = "Ethernet1/"
 	case "loopback":
-		intf.Policy = "int_loopback"
+		if intf.Policy == "" {
+			intf.Policy = "int_loopback"
+		}
 		ifPrefix = "loopback"
 	case "vlan":
-		intf.Policy = "int_vlan"
+		if intf.Policy == "" {
+			intf.Policy = "int_vlan"
+		}
 		ifPrefix = "vlan"
 	case "portchannel":
-		intf.Policy = "int_port_channel_trunk_host"
+		if intf.Policy == "" {
+			intf.Policy = "int_port_channel_trunk_host"
+		}
 		ifPrefix = "port-channel"
 	case "vpc":
-		intf.Policy = "int_vpc_trunk_host"
+		if intf.Policy == "" {
+			intf.Policy = "int_vpc_trunk_host"
+		}
 		ifPrefix = "vPC"
 	}
 	if globalSerial {
@@ -73,7 +95,8 @@ func GenerateIntfResource(intfObj **resource_interface_common.NDFCInterfaceCommo
 		ifTmp.NvPairs.AdminState = "true"
 		ifTmp.NvPairs.FreeformConfig = ""
 		ifTmp.NvPairs.InterfaceDescription = "Interface " + key
-		if ifType == "ethernet" {
+		switch ifType {
+		case "ethernet":
 			ifTmp.NvPairs.Speed = "Auto"
 			ifTmp.NvPairs.Mtu = "jumbo"
 			ifTmp.NvPairs.Netflow = "false"
@@ -81,17 +104,31 @@ func GenerateIntfResource(intfObj **resource_interface_common.NDFCInterfaceCommo
 			ifTmp.NvPairs.AccessVlan = new(types.Int64Custom)
 			*ifTmp.NvPairs.AccessVlan = types.Int64Custom(1500 + intfNumber)
 			ifTmp.NvPairs.AllowedVlans = "10-2000"
-		} else if ifType == "loopback" {
+			switch intf.Policy {
+			case "int_routed_host":
+				ifTmp.NvPairs.Ipv4Address = fmt.Sprintf("192.168.%d.10", intfNumber%256)
+				ifTmp.NvPairs.Vrf = "default"
+				ifTmp.NvPairs.Ipv4PrefixLength = "24"
+				ifTmp.NvPairs.RoutingTag = ""
+				ifTmp.NvPairs.Mtu = "9216"
+			case "epl_routed_intf":
+				ifTmp.NvPairs.Ipv4Address = fmt.Sprintf("192.168.%d.10", intfNumber%256)
+				ifTmp.NvPairs.Vrf = "default"
+				ifTmp.NvPairs.Ipv4PrefixLength = "24"
+				ifTmp.NvPairs.RoutingTag = ""
+				ifTmp.NvPairs.Mtu = "9216"
+			}
+		case "loopback":
 			ifTmp.NvPairs.Ipv4Address = fmt.Sprintf("192.168.%d.10", intfNumber%256)
 			ifTmp.NvPairs.Vrf = "default"
 
-		} else if ifType == "vlan" {
+		case "vlan":
 			ifTmp.InterfaceType = "vlan"
 			ifTmp.NvPairs.Ipv4Address = fmt.Sprintf("192.100.%d.10", intfNumber%256)
 			ifTmp.NvPairs.Vrf = "default"
 			ifTmp.NvPairs.Ipv4PrefixLength = "24"
 			ifTmp.NvPairs.RoutingTag = ""
-		} else if ifType == "portchannel" {
+		case "portchannel":
 			ifTmp.NvPairs.Speed = "Auto"
 			ifTmp.NvPairs.Mtu = "jumbo"
 			ifTmp.NvPairs.Netflow = "false"
@@ -103,7 +140,7 @@ func GenerateIntfResource(intfObj **resource_interface_common.NDFCInterfaceCommo
 			ifTmp.NvPairs.MemberInterfaces = fmt.Sprintf("Ethernet1/%d,Ethernet1/%d", EthIntf+1, EthIntf+2)
 			ifTmp.NvPairs.CopyPoDescription = "true"
 			EthIntf += 2
-		} else if ifType == "vpc" {
+		case "vpc":
 			ifTmp.NvPairs.Peer1MemberInterfaces = fmt.Sprintf("Ethernet1/%d", 10+intfNumber)
 			ifTmp.NvPairs.Peer2MemberInterfaces = fmt.Sprintf("Ethernet1/%d", 10+intfNumber)
 			ifTmp.NvPairs.Peer1PortChannelId = new(int64)

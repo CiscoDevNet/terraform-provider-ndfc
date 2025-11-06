@@ -394,12 +394,18 @@ func (c NDFC) networkAttachmentsGetDiff(ctx context.Context, dg *diag.Diagnostic
 	for nw, nwEntry := range vState.Networks {
 		nwEntry.FabricName = vState.FabricName
 		nwEntry.NetworkName = nw
+		// Skip if network is planned to be deleted
+		// Deleted networks are not available in plan
+		if _, ok := vPlan.Networks[nw]; !ok {
+			log.Printf("networkAttachmentsGetDiff: Network %s is planned to be deleted - no need to do attach diff", nw)
+			continue
+		}
 		for serial, attachEntry := range nwEntry.Attachments {
 			if attachEntry.FilterThisValue {
-				//seen in plan
+				//This entry was seen in plan in previous iteration. No need to process
 				continue
 			}
-			// not seen in plan - Detach
+			// Detachments are not seen in plan - hence mark for Detach
 			tflog.Debug(ctx, fmt.Sprintf("networkAttachmentsGetDiff: To be Detached attachment %s/%s",
 				nw,
 				serial))

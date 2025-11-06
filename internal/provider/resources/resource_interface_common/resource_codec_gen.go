@@ -29,62 +29,100 @@ type NDFCInterfacesValue struct {
 	InterfaceType          string            `json:"interfaceType,omitempty"`
 	DeploymentStatus       string            `json:"-"`
 	CustomPolicyParameters map[string]string `json:"-"`
+	PortChannelPolicy      string            `json:"-"`
 	NvPairs                NDFCNvPairsValue  `json:"nvPairs,omitempty"`
 }
 
 type NDFCNvPairsValue struct {
-	InterfaceName             string       `json:"INTF_NAME,omitempty"`
-	AdminState                string       `json:"ADMIN_STATE,omitempty"`
-	FreeformConfig            string       `json:"CONF"`
-	InterfaceDescription      string       `json:"DESC"`
-	Vrf                       string       `json:"INTF_VRF,omitempty"`
-	Ipv4Address               string       `json:"IP,omitempty"`
-	Ipv6Address               string       `json:"V6IP,omitempty"`
-	RouteMapTag               string       `json:"ROUTE_MAP_TAG,omitempty"`
-	BpduGuard                 string       `json:"BPDUGUARD_ENABLED,omitempty"`
-	PortTypeFast              string       `json:"PORTTYPE_FAST_ENABLED,omitempty"`
-	Mtu                       string       `json:"MTU"`
-	Speed                     string       `json:"SPEED,omitempty"`
-	AccessVlan                *Int64Custom `json:"ACCESS_VLAN,omitempty"`
-	OrphanPort                string       `json:"ENABLE_ORPHAN_PORT,omitempty"`
-	Ptp                       string       `json:"PTP,omitempty"`
-	Netflow                   string       `json:"ENABLE_NETFLOW,omitempty"`
-	NetflowMonitor            string       `json:"NETFLOW_MONITOR,omitempty"`
-	NetflowSampler            string       `json:"NETFLOW_SAMPLER,omitempty"`
-	AllowedVlans              string       `json:"ALLOWED_VLANS,omitempty"`
-	NativeVlan                *Int64Custom `json:"NATIVE_VLAN,omitempty"`
-	Ipv4PrefixLength          string       `json:"PREFIX,omitempty"`
-	RoutingTag                string       `json:"ROUTING_TAG"`
-	DisableIpRedirects        string       `json:"DISABLE_IP_REDIRECTS,omitempty"`
-	EnableHsrp                string       `json:"ENABLE_HSRP,omitempty"`
-	HsrpGroup                 *Int64Custom `json:"HSRP_GROUP,omitempty"`
-	HsrpVip                   string       `json:"HSRP_VIP,omitempty"`
-	HsrpPriority              *Int64Custom `json:"HSRP_PRIORITY,omitempty"`
-	HsrpVersion               string       `json:"HSRP_VERSION,omitempty"`
-	Preempt                   string       `json:"PREEMPT,omitempty"`
-	Mac                       string       `json:"MAC,omitempty"`
-	DhcpServerAddr1           string       `json:"dhcpServerAddr1,omitempty"`
-	DhcpServerAddr2           string       `json:"dhcpServerAddr2,omitempty"`
-	DhcpServerAddr3           string       `json:"dhcpServerAddr3,omitempty"`
-	VrfDhcp1                  string       `json:"vrfDhcp1,omitempty"`
-	VrfDhcp2                  string       `json:"vrfDhcp2,omitempty"`
-	VrfDhcp3                  string       `json:"vrfDhcp3,omitempty"`
-	AdvertiseSubnetInUnderlay string       `json:"advSubnetInUnderlay,omitempty"`
-	PortChannelName           string       `json:"PO_ID,omitempty"`
-	CopyPoDescription         string       `json:"COPY_DESC,omitempty"`
-	PortchannelMode           string       `json:"PC_MODE,omitempty"`
-	MemberInterfaces          string       `json:"MEMBER_INTERFACES,omitempty"`
-	MirrorConfig              string       `json:"ENABLE_MIRROR_CONFIG,omitempty"`
-	Peer1PoFreeformConfig     string       `json:"PEER1_PO_CONF"`
-	Peer2PoFreeformConfig     string       `json:"PEER2_PO_CONF"`
-	Peer1PoDescription        string       `json:"PEER1_PO_DESC"`
-	Peer2PoDescription        string       `json:"PEER2_PO_DESC"`
-	Peer1AllowedVlans         string       `json:"PEER1_ALLOWED_VLANS,omitempty"`
-	Peer2AllowedVlans         string       `json:"PEER2_ALLOWED_VLANS,omitempty"`
-	Peer1NativeVlan           *Int64Custom `json:"PEER1_NATIVE_VLAN,omitempty"`
-	Peer2NativeVlan           *Int64Custom `json:"PEER2_NATIVE_VLAN,omitempty"`
-	Peer1MemberInterfaces     string       `json:"PEER1_MEMBER_INTERFACES,omitempty"`
-	Peer2MemberInterfaces     string       `json:"PEER2_MEMBER_INTERFACES,omitempty"`
-	Peer1PortChannelId        *int64       `json:"PEER1_PCID,string,omitempty"`
-	Peer2PortChannelId        *Int64Custom `json:"PEER2_PCID,string,omitempty"`
+	InterfaceName             string                     `json:"INTF_NAME,omitempty"`
+	AdminState                string                     `json:"ADMIN_STATE,omitempty"`
+	FreeformConfig            string                     `json:"CONF"`
+	InterfaceDescription      string                     `json:"DESC"`
+	Vrf                       string                     `json:"INTF_VRF,omitempty"`
+	Ipv4Address               string                     `json:"IP,omitempty"`
+	Ipv6Address               string                     `json:"V6IP,omitempty"`
+	RouteMapTag               string                     `json:"ROUTE_MAP_TAG,omitempty"`
+	BpduGuard                 string                     `json:"BPDUGUARD_ENABLED,omitempty"`
+	PortTypeFast              string                     `json:"PORTTYPE_FAST_ENABLED,omitempty"`
+	Mtu                       string                     `json:"MTU"`
+	Speed                     string                     `json:"SPEED,omitempty"`
+	AccessVlan                *Int64Custom               `json:"ACCESS_VLAN,omitempty"`
+	OrphanPort                string                     `json:"ENABLE_ORPHAN_PORT,omitempty"`
+	Ptp                       string                     `json:"PTP,omitempty"`
+	Netflow                   string                     `json:"ENABLE_NETFLOW,omitempty"`
+	NetflowMonitor            string                     `json:"NETFLOW_MONITOR,omitempty"`
+	NetflowSampler            string                     `json:"NETFLOW_SAMPLER,omitempty"`
+	AllowedVlans              string                     `json:"ALLOWED_VLANS,omitempty"`
+	NativeVlan                *Int64Custom               `json:"NATIVE_VLAN,omitempty"`
+	Ipv4PrefixLength          string                     `json:"PREFIX,omitempty"`
+	RoutingTag                string                     `json:"ROUTING_TAG"`
+	DisableIpRedirects        string                     `json:"DISABLE_IP_REDIRECTS,omitempty"`
+	EnableHsrp                string                     `json:"ENABLE_HSRP,omitempty"`
+	HsrpGroup                 *Int64Custom               `json:"HSRP_GROUP,omitempty"`
+	HsrpVip                   string                     `json:"HSRP_VIP,omitempty"`
+	HsrpPriority              *Int64Custom               `json:"HSRP_PRIORITY,omitempty"`
+	HsrpVersion               string                     `json:"HSRP_VERSION,omitempty"`
+	Preempt                   string                     `json:"PREEMPT,omitempty"`
+	Mac                       string                     `json:"MAC,omitempty"`
+	DhcpServerAddr1           string                     `json:"dhcpServerAddr1,omitempty"`
+	DhcpServerAddr2           string                     `json:"dhcpServerAddr2,omitempty"`
+	DhcpServerAddr3           string                     `json:"dhcpServerAddr3,omitempty"`
+	VrfDhcp1                  string                     `json:"vrfDhcp1,omitempty"`
+	VrfDhcp2                  string                     `json:"vrfDhcp2,omitempty"`
+	VrfDhcp3                  string                     `json:"vrfDhcp3,omitempty"`
+	AdvertiseSubnetInUnderlay string                     `json:"advSubnetInUnderlay,omitempty"`
+	PortChannelName           string                     `json:"PO_ID,omitempty"`
+	CopyPoDescription         string                     `json:"COPY_DESC,omitempty"`
+	PortchannelMode           string                     `json:"PC_MODE,omitempty"`
+	MemberInterfaces          string                     `json:"MEMBER_INTERFACES,omitempty"`
+	MirrorConfig              string                     `json:"ENABLE_MIRROR_CONFIG,omitempty"`
+	Peer1PoFreeformConfig     string                     `json:"PEER1_PO_CONF"`
+	Peer2PoFreeformConfig     string                     `json:"PEER2_PO_CONF"`
+	Peer1PoDescription        string                     `json:"PEER1_PO_DESC"`
+	Peer2PoDescription        string                     `json:"PEER2_PO_DESC"`
+	Peer1AllowedVlans         string                     `json:"PEER1_ALLOWED_VLANS,omitempty"`
+	Peer2AllowedVlans         string                     `json:"PEER2_ALLOWED_VLANS,omitempty"`
+	Peer1NativeVlan           *Int64Custom               `json:"PEER1_NATIVE_VLAN,omitempty"`
+	Peer2NativeVlan           *Int64Custom               `json:"PEER2_NATIVE_VLAN,omitempty"`
+	Peer1MemberInterfaces     string                     `json:"PEER1_MEMBER_INTERFACES,omitempty"`
+	Peer2MemberInterfaces     string                     `json:"PEER2_MEMBER_INTERFACES,omitempty"`
+	Peer1PortChannelId        *int64                     `json:"PEER1_PCID,string,omitempty"`
+	Peer2PortChannelId        *Int64Custom               `json:"PEER2_PCID,string,omitempty"`
+	EnablePimSparse           string                     `json:"ENABLE_PIM_SPARSE,omitempty"`
+	PimDrPriority             string                     `json:"PIM_DR_PRIORITY,omitempty"`
+	EnablePfc                 string                     `json:"ENABLE_PFC,omitempty"`
+	EnableQos                 string                     `json:"ENABLE_QOS,omitempty"`
+	QosPolicy                 string                     `json:"QOS_POLICY,omitempty"`
+	QueuingPolicy             string                     `json:"QUEUING_POLICY,omitempty"`
+	LinkStateRoutingProtocol  string                     `json:"LINK_STATE_ROUTING,omitempty"`
+	LinkStateRoutingTag       string                     `json:"LINK_STATE_ROUTING_TAG,omitempty"`
+	Ipv6Addr                  string                     `json:"IPv6,omitempty"`
+	Ipv6PrefixLength          string                     `json:"IPv6_PREFIX,omitempty"`
+	CdpEnable                 string                     `json:"CDP_ENABLE,omitempty"`
+	PortDuplexMode            string                     `json:"PORT_DUPLEX_MODE,omitempty"`
+	EnableMonitor             string                     `json:"ENABLE_MONITOR,omitempty"`
+	PvlanMode                 string                     `json:"PVLAN_MODE,omitempty"`
+	PvlanAllowedVlans         string                     `json:"PVLAN_ALLOWED_VLANS,omitempty"`
+	PvlanNativeVlan           string                     `json:"PVLAN_NATIVE_VLAN,omitempty"`
+	IgForFex                  string                     `json:"IG_FOR_FEX,omitempty"`
+	AutoNegotiate             string                     `json:"AUTO_NEG,omitempty"`
+	PathCost                  *int64                     `json:"PATH_COST,string,omitempty"`
+	GuardMode                 string                     `json:"GUARD_MODE,omitempty"`
+	Ttag                      string                     `json:"TTAG,omitempty"`
+	PVlanMappingList          NDFCPVlanMappingListValues `json:"MAPPING_LIST,omitempty"`
+	PVlanAssocList            NDFCPVlanAssocListValues   `json:"ASSOCIATION_LIST,omitempty"`
+}
+
+type NDFCPVlanMappingListValues []NDFCPVlanMappingListValue
+
+type NDFCPVlanMappingListValue struct {
+	SVlan string `json:"S_VLAN,omitempty"`
+	PVlan string `json:"P_VLAN,omitempty"`
+}
+
+type NDFCPVlanAssocListValues []NDFCPVlanAssocListValue
+
+type NDFCPVlanAssocListValue struct {
+	SVlan string `json:"S_VLAN,omitempty"`
+	PVlan string `json:"P_VLAN,omitempty"`
 }

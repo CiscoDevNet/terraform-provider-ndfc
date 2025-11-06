@@ -70,7 +70,7 @@ func (r *fabricVxlanEvpnResource) Create(ctx context.Context, req resource.Creat
 	resp.Diagnostics.Append(req.Config.Get(ctx, &data)...)
 	// Create API call logic
 	deploy := data.Deploy.ValueBool()
-	r.client.RscCreateFabric(ctx, &resp.Diagnostics, &data, ndfc.ResourceVxlanEvpnType)
+	r.client.RscCreateFabric(ctx, &resp.Diagnostics, &data)
 	data.Deploy = types.BoolValue(deploy)
 	data.Id = data.FabricName
 	tflog.Debug(ctx, "data.Id = "+data.Id.ValueString())
@@ -110,7 +110,7 @@ func (r *fabricVxlanEvpnResource) Read(ctx context.Context, req resource.ReadReq
 	tflog.Info(ctx, fmt.Sprintf("Incoming ID %s", uniqueId))
 	deploy := data.Deploy.ValueBool()
 
-	r.client.RscReadFabric(ctx, &resp.Diagnostics, &data, ndfc.ResourceVxlanEvpnType)
+	r.client.RscReadFabric(ctx, &resp.Diagnostics, &data, data.FabricName.ValueString())
 	data.Deploy = types.BoolValue(deploy)
 	data.Id = data.FabricName
 	tflog.Debug(ctx, "data.FabricName = "+data.FabricName.ValueString())
@@ -146,7 +146,7 @@ func (r *fabricVxlanEvpnResource) Update(ctx context.Context, req resource.Updat
 	resp.Diagnostics.Append(req.Config.Get(ctx, &planData)...)
 	// Create API call logic
 	deploy := planData.Deploy.ValueBool()
-	r.client.RscUpdateFabric(ctx, &resp.Diagnostics, &planData, ndfc.ResourceVxlanEvpnType)
+	r.client.RscUpdateFabric(ctx, &resp.Diagnostics, &planData)
 	planData.Deploy = types.BoolValue(deploy)
 	planData.Id = planData.FabricName
 	if deploy {
@@ -181,7 +181,7 @@ func (r *fabricVxlanEvpnResource) Delete(ctx context.Context, req resource.Delet
 		resp.State.RemoveResource(ctx)
 		return
 	}
-	r.client.RscDeleteFabric(ctx, &resp.Diagnostics, &data, ndfc.ResourceVxlanEvpnType)
+	r.client.RscDeleteFabric(ctx, &resp.Diagnostics, data.FabricName.ValueString())
 	if resp.Diagnostics.HasError() {
 		tflog.Error(ctx, "Delete Fabric Failed")
 		return
@@ -198,7 +198,7 @@ func (r *fabricVxlanEvpnResource) ImportState(ctx context.Context, req resource.
 		return
 	}
 	data.FabricName = types.StringValue(req.ID)
-	r.client.RscImportFabric(ctx, &resp.Diagnostics, &data, ndfc.ResourceVxlanEvpnType)
+	r.client.RscImportFabric(ctx, &resp.Diagnostics, &data, req.ID)
 	if resp.Diagnostics.HasError() {
 		return
 	}

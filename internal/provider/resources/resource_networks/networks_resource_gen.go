@@ -27,8 +27,8 @@ func NetworksResourceSchema(ctx context.Context) schema.Schema {
 			"deploy_all_attachments": schema.BoolAttribute{
 				Optional:            true,
 				Computed:            true,
-				Description:         "If set to `true`, do a deployment of all attachments in this resource. This parameter cannot be `true` if either  `deploy_attachments` inside any `network` or `deploy_this_attachment` in any `attachments` is set to `true`",
-				MarkdownDescription: "If set to `true`, do a deployment of all attachments in this resource. This parameter cannot be `true` if either  `deploy_attachments` inside any `network` or `deploy_this_attachment` in any `attachments` is set to `true`",
+				Description:         "If set to true, do a deployment of all attachments in this resource.      This parameter cannot be true if either  `deploy_attachments` inside any `network` or `deploy_this_attachment` in any `attachments` is set to true.         __Note: Changing value from `true` to `false`, to undo a deployment is not supported__     \n",
+				MarkdownDescription: "If set to true, do a deployment of all attachments in this resource.      This parameter cannot be true if either  `deploy_attachments` inside any `network` or `deploy_this_attachment` in any `attachments` is set to true.         __Note: Changing value from `true` to `false`, to undo a deployment is not supported__     \n",
 				Default:             booldefault.StaticBool(false),
 			},
 			"fabric_name": schema.StringAttribute{
@@ -68,8 +68,8 @@ func NetworksResourceSchema(ctx context.Context) schema.Schema {
 									"deploy_this_attachment": schema.BoolAttribute{
 										Optional:            true,
 										Computed:            true,
-										Description:         "If set to `true`, deploys this attachment. This cannot be set to `true` if `deploy_all_attachments` at resource level is set to `true` or `deploy_attachments` in the corresponding `network` is set to `true`",
-										MarkdownDescription: "If set to `true`, deploys this attachment. This cannot be set to `true` if `deploy_all_attachments` at resource level is set to `true` or `deploy_attachments` in the corresponding `network` is set to `true`",
+										Description:         "If set to `true`, deploys this attachment.         This cannot be set to `true` if `deploy_all_attachments` at resource level is set to `true` or `deploy_attachments` in the corresponding `network` is set to `true`.         __Note: Changing value from `true` to `false`, to undo a deployment is not supported__      \n",
+										MarkdownDescription: "If set to `true`, deploys this attachment.         This cannot be set to `true` if `deploy_all_attachments` at resource level is set to `true` or `deploy_attachments` in the corresponding `network` is set to `true`.         __Note: Changing value from `true` to `false`, to undo a deployment is not supported__      \n",
 										Default:             booldefault.StaticBool(false),
 									},
 									"display_name": schema.StringAttribute{
@@ -77,6 +77,12 @@ func NetworksResourceSchema(ctx context.Context) schema.Schema {
 										Computed:            true,
 										Description:         "The name of the switch",
 										MarkdownDescription: "The name of the switch",
+									},
+									"fabric": schema.StringAttribute{
+										Optional:            true,
+										Computed:            true,
+										Description:         "The name of the fabric",
+										MarkdownDescription: "The name of the fabric",
 									},
 									"freeform_config": schema.StringAttribute{
 										Optional:            true,
@@ -131,8 +137,8 @@ func NetworksResourceSchema(ctx context.Context) schema.Schema {
 						"deploy_attachments": schema.BoolAttribute{
 							Optional:            true,
 							Computed:            true,
-							Description:         "If set to `true`, deploys all attachments in the network. This parameter cannot be `true` if `deploy_all_attachments` at resource level is set to `true` or `deploy_this_attachment` in any `attachments` is set to `true`",
-							MarkdownDescription: "If set to `true`, deploys all attachments in the network. This parameter cannot be `true` if `deploy_all_attachments` at resource level is set to `true` or `deploy_this_attachment` in any `attachments` is set to `true`",
+							Description:         "If set to `true`, deploys all attachments in the network.      This parameter cannot be `true` if `deploy_all_attachments` at resource level is set to `true` or `deploy_this_attachment` in any `attachments` is set to `true`.      __Note: Changing value from `true` to `false`, to undo a deployment is not supported__\n",
+							MarkdownDescription: "If set to `true`, deploys all attachments in the network.      This parameter cannot be `true` if `deploy_all_attachments` at resource level is set to `true` or `deploy_this_attachment` in any `attachments` is set to `true`.      __Note: Changing value from `true` to `false`, to undo a deployment is not supported__\n",
 							Default:             booldefault.StaticBool(false),
 						},
 						"dhcp_relay_loopback_id": schema.Int64Attribute{
@@ -191,7 +197,6 @@ func NetworksResourceSchema(ctx context.Context) schema.Schema {
 							Computed:            true,
 							Description:         "Ingress replication flag. Read-only per network, Fabric-wide setting.",
 							MarkdownDescription: "Ingress replication flag. Read-only per network, Fabric-wide setting.",
-							Default:             booldefault.StaticBool(false),
 						},
 						"interface_description": schema.StringAttribute{
 							Optional:            true,
@@ -203,7 +208,6 @@ func NetworksResourceSchema(ctx context.Context) schema.Schema {
 							Computed:            true,
 							Description:         "Enable L3 Gateway on Border",
 							MarkdownDescription: "Enable L3 Gateway on Border",
-							Default:             booldefault.StaticBool(false),
 						},
 						"layer2_only": schema.BoolAttribute{
 							Optional:            true,
@@ -230,7 +234,6 @@ func NetworksResourceSchema(ctx context.Context) schema.Schema {
 							Computed:            true,
 							Description:         "Netflow enable flag. Netflow is supported only if it is enabled on fabric. For NX-OS only.",
 							MarkdownDescription: "Netflow enable flag. Netflow is supported only if it is enabled on fabric. For NX-OS only.",
-							Default:             booldefault.StaticBool(false),
 						},
 						"network_extension_template": schema.StringAttribute{
 							Optional:            true,
@@ -2676,6 +2679,24 @@ func (t AttachmentsType) ValueFromObject(ctx context.Context, in basetypes.Objec
 			fmt.Sprintf(`display_name expected to be basetypes.StringValue, was: %T`, displayNameAttribute))
 	}
 
+	fabricAttribute, ok := attributes["fabric"]
+
+	if !ok {
+		diags.AddError(
+			"Attribute Missing",
+			`fabric is missing from object`)
+
+		return nil, diags
+	}
+
+	fabricVal, ok := fabricAttribute.(basetypes.StringValue)
+
+	if !ok {
+		diags.AddError(
+			"Attribute Wrong Type",
+			fmt.Sprintf(`fabric expected to be basetypes.StringValue, was: %T`, fabricAttribute))
+	}
+
 	freeformConfigAttribute, ok := attributes["freeform_config"]
 
 	if !ok {
@@ -2793,6 +2814,7 @@ func (t AttachmentsType) ValueFromObject(ctx context.Context, in basetypes.Objec
 		Attached:             attachedVal,
 		DeployThisAttachment: deployThisAttachmentVal,
 		DisplayName:          displayNameVal,
+		Fabric:               fabricVal,
 		FreeformConfig:       freeformConfigVal,
 		InstanceValues:       instanceValuesVal,
 		SwitchName:           switchNameVal,
@@ -2938,6 +2960,24 @@ func NewAttachmentsValue(attributeTypes map[string]attr.Type, attributes map[str
 			fmt.Sprintf(`display_name expected to be basetypes.StringValue, was: %T`, displayNameAttribute))
 	}
 
+	fabricAttribute, ok := attributes["fabric"]
+
+	if !ok {
+		diags.AddError(
+			"Attribute Missing",
+			`fabric is missing from object`)
+
+		return NewAttachmentsValueUnknown(), diags
+	}
+
+	fabricVal, ok := fabricAttribute.(basetypes.StringValue)
+
+	if !ok {
+		diags.AddError(
+			"Attribute Wrong Type",
+			fmt.Sprintf(`fabric expected to be basetypes.StringValue, was: %T`, fabricAttribute))
+	}
+
 	freeformConfigAttribute, ok := attributes["freeform_config"]
 
 	if !ok {
@@ -3055,6 +3095,7 @@ func NewAttachmentsValue(attributeTypes map[string]attr.Type, attributes map[str
 		Attached:             attachedVal,
 		DeployThisAttachment: deployThisAttachmentVal,
 		DisplayName:          displayNameVal,
+		Fabric:               fabricVal,
 		FreeformConfig:       freeformConfigVal,
 		InstanceValues:       instanceValuesVal,
 		SwitchName:           switchNameVal,
@@ -3137,6 +3178,7 @@ type AttachmentsValue struct {
 	Attached             basetypes.BoolValue   `tfsdk:"attached"`
 	DeployThisAttachment basetypes.BoolValue   `tfsdk:"deploy_this_attachment"`
 	DisplayName          basetypes.StringValue `tfsdk:"display_name"`
+	Fabric               basetypes.StringValue `tfsdk:"fabric"`
 	FreeformConfig       basetypes.StringValue `tfsdk:"freeform_config"`
 	InstanceValues       basetypes.StringValue `tfsdk:"instance_values"`
 	SwitchName           basetypes.StringValue `tfsdk:"switch_name"`
@@ -3147,7 +3189,7 @@ type AttachmentsValue struct {
 }
 
 func (v AttachmentsValue) ToTerraformValue(ctx context.Context) (tftypes.Value, error) {
-	attrTypes := make(map[string]tftypes.Type, 10)
+	attrTypes := make(map[string]tftypes.Type, 11)
 
 	var val tftypes.Value
 	var err error
@@ -3156,6 +3198,7 @@ func (v AttachmentsValue) ToTerraformValue(ctx context.Context) (tftypes.Value, 
 	attrTypes["attached"] = basetypes.BoolType{}.TerraformType(ctx)
 	attrTypes["deploy_this_attachment"] = basetypes.BoolType{}.TerraformType(ctx)
 	attrTypes["display_name"] = basetypes.StringType{}.TerraformType(ctx)
+	attrTypes["fabric"] = basetypes.StringType{}.TerraformType(ctx)
 	attrTypes["freeform_config"] = basetypes.StringType{}.TerraformType(ctx)
 	attrTypes["instance_values"] = basetypes.StringType{}.TerraformType(ctx)
 	attrTypes["switch_name"] = basetypes.StringType{}.TerraformType(ctx)
@@ -3171,7 +3214,7 @@ func (v AttachmentsValue) ToTerraformValue(ctx context.Context) (tftypes.Value, 
 
 	switch v.state {
 	case attr.ValueStateKnown:
-		vals := make(map[string]tftypes.Value, 10)
+		vals := make(map[string]tftypes.Value, 11)
 
 		val, err = v.AttachState.ToTerraformValue(ctx)
 
@@ -3204,6 +3247,14 @@ func (v AttachmentsValue) ToTerraformValue(ctx context.Context) (tftypes.Value, 
 		}
 
 		vals["display_name"] = val
+
+		val, err = v.Fabric.ToTerraformValue(ctx)
+
+		if err != nil {
+			return tftypes.NewValue(objectType, tftypes.UnknownValue), err
+		}
+
+		vals["fabric"] = val
 
 		val, err = v.FreeformConfig.ToTerraformValue(ctx)
 
@@ -3300,6 +3351,7 @@ func (v AttachmentsValue) ToObjectValue(ctx context.Context) (basetypes.ObjectVa
 			"attached":               basetypes.BoolType{},
 			"deploy_this_attachment": basetypes.BoolType{},
 			"display_name":           basetypes.StringType{},
+			"fabric":                 basetypes.StringType{},
 			"freeform_config":        basetypes.StringType{},
 			"instance_values":        basetypes.StringType{},
 			"switch_name":            basetypes.StringType{},
@@ -3331,6 +3383,7 @@ func (v AttachmentsValue) ToObjectValue(ctx context.Context) (basetypes.ObjectVa
 			"attached":               basetypes.BoolType{},
 			"deploy_this_attachment": basetypes.BoolType{},
 			"display_name":           basetypes.StringType{},
+			"fabric":                 basetypes.StringType{},
 			"freeform_config":        basetypes.StringType{},
 			"instance_values":        basetypes.StringType{},
 			"switch_name":            basetypes.StringType{},
@@ -3349,6 +3402,7 @@ func (v AttachmentsValue) ToObjectValue(ctx context.Context) (basetypes.ObjectVa
 		"attached":               basetypes.BoolType{},
 		"deploy_this_attachment": basetypes.BoolType{},
 		"display_name":           basetypes.StringType{},
+		"fabric":                 basetypes.StringType{},
 		"freeform_config":        basetypes.StringType{},
 		"instance_values":        basetypes.StringType{},
 		"switch_name":            basetypes.StringType{},
@@ -3376,6 +3430,7 @@ func (v AttachmentsValue) ToObjectValue(ctx context.Context) (basetypes.ObjectVa
 			"attached":               v.Attached,
 			"deploy_this_attachment": v.DeployThisAttachment,
 			"display_name":           v.DisplayName,
+			"fabric":                 v.Fabric,
 			"freeform_config":        v.FreeformConfig,
 			"instance_values":        v.InstanceValues,
 			"switch_name":            v.SwitchName,
@@ -3415,6 +3470,10 @@ func (v AttachmentsValue) Equal(o attr.Value) bool {
 	}
 
 	if !v.DisplayName.Equal(other.DisplayName) {
+		return false
+	}
+
+	if !v.Fabric.Equal(other.Fabric) {
 		return false
 	}
 
@@ -3459,6 +3518,7 @@ func (v AttachmentsValue) AttributeTypes(ctx context.Context) map[string]attr.Ty
 		"attached":               basetypes.BoolType{},
 		"deploy_this_attachment": basetypes.BoolType{},
 		"display_name":           basetypes.StringType{},
+		"fabric":                 basetypes.StringType{},
 		"freeform_config":        basetypes.StringType{},
 		"instance_values":        basetypes.StringType{},
 		"switch_name":            basetypes.StringType{},

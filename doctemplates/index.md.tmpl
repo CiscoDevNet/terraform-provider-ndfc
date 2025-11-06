@@ -29,3 +29,235 @@ username, password, url, timeout, domain and insecure can also be supplied as en
 ## Argument Reference
 
 {{.SchemaMarkdown}}
+
+## General Guidelines
+
+### Order of operations (Dependencies)
+
+The NDFC provider resources must be created in a specific order to satisfy infrastructure dependencies. Use Terraform's `depends_on` meta-argument to enforce the correct ordering when implicit dependencies are not sufficient.
+
+#### Dependency Hierarchy
+
+The following hierarchy shows the order in which resources should be created:
+
+1. **`ndfc_fabric_vxlan_evpn`** - Create the fabric first
+   - This is the foundation for all other resources
+
+2. **`ndfc_inventory_devices`** - Add devices to the fabric
+   - Depends on: `ndfc_fabric_vxlan_evpn`
+
+3. **`ndfc_vpc_pair`** - Configure VPC pairs on devices
+   - Depends on: `ndfc_inventory_devices`
+
+4. **Interface and VRF resources** (parallel - all depend on VPC pair):
+   - **`ndfc_interface_ethernet`** - Depends on: `ndfc_vpc_pair`
+   - **`ndfc_interface_loopback`** - Depends on: `ndfc_vpc_pair`
+   - **`ndfc_interface_vlan`** - Depends on: `ndfc_vpc_pair`
+   - **`ndfc_vrfs`** - Depends on: `ndfc_vpc_pair`
+
+5. **`ndfc_interface_portchannel`** - Configure port-channel interfaces
+   - Depends on: `ndfc_interface_ethernet`
+   - Note that the ports that are to be part of port-channel must be created first, as a reverse order is not supported.
+
+6. **`ndfc_interface_vpc`** - Configure VPC interfaces
+   - Depends on: `ndfc_inventory_devices` and `ndfc_vpc_pair`
+   - Note that the ports that are to be part of VPC must be created first, as a reverse order is not supported.
+
+7. **`ndfc_networks`** - Create networks/VLANs
+   - Depends on: `ndfc_vrfs`
+
+8. **`ndfc_policy`** - Apply policies
+   - Depends on: `ndfc_networks`
+
+9. **`ndfc_configuration_deploy`** - Deploy configurations globally
+   - Should be the last resource when using global deployment
+   - Depends on all interface and network resources that need deployment
+
+#### Example with Explicit Dependencies
+
+```hcl
+# Step 1: Create the fabric
+resource "ndfc_fabric_vxlan_evpn" "example" {
+  fabric_name = "my-fabric"
+  # ... other fabric configuration attributes
+}
+
+# Step 2: Add devices to the fabric
+resource "ndfc_inventory_devices" "example" {
+  fabric_name = ndfc_fabric_vxlan_evpn.example.fabric_name
+  username    = "admin"
+  password    = "password123"
+  deploy      = true
+  
+  devices = {
+    "10.1.1.1" = {
+      role = "leaf"
+    }
+    "10.1.1.2" = {
+      role = "leaf"
+    }
+  }
+}
+
+# Step 3: Create VPC pair
+resource "ndfc_vpc_pair" "example" {
+  serial_numbers       = ["SERIAL123", "SERIAL456"]
+  use_virtual_peerlink = false
+  deploy               = true
+  depends_on           = [ndfc_inventory_devices.example]
+}
+
+# Step 4a: Create interface resources (parallel)
+resource "ndfc_interface_ethernet" "example" {
+  policy        = "int_trunk_host"
+  serial_number = "SERIAL123"
+  deploy        = true
+  
+  interfaces = {
+    "Ethernet1/1" = {
+      interface_name = "Ethernet1/1"
+      admin_state    = true
+      mtu            = "jumbo"
+      allowed_vlans  = "10-20"
+    }
+  }
+  
+  depends_on = [ndfc_vpc_pair.example]
+}
+
+resource "ndfc_interface_loopback" "example" {
+  policy        = "int_loopback"
+  serial_number = "SERIAL123"
+  deploy        = true
+  
+  interfaces = {
+    "loopback0" = {
+      interface_name = "loopback0"
+      vrf            = "default"
+      ipv4_address   = "10.1.1.1"
+    }
+  }
+  
+  depends_on = [ndfc_vpc_pair.example]
+}
+
+resource "ndfc_interface_vlan" "example" {
+  serial_number = "SERIAL123"
+  deploy        = true
+  
+  interfaces = {
+    "vlan100" = {
+      interface_name = "vlan100"
+      admin_state    = true
+    }
+  }
+  
+  depends_on = [ndfc_vpc_pair.example]
+}
+
+# Step 4b: Create VRF resource (parallel with interfaces)
+resource "ndfc_vrfs" "example" {
+  fabric_name = ndfc_fabric_vxlan_evpn.example.fabric_name
+  
+  vrfs = {
+    "VRF1" = {
+      vrf_id      = 50001
+      vlan_id     = 2000
+      vlan_name   = "VRF1_VLAN"
+    }
+  }
+  
+  depends_on = [ndfc_vpc_pair.example]
+}
+
+# Step 5: Create port-channel (depends on ethernet interfaces)
+resource "ndfc_interface_portchannel" "example" {
+  policy        = "int_port_channel_trunk_host"
+  serial_number = "SERIAL123"
+  deploy        = true
+  
+  interfaces = {
+    "port-channel10" = {
+      interface_name    = "port-channel10"
+      member_interfaces = "eth1/1,eth1/2"  # Members must exist first
+      portchannel_mode  = "on"
+      allowed_vlans     = "10-20"
+    }
+  }
+  
+  depends_on = [ndfc_interface_ethernet.example]
+}
+
+# Step 6: Create VPC interface
+resource "ndfc_interface_vpc" "example" {
+  policy        = "int_vpc_trunk_host"
+  serial_number = "SERIAL123~SERIAL456"  # VPC pair syntax: peer1~peer2
+  deploy        = true
+  
+  interfaces = {
+    "vPC1" = {
+      interface_name           = "vPC1"
+      peer1_member_interfaces  = "eth1/10"
+      peer2_member_interfaces  = "eth1/10"
+      peer1_port_channel_id    = 100
+      peer2_port_channel_id    = 100
+      peer1_allowed_vlans      = "10-20"
+      peer2_allowed_vlans      = "10-20"
+    }
+  }
+  
+  depends_on = [
+    ndfc_inventory_devices.example,
+    ndfc_vpc_pair.example
+  ]
+}
+
+# Step 7: Create networks (depends on VRFs)
+resource "ndfc_networks" "example" {
+  fabric_name = ndfc_fabric_vxlan_evpn.example.fabric_name
+  
+  networks = {
+    "NET1" = {
+      network_id            = 30001
+      vrf_name              = "VRF1"
+      vlan_id               = 100
+      gateway_ipv4_address  = "192.168.1.1/24"
+    }
+  }
+  
+  depends_on = [ndfc_vrfs.example]
+}
+
+# Step 8: Apply policies (depends on networks)
+resource "ndfc_policy" "example" {
+  entity_name    = "MyPolicy"
+  entity_type    = "SWITCH"
+  template_name  = "switch_freeform"
+  serial_numbers = ["SERIAL123"]
+  deploy         = true
+  
+  policy_parameters = {
+    "CONF" = "logging level user 5"
+  }
+  
+  depends_on = [ndfc_networks.example]
+}
+
+# Step 9: Global configuration deploy (if not using resource-level deploy)
+resource "ndfc_configuration_deploy" "example" {
+  fabric_name    = ndfc_fabric_vxlan_evpn.example.fabric_name
+  serial_numbers = ["ALL"]
+  
+  depends_on = [
+    ndfc_interface_loopback.example,
+    ndfc_interface_portchannel.example,
+    ndfc_interface_vlan.example,
+    ndfc_interface_vpc.example,
+    ndfc_networks.example,
+    ndfc_policy.example
+  ]
+}
+```
+
+**Note**: Some dependencies may be implicit through resource references (e.g., using `ndfc_fabric_vxlan_evpn.example.fabric_name`). However, explicit `depends_on` declarations are recommended when the dependency is not captured through attribute references.
+

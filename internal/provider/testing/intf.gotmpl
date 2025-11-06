@@ -54,7 +54,6 @@ resource "ndfc_{{.RscType}}" "{{.RscName}}" {
             {{- if ne (deref $ifEntry.NvPairs.NativeVlan) 0}}
             native_vlan = "{{$ifEntry.NvPairs.NativeVlan}}"
             {{- end}}
-
             {{- if ne $ifEntry.NvPairs.Ipv4Address ""}}
             ipv4_address = "{{$ifEntry.NvPairs.Ipv4Address}}"
             {{- end}}
@@ -67,8 +66,11 @@ resource "ndfc_{{.RscType}}" "{{.RscName}}" {
             {{- if ne $ifEntry.NvPairs.RouteMapTag  ""}}
             route_map_tag = "{{$ifEntry.NvPairs.RouteMapTag}}"
             {{- end}}
-            {{- if eq $ifEntry.InterfaceType "vlan" }}
+            {{- if ne $ifEntry.NvPairs.Ipv4PrefixLength "" }}
             ipv4_prefix_length = "{{$ifEntry.NvPairs.Ipv4PrefixLength}}"
+            {{end}}
+            {{- if ne $ifEntry.NvPairs.Ipv6PrefixLength "" }}
+            ipv6_prefix_length = "{{$ifEntry.NvPairs.Ipv6PrefixLength}}"
             {{end}}
             {{- if ne $ifEntry.NvPairs.MemberInterfaces ""}}
             member_interfaces = "{{$ifEntry.NvPairs.MemberInterfaces}}"

@@ -141,7 +141,10 @@ func (v *NDFCNetworksModel) FillAttachmentsPayloadFromModel(payload *rna.NDFCNet
 		for serial, attachEntry := range nwEntry.Attachments {
 			log.Printf("Adding attachment %s/%s - operation %v", nwName, serial, op)
 			attachEntry.NetworkName = nwName
-			attachEntry.FabricName = v.FabricName
+			if attachEntry.Fabric == "" {
+				attachEntry.Fabric = v.FabricName
+			}
+			log.Printf("Attachment %s/%s fabricName=%s", nwName, serial, attachEntry.Fabric)
 			attachEntry.SerialNumber = serial
 			switch op {
 			case NwAttachmentAttach:
@@ -165,7 +168,9 @@ func (v NDFCNetworksValue) GetAttachmentValues(filters uint16, attach string) []
 	log.Printf("GetAttachmentValues: %s %s", v.NetworkName, v.FabricName)
 	update := func(a *rna.NDFCAttachmentsValue, serial string) {
 		log.Printf("GetAttachmentValues: update %s %s", v.NetworkName, v.FabricName)
-		a.FabricName = v.FabricName
+		if a.Fabric == "" {
+			a.Fabric = v.FabricName
+		}
 		a.NetworkName = v.NetworkName
 		a.SerialNumber = serial
 		if a.Vlan == nil {
