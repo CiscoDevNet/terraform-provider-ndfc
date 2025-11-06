@@ -4,7 +4,7 @@ resource "ndfc_fabric_vxlan_msd" "test_resource_fabric_vxlan_msd_1" {
   anycast_gw_mac             = "2020.0000.00aa"
   bgw_routing_tag            = 54321
   border_gwy_connections     = "Manual"
-  child_fabrics              = ["TF_FABRIC_VXLAN_1", "TF_FABRIC_VXLAN_2"]
+  child_fabrics              = ["TF_CHILD_FABRIC1", "TF_CHILD_FABRIC2"]
   cloudsec_autoconfig        = false
   dci_subnet_range           = "10.10.1.0/24"
   dci_subnet_target_mask     = 30

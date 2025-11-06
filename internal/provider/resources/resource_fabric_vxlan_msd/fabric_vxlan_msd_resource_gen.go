@@ -448,8 +448,8 @@ func FabricVxlanMsdResourceSchema(ctx context.Context) schema.Schema {
 				MarkdownDescription: "If not enabled, IPv4 underlay is used in child VXLAN fabric",
 			},
 		},
-		Description:         "Resource to configure and manage a VXLAN MSD Fabric. Only creation/updation/deletion of the fabric is supported, resources on top of the fabric are not supported yet.",
-		MarkdownDescription: "Resource to configure and manage a VXLAN MSD Fabric. Only creation/updation/deletion of the fabric is supported, resources on top of the fabric are not supported yet.",
+		Description:         "Resource to configure and manage a VXLAN MSD Fabric. Only creation/updation/deletion of the fabric is supported, MSD fabric features as seen in NDFC are no fully supported by the provider. Its under development.",
+		MarkdownDescription: "Resource to configure and manage a VXLAN MSD Fabric. Only creation/updation/deletion of the fabric is supported, MSD fabric features as seen in NDFC are no fully supported by the provider. Its under development.",
 	}
 }
 

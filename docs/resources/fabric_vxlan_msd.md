@@ -3,12 +3,12 @@
 page_title: "ndfc_fabric_vxlan_msd Resource - terraform-provider-ndfc"
 subcategory: ""
 description: |-
-  Resource to configure and manage a VXLAN MSD Fabric. Only creation/updation/deletion of the fabric is supported, resources on top of the fabric are not supported yet.
+  Resource to configure and manage a VXLAN MSD Fabric. Only creation/updation/deletion of the fabric is supported, MSD fabric features as seen in NDFC are no fully supported by the provider. Its under development.
 ---
 
 # ndfc_fabric_vxlan_msd (Resource)
 
-Resource to configure and manage a VXLAN MSD Fabric. Only creation/updation/deletion of the fabric is supported, resources on top of the fabric are not supported yet.
+Resource to configure and manage a VXLAN MSD Fabric. Only creation/updation/deletion of the fabric is supported, MSD fabric features as seen in NDFC are no fully supported by the provider. Its under development.
 
 ## Example Usage
 
@@ -18,7 +18,7 @@ resource "ndfc_fabric_vxlan_msd" "test_resource_fabric_vxlan_msd_1" {
   anycast_gw_mac             = "2020.0000.00aa"
   bgw_routing_tag            = 54321
   border_gwy_connections     = "Manual"
-  child_fabrics              = ["TF_FABRIC_VXLAN_1", "TF_FABRIC_VXLAN_2"]
+  child_fabrics              = ["TF_CHILD_FABRIC1", "TF_CHILD_FABRIC2"]
   cloudsec_autoconfig        = false
   dci_subnet_range           = "10.10.1.0/24"
   dci_subnet_target_mask     = 30
@@ -124,6 +124,8 @@ resource "ndfc_fabric_vxlan_msd" "test_resource_fabric_vxlan_msd_1" {
 ## Import
 
 Import is supported using the following syntax:
+
+The [`terraform import` command](https://developer.hashicorp.com/terraform/cli/commands/import) can be used, for example:
 
 ```shell
 # Format of ID used for import:
