@@ -10,9 +10,8 @@ resource:
     import_desc:
         - "Name of the fabric you would want to import for this resource"
     description: >-
-        Resource to configure and manage a VXLAN MSD Fabric.
-        Only creation/updation/deletion of the fabric is supported,
-        resources on top of the fabric are not supported yet.
+          Resource to configure and manage a VXLAN MSD Fabric. Only creation/updation/deletion of the fabric is supported,
+          MSD fabric features as seen in NDFC are no fully supported by the provider. Its under development.
     attributes:
         - model_name: id
           tf_name: id
@@ -77,7 +76,7 @@ resource:
           tf_name: child_fabrics
           description: "Add child fabrics to the MSD fabric"
           type: List:String
-          example: "[\"TF_FABRIC_VXLAN_1\", \"TF_FABRIC_VXLAN_2\"]"
+          example: "[\"TF_CHILD_FABRIC1\", \"TF_CHILD_FABRIC2\"]"
           ndfc_type: set
           payload_hide: true
           optional: true
