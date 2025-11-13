@@ -19,6 +19,8 @@ const (
 	Modified_file
 	Bgp_as_change_file
 	Different_fabric_profiles
+	Child_fabrics_initial
+	Child_fabrics_replace
 )
 
 func GenerateFabricConfig(tt string, cfg map[string]string, fileType int) string {

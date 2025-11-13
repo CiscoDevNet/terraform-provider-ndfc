@@ -111,9 +111,10 @@ func (c *NDFC) checkDeployStatus(ctx context.Context, diags *diag.Diagnostics, f
 
 	// Get configuration preview to refresh switch status.
 	// This is bug in NDFC sometimes the status is not updated
-	_, err := c.getConfigurationPreview(fabricName)
-	if err != nil {
+	payload, err := c.getConfigurationPreview(fabricName)
+	if err != nil  || payload == nil{
 		diags.AddError("Deploy failed", "Configuration preview failed")
+		tflog.Debug(ctx, fmt.Sprintf("checkDeployStatus: Configuration preview failed with error: %v", err))
 		return nil
 	}
 
@@ -223,10 +224,10 @@ func (c *NDFC) getConfigurationPreview(fabricName string) ([]byte, error) {
 
 	// Config Preview refreshes the config status of switches in the fabric
 	payload, err := previewApi.Get()
-	if len(payload) == 0 || string(payload) == "[]" || err != nil {
-		return nil, fmt.Errorf("configuration preview failed")
+	if (len(payload) == 0 || string(payload) == "[]") && err == nil {
+		return nil, nil
 	}
-	return payload, nil
+	return payload, err
 }
 
 // GetDeploymentHistoryWithFilters provides more detailed filtering options for deployment history

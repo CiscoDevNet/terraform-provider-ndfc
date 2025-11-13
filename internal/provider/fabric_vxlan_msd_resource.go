@@ -97,9 +97,16 @@ func (r *fabricVxlanMsdResource) Create(ctx context.Context, req resource.Create
 		return
 	}
 	r.client.AddChildFabricsToMsd(ctx, &resp.Diagnostics, &data)
+	if resp.Diagnostics.HasError() {
+		// Cleanup - delete the fabric created
+		r.client.RscDeleteFabric(ctx, &resp.Diagnostics, data.FabricName.ValueString())
+		return
+	}
 	// Get and set back the child fabrics to make sure they are correctly added in NDFC
 	data.ChildFabrics = r.GetChildFabrics(ctx, &resp.Diagnostics, data.FabricName.ValueString())
 	if resp.Diagnostics.HasError() {
+		// Cleanup - delete the fabric created
+		r.client.RscDeleteFabric(ctx, &resp.Diagnostics, data.FabricName.ValueString())
 		return
 	}
 	// Save updated data into Terraform state

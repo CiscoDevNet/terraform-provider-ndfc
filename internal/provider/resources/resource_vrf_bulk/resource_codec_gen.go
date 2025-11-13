@@ -30,17 +30,38 @@ type NDFCVrfBulkModel struct {
 }
 
 type NDFCVrfsValue struct {
-	Id                   *int64                                                  `json:"id,omitempty"`
-	FilterThisValue      bool                                                    `json:"-"`
-	VrfName              string                                                  `json:"vrfName,omitempty"`
-	FabricName           string                                                  `json:"fabric,omitempty"`
-	VrfTemplate          string                                                  `json:"vrfTemplate,omitempty"`
-	VrfExtensionTemplate string                                                  `json:"vrfExtensionTemplate,omitempty"`
-	VrfId                *int64                                                  `json:"vrfId,omitempty"`
-	VrfStatus            string                                                  `json:"vrfStatus,omitempty"`
-	DeployAttachments    bool                                                    `json:"-"`
-	AttachList           map[string]resource_vrf_attachments.NDFCAttachListValue `json:"lanAttachList,omitempty"`
-	VrfTemplateConfig    NDFCVrfTemplateConfigValue                              `json:"vrfTemplateConfig,omitempty"`
+	Id                       *int64                                                  `json:"id,omitempty"`
+	FilterThisValue          bool                                                    `json:"-"`
+	VrfName                  string                                                  `json:"vrfName,omitempty"`
+	FabricName               string                                                  `json:"fabric,omitempty"`
+	VrfTemplate              string                                                  `json:"vrfTemplate,omitempty"`
+	VrfExtensionTemplate     string                                                  `json:"vrfExtensionTemplate,omitempty"`
+	VrfId                    *int64                                                  `json:"vrfId,omitempty"`
+	VrfStatus                string                                                  `json:"vrfStatus,omitempty"`
+	DeployAttachments        bool                                                    `json:"-"`
+	MsdChildFabricAttributes map[string]NDFCMsdChildFabricAttributesValue            `json:"-"`
+	AttachList               map[string]resource_vrf_attachments.NDFCAttachListValue `json:"lanAttachList,omitempty"`
+	VrfTemplateConfig        NDFCVrfTemplateConfigValue                              `json:"vrfTemplateConfig,omitempty"`
+}
+
+type NDFCMsdChildFabricAttributesValue struct {
+	FabricName                  string       `json:"fabric_name,omitempty"`
+	AdvertiseHostRoutes         string       `json:"advertiseHostRouteFlag,omitempty"`
+	AdvertiseDefaultRoute       string       `json:"advertiseDefaultRouteFlag,omitempty"`
+	ConfigureStaticDefaultRoute string       `json:"configureStaticDefaultRouteFlag,omitempty"`
+	BgpPassword                 string       `json:"bgpPassword,omitempty"`
+	BgpPasswordType             string       `json:"bgpPasswordKeyType,omitempty"`
+	Netflow                     string       `json:"ENABLE_NETFLOW,omitempty"`
+	NetflowMonitor              string       `json:"NETFLOW_MONITOR,omitempty"`
+	Trm                         string       `json:"trmEnabled,omitempty"`
+	TrmBgwMsite                 string       `json:"trmBGWMSiteEnabled,omitempty"`
+	NoRp                        string       `json:"isRPAbsent,omitempty"`
+	RpAddress                   string       `json:"rpAddress,omitempty"`
+	RpLoopbackId                *Int64Custom `json:"loopbackNumber,omitempty"`
+	UnderlayMulticastAddress    string       `json:"L3VniMcastGroup,omitempty"`
+	OverlayMulticastGroups      string       `json:"multicastGroup,omitempty"`
+	RouteTargetImportMvpn       string       `json:"routeTargetImportMvpn,omitempty"`
+	RouteTargetExportMvpn       string       `json:"routeTargetExportMvpn,omitempty"`
 }
 
 type NDFCVrfTemplateConfigValue struct {
@@ -388,6 +409,27 @@ func (v *VrfsValue) SetValue(jsonData *NDFCVrfsValue) diag.Diagnostics {
 	}
 
 	v.DeployAttachments = types.BoolValue(jsonData.DeployAttachments)
+	if len(jsonData.MsdChildFabricAttributes) == 0 {
+		log.Printf("v.MsdChildFabricAttributes is empty")
+		v.MsdChildFabricAttributes = types.MapNull(MsdChildFabricAttributesValue{}.Type(context.Background()))
+	} else {
+		mapData := make(map[string]MsdChildFabricAttributesValue)
+		for key, item := range jsonData.MsdChildFabricAttributes {
+			data := new(MsdChildFabricAttributesValue)
+			err = data.SetValue(&item)
+			if err != nil {
+				log.Printf("Error in MsdChildFabricAttributesValue.SetValue")
+				return err
+			}
+			data.state = attr.ValueStateKnown
+			mapData[key] = *data
+		}
+		v.MsdChildFabricAttributes, err = types.MapValueFrom(context.Background(), MsdChildFabricAttributesValue{}.Type(context.Background()), mapData)
+		if err != nil {
+			log.Printf("Error in converting map[string]MsdChildFabricAttributesValue to  Map")
+
+		}
+	}
 	if len(jsonData.AttachList) == 0 {
 		log.Printf("v.AttachList is empty")
 		v.AttachList = types.MapNull(AttachListValue{}.Type(context.Background()))
@@ -413,6 +455,127 @@ func (v *VrfsValue) SetValue(jsonData *NDFCVrfsValue) diag.Diagnostics {
 			log.Printf("Error in converting map[string]AttachListValue to  Map")
 
 		}
+	}
+
+	return err
+}
+
+func (v *MsdChildFabricAttributesValue) SetValue(jsonData *NDFCMsdChildFabricAttributesValue) diag.Diagnostics {
+
+	var err diag.Diagnostics
+	err = nil
+
+	if jsonData.FabricName != "" {
+		v.FabricName = types.StringValue(jsonData.FabricName)
+	} else {
+		v.FabricName = types.StringNull()
+	}
+
+	if jsonData.AdvertiseHostRoutes != "" {
+		x, _ := strconv.ParseBool(jsonData.AdvertiseHostRoutes)
+		v.AdvertiseHostRoutes = types.BoolValue(x)
+	} else {
+		v.AdvertiseHostRoutes = types.BoolNull()
+	}
+
+	if jsonData.AdvertiseDefaultRoute != "" {
+		x, _ := strconv.ParseBool(jsonData.AdvertiseDefaultRoute)
+		v.AdvertiseDefaultRoute = types.BoolValue(x)
+	} else {
+		v.AdvertiseDefaultRoute = types.BoolNull()
+	}
+
+	if jsonData.ConfigureStaticDefaultRoute != "" {
+		x, _ := strconv.ParseBool(jsonData.ConfigureStaticDefaultRoute)
+		v.ConfigureStaticDefaultRoute = types.BoolValue(x)
+	} else {
+		v.ConfigureStaticDefaultRoute = types.BoolNull()
+	}
+
+	if jsonData.BgpPassword != "" {
+		v.BgpPassword = types.StringValue(jsonData.BgpPassword)
+	} else {
+		v.BgpPassword = types.StringNull()
+	}
+
+	if jsonData.BgpPasswordType != "" {
+		v.BgpPasswordType = types.StringValue(jsonData.BgpPasswordType)
+	} else {
+		v.BgpPasswordType = types.StringNull()
+	}
+
+	if jsonData.Netflow != "" {
+		x, _ := strconv.ParseBool(jsonData.Netflow)
+		v.Netflow = types.BoolValue(x)
+	} else {
+		v.Netflow = types.BoolNull()
+	}
+
+	if jsonData.NetflowMonitor != "" {
+		v.NetflowMonitor = types.StringValue(jsonData.NetflowMonitor)
+	} else {
+		v.NetflowMonitor = types.StringNull()
+	}
+
+	if jsonData.Trm != "" {
+		x, _ := strconv.ParseBool(jsonData.Trm)
+		v.Trm = types.BoolValue(x)
+	} else {
+		v.Trm = types.BoolNull()
+	}
+
+	if jsonData.TrmBgwMsite != "" {
+		x, _ := strconv.ParseBool(jsonData.TrmBgwMsite)
+		v.TrmBgwMsite = types.BoolValue(x)
+	} else {
+		v.TrmBgwMsite = types.BoolNull()
+	}
+
+	if jsonData.NoRp != "" {
+		x, _ := strconv.ParseBool(jsonData.NoRp)
+		v.NoRp = types.BoolValue(x)
+	} else {
+		v.NoRp = types.BoolNull()
+	}
+
+	if jsonData.RpAddress != "" {
+		v.RpAddress = types.StringValue(jsonData.RpAddress)
+	} else {
+		v.RpAddress = types.StringNull()
+	}
+
+	if jsonData.RpLoopbackId != nil {
+		if jsonData.RpLoopbackId.IsEmpty() {
+			v.RpLoopbackId = types.Int64Null()
+		} else {
+			v.RpLoopbackId = types.Int64Value(int64(*jsonData.RpLoopbackId))
+		}
+	} else {
+		v.RpLoopbackId = types.Int64Null()
+	}
+
+	if jsonData.UnderlayMulticastAddress != "" {
+		v.UnderlayMulticastAddress = types.StringValue(jsonData.UnderlayMulticastAddress)
+	} else {
+		v.UnderlayMulticastAddress = types.StringNull()
+	}
+
+	if jsonData.OverlayMulticastGroups != "" {
+		v.OverlayMulticastGroups = types.StringValue(jsonData.OverlayMulticastGroups)
+	} else {
+		v.OverlayMulticastGroups = types.StringNull()
+	}
+
+	if jsonData.RouteTargetImportMvpn != "" {
+		v.RouteTargetImportMvpn = types.StringValue(jsonData.RouteTargetImportMvpn)
+	} else {
+		v.RouteTargetImportMvpn = types.StringNull()
+	}
+
+	if jsonData.RouteTargetExportMvpn != "" {
+		v.RouteTargetExportMvpn = types.StringValue(jsonData.RouteTargetExportMvpn)
+	} else {
+		v.RouteTargetExportMvpn = types.StringNull()
 	}
 
 	return err
@@ -853,6 +1016,154 @@ func (v VrfBulkModel) GetModelData() *NDFCVrfBulkModel {
 
 				data1.DeployAttachments = ele1.DeployAttachments.ValueBool()
 
+			}
+
+			// msd_child_fabric_attributes | MapNested| []| false
+
+			if !ele1.MsdChildFabricAttributes.IsNull() && !ele1.MsdChildFabricAttributes.IsUnknown() {
+				elements2 := make(map[string]MsdChildFabricAttributesValue, len(ele1.MsdChildFabricAttributes.Elements()))
+
+				data1.MsdChildFabricAttributes = make(map[string]NDFCMsdChildFabricAttributesValue)
+
+				diag := ele1.MsdChildFabricAttributes.ElementsAs(context.Background(), &elements2, false)
+				if diag != nil {
+					panic(diag)
+				}
+				for k2, ele2 := range elements2 {
+					data2 := new(NDFCMsdChildFabricAttributesValue)
+
+					// fabric_name | String| []| false
+					// advertise_host_routes | Bool| []| false
+					if !ele2.AdvertiseHostRoutes.IsNull() && !ele2.AdvertiseHostRoutes.IsUnknown() {
+
+						data2.AdvertiseHostRoutes = strconv.FormatBool(ele2.AdvertiseHostRoutes.ValueBool())
+					} else {
+						data2.AdvertiseHostRoutes = ""
+					}
+
+					// advertise_default_route | Bool| []| false
+					if !ele2.AdvertiseDefaultRoute.IsNull() && !ele2.AdvertiseDefaultRoute.IsUnknown() {
+
+						data2.AdvertiseDefaultRoute = strconv.FormatBool(ele2.AdvertiseDefaultRoute.ValueBool())
+					} else {
+						data2.AdvertiseDefaultRoute = ""
+					}
+
+					// configure_static_default_route | Bool| []| false
+					if !ele2.ConfigureStaticDefaultRoute.IsNull() && !ele2.ConfigureStaticDefaultRoute.IsUnknown() {
+
+						data2.ConfigureStaticDefaultRoute = strconv.FormatBool(ele2.ConfigureStaticDefaultRoute.ValueBool())
+					} else {
+						data2.ConfigureStaticDefaultRoute = ""
+					}
+
+					// bgp_password | String| []| false
+					if !ele2.BgpPassword.IsNull() && !ele2.BgpPassword.IsUnknown() {
+
+						data2.BgpPassword = ele2.BgpPassword.ValueString()
+					} else {
+						data2.BgpPassword = ""
+					}
+
+					// bgp_password_type | String| []| false
+					if !ele2.BgpPasswordType.IsNull() && !ele2.BgpPasswordType.IsUnknown() {
+
+						data2.BgpPasswordType = ele2.BgpPasswordType.ValueString()
+					} else {
+						data2.BgpPasswordType = ""
+					}
+
+					// netflow | Bool| []| false
+					if !ele2.Netflow.IsNull() && !ele2.Netflow.IsUnknown() {
+
+						data2.Netflow = strconv.FormatBool(ele2.Netflow.ValueBool())
+					} else {
+						data2.Netflow = ""
+					}
+
+					// netflow_monitor | String| []| false
+					if !ele2.NetflowMonitor.IsNull() && !ele2.NetflowMonitor.IsUnknown() {
+
+						data2.NetflowMonitor = ele2.NetflowMonitor.ValueString()
+					} else {
+						data2.NetflowMonitor = ""
+					}
+
+					// trm | Bool| []| false
+					if !ele2.Trm.IsNull() && !ele2.Trm.IsUnknown() {
+
+						data2.Trm = strconv.FormatBool(ele2.Trm.ValueBool())
+					} else {
+						data2.Trm = ""
+					}
+
+					// trm_bgw_msite | Bool| []| false
+					if !ele2.TrmBgwMsite.IsNull() && !ele2.TrmBgwMsite.IsUnknown() {
+
+						data2.TrmBgwMsite = strconv.FormatBool(ele2.TrmBgwMsite.ValueBool())
+					} else {
+						data2.TrmBgwMsite = ""
+					}
+
+					// no_rp | Bool| []| false
+					if !ele2.NoRp.IsNull() && !ele2.NoRp.IsUnknown() {
+
+						data2.NoRp = strconv.FormatBool(ele2.NoRp.ValueBool())
+					} else {
+						data2.NoRp = ""
+					}
+
+					// rp_address | String| []| false
+					if !ele2.RpAddress.IsNull() && !ele2.RpAddress.IsUnknown() {
+
+						data2.RpAddress = ele2.RpAddress.ValueString()
+					} else {
+						data2.RpAddress = ""
+					}
+
+					// rp_loopback_id | Int64| []| false
+					if !ele2.RpLoopbackId.IsNull() && !ele2.RpLoopbackId.IsUnknown() {
+						data2.RpLoopbackId = new(Int64Custom)
+						*data2.RpLoopbackId = Int64Custom(ele2.RpLoopbackId.ValueInt64())
+					} else {
+						data2.RpLoopbackId = nil
+					}
+
+					// underlay_multicast_address | String| []| false
+					if !ele2.UnderlayMulticastAddress.IsNull() && !ele2.UnderlayMulticastAddress.IsUnknown() {
+
+						data2.UnderlayMulticastAddress = ele2.UnderlayMulticastAddress.ValueString()
+					} else {
+						data2.UnderlayMulticastAddress = ""
+					}
+
+					// overlay_multicast_groups | String| []| false
+					if !ele2.OverlayMulticastGroups.IsNull() && !ele2.OverlayMulticastGroups.IsUnknown() {
+
+						data2.OverlayMulticastGroups = ele2.OverlayMulticastGroups.ValueString()
+					} else {
+						data2.OverlayMulticastGroups = ""
+					}
+
+					// route_target_import_mvpn | String| []| false
+					if !ele2.RouteTargetImportMvpn.IsNull() && !ele2.RouteTargetImportMvpn.IsUnknown() {
+
+						data2.RouteTargetImportMvpn = ele2.RouteTargetImportMvpn.ValueString()
+					} else {
+						data2.RouteTargetImportMvpn = ""
+					}
+
+					// route_target_export_mvpn | String| []| false
+					if !ele2.RouteTargetExportMvpn.IsNull() && !ele2.RouteTargetExportMvpn.IsUnknown() {
+
+						data2.RouteTargetExportMvpn = ele2.RouteTargetExportMvpn.ValueString()
+					} else {
+						data2.RouteTargetExportMvpn = ""
+					}
+
+					data1.MsdChildFabricAttributes[k2] = *data2
+
+				}
 			}
 
 			// attach_list | MapNested| []| false

@@ -116,7 +116,7 @@ func (r *vrfBulkResource) Read(ctx context.Context, req resource.ReadRequest, re
 	}
 
 	tflog.Info(ctx, fmt.Sprintf("Incoming ID %s", unique_id))
-	dd := r.client.RscGetBulkVrf(ctx, &resp.Diagnostics, unique_id, &deployMap)
+	dd := r.client.RscGetBulkVrf(ctx, &resp.Diagnostics, unique_id, &deployMap, dataVrf)
 	if dd == nil {
 		tflog.Error(ctx, "Read Bulk VRF Failed")
 		resp.Diagnostics.AddWarning("Read Failure", "No configuration found in NDFC")

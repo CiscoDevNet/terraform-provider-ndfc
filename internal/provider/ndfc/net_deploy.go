@@ -47,6 +47,7 @@ func (c NDFC) RscDeployNetworkAttachments(ctx context.Context, dg *diag.Diagnost
 	// Get configuration preview to refresh the deploy status
 	// This is bug in NDFC sometimes the status is not updated
 	_, err := c.getConfigurationPreview(d.FabricName)
+	// payload is empty for MSD fabric hence only error is checked.
 	if err != nil {
 		dg.AddError("Deploy failed", "Configuration preview failed")
 		return
