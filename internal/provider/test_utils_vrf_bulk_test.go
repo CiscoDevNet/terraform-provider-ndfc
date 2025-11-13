@@ -36,6 +36,77 @@ func VrfBulkModelHelperStateCheck(RscName string, c resource_vrf_bulk.NDFCVrfBul
 	return ret
 }
 
+func MsdChildFabricAttributesValueHelperStateCheck(RscName string, c resource_vrf_bulk.NDFCMsdChildFabricAttributesValue, attrPath path.Path) []resource.TestCheckFunc {
+	ret := []resource.TestCheckFunc{}
+
+	if c.FabricName != "" {
+		ret = append(ret, resource.TestCheckResourceAttr(RscName, attrPath.AtName("fabric_name").String(), c.FabricName))
+	}
+	if c.AdvertiseHostRoutes != "" {
+		ret = append(ret, resource.TestCheckResourceAttr(RscName, attrPath.AtName("advertise_host_routes").String(), c.AdvertiseHostRoutes))
+	} else {
+		ret = append(ret, resource.TestCheckResourceAttr(RscName, attrPath.AtName("advertise_host_routes").String(), "false"))
+	}
+	if c.AdvertiseDefaultRoute != "" {
+		ret = append(ret, resource.TestCheckResourceAttr(RscName, attrPath.AtName("advertise_default_route").String(), c.AdvertiseDefaultRoute))
+	} else {
+		ret = append(ret, resource.TestCheckResourceAttr(RscName, attrPath.AtName("advertise_default_route").String(), "true"))
+	}
+	if c.ConfigureStaticDefaultRoute != "" {
+		ret = append(ret, resource.TestCheckResourceAttr(RscName, attrPath.AtName("configure_static_default_route").String(), c.ConfigureStaticDefaultRoute))
+	} else {
+		ret = append(ret, resource.TestCheckResourceAttr(RscName, attrPath.AtName("configure_static_default_route").String(), "true"))
+	}
+	if c.BgpPassword != "" {
+		ret = append(ret, resource.TestCheckResourceAttr(RscName, attrPath.AtName("bgp_password").String(), c.BgpPassword))
+	}
+	if c.BgpPasswordType != "" {
+		ret = append(ret, resource.TestCheckResourceAttr(RscName, attrPath.AtName("bgp_password_type").String(), c.BgpPasswordType))
+	}
+	if c.Netflow != "" {
+		ret = append(ret, resource.TestCheckResourceAttr(RscName, attrPath.AtName("netflow").String(), c.Netflow))
+	} else {
+		ret = append(ret, resource.TestCheckResourceAttr(RscName, attrPath.AtName("netflow").String(), "false"))
+	}
+	if c.NetflowMonitor != "" {
+		ret = append(ret, resource.TestCheckResourceAttr(RscName, attrPath.AtName("netflow_monitor").String(), c.NetflowMonitor))
+	}
+	if c.Trm != "" {
+		ret = append(ret, resource.TestCheckResourceAttr(RscName, attrPath.AtName("trm").String(), c.Trm))
+	} else {
+		ret = append(ret, resource.TestCheckResourceAttr(RscName, attrPath.AtName("trm").String(), "false"))
+	}
+	if c.TrmBgwMsite != "" {
+		ret = append(ret, resource.TestCheckResourceAttr(RscName, attrPath.AtName("trm_bgw_msite").String(), c.TrmBgwMsite))
+	} else {
+		ret = append(ret, resource.TestCheckResourceAttr(RscName, attrPath.AtName("trm_bgw_msite").String(), "false"))
+	}
+	if c.NoRp != "" {
+		ret = append(ret, resource.TestCheckResourceAttr(RscName, attrPath.AtName("no_rp").String(), c.NoRp))
+	} else {
+		ret = append(ret, resource.TestCheckResourceAttr(RscName, attrPath.AtName("no_rp").String(), "false"))
+	}
+	if c.RpAddress != "" {
+		ret = append(ret, resource.TestCheckResourceAttr(RscName, attrPath.AtName("rp_address").String(), c.RpAddress))
+	}
+	if c.RpLoopbackId != nil {
+		ret = append(ret, resource.TestCheckResourceAttr(RscName, attrPath.AtName("rp_loopback_id").String(), strconv.Itoa(int(*c.RpLoopbackId))))
+	}
+	if c.UnderlayMulticastAddress != "" {
+		ret = append(ret, resource.TestCheckResourceAttr(RscName, attrPath.AtName("underlay_multicast_address").String(), c.UnderlayMulticastAddress))
+	}
+	if c.OverlayMulticastGroups != "" {
+		ret = append(ret, resource.TestCheckResourceAttr(RscName, attrPath.AtName("overlay_multicast_groups").String(), c.OverlayMulticastGroups))
+	}
+	if c.RouteTargetImportMvpn != "" {
+		ret = append(ret, resource.TestCheckResourceAttr(RscName, attrPath.AtName("route_target_import_mvpn").String(), c.RouteTargetImportMvpn))
+	}
+	if c.RouteTargetExportMvpn != "" {
+		ret = append(ret, resource.TestCheckResourceAttr(RscName, attrPath.AtName("route_target_export_mvpn").String(), c.RouteTargetExportMvpn))
+	}
+	return ret
+}
+
 func VrfsValueHelperStateCheck(RscName string, c resource_vrf_bulk.NDFCVrfsValue, attrPath path.Path) []resource.TestCheckFunc {
 	ret := []resource.TestCheckFunc{}
 
@@ -178,6 +249,10 @@ func VrfsValueHelperStateCheck(RscName string, c resource_vrf_bulk.NDFCVrfsValue
 		ret = append(ret, resource.TestCheckResourceAttr(RscName, attrPath.AtName("deploy_attachments").String(), "true"))
 	} else {
 		ret = append(ret, resource.TestCheckResourceAttr(RscName, attrPath.AtName("deploy_attachments").String(), "false"))
+	}
+	for key, value := range c.MsdChildFabricAttributes {
+		attrNewPath := attrPath.AtName("msd_child_fabric_attributes").AtName(key)
+		ret = append(ret, MsdChildFabricAttributesValueHelperStateCheck(RscName, value, attrNewPath)...)
 	}
 	for key, value := range c.AttachList {
 		attrNewPath := attrPath.AtName("attach_list").AtName(key)

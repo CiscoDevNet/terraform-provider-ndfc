@@ -81,14 +81,14 @@ func TestAccFabricVxlanMsdResource(t *testing.T) {
 		PreCheck:                 func() { testAccPreCheck(t, "fabric_vxlan_msd") },
 		ProtoV6ProviderFactories: testAccProtoV6ProviderFactories,
 		Steps: []resource.TestStep{
-			{ // Create fabric
+			{ // Create MSD fabric with child_fabric1 and child_fabric2 (resource.tf)
 				Config: func() string {
 					*stepCount++
 					tt := fmt.Sprintf("%s%d", t.Name(), *stepCount)
 					return helper.GenerateFabricConfig(tt, cfg, helper.Base_file)
 				}(),
 				//Check: resource.ComposeTestCheckFunc(FabricVxlanMsdModelHelperStateCheck("ndfc_fabric_vxlan_msd.test_resource_fabric_vxlan_msd_1", FabricRsc, path.Empty())...),
-			}, { // modify fields like ANYCAST_GW_MAC, BGW_ROUTING_TAG and DELAY_RESTORE with different values and deploy true
+			}, { // Modify attributes and replace child_fabric2 with child_fabric3 (resource_modified.tf)
 				Config: func() string {
 					*stepCount++
 					tt := fmt.Sprintf("%s%d", t.Name(), *stepCount)

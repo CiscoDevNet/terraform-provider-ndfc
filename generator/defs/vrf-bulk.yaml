@@ -400,9 +400,132 @@ resource:
         description: If set to `true`, does a deployment of all attachments in this `vrf`. This parameter cannot be set to `true` if  `deploy_all_attachments` in the resource is set or `deploy_this_attachment` in the  `attach-list` is set
         ndfc_type: bool
         example: false
+      - model_name: msd_child_fabric_attributes
+        tf_name: msd_child_fabric_attributes
+        type: MapNested
+        description: Multi Site Domain child fabric specific vrf attributes
+        payload_hide: true
+        computed: true
+        optional: true
+        attributes:
+        - model_name: fabric_name
+          tf_name: fabric_name
+          type: String
+          description: The name of the fabric
+          example: CML
+          computed: true
+        - model_name: advertiseHostRouteFlag
+          tf_name: advertise_host_routes
+          type: Bool
+          optional: true
+          computed: true
+          default_value: false
+          description: "MSD Child fabric: Flag to Control Advertisement of /32 and /128 Routes to Edge Routers"
+          example: true
+        - model_name: advertiseDefaultRouteFlag
+          tf_name: advertise_default_route
+          type: Bool
+          optional: true
+          computed: true
+          default_value: true
+          description: "Child fabric: Flag to Control Advertisement of Default Route Internally"
+          example: false
+        - model_name: configureStaticDefaultRouteFlag
+          tf_name: configure_static_default_route
+          type: Bool
+          optional: true
+          computed: true
+          default_value: true
+          description: "Child fabric: Flag to Control Static Default Route Configuration"
+          example: false
+        - model_name: bgpPassword
+          tf_name: bgp_password
+          type: String
+          string_patterns: ['^[a-fA-F0-9]+$']
+          default_value: ""
+          description: VRF Lite BGP neighbor password (Hex String)
+          example: 1234567890ABCDEF
+        - model_name: bgpPasswordKeyType
+          tf_name: bgp_password_type
+          type: String
+          enum_values: ["3", "7"]
+          default_value: ""
+          description: "VRF Lite BGP Key Encryption Type: 3 - 3DES, 7 - Cisco"
+          example: 7
+        - model_name: ENABLE_NETFLOW
+          tf_name: netflow
+          type: Bool
+          optional: true
+          computed: true
+          default_value: false
+          description: For netflow on VRF-LITE Sub-interface. Supported only if netflow is enabled on fabric. For NX-OS only
+          example: false
+        - model_name: NETFLOW_MONITOR
+          tf_name: netflow_monitor
+          type: String
+          default_value: ""
+          description: Netflow monitor. For NX-OS only
+          example: MON1
+        - model_name: trmEnabled
+          tf_name: trm
+          type: Bool
+          optional: true
+          computed: true
+          default_value: false
+          description: Enable Tenant Routed Multicast
+        - model_name: trmBGWMSiteEnabled
+          tf_name: trm_bgw_msite
+          type: Bool
+          optional: true
+          computed: true
+          default_value: false
+          description: Enable TRM on Border Gateway Multisite
+          example: true
+        - model_name: isRPAbsent
+          tf_name: no_rp
+          type: Bool
+          optional: true
+          computed: true
+          default_value: false
+          description: There is no RP as only SSM is used
+          example: false
+        - model_name: rpAddress
+          tf_name: rp_address
+          type: String
+          default_value: ""
+          description: IPv4 address
+        - model_name: loopbackNumber
+          tf_name: rp_loopback_id
+          type: Int64
+          handle_empty: true
+          min_int: 0
+          max_int: 1023
+          description: RP loopback ID
+        - model_name: L3VniMcastGroup
+          tf_name: underlay_multicast_address
+          type: String
+          default_value: ""
+          description: IPv4 Multicast Address. Applicable only when TRM is enabled.
+        - model_name: multicastGroup
+          tf_name: overlay_multicast_groups
+          type: String
+          default_value: ""
+          description: Overlay multicast groups
+          example: 234.0.0.0/8
+        - model_name: routeTargetImportMvpn
+          tf_name: route_target_import_mvpn
+          type: String
+          default_value: ""
+          description: For MVPN Routes Import, One or a Comma Separated List
+          exclude_test: true
+        - model_name: routeTargetExportMvpn
+          tf_name: route_target_export_mvpn
+          type: String
+          default_value: ""
+          description: For MVPN Routes Export, One or a Comma Separated List
+          exclude_test: true
       - model_name: lanAttachList
         augment_from: vrf_attachments.attachments.lanAttachList
-        
 datasource:
   name: vrf_bulk
   doc_category: Fabric
@@ -650,4 +773,3 @@ datasource:
             exclude_test: true
             computed: true
             optional: false
-  

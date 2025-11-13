@@ -16,8 +16,6 @@ import (
 	"time"
 
 	"github.com/netascode/go-nd"
-
-	"github.com/tidwall/gjson"
 )
 
 type NDFCAPI interface {
@@ -87,7 +85,7 @@ func (c NDFCAPICommon) Get() ([]byte, error) {
 	return res, nil
 }
 
-func (c NDFCAPICommon) Post(payload []byte) (gjson.Result, error) {
+func (c NDFCAPICommon) Post(payload []byte) (nd.Res, error) {
 
 	url := c.NDFCAPI.PostUrl()
 	if strings.Contains(url, "deploy") {
@@ -112,6 +110,13 @@ func (c NDFCAPICommon) Post(payload []byte) (gjson.Result, error) {
 		res, err = c.client.Post(c.NDFCAPI.PostUrl(), string(payload))
 	}
 	if err != nil {
+		// Ensure response body is populated for error reporting
+		if res.Str == "" && res.String() != "" {
+			res.Str = res.String()
+		}
+		if res.Str == "" && res.Raw != "" {
+			res.Str = res.Raw
+		}
 		log.Printf("[ERR] Failed to make POST request: %s |%v|", err, res)
 		return res, err
 	}
@@ -119,22 +124,34 @@ func (c NDFCAPICommon) Post(payload []byte) (gjson.Result, error) {
 	return res, nil
 }
 
-func (c NDFCAPICommon) Put(payload []byte) (gjson.Result, error) {
+func (c NDFCAPICommon) Put(payload []byte) (nd.Res, error) {
 	// Acquire deploy r lock
 	fnRscAcquireLock(c.NDFCAPI.RscName())
 	defer fnRscReleaseLock(c.NDFCAPI.RscName())
-
+	log.Printf("Put URL: %s\n", c.NDFCAPI.PutUrl())
 	lock := c.NDFCAPI.GetLock()
 	lock.Lock()
 	defer lock.Unlock()
-	res, err := c.client.Put(c.NDFCAPI.PutUrl(), string(payload))
+	log.Printf("Put URL acquired lock: %s\n", c.NDFCAPI.PutUrl())
+	var res nd.Res
+	var err error
+	res, err = c.client.Put(c.NDFCAPI.PutUrl(), string(payload))
 	if err != nil {
+		// Ensure response body is populated for error reporting
+		if res.Str == "" && res.String() != "" {
+			res.Str = res.String()
+		}
+		if res.Str == "" && res.Raw != "" {
+			res.Str = res.Raw
+		}
+		log.Printf("[ERR] Failed to make PUT request: %s |%v|", err, res)
 		return res, err
 	}
+	log.Printf("[DEBUG] PUT request was ok")
 	return res, nil
 }
 
-func (c NDFCAPICommon) Delete() (gjson.Result, error) {
+func (c NDFCAPICommon) Delete() (nd.Res, error) {
 	fnRscAcquireLock(c.NDFCAPI.RscName())
 	defer fnRscReleaseLock(c.NDFCAPI.RscName())
 
@@ -159,21 +176,42 @@ func (c NDFCAPICommon) Delete() (gjson.Result, error) {
 		res, err = c.client.Delete(c.NDFCAPI.DeleteUrl(), "")
 	}
 	if err != nil {
+		// Ensure response body is populated for error reporting
+		if res.Str == "" && res.String() != "" {
+			res.Str = res.String()
+		}
+		if res.Str == "" && res.Raw != "" {
+			res.Str = res.Raw
+		}
+		log.Printf("[ERR] Failed to make DELETE request: %s |%v|", err, res)
 		return res, err
 	}
+	log.Printf("[DEBUG] DELETE request was ok")
 	return res, nil
 }
 
-func (c NDFCAPICommon) DeleteWithPayload(payload []byte) (gjson.Result, error) {
+func (c NDFCAPICommon) DeleteWithPayload(payload []byte) (nd.Res, error) {
 	fnRscAcquireLock(c.NDFCAPI.RscName())
 	defer fnRscReleaseLock(c.NDFCAPI.RscName())
 
 	c.NDFCAPI.GetLock().Lock()
 	defer c.NDFCAPI.GetLock().Unlock()
-	res, err := c.client.Delete(c.NDFCAPI.DeleteUrl(), string(payload))
+	log.Printf("DeleteWithPayload URL: %s\n", c.NDFCAPI.DeleteUrl())
+	var res nd.Res
+	var err error
+	res, err = c.client.Delete(c.NDFCAPI.DeleteUrl(), string(payload))
 	if err != nil {
+		// Ensure response body is populated for error reporting
+		if res.Str == "" && res.String() != "" {
+			res.Str = res.String()
+		}
+		if res.Str == "" && res.Raw != "" {
+			res.Str = res.Raw
+		}
+		log.Printf("[ERR] Failed to make DELETE request with payload: %s |%v|", err, res)
 		return res, err
 	}
+	log.Printf("[DEBUG] DELETE request with payload was ok")
 	return res, nil
 }
 
@@ -181,7 +219,7 @@ func (c *NDFCAPICommon) SetDeployLocked() {
 	c.LockedForDeploy = true
 }
 
-func (c NDFCAPICommon) DeployPost(payload []byte) (gjson.Result, error) {
+func (c NDFCAPICommon) DeployPost(payload []byte) (nd.Res, error) {
 	// Global write lock must be acquired before deploy lock
 	// Check
 	if fnGlobalDeployTryLock(c.NDFCAPI.RscName()) {
@@ -195,10 +233,21 @@ func (c NDFCAPICommon) DeployPost(payload []byte) (gjson.Result, error) {
 	lock.Lock()
 	defer lock.Unlock()
 	log.Printf("Deploy Post URL acquired lock: %s\n", c.NDFCAPI.PostUrl())
-	res, err := c.client.Post(c.NDFCAPI.PostUrl(), string(payload))
+	var res nd.Res
+	var err error
+	res, err = c.client.Post(c.NDFCAPI.PostUrl(), string(payload))
 	if err != nil {
+		// Ensure response body is populated for error reporting
+		if res.Str == "" && res.String() != "" {
+			res.Str = res.String()
+		}
+		if res.Str == "" && res.Raw != "" {
+			res.Str = res.Raw
+		}
+		log.Printf("[ERR] Failed to make DEPLOY POST request: %s |%v|", err, res)
 		return res, err
 	}
+	log.Printf("[DEBUG] DEPLOY POST request was ok")
 	return res, nil
 }
 

@@ -87,7 +87,7 @@ func (c NDFC) VrfBulkCreateID(ndVrfs *resource_vrf_bulk.NDFCVrfBulkModel) string
 	return ""
 }
 
-func (c NDFC) RscGetBulkVrf(ctx context.Context, dg *diag.Diagnostics, ID string, depMap *map[string][]string) *resource_vrf_bulk.VrfBulkModel {
+func (c NDFC) RscGetBulkVrf(ctx context.Context, dg *diag.Diagnostics, ID string, depMap *map[string][]string, stateVrfs *resource_vrf_bulk.NDFCVrfBulkModel) *resource_vrf_bulk.VrfBulkModel {
 	var filterMap map[string]bool
 	tflog.Debug(ctx, fmt.Sprintf("RscGetBulkVrf entry fabirc %s", ID))
 
@@ -96,6 +96,12 @@ func (c NDFC) RscGetBulkVrf(ctx context.Context, dg *diag.Diagnostics, ID string
 	log.Printf("FilterMap: %v vrfs %v", filterMap, vrfs)
 	if fabricName == "" {
 		dg.AddError("ID format error", "ID is incorrect")
+		return nil
+	}
+
+	// Check if this is an MSD fabric
+	isMsd := c.IsFabricMsd(ctx, dg, fabricName)
+	if dg.HasError() {
 		return nil
 	}
 	vrfObj := api.NewVrfAPI(fabricName, c.GetLock(ResourceVrfBulk), &c.apiClient)
@@ -184,6 +190,15 @@ func (c NDFC) RscGetBulkVrf(ctx context.Context, dg *diag.Diagnostics, ID string
 	} else {
 		dg.AddError("VRF Attachments read failed", err.Error())
 	}
+
+	// Fetch MSD child fabric attributes from child fabrics to get actual values
+	if isMsd {
+		c.vrfFetchMsdChildFabricAttributes(ctx, dg, &ndVrfs, fabricName)
+		if dg.HasError() {
+			return nil
+		}
+	}
+
 	vModel := new(resource_vrf_bulk.VrfBulkModel)
 	vModel.Id = types.StringValue(ID)
 	d := vModel.SetModelData(&ndVrfs)
@@ -206,6 +221,12 @@ func (c NDFC) RscImportBulkVrf(ctx context.Context, dg *diag.Diagnostics, ID str
 	log.Printf("FilterMap: %v vrfs %v", filterMap, vrfs)
 	if fabricName == "" {
 		dg.AddError("ID format error", "ID is incorrect")
+		return nil
+	}
+
+	// Check if this is an MSD fabric
+	isMsd := c.IsFabricMsd(ctx, dg, fabricName)
+	if dg.HasError() {
 		return nil
 	}
 	vrfObj := api.NewVrfAPI(fabricName, c.GetLock(ResourceVrfBulk), &c.apiClient)
@@ -277,6 +298,14 @@ func (c NDFC) RscImportBulkVrf(ctx context.Context, dg *diag.Diagnostics, ID str
 		dg.AddError("VRF Attachments read failed", err.Error())
 	}
 
+	// Fetch MSD child fabric attributes from child fabrics to get actual values
+	if isMsd {
+		c.vrfFetchMsdChildFabricAttributes(ctx, dg, &ndVrfs, fabricName)
+		if dg.HasError() {
+			return nil
+		}
+	}
+
 	vModel := new(resource_vrf_bulk.VrfBulkModel)
 	vModel.Id = types.StringValue(ID)
 	d := vModel.SetModelData(&ndVrfs)
@@ -319,9 +348,34 @@ func (c NDFC) RscCreateBulkVrf(ctx context.Context, dg *diag.Diagnostics, vrfBul
 		return nil
 	}
 
-	c.ValidateMsdParentVrfParameters(ctx, dg, vrf)
+	// Check if this is an MSD fabric
+	isMsd := c.IsFabricMsd(ctx, dg, vrf.FabricName)
 	if dg.HasError() {
 		return nil
+	}
+
+	// Validate MSD-specific parameters if this is an MSD fabric
+	if isMsd {
+		c.ValidateMsdParentVrfParameters(ctx, dg, vrf)
+		if dg.HasError() {
+			return nil
+		}
+	} else {
+		// For non-MSD fabrics, validate attachment fabric names
+		for _, entry := range vrf.Vrfs {
+			if len(entry.MsdChildFabricAttributes) > 0 {
+				tflog.Error(ctx, fmt.Sprintf("VRF operation failed for VRF %s, MSD Child Fabric Attributes can only be set for MSD fabrics", entry.VrfName))
+				dg.AddError("VRF operation failed", fmt.Sprintf("MSD Child Fabric Attributes can only be set for MSD fabrics (VRF: %s)", entry.VrfName))
+				return nil
+			}
+			for serial, attach := range entry.AttachList {
+				if attach.Fabric != "" && vrf.FabricName != attach.Fabric {
+					tflog.Error(ctx, "VRF operation failed, FabricName in attachment should match VRF FabricName")
+					dg.AddError("VRF operation failed", fmt.Sprintf("FabricName in attachment \"%s\" should match VRF FabricName \"%s\"", serial, vrf.FabricName))
+					return nil
+				}
+			}
+		}
 	}
 
 	//form ID
@@ -357,6 +411,18 @@ func (c NDFC) RscCreateBulkVrf(ctx context.Context, dg *diag.Diagnostics, vrfBul
 		return nil
 	}
 	tflog.Info(ctx, fmt.Sprintf("Create Bulk VRF success ID %s", ID))
+
+	// Update MSD child fabric attributes if this is an MSD fabric
+	if isMsd {
+		c.vrfApplyMsdChildFabricAttributes(ctx, dg, vrf)
+		if dg.HasError() {
+			tflog.Error(ctx, "MSD child fabric attributes update failed")
+			tflog.Error(ctx, "Rolling back the configurations...delete VRFs")
+			c.RscDeleteBulkVrf(ctx, dg, ID, vrfBulk)
+			return nil
+		}
+	}
+
 	//Part 2: Create Attachments if any
 
 	// fill the attachment entries
@@ -373,12 +439,13 @@ func (c NDFC) RscCreateBulkVrf(ctx context.Context, dg *diag.Diagnostics, vrfBul
 		//Check and deploy
 		c.RscDeployVrfAttachments(ctx, dg, vrf)
 	}
-	outVrf := c.RscGetBulkVrf(ctx, dg, ID, &va.DepMap)
+	outVrf := c.RscGetBulkVrf(ctx, dg, ID, &va.DepMap, vrf)
 	if outVrf == nil {
 		tflog.Error(ctx, "Failed to verify: Reading from NDFC after create failed")
 		dg.AddError("Failed to verify", "Reading from NDFC after create failed")
 		return nil
 	}
+
 	if ID != "" {
 		outVrf.Id = types.StringValue(ID)
 	}
@@ -452,9 +519,34 @@ func (c NDFC) RscUpdateBulkVrf(ctx context.Context,
 	plan := actions["plan"].(*resource_vrf_bulk.NDFCVrfBulkModel)
 	state := actions["state"].(*resource_vrf_bulk.NDFCVrfBulkModel)
 
-	c.ValidateMsdParentVrfParameters(ctx, dg, plan)
+	// Check if this is an MSD fabric
+	isMsd := c.IsFabricMsd(ctx, dg, plan.FabricName)
 	if dg.HasError() {
 		return
+	}
+
+	// Validate MSD-specific parameters if this is an MSD fabric
+	if isMsd {
+		c.ValidateMsdParentVrfParameters(ctx, dg, plan)
+		if dg.HasError() {
+			return
+		}
+	} else {
+		// For non-MSD fabrics, validate attachment fabric names
+		for _, entry := range plan.Vrfs {
+			if len(entry.MsdChildFabricAttributes) > 0 {
+				tflog.Error(ctx, fmt.Sprintf("VRF operation failed for VRF %s, MSD Child Fabric Attributes can only be set for MSD fabrics", entry.VrfName))
+				dg.AddError("VRF operation failed", fmt.Sprintf("MSD Child Fabric Attributes can only be set for MSD fabrics (VRF: %s)", entry.VrfName))
+				return
+			}
+			for serial, attach := range entry.AttachList {
+				if attach.Fabric != "" && plan.FabricName != attach.Fabric {
+					tflog.Error(ctx, "VRF operation failed, FabricName in attachment should match VRF FabricName")
+					dg.AddError("VRF operation failed", fmt.Sprintf("FabricName in attachment \"%s\" should match VRF FabricName \"%s\"", serial, plan.FabricName))
+					return
+				}
+			}
+		}
 	}
 	ndfcVRFs, err := c.vrfBulkGet(ctx, vrfBulkPlan.FabricName.ValueString())
 	// Step 1 - Check if VRFs to update are present in NDFC
@@ -545,6 +637,45 @@ func (c NDFC) RscUpdateBulkVrf(ctx context.Context,
 		}
 	}
 
+	// Update MSD child fabric attributes if this is an MSD fabric
+	// This handles both modified and newly created VRFs
+	if isMsd {
+		// Handle MSD child fabric attribute changes for ALL existing VRFs (not just putVrfs)
+		// because MSD child fabric attributes can change even when main VRF attributes don't
+		updateAttrs, deleteChildFabrics := c.vrfGetMsdChildFabricAttributesDiff(ctx, plan, state, plan)
+
+		// Delete child fabric attributes that were removed from configuration
+		if len(deleteChildFabrics) > 0 {
+			tflog.Info(ctx, "Deleting MSD child fabric attributes for modified VRFs")
+			c.vrfDeleteMsdChildFabricAttributes(ctx, dg, deleteChildFabrics)
+			if dg.HasError() {
+				tflog.Error(ctx, "MSD child fabric attributes deletion failed during bulk update")
+				return
+			}
+		}
+
+		// Update child fabric attributes that were added or modified for existing VRFs
+		if len(updateAttrs.Vrfs) > 0 {
+			tflog.Info(ctx, "Updating MSD child fabric attributes for modified VRFs")
+			c.vrfApplyMsdChildFabricAttributes(ctx, dg, updateAttrs)
+			if dg.HasError() {
+				tflog.Error(ctx, "MSD child fabric attributes update failed during bulk update")
+				return
+			}
+		}
+
+		// Update MSD child fabric attributes for newly created VRFs
+		updateNewVrfsInChild := c.vrfFilterVrfsWithMsdChildFabricAttributes(newVrfs)
+		if len(updateNewVrfsInChild.Vrfs) > 0 {
+			tflog.Info(ctx, "Updating MSD child fabric attributes for newly created VRFs")
+			c.vrfApplyMsdChildFabricAttributes(ctx, dg, updateNewVrfsInChild)
+			if dg.HasError() {
+				tflog.Error(ctx, "MSD child fabric attributes update failed for new VRFs during bulk update")
+				return
+			}
+		}
+	}
+
 	//Deal with attachments
 	//updateVA.VrfAttachments = make(resource_vrf_attachments.NDFCVrfAttachmentsValues, 0)
 	//copyVrfAttachments(plan, &updateVA)
@@ -558,7 +689,10 @@ func (c NDFC) RscUpdateBulkVrf(ctx context.Context,
 	newID := c.VrfBulkCreateID(plan)
 	depMap := FillDeployMap(plan)
 
-	*(vrfBulkPlan) = *(c.RscGetBulkVrf(ctx, dg, newID, &depMap))
+	*(vrfBulkPlan) = *(c.RscGetBulkVrf(ctx, dg, newID, &depMap, plan))
+
+	// Note: MSD child fabric attributes are already fetched in RscGetBulkVrf
+	// so no need to fetch them again here
 }
 
 func FillDeployMap(plan *resource_vrf_bulk.NDFCVrfBulkModel) map[string][]string {
@@ -631,72 +765,45 @@ func (c NDFC) vrfGet(fabric, vrfName string) *resource_vrf_bulk.NDFCVrfsValue {
 }
 */
 
+// ValidateMsdParentVrfParameters validates VRF parameters for MSD parent fabric
+// Note: This function should only be called if the fabric is MSD type (checked at call site)
 func (c NDFC) ValidateMsdParentVrfParameters(ctx context.Context, dg *diag.Diagnostics, vrf *resource_vrf_bulk.NDFCVrfBulkModel) {
-	// Validate VRF parameters for MSD parent fabric
-	fType := c.GetFabricTemplateType(ctx, dg, vrf.FabricName)
-	tflog.Debug(ctx, fmt.Sprintf("Fabric Type is %s", fType))
-	if fType == ResourceVxlanMsdType {
-		for _, entry := range vrf.Vrfs {
-			switch {
-			case len(entry.VrfTemplateConfig.AdvertiseHostRoutes) != 0:
-				tflog.Error(ctx, "VRF operation failed, AdvertiseHostRoutes is not supported for MSD parent fabric")
-				dg.AddError("VRF operation failed", "AdvertiseHostRoutes is not supported for MSD parent fabric")
-			case len(entry.VrfTemplateConfig.AdvertiseDefaultRoute) != 0:
-				tflog.Error(ctx, "VRF operation failed, AdvertiseDefaultRoute is not supported for MSD parent fabric")
-				dg.AddError("VRF operation failed", "AdvertiseDefaultRoute is not supported for MSD parent fabric")
-			case len(entry.VrfTemplateConfig.ConfigureStaticDefaultRoute) != 0:
-				tflog.Error(ctx, "VRF operation failed, ConfigureStaticDefaultRoute is not supported for MSD parent fabric")
-				dg.AddError("VRF operation failed", "ConfigureStaticDefaultRoute is not supported for MSD parent fabric")
-			case len(entry.VrfTemplateConfig.BgpPassword) != 0:
-				tflog.Error(ctx, "VRF operation failed, BgpPassword is not supported for MSD parent fabric")
-				dg.AddError("VRF operation failed", "BgpPassword is not supported for MSD parent fabric")
-			case len(entry.VrfTemplateConfig.BgpPasswordType) != 0:
-				tflog.Error(ctx, "VRF operation failed, BgpPasswordType is not supported for MSD parent fabric")
-				dg.AddError("VRF operation failed", "BgpPasswordType is not supported for MSD parent fabric")
-			case len(entry.VrfTemplateConfig.Netflow) != 0:
-				tflog.Error(ctx, "VRF operation failed, Netflow is not supported for MSD parent fabric")
-				dg.AddError("VRF operation failed", "Netflow is not supported for MSD parent fabric")
-			case len(entry.VrfTemplateConfig.NetflowMonitor) != 0:
-				tflog.Error(ctx, "VRF operation failed, NetflowMonitor is not supported for MSD parent fabric")
-				dg.AddError("VRF operation failed", "NetflowMonitor is not supported for MSD parent fabric")
-			case len(entry.VrfTemplateConfig.Trm) != 0:
-				tflog.Error(ctx, "VRF operation failed, TRM is not supported for MSD parent fabric")
-				dg.AddError("VRF operation failed", "TRM is not supported for MSD parent fabric")
-			case len(entry.VrfTemplateConfig.TrmBgwMsite) != 0:
-				tflog.Error(ctx, "VRF operation failed, TRM BGP Multi-Site is not supported for MSD parent fabric")
-				dg.AddError("VRF operation failed", "TRM BGP Multi-Site is not supported for MSD parent fabric")
-			case len(entry.VrfTemplateConfig.NoRp) != 0:
-				tflog.Error(ctx, "VRF operation failed, NoRp is not supported for MSD parent fabric")
-				dg.AddError("VRF operation failed", "NoRp is not supported for MSD parent fabric")
-			case len(entry.VrfTemplateConfig.RpAddress) != 0:
-				tflog.Error(ctx, "VRF operation failed, RpAddress is not supported for MSD parent fabric")
-				dg.AddError("VRF operation failed", "RpAddress is not supported for MSD parent fabric")
-			case entry.VrfTemplateConfig.RpLoopbackId != nil:
-				tflog.Error(ctx, "VRF operation failed, RpLoopbackId is not supported for MSD parent fabric")
-				dg.AddError("VRF operation failed", "RpLoopbackId is not supported for MSD parent fabric")
-			case len(entry.VrfTemplateConfig.UnderlayMulticastAddress) != 0:
-				tflog.Error(ctx, "VRF operation failed, UnderlayMulticastAddress is not supported for MSD parent fabric")
-				dg.AddError("VRF operation failed", "UnderlayMulticastAddress is not supported for MSD parent fabric")
-			case len(entry.VrfTemplateConfig.OverlayMulticastGroups) != 0:
-				tflog.Error(ctx, "VRF operation failed, OverlayMulticastGroups is not supported for MSD parent fabric")
-				dg.AddError("VRF operation failed", "OverlayMulticastGroups is not supported for MSD parent fabric")
-			case len(entry.VrfTemplateConfig.RouteTargetImportMvpn) != 0:
-				tflog.Error(ctx, "VRF operation failed, RouteTargetImportMvpn is not supported for MSD parent fabric")
-				dg.AddError("VRF operation failed", "RouteTargetImportMvpn is not supported for MSD parent fabric")
-			case len(entry.VrfTemplateConfig.RouteTargetExportMvpn) != 0:
-				tflog.Error(ctx, "VRF operation failed, RouteTargetExportMvpn is not supported for MSD parent fabric")
-				dg.AddError("VRF operation failed", "RouteTargetExportMvpn is not supported for MSD parent fabric")
-			}
-		}
-	} else {
-		for _, entry := range vrf.Vrfs {
-			for serial, attach := range entry.AttachList {
-				if attach.Fabric != "" && vrf.FabricName != attach.Fabric {
-					tflog.Error(ctx, "VRF operation failed, FabricName in attachment should match VRF FabricName")
-					dg.AddError("VRF operation failed", fmt.Sprintf("FabricName in attachment \"%s\" should match VRF FabricName \"%s\"", serial, vrf.FabricName))
-					return
-				}
-			}
+	tflog.Debug(ctx, fmt.Sprintf("Validating MSD parent VRF parameters for fabric %s", vrf.FabricName))
+
+	for _, entry := range vrf.Vrfs {
+		switch {
+		case len(entry.VrfTemplateConfig.AdvertiseHostRoutes) != 0:
+			dg.AddError("VRF operation failed", "In fabric type MSD, AdvertiseHostRoutes is managed under msd_child_fabric_attributes, not at parent fabric level")
+		case len(entry.VrfTemplateConfig.AdvertiseDefaultRoute) != 0:
+			dg.AddError("VRF operation failed", "In fabric type MSD, AdvertiseDefaultRoute is managed under msd_child_fabric_attributes, not at parent fabric level")
+		case len(entry.VrfTemplateConfig.ConfigureStaticDefaultRoute) != 0:
+			dg.AddError("VRF operation failed", "In fabric type MSD, ConfigureStaticDefaultRoute is managed under msd_child_fabric_attributes, not at parent fabric level")
+		case len(entry.VrfTemplateConfig.BgpPassword) != 0:
+			dg.AddError("VRF operation failed", "In fabric type MSD, BgpPassword is managed under msd_child_fabric_attributes, not at parent fabric level")
+		case len(entry.VrfTemplateConfig.BgpPasswordType) != 0:
+			dg.AddError("VRF operation failed", "In fabric type MSD, BgpPasswordType is managed under msd_child_fabric_attributes, not at parent fabric level")
+		case len(entry.VrfTemplateConfig.Netflow) != 0:
+			dg.AddError("VRF operation failed", "In fabric type MSD, Netflow is managed under msd_child_fabric_attributes, not at parent fabric level")
+		case len(entry.VrfTemplateConfig.NetflowMonitor) != 0:
+			dg.AddError("VRF operation failed", "In fabric type MSD, NetflowMonitor is managed under msd_child_fabric_attributes, not at parent fabric level")
+		case len(entry.VrfTemplateConfig.Trm) != 0:
+			dg.AddError("VRF operation failed", "In fabric type MSD, TRM is managed under msd_child_fabric_attributes, not at parent fabric level")
+		case len(entry.VrfTemplateConfig.TrmBgwMsite) != 0:
+			dg.AddError("VRF operation failed", "In fabric type MSD, TRM BGP Multi-Site is managed under msd_child_fabric_attributes, not at parent fabric level")
+		case len(entry.VrfTemplateConfig.NoRp) != 0:
+			dg.AddError("VRF operation failed", "In fabric type MSD, NoRp is managed under msd_child_fabric_attributes, not at parent fabric level")
+		case len(entry.VrfTemplateConfig.RpAddress) != 0:
+			dg.AddError("VRF operation failed", "In fabric type MSD, RpAddress is managed under msd_child_fabric_attributes, not at parent fabric level")
+		case entry.VrfTemplateConfig.RpLoopbackId != nil:
+			dg.AddError("VRF operation failed", "In fabric type MSD, RpLoopbackId is managed under msd_child_fabric_attributes, not at parent fabric level")
+		case len(entry.VrfTemplateConfig.UnderlayMulticastAddress) != 0:
+			dg.AddError("VRF operation failed", "In fabric type MSD, UnderlayMulticastAddress is managed under msd_child_fabric_attributes, not at parent fabric level")
+		case len(entry.VrfTemplateConfig.OverlayMulticastGroups) != 0:
+			dg.AddError("VRF operation failed", "In fabric type MSD, OverlayMulticastGroups is managed under msd_child_fabric_attributes, not at parent fabric level")
+		case len(entry.VrfTemplateConfig.RouteTargetImportMvpn) != 0:
+			dg.AddError("VRF operation failed", "In fabric type MSD, RouteTargetImportMvpn is managed under msd_child_fabric_attributes, not at parent fabric level")
+		case len(entry.VrfTemplateConfig.RouteTargetExportMvpn) != 0:
+			dg.AddError("VRF operation failed", "In fabric type MSD, RouteTargetExportMvpn is managed under msd_child_fabric_attributes, not at parent fabric level")
 		}
 	}
 }

@@ -27,5 +27,9 @@ rm -rf "$TF_ACC_LOG_PATH"
 # install test summary tool
 go get gotest.tools/gotestsum
 go install gotest.tools/gotestsum
+# Set GOBIN if not set
+if [ -z "$GOBIN" ]; then
+    GOBIN=$(go env GOPATH)/bin
+fi
 #GOFLAGS="-count=1" go test -timeout ${TIMEOUT} -v -run ^${PATTERN} ./... 
 GOFLAGS="-count=1" $GOBIN/gotestsum --format testname  --format-hide-empty-pkg  --debug --jsonfile /tmp/tftest_output_${TIME_DATE}.json -- -failfast -v -timeout ${TIMEOUT} -run ^${PATTERN} ./internal/provider

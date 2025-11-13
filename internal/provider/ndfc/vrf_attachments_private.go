@@ -322,7 +322,9 @@ func (c NDFC) diffVrfAttachments(ctx context.Context, planData *resource_vrf_bul
 				for serial, attachEntry := range planVrf.AttachList {
 					attachEntry.SerialNumber = serial
 					attachEntry.VrfName = vrf
-					attachEntry.FabricName = planData.FabricName
+					if attachEntry.FabricName == "" {
+						attachEntry.FabricName = planData.FabricName
+					}
 					if attachEntry.DeployThisAttachment {
 						attachEntry.UpdateAction |= Deploy
 						planVrf.AttachList[serial] = attachEntry

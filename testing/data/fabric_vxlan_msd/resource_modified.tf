@@ -1,7 +1,24 @@
 
+resource "ndfc_fabric_vxlan_evpn" "child_fabric1" {
+  fabric_name   = "child_fabric1"
+  bgp_as        = "65000"
+  deploy        = false
+}
+
+resource "ndfc_fabric_vxlan_evpn" "child_fabric2" {
+  fabric_name = "child_fabric2"
+  bgp_as      = "65002"
+  deploy      = false
+}
+
+resource "ndfc_fabric_vxlan_evpn" "child_fabric3" {
+  fabric_name = "child_fabric3"
+  bgp_as      = "65003"
+  deploy      = false
+}
+
 resource "ndfc_fabric_vxlan_msd" "test_resource_fabric_vxlan_msd_1" {
   fabric_name                = "TF_FABRIC_VXLAN_MSD"
-  anycast_gw_mac             = "2020.0000.00bb"
   bgw_routing_tag            = 34451
   border_gwy_connections     = "Manual"
   cloudsec_autoconfig        = false
@@ -20,5 +37,10 @@ resource "ndfc_fabric_vxlan_msd" "test_resource_fabric_vxlan_msd_1" {
   default_vrf                = "Default_VRF_Universal"
   network_extension_template = "Default_Network_Extension_Universal"
   vrf_extension_template     = "Default_VRF_Extension_Universal"
-  deploy                     = true
+  deploy                     = false
+  child_fabrics              = ["child_fabric1", "child_fabric3"]
+  depends_on = [
+    ndfc_fabric_vxlan_evpn.child_fabric1,
+    ndfc_fabric_vxlan_evpn.child_fabric3
+  ]
 }

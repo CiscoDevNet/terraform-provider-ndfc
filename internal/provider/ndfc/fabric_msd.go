@@ -116,3 +116,19 @@ func (m *NDFC) GetMsdChildFabricAssociations(ctx context.Context, dg *diag.Diagn
 	}
 	return childFabrics
 }
+
+// IsFabricMsd checks if a fabric is an MSD parent fabric
+func (m *NDFC) IsFabricMsd(ctx context.Context, dg *diag.Diagnostics, fabricName string) bool {
+	fType := m.GetFabricTemplateType(ctx, dg, fabricName)
+	if dg.HasError() {
+		return false
+	}
+
+	if fType != ResourceVxlanMsdType {
+		tflog.Debug(ctx, fmt.Sprintf("Fabric %s is not MSD parent fabric (type: %s)", fabricName, fType))
+		return false
+	}
+
+	tflog.Debug(ctx, fmt.Sprintf("Fabric %s is MSD parent fabric", fabricName))
+	return true
+}

@@ -15,6 +15,90 @@ import (
 	. "terraform-provider-ndfc/internal/provider/types"
 )
 
+func (v NDFCMsdChildFabricAttributesValue) DeepEqual(c NDFCMsdChildFabricAttributesValue) int {
+	cf := false
+	if v.AdvertiseHostRoutes != c.AdvertiseHostRoutes {
+		log.Printf("v.AdvertiseHostRoutes=%v, c.AdvertiseHostRoutes=%v", v.AdvertiseHostRoutes, c.AdvertiseHostRoutes)
+		return RequiresUpdate
+	}
+	if v.AdvertiseDefaultRoute != c.AdvertiseDefaultRoute {
+		log.Printf("v.AdvertiseDefaultRoute=%v, c.AdvertiseDefaultRoute=%v", v.AdvertiseDefaultRoute, c.AdvertiseDefaultRoute)
+		return RequiresUpdate
+	}
+	if v.ConfigureStaticDefaultRoute != c.ConfigureStaticDefaultRoute {
+		log.Printf("v.ConfigureStaticDefaultRoute=%v, c.ConfigureStaticDefaultRoute=%v", v.ConfigureStaticDefaultRoute, c.ConfigureStaticDefaultRoute)
+		return RequiresUpdate
+	}
+	if v.BgpPassword != c.BgpPassword {
+		log.Printf("v.BgpPassword=%v, c.BgpPassword=%v", v.BgpPassword, c.BgpPassword)
+		return RequiresUpdate
+	}
+	if v.BgpPasswordType != c.BgpPasswordType {
+		log.Printf("v.BgpPasswordType=%v, c.BgpPasswordType=%v", v.BgpPasswordType, c.BgpPasswordType)
+		return RequiresUpdate
+	}
+	if v.Netflow != c.Netflow {
+		log.Printf("v.Netflow=%v, c.Netflow=%v", v.Netflow, c.Netflow)
+		return RequiresUpdate
+	}
+	if v.NetflowMonitor != c.NetflowMonitor {
+		log.Printf("v.NetflowMonitor=%v, c.NetflowMonitor=%v", v.NetflowMonitor, c.NetflowMonitor)
+		return RequiresUpdate
+	}
+	if v.Trm != c.Trm {
+		log.Printf("v.Trm=%v, c.Trm=%v", v.Trm, c.Trm)
+		return RequiresUpdate
+	}
+	if v.TrmBgwMsite != c.TrmBgwMsite {
+		log.Printf("v.TrmBgwMsite=%v, c.TrmBgwMsite=%v", v.TrmBgwMsite, c.TrmBgwMsite)
+		return RequiresUpdate
+	}
+	if v.NoRp != c.NoRp {
+		log.Printf("v.NoRp=%v, c.NoRp=%v", v.NoRp, c.NoRp)
+		return RequiresUpdate
+	}
+	if v.RpAddress != c.RpAddress {
+		log.Printf("v.RpAddress=%v, c.RpAddress=%v", v.RpAddress, c.RpAddress)
+		return RequiresUpdate
+	}
+
+	if !v.RpLoopbackId.IsEmpty() && !c.RpLoopbackId.IsEmpty() {
+		if *v.RpLoopbackId != *c.RpLoopbackId {
+			log.Printf("v.RpLoopbackId=%v, c.RpLoopbackId=%v", *v.RpLoopbackId, *c.RpLoopbackId)
+			return RequiresUpdate
+		}
+	} else {
+		if !v.RpLoopbackId.IsEmpty() {
+			log.Printf("v.RpLoopbackId=%v", *v.RpLoopbackId)
+			return RequiresUpdate
+		} else if !c.RpLoopbackId.IsEmpty() {
+			log.Printf("c.RpLoopbackId=%v", *c.RpLoopbackId)
+			return RequiresUpdate
+		}
+	}
+	if v.UnderlayMulticastAddress != c.UnderlayMulticastAddress {
+		log.Printf("v.UnderlayMulticastAddress=%v, c.UnderlayMulticastAddress=%v", v.UnderlayMulticastAddress, c.UnderlayMulticastAddress)
+		return RequiresUpdate
+	}
+	if v.OverlayMulticastGroups != c.OverlayMulticastGroups {
+		log.Printf("v.OverlayMulticastGroups=%v, c.OverlayMulticastGroups=%v", v.OverlayMulticastGroups, c.OverlayMulticastGroups)
+		return RequiresUpdate
+	}
+	if v.RouteTargetImportMvpn != c.RouteTargetImportMvpn {
+		log.Printf("v.RouteTargetImportMvpn=%v, c.RouteTargetImportMvpn=%v", v.RouteTargetImportMvpn, c.RouteTargetImportMvpn)
+		return RequiresUpdate
+	}
+	if v.RouteTargetExportMvpn != c.RouteTargetExportMvpn {
+		log.Printf("v.RouteTargetExportMvpn=%v, c.RouteTargetExportMvpn=%v", v.RouteTargetExportMvpn, c.RouteTargetExportMvpn)
+		return RequiresUpdate
+	}
+
+	if cf {
+		return ControlFlagUpdate
+	}
+	return ValuesDeeplyEqual
+}
+
 func (v NDFCVrfsValue) DeepEqual(c NDFCVrfsValue) int {
 	cf := false
 	if v.VrfTemplate != c.VrfTemplate {
@@ -293,6 +377,200 @@ func (v NDFCVrfsValue) DeepEqual(c NDFCVrfsValue) int {
 		return ControlFlagUpdate
 	}
 	return ValuesDeeplyEqual
+}
+
+func (v *NDFCMsdChildFabricAttributesValue) CreatePlan(c NDFCMsdChildFabricAttributesValue, cf *bool) int {
+	action := ActionNone
+
+	if v.AdvertiseHostRoutes != c.AdvertiseHostRoutes {
+		log.Printf("Update: v.AdvertiseHostRoutes=%v, c.AdvertiseHostRoutes=%v", v.AdvertiseHostRoutes, c.AdvertiseHostRoutes)
+		if action == ActionNone || action == RequiresUpdate {
+			action = RequiresUpdate
+		}
+	}
+
+	if v.AdvertiseDefaultRoute != c.AdvertiseDefaultRoute {
+		log.Printf("Update: v.AdvertiseDefaultRoute=%v, c.AdvertiseDefaultRoute=%v", v.AdvertiseDefaultRoute, c.AdvertiseDefaultRoute)
+		if action == ActionNone || action == RequiresUpdate {
+			action = RequiresUpdate
+		}
+	}
+
+	if v.ConfigureStaticDefaultRoute != c.ConfigureStaticDefaultRoute {
+		log.Printf("Update: v.ConfigureStaticDefaultRoute=%v, c.ConfigureStaticDefaultRoute=%v", v.ConfigureStaticDefaultRoute, c.ConfigureStaticDefaultRoute)
+		if action == ActionNone || action == RequiresUpdate {
+			action = RequiresUpdate
+		}
+	}
+
+	if v.BgpPassword != "" {
+
+		if v.BgpPassword != c.BgpPassword {
+			log.Printf("Update: v.BgpPassword=%v, c.BgpPassword=%v", v.BgpPassword, c.BgpPassword)
+			if action == ActionNone || action == RequiresUpdate {
+				action = RequiresUpdate
+			}
+		}
+
+	} else {
+		//v empty, fill with c
+		log.Printf("Copy from state: v.BgpPassword=%v, c.BgpPassword=%v", v.BgpPassword, c.BgpPassword)
+		v.BgpPassword = c.BgpPassword
+	}
+
+	if v.BgpPasswordType != "" {
+
+		if v.BgpPasswordType != c.BgpPasswordType {
+			log.Printf("Update: v.BgpPasswordType=%v, c.BgpPasswordType=%v", v.BgpPasswordType, c.BgpPasswordType)
+			if action == ActionNone || action == RequiresUpdate {
+				action = RequiresUpdate
+			}
+		}
+
+	} else {
+		//v empty, fill with c
+		log.Printf("Copy from state: v.BgpPasswordType=%v, c.BgpPasswordType=%v", v.BgpPasswordType, c.BgpPasswordType)
+		v.BgpPasswordType = c.BgpPasswordType
+	}
+
+	if v.Netflow != c.Netflow {
+		log.Printf("Update: v.Netflow=%v, c.Netflow=%v", v.Netflow, c.Netflow)
+		if action == ActionNone || action == RequiresUpdate {
+			action = RequiresUpdate
+		}
+	}
+
+	if v.NetflowMonitor != "" {
+
+		if v.NetflowMonitor != c.NetflowMonitor {
+			log.Printf("Update: v.NetflowMonitor=%v, c.NetflowMonitor=%v", v.NetflowMonitor, c.NetflowMonitor)
+			if action == ActionNone || action == RequiresUpdate {
+				action = RequiresUpdate
+			}
+		}
+
+	} else {
+		//v empty, fill with c
+		log.Printf("Copy from state: v.NetflowMonitor=%v, c.NetflowMonitor=%v", v.NetflowMonitor, c.NetflowMonitor)
+		v.NetflowMonitor = c.NetflowMonitor
+	}
+
+	if v.Trm != c.Trm {
+		log.Printf("Update: v.Trm=%v, c.Trm=%v", v.Trm, c.Trm)
+		if action == ActionNone || action == RequiresUpdate {
+			action = RequiresUpdate
+		}
+	}
+
+	if v.TrmBgwMsite != c.TrmBgwMsite {
+		log.Printf("Update: v.TrmBgwMsite=%v, c.TrmBgwMsite=%v", v.TrmBgwMsite, c.TrmBgwMsite)
+		if action == ActionNone || action == RequiresUpdate {
+			action = RequiresUpdate
+		}
+	}
+
+	if v.NoRp != c.NoRp {
+		log.Printf("Update: v.NoRp=%v, c.NoRp=%v", v.NoRp, c.NoRp)
+		if action == ActionNone || action == RequiresUpdate {
+			action = RequiresUpdate
+		}
+	}
+
+	if v.RpAddress != "" {
+
+		if v.RpAddress != c.RpAddress {
+			log.Printf("Update: v.RpAddress=%v, c.RpAddress=%v", v.RpAddress, c.RpAddress)
+			if action == ActionNone || action == RequiresUpdate {
+				action = RequiresUpdate
+			}
+		}
+
+	} else {
+		//v empty, fill with c
+		log.Printf("Copy from state: v.RpAddress=%v, c.RpAddress=%v", v.RpAddress, c.RpAddress)
+		v.RpAddress = c.RpAddress
+	}
+
+	if !v.RpLoopbackId.IsEmpty() && !c.RpLoopbackId.IsEmpty() {
+		if *v.RpLoopbackId != *c.RpLoopbackId {
+			log.Printf("Update: v.RpLoopbackId=%v, c.RpLoopbackId=%v", *v.RpLoopbackId, *c.RpLoopbackId)
+			if action == ActionNone || action == RequiresUpdate {
+				action = RequiresUpdate
+			}
+		}
+	} else {
+		if !v.RpLoopbackId.IsEmpty() {
+			log.Printf("Update: v.RpLoopbackId=%v", *v.RpLoopbackId)
+			if action == ActionNone || action == RequiresUpdate {
+				action = RequiresUpdate
+			}
+		} else if !c.RpLoopbackId.IsEmpty() {
+			log.Printf("Copy from State: c.RpLoopbackId=%v", *c.RpLoopbackId)
+			v.RpLoopbackId = new(Int64Custom)
+			*v.RpLoopbackId = *c.RpLoopbackId
+		}
+	}
+	if v.UnderlayMulticastAddress != "" {
+
+		if v.UnderlayMulticastAddress != c.UnderlayMulticastAddress {
+			log.Printf("Update: v.UnderlayMulticastAddress=%v, c.UnderlayMulticastAddress=%v", v.UnderlayMulticastAddress, c.UnderlayMulticastAddress)
+			if action == ActionNone || action == RequiresUpdate {
+				action = RequiresUpdate
+			}
+		}
+
+	} else {
+		//v empty, fill with c
+		log.Printf("Copy from state: v.UnderlayMulticastAddress=%v, c.UnderlayMulticastAddress=%v", v.UnderlayMulticastAddress, c.UnderlayMulticastAddress)
+		v.UnderlayMulticastAddress = c.UnderlayMulticastAddress
+	}
+
+	if v.OverlayMulticastGroups != "" {
+
+		if v.OverlayMulticastGroups != c.OverlayMulticastGroups {
+			log.Printf("Update: v.OverlayMulticastGroups=%v, c.OverlayMulticastGroups=%v", v.OverlayMulticastGroups, c.OverlayMulticastGroups)
+			if action == ActionNone || action == RequiresUpdate {
+				action = RequiresUpdate
+			}
+		}
+
+	} else {
+		//v empty, fill with c
+		log.Printf("Copy from state: v.OverlayMulticastGroups=%v, c.OverlayMulticastGroups=%v", v.OverlayMulticastGroups, c.OverlayMulticastGroups)
+		v.OverlayMulticastGroups = c.OverlayMulticastGroups
+	}
+
+	if v.RouteTargetImportMvpn != "" {
+
+		if v.RouteTargetImportMvpn != c.RouteTargetImportMvpn {
+			log.Printf("Update: v.RouteTargetImportMvpn=%v, c.RouteTargetImportMvpn=%v", v.RouteTargetImportMvpn, c.RouteTargetImportMvpn)
+			if action == ActionNone || action == RequiresUpdate {
+				action = RequiresUpdate
+			}
+		}
+
+	} else {
+		//v empty, fill with c
+		log.Printf("Copy from state: v.RouteTargetImportMvpn=%v, c.RouteTargetImportMvpn=%v", v.RouteTargetImportMvpn, c.RouteTargetImportMvpn)
+		v.RouteTargetImportMvpn = c.RouteTargetImportMvpn
+	}
+
+	if v.RouteTargetExportMvpn != "" {
+
+		if v.RouteTargetExportMvpn != c.RouteTargetExportMvpn {
+			log.Printf("Update: v.RouteTargetExportMvpn=%v, c.RouteTargetExportMvpn=%v", v.RouteTargetExportMvpn, c.RouteTargetExportMvpn)
+			if action == ActionNone || action == RequiresUpdate {
+				action = RequiresUpdate
+			}
+		}
+
+	} else {
+		//v empty, fill with c
+		log.Printf("Copy from state: v.RouteTargetExportMvpn=%v, c.RouteTargetExportMvpn=%v", v.RouteTargetExportMvpn, c.RouteTargetExportMvpn)
+		v.RouteTargetExportMvpn = c.RouteTargetExportMvpn
+	}
+
+	return action
 }
 
 func (v *NDFCVrfsValue) CreatePlan(c NDFCVrfsValue, cf *bool) int {

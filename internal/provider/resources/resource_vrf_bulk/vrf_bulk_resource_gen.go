@@ -193,6 +193,120 @@ func VrfBulkResourceSchema(ctx context.Context) schema.Schema {
 							MarkdownDescription: "Maximum iBGP paths",
 							Default:             int64default.StaticInt64(2),
 						},
+						"msd_child_fabric_attributes": schema.MapNestedAttribute{
+							NestedObject: schema.NestedAttributeObject{
+								Attributes: map[string]schema.Attribute{
+									"advertise_default_route": schema.BoolAttribute{
+										Optional:            true,
+										Computed:            true,
+										Description:         "Child fabric: Flag to Control Advertisement of Default Route Internally",
+										MarkdownDescription: "Child fabric: Flag to Control Advertisement of Default Route Internally",
+										Default:             booldefault.StaticBool(true),
+									},
+									"advertise_host_routes": schema.BoolAttribute{
+										Optional:            true,
+										Computed:            true,
+										Description:         "MSD Child fabric: Flag to Control Advertisement of /32 and /128 Routes to Edge Routers",
+										MarkdownDescription: "MSD Child fabric: Flag to Control Advertisement of /32 and /128 Routes to Edge Routers",
+										Default:             booldefault.StaticBool(false),
+									},
+									"bgp_password": schema.StringAttribute{
+										Optional:            true,
+										Description:         "VRF Lite BGP neighbor password (Hex String)",
+										MarkdownDescription: "VRF Lite BGP neighbor password (Hex String)",
+									},
+									"bgp_password_type": schema.StringAttribute{
+										Optional:            true,
+										Description:         "VRF Lite BGP Key Encryption Type: 3 - 3DES, 7 - Cisco",
+										MarkdownDescription: "VRF Lite BGP Key Encryption Type: 3 - 3DES, 7 - Cisco",
+									},
+									"configure_static_default_route": schema.BoolAttribute{
+										Optional:            true,
+										Computed:            true,
+										Description:         "Child fabric: Flag to Control Static Default Route Configuration",
+										MarkdownDescription: "Child fabric: Flag to Control Static Default Route Configuration",
+										Default:             booldefault.StaticBool(true),
+									},
+									"fabric_name": schema.StringAttribute{
+										Computed:            true,
+										Description:         "The name of the fabric",
+										MarkdownDescription: "The name of the fabric",
+									},
+									"netflow": schema.BoolAttribute{
+										Optional:            true,
+										Computed:            true,
+										Description:         "For netflow on VRF-LITE Sub-interface. Supported only if netflow is enabled on fabric. For NX-OS only",
+										MarkdownDescription: "For netflow on VRF-LITE Sub-interface. Supported only if netflow is enabled on fabric. For NX-OS only",
+										Default:             booldefault.StaticBool(false),
+									},
+									"netflow_monitor": schema.StringAttribute{
+										Optional:            true,
+										Description:         "Netflow monitor. For NX-OS only",
+										MarkdownDescription: "Netflow monitor. For NX-OS only",
+									},
+									"no_rp": schema.BoolAttribute{
+										Optional:            true,
+										Computed:            true,
+										Description:         "There is no RP as only SSM is used",
+										MarkdownDescription: "There is no RP as only SSM is used",
+										Default:             booldefault.StaticBool(false),
+									},
+									"overlay_multicast_groups": schema.StringAttribute{
+										Optional:            true,
+										Description:         "Overlay multicast groups",
+										MarkdownDescription: "Overlay multicast groups",
+									},
+									"route_target_export_mvpn": schema.StringAttribute{
+										Optional:            true,
+										Description:         "For MVPN Routes Export, One or a Comma Separated List",
+										MarkdownDescription: "For MVPN Routes Export, One or a Comma Separated List",
+									},
+									"route_target_import_mvpn": schema.StringAttribute{
+										Optional:            true,
+										Description:         "For MVPN Routes Import, One or a Comma Separated List",
+										MarkdownDescription: "For MVPN Routes Import, One or a Comma Separated List",
+									},
+									"rp_address": schema.StringAttribute{
+										Optional:            true,
+										Description:         "IPv4 address",
+										MarkdownDescription: "IPv4 address",
+									},
+									"rp_loopback_id": schema.Int64Attribute{
+										Optional:            true,
+										Description:         "RP loopback ID",
+										MarkdownDescription: "RP loopback ID",
+									},
+									"trm": schema.BoolAttribute{
+										Optional:            true,
+										Computed:            true,
+										Description:         "Enable Tenant Routed Multicast",
+										MarkdownDescription: "Enable Tenant Routed Multicast",
+										Default:             booldefault.StaticBool(false),
+									},
+									"trm_bgw_msite": schema.BoolAttribute{
+										Optional:            true,
+										Computed:            true,
+										Description:         "Enable TRM on Border Gateway Multisite",
+										MarkdownDescription: "Enable TRM on Border Gateway Multisite",
+										Default:             booldefault.StaticBool(false),
+									},
+									"underlay_multicast_address": schema.StringAttribute{
+										Optional:            true,
+										Description:         "IPv4 Multicast Address. Applicable only when TRM is enabled.",
+										MarkdownDescription: "IPv4 Multicast Address. Applicable only when TRM is enabled.",
+									},
+								},
+								CustomType: MsdChildFabricAttributesType{
+									ObjectType: types.ObjectType{
+										AttrTypes: MsdChildFabricAttributesValue{}.AttributeTypes(ctx),
+									},
+								},
+							},
+							Optional:            true,
+							Computed:            true,
+							Description:         "Multi Site Domain child fabric specific vrf attributes",
+							MarkdownDescription: "Multi Site Domain child fabric specific vrf attributes",
+						},
 						"mtu": schema.Int64Attribute{
 							Optional:            true,
 							Computed:            true,
@@ -638,6 +752,24 @@ func (t VrfsType) ValueFromObject(ctx context.Context, in basetypes.ObjectValue)
 			fmt.Sprintf(`max_ibgp_paths expected to be basetypes.Int64Value, was: %T`, maxIbgpPathsAttribute))
 	}
 
+	msdChildFabricAttributesAttribute, ok := attributes["msd_child_fabric_attributes"]
+
+	if !ok {
+		diags.AddError(
+			"Attribute Missing",
+			`msd_child_fabric_attributes is missing from object`)
+
+		return nil, diags
+	}
+
+	msdChildFabricAttributesVal, ok := msdChildFabricAttributesAttribute.(basetypes.MapValue)
+
+	if !ok {
+		diags.AddError(
+			"Attribute Wrong Type",
+			fmt.Sprintf(`msd_child_fabric_attributes expected to be basetypes.MapValue, was: %T`, msdChildFabricAttributesAttribute))
+	}
+
 	mtuAttribute, ok := attributes["mtu"]
 
 	if !ok {
@@ -1160,6 +1292,7 @@ func (t VrfsType) ValueFromObject(ctx context.Context, in basetypes.ObjectValue)
 		LoopbackRoutingTag:          loopbackRoutingTagVal,
 		MaxBgpPaths:                 maxBgpPathsVal,
 		MaxIbgpPaths:                maxIbgpPathsVal,
+		MsdChildFabricAttributes:    msdChildFabricAttributesVal,
 		Mtu:                         mtuVal,
 		MvpnInterAs:                 mvpnInterAsVal,
 		Netflow:                     netflowVal,
@@ -1489,6 +1622,24 @@ func NewVrfsValue(attributeTypes map[string]attr.Type, attributes map[string]att
 			fmt.Sprintf(`max_ibgp_paths expected to be basetypes.Int64Value, was: %T`, maxIbgpPathsAttribute))
 	}
 
+	msdChildFabricAttributesAttribute, ok := attributes["msd_child_fabric_attributes"]
+
+	if !ok {
+		diags.AddError(
+			"Attribute Missing",
+			`msd_child_fabric_attributes is missing from object`)
+
+		return NewVrfsValueUnknown(), diags
+	}
+
+	msdChildFabricAttributesVal, ok := msdChildFabricAttributesAttribute.(basetypes.MapValue)
+
+	if !ok {
+		diags.AddError(
+			"Attribute Wrong Type",
+			fmt.Sprintf(`msd_child_fabric_attributes expected to be basetypes.MapValue, was: %T`, msdChildFabricAttributesAttribute))
+	}
+
 	mtuAttribute, ok := attributes["mtu"]
 
 	if !ok {
@@ -2011,6 +2162,7 @@ func NewVrfsValue(attributeTypes map[string]attr.Type, attributes map[string]att
 		LoopbackRoutingTag:          loopbackRoutingTagVal,
 		MaxBgpPaths:                 maxBgpPathsVal,
 		MaxIbgpPaths:                maxIbgpPathsVal,
+		MsdChildFabricAttributes:    msdChildFabricAttributesVal,
 		Mtu:                         mtuVal,
 		MvpnInterAs:                 mvpnInterAsVal,
 		Netflow:                     netflowVal,
@@ -2124,6 +2276,7 @@ type VrfsValue struct {
 	LoopbackRoutingTag          basetypes.Int64Value  `tfsdk:"loopback_routing_tag"`
 	MaxBgpPaths                 basetypes.Int64Value  `tfsdk:"max_bgp_paths"`
 	MaxIbgpPaths                basetypes.Int64Value  `tfsdk:"max_ibgp_paths"`
+	MsdChildFabricAttributes    basetypes.MapValue    `tfsdk:"msd_child_fabric_attributes"`
 	Mtu                         basetypes.Int64Value  `tfsdk:"mtu"`
 	MvpnInterAs                 basetypes.BoolValue   `tfsdk:"mvpn_inter_as"`
 	Netflow                     basetypes.BoolValue   `tfsdk:"netflow"`
@@ -2156,7 +2309,7 @@ type VrfsValue struct {
 }
 
 func (v VrfsValue) ToTerraformValue(ctx context.Context) (tftypes.Value, error) {
-	attrTypes := make(map[string]tftypes.Type, 41)
+	attrTypes := make(map[string]tftypes.Type, 42)
 
 	var val tftypes.Value
 	var err error
@@ -2176,6 +2329,9 @@ func (v VrfsValue) ToTerraformValue(ctx context.Context) (tftypes.Value, error) 
 	attrTypes["loopback_routing_tag"] = basetypes.Int64Type{}.TerraformType(ctx)
 	attrTypes["max_bgp_paths"] = basetypes.Int64Type{}.TerraformType(ctx)
 	attrTypes["max_ibgp_paths"] = basetypes.Int64Type{}.TerraformType(ctx)
+	attrTypes["msd_child_fabric_attributes"] = basetypes.MapType{
+		ElemType: MsdChildFabricAttributesValue{}.Type(ctx),
+	}.TerraformType(ctx)
 	attrTypes["mtu"] = basetypes.Int64Type{}.TerraformType(ctx)
 	attrTypes["mvpn_inter_as"] = basetypes.BoolType{}.TerraformType(ctx)
 	attrTypes["netflow"] = basetypes.BoolType{}.TerraformType(ctx)
@@ -2209,7 +2365,7 @@ func (v VrfsValue) ToTerraformValue(ctx context.Context) (tftypes.Value, error) 
 
 	switch v.state {
 	case attr.ValueStateKnown:
-		vals := make(map[string]tftypes.Value, 41)
+		vals := make(map[string]tftypes.Value, 42)
 
 		val, err = v.AdvertiseDefaultRoute.ToTerraformValue(ctx)
 
@@ -2314,6 +2470,14 @@ func (v VrfsValue) ToTerraformValue(ctx context.Context) (tftypes.Value, error) 
 		}
 
 		vals["max_ibgp_paths"] = val
+
+		val, err = v.MsdChildFabricAttributes.ToTerraformValue(ctx)
+
+		if err != nil {
+			return tftypes.NewValue(objectType, tftypes.UnknownValue), err
+		}
+
+		vals["msd_child_fabric_attributes"] = val
 
 		val, err = v.Mtu.ToTerraformValue(ctx)
 
@@ -2597,6 +2761,35 @@ func (v VrfsValue) ToObjectValue(ctx context.Context) (basetypes.ObjectValue, di
 		)
 	}
 
+	msdChildFabricAttributes := types.MapValueMust(
+		MsdChildFabricAttributesType{
+			basetypes.ObjectType{
+				AttrTypes: MsdChildFabricAttributesValue{}.AttributeTypes(ctx),
+			},
+		},
+		v.MsdChildFabricAttributes.Elements(),
+	)
+
+	if v.MsdChildFabricAttributes.IsNull() {
+		msdChildFabricAttributes = types.MapNull(
+			MsdChildFabricAttributesType{
+				basetypes.ObjectType{
+					AttrTypes: MsdChildFabricAttributesValue{}.AttributeTypes(ctx),
+				},
+			},
+		)
+	}
+
+	if v.MsdChildFabricAttributes.IsUnknown() {
+		msdChildFabricAttributes = types.MapUnknown(
+			MsdChildFabricAttributesType{
+				basetypes.ObjectType{
+					AttrTypes: MsdChildFabricAttributesValue{}.AttributeTypes(ctx),
+				},
+			},
+		)
+	}
+
 	attributeTypes := map[string]attr.Type{
 		"advertise_default_route": basetypes.BoolType{},
 		"advertise_host_routes":   basetypes.BoolType{},
@@ -2613,6 +2806,9 @@ func (v VrfsValue) ToObjectValue(ctx context.Context) (basetypes.ObjectValue, di
 		"loopback_routing_tag":           basetypes.Int64Type{},
 		"max_bgp_paths":                  basetypes.Int64Type{},
 		"max_ibgp_paths":                 basetypes.Int64Type{},
+		"msd_child_fabric_attributes": basetypes.MapType{
+			ElemType: MsdChildFabricAttributesValue{}.Type(ctx),
+		},
 		"mtu":                            basetypes.Int64Type{},
 		"mvpn_inter_as":                  basetypes.BoolType{},
 		"netflow":                        basetypes.BoolType{},
@@ -2667,6 +2863,7 @@ func (v VrfsValue) ToObjectValue(ctx context.Context) (basetypes.ObjectValue, di
 			"loopback_routing_tag":           v.LoopbackRoutingTag,
 			"max_bgp_paths":                  v.MaxBgpPaths,
 			"max_ibgp_paths":                 v.MaxIbgpPaths,
+			"msd_child_fabric_attributes":    msdChildFabricAttributes,
 			"mtu":                            v.Mtu,
 			"mvpn_inter_as":                  v.MvpnInterAs,
 			"netflow":                        v.Netflow,
@@ -2764,6 +2961,10 @@ func (v VrfsValue) Equal(o attr.Value) bool {
 	}
 
 	if !v.MaxIbgpPaths.Equal(other.MaxIbgpPaths) {
+		return false
+	}
+
+	if !v.MsdChildFabricAttributes.Equal(other.MsdChildFabricAttributes) {
 		return false
 	}
 
@@ -2907,6 +3108,9 @@ func (v VrfsValue) AttributeTypes(ctx context.Context) map[string]attr.Type {
 		"loopback_routing_tag":           basetypes.Int64Type{},
 		"max_bgp_paths":                  basetypes.Int64Type{},
 		"max_ibgp_paths":                 basetypes.Int64Type{},
+		"msd_child_fabric_attributes": basetypes.MapType{
+			ElemType: MsdChildFabricAttributesValue{}.Type(ctx),
+		},
 		"mtu":                            basetypes.Int64Type{},
 		"mvpn_inter_as":                  basetypes.BoolType{},
 		"netflow":                        basetypes.BoolType{},
@@ -3754,5 +3958,1209 @@ func (v AttachListValue) AttributeTypes(ctx context.Context) map[string]attr.Typ
 		"loopback_ipv6":          basetypes.StringType{},
 		"switch_name":            basetypes.StringType{},
 		"vlan":                   basetypes.Int64Type{},
+	}
+}
+
+var _ basetypes.ObjectTypable = MsdChildFabricAttributesType{}
+
+type MsdChildFabricAttributesType struct {
+	basetypes.ObjectType
+}
+
+func (t MsdChildFabricAttributesType) Equal(o attr.Type) bool {
+	other, ok := o.(MsdChildFabricAttributesType)
+
+	if !ok {
+		return false
+	}
+
+	return t.ObjectType.Equal(other.ObjectType)
+}
+
+func (t MsdChildFabricAttributesType) String() string {
+	return "MsdChildFabricAttributesType"
+}
+
+func (t MsdChildFabricAttributesType) ValueFromObject(ctx context.Context, in basetypes.ObjectValue) (basetypes.ObjectValuable, diag.Diagnostics) {
+	var diags diag.Diagnostics
+
+	attributes := in.Attributes()
+
+	advertiseDefaultRouteAttribute, ok := attributes["advertise_default_route"]
+
+	if !ok {
+		diags.AddError(
+			"Attribute Missing",
+			`advertise_default_route is missing from object`)
+
+		return nil, diags
+	}
+
+	advertiseDefaultRouteVal, ok := advertiseDefaultRouteAttribute.(basetypes.BoolValue)
+
+	if !ok {
+		diags.AddError(
+			"Attribute Wrong Type",
+			fmt.Sprintf(`advertise_default_route expected to be basetypes.BoolValue, was: %T`, advertiseDefaultRouteAttribute))
+	}
+
+	advertiseHostRoutesAttribute, ok := attributes["advertise_host_routes"]
+
+	if !ok {
+		diags.AddError(
+			"Attribute Missing",
+			`advertise_host_routes is missing from object`)
+
+		return nil, diags
+	}
+
+	advertiseHostRoutesVal, ok := advertiseHostRoutesAttribute.(basetypes.BoolValue)
+
+	if !ok {
+		diags.AddError(
+			"Attribute Wrong Type",
+			fmt.Sprintf(`advertise_host_routes expected to be basetypes.BoolValue, was: %T`, advertiseHostRoutesAttribute))
+	}
+
+	bgpPasswordAttribute, ok := attributes["bgp_password"]
+
+	if !ok {
+		diags.AddError(
+			"Attribute Missing",
+			`bgp_password is missing from object`)
+
+		return nil, diags
+	}
+
+	bgpPasswordVal, ok := bgpPasswordAttribute.(basetypes.StringValue)
+
+	if !ok {
+		diags.AddError(
+			"Attribute Wrong Type",
+			fmt.Sprintf(`bgp_password expected to be basetypes.StringValue, was: %T`, bgpPasswordAttribute))
+	}
+
+	bgpPasswordTypeAttribute, ok := attributes["bgp_password_type"]
+
+	if !ok {
+		diags.AddError(
+			"Attribute Missing",
+			`bgp_password_type is missing from object`)
+
+		return nil, diags
+	}
+
+	bgpPasswordTypeVal, ok := bgpPasswordTypeAttribute.(basetypes.StringValue)
+
+	if !ok {
+		diags.AddError(
+			"Attribute Wrong Type",
+			fmt.Sprintf(`bgp_password_type expected to be basetypes.StringValue, was: %T`, bgpPasswordTypeAttribute))
+	}
+
+	configureStaticDefaultRouteAttribute, ok := attributes["configure_static_default_route"]
+
+	if !ok {
+		diags.AddError(
+			"Attribute Missing",
+			`configure_static_default_route is missing from object`)
+
+		return nil, diags
+	}
+
+	configureStaticDefaultRouteVal, ok := configureStaticDefaultRouteAttribute.(basetypes.BoolValue)
+
+	if !ok {
+		diags.AddError(
+			"Attribute Wrong Type",
+			fmt.Sprintf(`configure_static_default_route expected to be basetypes.BoolValue, was: %T`, configureStaticDefaultRouteAttribute))
+	}
+
+	fabricNameAttribute, ok := attributes["fabric_name"]
+
+	if !ok {
+		diags.AddError(
+			"Attribute Missing",
+			`fabric_name is missing from object`)
+
+		return nil, diags
+	}
+
+	fabricNameVal, ok := fabricNameAttribute.(basetypes.StringValue)
+
+	if !ok {
+		diags.AddError(
+			"Attribute Wrong Type",
+			fmt.Sprintf(`fabric_name expected to be basetypes.StringValue, was: %T`, fabricNameAttribute))
+	}
+
+	netflowAttribute, ok := attributes["netflow"]
+
+	if !ok {
+		diags.AddError(
+			"Attribute Missing",
+			`netflow is missing from object`)
+
+		return nil, diags
+	}
+
+	netflowVal, ok := netflowAttribute.(basetypes.BoolValue)
+
+	if !ok {
+		diags.AddError(
+			"Attribute Wrong Type",
+			fmt.Sprintf(`netflow expected to be basetypes.BoolValue, was: %T`, netflowAttribute))
+	}
+
+	netflowMonitorAttribute, ok := attributes["netflow_monitor"]
+
+	if !ok {
+		diags.AddError(
+			"Attribute Missing",
+			`netflow_monitor is missing from object`)
+
+		return nil, diags
+	}
+
+	netflowMonitorVal, ok := netflowMonitorAttribute.(basetypes.StringValue)
+
+	if !ok {
+		diags.AddError(
+			"Attribute Wrong Type",
+			fmt.Sprintf(`netflow_monitor expected to be basetypes.StringValue, was: %T`, netflowMonitorAttribute))
+	}
+
+	noRpAttribute, ok := attributes["no_rp"]
+
+	if !ok {
+		diags.AddError(
+			"Attribute Missing",
+			`no_rp is missing from object`)
+
+		return nil, diags
+	}
+
+	noRpVal, ok := noRpAttribute.(basetypes.BoolValue)
+
+	if !ok {
+		diags.AddError(
+			"Attribute Wrong Type",
+			fmt.Sprintf(`no_rp expected to be basetypes.BoolValue, was: %T`, noRpAttribute))
+	}
+
+	overlayMulticastGroupsAttribute, ok := attributes["overlay_multicast_groups"]
+
+	if !ok {
+		diags.AddError(
+			"Attribute Missing",
+			`overlay_multicast_groups is missing from object`)
+
+		return nil, diags
+	}
+
+	overlayMulticastGroupsVal, ok := overlayMulticastGroupsAttribute.(basetypes.StringValue)
+
+	if !ok {
+		diags.AddError(
+			"Attribute Wrong Type",
+			fmt.Sprintf(`overlay_multicast_groups expected to be basetypes.StringValue, was: %T`, overlayMulticastGroupsAttribute))
+	}
+
+	routeTargetExportMvpnAttribute, ok := attributes["route_target_export_mvpn"]
+
+	if !ok {
+		diags.AddError(
+			"Attribute Missing",
+			`route_target_export_mvpn is missing from object`)
+
+		return nil, diags
+	}
+
+	routeTargetExportMvpnVal, ok := routeTargetExportMvpnAttribute.(basetypes.StringValue)
+
+	if !ok {
+		diags.AddError(
+			"Attribute Wrong Type",
+			fmt.Sprintf(`route_target_export_mvpn expected to be basetypes.StringValue, was: %T`, routeTargetExportMvpnAttribute))
+	}
+
+	routeTargetImportMvpnAttribute, ok := attributes["route_target_import_mvpn"]
+
+	if !ok {
+		diags.AddError(
+			"Attribute Missing",
+			`route_target_import_mvpn is missing from object`)
+
+		return nil, diags
+	}
+
+	routeTargetImportMvpnVal, ok := routeTargetImportMvpnAttribute.(basetypes.StringValue)
+
+	if !ok {
+		diags.AddError(
+			"Attribute Wrong Type",
+			fmt.Sprintf(`route_target_import_mvpn expected to be basetypes.StringValue, was: %T`, routeTargetImportMvpnAttribute))
+	}
+
+	rpAddressAttribute, ok := attributes["rp_address"]
+
+	if !ok {
+		diags.AddError(
+			"Attribute Missing",
+			`rp_address is missing from object`)
+
+		return nil, diags
+	}
+
+	rpAddressVal, ok := rpAddressAttribute.(basetypes.StringValue)
+
+	if !ok {
+		diags.AddError(
+			"Attribute Wrong Type",
+			fmt.Sprintf(`rp_address expected to be basetypes.StringValue, was: %T`, rpAddressAttribute))
+	}
+
+	rpLoopbackIdAttribute, ok := attributes["rp_loopback_id"]
+
+	if !ok {
+		diags.AddError(
+			"Attribute Missing",
+			`rp_loopback_id is missing from object`)
+
+		return nil, diags
+	}
+
+	rpLoopbackIdVal, ok := rpLoopbackIdAttribute.(basetypes.Int64Value)
+
+	if !ok {
+		diags.AddError(
+			"Attribute Wrong Type",
+			fmt.Sprintf(`rp_loopback_id expected to be basetypes.Int64Value, was: %T`, rpLoopbackIdAttribute))
+	}
+
+	trmAttribute, ok := attributes["trm"]
+
+	if !ok {
+		diags.AddError(
+			"Attribute Missing",
+			`trm is missing from object`)
+
+		return nil, diags
+	}
+
+	trmVal, ok := trmAttribute.(basetypes.BoolValue)
+
+	if !ok {
+		diags.AddError(
+			"Attribute Wrong Type",
+			fmt.Sprintf(`trm expected to be basetypes.BoolValue, was: %T`, trmAttribute))
+	}
+
+	trmBgwMsiteAttribute, ok := attributes["trm_bgw_msite"]
+
+	if !ok {
+		diags.AddError(
+			"Attribute Missing",
+			`trm_bgw_msite is missing from object`)
+
+		return nil, diags
+	}
+
+	trmBgwMsiteVal, ok := trmBgwMsiteAttribute.(basetypes.BoolValue)
+
+	if !ok {
+		diags.AddError(
+			"Attribute Wrong Type",
+			fmt.Sprintf(`trm_bgw_msite expected to be basetypes.BoolValue, was: %T`, trmBgwMsiteAttribute))
+	}
+
+	underlayMulticastAddressAttribute, ok := attributes["underlay_multicast_address"]
+
+	if !ok {
+		diags.AddError(
+			"Attribute Missing",
+			`underlay_multicast_address is missing from object`)
+
+		return nil, diags
+	}
+
+	underlayMulticastAddressVal, ok := underlayMulticastAddressAttribute.(basetypes.StringValue)
+
+	if !ok {
+		diags.AddError(
+			"Attribute Wrong Type",
+			fmt.Sprintf(`underlay_multicast_address expected to be basetypes.StringValue, was: %T`, underlayMulticastAddressAttribute))
+	}
+
+	if diags.HasError() {
+		return nil, diags
+	}
+
+	return MsdChildFabricAttributesValue{
+		AdvertiseDefaultRoute:       advertiseDefaultRouteVal,
+		AdvertiseHostRoutes:         advertiseHostRoutesVal,
+		BgpPassword:                 bgpPasswordVal,
+		BgpPasswordType:             bgpPasswordTypeVal,
+		ConfigureStaticDefaultRoute: configureStaticDefaultRouteVal,
+		FabricName:                  fabricNameVal,
+		Netflow:                     netflowVal,
+		NetflowMonitor:              netflowMonitorVal,
+		NoRp:                        noRpVal,
+		OverlayMulticastGroups:      overlayMulticastGroupsVal,
+		RouteTargetExportMvpn:       routeTargetExportMvpnVal,
+		RouteTargetImportMvpn:       routeTargetImportMvpnVal,
+		RpAddress:                   rpAddressVal,
+		RpLoopbackId:                rpLoopbackIdVal,
+		Trm:                         trmVal,
+		TrmBgwMsite:                 trmBgwMsiteVal,
+		UnderlayMulticastAddress:    underlayMulticastAddressVal,
+		state:                       attr.ValueStateKnown,
+	}, diags
+}
+
+func NewMsdChildFabricAttributesValueNull() MsdChildFabricAttributesValue {
+	return MsdChildFabricAttributesValue{
+		state: attr.ValueStateNull,
+	}
+}
+
+func NewMsdChildFabricAttributesValueUnknown() MsdChildFabricAttributesValue {
+	return MsdChildFabricAttributesValue{
+		state: attr.ValueStateUnknown,
+	}
+}
+
+func NewMsdChildFabricAttributesValue(attributeTypes map[string]attr.Type, attributes map[string]attr.Value) (MsdChildFabricAttributesValue, diag.Diagnostics) {
+	var diags diag.Diagnostics
+
+	// Reference: https://github.com/hashicorp/terraform-plugin-framework/issues/521
+	ctx := context.Background()
+
+	for name, attributeType := range attributeTypes {
+		attribute, ok := attributes[name]
+
+		if !ok {
+			diags.AddError(
+				"Missing MsdChildFabricAttributesValue Attribute Value",
+				"While creating a MsdChildFabricAttributesValue value, a missing attribute value was detected. "+
+					"A MsdChildFabricAttributesValue must contain values for all attributes, even if null or unknown. "+
+					"This is always an issue with the provider and should be reported to the provider developers.\n\n"+
+					fmt.Sprintf("MsdChildFabricAttributesValue Attribute Name (%s) Expected Type: %s", name, attributeType.String()),
+			)
+
+			continue
+		}
+
+		if !attributeType.Equal(attribute.Type(ctx)) {
+			diags.AddError(
+				"Invalid MsdChildFabricAttributesValue Attribute Type",
+				"While creating a MsdChildFabricAttributesValue value, an invalid attribute value was detected. "+
+					"A MsdChildFabricAttributesValue must use a matching attribute type for the value. "+
+					"This is always an issue with the provider and should be reported to the provider developers.\n\n"+
+					fmt.Sprintf("MsdChildFabricAttributesValue Attribute Name (%s) Expected Type: %s\n", name, attributeType.String())+
+					fmt.Sprintf("MsdChildFabricAttributesValue Attribute Name (%s) Given Type: %s", name, attribute.Type(ctx)),
+			)
+		}
+	}
+
+	for name := range attributes {
+		_, ok := attributeTypes[name]
+
+		if !ok {
+			diags.AddError(
+				"Extra MsdChildFabricAttributesValue Attribute Value",
+				"While creating a MsdChildFabricAttributesValue value, an extra attribute value was detected. "+
+					"A MsdChildFabricAttributesValue must not contain values beyond the expected attribute types. "+
+					"This is always an issue with the provider and should be reported to the provider developers.\n\n"+
+					fmt.Sprintf("Extra MsdChildFabricAttributesValue Attribute Name: %s", name),
+			)
+		}
+	}
+
+	if diags.HasError() {
+		return NewMsdChildFabricAttributesValueUnknown(), diags
+	}
+
+	advertiseDefaultRouteAttribute, ok := attributes["advertise_default_route"]
+
+	if !ok {
+		diags.AddError(
+			"Attribute Missing",
+			`advertise_default_route is missing from object`)
+
+		return NewMsdChildFabricAttributesValueUnknown(), diags
+	}
+
+	advertiseDefaultRouteVal, ok := advertiseDefaultRouteAttribute.(basetypes.BoolValue)
+
+	if !ok {
+		diags.AddError(
+			"Attribute Wrong Type",
+			fmt.Sprintf(`advertise_default_route expected to be basetypes.BoolValue, was: %T`, advertiseDefaultRouteAttribute))
+	}
+
+	advertiseHostRoutesAttribute, ok := attributes["advertise_host_routes"]
+
+	if !ok {
+		diags.AddError(
+			"Attribute Missing",
+			`advertise_host_routes is missing from object`)
+
+		return NewMsdChildFabricAttributesValueUnknown(), diags
+	}
+
+	advertiseHostRoutesVal, ok := advertiseHostRoutesAttribute.(basetypes.BoolValue)
+
+	if !ok {
+		diags.AddError(
+			"Attribute Wrong Type",
+			fmt.Sprintf(`advertise_host_routes expected to be basetypes.BoolValue, was: %T`, advertiseHostRoutesAttribute))
+	}
+
+	bgpPasswordAttribute, ok := attributes["bgp_password"]
+
+	if !ok {
+		diags.AddError(
+			"Attribute Missing",
+			`bgp_password is missing from object`)
+
+		return NewMsdChildFabricAttributesValueUnknown(), diags
+	}
+
+	bgpPasswordVal, ok := bgpPasswordAttribute.(basetypes.StringValue)
+
+	if !ok {
+		diags.AddError(
+			"Attribute Wrong Type",
+			fmt.Sprintf(`bgp_password expected to be basetypes.StringValue, was: %T`, bgpPasswordAttribute))
+	}
+
+	bgpPasswordTypeAttribute, ok := attributes["bgp_password_type"]
+
+	if !ok {
+		diags.AddError(
+			"Attribute Missing",
+			`bgp_password_type is missing from object`)
+
+		return NewMsdChildFabricAttributesValueUnknown(), diags
+	}
+
+	bgpPasswordTypeVal, ok := bgpPasswordTypeAttribute.(basetypes.StringValue)
+
+	if !ok {
+		diags.AddError(
+			"Attribute Wrong Type",
+			fmt.Sprintf(`bgp_password_type expected to be basetypes.StringValue, was: %T`, bgpPasswordTypeAttribute))
+	}
+
+	configureStaticDefaultRouteAttribute, ok := attributes["configure_static_default_route"]
+
+	if !ok {
+		diags.AddError(
+			"Attribute Missing",
+			`configure_static_default_route is missing from object`)
+
+		return NewMsdChildFabricAttributesValueUnknown(), diags
+	}
+
+	configureStaticDefaultRouteVal, ok := configureStaticDefaultRouteAttribute.(basetypes.BoolValue)
+
+	if !ok {
+		diags.AddError(
+			"Attribute Wrong Type",
+			fmt.Sprintf(`configure_static_default_route expected to be basetypes.BoolValue, was: %T`, configureStaticDefaultRouteAttribute))
+	}
+
+	fabricNameAttribute, ok := attributes["fabric_name"]
+
+	if !ok {
+		diags.AddError(
+			"Attribute Missing",
+			`fabric_name is missing from object`)
+
+		return NewMsdChildFabricAttributesValueUnknown(), diags
+	}
+
+	fabricNameVal, ok := fabricNameAttribute.(basetypes.StringValue)
+
+	if !ok {
+		diags.AddError(
+			"Attribute Wrong Type",
+			fmt.Sprintf(`fabric_name expected to be basetypes.StringValue, was: %T`, fabricNameAttribute))
+	}
+
+	netflowAttribute, ok := attributes["netflow"]
+
+	if !ok {
+		diags.AddError(
+			"Attribute Missing",
+			`netflow is missing from object`)
+
+		return NewMsdChildFabricAttributesValueUnknown(), diags
+	}
+
+	netflowVal, ok := netflowAttribute.(basetypes.BoolValue)
+
+	if !ok {
+		diags.AddError(
+			"Attribute Wrong Type",
+			fmt.Sprintf(`netflow expected to be basetypes.BoolValue, was: %T`, netflowAttribute))
+	}
+
+	netflowMonitorAttribute, ok := attributes["netflow_monitor"]
+
+	if !ok {
+		diags.AddError(
+			"Attribute Missing",
+			`netflow_monitor is missing from object`)
+
+		return NewMsdChildFabricAttributesValueUnknown(), diags
+	}
+
+	netflowMonitorVal, ok := netflowMonitorAttribute.(basetypes.StringValue)
+
+	if !ok {
+		diags.AddError(
+			"Attribute Wrong Type",
+			fmt.Sprintf(`netflow_monitor expected to be basetypes.StringValue, was: %T`, netflowMonitorAttribute))
+	}
+
+	noRpAttribute, ok := attributes["no_rp"]
+
+	if !ok {
+		diags.AddError(
+			"Attribute Missing",
+			`no_rp is missing from object`)
+
+		return NewMsdChildFabricAttributesValueUnknown(), diags
+	}
+
+	noRpVal, ok := noRpAttribute.(basetypes.BoolValue)
+
+	if !ok {
+		diags.AddError(
+			"Attribute Wrong Type",
+			fmt.Sprintf(`no_rp expected to be basetypes.BoolValue, was: %T`, noRpAttribute))
+	}
+
+	overlayMulticastGroupsAttribute, ok := attributes["overlay_multicast_groups"]
+
+	if !ok {
+		diags.AddError(
+			"Attribute Missing",
+			`overlay_multicast_groups is missing from object`)
+
+		return NewMsdChildFabricAttributesValueUnknown(), diags
+	}
+
+	overlayMulticastGroupsVal, ok := overlayMulticastGroupsAttribute.(basetypes.StringValue)
+
+	if !ok {
+		diags.AddError(
+			"Attribute Wrong Type",
+			fmt.Sprintf(`overlay_multicast_groups expected to be basetypes.StringValue, was: %T`, overlayMulticastGroupsAttribute))
+	}
+
+	routeTargetExportMvpnAttribute, ok := attributes["route_target_export_mvpn"]
+
+	if !ok {
+		diags.AddError(
+			"Attribute Missing",
+			`route_target_export_mvpn is missing from object`)
+
+		return NewMsdChildFabricAttributesValueUnknown(), diags
+	}
+
+	routeTargetExportMvpnVal, ok := routeTargetExportMvpnAttribute.(basetypes.StringValue)
+
+	if !ok {
+		diags.AddError(
+			"Attribute Wrong Type",
+			fmt.Sprintf(`route_target_export_mvpn expected to be basetypes.StringValue, was: %T`, routeTargetExportMvpnAttribute))
+	}
+
+	routeTargetImportMvpnAttribute, ok := attributes["route_target_import_mvpn"]
+
+	if !ok {
+		diags.AddError(
+			"Attribute Missing",
+			`route_target_import_mvpn is missing from object`)
+
+		return NewMsdChildFabricAttributesValueUnknown(), diags
+	}
+
+	routeTargetImportMvpnVal, ok := routeTargetImportMvpnAttribute.(basetypes.StringValue)
+
+	if !ok {
+		diags.AddError(
+			"Attribute Wrong Type",
+			fmt.Sprintf(`route_target_import_mvpn expected to be basetypes.StringValue, was: %T`, routeTargetImportMvpnAttribute))
+	}
+
+	rpAddressAttribute, ok := attributes["rp_address"]
+
+	if !ok {
+		diags.AddError(
+			"Attribute Missing",
+			`rp_address is missing from object`)
+
+		return NewMsdChildFabricAttributesValueUnknown(), diags
+	}
+
+	rpAddressVal, ok := rpAddressAttribute.(basetypes.StringValue)
+
+	if !ok {
+		diags.AddError(
+			"Attribute Wrong Type",
+			fmt.Sprintf(`rp_address expected to be basetypes.StringValue, was: %T`, rpAddressAttribute))
+	}
+
+	rpLoopbackIdAttribute, ok := attributes["rp_loopback_id"]
+
+	if !ok {
+		diags.AddError(
+			"Attribute Missing",
+			`rp_loopback_id is missing from object`)
+
+		return NewMsdChildFabricAttributesValueUnknown(), diags
+	}
+
+	rpLoopbackIdVal, ok := rpLoopbackIdAttribute.(basetypes.Int64Value)
+
+	if !ok {
+		diags.AddError(
+			"Attribute Wrong Type",
+			fmt.Sprintf(`rp_loopback_id expected to be basetypes.Int64Value, was: %T`, rpLoopbackIdAttribute))
+	}
+
+	trmAttribute, ok := attributes["trm"]
+
+	if !ok {
+		diags.AddError(
+			"Attribute Missing",
+			`trm is missing from object`)
+
+		return NewMsdChildFabricAttributesValueUnknown(), diags
+	}
+
+	trmVal, ok := trmAttribute.(basetypes.BoolValue)
+
+	if !ok {
+		diags.AddError(
+			"Attribute Wrong Type",
+			fmt.Sprintf(`trm expected to be basetypes.BoolValue, was: %T`, trmAttribute))
+	}
+
+	trmBgwMsiteAttribute, ok := attributes["trm_bgw_msite"]
+
+	if !ok {
+		diags.AddError(
+			"Attribute Missing",
+			`trm_bgw_msite is missing from object`)
+
+		return NewMsdChildFabricAttributesValueUnknown(), diags
+	}
+
+	trmBgwMsiteVal, ok := trmBgwMsiteAttribute.(basetypes.BoolValue)
+
+	if !ok {
+		diags.AddError(
+			"Attribute Wrong Type",
+			fmt.Sprintf(`trm_bgw_msite expected to be basetypes.BoolValue, was: %T`, trmBgwMsiteAttribute))
+	}
+
+	underlayMulticastAddressAttribute, ok := attributes["underlay_multicast_address"]
+
+	if !ok {
+		diags.AddError(
+			"Attribute Missing",
+			`underlay_multicast_address is missing from object`)
+
+		return NewMsdChildFabricAttributesValueUnknown(), diags
+	}
+
+	underlayMulticastAddressVal, ok := underlayMulticastAddressAttribute.(basetypes.StringValue)
+
+	if !ok {
+		diags.AddError(
+			"Attribute Wrong Type",
+			fmt.Sprintf(`underlay_multicast_address expected to be basetypes.StringValue, was: %T`, underlayMulticastAddressAttribute))
+	}
+
+	if diags.HasError() {
+		return NewMsdChildFabricAttributesValueUnknown(), diags
+	}
+
+	return MsdChildFabricAttributesValue{
+		AdvertiseDefaultRoute:       advertiseDefaultRouteVal,
+		AdvertiseHostRoutes:         advertiseHostRoutesVal,
+		BgpPassword:                 bgpPasswordVal,
+		BgpPasswordType:             bgpPasswordTypeVal,
+		ConfigureStaticDefaultRoute: configureStaticDefaultRouteVal,
+		FabricName:                  fabricNameVal,
+		Netflow:                     netflowVal,
+		NetflowMonitor:              netflowMonitorVal,
+		NoRp:                        noRpVal,
+		OverlayMulticastGroups:      overlayMulticastGroupsVal,
+		RouteTargetExportMvpn:       routeTargetExportMvpnVal,
+		RouteTargetImportMvpn:       routeTargetImportMvpnVal,
+		RpAddress:                   rpAddressVal,
+		RpLoopbackId:                rpLoopbackIdVal,
+		Trm:                         trmVal,
+		TrmBgwMsite:                 trmBgwMsiteVal,
+		UnderlayMulticastAddress:    underlayMulticastAddressVal,
+		state:                       attr.ValueStateKnown,
+	}, diags
+}
+
+func NewMsdChildFabricAttributesValueMust(attributeTypes map[string]attr.Type, attributes map[string]attr.Value) MsdChildFabricAttributesValue {
+	object, diags := NewMsdChildFabricAttributesValue(attributeTypes, attributes)
+
+	if diags.HasError() {
+		// This could potentially be added to the diag package.
+		diagsStrings := make([]string, 0, len(diags))
+
+		for _, diagnostic := range diags {
+			diagsStrings = append(diagsStrings, fmt.Sprintf(
+				"%s | %s | %s",
+				diagnostic.Severity(),
+				diagnostic.Summary(),
+				diagnostic.Detail()))
+		}
+
+		panic("NewMsdChildFabricAttributesValueMust received error(s): " + strings.Join(diagsStrings, "\n"))
+	}
+
+	return object
+}
+
+func (t MsdChildFabricAttributesType) ValueFromTerraform(ctx context.Context, in tftypes.Value) (attr.Value, error) {
+	if in.Type() == nil {
+		return NewMsdChildFabricAttributesValueNull(), nil
+	}
+
+	if !in.Type().Equal(t.TerraformType(ctx)) {
+		return nil, fmt.Errorf("expected %s, got %s", t.TerraformType(ctx), in.Type())
+	}
+
+	if !in.IsKnown() {
+		return NewMsdChildFabricAttributesValueUnknown(), nil
+	}
+
+	if in.IsNull() {
+		return NewMsdChildFabricAttributesValueNull(), nil
+	}
+
+	attributes := map[string]attr.Value{}
+
+	val := map[string]tftypes.Value{}
+
+	err := in.As(&val)
+
+	if err != nil {
+		return nil, err
+	}
+
+	for k, v := range val {
+		a, err := t.AttrTypes[k].ValueFromTerraform(ctx, v)
+
+		if err != nil {
+			return nil, err
+		}
+
+		attributes[k] = a
+	}
+
+	return NewMsdChildFabricAttributesValueMust(MsdChildFabricAttributesValue{}.AttributeTypes(ctx), attributes), nil
+}
+
+func (t MsdChildFabricAttributesType) ValueType(ctx context.Context) attr.Value {
+	return MsdChildFabricAttributesValue{}
+}
+
+var _ basetypes.ObjectValuable = MsdChildFabricAttributesValue{}
+
+type MsdChildFabricAttributesValue struct {
+	AdvertiseDefaultRoute       basetypes.BoolValue   `tfsdk:"advertise_default_route"`
+	AdvertiseHostRoutes         basetypes.BoolValue   `tfsdk:"advertise_host_routes"`
+	BgpPassword                 basetypes.StringValue `tfsdk:"bgp_password"`
+	BgpPasswordType             basetypes.StringValue `tfsdk:"bgp_password_type"`
+	ConfigureStaticDefaultRoute basetypes.BoolValue   `tfsdk:"configure_static_default_route"`
+	FabricName                  basetypes.StringValue `tfsdk:"fabric_name"`
+	Netflow                     basetypes.BoolValue   `tfsdk:"netflow"`
+	NetflowMonitor              basetypes.StringValue `tfsdk:"netflow_monitor"`
+	NoRp                        basetypes.BoolValue   `tfsdk:"no_rp"`
+	OverlayMulticastGroups      basetypes.StringValue `tfsdk:"overlay_multicast_groups"`
+	RouteTargetExportMvpn       basetypes.StringValue `tfsdk:"route_target_export_mvpn"`
+	RouteTargetImportMvpn       basetypes.StringValue `tfsdk:"route_target_import_mvpn"`
+	RpAddress                   basetypes.StringValue `tfsdk:"rp_address"`
+	RpLoopbackId                basetypes.Int64Value  `tfsdk:"rp_loopback_id"`
+	Trm                         basetypes.BoolValue   `tfsdk:"trm"`
+	TrmBgwMsite                 basetypes.BoolValue   `tfsdk:"trm_bgw_msite"`
+	UnderlayMulticastAddress    basetypes.StringValue `tfsdk:"underlay_multicast_address"`
+	state                       attr.ValueState
+}
+
+func (v MsdChildFabricAttributesValue) ToTerraformValue(ctx context.Context) (tftypes.Value, error) {
+	attrTypes := make(map[string]tftypes.Type, 17)
+
+	var val tftypes.Value
+	var err error
+
+	attrTypes["advertise_default_route"] = basetypes.BoolType{}.TerraformType(ctx)
+	attrTypes["advertise_host_routes"] = basetypes.BoolType{}.TerraformType(ctx)
+	attrTypes["bgp_password"] = basetypes.StringType{}.TerraformType(ctx)
+	attrTypes["bgp_password_type"] = basetypes.StringType{}.TerraformType(ctx)
+	attrTypes["configure_static_default_route"] = basetypes.BoolType{}.TerraformType(ctx)
+	attrTypes["fabric_name"] = basetypes.StringType{}.TerraformType(ctx)
+	attrTypes["netflow"] = basetypes.BoolType{}.TerraformType(ctx)
+	attrTypes["netflow_monitor"] = basetypes.StringType{}.TerraformType(ctx)
+	attrTypes["no_rp"] = basetypes.BoolType{}.TerraformType(ctx)
+	attrTypes["overlay_multicast_groups"] = basetypes.StringType{}.TerraformType(ctx)
+	attrTypes["route_target_export_mvpn"] = basetypes.StringType{}.TerraformType(ctx)
+	attrTypes["route_target_import_mvpn"] = basetypes.StringType{}.TerraformType(ctx)
+	attrTypes["rp_address"] = basetypes.StringType{}.TerraformType(ctx)
+	attrTypes["rp_loopback_id"] = basetypes.Int64Type{}.TerraformType(ctx)
+	attrTypes["trm"] = basetypes.BoolType{}.TerraformType(ctx)
+	attrTypes["trm_bgw_msite"] = basetypes.BoolType{}.TerraformType(ctx)
+	attrTypes["underlay_multicast_address"] = basetypes.StringType{}.TerraformType(ctx)
+
+	objectType := tftypes.Object{AttributeTypes: attrTypes}
+
+	switch v.state {
+	case attr.ValueStateKnown:
+		vals := make(map[string]tftypes.Value, 17)
+
+		val, err = v.AdvertiseDefaultRoute.ToTerraformValue(ctx)
+
+		if err != nil {
+			return tftypes.NewValue(objectType, tftypes.UnknownValue), err
+		}
+
+		vals["advertise_default_route"] = val
+
+		val, err = v.AdvertiseHostRoutes.ToTerraformValue(ctx)
+
+		if err != nil {
+			return tftypes.NewValue(objectType, tftypes.UnknownValue), err
+		}
+
+		vals["advertise_host_routes"] = val
+
+		val, err = v.BgpPassword.ToTerraformValue(ctx)
+
+		if err != nil {
+			return tftypes.NewValue(objectType, tftypes.UnknownValue), err
+		}
+
+		vals["bgp_password"] = val
+
+		val, err = v.BgpPasswordType.ToTerraformValue(ctx)
+
+		if err != nil {
+			return tftypes.NewValue(objectType, tftypes.UnknownValue), err
+		}
+
+		vals["bgp_password_type"] = val
+
+		val, err = v.ConfigureStaticDefaultRoute.ToTerraformValue(ctx)
+
+		if err != nil {
+			return tftypes.NewValue(objectType, tftypes.UnknownValue), err
+		}
+
+		vals["configure_static_default_route"] = val
+
+		val, err = v.FabricName.ToTerraformValue(ctx)
+
+		if err != nil {
+			return tftypes.NewValue(objectType, tftypes.UnknownValue), err
+		}
+
+		vals["fabric_name"] = val
+
+		val, err = v.Netflow.ToTerraformValue(ctx)
+
+		if err != nil {
+			return tftypes.NewValue(objectType, tftypes.UnknownValue), err
+		}
+
+		vals["netflow"] = val
+
+		val, err = v.NetflowMonitor.ToTerraformValue(ctx)
+
+		if err != nil {
+			return tftypes.NewValue(objectType, tftypes.UnknownValue), err
+		}
+
+		vals["netflow_monitor"] = val
+
+		val, err = v.NoRp.ToTerraformValue(ctx)
+
+		if err != nil {
+			return tftypes.NewValue(objectType, tftypes.UnknownValue), err
+		}
+
+		vals["no_rp"] = val
+
+		val, err = v.OverlayMulticastGroups.ToTerraformValue(ctx)
+
+		if err != nil {
+			return tftypes.NewValue(objectType, tftypes.UnknownValue), err
+		}
+
+		vals["overlay_multicast_groups"] = val
+
+		val, err = v.RouteTargetExportMvpn.ToTerraformValue(ctx)
+
+		if err != nil {
+			return tftypes.NewValue(objectType, tftypes.UnknownValue), err
+		}
+
+		vals["route_target_export_mvpn"] = val
+
+		val, err = v.RouteTargetImportMvpn.ToTerraformValue(ctx)
+
+		if err != nil {
+			return tftypes.NewValue(objectType, tftypes.UnknownValue), err
+		}
+
+		vals["route_target_import_mvpn"] = val
+
+		val, err = v.RpAddress.ToTerraformValue(ctx)
+
+		if err != nil {
+			return tftypes.NewValue(objectType, tftypes.UnknownValue), err
+		}
+
+		vals["rp_address"] = val
+
+		val, err = v.RpLoopbackId.ToTerraformValue(ctx)
+
+		if err != nil {
+			return tftypes.NewValue(objectType, tftypes.UnknownValue), err
+		}
+
+		vals["rp_loopback_id"] = val
+
+		val, err = v.Trm.ToTerraformValue(ctx)
+
+		if err != nil {
+			return tftypes.NewValue(objectType, tftypes.UnknownValue), err
+		}
+
+		vals["trm"] = val
+
+		val, err = v.TrmBgwMsite.ToTerraformValue(ctx)
+
+		if err != nil {
+			return tftypes.NewValue(objectType, tftypes.UnknownValue), err
+		}
+
+		vals["trm_bgw_msite"] = val
+
+		val, err = v.UnderlayMulticastAddress.ToTerraformValue(ctx)
+
+		if err != nil {
+			return tftypes.NewValue(objectType, tftypes.UnknownValue), err
+		}
+
+		vals["underlay_multicast_address"] = val
+
+		if err := tftypes.ValidateValue(objectType, vals); err != nil {
+			return tftypes.NewValue(objectType, tftypes.UnknownValue), err
+		}
+
+		return tftypes.NewValue(objectType, vals), nil
+	case attr.ValueStateNull:
+		return tftypes.NewValue(objectType, nil), nil
+	case attr.ValueStateUnknown:
+		return tftypes.NewValue(objectType, tftypes.UnknownValue), nil
+	default:
+		panic(fmt.Sprintf("unhandled Object state in ToTerraformValue: %s", v.state))
+	}
+}
+
+func (v MsdChildFabricAttributesValue) IsNull() bool {
+	return v.state == attr.ValueStateNull
+}
+
+func (v MsdChildFabricAttributesValue) IsUnknown() bool {
+	return v.state == attr.ValueStateUnknown
+}
+
+func (v MsdChildFabricAttributesValue) String() string {
+	return "MsdChildFabricAttributesValue"
+}
+
+func (v MsdChildFabricAttributesValue) ToObjectValue(ctx context.Context) (basetypes.ObjectValue, diag.Diagnostics) {
+	var diags diag.Diagnostics
+
+	attributeTypes := map[string]attr.Type{
+		"advertise_default_route":        basetypes.BoolType{},
+		"advertise_host_routes":          basetypes.BoolType{},
+		"bgp_password":                   basetypes.StringType{},
+		"bgp_password_type":              basetypes.StringType{},
+		"configure_static_default_route": basetypes.BoolType{},
+		"fabric_name":                    basetypes.StringType{},
+		"netflow":                        basetypes.BoolType{},
+		"netflow_monitor":                basetypes.StringType{},
+		"no_rp":                          basetypes.BoolType{},
+		"overlay_multicast_groups":       basetypes.StringType{},
+		"route_target_export_mvpn":       basetypes.StringType{},
+		"route_target_import_mvpn":       basetypes.StringType{},
+		"rp_address":                     basetypes.StringType{},
+		"rp_loopback_id":                 basetypes.Int64Type{},
+		"trm":                            basetypes.BoolType{},
+		"trm_bgw_msite":                  basetypes.BoolType{},
+		"underlay_multicast_address":     basetypes.StringType{},
+	}
+
+	if v.IsNull() {
+		return types.ObjectNull(attributeTypes), diags
+	}
+
+	if v.IsUnknown() {
+		return types.ObjectUnknown(attributeTypes), diags
+	}
+
+	objVal, diags := types.ObjectValue(
+		attributeTypes,
+		map[string]attr.Value{
+			"advertise_default_route":        v.AdvertiseDefaultRoute,
+			"advertise_host_routes":          v.AdvertiseHostRoutes,
+			"bgp_password":                   v.BgpPassword,
+			"bgp_password_type":              v.BgpPasswordType,
+			"configure_static_default_route": v.ConfigureStaticDefaultRoute,
+			"fabric_name":                    v.FabricName,
+			"netflow":                        v.Netflow,
+			"netflow_monitor":                v.NetflowMonitor,
+			"no_rp":                          v.NoRp,
+			"overlay_multicast_groups":       v.OverlayMulticastGroups,
+			"route_target_export_mvpn":       v.RouteTargetExportMvpn,
+			"route_target_import_mvpn":       v.RouteTargetImportMvpn,
+			"rp_address":                     v.RpAddress,
+			"rp_loopback_id":                 v.RpLoopbackId,
+			"trm":                            v.Trm,
+			"trm_bgw_msite":                  v.TrmBgwMsite,
+			"underlay_multicast_address":     v.UnderlayMulticastAddress,
+		})
+
+	return objVal, diags
+}
+
+func (v MsdChildFabricAttributesValue) Equal(o attr.Value) bool {
+	other, ok := o.(MsdChildFabricAttributesValue)
+
+	if !ok {
+		return false
+	}
+
+	if v.state != other.state {
+		return false
+	}
+
+	if v.state != attr.ValueStateKnown {
+		return true
+	}
+
+	if !v.AdvertiseDefaultRoute.Equal(other.AdvertiseDefaultRoute) {
+		return false
+	}
+
+	if !v.AdvertiseHostRoutes.Equal(other.AdvertiseHostRoutes) {
+		return false
+	}
+
+	if !v.BgpPassword.Equal(other.BgpPassword) {
+		return false
+	}
+
+	if !v.BgpPasswordType.Equal(other.BgpPasswordType) {
+		return false
+	}
+
+	if !v.ConfigureStaticDefaultRoute.Equal(other.ConfigureStaticDefaultRoute) {
+		return false
+	}
+
+	if !v.FabricName.Equal(other.FabricName) {
+		return false
+	}
+
+	if !v.Netflow.Equal(other.Netflow) {
+		return false
+	}
+
+	if !v.NetflowMonitor.Equal(other.NetflowMonitor) {
+		return false
+	}
+
+	if !v.NoRp.Equal(other.NoRp) {
+		return false
+	}
+
+	if !v.OverlayMulticastGroups.Equal(other.OverlayMulticastGroups) {
+		return false
+	}
+
+	if !v.RouteTargetExportMvpn.Equal(other.RouteTargetExportMvpn) {
+		return false
+	}
+
+	if !v.RouteTargetImportMvpn.Equal(other.RouteTargetImportMvpn) {
+		return false
+	}
+
+	if !v.RpAddress.Equal(other.RpAddress) {
+		return false
+	}
+
+	if !v.RpLoopbackId.Equal(other.RpLoopbackId) {
+		return false
+	}
+
+	if !v.Trm.Equal(other.Trm) {
+		return false
+	}
+
+	if !v.TrmBgwMsite.Equal(other.TrmBgwMsite) {
+		return false
+	}
+
+	if !v.UnderlayMulticastAddress.Equal(other.UnderlayMulticastAddress) {
+		return false
+	}
+
+	return true
+}
+
+func (v MsdChildFabricAttributesValue) Type(ctx context.Context) attr.Type {
+	return MsdChildFabricAttributesType{
+		basetypes.ObjectType{
+			AttrTypes: v.AttributeTypes(ctx),
+		},
+	}
+}
+
+func (v MsdChildFabricAttributesValue) AttributeTypes(ctx context.Context) map[string]attr.Type {
+	return map[string]attr.Type{
+		"advertise_default_route":        basetypes.BoolType{},
+		"advertise_host_routes":          basetypes.BoolType{},
+		"bgp_password":                   basetypes.StringType{},
+		"bgp_password_type":              basetypes.StringType{},
+		"configure_static_default_route": basetypes.BoolType{},
+		"fabric_name":                    basetypes.StringType{},
+		"netflow":                        basetypes.BoolType{},
+		"netflow_monitor":                basetypes.StringType{},
+		"no_rp":                          basetypes.BoolType{},
+		"overlay_multicast_groups":       basetypes.StringType{},
+		"route_target_export_mvpn":       basetypes.StringType{},
+		"route_target_import_mvpn":       basetypes.StringType{},
+		"rp_address":                     basetypes.StringType{},
+		"rp_loopback_id":                 basetypes.Int64Type{},
+		"trm":                            basetypes.BoolType{},
+		"trm_bgw_msite":                  basetypes.BoolType{},
+		"underlay_multicast_address":     basetypes.StringType{},
 	}
 }
