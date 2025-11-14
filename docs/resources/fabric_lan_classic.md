@@ -174,6 +174,8 @@ resource "ndfc_fabric_lan_classic" "test_resource_fabric_lan_classic_1" {
 
 Import is supported using the following syntax:
 
+The [`terraform import` command](https://developer.hashicorp.com/terraform/cli/commands/import) can be used, for example:
+
 ```shell
 # Format of ID used for import:
 # Name of the fabric you would want to import for this resource
