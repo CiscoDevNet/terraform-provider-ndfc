@@ -37,6 +37,8 @@ resource "ndfc_vpc_pair" "test_resource_vpc_pair_1" {
 
 Import is supported using the following syntax:
 
+The [`terraform import` command](https://developer.hashicorp.com/terraform/cli/commands/import) can be used, for example:
+
 ```shell
 # Format of ID used for import:
 # Serial numbers of the switches in the vPC pair seperated by `:`. Must contain exactly two serial numbers

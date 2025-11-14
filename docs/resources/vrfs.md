@@ -156,6 +156,8 @@ Read-Only:
 
 Import is supported using the following syntax:
 
+The [`terraform import` command](https://developer.hashicorp.com/terraform/cli/commands/import) can be used, for example:
+
 ```shell
 # Format of ID used for import:
 # fabric_name/[comma separated list of vrfs to be imported]
