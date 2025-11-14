@@ -109,6 +109,8 @@ Read-Only:
 
 Import is supported using the following syntax:
 
+The [`terraform import` command](https://developer.hashicorp.com/terraform/cli/commands/import) can be used, for example:
+
 ```shell
 # Format of ID used for import:
 # if_policy:serial_number[comma seperated list of interfaces]
