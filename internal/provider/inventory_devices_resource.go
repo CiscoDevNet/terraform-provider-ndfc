@@ -254,8 +254,7 @@ func (r *InventoryDevicesResource) Create(ctx context.Context, req resource.Crea
 		deleteDevicesFromInventory(ctx, r.client, &resp.Diagnostics, &stateData)
 		return
 	}
-
-	deployAndSave(ctx, r.client, &resp.Diagnostics, &planData)
+	deployAndSaveWithRetry(ctx, r.client, &resp.Diagnostics, &planData, 5, 60)
 	if resp.Diagnostics.HasError() {
 		tflog.Debug(ctx, "Save and Deploy failed, deleting devices from inventory")
 		deleteDevicesFromInventory(ctx, r.client, &resp.Diagnostics, &planData)
@@ -1088,6 +1087,32 @@ func deployAndSave(ctx context.Context, client *ndfc.NDFC, diags *diag.Diagnosti
 	}
 
 	tflog.Debug(ctx, fmt.Sprintf("End of %s deployAndSave", loggingInventoryDevices))
+}
+
+func deployAndSaveWithRetry(
+	ctx context.Context,
+	client *ndfc.NDFC,
+	diags *diag.Diagnostics,
+	data *InventoryDevicesModel,
+	maxRetries int64,
+	retryWaitTimeout int64,
+) {
+	tflog.Debug(ctx, fmt.Sprintf("Start of %s deployAndSaveWithRetry", loggingInventoryDevices))
+	// This retry mechanism is a fix for unexpected NDFC 12.2.2/ND4.1 behaviour where sometimes, recalculate (config-save) fails even if devices are reachable.
+	for attempt := int64(0); attempt < maxRetries; attempt++ {
+		tflog.Debug(ctx, fmt.Sprintf("This is attempt number: %d", attempt+1))
+		deployAndSave(ctx, client, diags, data)
+		if diags.HasError() {
+			tflog.Debug(ctx, fmt.Sprintf("Waiting for %v seconds before retrying config-save", retryWaitTimeout))
+			time.Sleep(time.Duration(retryWaitTimeout) * time.Second)
+			if attempt < maxRetries-1 {
+				*diags = diag.Diagnostics{}
+			}
+			continue
+		}
+		break
+	}
+	tflog.Debug(ctx, fmt.Sprintf("End of %s deployAndSaveWithRetry", loggingInventoryDevices))
 }
 
 func rediscoverDevices(ctx context.Context, client *ndfc.NDFC, diags *diag.Diagnostics, data *InventoryDevicesModel, switchDbIDs []string) {
