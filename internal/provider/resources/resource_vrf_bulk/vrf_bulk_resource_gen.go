@@ -80,7 +80,6 @@ func VrfBulkResourceSchema(ctx context.Context) schema.Schema {
 										Default:             booldefault.StaticBool(false),
 									},
 									"fabric": schema.StringAttribute{
-										Optional:            true,
 										Computed:            true,
 										Description:         "The name of the fabric",
 										MarkdownDescription: "The name of the fabric",

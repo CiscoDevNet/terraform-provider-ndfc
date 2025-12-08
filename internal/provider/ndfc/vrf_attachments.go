@@ -67,7 +67,7 @@ func VrfAttachmentsSplitID(id string) (string, []string) {
 
 // TODO - roll back if there is partial failure
 // Creating VRF Attachment resource involves attaching all the VRFs/Switches present in the resource
-func (c NDFC) RscCreateVrfAttachments(ctx context.Context, dg *diag.Diagnostics, va *rva.NDFCVrfAttachmentsPayloads) error {
+func (c NDFC) RscCreateVrfAttachments(ctx context.Context, dg *diag.Diagnostics, va *rva.NDFCVrfAttachmentsPayloads, fabricName string) error {
 	tflog.Debug(ctx, "RscCreateVrfAttachments: Entering Create")
 
 	// Attach the VRF Attachments
@@ -76,7 +76,8 @@ func (c NDFC) RscCreateVrfAttachments(ctx context.Context, dg *diag.Diagnostics,
 		tflog.Error(ctx, fmt.Sprintf("RscCreateVrfAttachments: Error marshalling VRF Attachments %s", err.Error()))
 		return err
 	}
-	err = c.vrfAttachmentsPost(ctx, va.FabricName, data)
+	// Use fabricName parameter for API URL (child fabric for MSD), payload has parent fabric in attachment entries
+	err = c.vrfAttachmentsPost(ctx, fabricName, data)
 	if err != nil {
 		tflog.Error(ctx, fmt.Sprintf("RscCreateVrfAttachments: Error creating VRF Attachments %s", err.Error()))
 		dg.AddError("Attachments Failed", err.Error())

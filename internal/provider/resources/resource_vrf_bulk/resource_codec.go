@@ -147,6 +147,91 @@ func (v *NDFCVrfBulkModel) FillVrfPayloadFromModel(depMap *map[string][]string) 
 	return payload
 }
 
+// ParentManagedVrfProperties stores VRF properties that are managed at parent fabric level
+// These properties come from Terraform config and should be preserved after reading from NDFC
+type ParentManagedVrfProperties struct {
+	VlanId                     *Int64Custom
+	VlanName                   string
+	InterfaceDescription       string
+	VrfDescription             string
+	Mtu                        *int64
+	LoopbackRoutingTag         *int64
+	RedistributeDirectRouteMap string
+	MaxBgpPaths                *int64
+	MaxIbgpPaths               *int64
+	Ipv6LinkLocal              string
+	RpExternal                 string
+	MvpnInterAs                string
+	DisableRtAuto              string
+	RouteTargetImport          string
+	RouteTargetExport          string
+	RouteTargetImportEvpn      string
+	RouteTargetExportEvpn      string
+	RouteTargetImportCloudEvpn string
+	RouteTargetExportCloudEvpn string
+}
+
+// StoreParentProperties stores VRF properties that are managed at parent fabric level from Terraform config
+// Returns a map of vrfName -> parent-managed properties for later restoration
+func (v *NDFCVrfBulkModel) StoreParentProperties() map[string]ParentManagedVrfProperties {
+	parentProps := make(map[string]ParentManagedVrfProperties)
+	for vrfName, vrfEntry := range v.Vrfs {
+		// Store parent-managed properties from config
+		parentProps[vrfName] = ParentManagedVrfProperties{
+			VlanId:                     vrfEntry.VrfTemplateConfig.VlanId,
+			VlanName:                   vrfEntry.VrfTemplateConfig.VlanName,
+			InterfaceDescription:       vrfEntry.VrfTemplateConfig.InterfaceDescription,
+			VrfDescription:             vrfEntry.VrfTemplateConfig.VrfDescription,
+			Mtu:                        vrfEntry.VrfTemplateConfig.Mtu,
+			LoopbackRoutingTag:         vrfEntry.VrfTemplateConfig.LoopbackRoutingTag,
+			RedistributeDirectRouteMap: vrfEntry.VrfTemplateConfig.RedistributeDirectRouteMap,
+			MaxBgpPaths:                vrfEntry.VrfTemplateConfig.MaxBgpPaths,
+			MaxIbgpPaths:               vrfEntry.VrfTemplateConfig.MaxIbgpPaths,
+			Ipv6LinkLocal:              vrfEntry.VrfTemplateConfig.Ipv6LinkLocal,
+			RpExternal:                 vrfEntry.VrfTemplateConfig.RpExternal,
+			MvpnInterAs:                vrfEntry.VrfTemplateConfig.MvpnInterAs,
+			DisableRtAuto:              vrfEntry.VrfTemplateConfig.DisableRtAuto,
+			RouteTargetImport:          vrfEntry.VrfTemplateConfig.RouteTargetImport,
+			RouteTargetExport:          vrfEntry.VrfTemplateConfig.RouteTargetExport,
+			RouteTargetImportEvpn:      vrfEntry.VrfTemplateConfig.RouteTargetImportEvpn,
+			RouteTargetExportEvpn:      vrfEntry.VrfTemplateConfig.RouteTargetExportEvpn,
+			RouteTargetImportCloudEvpn: vrfEntry.VrfTemplateConfig.RouteTargetImportCloudEvpn,
+			RouteTargetExportCloudEvpn: vrfEntry.VrfTemplateConfig.RouteTargetExportCloudEvpn,
+		}
+	}
+	return parentProps
+}
+
+// RestoreParentProperties restores parent-managed VRF properties from Terraform config into state
+// This is used after reading VRFs from NDFC to overlay config-based parent properties onto NDFC-fetched child properties
+func (v *NDFCVrfBulkModel) RestoreParentProperties(parentProps map[string]ParentManagedVrfProperties) {
+	for vrfName, vrfEntry := range v.Vrfs {
+		if props, exists := parentProps[vrfName]; exists {
+			// Restore parent-managed properties from config (child-specific properties remain from NDFC)
+			vrfEntry.VrfTemplateConfig.VlanId = props.VlanId
+			vrfEntry.VrfTemplateConfig.VlanName = props.VlanName
+			vrfEntry.VrfTemplateConfig.InterfaceDescription = props.InterfaceDescription
+			vrfEntry.VrfTemplateConfig.VrfDescription = props.VrfDescription
+			vrfEntry.VrfTemplateConfig.Mtu = props.Mtu
+			vrfEntry.VrfTemplateConfig.LoopbackRoutingTag = props.LoopbackRoutingTag
+			vrfEntry.VrfTemplateConfig.RedistributeDirectRouteMap = props.RedistributeDirectRouteMap
+			vrfEntry.VrfTemplateConfig.MaxBgpPaths = props.MaxBgpPaths
+			vrfEntry.VrfTemplateConfig.MaxIbgpPaths = props.MaxIbgpPaths
+			vrfEntry.VrfTemplateConfig.Ipv6LinkLocal = props.Ipv6LinkLocal
+			vrfEntry.VrfTemplateConfig.RpExternal = props.RpExternal
+			vrfEntry.VrfTemplateConfig.MvpnInterAs = props.MvpnInterAs
+			vrfEntry.VrfTemplateConfig.DisableRtAuto = props.DisableRtAuto
+			vrfEntry.VrfTemplateConfig.RouteTargetImport = props.RouteTargetImport
+			vrfEntry.VrfTemplateConfig.RouteTargetExport = props.RouteTargetExport
+			vrfEntry.VrfTemplateConfig.RouteTargetImportEvpn = props.RouteTargetImportEvpn
+			vrfEntry.VrfTemplateConfig.RouteTargetExportEvpn = props.RouteTargetExportEvpn
+			vrfEntry.VrfTemplateConfig.RouteTargetImportCloudEvpn = props.RouteTargetImportCloudEvpn
+			vrfEntry.VrfTemplateConfig.RouteTargetExportCloudEvpn = props.RouteTargetExportCloudEvpn
+			v.Vrfs[vrfName] = vrfEntry
+		}
+	}
+}
+
 func (v *NDFCVrfBulkModel) FillAttachmentsFromPayload(payload *rva.NDFCVrfAttachmentsPayloads) {
 	for i := range (*payload).VrfAttachments {
 		vrfName := (*payload).VrfAttachments[i].VrfName

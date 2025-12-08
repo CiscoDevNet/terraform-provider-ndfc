@@ -1,0 +1,362 @@
+---
+resource:
+  name: msd_vrfs_parent
+  doc_category: Fabric
+  generate_tf_resource: true
+  description: "Resource to manage MSD Parent VRF configuration on a fabric"
+  import_id: ["fabric_vxlan/[vrf1, vrf2, vrf3]"]
+  import_desc: ["fabric_name/[comma separated list of vrfs to be imported]"]
+  attributes:
+    - model_name: id
+      tf_name: id
+      description: Terraform unique Id for the resource
+      type: String
+      id: true
+      computed: true
+    - &fname
+      model_name: fabric
+      tf_name: fabric_name
+      reference: true
+      description: The name of the fabric
+      type: String
+      example: CML
+      mandatory: true
+      tf_requires_replace: true
+    - model_name: vrfs
+      tf_name: vrfs
+      description: List of vrfs
+      type: Map
+      bulk: true
+      mandatory: true
+      filtered: true
+      example: "VRF1"
+      attributes:
+      - model_name: id
+        tf_name: id
+        type: Int64
+        tf_hide: true
+        sort: true
+      - model_name: filterThisValue
+        tf_name: filter_this_value
+        type: Bool
+        tf_hide: true
+        payload_hide: true
+      - &vrfName
+        model_name: vrfName
+        tf_name: vrf_name
+        type: String
+        id: false
+        description: The name of the VRF
+        example: VRF1
+        map_key: true
+        tf_hide: true
+      - model_name: fabric
+        tf_name: fabric_name
+        reference: true
+        description: The name of the fabric
+        type: String
+        example: CML
+        tf_hide: true
+      - &vrfTemplate
+        model_name: vrfTemplate
+        tf_name: vrf_template
+        type: String
+        description: The name of the VRF template
+        default_value: Default_VRF_Universal
+        example: Default_VRF_Universal
+      - &vrfExtensionTemplate
+        model_name: vrfExtensionTemplate
+        tf_name: vrf_extension_template
+        type: String
+        description: The name of the VRF extension template
+        default_value: Default_VRF_Extension_Universal
+        example: Default_VRF_Extension_Universal
+      - &vrfId
+        model_name: vrfId
+        tf_name: vrf_id
+        type: Int64
+        optional: true
+        computed: true
+        min_int: 1
+        max_int: 16777214
+        description: VNI ID of VRF
+        example: 50000
+        requires_replace: true
+        use_state: true
+      - &vrfVlanId
+        model_name: vrfVlanId
+        ndfc_nested: [vrfTemplateConfig]
+        tf_name: vlan_id
+        type: Int64
+        optional: true
+        computed: true
+        use_state: true
+        min_int: 2
+        max_int: 4094
+        description: VLAN ID
+        example: 1500
+        handle_empty: true
+      - &vrfVlanName
+        model_name: vrfVlanName
+        ndfc_nested: [vrfTemplateConfig]
+        tf_name: vlan_name
+        type: String
+        string_patterns: ['^[^\?,\\,\s]{1,128}$']
+        description: VLAN name
+        example: VLAN1500
+      - &vrfIntfDescription
+        model_name: vrfIntfDescription
+        ndfc_nested: [vrfTemplateConfig]
+        tf_name: interface_description
+        type: String
+        description: Interface description
+        example: My int description
+      - &vrfDescription
+        model_name: vrfDescription
+        ndfc_nested: [vrfTemplateConfig]
+        tf_name: vrf_description
+        type: String
+        description: VRF description
+        example: My vrf description
+      - &mtu
+        model_name: mtu
+        ndfc_nested: [vrfTemplateConfig]
+        tf_name: mtu
+        type: Int64
+        ndfc_type: string
+        min_int: 68
+        max_int: 9216
+        default_value: 9216
+        description: Interface MTU
+        example: 9200
+      - &vrfStatus
+        model_name: vrfStatus
+        ndfc_nested:
+        tf_name: vrf_status
+        type: String
+        computed: true
+        description: VRF Deployment status
+        example: "DEPLOYED"
+      - &tag
+        model_name: tag
+        ndfc_nested: [vrfTemplateConfig]
+        tf_name: loopback_routing_tag
+        type: Int64
+        ndfc_type: string
+        min_int: 0
+        max_int: 4294967295
+        default_value: 12345
+        description: Loopback routing tag
+        example: 11111
+      - &vrfRouteMap
+        model_name: vrfRouteMap
+        ndfc_nested: [vrfTemplateConfig]
+        tf_name: redistribute_direct_route_map
+        type: String
+        default_value: FABRIC-RMAP-REDIST-SUBNET
+        description: Redistribute direct route map
+        example: FABRIC-RMAP-REDIST
+      - &maxBgpPaths
+        model_name: maxBgpPaths
+        ndfc_nested: [vrfTemplateConfig]
+        tf_name: max_bgp_paths
+        type: Int64
+        ndfc_type: string
+        min_int: 1
+        max_int: 64
+        default_value: 1
+        description: Maximum BGP paths
+        example: 2
+      - &maxIbgpPaths
+        model_name: maxIbgpPaths
+        ndfc_nested: [vrfTemplateConfig]
+        tf_name: max_ibgp_paths
+        type: Int64
+        ndfc_type: string
+        min_int: 1
+        max_int: 64
+        default_value: 2
+        description: Maximum iBGP paths
+        example: 3
+      - &ipv6LinkLocalFlag
+        model_name: ipv6LinkLocalFlag
+        ndfc_nested: [vrfTemplateConfig]
+        tf_name: ipv6_link_local
+        type: Bool
+        default_value: true
+        description: Enables IPv6 link-local Option under VRF SVI
+        example: false
+      - &trmEnabled
+        model_name: trmEnabled
+        ndfc_nested: [vrfTemplateConfig]
+        tf_name: trm
+        type: Bool
+        optional: true
+        computed: true
+        description: Enable Tenant Routed Multicast
+      - &isRPExternal
+        model_name: isRPExternal
+        ndfc_nested: [vrfTemplateConfig]
+        tf_name: rp_external
+        type: Bool
+        optional: true
+        computed: true
+        description: Is RP external to the fabric
+        example: true
+      - &mvpnInterAs
+        model_name: mvpnInterAs
+        ndfc_nested: [vrfTemplateConfig]
+        tf_name: mvpn_inter_as
+        type: Bool
+        optional: true
+        computed: true
+        description: Use the inter-as keyword for the MVPN address family routes to cross the BGP autonomous system (AS) boundaries, applicable when TRM is enabled. IOS XE Specific
+        example: false
+      - &disableRtAuto
+        model_name: disableRtAuto
+        ndfc_nested: [vrfTemplateConfig]
+        tf_name: disable_rt_auto
+        type: Bool
+        default_value: false
+        description: Applicable to IPv4, IPv6 VPN/EVPN/MVPN
+        example: true
+      - &routeTargetImport
+        model_name: routeTargetImport
+        ndfc_nested: [vrfTemplateConfig]
+        tf_name: route_target_import
+        type: String
+        description: For VPN Routes Import, One or a Comma Separated List
+        example: "1:1"
+      - &routeTargetExport
+        model_name: routeTargetExport
+        ndfc_nested: [vrfTemplateConfig]
+        tf_name: route_target_export
+        type: String
+        description: For VPN Routes Export, One or a Comma Separated List
+        example: "1:1"
+      - &routeTargetImportEvpn
+        model_name: routeTargetImportEvpn
+        ndfc_nested: [vrfTemplateConfig]
+        tf_name: route_target_import_evpn
+        type: String
+        description: For EVPN Routes Import, One or a Comma Separated List
+        example: "1:1"
+      - &routeTargetExportEvpn
+        model_name: routeTargetExportEvpn
+        ndfc_nested: [vrfTemplateConfig]
+        tf_name: route_target_export_evpn
+        type: String
+        description: For EVPN Routes Export, One or a Comma Separated List
+        example: "1:1"
+      - &cloudRouteTargetImportEvpn
+        model_name: cloudRouteTargetImportEvpn
+        ndfc_nested: [vrfTemplateConfig]
+        tf_name: route_target_import_cloud_evpn
+        type: String
+        description: For Cloud EVPN Routes Import, One or a Comma Separated List
+        example: "1:1"
+      - &cloudRouteTargetExportEvpn
+        model_name: cloudRouteTargetExportEvpn
+        ndfc_nested: [vrfTemplateConfig]
+        tf_name: route_target_export_cloud_evpn
+        type: String
+        description: For Cloud EVPN Routes Export, One or a Comma Separated List
+        example: "1:1"
+
+datasource:
+  name: msd_vrfs_parent
+  doc_category: Fabric
+  generate_tf_resource: true
+  attributes:
+    - <<: *fname
+      mandatory: true
+    - model_name: vrfs
+      tf_name: vrfs
+      description: List of vrfs
+      type: List
+      mandatory: false
+      computed: true
+      attributes: 
+      - model_name: Id
+        tf_name: id
+        type: Int64
+        description: Internal ID of VRF generated by NDFC
+        example: 10
+        exclude_test: true 
+        computed: true
+      - <<: *vrfName
+        mandatory: false
+        computed: true
+        tf_hide: false
+      - <<: *vrfTemplate
+        computed: true
+        optional: false
+      - <<: *vrfStatus
+        computed: true
+        optional: false
+      - <<: *vrfExtensionTemplate
+        computed: true
+        optional: false
+      - <<: *vrfId
+        computed: true
+        optional: false
+      - <<: *vrfVlanId
+        computed: true
+        optional: false
+      - <<: *vrfVlanName
+        computed: true
+        optional: false
+      - <<: *vrfIntfDescription
+        computed: true
+        optional: false
+      - <<: *vrfDescription
+        computed: true
+        optional: false
+      - <<: *mtu
+        computed: true
+        optional: false
+      - <<: *tag
+        computed: true
+        optional: false
+      - <<: *vrfRouteMap
+        computed: true
+        optional: false
+      - <<: *maxBgpPaths
+        computed: true
+        optional: false
+      - <<: *maxIbgpPaths
+        computed: true
+        optional: false
+      - <<: *ipv6LinkLocalFlag
+        computed: true
+        optional: false
+      - <<: *trmEnabled
+        computed: true
+        optional: false
+      - <<: *isRPExternal
+        computed: true
+        optional: false
+      - <<: *mvpnInterAs
+        computed: true
+        optional: false
+      - <<: *disableRtAuto
+        computed: true
+        optional: false
+      - <<: *routeTargetImport
+        computed: true
+        optional: false
+      - <<: *routeTargetExport
+        computed: true
+        optional: false
+      - <<: *routeTargetImportEvpn
+        computed: true
+        optional: false
+      - <<: *routeTargetExportEvpn
+        computed: true
+        optional: false
+      - <<: *cloudRouteTargetImportEvpn
+        computed: true
+        optional: false
+      - <<: *cloudRouteTargetExportEvpn
+        computed: true
+        optional: false

@@ -25,3 +25,4 @@ files:
   - fabric_msite_ext_net.yaml
   - links.yaml
   - rest.yaml
+  - msd_vrfs.yaml
