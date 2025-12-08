@@ -26,6 +26,18 @@ func (m *NDFC) RemoveChildFabricsFromMsd(ctx context.Context, dg *diag.Diagnosti
 	if len(model.ChildFabrics) > 0 {
 		tflog.Debug(ctx, fmt.Sprintf("RemoveChildFabricsFromMsd: child fabrics %v", model.ChildFabrics))
 		m.ManageChildFabricsInMsd(ctx, dg, model.FabricName, model.ChildFabrics, "remove")
+		if dg.HasError() {
+			return
+		}
+		// Deploy the removed child fabrics to ensure configuration is applied
+		for _, childFabric := range model.ChildFabrics {
+			tflog.Info(ctx, fmt.Sprintf("RemoveChildFabricsFromMsd: Deploying removed child fabric %s", childFabric))
+			m.RscDeployFabric(ctx, dg, childFabric)
+			if dg.HasError() {
+				tflog.Error(ctx, fmt.Sprintf("RemoveChildFabricsFromMsd: Failed to deploy removed child fabric %s", childFabric))
+				return
+			}
+		}
 		return
 	}
 	tflog.Debug(ctx, "RemoveChildFabricsFromMsd: No child fabrics to remove")
@@ -86,7 +98,11 @@ func (m *NDFC) ManageChildFabricsInMsd(ctx context.Context, dg *diag.Diagnostics
 		res, err := fapi.Post(payload)
 		if err != nil {
 			tflog.Error(ctx, "ManageChildFabricsInMsd: POST failed with payload %s", map[string]any{"Payload": payload})
-			dg.AddError("Failed to add child fabric to msd", fmt.Sprintf("Error: %q %q", err.Error(), res.String()))
+			errorMsg := fmt.Sprintf("Failed to %s child fabric '%s' to/from MSD fabric '%s'", op, childFabric, parentFabric)
+			if res.String() != "" {
+				errorMsg = fmt.Sprintf("%s. NDFC Response: %s", errorMsg, res.String())
+			}
+			dg.AddError(errorMsg, fmt.Sprintf("Error: %s", err.Error()))
 			return
 		}
 	}
@@ -115,4 +131,48 @@ func (m *NDFC) GetMsdChildFabricAssociations(ctx context.Context, dg *diag.Diagn
 		}
 	}
 	return childFabrics
+}
+
+// IsFabricMsdParent checks if a fabric is an MSD parent fabric
+func (m *NDFC) IsFabricMsdParent(ctx context.Context, dg *diag.Diagnostics, fabricName string) bool {
+	fType := m.GetFabricTemplateType(ctx, dg, fabricName)
+	if dg.HasError() {
+		return false
+	}
+
+	if fType != ResourceVxlanMsdType {
+		tflog.Debug(ctx, fmt.Sprintf("Fabric %s is not MSD parent fabric (type: %s)", fabricName, fType))
+		return false
+	}
+
+	tflog.Debug(ctx, fmt.Sprintf("Fabric %s is MSD parent fabric", fabricName))
+	return true
+}
+
+// IsFabricMsdChild checks if a fabric is an MSD child fabric and returns the parent fabric name if true
+func (m *NDFC) IsFabricMsdChild(ctx context.Context, dg *diag.Diagnostics, fabricName string) string {
+	fapi := api.NewFabricAPI(m.GetLock(ResourceFabrics), &m.apiClient)
+	fapi.MsdOperation = api.MSD_OPERATION_GET
+	var fabricAscs []resource_fabric_common.NdfcMsdFabricAssociations
+	res, err := fapi.Get()
+	if err != nil {
+		tflog.Error(ctx, "GetMsdFabricAssociations: GET failed")
+		dg.AddError("Failed to get msd fabric associations", fmt.Sprintf("Error: %q", err.Error()))
+		return ""
+	}
+	err = json.Unmarshal(res, &fabricAscs)
+	if err != nil {
+		tflog.Error(ctx, "GetMsdFabricAssociations: Failed to unmarshal response")
+		dg.AddError("Failed to unmarshal msd fabric associations", fmt.Sprintf("Error: %q", err.Error()))
+		return ""
+	}
+
+	for _, asc := range fabricAscs {
+		if asc.FabricName == fabricName && asc.FabricParent != "" {
+			tflog.Debug(ctx, fmt.Sprintf("Fabric %s is MSD child fabric", fabricName))
+			return asc.FabricParent
+		}
+	}
+	tflog.Debug(ctx, fmt.Sprintf("Fabric %s is not MSD child fabric", fabricName))
+	return ""
 }

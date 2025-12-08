@@ -48,7 +48,6 @@ resource:
             - model_name: fabric
               tf_name: fabric
               type: String
-              optional: true
               computed: true
               unmarshal_tag: fabricName
               description: The name of the fabric

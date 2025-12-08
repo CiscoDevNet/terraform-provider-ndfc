@@ -10,5 +10,7 @@ dist/
 generator/templates/*
 /templates*
 generator/tools/*
+.github/copilot-instructions.md
+INSTRUCTIONS.md
 
 

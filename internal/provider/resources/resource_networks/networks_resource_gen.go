@@ -79,7 +79,6 @@ func NetworksResourceSchema(ctx context.Context) schema.Schema {
 										MarkdownDescription: "The name of the switch",
 									},
 									"fabric": schema.StringAttribute{
-										Optional:            true,
 										Computed:            true,
 										Description:         "The name of the fabric",
 										MarkdownDescription: "The name of the fabric",

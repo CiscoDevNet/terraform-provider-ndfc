@@ -166,6 +166,7 @@ func (p *ndfcProvider) DataSources(ctx context.Context) []func() datasource.Data
 func (p *ndfcProvider) Resources(ctx context.Context) []func() resource.Resource {
 	return []func() resource.Resource{
 		NewVrfBulkResource,
+		NewMsdVrfsParentResource,
 		NewNetworksResource,
 		NewInterfaceEthernetResource,
 		NewInterfaceLoopbackResource,

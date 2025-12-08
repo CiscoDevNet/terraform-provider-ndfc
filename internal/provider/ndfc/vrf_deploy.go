@@ -41,6 +41,16 @@ func (c NDFC) RscDeployVrfAttachments(ctx context.Context, dg *diag.Diagnostics,
 		//dg.AddWarning("Deployment not done", "No attachments to deploy")
 		return
 	}
+
+	// Get configuration preview to refresh the deploy status
+	// This is bug in NDFC sometimes the status is not updated
+	_, err := c.getConfigurationPreview(d.FabricName)
+	// payload is empty for MSD fabric hence only error is checked.
+	if err != nil {
+		dg.AddError("Deploy failed", "Configuration preview failed")
+		return
+	}
+
 	// If detach is present in the list
 	// have to wait for deploy complete so that subsequent ops like delete can be taken up
 	if detach_present || d.ctrlr.WaitForDeployComplete {

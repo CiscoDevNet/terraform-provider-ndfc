@@ -38,7 +38,7 @@ func (c NDFC) vrfCreateBulk(ctx context.Context, fabricName string, vrfsPayload 
 	if err != nil {
 		tflog.Error(ctx, fmt.Sprintf("Error POST:  %s", err.Error()))
 		okList, err1 := c.processBulkResponse(ctx, res)
-		err2 := c.vrfBulkDelete(ctx, fabricName, okList)
+		err2 := c.vrfBulkDelete(ctx, fabricName, okList, false)
 		return errors.Join(err, err1, err2)
 	}
 
@@ -46,7 +46,7 @@ func (c NDFC) vrfCreateBulk(ctx context.Context, fabricName string, vrfsPayload 
 	return nil
 }
 
-func (c NDFC) vrfBulkDelete(ctx context.Context, fabricName string, vrfList []string) error {
+func (c NDFC) vrfBulkDelete(ctx context.Context, fabricName string, vrfList []string, isMsdChild bool) error {
 	if len(vrfList) == 0 {
 		return nil
 	}
@@ -56,13 +56,52 @@ func (c NDFC) vrfBulkDelete(ctx context.Context, fabricName string, vrfList []st
 	vrfObj.SetDeleteList(vrfList)
 	res, err := vrfObj.Delete()
 	if err != nil {
-
-		_, err1 := c.processBulkResponse(ctx, res)
-		return err1
+		// For MSD child fabrics, verify "Invalid VRF" errors by checking if VRF actually exists
+		if isMsdChild {
+			return c.processBulkDeleteResponse(ctx, fabricName, res)
+		}
+		return err
 	}
 	tflog.Info(ctx, fmt.Sprintf("Deleting VRFs OK fabric_name=%s, vrfs = %v", fabricName, vrfList))
 	return nil
 
+}
+
+// filterVrfsForMsdChildDelete filters VRF list before delete for MSD child fabrics.
+// Returns only VRFs that actually exist in the parent fabric.
+// This avoids unnecessary delete calls when another child fabric has already deleted the VRF.
+func (c NDFC) filterVrfsForMsdChildDelete(ctx context.Context, fabricName string, vrfList []string) []string {
+	if len(vrfList) == 0 {
+		return vrfList
+	}
+
+	ndfcVRFs, err := c.vrfBulkGet(ctx, fabricName)
+	if err != nil {
+		tflog.Warn(ctx, fmt.Sprintf("Failed to get VRFs before delete: %v, proceeding with full list", err))
+		return vrfList
+	}
+
+	var existingVrfs []string
+	for _, vrfName := range vrfList {
+		if ndfcVRFs != nil && ndfcVRFs.Vrfs != nil {
+			if _, exists := ndfcVRFs.Vrfs[vrfName]; exists {
+				existingVrfs = append(existingVrfs, vrfName)
+			} else {
+				tflog.Info(ctx, fmt.Sprintf("VRF %s already deleted from fabric %s - skipping", vrfName, fabricName))
+			}
+		}
+	}
+
+	if len(existingVrfs) == 0 {
+		tflog.Info(ctx, fmt.Sprintf("All VRFs %v already deleted from fabric %s - nothing to do", vrfList, fabricName))
+		return nil
+	}
+
+	if len(existingVrfs) < len(vrfList) {
+		tflog.Info(ctx, fmt.Sprintf("Filtered VRF delete list from %v to %v", vrfList, existingVrfs))
+	}
+
+	return existingVrfs
 }
 
 func (c NDFC) vrfBulkGet(ctx context.Context, fabricName string) (*resource_vrf_bulk.NDFCVrfBulkModel, error) {
@@ -144,6 +183,53 @@ func (c NDFC) processBulkResponse(ctx context.Context, res gjson.Result) ([]stri
 	return arr, errors.Join(errs...)
 }
 
+// processBulkDeleteResponse processes bulk delete responses by verifying if failed VRFs still exist.
+// If none of the failed VRFs exist in the fabric, delete is considered successful (idempotent).
+func (c NDFC) processBulkDeleteResponse(ctx context.Context, fabricName string, res gjson.Result) error {
+	tflog.Debug(ctx, fmt.Sprintf("Processing bulk delete response: %s", res.String()))
+
+	// Get failed VRF names from response
+	flist := res.Get("failureList")
+	var failed []map[string]string
+	if err := json.Unmarshal([]byte(flist.Raw), &failed); err != nil {
+		return fmt.Errorf("error unmarshalling delete response: %v", err)
+	}
+
+	if len(failed) == 0 {
+		return nil
+	}
+
+	// Collect failed VRF names
+	var failedVrfNames []string
+	for _, v := range failed {
+		failedVrfNames = append(failedVrfNames, v["name"])
+	}
+	tflog.Debug(ctx, fmt.Sprintf("VRFs reported as failed: %v", failedVrfNames))
+
+	// Get current VRFs from fabric
+	ndfcVRFs, err := c.vrfBulkGet(ctx, fabricName)
+	if err != nil {
+		return fmt.Errorf("failed to verify VRF deletion: %v", err)
+	}
+
+	// Check if any failed VRF still exists
+	var stillExist []string
+	for _, vrfName := range failedVrfNames {
+		if ndfcVRFs != nil && ndfcVRFs.Vrfs != nil {
+			if _, exists := ndfcVRFs.Vrfs[vrfName]; exists {
+				stillExist = append(stillExist, vrfName)
+			}
+		}
+	}
+
+	if len(stillExist) > 0 {
+		return fmt.Errorf("VRF delete failed - VRFs still exist: %v", stillExist)
+	}
+
+	tflog.Info(ctx, fmt.Sprintf("All VRFs %v confirmed deleted from fabric %s", failedVrfNames, fabricName))
+	return nil
+}
+
 /*
 	func (c NDFC) vrfBulkSplitID(ID string) (string, []string) {
 		idSplit := strings.Split(ID, "/")
@@ -161,7 +247,8 @@ func (c NDFC) processBulkResponse(ctx context.Context, res gjson.Result) ([]stri
 */
 func (c NDFC) vrfBulkGetDiff(ctx context.Context,
 	vPlan *resource_vrf_bulk.VrfBulkModel,
-	vState *resource_vrf_bulk.VrfBulkModel, _ *resource_vrf_bulk.VrfBulkModel) map[string]interface{} {
+	vState *resource_vrf_bulk.VrfBulkModel, _ *resource_vrf_bulk.VrfBulkModel,
+	parentFabric string, ndfcVRFs *resource_vrf_bulk.NDFCVrfBulkModel) map[string]interface{} {
 
 	actions := make(map[string]interface{})
 	vrfState := vState.GetModelData()
@@ -222,10 +309,32 @@ func (c NDFC) vrfBulkGetDiff(ctx context.Context,
 			delVrfs.Vrfs[sVrfName] = sVrf
 		}
 	}
-	//case 5: Deal with New VRFs in plan - Add
+	//case 5: Deal with New VRFs in plan - Add or Update for MSD child fabrics
 	for k, v := range vrfConfig.Vrfs {
 		if !v.FilterThisValue {
 			v.FabricName = newVRFs.FabricName
+
+			// For MSD child fabrics, check if VRF exists in parent fabric
+			// If it does, treat as update instead of create
+			if parentFabric != "" && ndfcVRFs != nil {
+				if ndfcVrf, exists := ndfcVRFs.Vrfs[k]; exists {
+					tflog.Info(ctx, fmt.Sprintf("MSD child fabric: VRF %s exists in parent fabric %s. Treating as update.", k, parentFabric))
+					// Merge plan with existing NDFC state to avoid changing immutable fields
+					v.FilterThisValue = true
+					v.VrfName = k
+					cf := false
+					updateAction := v.CreatePlan(ndfcVrf, &cf)
+					if updateAction != ActionNone {
+						putVRFs.Vrfs[k] = v
+						tflog.Info(ctx, fmt.Sprintf("MSD child fabric: VRF %s needs update", k))
+					} else {
+						tflog.Info(ctx, fmt.Sprintf("MSD child fabric: VRF %s not changed", k))
+					}
+					continue
+				}
+			}
+
+			// Standard create path for new VRFs
 			newVRFs.Vrfs[k] = v
 		}
 	}

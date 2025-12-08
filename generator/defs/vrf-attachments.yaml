@@ -73,7 +73,6 @@ resource:
               sort: true
               payload_hide: true
             - <<: *fabricName
-              optional: true
               computed: true
               unmarshal_tag: fabricName
             - <<: *vrfName

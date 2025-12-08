@@ -129,7 +129,6 @@ Optional:
 
 - `deploy_this_attachment` (Boolean) If set to `true`, deploys this attachment.         This cannot be set to `true` if `deploy_all_attachments` at resource level is set to `true` or `deploy_attachments` in the corresponding `network` is set to `true`.         __Note: Changing value from `true` to `false`, to undo a deployment is not supported__
 - `display_name` (String) The name of the switch
-- `fabric` (String) The name of the fabric
 - `freeform_config` (String) This field covers any configuration not included in overlay templates which is needed as part of this VRF attachment
 - `instance_values` (String) Instance values
 - `switch_ports` (Set of String) List of switch ports
@@ -140,6 +139,7 @@ Read-Only:
 
 - `attach_state` (String) The state of the attachment
 - `attached` (Boolean) The state of the attachment
+- `fabric` (String) The name of the fabric
 - `switch_name` (String) The name of the switch
 
 
