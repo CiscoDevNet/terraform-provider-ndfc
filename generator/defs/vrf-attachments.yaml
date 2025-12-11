@@ -132,7 +132,7 @@ resource:
               example: true
               computed: true
               ndfc_type: bool
-            - model_name: freeformconfig
+            - model_name: freeformConfig
               tf_name: freeform_config
               type: String
               description: This field covers any configuration not included in overlay templates which is needed as part of this VRF attachment

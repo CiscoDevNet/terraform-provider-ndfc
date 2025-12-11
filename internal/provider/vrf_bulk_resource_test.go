@@ -1466,3 +1466,117 @@ func TestAccVRFResourceMixedReplaceAndUpdate(t *testing.T) {
 		}},
 	)
 }
+
+// TestAccVRFResourceFreeformConfig tests freeform config on VRF attachments
+// Tests setting, updating, and removing freeform config
+func TestAccVRFResourceFreeformConfig(t *testing.T) {
+	x := &map[string]string{
+		"RscType":  ndfc.ResourceVrfBulk,
+		"RscName":  "vrf_test",
+		"User":     helper.GetConfig("vrf").NDFC.User,
+		"Password": helper.GetConfig("vrf").NDFC.Password,
+		"Host":     helper.GetConfig("vrf").NDFC.URL,
+		"Insecure": helper.GetConfig("vrf").NDFC.Insecure,
+	}
+
+	tfConfig := new(string)
+	stepCount := new(int)
+	*stepCount = 0
+	vrfScaledBulk := new(resource_vrf_bulk.NDFCVrfBulkModel)
+
+	resource.Test(t, resource.TestCase{
+		PreCheck:                 func() { testAccPreCheck(t, "vrf") },
+		ProtoV6ProviderFactories: testAccProtoV6ProviderFactories,
+		Steps: []resource.TestStep{
+			// Step 1: Create 3 VRFs with 2 attachments each (no freeform config initially)
+			{
+				Config: func() string {
+					*stepCount++
+					tName := fmt.Sprintf("%s_%d", t.Name(), *stepCount)
+					helper.GenerateVrfBulkObject(&vrfScaledBulk, helper.GetConfig("vrf").NDFC.Fabric,
+						3, false, false, false, []string{helper.GetConfig("vrf").NDFC.Switches[0], helper.GetConfig("vrf").NDFC.Switches[1]})
+					helper.GetTFConfigWithSingleResource(tName, *x, []interface{}{vrfScaledBulk}, &tfConfig)
+					return *tfConfig
+				}(),
+				Check: resource.ComposeTestCheckFunc(VrfBulkModelHelperStateCheck(vrfTestRscName, *vrfScaledBulk, path.Empty())...),
+			},
+
+			// Step 2: Add freeform_config to first attachment of VRF 1
+			{
+				Config: func() string {
+					*stepCount++
+					tName := fmt.Sprintf("%s_%d", t.Name(), *stepCount)
+					helper.VrfAttachmentsMod(&vrfScaledBulk, 1, 1, nil, helper.GetConfig("vrf").NDFC.Switches[0], map[string]interface{}{
+						"freeform_config": "router bgp 29500\\n  vrf {vrfName}\\n    address-family ipv4 unicast\\n      maximum-paths 2\\ninterface Ethernet1/21.1010\\n    encapsulation dot1q 1010\\n    vrf member {vrfName}\\n    mtu 9216\\n    ip address 10.1.0.1/30\\n    no shutdown",
+					})
+					helper.GetTFConfigWithSingleResource(tName, *x, []interface{}{vrfScaledBulk}, &tfConfig)
+					return *tfConfig
+				}(),
+				//Check: resource.ComposeTestCheckFunc(VrfBulkModelHelperStateCheck(vrfTestRscName, *vrfScaledBulk, path.Empty())...),
+			},
+
+			// Step 3: Add freeform_config to multiple attachments across different VRFs
+			{
+				Config: func() string {
+					*stepCount++
+					tName := fmt.Sprintf("%s_%d", t.Name(), *stepCount)
+					// VRF 1, Switch 1: Already has config from previous step
+					// VRF 1, Switch 2: Add new freeform config
+					helper.VrfAttachmentsMod(&vrfScaledBulk, 1, 1, nil, helper.GetConfig("vrf").NDFC.Switches[1], map[string]interface{}{
+						"freeform_config": "router bgp 29500\\n  vrf {vrfName}\\n    address-family ipv4 unicast\\n      maximum-paths 2\\ninterface Ethernet1/22.1011\\n    encapsulation dot1q 1011\\n    vrf member {vrfName}\\n    mtu 9216\\n    ip address 10.1.1.1/30\\n    no shutdown",
+					})
+					// VRF 2, Switch 1: Add freeform config
+					helper.VrfAttachmentsMod(&vrfScaledBulk, 2, 2, nil, helper.GetConfig("vrf").NDFC.Switches[0], map[string]interface{}{
+						"freeform_config": "router bgp 29500\\n  vrf {vrfName}\\n    address-family ipv4 unicast\\n      maximum-paths 3\\ninterface Ethernet1/21.1020\\n    encapsulation dot1q 1020\\n    vrf member {vrfName}\\n    mtu 9216\\n    ip address 10.2.0.1/30\\n    no shutdown",
+					})
+					helper.GetTFConfigWithSingleResource(tName, *x, []interface{}{vrfScaledBulk}, &tfConfig)
+					return *tfConfig
+				}(),
+				//Check: resource.ComposeTestCheckFunc(VrfBulkModelHelperStateCheck(vrfTestRscName, *vrfScaledBulk, path.Empty())...),
+			},
+
+			// Step 4: Update existing freeform_config (modify content)
+			{
+				Config: func() string {
+					*stepCount++
+					tName := fmt.Sprintf("%s_%d", t.Name(), *stepCount)
+					helper.VrfAttachmentsMod(&vrfScaledBulk, 1, 1, nil, helper.GetConfig("vrf").NDFC.Switches[0], map[string]interface{}{
+						"freeform_config": "router bgp 29500\\n  vrf {vrfName}\\n    address-family ipv4 unicast\\n      maximum-paths 4\\ninterface Ethernet1/21.1012\\n    encapsulation dot1q 1012\\n    vrf member {vrfName}\\n    mtu 9000\\n    ip address 10.1.0.5/30\\n    no shutdown",
+					})
+					helper.GetTFConfigWithSingleResource(tName, *x, []interface{}{vrfScaledBulk}, &tfConfig)
+					return *tfConfig
+				}(),
+				//Check: resource.ComposeTestCheckFunc(VrfBulkModelHelperStateCheck(vrfTestRscName, *vrfScaledBulk, path.Empty())...),
+			},
+
+			// Step 5: Remove freeform_config from one attachment (set to empty string)
+			{
+				Config: func() string {
+					*stepCount++
+					tName := fmt.Sprintf("%s_%d", t.Name(), *stepCount)
+					helper.VrfAttachmentsMod(&vrfScaledBulk, 2, 2, nil, helper.GetConfig("vrf").NDFC.Switches[0], map[string]interface{}{
+						"freeform_config": "",
+					})
+					helper.GetTFConfigWithSingleResource(tName, *x, []interface{}{vrfScaledBulk}, &tfConfig)
+					return *tfConfig
+				}(),
+				//Check: resource.ComposeTestCheckFunc(VrfBulkModelHelperStateCheck(vrfTestRscName, *vrfScaledBulk, path.Empty())...),
+			},
+
+			// Step 6: Add freeform_config along with other attachment parameters
+			{
+				Config: func() string {
+					*stepCount++
+					tName := fmt.Sprintf("%s_%d", t.Name(), *stepCount)
+					helper.VrfAttachmentsMod(&vrfScaledBulk, 3, 3, nil, helper.GetConfig("vrf").NDFC.Switches[0], map[string]interface{}{
+						"freeform_config": "router bgp 29500\\n  vrf {vrfName}\\n    address-family ipv4 unicast\\n      maximum-paths 2\\ninterface Ethernet1/21.1030\\n    encapsulation dot1q 1030\\n    vrf member {vrfName}\\n    mtu 9216\\n    ip address 10.3.0.1/30\\n    no shutdown",
+						"vlan":            300,
+					})
+					helper.GetTFConfigWithSingleResource(tName, *x, []interface{}{vrfScaledBulk}, &tfConfig)
+					return *tfConfig
+				}(),
+				//Check: resource.ComposeTestCheckFunc(VrfBulkModelHelperStateCheck(vrfTestRscName, *vrfScaledBulk, path.Empty())...),
+			},
+		}},
+	)
+}

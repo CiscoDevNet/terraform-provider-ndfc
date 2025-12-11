@@ -74,6 +74,9 @@ resource "ndfc_{{.RscType}}" "{{.RscName}}" {
                     {{- if $attachEntry.InstanceValues.LoopbackIpv6 }}
                     loopback_ipv6 = "{{$attachEntry.InstanceValues.LoopbackIpv6}}"
                     {{- end}}
+                    {{- if $attachEntry.FreeformConfig }}
+                    freeform_config = "{{$attachEntry.FreeformConfig}}"
+                    {{- end}}
                 }
                 {{end}}
             }

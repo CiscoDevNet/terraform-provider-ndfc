@@ -136,6 +136,12 @@ func (c NDFC) RscGetVrfAttachments(ctx context.Context, dg *diag.Diagnostics, vr
 		}
 		vrfs.Vrfs[i] = vrfEntry
 	}
+	// Fill missing parameters like freeformConfig from the switch details API
+	err = c.fillMissingParams(ctx, vrfs)
+	if err != nil {
+		tflog.Warn(ctx, fmt.Sprintf("Failed to fill missing parameters: %v", err))
+		// Don't return error, just log warning as this is supplementary data
+	}
 	return nil
 }
 

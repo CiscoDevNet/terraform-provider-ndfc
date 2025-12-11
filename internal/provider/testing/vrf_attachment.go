@@ -10,6 +10,7 @@ package testing
 
 import (
 	"strconv"
+	"strings"
 	"terraform-provider-ndfc/internal/provider/resources/resource_vrf_attachments"
 	"terraform-provider-ndfc/internal/provider/resources/resource_vrf_bulk"
 	"terraform-provider-ndfc/internal/provider/types"
@@ -67,7 +68,14 @@ func VrfAttachmentsMod(vrfs **resource_vrf_bulk.NDFCVrfBulkModel, start, end int
 		}
 		attachEntry, ok := vrfEntry.AttachList[serial]
 		if !ok {
-			panic("Serial not found in AttachList")
+			// create a new attachment entry
+			if vrfEntry.AttachList == nil {
+				vrfEntry.AttachList = make(map[string]resource_vrf_attachments.NDFCAttachListValue)
+			}
+			attachEntry = resource_vrf_attachments.NDFCAttachListValue{}
+			attachEntry.SerialNumber = serial
+			attachEntry.DeployThisAttachment = false
+			vrfEntry.AttachList[serial] = attachEntry
 		}
 
 		for key, value := range x {
@@ -76,7 +84,11 @@ func VrfAttachmentsMod(vrfs **resource_vrf_bulk.NDFCVrfBulkModel, start, end int
 				attachEntry.Vlan = new(types.Int64Custom)
 				*attachEntry.Vlan = types.Int64Custom(value.(int))
 			case "freeform_config":
-				attachEntry.FreeformConfig = value.(string)
+				// freeform may have template variables
+				// replace them with actual values
+				freeformConfig := value.(string)
+				freeformConfig = strings.ReplaceAll(freeformConfig, "{vrfName}", vrfName)
+				attachEntry.FreeformConfig = freeformConfig
 			case "loopback_id":
 				attachEntry.InstanceValues.LoopbackId = new(types.Int64Custom)
 				*attachEntry.InstanceValues.LoopbackId = types.Int64Custom(value.(int))
