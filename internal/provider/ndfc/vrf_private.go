@@ -312,3 +312,110 @@ func updateVrfUpdateActionFlag(planVrf *resource_vrf_bulk.NDFCVrfsValue, action 
 		planVrf.AttachList[serial] = attach
 	}
 }
+
+// VrfSwitchDetailResponse represents the response structure from the VRF switch details API
+type VrfSwitchDetailResponse struct {
+	VrfName           string                  `json:"vrfName"`
+	TemplateName      string                  `json:"templateName"`
+	SwitchDetailsList []SwitchDetailsListItem `json:"switchDetailsList"`
+}
+
+type SwitchDetailsListItem struct {
+	SwitchName       string `json:"switchName"`
+	Vlan             int    `json:"vlan"`
+	SerialNumber     string `json:"serialNumber"`
+	FreeformConfig   string `json:"freeformConfig"`
+	InstanceValues   string `json:"instanceValues"`
+	ExtensionValues  string `json:"extensionValues"`
+	IsLanAttached    bool   `json:"islanAttached"`
+	LanAttachedState string `json:"lanAttachedState"`
+}
+
+func (c NDFC) fillMissingParams(ctx context.Context, ndVRFs *resource_vrf_bulk.NDFCVrfBulkModel) error {
+	// Collect all VRF names and serial numbers
+	vrfNames := make([]string, 0)
+	serialNumbersSet := make(map[string]bool)
+
+	for vrfName, vrfEntry := range ndVRFs.Vrfs {
+		vrfNames = append(vrfNames, vrfName)
+		for serial := range vrfEntry.AttachList {
+			if vrfEntry.AttachList[serial].FilterThisValue {
+				continue
+			}
+			serialNumbersSet[serial] = true
+		}
+	}
+
+	if len(vrfNames) == 0 || len(serialNumbersSet) == 0 {
+		tflog.Info(ctx, "fillMissingParams: No VRFs or attachments to process")
+		return nil
+	}
+
+	tflog.Info(ctx, fmt.Sprintf("fillMissingParams: Fetching details for VRFs=%v, SerialCount=%d", vrfNames, len(serialNumbersSet)))
+	// Add counters
+	totalUpdated := 0
+	totalSkipped := 0
+	totalErrors := 0
+
+	// Make individual API calls per serial number to avoid switch type mismatch errors
+	// (API requires switches to be of same type Border/Leaf)
+	for serial := range serialNumbersSet {
+		tflog.Debug(ctx, fmt.Sprintf("fillMissingParams: Fetching details for Serial=%s", serial))
+
+		vrfObj := api.NewVrfAPI(ndVRFs.FabricName, c.GetLock(ResourceVrfBulk), &c.apiClient)
+		res, err := vrfObj.GetVrfSwitchDetails(vrfNames, []string{serial})
+		if err != nil {
+			tflog.Warn(ctx, fmt.Sprintf("fillMissingParams: Error fetching switch details for Serial=%s: %v", serial, err))
+			// Continue with other serials even if one fails
+			totalErrors++
+			continue
+		}
+
+		tflog.Debug(ctx, fmt.Sprintf("fillMissingParams: API Response for Serial=%s: %s", serial, string(res)))
+
+		// Parse response
+		var switchDetails []VrfSwitchDetailResponse
+		err = json.Unmarshal(res, &switchDetails)
+		if err != nil {
+			tflog.Warn(ctx, fmt.Sprintf("fillMissingParams: Error unmarshalling response for Serial=%s: %v", serial, err))
+			// Continue with other serials even if one fails
+			totalErrors++
+			continue
+		}
+
+		// Map freeformConfig to attachments
+		for _, vrfDetail := range switchDetails {
+			vrfEntry, ok := ndVRFs.Vrfs[vrfDetail.VrfName]
+			if !ok {
+				continue
+			}
+
+			for _, switchDetail := range vrfDetail.SwitchDetailsList {
+				if switchDetail.SerialNumber != serial {
+					continue
+				}
+
+				attachEntry, ok := vrfEntry.AttachList[switchDetail.SerialNumber]
+				if ok {
+					// Update freeformConfig if not empty in the response
+					if switchDetail.FreeformConfig != "" {
+						attachEntry.FreeformConfig = switchDetail.FreeformConfig
+						vrfEntry.AttachList[switchDetail.SerialNumber] = attachEntry
+						tflog.Debug(ctx, fmt.Sprintf("fillMissingParams: Updated freeformConfig for VRF=%s, Serial=%s",
+							vrfDetail.VrfName, switchDetail.SerialNumber))
+						totalUpdated++
+					} else {
+						totalSkipped++
+					}
+				}
+			}
+
+			// Put the updated vrfEntry back
+			ndVRFs.Vrfs[vrfDetail.VrfName] = vrfEntry
+		}
+	}
+
+	tflog.Info(ctx, fmt.Sprintf("fillMissingParams: Complete - Updated=%d, Skipped=%d, Errors=%d",
+		totalUpdated, totalSkipped, totalErrors))
+	return nil
+}
