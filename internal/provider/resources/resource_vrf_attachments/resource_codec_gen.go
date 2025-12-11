@@ -42,7 +42,7 @@ type NDFCAttachListValue struct {
 	Deployment           string                  `json:"deployment,omitempty"`
 	AttachState          string                  `json:"lanAttachState,omitempty"`
 	Attached             *bool                   `json:"isLanAttached,omitempty"`
-	FreeformConfig       string                  `json:"freeformconfig,omitempty"`
+	FreeformConfig       string                  `json:"freeformConfig,omitempty"`
 	DeployThisAttachment bool                    `json:"-"`
 	UpdateAction         uint16                  `json:"-"`
 	InstanceValues       NDFCInstanceValuesValue `json:"instanceValues,omitempty"`

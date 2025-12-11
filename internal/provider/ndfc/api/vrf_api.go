@@ -24,6 +24,9 @@ type VrfAPI struct {
 	PutVrf     string
 	Payload    string
 	DelList    []string
+	AttachDetail bool
+	VrfNames     []string
+	SerialNumbers []string
 }
 
 const UrlVrfGetBulk = "/lan-fabric/rest/top-down/v2/fabrics/%s/vrfs"
@@ -32,6 +35,7 @@ const UrlVrfDeleteBulk = "/lan-fabric/rest/top-down/v2/fabrics/%s/bulk-delete/vr
 const UrlVrfGet = "/lan-fabric/rest/top-down/v2/fabrics/%s/vrfs/%s"
 const UrlVrfUpdate = "/lan-fabric/rest/top-down/v2/fabrics/%s/vrfs/%s"
 const UrlVrfAttachmentsGet = "/lan-fabric/rest/top-down/fabrics/%s/vrfs/attachments"
+const UrlVrfAttachmentSwitchDetailGet = "/lan-fabric/rest/top-down/fabrics/%s/vrfs/switches"
 
 func (c *VrfAPI) GetLock() *sync.Mutex {
 	log.Printf("GetLock - VrfAPI %v", c.mutex)
@@ -40,6 +44,16 @@ func (c *VrfAPI) GetLock() *sync.Mutex {
 
 func (c *VrfAPI) GetUrl() string {
 	log.Printf("GetUrl - VrfAPI")
+	if c.AttachDetail {
+		url := fmt.Sprintf(UrlVrfAttachmentSwitchDetailGet, c.fabricName)
+		if len(c.VrfNames) > 0 {
+			url += "?vrf-names=" + strings.Join(c.VrfNames, ",")
+			if len(c.SerialNumbers) > 0 {
+				url += "&serial-numbers=" + strings.Join(c.SerialNumbers, ",")
+			}
+		}
+		return url
+	}
 	return fmt.Sprintf(UrlVrfGetBulk, c.fabricName)
 }
 
@@ -71,6 +85,18 @@ func (c *VrfAPI) GetDeleteQP() []string {
 
 func (c *VrfAPI) RscName() string {
 	return "vrf"
+}
+
+func (c *VrfAPI) GetVrfSwitchDetails(vrfNames []string, serialNumbers []string) ([]byte, error) {
+	log.Printf("GetVrfSwitchDetails - VrfAPI")
+	c.AttachDetail = true
+	c.VrfNames = vrfNames
+	c.SerialNumbers = serialNumbers
+	res, err := c.Get()
+	if err != nil {
+		return nil, err
+	}
+	return res, nil
 }
 
 /*
