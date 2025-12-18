@@ -94,24 +94,16 @@ func (v NDFCVrfAttachmentsValue) DeepEqual(c NDFCVrfAttachmentsValue) int {
 func (v *NDFCAttachListValue) CreatePlan(c NDFCAttachListValue, cf *bool) int {
 	action := ActionNone
 
-	if v.Fabric != "" {
-
-		if v.Fabric != c.Fabric {
-			log.Printf("Update: v.Fabric=%v, c.Fabric=%v", v.Fabric, c.Fabric)
-			if action == ActionNone || action == RequiresUpdate {
-				action = RequiresUpdate
-			}
+	if v.Fabric != c.Fabric {
+		log.Printf("Fabric-Update: v.Fabric=%v, c.Fabric=%v", v.Fabric, c.Fabric)
+		if action == ActionNone || action == RequiresUpdate {
+			action = RequiresUpdate
 		}
-
-	} else {
-		//v empty, fill with c
-		log.Printf("Copy from state: v.Fabric=%v, c.Fabric=%v", v.Fabric, c.Fabric)
-		v.Fabric = c.Fabric
 	}
 
 	if !v.Vlan.IsEmpty() && !c.Vlan.IsEmpty() {
 		if *v.Vlan != *c.Vlan {
-			log.Printf("Update: v.Vlan=%v, c.Vlan=%v", *v.Vlan, *c.Vlan)
+			log.Printf("Vlan-Update: v.Vlan=%v, c.Vlan=%v", *v.Vlan, *c.Vlan)
 			if action == ActionNone || action == RequiresUpdate {
 				action = RequiresUpdate
 			}
@@ -128,23 +120,15 @@ func (v *NDFCAttachListValue) CreatePlan(c NDFCAttachListValue, cf *bool) int {
 			*v.Vlan = *c.Vlan
 		}
 	}
-	if v.FreeformConfig != "" {
-
-		if v.FreeformConfig != c.FreeformConfig {
-			log.Printf("Update: v.FreeformConfig=%v, c.FreeformConfig=%v", v.FreeformConfig, c.FreeformConfig)
-			if action == ActionNone || action == RequiresUpdate {
-				action = RequiresUpdate
-			}
+	if v.FreeformConfig != c.FreeformConfig {
+		log.Printf("FreeformConfig-Update: v.FreeformConfig=%v, c.FreeformConfig=%v", v.FreeformConfig, c.FreeformConfig)
+		if action == ActionNone || action == RequiresUpdate {
+			action = RequiresUpdate
 		}
-
-	} else {
-		//v empty, fill with c
-		log.Printf("Copy from state: v.FreeformConfig=%v, c.FreeformConfig=%v", v.FreeformConfig, c.FreeformConfig)
-		v.FreeformConfig = c.FreeformConfig
 	}
 
 	if v.DeployThisAttachment != c.DeployThisAttachment {
-		log.Printf("Update: v.DeployThisAttachment=%v, c.DeployThisAttachment=%v", v.DeployThisAttachment, c.DeployThisAttachment)
+		log.Printf("DeployThisAttachment-Update: v.DeployThisAttachment=%v, c.DeployThisAttachment=%v", v.DeployThisAttachment, c.DeployThisAttachment)
 		*cf = true
 	}
 
@@ -166,30 +150,18 @@ func (v *NDFCAttachListValue) CreatePlan(c NDFCAttachListValue, cf *bool) int {
 		*v.InstanceValues.LoopbackId = *c.InstanceValues.LoopbackId
 	}
 
-	if v.InstanceValues.LoopbackIpv4 != "" {
-		if v.InstanceValues.LoopbackIpv4 != c.InstanceValues.LoopbackIpv4 {
-			log.Printf("Update: v.InstanceValues.LoopbackIpv4=%v, c.InstanceValues.LoopbackIpv4=%v", v.InstanceValues.LoopbackIpv4, c.InstanceValues.LoopbackIpv4)
-			if action == ActionNone || action == RequiresUpdate {
-				action = RequiresUpdate
-			}
+	if v.InstanceValues.LoopbackIpv4 != c.InstanceValues.LoopbackIpv4 {
+		log.Printf("Update: v.InstanceValues.LoopbackIpv4=%v, c.InstanceValues.LoopbackIpv4=%v", v.InstanceValues.LoopbackIpv4, c.InstanceValues.LoopbackIpv4)
+		if action == ActionNone || action == RequiresUpdate {
+			action = RequiresUpdate
 		}
-	} else {
-		//v empty, fill with c
-		log.Printf("Copy from state: v.InstanceValues.LoopbackIpv4=%v, c.InstanceValues.LoopbackIpv4=%v", v.InstanceValues.LoopbackIpv4, c.InstanceValues.LoopbackIpv4)
-		v.InstanceValues.LoopbackIpv4 = c.InstanceValues.LoopbackIpv4
 	}
 
-	if v.InstanceValues.LoopbackIpv6 != "" {
-		if v.InstanceValues.LoopbackIpv6 != c.InstanceValues.LoopbackIpv6 {
-			log.Printf("Update: v.InstanceValues.LoopbackIpv6=%v, c.InstanceValues.LoopbackIpv6=%v", v.InstanceValues.LoopbackIpv6, c.InstanceValues.LoopbackIpv6)
-			if action == ActionNone || action == RequiresUpdate {
-				action = RequiresUpdate
-			}
+	if v.InstanceValues.LoopbackIpv6 != c.InstanceValues.LoopbackIpv6 {
+		log.Printf("Update: v.InstanceValues.LoopbackIpv6=%v, c.InstanceValues.LoopbackIpv6=%v", v.InstanceValues.LoopbackIpv6, c.InstanceValues.LoopbackIpv6)
+		if action == ActionNone || action == RequiresUpdate {
+			action = RequiresUpdate
 		}
-	} else {
-		//v empty, fill with c
-		log.Printf("Copy from state: v.InstanceValues.LoopbackIpv6=%v, c.InstanceValues.LoopbackIpv6=%v", v.InstanceValues.LoopbackIpv6, c.InstanceValues.LoopbackIpv6)
-		v.InstanceValues.LoopbackIpv6 = c.InstanceValues.LoopbackIpv6
 	}
 
 	return action
@@ -198,23 +170,15 @@ func (v *NDFCAttachListValue) CreatePlan(c NDFCAttachListValue, cf *bool) int {
 func (v *NDFCVrfAttachmentsValue) CreatePlan(c NDFCVrfAttachmentsValue, cf *bool) int {
 	action := ActionNone
 
-	if v.VrfName != "" {
-
-		if v.VrfName != c.VrfName {
-			log.Printf("Update: v.VrfName=%v, c.VrfName=%v", v.VrfName, c.VrfName)
-			if action == ActionNone || action == RequiresUpdate {
-				action = RequiresReplace
-			}
+	if v.VrfName != c.VrfName {
+		log.Printf("VrfName-Update: v.VrfName=%v, c.VrfName=%v", v.VrfName, c.VrfName)
+		if action == ActionNone || action == RequiresUpdate {
+			action = RequiresReplace
 		}
-
-	} else {
-		//v empty, fill with c
-		log.Printf("Copy from state: v.VrfName=%v, c.VrfName=%v", v.VrfName, c.VrfName)
-		v.VrfName = c.VrfName
 	}
 
 	if v.DeployAllAttachments != c.DeployAllAttachments {
-		log.Printf("Update: v.DeployAllAttachments=%v, c.DeployAllAttachments=%v", v.DeployAllAttachments, c.DeployAllAttachments)
+		log.Printf("DeployAllAttachments-Update: v.DeployAllAttachments=%v, c.DeployAllAttachments=%v", v.DeployAllAttachments, c.DeployAllAttachments)
 		*cf = true
 	}
 

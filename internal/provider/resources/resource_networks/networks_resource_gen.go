@@ -8,6 +8,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/booldefault"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/boolplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/int64default"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/int64planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
@@ -73,7 +74,6 @@ func NetworksResourceSchema(ctx context.Context) schema.Schema {
 										Default:             booldefault.StaticBool(false),
 									},
 									"display_name": schema.StringAttribute{
-										Optional:            true,
 										Computed:            true,
 										Description:         "The name of the switch",
 										MarkdownDescription: "The name of the switch",
@@ -83,17 +83,26 @@ func NetworksResourceSchema(ctx context.Context) schema.Schema {
 										Computed:            true,
 										Description:         "The name of the fabric",
 										MarkdownDescription: "The name of the fabric",
+										PlanModifiers: []planmodifier.String{
+											stringplanmodifier.UseStateForUnknown(),
+										},
 									},
 									"freeform_config": schema.StringAttribute{
 										Optional:            true,
 										Description:         "This field covers any configuration not included in overlay templates which is needed as part of this VRF attachment",
 										MarkdownDescription: "This field covers any configuration not included in overlay templates which is needed as part of this VRF attachment",
+										PlanModifiers: []planmodifier.String{
+											stringplanmodifier.UseStateForUnknown(),
+										},
 									},
 									"instance_values": schema.StringAttribute{
 										Optional:            true,
 										Computed:            true,
 										Description:         "Instance values",
 										MarkdownDescription: "Instance values",
+										PlanModifiers: []planmodifier.String{
+											stringplanmodifier.UseStateForUnknown(),
+										},
 									},
 									"switch_name": schema.StringAttribute{
 										Computed:            true,
@@ -175,6 +184,9 @@ func NetworksResourceSchema(ctx context.Context) schema.Schema {
 							Computed:            true,
 							Description:         "Customized name of the network. By default, it will be same as the network name",
 							MarkdownDescription: "Customized name of the network. By default, it will be same as the network name",
+							PlanModifiers: []planmodifier.String{
+								stringplanmodifier.UseStateForUnknown(),
+							},
 						},
 						"gateway_ipv4_address": schema.StringAttribute{
 							Optional:            true,
@@ -191,12 +203,18 @@ func NetworksResourceSchema(ctx context.Context) schema.Schema {
 							Computed:            true,
 							Description:         "IGMP version",
 							MarkdownDescription: "IGMP version",
+							PlanModifiers: []planmodifier.String{
+								stringplanmodifier.UseStateForUnknown(),
+							},
 						},
 						"ingress_replication": schema.BoolAttribute{
 							Optional:            true,
 							Computed:            true,
 							Description:         "Ingress replication flag. Read-only per network, Fabric-wide setting.",
 							MarkdownDescription: "Ingress replication flag. Read-only per network, Fabric-wide setting.",
+							PlanModifiers: []planmodifier.Bool{
+								boolplanmodifier.UseStateForUnknown(),
+							},
 						},
 						"interface_description": schema.StringAttribute{
 							Optional:            true,
@@ -208,6 +226,9 @@ func NetworksResourceSchema(ctx context.Context) schema.Schema {
 							Computed:            true,
 							Description:         "Enable L3 Gateway on Border",
 							MarkdownDescription: "Enable L3 Gateway on Border",
+							PlanModifiers: []planmodifier.Bool{
+								boolplanmodifier.UseStateForUnknown(),
+							},
 						},
 						"layer2_only": schema.BoolAttribute{
 							Optional:            true,
@@ -228,12 +249,18 @@ func NetworksResourceSchema(ctx context.Context) schema.Schema {
 							Computed:            true,
 							Description:         "Multicast group address",
 							MarkdownDescription: "Multicast group address",
+							PlanModifiers: []planmodifier.String{
+								stringplanmodifier.UseStateForUnknown(),
+							},
 						},
 						"netflow": schema.BoolAttribute{
 							Optional:            true,
 							Computed:            true,
 							Description:         "Netflow enable flag. Netflow is supported only if it is enabled on fabric. For NX-OS only.",
 							MarkdownDescription: "Netflow enable flag. Netflow is supported only if it is enabled on fabric. For NX-OS only.",
+							PlanModifiers: []planmodifier.Bool{
+								boolplanmodifier.UseStateForUnknown(),
+							},
 						},
 						"network_extension_template": schema.StringAttribute{
 							Optional:            true,

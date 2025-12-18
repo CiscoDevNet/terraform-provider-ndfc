@@ -21,10 +21,6 @@ func (v NDFCAttachmentsValue) DeepEqual(c NDFCAttachmentsValue) int {
 		log.Printf("v.Fabric=%v, c.Fabric=%v", v.Fabric, c.Fabric)
 		return RequiresUpdate
 	}
-	if v.DisplayName != c.DisplayName {
-		log.Printf("v.DisplayName=%v, c.DisplayName=%v", v.DisplayName, c.DisplayName)
-		return RequiresUpdate
-	}
 
 	if !v.Vlan.IsEmpty() && !c.Vlan.IsEmpty() {
 		if *v.Vlan != *c.Vlan {
@@ -97,39 +93,16 @@ func (v NDFCNetworkAttachmentsValue) DeepEqual(c NDFCNetworkAttachmentsValue) in
 func (v *NDFCAttachmentsValue) CreatePlan(c NDFCAttachmentsValue, cf *bool) int {
 	action := ActionNone
 
-	if v.Fabric != "" {
-
-		if v.Fabric != c.Fabric {
-			log.Printf("Update: v.Fabric=%v, c.Fabric=%v", v.Fabric, c.Fabric)
-			if action == ActionNone || action == RequiresUpdate {
-				action = RequiresUpdate
-			}
+	if v.Fabric != c.Fabric {
+		log.Printf("Fabric-Update: v.Fabric=%v, c.Fabric=%v", v.Fabric, c.Fabric)
+		if action == ActionNone || action == RequiresUpdate {
+			action = RequiresUpdate
 		}
-
-	} else {
-		//v empty, fill with c
-		log.Printf("Copy from state: v.Fabric=%v, c.Fabric=%v", v.Fabric, c.Fabric)
-		v.Fabric = c.Fabric
-	}
-
-	if v.DisplayName != "" {
-
-		if v.DisplayName != c.DisplayName {
-			log.Printf("Update: v.DisplayName=%v, c.DisplayName=%v", v.DisplayName, c.DisplayName)
-			if action == ActionNone || action == RequiresUpdate {
-				action = RequiresUpdate
-			}
-		}
-
-	} else {
-		//v empty, fill with c
-		log.Printf("Copy from state: v.DisplayName=%v, c.DisplayName=%v", v.DisplayName, c.DisplayName)
-		v.DisplayName = c.DisplayName
 	}
 
 	if !v.Vlan.IsEmpty() && !c.Vlan.IsEmpty() {
 		if *v.Vlan != *c.Vlan {
-			log.Printf("Update: v.Vlan=%v, c.Vlan=%v", *v.Vlan, *c.Vlan)
+			log.Printf("Vlan-Update: v.Vlan=%v, c.Vlan=%v", *v.Vlan, *c.Vlan)
 			if action == ActionNone || action == RequiresUpdate {
 				action = RequiresUpdate
 			}
@@ -146,23 +119,15 @@ func (v *NDFCAttachmentsValue) CreatePlan(c NDFCAttachmentsValue, cf *bool) int 
 			*v.Vlan = *c.Vlan
 		}
 	}
-	if v.FreeformConfig != "" {
-
-		if v.FreeformConfig != c.FreeformConfig {
-			log.Printf("Update: v.FreeformConfig=%v, c.FreeformConfig=%v", v.FreeformConfig, c.FreeformConfig)
-			if action == ActionNone || action == RequiresUpdate {
-				action = RequiresUpdate
-			}
+	if v.FreeformConfig != c.FreeformConfig {
+		log.Printf("FreeformConfig-Update: v.FreeformConfig=%v, c.FreeformConfig=%v", v.FreeformConfig, c.FreeformConfig)
+		if action == ActionNone || action == RequiresUpdate {
+			action = RequiresUpdate
 		}
-
-	} else {
-		//v empty, fill with c
-		log.Printf("Copy from state: v.FreeformConfig=%v, c.FreeformConfig=%v", v.FreeformConfig, c.FreeformConfig)
-		v.FreeformConfig = c.FreeformConfig
 	}
 
 	if v.DeployThisAttachment != c.DeployThisAttachment {
-		log.Printf("Update: v.DeployThisAttachment=%v, c.DeployThisAttachment=%v", v.DeployThisAttachment, c.DeployThisAttachment)
+		log.Printf("DeployThisAttachment-Update: v.DeployThisAttachment=%v, c.DeployThisAttachment=%v", v.DeployThisAttachment, c.DeployThisAttachment)
 		*cf = true
 	}
 
@@ -188,19 +153,11 @@ func (v *NDFCAttachmentsValue) CreatePlan(c NDFCAttachmentsValue, cf *bool) int 
 		}
 	}
 
-	if v.InstanceValues != "" {
-
-		if v.InstanceValues != c.InstanceValues {
-			log.Printf("Update: v.InstanceValues=%v, c.InstanceValues=%v", v.InstanceValues, c.InstanceValues)
-			if action == ActionNone || action == RequiresUpdate {
-				action = RequiresUpdate
-			}
+	if v.InstanceValues != c.InstanceValues {
+		log.Printf("InstanceValues-Update: v.InstanceValues=%v, c.InstanceValues=%v", v.InstanceValues, c.InstanceValues)
+		if action == ActionNone || action == RequiresUpdate {
+			action = RequiresUpdate
 		}
-
-	} else {
-		//v empty, fill with c
-		log.Printf("Copy from state: v.InstanceValues=%v, c.InstanceValues=%v", v.InstanceValues, c.InstanceValues)
-		v.InstanceValues = c.InstanceValues
 	}
 
 	return action
@@ -209,19 +166,11 @@ func (v *NDFCAttachmentsValue) CreatePlan(c NDFCAttachmentsValue, cf *bool) int 
 func (v *NDFCNetworkAttachmentsValue) CreatePlan(c NDFCNetworkAttachmentsValue, cf *bool) int {
 	action := ActionNone
 
-	if v.NetworkName != "" {
-
-		if v.NetworkName != c.NetworkName {
-			log.Printf("Update: v.NetworkName=%v, c.NetworkName=%v", v.NetworkName, c.NetworkName)
-			if action == ActionNone || action == RequiresUpdate {
-				action = RequiresReplace
-			}
+	if v.NetworkName != c.NetworkName {
+		log.Printf("NetworkName-Update: v.NetworkName=%v, c.NetworkName=%v", v.NetworkName, c.NetworkName)
+		if action == ActionNone || action == RequiresUpdate {
+			action = RequiresReplace
 		}
-
-	} else {
-		//v empty, fill with c
-		log.Printf("Copy from state: v.NetworkName=%v, c.NetworkName=%v", v.NetworkName, c.NetworkName)
-		v.NetworkName = c.NetworkName
 	}
 
 	return action

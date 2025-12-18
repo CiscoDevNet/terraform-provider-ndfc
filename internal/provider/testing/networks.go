@@ -119,6 +119,14 @@ func ModifyNetworksObject(nws **resource_networks.NDFCNetworksModel, nwNo int, v
 			case "nw_id":
 				nw.NetworkId = new(int64)
 				*nw.NetworkId = int64(value.(int))
+			case "display_name":
+				nw.DisplayName = value.(string)
+			case "vlan_name":
+				nw.NetworkTemplateConfig.VlanName = value.(string)
+			case "interface_description":
+				nw.NetworkTemplateConfig.InterfaceDescription = value.(string)
+			case "layer2_only":
+				nw.NetworkTemplateConfig.Layer2Only = value.(string)
 			}
 		}
 		nets.Networks[nwName] = nw
@@ -269,7 +277,9 @@ func NetAttachmentsMod(nw **resource_networks.NDFCNetworksModel, start, end int,
 		}
 		attachEntry, ok := netEntry.Attachments[serial]
 		if !ok {
-			panic("Serial not found in Attachments")
+			attachEntry = rna.NDFCAttachmentsValue{}
+			attachEntry.SerialNumber = serial
+			attachEntry.DeployThisAttachment = false
 		}
 
 		for key, value := range x {
@@ -278,10 +288,21 @@ func NetAttachmentsMod(nw **resource_networks.NDFCNetworksModel, start, end int,
 				attachEntry.Vlan = new(types.Int64Custom)
 				*attachEntry.Vlan = types.Int64Custom(value.(int))
 			case "freeform_config":
-				attachEntry.FreeformConfig = value.(string)
+				// freeform may have template variables
+				// replace them with actual values
+				freeformConfig := value.(string)
+				freeformConfig = strings.ReplaceAll(freeformConfig, "{networkName}", nwName)
+				attachEntry.FreeformConfig = freeformConfig
 			case "switch_ports":
 				attachEntry.SwitchPorts = value.(types.CSVString)
+			case "tor_ports":
+				attachEntry.TorPorts = value.(types.CSVString)
+			case "instance_values":
+				attachEntry.InstanceValues = value.(string)
 			}
+		}
+		if netEntry.Attachments == nil {
+			netEntry.Attachments = make(map[string]rna.NDFCAttachmentsValue)
 		}
 		netEntry.Attachments[serial] = attachEntry
 		nwRsc.Networks[nwName] = netEntry
