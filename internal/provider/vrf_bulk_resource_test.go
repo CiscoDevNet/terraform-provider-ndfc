@@ -1329,7 +1329,7 @@ func TestAccVRFResourceEmptyStateTransition(t *testing.T) {
 				// Currently code returns null VRF map, whereas TF expects an empty map.
 				// This scenario is unlikely in field; if all vrfs are removed, might as well destroy the resource
 				// So marking an expected failure here. Next step should carry on
-				ExpectError: regexp.MustCompile("Error: Provider produced inconsistent result after apply*"),
+				// ExpectError: regexp.MustCompile("Error: Provider produced inconsistent result after apply*"),
 			},
 
 			// Step 3: Add different set of VRFs back (test recovery from empty state)

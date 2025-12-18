@@ -298,34 +298,18 @@ func (v NDFCVrfsValue) DeepEqual(c NDFCVrfsValue) int {
 func (v *NDFCVrfsValue) CreatePlan(c NDFCVrfsValue, cf *bool) int {
 	action := ActionNone
 
-	if v.VrfTemplate != "" {
-
-		if v.VrfTemplate != c.VrfTemplate {
-			log.Printf("Update: v.VrfTemplate=%v, c.VrfTemplate=%v", v.VrfTemplate, c.VrfTemplate)
-			if action == ActionNone || action == RequiresUpdate {
-				action = RequiresUpdate
-			}
+	if v.VrfTemplate != c.VrfTemplate {
+		log.Printf("VrfTemplate-Update: v.VrfTemplate=%v, c.VrfTemplate=%v", v.VrfTemplate, c.VrfTemplate)
+		if action == ActionNone || action == RequiresUpdate {
+			action = RequiresUpdate
 		}
-
-	} else {
-		//v empty, fill with c
-		log.Printf("Copy from state: v.VrfTemplate=%v, c.VrfTemplate=%v", v.VrfTemplate, c.VrfTemplate)
-		v.VrfTemplate = c.VrfTemplate
 	}
 
-	if v.VrfExtensionTemplate != "" {
-
-		if v.VrfExtensionTemplate != c.VrfExtensionTemplate {
-			log.Printf("Update: v.VrfExtensionTemplate=%v, c.VrfExtensionTemplate=%v", v.VrfExtensionTemplate, c.VrfExtensionTemplate)
-			if action == ActionNone || action == RequiresUpdate {
-				action = RequiresUpdate
-			}
+	if v.VrfExtensionTemplate != c.VrfExtensionTemplate {
+		log.Printf("VrfExtensionTemplate-Update: v.VrfExtensionTemplate=%v, c.VrfExtensionTemplate=%v", v.VrfExtensionTemplate, c.VrfExtensionTemplate)
+		if action == ActionNone || action == RequiresUpdate {
+			action = RequiresUpdate
 		}
-
-	} else {
-		//v empty, fill with c
-		log.Printf("Copy from state: v.VrfExtensionTemplate=%v, c.VrfExtensionTemplate=%v", v.VrfExtensionTemplate, c.VrfExtensionTemplate)
-		v.VrfExtensionTemplate = c.VrfExtensionTemplate
 	}
 
 	if v.VrfId != nil && c.VrfId != nil {
@@ -363,43 +347,25 @@ func (v *NDFCVrfsValue) CreatePlan(c NDFCVrfsValue, cf *bool) int {
 		*v.VrfTemplateConfig.VlanId = *c.VrfTemplateConfig.VlanId
 	}
 
-	if v.VrfTemplateConfig.VlanName != "" {
-		if v.VrfTemplateConfig.VlanName != c.VrfTemplateConfig.VlanName {
-			log.Printf("Update: v.VrfTemplateConfig.VlanName=%v, c.VrfTemplateConfig.VlanName=%v", v.VrfTemplateConfig.VlanName, c.VrfTemplateConfig.VlanName)
-			if action == ActionNone || action == RequiresUpdate {
-				action = RequiresUpdate
-			}
+	if v.VrfTemplateConfig.VlanName != c.VrfTemplateConfig.VlanName {
+		log.Printf("Update: v.VrfTemplateConfig.VlanName=%v, c.VrfTemplateConfig.VlanName=%v", v.VrfTemplateConfig.VlanName, c.VrfTemplateConfig.VlanName)
+		if action == ActionNone || action == RequiresUpdate {
+			action = RequiresUpdate
 		}
-	} else {
-		//v empty, fill with c
-		log.Printf("Copy from state: v.VrfTemplateConfig.VlanName=%v, c.VrfTemplateConfig.VlanName=%v", v.VrfTemplateConfig.VlanName, c.VrfTemplateConfig.VlanName)
-		v.VrfTemplateConfig.VlanName = c.VrfTemplateConfig.VlanName
 	}
 
-	if v.VrfTemplateConfig.InterfaceDescription != "" {
-		if v.VrfTemplateConfig.InterfaceDescription != c.VrfTemplateConfig.InterfaceDescription {
-			log.Printf("Update: v.VrfTemplateConfig.InterfaceDescription=%v, c.VrfTemplateConfig.InterfaceDescription=%v", v.VrfTemplateConfig.InterfaceDescription, c.VrfTemplateConfig.InterfaceDescription)
-			if action == ActionNone || action == RequiresUpdate {
-				action = RequiresUpdate
-			}
+	if v.VrfTemplateConfig.InterfaceDescription != c.VrfTemplateConfig.InterfaceDescription {
+		log.Printf("Update: v.VrfTemplateConfig.InterfaceDescription=%v, c.VrfTemplateConfig.InterfaceDescription=%v", v.VrfTemplateConfig.InterfaceDescription, c.VrfTemplateConfig.InterfaceDescription)
+		if action == ActionNone || action == RequiresUpdate {
+			action = RequiresUpdate
 		}
-	} else {
-		//v empty, fill with c
-		log.Printf("Copy from state: v.VrfTemplateConfig.InterfaceDescription=%v, c.VrfTemplateConfig.InterfaceDescription=%v", v.VrfTemplateConfig.InterfaceDescription, c.VrfTemplateConfig.InterfaceDescription)
-		v.VrfTemplateConfig.InterfaceDescription = c.VrfTemplateConfig.InterfaceDescription
 	}
 
-	if v.VrfTemplateConfig.VrfDescription != "" {
-		if v.VrfTemplateConfig.VrfDescription != c.VrfTemplateConfig.VrfDescription {
-			log.Printf("Update: v.VrfTemplateConfig.VrfDescription=%v, c.VrfTemplateConfig.VrfDescription=%v", v.VrfTemplateConfig.VrfDescription, c.VrfTemplateConfig.VrfDescription)
-			if action == ActionNone || action == RequiresUpdate {
-				action = RequiresUpdate
-			}
+	if v.VrfTemplateConfig.VrfDescription != c.VrfTemplateConfig.VrfDescription {
+		log.Printf("Update: v.VrfTemplateConfig.VrfDescription=%v, c.VrfTemplateConfig.VrfDescription=%v", v.VrfTemplateConfig.VrfDescription, c.VrfTemplateConfig.VrfDescription)
+		if action == ActionNone || action == RequiresUpdate {
+			action = RequiresUpdate
 		}
-	} else {
-		//v empty, fill with c
-		log.Printf("Copy from state: v.VrfTemplateConfig.VrfDescription=%v, c.VrfTemplateConfig.VrfDescription=%v", v.VrfTemplateConfig.VrfDescription, c.VrfTemplateConfig.VrfDescription)
-		v.VrfTemplateConfig.VrfDescription = c.VrfTemplateConfig.VrfDescription
 	}
 
 	if v.VrfTemplateConfig.Mtu != nil && c.VrfTemplateConfig.Mtu != nil {
@@ -438,17 +404,11 @@ func (v *NDFCVrfsValue) CreatePlan(c NDFCVrfsValue, cf *bool) int {
 		*v.VrfTemplateConfig.LoopbackRoutingTag = *c.VrfTemplateConfig.LoopbackRoutingTag
 	}
 
-	if v.VrfTemplateConfig.RedistributeDirectRouteMap != "" {
-		if v.VrfTemplateConfig.RedistributeDirectRouteMap != c.VrfTemplateConfig.RedistributeDirectRouteMap {
-			log.Printf("Update: v.VrfTemplateConfig.RedistributeDirectRouteMap=%v, c.VrfTemplateConfig.RedistributeDirectRouteMap=%v", v.VrfTemplateConfig.RedistributeDirectRouteMap, c.VrfTemplateConfig.RedistributeDirectRouteMap)
-			if action == ActionNone || action == RequiresUpdate {
-				action = RequiresUpdate
-			}
+	if v.VrfTemplateConfig.RedistributeDirectRouteMap != c.VrfTemplateConfig.RedistributeDirectRouteMap {
+		log.Printf("Update: v.VrfTemplateConfig.RedistributeDirectRouteMap=%v, c.VrfTemplateConfig.RedistributeDirectRouteMap=%v", v.VrfTemplateConfig.RedistributeDirectRouteMap, c.VrfTemplateConfig.RedistributeDirectRouteMap)
+		if action == ActionNone || action == RequiresUpdate {
+			action = RequiresUpdate
 		}
-	} else {
-		//v empty, fill with c
-		log.Printf("Copy from state: v.VrfTemplateConfig.RedistributeDirectRouteMap=%v, c.VrfTemplateConfig.RedistributeDirectRouteMap=%v", v.VrfTemplateConfig.RedistributeDirectRouteMap, c.VrfTemplateConfig.RedistributeDirectRouteMap)
-		v.VrfTemplateConfig.RedistributeDirectRouteMap = c.VrfTemplateConfig.RedistributeDirectRouteMap
 	}
 
 	if v.VrfTemplateConfig.MaxBgpPaths != nil && c.VrfTemplateConfig.MaxBgpPaths != nil {
@@ -487,45 +447,63 @@ func (v *NDFCVrfsValue) CreatePlan(c NDFCVrfsValue, cf *bool) int {
 		*v.VrfTemplateConfig.MaxIbgpPaths = *c.VrfTemplateConfig.MaxIbgpPaths
 	}
 
-	if v.VrfTemplateConfig.Ipv6LinkLocal != c.VrfTemplateConfig.Ipv6LinkLocal {
-		log.Printf("Update: v.VrfTemplateConfig.Ipv6LinkLocal=%v, c.VrfTemplateConfig.Ipv6LinkLocal=%v", v.VrfTemplateConfig.Ipv6LinkLocal, c.VrfTemplateConfig.Ipv6LinkLocal)
-		if action == ActionNone || action == RequiresUpdate {
-			action = RequiresUpdate
-		}
-	}
-
-	if v.VrfTemplateConfig.Trm != c.VrfTemplateConfig.Trm {
-		log.Printf("Update: v.VrfTemplateConfig.Trm=%v, c.VrfTemplateConfig.Trm=%v", v.VrfTemplateConfig.Trm, c.VrfTemplateConfig.Trm)
-		if action == ActionNone || action == RequiresUpdate {
-			action = RequiresUpdate
-		}
-	}
-
-	if v.VrfTemplateConfig.NoRp != c.VrfTemplateConfig.NoRp {
-		log.Printf("Update: v.VrfTemplateConfig.NoRp=%v, c.VrfTemplateConfig.NoRp=%v", v.VrfTemplateConfig.NoRp, c.VrfTemplateConfig.NoRp)
-		if action == ActionNone || action == RequiresUpdate {
-			action = RequiresUpdate
-		}
-	}
-
-	if v.VrfTemplateConfig.RpExternal != c.VrfTemplateConfig.RpExternal {
-		log.Printf("Update: v.VrfTemplateConfig.RpExternal=%v, c.VrfTemplateConfig.RpExternal=%v", v.VrfTemplateConfig.RpExternal, c.VrfTemplateConfig.RpExternal)
-		if action == ActionNone || action == RequiresUpdate {
-			action = RequiresUpdate
-		}
-	}
-
-	if v.VrfTemplateConfig.RpAddress != "" {
-		if v.VrfTemplateConfig.RpAddress != c.VrfTemplateConfig.RpAddress {
-			log.Printf("Update: v.VrfTemplateConfig.RpAddress=%v, c.VrfTemplateConfig.RpAddress=%v", v.VrfTemplateConfig.RpAddress, c.VrfTemplateConfig.RpAddress)
+	if v.VrfTemplateConfig.Ipv6LinkLocal != "" {
+		if v.VrfTemplateConfig.Ipv6LinkLocal != c.VrfTemplateConfig.Ipv6LinkLocal {
+			log.Printf("Update: v.VrfTemplateConfig.Ipv6LinkLocal=%v, c.VrfTemplateConfig.Ipv6LinkLocal=%v", v.VrfTemplateConfig.Ipv6LinkLocal, c.VrfTemplateConfig.Ipv6LinkLocal)
 			if action == ActionNone || action == RequiresUpdate {
 				action = RequiresUpdate
 			}
 		}
 	} else {
 		//v empty, fill with c
-		log.Printf("Copy from state: v.VrfTemplateConfig.RpAddress=%v, c.VrfTemplateConfig.RpAddress=%v", v.VrfTemplateConfig.RpAddress, c.VrfTemplateConfig.RpAddress)
-		v.VrfTemplateConfig.RpAddress = c.VrfTemplateConfig.RpAddress
+		log.Printf("Copy from state: v.VrfTemplateConfig.Ipv6LinkLocal=%v, c.VrfTemplateConfig.Ipv6LinkLocal=%v", v.VrfTemplateConfig.Ipv6LinkLocal, c.VrfTemplateConfig.Ipv6LinkLocal)
+		v.VrfTemplateConfig.Ipv6LinkLocal = c.VrfTemplateConfig.Ipv6LinkLocal
+	}
+
+	if v.VrfTemplateConfig.Trm != "" {
+		if v.VrfTemplateConfig.Trm != c.VrfTemplateConfig.Trm {
+			log.Printf("Update: v.VrfTemplateConfig.Trm=%v, c.VrfTemplateConfig.Trm=%v", v.VrfTemplateConfig.Trm, c.VrfTemplateConfig.Trm)
+			if action == ActionNone || action == RequiresUpdate {
+				action = RequiresUpdate
+			}
+		}
+	} else {
+		//v empty, fill with c
+		log.Printf("Copy from state: v.VrfTemplateConfig.Trm=%v, c.VrfTemplateConfig.Trm=%v", v.VrfTemplateConfig.Trm, c.VrfTemplateConfig.Trm)
+		v.VrfTemplateConfig.Trm = c.VrfTemplateConfig.Trm
+	}
+
+	if v.VrfTemplateConfig.NoRp != "" {
+		if v.VrfTemplateConfig.NoRp != c.VrfTemplateConfig.NoRp {
+			log.Printf("Update: v.VrfTemplateConfig.NoRp=%v, c.VrfTemplateConfig.NoRp=%v", v.VrfTemplateConfig.NoRp, c.VrfTemplateConfig.NoRp)
+			if action == ActionNone || action == RequiresUpdate {
+				action = RequiresUpdate
+			}
+		}
+	} else {
+		//v empty, fill with c
+		log.Printf("Copy from state: v.VrfTemplateConfig.NoRp=%v, c.VrfTemplateConfig.NoRp=%v", v.VrfTemplateConfig.NoRp, c.VrfTemplateConfig.NoRp)
+		v.VrfTemplateConfig.NoRp = c.VrfTemplateConfig.NoRp
+	}
+
+	if v.VrfTemplateConfig.RpExternal != "" {
+		if v.VrfTemplateConfig.RpExternal != c.VrfTemplateConfig.RpExternal {
+			log.Printf("Update: v.VrfTemplateConfig.RpExternal=%v, c.VrfTemplateConfig.RpExternal=%v", v.VrfTemplateConfig.RpExternal, c.VrfTemplateConfig.RpExternal)
+			if action == ActionNone || action == RequiresUpdate {
+				action = RequiresUpdate
+			}
+		}
+	} else {
+		//v empty, fill with c
+		log.Printf("Copy from state: v.VrfTemplateConfig.RpExternal=%v, c.VrfTemplateConfig.RpExternal=%v", v.VrfTemplateConfig.RpExternal, c.VrfTemplateConfig.RpExternal)
+		v.VrfTemplateConfig.RpExternal = c.VrfTemplateConfig.RpExternal
+	}
+
+	if v.VrfTemplateConfig.RpAddress != c.VrfTemplateConfig.RpAddress {
+		log.Printf("Update: v.VrfTemplateConfig.RpAddress=%v, c.VrfTemplateConfig.RpAddress=%v", v.VrfTemplateConfig.RpAddress, c.VrfTemplateConfig.RpAddress)
+		if action == ActionNone || action == RequiresUpdate {
+			action = RequiresUpdate
+		}
 	}
 
 	if !v.VrfTemplateConfig.RpLoopbackId.IsEmpty() && !c.VrfTemplateConfig.RpLoopbackId.IsEmpty() {
@@ -546,226 +524,190 @@ func (v *NDFCVrfsValue) CreatePlan(c NDFCVrfsValue, cf *bool) int {
 		*v.VrfTemplateConfig.RpLoopbackId = *c.VrfTemplateConfig.RpLoopbackId
 	}
 
-	if v.VrfTemplateConfig.UnderlayMulticastAddress != "" {
-		if v.VrfTemplateConfig.UnderlayMulticastAddress != c.VrfTemplateConfig.UnderlayMulticastAddress {
-			log.Printf("Update: v.VrfTemplateConfig.UnderlayMulticastAddress=%v, c.VrfTemplateConfig.UnderlayMulticastAddress=%v", v.VrfTemplateConfig.UnderlayMulticastAddress, c.VrfTemplateConfig.UnderlayMulticastAddress)
-			if action == ActionNone || action == RequiresUpdate {
-				action = RequiresUpdate
-			}
-		}
-	} else {
-		//v empty, fill with c
-		log.Printf("Copy from state: v.VrfTemplateConfig.UnderlayMulticastAddress=%v, c.VrfTemplateConfig.UnderlayMulticastAddress=%v", v.VrfTemplateConfig.UnderlayMulticastAddress, c.VrfTemplateConfig.UnderlayMulticastAddress)
-		v.VrfTemplateConfig.UnderlayMulticastAddress = c.VrfTemplateConfig.UnderlayMulticastAddress
-	}
-
-	if v.VrfTemplateConfig.OverlayMulticastGroups != "" {
-		if v.VrfTemplateConfig.OverlayMulticastGroups != c.VrfTemplateConfig.OverlayMulticastGroups {
-			log.Printf("Update: v.VrfTemplateConfig.OverlayMulticastGroups=%v, c.VrfTemplateConfig.OverlayMulticastGroups=%v", v.VrfTemplateConfig.OverlayMulticastGroups, c.VrfTemplateConfig.OverlayMulticastGroups)
-			if action == ActionNone || action == RequiresUpdate {
-				action = RequiresUpdate
-			}
-		}
-	} else {
-		//v empty, fill with c
-		log.Printf("Copy from state: v.VrfTemplateConfig.OverlayMulticastGroups=%v, c.VrfTemplateConfig.OverlayMulticastGroups=%v", v.VrfTemplateConfig.OverlayMulticastGroups, c.VrfTemplateConfig.OverlayMulticastGroups)
-		v.VrfTemplateConfig.OverlayMulticastGroups = c.VrfTemplateConfig.OverlayMulticastGroups
-	}
-
-	if v.VrfTemplateConfig.MvpnInterAs != c.VrfTemplateConfig.MvpnInterAs {
-		log.Printf("Update: v.VrfTemplateConfig.MvpnInterAs=%v, c.VrfTemplateConfig.MvpnInterAs=%v", v.VrfTemplateConfig.MvpnInterAs, c.VrfTemplateConfig.MvpnInterAs)
+	if v.VrfTemplateConfig.UnderlayMulticastAddress != c.VrfTemplateConfig.UnderlayMulticastAddress {
+		log.Printf("Update: v.VrfTemplateConfig.UnderlayMulticastAddress=%v, c.VrfTemplateConfig.UnderlayMulticastAddress=%v", v.VrfTemplateConfig.UnderlayMulticastAddress, c.VrfTemplateConfig.UnderlayMulticastAddress)
 		if action == ActionNone || action == RequiresUpdate {
 			action = RequiresUpdate
 		}
 	}
 
-	if v.VrfTemplateConfig.TrmBgwMsite != c.VrfTemplateConfig.TrmBgwMsite {
-		log.Printf("Update: v.VrfTemplateConfig.TrmBgwMsite=%v, c.VrfTemplateConfig.TrmBgwMsite=%v", v.VrfTemplateConfig.TrmBgwMsite, c.VrfTemplateConfig.TrmBgwMsite)
+	if v.VrfTemplateConfig.OverlayMulticastGroups != c.VrfTemplateConfig.OverlayMulticastGroups {
+		log.Printf("Update: v.VrfTemplateConfig.OverlayMulticastGroups=%v, c.VrfTemplateConfig.OverlayMulticastGroups=%v", v.VrfTemplateConfig.OverlayMulticastGroups, c.VrfTemplateConfig.OverlayMulticastGroups)
 		if action == ActionNone || action == RequiresUpdate {
 			action = RequiresUpdate
 		}
 	}
 
-	if v.VrfTemplateConfig.AdvertiseHostRoutes != c.VrfTemplateConfig.AdvertiseHostRoutes {
-		log.Printf("Update: v.VrfTemplateConfig.AdvertiseHostRoutes=%v, c.VrfTemplateConfig.AdvertiseHostRoutes=%v", v.VrfTemplateConfig.AdvertiseHostRoutes, c.VrfTemplateConfig.AdvertiseHostRoutes)
+	if v.VrfTemplateConfig.MvpnInterAs != "" {
+		if v.VrfTemplateConfig.MvpnInterAs != c.VrfTemplateConfig.MvpnInterAs {
+			log.Printf("Update: v.VrfTemplateConfig.MvpnInterAs=%v, c.VrfTemplateConfig.MvpnInterAs=%v", v.VrfTemplateConfig.MvpnInterAs, c.VrfTemplateConfig.MvpnInterAs)
+			if action == ActionNone || action == RequiresUpdate {
+				action = RequiresUpdate
+			}
+		}
+	} else {
+		//v empty, fill with c
+		log.Printf("Copy from state: v.VrfTemplateConfig.MvpnInterAs=%v, c.VrfTemplateConfig.MvpnInterAs=%v", v.VrfTemplateConfig.MvpnInterAs, c.VrfTemplateConfig.MvpnInterAs)
+		v.VrfTemplateConfig.MvpnInterAs = c.VrfTemplateConfig.MvpnInterAs
+	}
+
+	if v.VrfTemplateConfig.TrmBgwMsite != "" {
+		if v.VrfTemplateConfig.TrmBgwMsite != c.VrfTemplateConfig.TrmBgwMsite {
+			log.Printf("Update: v.VrfTemplateConfig.TrmBgwMsite=%v, c.VrfTemplateConfig.TrmBgwMsite=%v", v.VrfTemplateConfig.TrmBgwMsite, c.VrfTemplateConfig.TrmBgwMsite)
+			if action == ActionNone || action == RequiresUpdate {
+				action = RequiresUpdate
+			}
+		}
+	} else {
+		//v empty, fill with c
+		log.Printf("Copy from state: v.VrfTemplateConfig.TrmBgwMsite=%v, c.VrfTemplateConfig.TrmBgwMsite=%v", v.VrfTemplateConfig.TrmBgwMsite, c.VrfTemplateConfig.TrmBgwMsite)
+		v.VrfTemplateConfig.TrmBgwMsite = c.VrfTemplateConfig.TrmBgwMsite
+	}
+
+	if v.VrfTemplateConfig.AdvertiseHostRoutes != "" {
+		if v.VrfTemplateConfig.AdvertiseHostRoutes != c.VrfTemplateConfig.AdvertiseHostRoutes {
+			log.Printf("Update: v.VrfTemplateConfig.AdvertiseHostRoutes=%v, c.VrfTemplateConfig.AdvertiseHostRoutes=%v", v.VrfTemplateConfig.AdvertiseHostRoutes, c.VrfTemplateConfig.AdvertiseHostRoutes)
+			if action == ActionNone || action == RequiresUpdate {
+				action = RequiresUpdate
+			}
+		}
+	} else {
+		//v empty, fill with c
+		log.Printf("Copy from state: v.VrfTemplateConfig.AdvertiseHostRoutes=%v, c.VrfTemplateConfig.AdvertiseHostRoutes=%v", v.VrfTemplateConfig.AdvertiseHostRoutes, c.VrfTemplateConfig.AdvertiseHostRoutes)
+		v.VrfTemplateConfig.AdvertiseHostRoutes = c.VrfTemplateConfig.AdvertiseHostRoutes
+	}
+
+	if v.VrfTemplateConfig.AdvertiseDefaultRoute != "" {
+		if v.VrfTemplateConfig.AdvertiseDefaultRoute != c.VrfTemplateConfig.AdvertiseDefaultRoute {
+			log.Printf("Update: v.VrfTemplateConfig.AdvertiseDefaultRoute=%v, c.VrfTemplateConfig.AdvertiseDefaultRoute=%v", v.VrfTemplateConfig.AdvertiseDefaultRoute, c.VrfTemplateConfig.AdvertiseDefaultRoute)
+			if action == ActionNone || action == RequiresUpdate {
+				action = RequiresUpdate
+			}
+		}
+	} else {
+		//v empty, fill with c
+		log.Printf("Copy from state: v.VrfTemplateConfig.AdvertiseDefaultRoute=%v, c.VrfTemplateConfig.AdvertiseDefaultRoute=%v", v.VrfTemplateConfig.AdvertiseDefaultRoute, c.VrfTemplateConfig.AdvertiseDefaultRoute)
+		v.VrfTemplateConfig.AdvertiseDefaultRoute = c.VrfTemplateConfig.AdvertiseDefaultRoute
+	}
+
+	if v.VrfTemplateConfig.ConfigureStaticDefaultRoute != "" {
+		if v.VrfTemplateConfig.ConfigureStaticDefaultRoute != c.VrfTemplateConfig.ConfigureStaticDefaultRoute {
+			log.Printf("Update: v.VrfTemplateConfig.ConfigureStaticDefaultRoute=%v, c.VrfTemplateConfig.ConfigureStaticDefaultRoute=%v", v.VrfTemplateConfig.ConfigureStaticDefaultRoute, c.VrfTemplateConfig.ConfigureStaticDefaultRoute)
+			if action == ActionNone || action == RequiresUpdate {
+				action = RequiresUpdate
+			}
+		}
+	} else {
+		//v empty, fill with c
+		log.Printf("Copy from state: v.VrfTemplateConfig.ConfigureStaticDefaultRoute=%v, c.VrfTemplateConfig.ConfigureStaticDefaultRoute=%v", v.VrfTemplateConfig.ConfigureStaticDefaultRoute, c.VrfTemplateConfig.ConfigureStaticDefaultRoute)
+		v.VrfTemplateConfig.ConfigureStaticDefaultRoute = c.VrfTemplateConfig.ConfigureStaticDefaultRoute
+	}
+
+	if v.VrfTemplateConfig.BgpPassword != c.VrfTemplateConfig.BgpPassword {
+		log.Printf("Update: v.VrfTemplateConfig.BgpPassword=%v, c.VrfTemplateConfig.BgpPassword=%v", v.VrfTemplateConfig.BgpPassword, c.VrfTemplateConfig.BgpPassword)
 		if action == ActionNone || action == RequiresUpdate {
 			action = RequiresUpdate
 		}
 	}
 
-	if v.VrfTemplateConfig.AdvertiseDefaultRoute != c.VrfTemplateConfig.AdvertiseDefaultRoute {
-		log.Printf("Update: v.VrfTemplateConfig.AdvertiseDefaultRoute=%v, c.VrfTemplateConfig.AdvertiseDefaultRoute=%v", v.VrfTemplateConfig.AdvertiseDefaultRoute, c.VrfTemplateConfig.AdvertiseDefaultRoute)
+	if v.VrfTemplateConfig.BgpPasswordType != c.VrfTemplateConfig.BgpPasswordType {
+		log.Printf("Update: v.VrfTemplateConfig.BgpPasswordType=%v, c.VrfTemplateConfig.BgpPasswordType=%v", v.VrfTemplateConfig.BgpPasswordType, c.VrfTemplateConfig.BgpPasswordType)
 		if action == ActionNone || action == RequiresUpdate {
 			action = RequiresUpdate
 		}
 	}
 
-	if v.VrfTemplateConfig.ConfigureStaticDefaultRoute != c.VrfTemplateConfig.ConfigureStaticDefaultRoute {
-		log.Printf("Update: v.VrfTemplateConfig.ConfigureStaticDefaultRoute=%v, c.VrfTemplateConfig.ConfigureStaticDefaultRoute=%v", v.VrfTemplateConfig.ConfigureStaticDefaultRoute, c.VrfTemplateConfig.ConfigureStaticDefaultRoute)
+	if v.VrfTemplateConfig.Netflow != "" {
+		if v.VrfTemplateConfig.Netflow != c.VrfTemplateConfig.Netflow {
+			log.Printf("Update: v.VrfTemplateConfig.Netflow=%v, c.VrfTemplateConfig.Netflow=%v", v.VrfTemplateConfig.Netflow, c.VrfTemplateConfig.Netflow)
+			if action == ActionNone || action == RequiresUpdate {
+				action = RequiresUpdate
+			}
+		}
+	} else {
+		//v empty, fill with c
+		log.Printf("Copy from state: v.VrfTemplateConfig.Netflow=%v, c.VrfTemplateConfig.Netflow=%v", v.VrfTemplateConfig.Netflow, c.VrfTemplateConfig.Netflow)
+		v.VrfTemplateConfig.Netflow = c.VrfTemplateConfig.Netflow
+	}
+
+	if v.VrfTemplateConfig.NetflowMonitor != c.VrfTemplateConfig.NetflowMonitor {
+		log.Printf("Update: v.VrfTemplateConfig.NetflowMonitor=%v, c.VrfTemplateConfig.NetflowMonitor=%v", v.VrfTemplateConfig.NetflowMonitor, c.VrfTemplateConfig.NetflowMonitor)
 		if action == ActionNone || action == RequiresUpdate {
 			action = RequiresUpdate
 		}
 	}
 
-	if v.VrfTemplateConfig.BgpPassword != "" {
-		if v.VrfTemplateConfig.BgpPassword != c.VrfTemplateConfig.BgpPassword {
-			log.Printf("Update: v.VrfTemplateConfig.BgpPassword=%v, c.VrfTemplateConfig.BgpPassword=%v", v.VrfTemplateConfig.BgpPassword, c.VrfTemplateConfig.BgpPassword)
+	if v.VrfTemplateConfig.DisableRtAuto != "" {
+		if v.VrfTemplateConfig.DisableRtAuto != c.VrfTemplateConfig.DisableRtAuto {
+			log.Printf("Update: v.VrfTemplateConfig.DisableRtAuto=%v, c.VrfTemplateConfig.DisableRtAuto=%v", v.VrfTemplateConfig.DisableRtAuto, c.VrfTemplateConfig.DisableRtAuto)
 			if action == ActionNone || action == RequiresUpdate {
 				action = RequiresUpdate
 			}
 		}
 	} else {
 		//v empty, fill with c
-		log.Printf("Copy from state: v.VrfTemplateConfig.BgpPassword=%v, c.VrfTemplateConfig.BgpPassword=%v", v.VrfTemplateConfig.BgpPassword, c.VrfTemplateConfig.BgpPassword)
-		v.VrfTemplateConfig.BgpPassword = c.VrfTemplateConfig.BgpPassword
+		log.Printf("Copy from state: v.VrfTemplateConfig.DisableRtAuto=%v, c.VrfTemplateConfig.DisableRtAuto=%v", v.VrfTemplateConfig.DisableRtAuto, c.VrfTemplateConfig.DisableRtAuto)
+		v.VrfTemplateConfig.DisableRtAuto = c.VrfTemplateConfig.DisableRtAuto
 	}
 
-	if v.VrfTemplateConfig.BgpPasswordType != "" {
-		if v.VrfTemplateConfig.BgpPasswordType != c.VrfTemplateConfig.BgpPasswordType {
-			log.Printf("Update: v.VrfTemplateConfig.BgpPasswordType=%v, c.VrfTemplateConfig.BgpPasswordType=%v", v.VrfTemplateConfig.BgpPasswordType, c.VrfTemplateConfig.BgpPasswordType)
-			if action == ActionNone || action == RequiresUpdate {
-				action = RequiresUpdate
-			}
-		}
-	} else {
-		//v empty, fill with c
-		log.Printf("Copy from state: v.VrfTemplateConfig.BgpPasswordType=%v, c.VrfTemplateConfig.BgpPasswordType=%v", v.VrfTemplateConfig.BgpPasswordType, c.VrfTemplateConfig.BgpPasswordType)
-		v.VrfTemplateConfig.BgpPasswordType = c.VrfTemplateConfig.BgpPasswordType
-	}
-
-	if v.VrfTemplateConfig.Netflow != c.VrfTemplateConfig.Netflow {
-		log.Printf("Update: v.VrfTemplateConfig.Netflow=%v, c.VrfTemplateConfig.Netflow=%v", v.VrfTemplateConfig.Netflow, c.VrfTemplateConfig.Netflow)
+	if v.VrfTemplateConfig.RouteTargetImport != c.VrfTemplateConfig.RouteTargetImport {
+		log.Printf("Update: v.VrfTemplateConfig.RouteTargetImport=%v, c.VrfTemplateConfig.RouteTargetImport=%v", v.VrfTemplateConfig.RouteTargetImport, c.VrfTemplateConfig.RouteTargetImport)
 		if action == ActionNone || action == RequiresUpdate {
 			action = RequiresUpdate
 		}
 	}
 
-	if v.VrfTemplateConfig.NetflowMonitor != "" {
-		if v.VrfTemplateConfig.NetflowMonitor != c.VrfTemplateConfig.NetflowMonitor {
-			log.Printf("Update: v.VrfTemplateConfig.NetflowMonitor=%v, c.VrfTemplateConfig.NetflowMonitor=%v", v.VrfTemplateConfig.NetflowMonitor, c.VrfTemplateConfig.NetflowMonitor)
-			if action == ActionNone || action == RequiresUpdate {
-				action = RequiresUpdate
-			}
-		}
-	} else {
-		//v empty, fill with c
-		log.Printf("Copy from state: v.VrfTemplateConfig.NetflowMonitor=%v, c.VrfTemplateConfig.NetflowMonitor=%v", v.VrfTemplateConfig.NetflowMonitor, c.VrfTemplateConfig.NetflowMonitor)
-		v.VrfTemplateConfig.NetflowMonitor = c.VrfTemplateConfig.NetflowMonitor
-	}
-
-	if v.VrfTemplateConfig.DisableRtAuto != c.VrfTemplateConfig.DisableRtAuto {
-		log.Printf("Update: v.VrfTemplateConfig.DisableRtAuto=%v, c.VrfTemplateConfig.DisableRtAuto=%v", v.VrfTemplateConfig.DisableRtAuto, c.VrfTemplateConfig.DisableRtAuto)
+	if v.VrfTemplateConfig.RouteTargetExport != c.VrfTemplateConfig.RouteTargetExport {
+		log.Printf("Update: v.VrfTemplateConfig.RouteTargetExport=%v, c.VrfTemplateConfig.RouteTargetExport=%v", v.VrfTemplateConfig.RouteTargetExport, c.VrfTemplateConfig.RouteTargetExport)
 		if action == ActionNone || action == RequiresUpdate {
 			action = RequiresUpdate
 		}
 	}
 
-	if v.VrfTemplateConfig.RouteTargetImport != "" {
-		if v.VrfTemplateConfig.RouteTargetImport != c.VrfTemplateConfig.RouteTargetImport {
-			log.Printf("Update: v.VrfTemplateConfig.RouteTargetImport=%v, c.VrfTemplateConfig.RouteTargetImport=%v", v.VrfTemplateConfig.RouteTargetImport, c.VrfTemplateConfig.RouteTargetImport)
-			if action == ActionNone || action == RequiresUpdate {
-				action = RequiresUpdate
-			}
+	if v.VrfTemplateConfig.RouteTargetImportEvpn != c.VrfTemplateConfig.RouteTargetImportEvpn {
+		log.Printf("Update: v.VrfTemplateConfig.RouteTargetImportEvpn=%v, c.VrfTemplateConfig.RouteTargetImportEvpn=%v", v.VrfTemplateConfig.RouteTargetImportEvpn, c.VrfTemplateConfig.RouteTargetImportEvpn)
+		if action == ActionNone || action == RequiresUpdate {
+			action = RequiresUpdate
 		}
-	} else {
-		//v empty, fill with c
-		log.Printf("Copy from state: v.VrfTemplateConfig.RouteTargetImport=%v, c.VrfTemplateConfig.RouteTargetImport=%v", v.VrfTemplateConfig.RouteTargetImport, c.VrfTemplateConfig.RouteTargetImport)
-		v.VrfTemplateConfig.RouteTargetImport = c.VrfTemplateConfig.RouteTargetImport
 	}
 
-	if v.VrfTemplateConfig.RouteTargetExport != "" {
-		if v.VrfTemplateConfig.RouteTargetExport != c.VrfTemplateConfig.RouteTargetExport {
-			log.Printf("Update: v.VrfTemplateConfig.RouteTargetExport=%v, c.VrfTemplateConfig.RouteTargetExport=%v", v.VrfTemplateConfig.RouteTargetExport, c.VrfTemplateConfig.RouteTargetExport)
-			if action == ActionNone || action == RequiresUpdate {
-				action = RequiresUpdate
-			}
+	if v.VrfTemplateConfig.RouteTargetExportEvpn != c.VrfTemplateConfig.RouteTargetExportEvpn {
+		log.Printf("Update: v.VrfTemplateConfig.RouteTargetExportEvpn=%v, c.VrfTemplateConfig.RouteTargetExportEvpn=%v", v.VrfTemplateConfig.RouteTargetExportEvpn, c.VrfTemplateConfig.RouteTargetExportEvpn)
+		if action == ActionNone || action == RequiresUpdate {
+			action = RequiresUpdate
 		}
-	} else {
-		//v empty, fill with c
-		log.Printf("Copy from state: v.VrfTemplateConfig.RouteTargetExport=%v, c.VrfTemplateConfig.RouteTargetExport=%v", v.VrfTemplateConfig.RouteTargetExport, c.VrfTemplateConfig.RouteTargetExport)
-		v.VrfTemplateConfig.RouteTargetExport = c.VrfTemplateConfig.RouteTargetExport
 	}
 
-	if v.VrfTemplateConfig.RouteTargetImportEvpn != "" {
-		if v.VrfTemplateConfig.RouteTargetImportEvpn != c.VrfTemplateConfig.RouteTargetImportEvpn {
-			log.Printf("Update: v.VrfTemplateConfig.RouteTargetImportEvpn=%v, c.VrfTemplateConfig.RouteTargetImportEvpn=%v", v.VrfTemplateConfig.RouteTargetImportEvpn, c.VrfTemplateConfig.RouteTargetImportEvpn)
-			if action == ActionNone || action == RequiresUpdate {
-				action = RequiresUpdate
-			}
+	if v.VrfTemplateConfig.RouteTargetImportMvpn != c.VrfTemplateConfig.RouteTargetImportMvpn {
+		log.Printf("Update: v.VrfTemplateConfig.RouteTargetImportMvpn=%v, c.VrfTemplateConfig.RouteTargetImportMvpn=%v", v.VrfTemplateConfig.RouteTargetImportMvpn, c.VrfTemplateConfig.RouteTargetImportMvpn)
+		if action == ActionNone || action == RequiresUpdate {
+			action = RequiresUpdate
 		}
-	} else {
-		//v empty, fill with c
-		log.Printf("Copy from state: v.VrfTemplateConfig.RouteTargetImportEvpn=%v, c.VrfTemplateConfig.RouteTargetImportEvpn=%v", v.VrfTemplateConfig.RouteTargetImportEvpn, c.VrfTemplateConfig.RouteTargetImportEvpn)
-		v.VrfTemplateConfig.RouteTargetImportEvpn = c.VrfTemplateConfig.RouteTargetImportEvpn
 	}
 
-	if v.VrfTemplateConfig.RouteTargetExportEvpn != "" {
-		if v.VrfTemplateConfig.RouteTargetExportEvpn != c.VrfTemplateConfig.RouteTargetExportEvpn {
-			log.Printf("Update: v.VrfTemplateConfig.RouteTargetExportEvpn=%v, c.VrfTemplateConfig.RouteTargetExportEvpn=%v", v.VrfTemplateConfig.RouteTargetExportEvpn, c.VrfTemplateConfig.RouteTargetExportEvpn)
-			if action == ActionNone || action == RequiresUpdate {
-				action = RequiresUpdate
-			}
+	if v.VrfTemplateConfig.RouteTargetExportMvpn != c.VrfTemplateConfig.RouteTargetExportMvpn {
+		log.Printf("Update: v.VrfTemplateConfig.RouteTargetExportMvpn=%v, c.VrfTemplateConfig.RouteTargetExportMvpn=%v", v.VrfTemplateConfig.RouteTargetExportMvpn, c.VrfTemplateConfig.RouteTargetExportMvpn)
+		if action == ActionNone || action == RequiresUpdate {
+			action = RequiresUpdate
 		}
-	} else {
-		//v empty, fill with c
-		log.Printf("Copy from state: v.VrfTemplateConfig.RouteTargetExportEvpn=%v, c.VrfTemplateConfig.RouteTargetExportEvpn=%v", v.VrfTemplateConfig.RouteTargetExportEvpn, c.VrfTemplateConfig.RouteTargetExportEvpn)
-		v.VrfTemplateConfig.RouteTargetExportEvpn = c.VrfTemplateConfig.RouteTargetExportEvpn
 	}
 
-	if v.VrfTemplateConfig.RouteTargetImportMvpn != "" {
-		if v.VrfTemplateConfig.RouteTargetImportMvpn != c.VrfTemplateConfig.RouteTargetImportMvpn {
-			log.Printf("Update: v.VrfTemplateConfig.RouteTargetImportMvpn=%v, c.VrfTemplateConfig.RouteTargetImportMvpn=%v", v.VrfTemplateConfig.RouteTargetImportMvpn, c.VrfTemplateConfig.RouteTargetImportMvpn)
-			if action == ActionNone || action == RequiresUpdate {
-				action = RequiresUpdate
-			}
+	if v.VrfTemplateConfig.RouteTargetImportCloudEvpn != c.VrfTemplateConfig.RouteTargetImportCloudEvpn {
+		log.Printf("Update: v.VrfTemplateConfig.RouteTargetImportCloudEvpn=%v, c.VrfTemplateConfig.RouteTargetImportCloudEvpn=%v", v.VrfTemplateConfig.RouteTargetImportCloudEvpn, c.VrfTemplateConfig.RouteTargetImportCloudEvpn)
+		if action == ActionNone || action == RequiresUpdate {
+			action = RequiresUpdate
 		}
-	} else {
-		//v empty, fill with c
-		log.Printf("Copy from state: v.VrfTemplateConfig.RouteTargetImportMvpn=%v, c.VrfTemplateConfig.RouteTargetImportMvpn=%v", v.VrfTemplateConfig.RouteTargetImportMvpn, c.VrfTemplateConfig.RouteTargetImportMvpn)
-		v.VrfTemplateConfig.RouteTargetImportMvpn = c.VrfTemplateConfig.RouteTargetImportMvpn
 	}
 
-	if v.VrfTemplateConfig.RouteTargetExportMvpn != "" {
-		if v.VrfTemplateConfig.RouteTargetExportMvpn != c.VrfTemplateConfig.RouteTargetExportMvpn {
-			log.Printf("Update: v.VrfTemplateConfig.RouteTargetExportMvpn=%v, c.VrfTemplateConfig.RouteTargetExportMvpn=%v", v.VrfTemplateConfig.RouteTargetExportMvpn, c.VrfTemplateConfig.RouteTargetExportMvpn)
-			if action == ActionNone || action == RequiresUpdate {
-				action = RequiresUpdate
-			}
+	if v.VrfTemplateConfig.RouteTargetExportCloudEvpn != c.VrfTemplateConfig.RouteTargetExportCloudEvpn {
+		log.Printf("Update: v.VrfTemplateConfig.RouteTargetExportCloudEvpn=%v, c.VrfTemplateConfig.RouteTargetExportCloudEvpn=%v", v.VrfTemplateConfig.RouteTargetExportCloudEvpn, c.VrfTemplateConfig.RouteTargetExportCloudEvpn)
+		if action == ActionNone || action == RequiresUpdate {
+			action = RequiresUpdate
 		}
-	} else {
-		//v empty, fill with c
-		log.Printf("Copy from state: v.VrfTemplateConfig.RouteTargetExportMvpn=%v, c.VrfTemplateConfig.RouteTargetExportMvpn=%v", v.VrfTemplateConfig.RouteTargetExportMvpn, c.VrfTemplateConfig.RouteTargetExportMvpn)
-		v.VrfTemplateConfig.RouteTargetExportMvpn = c.VrfTemplateConfig.RouteTargetExportMvpn
-	}
-
-	if v.VrfTemplateConfig.RouteTargetImportCloudEvpn != "" {
-		if v.VrfTemplateConfig.RouteTargetImportCloudEvpn != c.VrfTemplateConfig.RouteTargetImportCloudEvpn {
-			log.Printf("Update: v.VrfTemplateConfig.RouteTargetImportCloudEvpn=%v, c.VrfTemplateConfig.RouteTargetImportCloudEvpn=%v", v.VrfTemplateConfig.RouteTargetImportCloudEvpn, c.VrfTemplateConfig.RouteTargetImportCloudEvpn)
-			if action == ActionNone || action == RequiresUpdate {
-				action = RequiresUpdate
-			}
-		}
-	} else {
-		//v empty, fill with c
-		log.Printf("Copy from state: v.VrfTemplateConfig.RouteTargetImportCloudEvpn=%v, c.VrfTemplateConfig.RouteTargetImportCloudEvpn=%v", v.VrfTemplateConfig.RouteTargetImportCloudEvpn, c.VrfTemplateConfig.RouteTargetImportCloudEvpn)
-		v.VrfTemplateConfig.RouteTargetImportCloudEvpn = c.VrfTemplateConfig.RouteTargetImportCloudEvpn
-	}
-
-	if v.VrfTemplateConfig.RouteTargetExportCloudEvpn != "" {
-		if v.VrfTemplateConfig.RouteTargetExportCloudEvpn != c.VrfTemplateConfig.RouteTargetExportCloudEvpn {
-			log.Printf("Update: v.VrfTemplateConfig.RouteTargetExportCloudEvpn=%v, c.VrfTemplateConfig.RouteTargetExportCloudEvpn=%v", v.VrfTemplateConfig.RouteTargetExportCloudEvpn, c.VrfTemplateConfig.RouteTargetExportCloudEvpn)
-			if action == ActionNone || action == RequiresUpdate {
-				action = RequiresUpdate
-			}
-		}
-	} else {
-		//v empty, fill with c
-		log.Printf("Copy from state: v.VrfTemplateConfig.RouteTargetExportCloudEvpn=%v, c.VrfTemplateConfig.RouteTargetExportCloudEvpn=%v", v.VrfTemplateConfig.RouteTargetExportCloudEvpn, c.VrfTemplateConfig.RouteTargetExportCloudEvpn)
-		v.VrfTemplateConfig.RouteTargetExportCloudEvpn = c.VrfTemplateConfig.RouteTargetExportCloudEvpn
 	}
 
 	if v.DeployAttachments != c.DeployAttachments {
-		log.Printf("Update: v.DeployAttachments=%v, c.DeployAttachments=%v", v.DeployAttachments, c.DeployAttachments)
+		log.Printf("DeployAttachments-Update: v.DeployAttachments=%v, c.DeployAttachments=%v", v.DeployAttachments, c.DeployAttachments)
 		*cf = true
 	}
 
