@@ -19,12 +19,14 @@ import (
 
 type NetworkAPI struct {
 	NDFCAPICommon
-	mutex          *sync.Mutex
-	fabricName     string
-	PutNetworkName string
-	Payload        string
-	DelList        []string
-	GetNetworkName string
+	mutex             *sync.Mutex
+	fabricName        string
+	PutNetworkName    string
+	Payload           string
+	DelList           []string
+	GetNetworkName    string
+	GetSwitchNetworks []string
+	GetSwitchSerials  []string
 }
 
 const UrlNetworkGetBulk = "/lan-fabric/rest/top-down/v2/fabrics/%s/networks"
@@ -38,12 +40,39 @@ const UrlNetworkGenMulticastIP = "/lan-fabric/rest/top-down/v2/fabrics/%s/genera
 const UrlNetworkGenVNI = "/lan-fabric/rest/top-down/v2/fabrics/%s/netinfo"
 const UrlGetFreeVlanId = "/lan-fabric/rest/resource-manager/vlan/%s"
 
+const UrlNetworkSwitchDetails = "/lan-fabric/rest/top-down/fabrics/%s/networks/switches"
+
 func (c *NetworkAPI) GetLock() *sync.Mutex {
 	return c.mutex
 }
 
 func (c *NetworkAPI) GetUrl() string {
 	log.Printf("GetUrl - NetworkAPI |%v|", c.GetNetworkName)
+	// Check if this is a network switch details query (for freeform config, etc.)
+	if len(c.GetSwitchNetworks) > 0 || len(c.GetSwitchSerials) > 0 {
+		url := fmt.Sprintf(UrlNetworkSwitchDetails, c.fabricName)
+
+		// Build query parameters
+		queryParams := []string{}
+		if len(c.GetSwitchNetworks) > 0 {
+			queryParams = append(queryParams, "network-names="+strings.Join(c.GetSwitchNetworks, ","))
+		}
+		if len(c.GetSwitchSerials) > 0 {
+			queryParams = append(queryParams, "serial-numbers="+strings.Join(c.GetSwitchSerials, ","))
+		}
+
+		fullUrl := url
+		if len(queryParams) > 0 {
+			fullUrl = url + "?" + strings.Join(queryParams, "&")
+		}
+
+		// Clear the fields after use
+		c.GetSwitchNetworks = nil
+		c.GetSwitchSerials = nil
+
+		return fullUrl
+	}
+
 	if c.GetNetworkName == "" {
 		return fmt.Sprintf(UrlNetworkGetBulk, c.fabricName)
 	}
@@ -118,6 +147,17 @@ func (c *NetworkAPI) SetDeleteList(qp []string) {
 	copy(c.DelList, qp)
 	log.Printf("Copied delete list %v", c.DelList)
 
+}
+
+func (c *NetworkAPI) GetNetworkSwitchDetails(networkNames []string, serialNumbers []string) ([]byte, error) {
+	log.Printf("GetNetworkSwitchDetails - NetworkAPI")
+	c.GetSwitchNetworks = networkNames
+	c.GetSwitchSerials = serialNumbers
+	res, err := c.Get()
+	if err != nil {
+		return nil, err
+	}
+	return res, nil
 }
 
 func NewNetworksAPI(fabricName string, lock *sync.Mutex, client *nd.Client) *NetworkAPI {
