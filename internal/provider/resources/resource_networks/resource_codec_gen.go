@@ -414,9 +414,11 @@ func (v *NDFCNetworksModel) FillNetworksPayloadFromModel() *NDFCNetworksPayload 
 	payload := new(NDFCNetworksPayload)
 	payload.Networks = make([]NDFCNetworksValue, 0)
 	for name, entry := range v.Networks {
+		entCopy := new(NDFCNetworksValue)
 		entry.FabricName = v.FabricName
 		entry.NetworkName = name
-		payload.Networks = append(payload.Networks, entry)
+		*entCopy = entry
+		payload.Networks = append(payload.Networks, *entCopy)
 	}
 	return payload
 }
@@ -898,13 +900,6 @@ func (v NetworksModel) GetModelData() *NDFCNetworksModel {
 					// serial_number | String| []| true
 					// switch_name | String| []| false
 					// display_name | String| []| false
-					if !ele2.DisplayName.IsNull() && !ele2.DisplayName.IsUnknown() {
-
-						data2.DisplayName = ele2.DisplayName.ValueString()
-					} else {
-						data2.DisplayName = ""
-					}
-
 					// vlan | Int64| []| false
 					if !ele2.Vlan.IsNull() && !ele2.Vlan.IsUnknown() {
 						data2.Vlan = new(Int64Custom)
