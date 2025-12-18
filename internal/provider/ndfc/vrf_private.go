@@ -72,14 +72,14 @@ func (c NDFC) vrfBulkGet(ctx context.Context, fabricName string) (*resource_vrf_
 	if err != nil {
 		return nil, err
 	}
-	tflog.Debug(ctx, fmt.Sprintf("RscGetBulkVrf: result %s", string(res)))
+	tflog.Debug(ctx, fmt.Sprintf("vrfBulkGet: result %s", string(res)))
 	ndVrfs := resource_vrf_bulk.NDFCVrfBulkModel{}
 	vrfPayloads := resource_vrf_bulk.NDFCBulkVrfPayload{}
 	err = json.Unmarshal(res, &vrfPayloads.Vrfs)
 	if err != nil {
 		return nil, err
 	} else {
-		tflog.Debug(ctx, "resource_vrf_bulk: Unmarshal OK")
+		tflog.Debug(ctx, "vrfBulkGet: Unmarshal OK")
 	}
 	ndVrfs.FillVrfsFromPayload(&vrfPayloads)
 	return &ndVrfs, nil

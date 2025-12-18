@@ -17,6 +17,7 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
+	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-log/tflog"
 )
 
@@ -122,6 +123,18 @@ func (r *vrfBulkResource) Read(ctx context.Context, req resource.ReadRequest, re
 		resp.Diagnostics.AddWarning("Read Failure", "No configuration found in NDFC")
 		//resp.Diagnostics.AddError("Read Failure", "No data received from NDFC")
 
+	} else {
+		if !data.Vrfs.IsNull() {
+			tflog.Debug(ctx, "Update: Vrfs map is not null in config")
+			if dd.Vrfs.IsNull() {
+				tflog.Debug(ctx, "Update: Vrfs map is null in response - create empty map")
+				// create an empty map
+				dd.Vrfs, _ = types.MapValueFrom(ctx, resource_vrf_bulk.VrfsValue{}.Type(ctx), map[string]resource_vrf_bulk.VrfsValue{})
+			}
+			if dd.FabricName.IsUnknown() || dd.FabricName.IsNull() {
+				dd.FabricName = data.FabricName
+			}
+		}
 	}
 	// Save updated data into Terraform state
 	resp.Diagnostics.Append(resp.State.Set(ctx, dd)...)
@@ -155,10 +168,19 @@ func (r *vrfBulkResource) Update(ctx context.Context, req resource.UpdateRequest
 		tflog.Error(ctx, "Create Bulk VRF Failed")
 		return
 	}
-	//
-
+	// Handle empty Vrfs map
+	if !configData.Vrfs.IsNull() {
+		tflog.Debug(ctx, "Update: Vrfs map is not null in config")
+		if planData.Vrfs.IsNull() {
+			tflog.Debug(ctx, "Update: Vrfs map is null in response - create empty map")
+			// create an empty map
+			planData.Vrfs, _ = types.MapValueFrom(ctx, resource_vrf_bulk.VrfsValue{}.Type(ctx), map[string]resource_vrf_bulk.VrfsValue{})
+			if planData.FabricName.IsUnknown() || planData.FabricName.IsNull() {
+				planData.FabricName = stateData.FabricName
+			}
+		}
+	}
 	// Save updated data into Terraform state
-
 	resp.Diagnostics.Append(resp.State.Set(ctx, &planData)...)
 }
 

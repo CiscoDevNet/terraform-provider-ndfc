@@ -90,169 +90,81 @@ func (v NDFCDevicesValue) DeepEqual(c NDFCDevicesValue) int {
 func (v *NDFCDevicesValue) CreatePlan(c NDFCDevicesValue, cf *bool) int {
 	action := ActionNone
 
-	if v.Role != "" {
-
-		if v.Role != c.Role {
-			log.Printf("Update: v.Role=%v, c.Role=%v", v.Role, c.Role)
-			if action == ActionNone || action == RequiresUpdate {
-				action = RequiresUpdate
-			}
+	if v.Role != c.Role {
+		log.Printf("Role-Update: v.Role=%v, c.Role=%v", v.Role, c.Role)
+		if action == ActionNone || action == RequiresUpdate {
+			action = RequiresUpdate
 		}
-
-	} else {
-		//v empty, fill with c
-		log.Printf("Copy from state: v.Role=%v, c.Role=%v", v.Role, c.Role)
-		v.Role = c.Role
 	}
 
-	if v.DiscoveryType != "" {
-
-		if v.DiscoveryType != c.DiscoveryType {
-			log.Printf("Update: v.DiscoveryType=%v, c.DiscoveryType=%v", v.DiscoveryType, c.DiscoveryType)
-			if action == ActionNone || action == RequiresUpdate {
-				action = RequiresUpdate
-			}
+	if v.DiscoveryType != c.DiscoveryType {
+		log.Printf("DiscoveryType-Update: v.DiscoveryType=%v, c.DiscoveryType=%v", v.DiscoveryType, c.DiscoveryType)
+		if action == ActionNone || action == RequiresUpdate {
+			action = RequiresUpdate
 		}
-
-	} else {
-		//v empty, fill with c
-		log.Printf("Copy from state: v.DiscoveryType=%v, c.DiscoveryType=%v", v.DiscoveryType, c.DiscoveryType)
-		v.DiscoveryType = c.DiscoveryType
 	}
 
-	if v.DiscoveryUsername != "" {
-
-		if v.DiscoveryUsername != c.DiscoveryUsername {
-			log.Printf("Update: v.DiscoveryUsername=%v, c.DiscoveryUsername=%v", v.DiscoveryUsername, c.DiscoveryUsername)
-			if action == ActionNone || action == RequiresUpdate {
-				action = RequiresUpdate
-			}
+	if v.DiscoveryUsername != c.DiscoveryUsername {
+		log.Printf("DiscoveryUsername-Update: v.DiscoveryUsername=%v, c.DiscoveryUsername=%v", v.DiscoveryUsername, c.DiscoveryUsername)
+		if action == ActionNone || action == RequiresUpdate {
+			action = RequiresUpdate
 		}
-
-	} else {
-		//v empty, fill with c
-		log.Printf("Copy from state: v.DiscoveryUsername=%v, c.DiscoveryUsername=%v", v.DiscoveryUsername, c.DiscoveryUsername)
-		v.DiscoveryUsername = c.DiscoveryUsername
 	}
 
-	if v.DiscoveryPassword != "" {
-
-		if v.DiscoveryPassword != c.DiscoveryPassword {
-			log.Printf("Update: v.DiscoveryPassword=%v, c.DiscoveryPassword=%v", v.DiscoveryPassword, c.DiscoveryPassword)
-			if action == ActionNone || action == RequiresUpdate {
-				action = RequiresUpdate
-			}
+	if v.DiscoveryPassword != c.DiscoveryPassword {
+		log.Printf("DiscoveryPassword-Update: v.DiscoveryPassword=%v, c.DiscoveryPassword=%v", v.DiscoveryPassword, c.DiscoveryPassword)
+		if action == ActionNone || action == RequiresUpdate {
+			action = RequiresUpdate
 		}
-
-	} else {
-		//v empty, fill with c
-		log.Printf("Copy from state: v.DiscoveryPassword=%v, c.DiscoveryPassword=%v", v.DiscoveryPassword, c.DiscoveryPassword)
-		v.DiscoveryPassword = c.DiscoveryPassword
 	}
 
-	if v.DiscoveryAuthProtocol != "" {
-
-		if v.DiscoveryAuthProtocol != c.DiscoveryAuthProtocol {
-			log.Printf("Update: v.DiscoveryAuthProtocol=%v, c.DiscoveryAuthProtocol=%v", v.DiscoveryAuthProtocol, c.DiscoveryAuthProtocol)
-			if action == ActionNone || action == RequiresUpdate {
-				action = RequiresUpdate
-			}
+	if v.DiscoveryAuthProtocol != c.DiscoveryAuthProtocol {
+		log.Printf("DiscoveryAuthProtocol-Update: v.DiscoveryAuthProtocol=%v, c.DiscoveryAuthProtocol=%v", v.DiscoveryAuthProtocol, c.DiscoveryAuthProtocol)
+		if action == ActionNone || action == RequiresUpdate {
+			action = RequiresUpdate
 		}
-
-	} else {
-		//v empty, fill with c
-		log.Printf("Copy from state: v.DiscoveryAuthProtocol=%v, c.DiscoveryAuthProtocol=%v", v.DiscoveryAuthProtocol, c.DiscoveryAuthProtocol)
-		v.DiscoveryAuthProtocol = c.DiscoveryAuthProtocol
 	}
 
-	if v.SerialNumber != "" {
-
-		if v.SerialNumber != c.SerialNumber {
-			log.Printf("Update: v.SerialNumber=%v, c.SerialNumber=%v", v.SerialNumber, c.SerialNumber)
-			if action == ActionNone || action == RequiresUpdate {
-				action = RequiresUpdate
-			}
+	if v.SerialNumber != c.SerialNumber {
+		log.Printf("SerialNumber-Update: v.SerialNumber=%v, c.SerialNumber=%v", v.SerialNumber, c.SerialNumber)
+		if action == ActionNone || action == RequiresUpdate {
+			action = RequiresUpdate
 		}
-
-	} else {
-		//v empty, fill with c
-		log.Printf("Copy from state: v.SerialNumber=%v, c.SerialNumber=%v", v.SerialNumber, c.SerialNumber)
-		v.SerialNumber = c.SerialNumber
 	}
 
-	if v.Model != "" {
-
-		if v.Model != c.Model {
-			log.Printf("Update: v.Model=%v, c.Model=%v", v.Model, c.Model)
-			if action == ActionNone || action == RequiresUpdate {
-				action = RequiresUpdate
-			}
+	if v.Model != c.Model {
+		log.Printf("Model-Update: v.Model=%v, c.Model=%v", v.Model, c.Model)
+		if action == ActionNone || action == RequiresUpdate {
+			action = RequiresUpdate
 		}
-
-	} else {
-		//v empty, fill with c
-		log.Printf("Copy from state: v.Model=%v, c.Model=%v", v.Model, c.Model)
-		v.Model = c.Model
 	}
 
-	if v.Version != "" {
-
-		if v.Version != c.Version {
-			log.Printf("Update: v.Version=%v, c.Version=%v", v.Version, c.Version)
-			if action == ActionNone || action == RequiresUpdate {
-				action = RequiresUpdate
-			}
+	if v.Version != c.Version {
+		log.Printf("Version-Update: v.Version=%v, c.Version=%v", v.Version, c.Version)
+		if action == ActionNone || action == RequiresUpdate {
+			action = RequiresUpdate
 		}
-
-	} else {
-		//v empty, fill with c
-		log.Printf("Copy from state: v.Version=%v, c.Version=%v", v.Version, c.Version)
-		v.Version = c.Version
 	}
 
-	if v.Hostname != "" {
-
-		if v.Hostname != c.Hostname {
-			log.Printf("Update: v.Hostname=%v, c.Hostname=%v", v.Hostname, c.Hostname)
-			if action == ActionNone || action == RequiresUpdate {
-				action = RequiresUpdate
-			}
+	if v.Hostname != c.Hostname {
+		log.Printf("Hostname-Update: v.Hostname=%v, c.Hostname=%v", v.Hostname, c.Hostname)
+		if action == ActionNone || action == RequiresUpdate {
+			action = RequiresUpdate
 		}
-
-	} else {
-		//v empty, fill with c
-		log.Printf("Copy from state: v.Hostname=%v, c.Hostname=%v", v.Hostname, c.Hostname)
-		v.Hostname = c.Hostname
 	}
 
-	if v.ImagePolicy != "" {
-
-		if v.ImagePolicy != c.ImagePolicy {
-			log.Printf("Update: v.ImagePolicy=%v, c.ImagePolicy=%v", v.ImagePolicy, c.ImagePolicy)
-			if action == ActionNone || action == RequiresUpdate {
-				action = RequiresUpdate
-			}
+	if v.ImagePolicy != c.ImagePolicy {
+		log.Printf("ImagePolicy-Update: v.ImagePolicy=%v, c.ImagePolicy=%v", v.ImagePolicy, c.ImagePolicy)
+		if action == ActionNone || action == RequiresUpdate {
+			action = RequiresUpdate
 		}
-
-	} else {
-		//v empty, fill with c
-		log.Printf("Copy from state: v.ImagePolicy=%v, c.ImagePolicy=%v", v.ImagePolicy, c.ImagePolicy)
-		v.ImagePolicy = c.ImagePolicy
 	}
 
-	if v.Gateway != "" {
-
-		if v.Gateway != c.Gateway {
-			log.Printf("Update: v.Gateway=%v, c.Gateway=%v", v.Gateway, c.Gateway)
-			if action == ActionNone || action == RequiresUpdate {
-				action = RequiresUpdate
-			}
+	if v.Gateway != c.Gateway {
+		log.Printf("Gateway-Update: v.Gateway=%v, c.Gateway=%v", v.Gateway, c.Gateway)
+		if action == ActionNone || action == RequiresUpdate {
+			action = RequiresUpdate
 		}
-
-	} else {
-		//v empty, fill with c
-		log.Printf("Copy from state: v.Gateway=%v, c.Gateway=%v", v.Gateway, c.Gateway)
-		v.Gateway = c.Gateway
 	}
 
 	if len(v.ModulesModel) != len(c.ModulesModel) {
@@ -266,34 +178,18 @@ func (v *NDFCDevicesValue) CreatePlan(c NDFCDevicesValue, cf *bool) int {
 		}
 	}
 
-	if v.Breakout != "" {
-
-		if v.Breakout != c.Breakout {
-			log.Printf("Update: v.Breakout=%v, c.Breakout=%v", v.Breakout, c.Breakout)
-			if action == ActionNone || action == RequiresUpdate {
-				action = RequiresUpdate
-			}
+	if v.Breakout != c.Breakout {
+		log.Printf("Breakout-Update: v.Breakout=%v, c.Breakout=%v", v.Breakout, c.Breakout)
+		if action == ActionNone || action == RequiresUpdate {
+			action = RequiresUpdate
 		}
-
-	} else {
-		//v empty, fill with c
-		log.Printf("Copy from state: v.Breakout=%v, c.Breakout=%v", v.Breakout, c.Breakout)
-		v.Breakout = c.Breakout
 	}
 
-	if v.PortMode != "" {
-
-		if v.PortMode != c.PortMode {
-			log.Printf("Update: v.PortMode=%v, c.PortMode=%v", v.PortMode, c.PortMode)
-			if action == ActionNone || action == RequiresUpdate {
-				action = RequiresUpdate
-			}
+	if v.PortMode != c.PortMode {
+		log.Printf("PortMode-Update: v.PortMode=%v, c.PortMode=%v", v.PortMode, c.PortMode)
+		if action == ActionNone || action == RequiresUpdate {
+			action = RequiresUpdate
 		}
-
-	} else {
-		//v empty, fill with c
-		log.Printf("Copy from state: v.PortMode=%v, c.PortMode=%v", v.PortMode, c.PortMode)
-		v.PortMode = c.PortMode
 	}
 
 	return action

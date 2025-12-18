@@ -99,8 +99,17 @@ depends_on = [resource.ndfc_vrfs.{{.VrfRscName}}]
         "{{$network}}" : {
             deploy_attachments = {{$networkEntry.DeployAttachments}}
             vrf_name = "{{$networkEntry.VrfName}}"
+            {{- if $networkEntry.DisplayName }}
+            display_name = "{{$networkEntry.DisplayName}}"
+            {{- end}}
             {{- if $networkEntry.NetworkTemplateConfig.VlanId }}
             vlan_id = "{{$networkEntry.NetworkTemplateConfig.VlanId}}"
+            {{- end}}
+            {{- if $networkEntry.NetworkTemplateConfig.VlanName }}
+            vlan_name = "{{$networkEntry.NetworkTemplateConfig.VlanName}}"
+            {{- end}}
+            {{- if $networkEntry.NetworkTemplateConfig.InterfaceDescription }}
+            interface_description = "{{$networkEntry.NetworkTemplateConfig.InterfaceDescription}}"
             {{- end}}
             {{- if $networkEntry.NetworkTemplateConfig.SecondaryGateway1 }}
             secondary_gateway_1 = "{{$networkEntry.NetworkTemplateConfig.SecondaryGateway1}}"
@@ -117,6 +126,12 @@ depends_on = [resource.ndfc_vrfs.{{.VrfRscName}}]
             {{- if $networkEntry.NetworkTemplateConfig.ArpSuppression }}
             arp_suppression = "{{$networkEntry.NetworkTemplateConfig.ArpSuppression}}"
             {{- end}}
+            {{- if $networkEntry.NetworkTemplateConfig.Trm }}
+            trm = "{{$networkEntry.NetworkTemplateConfig.Trm}}"
+            {{- end}}
+            {{- if $networkEntry.NetworkTemplateConfig.RouteTargetBoth }}
+            route_target_both = "{{$networkEntry.NetworkTemplateConfig.RouteTargetBoth}}"
+            {{- end}}
             {{- if $networkEntry.NetworkTemplateConfig.DhcpRelayLoopbackId }}
             dhcp_relay_loopback_id = "{{$networkEntry.NetworkTemplateConfig.DhcpRelayLoopbackId}}"
             {{- end}}
@@ -125,6 +140,9 @@ depends_on = [resource.ndfc_vrfs.{{.VrfRscName}}]
             {{- end}}
             {{- if $networkEntry.NetworkTemplateConfig.Mtu }}
             mtu = "{{$networkEntry.NetworkTemplateConfig.Mtu}}"
+            {{- end}}
+            {{- if $networkEntry.NetworkTemplateConfig.RoutingTag }}
+            routing_tag = "{{$networkEntry.NetworkTemplateConfig.RoutingTag}}"
             {{- end}}
             {{- if $networkEntry.Attachments}}
             attachments = {
@@ -148,7 +166,7 @@ depends_on = [resource.ndfc_vrfs.{{.VrfRscName}}]
                         {{- end}}
                     ]
                     {{- end}}
-                    {{- if $attachEntry.Vlan }}
+                    {{- if and $attachEntry.Vlan (ne (printf "%v" $attachEntry.Vlan) "4095") }}
                     vlan = "{{$attachEntry.Vlan}}"
                     {{- end}}
                 }

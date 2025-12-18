@@ -241,3 +241,111 @@ func (c NDFC) networksGetDiff(ctx context.Context, dg *diag.Diagnostics,
 
 	return actions
 }
+
+// NetworkSwitchDetailResponse represents the response structure from the network switch details API
+type NetworkSwitchDetailResponse struct {
+	NetworkName       string                         `json:"networkName"`
+	TemplateName      string                         `json:"templateName"`
+	SwitchDetailsList []NetworkSwitchDetailsListItem `json:"switchDetailsList"`
+}
+
+type NetworkSwitchDetailsListItem struct {
+	SwitchName       string `json:"switchName"`
+	Vlan             int    `json:"vlan"`
+	SerialNumber     string `json:"serialNumber"`
+	FreeformConfig   string `json:"freeformConfig"`
+	InstanceValues   string `json:"instanceValues"`
+	ExtensionValues  string `json:"extensionValues"`
+	IsLanAttached    bool   `json:"islanAttached"`
+	LanAttachedState string `json:"lanAttachedState"`
+}
+
+// fillNetworkAttachmentMissingParams fetches additional attachment details like freeformConfig
+func (c NDFC) fillNetworkAttachmentMissingParams(ctx context.Context, ndNetworks *resource_networks.NDFCNetworksModel) error {
+	// Collect all network names and serial numbers
+	networkNames := make([]string, 0)
+	serialNumbersSet := make(map[string]bool)
+
+	for networkName, networkEntry := range ndNetworks.Networks {
+		networkNames = append(networkNames, networkName)
+		for serial := range networkEntry.Attachments {
+			if networkEntry.Attachments[serial].FilterThisValue {
+				continue
+			}
+			serialNumbersSet[serial] = true
+		}
+	}
+
+	if len(networkNames) == 0 || len(serialNumbersSet) == 0 {
+		tflog.Info(ctx, "fillNetworkAttachmentMissingParams: No networks or attachments to process")
+		return nil
+	}
+
+	tflog.Info(ctx, fmt.Sprintf("fillNetworkAttachmentMissingParams: Fetching details for Networks=%v, SerialCount=%d", networkNames, len(serialNumbersSet)))
+	// Add counters
+	totalUpdated := 0
+	totalSkipped := 0
+	totalErrors := 0
+
+	// Make individual API calls per serial number to avoid switch type mismatch errors
+	// (API requires switches to be of same type Border/Leaf)
+	for serial := range serialNumbersSet {
+		tflog.Debug(ctx, fmt.Sprintf("fillNetworkAttachmentMissingParams: Fetching details for Serial=%s", serial))
+
+		networkObj := api.NewNetworksAPI(ndNetworks.FabricName, c.GetLock(ResourceNetworks), &c.apiClient)
+		res, err := networkObj.GetNetworkSwitchDetails(networkNames, []string{serial})
+		if err != nil {
+			tflog.Warn(ctx, fmt.Sprintf("fillNetworkAttachmentMissingParams: Error fetching switch details for Serial=%s: %v", serial, err))
+			// Continue with other serials even if one fails
+			totalErrors++
+			continue
+		}
+
+		tflog.Debug(ctx, fmt.Sprintf("fillNetworkAttachmentMissingParams: API Response for Serial=%s: %s", serial, string(res)))
+
+		// Parse response
+		var switchDetails []NetworkSwitchDetailResponse
+		err = json.Unmarshal(res, &switchDetails)
+		if err != nil {
+			tflog.Warn(ctx, fmt.Sprintf("fillNetworkAttachmentMissingParams: Error unmarshalling response for Serial=%s: %v", serial, err))
+			// Continue with other serials even if one fails
+			totalErrors++
+			continue
+		}
+
+		// Map freeformConfig to attachments
+		for _, networkDetail := range switchDetails {
+			networkEntry, ok := ndNetworks.Networks[networkDetail.NetworkName]
+			if !ok {
+				continue
+			}
+
+			for _, switchDetail := range networkDetail.SwitchDetailsList {
+				if switchDetail.SerialNumber != serial {
+					continue
+				}
+
+				attachEntry, ok := networkEntry.Attachments[switchDetail.SerialNumber]
+				if ok {
+					// Update freeformConfig if not empty in the response
+					if switchDetail.FreeformConfig != "" {
+						attachEntry.FreeformConfig = switchDetail.FreeformConfig
+						networkEntry.Attachments[switchDetail.SerialNumber] = attachEntry
+						tflog.Debug(ctx, fmt.Sprintf("fillNetworkAttachmentMissingParams: Updated freeformConfig for Network=%s, Serial=%s",
+							networkDetail.NetworkName, switchDetail.SerialNumber))
+						totalUpdated++
+					} else {
+						totalSkipped++
+					}
+				}
+			}
+
+			// Put the updated networkEntry back
+			ndNetworks.Networks[networkDetail.NetworkName] = networkEntry
+		}
+	}
+
+	tflog.Info(ctx, fmt.Sprintf("fillNetworkAttachmentMissingParams: Complete - Updated=%d, Skipped=%d, Errors=%d",
+		totalUpdated, totalSkipped, totalErrors))
+	return nil
+}
