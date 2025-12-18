@@ -76,6 +76,7 @@ resource:
         computed: true
         description: Customized name of the network. By default, it will be same as the network name
         example: NET1
+        use_state: true
       - &netId
         model_name: networkId
         tf_name: network_id
@@ -235,6 +236,7 @@ resource:
         type: Bool
         optional: true
         computed: true
+        use_state: true
         example: false
         description: Ingress replication flag. Read-only per network, Fabric-wide setting.
       - &mcastGroup
@@ -244,6 +246,7 @@ resource:
         type: String
         computed: true
         optional: true
+        use_state: true
         description: Multicast group address
         example: 233.1.1.1
       - &dhcpServers
@@ -305,6 +308,7 @@ resource:
         type: Bool
         optional: true
         computed: true
+        use_state: true
         description: Netflow enable flag. Netflow is supported only if it is enabled on fabric. For NX-OS only.
         example: false
       - &sviNetflowMonitor
@@ -328,6 +332,7 @@ resource:
         type: Bool
         optional: true
         computed: true
+        use_state: true
         description: Enable L3 Gateway on Border
         example: true
       - &igmpVerion
@@ -338,6 +343,7 @@ resource:
         description: IGMP version
         optional: true
         computed: true
+        use_state: true
         example: 3
       - model_name: deploy_attachments
         tf_name: deploy_attachments

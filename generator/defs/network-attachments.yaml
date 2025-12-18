@@ -52,6 +52,7 @@ resource:
               computed: true
               unmarshal_tag: fabricName
               description: The name of the fabric
+              use_state: true
             - model_name: networkName
               tf_name: network_name
               type: String
@@ -82,7 +83,6 @@ resource:
               tf_name: display_name
               type: String
               computed: true
-              optional: true
               description: The name of the switch
             - &VlanId
               model_name: vlan
@@ -120,11 +120,12 @@ resource:
               example: true
               computed: true
               ndfc_type: bool
-            - model_name: freeformconfig
+            - model_name: freeformConfig
               tf_name: freeform_config
               type: String
               description: This field covers any configuration not included in overlay templates which is needed as part of this VRF attachment
               exclude_test: true
+              use_state: true
             - model_name: deployThisAttachment
               type: Bool
               tf_name: deploy_this_attachment
@@ -143,12 +144,14 @@ resource:
               ndfc_type: csv
               optional: true
               computed: true
+              use_state: true
               example: "[\"Ethernet1/10\", \"Ethernet1/12\"]"
             - model_name: detachSwitchPorts
               tf_name: detach_switch_ports
               type: List:String
               description: List of switch ports to detach
               ndfc_type: csv
+              use_state: true
               tf_hide: true
             - model_name: portNames
               tf_name: port_names
@@ -161,12 +164,14 @@ resource:
               description: List of TOR ports
               optional: true
               computed: true
+              use_state: true
               ndfc_type: csv
             - model_name: instanceValues
               tf_name: instance_values
               type: String
               optional: true
               computed: true
+              use_state: true
               description: Instance values
             - model_name: update_action
               tf_name: update_action

@@ -51,6 +51,14 @@ func (c *NDFC) RscGetNetworkAttachments(ctx context.Context, nw *resource_networ
 		//put it back
 		nw.Networks[netName] = nwEntry
 	}
+
+	// Fill missing parameters like freeformConfig from the switch details API
+	err = c.fillNetworkAttachmentMissingParams(ctx, nw)
+	if err != nil {
+		tflog.Warn(ctx, fmt.Sprintf("Failed to fill missing network attachment parameters: %v", err))
+		// Don't return error, just log warning as this is supplementary data
+	}
+
 	return nil
 }
 
