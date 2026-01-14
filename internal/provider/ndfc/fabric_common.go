@@ -82,11 +82,11 @@ func (f *NDFC) RscCreateFabric(ctx context.Context, dg *diag.Diagnostics, tf res
 		return
 	}
 
-	ret, _ := fapi.Get()
-	tflog.Debug(ctx, fmt.Sprintf("RscCreateFabric: response %s", ret))
-	if len(ret) > 0 && string(ret) != "[]" && string(ret) != "" {
+	// Check if fabric already exists
+	exists := f.FabricExists(ctx, model.FabricName)
+	if exists {
 		tflog.Error(ctx, "RscCreateFabric: Fabric already exists")
-		dg.AddError("Fabric already exists", fmt.Sprintf("Fabric %s already exists", model.FabricName))
+		dg.AddError("Failed to create fabric", fmt.Sprintf("Fabric %s already exists", model.FabricName))
 		return
 	}
 
@@ -123,9 +123,11 @@ func (f *NDFC) RscUpdateFabric(ctx context.Context, dg *diag.Diagnostics, tf res
 		dg.AddError("Failed to update fabric", fmt.Sprintf("Error: %q %q", err.Error(), res.String()))
 		return
 	}
-	f.RscDeployFabric(ctx, dg, fname, deploy)
-	if dg.HasError() {
-		return
+	if deploy {
+		f.RscDeployFabric(ctx, dg, fname)
+		if dg.HasError() {
+			return
+		}
 	}
 	f.RscReadFabric(ctx, dg, tf, fname)
 }
@@ -143,12 +145,12 @@ func (f *NDFC) RscDeleteFabric(ctx context.Context, dg *diag.Diagnostics, fname 
 	   and throw an error if switches are present */
 
 	payload, err := f.GetSwitchesInFabric(ctx, fname)
-	tflog.Debug(ctx, fmt.Sprintf("RscDeployFabric: payload %s", string(payload)))
+	tflog.Debug(ctx, fmt.Sprintf("RscDeleteFabric: payload %s", string(payload)))
 	if !(len(payload) == 0 || string(payload) == "[]") {
 		if err == nil {
 			err = fmt.Errorf("switches in fabric needs to be deleted before deleting the fabric")
 		}
-		tflog.Error(ctx, "RscDeployFabric: Failed to get switches in fabric")
+		tflog.Error(ctx, "RscDeleteFabric: Failed to get switches in fabric")
 		dg.AddError("Fabric updated but not deployed", fmt.Sprintf("Reason: %q", err.Error()))
 		return
 	}
@@ -160,9 +162,8 @@ func (f *NDFC) RscDeleteFabric(ctx context.Context, dg *diag.Diagnostics, fname 
 	}
 	tflog.Info(ctx, "RscDeleteFabric: Fabric delete initiated")
 	time.Sleep(3 * time.Second) // Wait for DB to sync
-	payload, err = fapi.Get()
-	tflog.Debug(ctx, fmt.Sprintf("RscDeleteFabric: payload %s", string(payload)))
-	if err != nil || len(payload) == 0 || string(payload) == "[]" {
+	fabricExists := f.FabricExists(ctx, fname)
+	if !fabricExists {
 		tflog.Info(ctx, "RscDeleteFabric: Fabric deleted")
 		/* Fabric is deleted. */
 		return
@@ -189,23 +190,22 @@ func (f NDFC) RscGetFabricApiDetails(ctx context.Context, dg *diag.Diagnostics, 
 	}
 	return fapi, payload
 }
-func (f *NDFC) RscDeployFabric(ctx context.Context, dg *diag.Diagnostics, fname string, deploy bool) {
-	if deploy {
-		payload, err := f.GetSwitchesInFabric(ctx, fname)
-		tflog.Debug(ctx, fmt.Sprintf("RscDeployFabric: payload %s", string(payload)))
-		if len(payload) == 0 || string(payload) == "[]" {
-			if err == nil {
-				err = fmt.Errorf("no switches found in the fabric for deployment")
-			}
-			tflog.Error(ctx, "RscDeployFabric: Failed to get switches in fabric")
-			dg.AddWarning("Fabric not deployed", fmt.Sprintf("Reason: %q", err.Error()))
-			return
+func (f *NDFC) RscDeployFabric(ctx context.Context, dg *diag.Diagnostics, fname string) {
+	payload, err := f.GetSwitchesInFabric(ctx, fname)
+	tflog.Debug(ctx, fmt.Sprintf("RscDeployFabric: payload %s", string(payload)))
+	if len(payload) == 0 || string(payload) == "[]" {
+		if err == nil {
+			err = fmt.Errorf("no switches found in the fabric for deployment")
 		}
-		f.RecalculateAndDeploy(ctx, dg, fname, true, deploy, nil)
-		if dg.HasError() {
-			return
-		}
+		tflog.Error(ctx, "RscDeployFabric: Failed to get switches in fabric")
+		dg.AddWarning("Fabric not deployed", fmt.Sprintf("Reason: %q", err.Error()))
+		return
 	}
+	f.RecalculateAndDeploy(ctx, dg, fname, true, true, nil)
+	if dg.HasError() {
+		return
+	}
+
 }
 func (f *NDFC) GetSwitchesInFabric(ctx context.Context, fname string) ([]byte, error) {
 	fapi := api.NewFabricAPI(f.GetLock(ResourceFabrics), &f.apiClient)
@@ -281,4 +281,22 @@ func (f *NDFC) DSGetFabric(ctx context.Context, dg *diag.Diagnostics, fname stri
 		tflog.Debug(ctx, fmt.Sprintf("DSGetFabric: SetModelData OK for fabric %s", data.FabricName.ValueString()))
 	}
 	return data
+}
+
+// FabricExists checks if a fabric with the given name exists in NDFC
+// Returns true if the fabric exists, false otherwise
+func (f *NDFC) FabricExists(ctx context.Context, fname string) bool {
+	fapi := api.NewFabricAPI(f.GetLock(ResourceFabrics), &f.apiClient)
+	fapi.FabricName = fname
+	payload, err := fapi.Get()
+	if err != nil {
+		tflog.Debug(ctx, fmt.Sprintf("FabricExists: Error checking fabric %s: %v", fname, err))
+		return false
+	}
+	if len(payload) == 0 || string(payload) == "[]" || string(payload) == "" {
+		tflog.Debug(ctx, fmt.Sprintf("FabricExists: Fabric %s not found, payload %s", fname, string(payload)))
+		return false
+	}
+	tflog.Debug(ctx, fmt.Sprintf("FabricExists: Fabric %s exists", fname))
+	return true
 }

@@ -97,9 +97,18 @@ func (r *fabricVxlanMsdResource) Create(ctx context.Context, req resource.Create
 		return
 	}
 	r.client.AddChildFabricsToMsd(ctx, &resp.Diagnostics, &data)
+	if resp.Diagnostics.HasError() {
+		tflog.Error(ctx, "Add Child Fabrics Failed - cleaning up MSD fabric")
+		// Cleanup - delete the fabric created since child fabrics couldn't be added
+		r.client.RscDeleteFabric(ctx, &resp.Diagnostics, data.FabricName.ValueString())
+		return
+	}
 	// Get and set back the child fabrics to make sure they are correctly added in NDFC
 	data.ChildFabrics = r.GetChildFabrics(ctx, &resp.Diagnostics, data.FabricName.ValueString())
 	if resp.Diagnostics.HasError() {
+		tflog.Error(ctx, "Get Child Fabrics Failed - cleaning up MSD fabric")
+		// Cleanup - delete the fabric created
+		r.client.RscDeleteFabric(ctx, &resp.Diagnostics, data.FabricName.ValueString())
 		return
 	}
 	// Save updated data into Terraform state
@@ -191,6 +200,10 @@ func (r *fabricVxlanMsdResource) Update(ctx context.Context, req resource.Update
 	tflog.Info(ctx, fmt.Sprintf("Update Fabric Success %s", id))
 	r.client.UpdateChildFabricsToMsd(ctx, &resp.Diagnostics, &planData, &stateData)
 	// Get and set back the child fabrics to make sure they are correctly added in NDFC
+	if resp.Diagnostics.HasError() {
+		tflog.Error(ctx, "Update Child Fabrics Failed")
+		return
+	}
 	planData.ChildFabrics = r.GetChildFabrics(ctx, &resp.Diagnostics, planData.FabricName.ValueString())
 	if resp.Diagnostics.HasError() {
 		return
