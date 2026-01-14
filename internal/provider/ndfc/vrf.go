@@ -138,7 +138,6 @@ func (c NDFC) RscGetBulkVrf(ctx context.Context, dg *diag.Diagnostics, ID string
 
 	//Get Attachments
 	err = c.RscGetVrfAttachments(ctx, dg, &ndVrfs, keyMap)
-
 	if err == nil {
 		for i, vrfEntry := range ndVrfs.Vrfs {
 			if vrfEntry.FilterThisValue {
@@ -314,25 +313,33 @@ case 4: Nothing was created
 	return failure, report the errors coming from NDFC
 */
 func (c NDFC) RscCreateBulkVrf(ctx context.Context, dg *diag.Diagnostics, vrfBulk *resource_vrf_bulk.VrfBulkModel) *resource_vrf_bulk.VrfBulkModel {
-	tflog.Debug(ctx, fmt.Sprintf("RscCreateBulkVrf entry fabirc %s", vrfBulk.FabricName.ValueString()))
+	tflog.Debug(ctx, fmt.Sprintf("RscCreateBulkVrf entry fabric %s", vrfBulk.FabricName.ValueString()))
 	vrf := vrfBulk.GetModelData()
+	tflog.Info(ctx, fmt.Sprintf("Regular (non-MSD) fabric detected: %s", vrf.FabricName))
 	if vrf == nil {
 		tflog.Error(ctx, "Data conversion from model failed")
 		dg.AddError("Data conversion from model failed", "GetModelData returned empty")
 		return nil
 	}
 
-	c.ValidateMsdParentVrfParameters(ctx, dg, vrf)
+	exists := c.FabricExists(ctx, vrf.FabricName)
+	if !exists {
+		errMsg := fmt.Sprintf("Fabric %s does not exist in NDFC", vrf.FabricName)
+		tflog.Error(ctx, errMsg)
+		dg.AddError("Fabric not found", errMsg)
+		return nil
+	}
+
+	// Validate attachment fabric field for regular fabric
+	c.validateAttachmentFabricField(ctx, dg, vrf, false, false)
 	if dg.HasError() {
 		return nil
 	}
 
-	//form ID
+	// Form ID
 	ID := c.VrfBulkCreateID(vrf)
-	//create
 
 	retVrfs, err := c.VrfBulkIsPresent(ctx, ID)
-
 	if err != nil {
 		tflog.Error(ctx, "Error while getting VRFs ", map[string]interface{}{"Err": err})
 		dg.AddError("VRF Read Failed", err.Error())
@@ -349,9 +356,8 @@ func (c NDFC) RscCreateBulkVrf(ctx context.Context, dg *diag.Diagnostics, vrfBul
 		return nil
 	}
 
-	//Part 1: Create VRFs
+	// Part 1: Create VRFs
 	ndfcVrfBulkPayload := vrf.FillVrfPayloadFromModel(nil)
-	//ndfcVrfBulkPayload.Vrfs = vrf.GetVrfValues()
 
 	err = c.vrfCreateBulk(ctx, vrf.FabricName, ndfcVrfBulkPayload)
 	if err != nil {
@@ -360,21 +366,20 @@ func (c NDFC) RscCreateBulkVrf(ctx context.Context, dg *diag.Diagnostics, vrfBul
 		return nil
 	}
 	tflog.Info(ctx, fmt.Sprintf("Create Bulk VRF success ID %s", ID))
-	//Part 2: Create Attachments if any
 
-	// fill the attachment entries
+	// Part 2: Create Attachments if any
 	keyMap := c.vrfAttachmentSerialRemap(ctx, vrf)
 	va := vrf.FillAttachPayloadFromModel(false)
 
 	if len(va.VrfAttachments) > 0 {
-		err := c.RscCreateVrfAttachments(ctx, dg, va)
+		err = c.RscCreateVrfAttachments(ctx, dg, va)
 		if err != nil {
 			tflog.Error(ctx, "VRF Attachments create failed")
 			tflog.Error(ctx, "Rolling back the configurations...delete VRFs")
 			c.RscDeleteBulkVrf(ctx, dg, ID, vrfBulk)
 			return nil
 		}
-		//Check and deploy
+		// Check and deploy
 		c.RscDeployVrfAttachments(ctx, dg, vrf)
 	}
 
@@ -388,7 +393,6 @@ func (c NDFC) RscCreateBulkVrf(ctx context.Context, dg *diag.Diagnostics, vrfBul
 		outVrf.Id = types.StringValue(ID)
 	}
 	return outVrf
-
 }
 
 func (c NDFC) RscDeleteBulkVrf(ctx context.Context, dg *diag.Diagnostics, ID string, vrfBulk *resource_vrf_bulk.VrfBulkModel) {
@@ -405,12 +409,14 @@ func (c NDFC) RscDeleteBulkVrf(ctx context.Context, dg *diag.Diagnostics, ID str
 	if len(vrfs) != len(vrfsFromId) {
 		errString := fmt.Sprintf("Mismatch in VRF data: fabric %s Read %v, from ID %v", fabricName, vrfs, vrfsFromId)
 		tflog.Error(ctx, errString)
-		dg.AddWarning(("Mismatch in VRF data"), errString)
+		dg.AddWarning("Mismatch in VRF data", errString)
 		vrfsFromId = vrfs
 	}
 
-	delVrf := vrfBulk.GetModelData()
+	tflog.Info(ctx, fmt.Sprintf("Regular (non-MSD) fabric: Deleting VRFs from %s", fabricName))
 
+	// Delete attachments - all attachments on same fabric
+	delVrf := vrfBulk.GetModelData()
 	err = c.RscDeleteVrfAttachments(ctx, dg, delVrf)
 	if err != nil {
 		tflog.Error(ctx, "VRF Attachments delete failed")
@@ -418,6 +424,7 @@ func (c NDFC) RscDeleteBulkVrf(ctx context.Context, dg *diag.Diagnostics, ID str
 		return
 	}
 
+	// Delete the VRFs
 	err = c.vrfBulkDelete(ctx, fabricName, vrfsFromId)
 	if err != nil {
 		errString := fmt.Sprintf("VRF delete failed on fabric %s vrfs %v", fabricName, vrfsFromId)
@@ -427,7 +434,6 @@ func (c NDFC) RscDeleteBulkVrf(ctx context.Context, dg *diag.Diagnostics, ID str
 	}
 
 	tflog.Info(ctx, fmt.Sprintf("VRF Bulk Delete Success %s", ID))
-
 }
 
 /*
@@ -439,35 +445,46 @@ func (c NDFC) RscUpdateBulkVrf(ctx context.Context,
 	vrfBulkPlan *resource_vrf_bulk.VrfBulkModel,
 	vrfState *resource_vrf_bulk.VrfBulkModel, vrfConfig *resource_vrf_bulk.VrfBulkModel) {
 
+	tflog.Debug(ctx, fmt.Sprintf("RscUpdateBulkVrf entry fabric %s", vrfBulkPlan.FabricName.ValueString()))
+
 	c.validateVrfsUpdate(ctx, dg, vrfBulkPlan, vrfState)
 	if dg.HasError() {
 		return
 	}
 
+	fabricName := vrfBulkPlan.FabricName.ValueString()
+
+	// Get plan model for validation
+	planModel := vrfBulkPlan.GetModelData()
+	if planModel == nil {
+		tflog.Error(ctx, "Data conversion from model failed")
+		dg.AddError("Data conversion from model failed", "GetModelData returned empty")
+		return
+	}
+
+	// Validate attachment fabric field for regular fabric
+	c.validateAttachmentFabricField(ctx, dg, planModel, false, false)
+	if dg.HasError() {
+		return
+	}
+
+	// Get diff actions
 	actions := c.vrfBulkGetDiff(ctx, vrfBulkPlan, vrfState, vrfConfig)
 
-	// Validate the Diff
-	//Get the current VRFs from NDFC
-
 	delVrfs := actions["del"].(*resource_vrf_bulk.NDFCVrfBulkModel)
-	//deployVrfs := actions["deploy"].([]string)
-
 	putVrfs := actions["put"].(*resource_vrf_bulk.NDFCVrfBulkModel)
 	newVrfs := actions["add"].(*resource_vrf_bulk.NDFCVrfBulkModel)
 	plan := actions["plan"].(*resource_vrf_bulk.NDFCVrfBulkModel)
 	state := actions["state"].(*resource_vrf_bulk.NDFCVrfBulkModel)
 
-	c.ValidateMsdParentVrfParameters(ctx, dg, plan)
-	if dg.HasError() {
-		return
-	}
-	ndfcVRFs, err := c.vrfBulkGet(ctx, vrfBulkPlan.FabricName.ValueString())
-	// Step 1 - Check if VRFs to update are present in NDFC
+	ndfcVRFs, err := c.vrfBulkGet(ctx, fabricName)
 	if err != nil {
 		tflog.Error(ctx, "Failed to Read existing VRFs")
 		dg.AddError("VRF Read Failed", err.Error())
 		return
 	}
+
+	// Step 1 - Check if VRFs to update are present in NDFC
 	for vrf := range putVrfs.Vrfs {
 		_, ok := ndfcVRFs.Vrfs[vrf]
 		if !ok {
@@ -477,28 +494,20 @@ func (c NDFC) RscUpdateBulkVrf(ctx context.Context,
 			return
 		}
 	}
-	/*
-		updateVA := resource_vrf_attachments.NDFCVrfAttachmentsModel{}
-		updateVA.FabricName = vrfBulkPlan.FabricName.ValueString()
-		updateVA.VrfAttachments = make(resource_vrf_attachments.NDFCVrfAttachmentsValues, 0)
-	*/
+
 	// Step 2 - VRFs to delete are available
 	for vrf := range delVrfs.Vrfs {
 		_, ok := ndfcVRFs.Vrfs[vrf]
 		if !ok {
-			// is this error a big deal? VRFs to be deleted missing - so ignore??
 			delete(delVrfs.Vrfs, vrf)
 			tflog.Error(ctx, fmt.Sprintf("VRF to DELETE %s is missing in NDFC", vrf))
 		}
 	}
-	// Step 3 - Check if VRFs to be created (create-delete) are not present in NDFC
 
+	// Step 3 - Check if VRFs to be created are not present in NDFC
 	for vrf := range newVrfs.Vrfs {
 		_, ok := ndfcVRFs.Vrfs[vrf]
 		if ok {
-			//VRF present in NDFC
-			//Check if the VRF is marked for deletion as part of Delete-Create diff
-
 			if _, ok := delVrfs.Vrfs[vrf]; ok {
 				tflog.Debug(ctx, "VRF marked for delete", map[string]interface{}{"vrfName": vrf})
 				continue
@@ -510,8 +519,7 @@ func (c NDFC) RscUpdateBulkVrf(ctx context.Context,
 		}
 	}
 
-	//Begin update - No rollback from here on
-
+	// Begin update - No rollback from here on
 	if len(delVrfs.Vrfs) > 0 {
 		// Check and delete attachments
 		err := c.RscDeleteVrfAttachments(ctx, dg, delVrfs)
@@ -521,15 +529,16 @@ func (c NDFC) RscUpdateBulkVrf(ctx context.Context,
 			return
 		}
 		tflog.Info(ctx, fmt.Sprintf("Deleting VRFs %v, as part of Bulk Update", delVrfs.GetVrfNames()))
-		err = c.vrfBulkDelete(ctx, vrfBulkPlan.FabricName.ValueString(), delVrfs.GetVrfNames())
+		err = c.vrfBulkDelete(ctx, fabricName, delVrfs.GetVrfNames())
 		if err != nil {
 			dg.AddError("Bulk Delete failed", err.Error())
 		}
 	} else {
 		tflog.Info(ctx, "Nothing to delete")
 	}
+
 	if len(putVrfs.Vrfs) > 0 {
-		tflog.Info(ctx, "Modifying VRFs , as part of Bulk Update")
+		tflog.Info(ctx, "Modifying VRFs, as part of Bulk Update")
 		c.vrfBulkUpdate(ctx, dg, putVrfs)
 		if dg.HasError() {
 			tflog.Info(ctx, fmt.Sprintf("Modifying VRFs Failed %v", dg.Errors()))
@@ -538,31 +547,28 @@ func (c NDFC) RscUpdateBulkVrf(ctx context.Context,
 	} else {
 		tflog.Info(ctx, "Nothing to modify")
 	}
-	// TODO: All deployed attachments of modified VRFs must be re-deployed
 
 	if len(newVrfs.Vrfs) > 0 {
-		tflog.Info(ctx, "Adding VRFs , as part of Bulk Update")
+		tflog.Info(ctx, "Adding VRFs, as part of Bulk Update")
 		newVrfPayload := newVrfs.FillVrfPayloadFromModel(nil)
-		err := c.vrfCreateBulk(ctx, vrfBulkPlan.FabricName.ValueString(), newVrfPayload)
+		err := c.vrfCreateBulk(ctx, fabricName, newVrfPayload)
 		if err != nil {
 			dg.AddError("VRF create failed", err.Error())
 			return
 		}
 	}
 
-	//Deal with attachments
-	//updateVA.VrfAttachments = make(resource_vrf_attachments.NDFCVrfAttachmentsValues, 0)
-	//copyVrfAttachments(plan, &updateVA)
-	//stateVA := resource_vrf_attachments.NDFCVrfAttachmentsModel{}
-	//copyVrfAttachments(state, &stateVA)
+	// Deal with attachments
 	c.RscUpdateVrfAttachments(ctx, dg, plan, state)
 	if dg.HasError() {
 		tflog.Error(ctx, "Error during update")
 		return
 	}
+
 	keyMap := c.vrfAttachmentSerialRemap(ctx, plan)
 	newID := c.VrfBulkCreateID(plan)
 	depMap := FillDeployMap(plan)
+
 	*(vrfBulkPlan) = *(c.RscGetBulkVrf(ctx, dg, newID, &depMap, &keyMap))
 }
 
@@ -580,8 +586,8 @@ func FillDeployMap(plan *resource_vrf_bulk.NDFCVrfBulkModel) map[string][]string
 		}
 		for j := range plan.Vrfs[i].AttachList {
 			if plan.Vrfs[i].AttachList[j].DeployThisAttachment {
-				log.Printf("FillDeployMap: deploy_this_attachment for VRF %s, Serial Number %s set", plan.Vrfs[i].VrfName, plan.Vrfs[i].AttachList[j].SerialNumber)
-				//depKey := fmt.Sprintf("%s/%s", plan.Vrfs[i].VrfName, plan.Vrfs[i].AttachList[j].SerialNumber)
+				// Use the map key 'j' as the serial number since AttachList is keyed by serial number
+				log.Printf("FillDeployMap: deploy_this_attachment for VRF %s, Serial Number %s set", plan.Vrfs[i].VrfName, j)
 				depKey := plan.Vrfs[i].VrfName
 				depMap[depKey] = append(depMap[depKey], plan.Vrfs[i].AttachList[j].SerialNumber)
 			}
@@ -618,90 +624,4 @@ func (c NDFC) VrfBulkIsPresent(ctx context.Context, ID string) ([]string, error)
 	}
 	return retVrfs, nil
 
-}
-
-/*
-func (c NDFC) vrfGet(fabric, vrfName string) *resource_vrf_bulk.NDFCVrfsValue {
-	vrfObj := api.NewVrfAPI(fabric, c.GetLock(ResourceVrfBulk), &c.apiClient)
-	res, err := vrfObj.GetSingleVRF(fabric, vrfName)
-	if err != nil {
-		return nil
-	}
-	vrf := resource_vrf_bulk.NDFCVrfsValue{}
-	err = json.Unmarshal(res, &vrf)
-	if err != nil {
-		return nil
-	}
-	return &vrf
-}
-*/
-
-func (c NDFC) ValidateMsdParentVrfParameters(ctx context.Context, dg *diag.Diagnostics, vrf *resource_vrf_bulk.NDFCVrfBulkModel) {
-	// Validate VRF parameters for MSD parent fabric
-	fType := c.GetFabricTemplateType(ctx, dg, vrf.FabricName)
-	tflog.Debug(ctx, fmt.Sprintf("Fabric Type is %s", fType))
-	if fType == ResourceVxlanMsdType {
-		for _, entry := range vrf.Vrfs {
-			switch {
-			case len(entry.VrfTemplateConfig.AdvertiseHostRoutes) != 0:
-				tflog.Error(ctx, "VRF operation failed, AdvertiseHostRoutes is not supported for MSD parent fabric")
-				dg.AddError("VRF operation failed", "AdvertiseHostRoutes is not supported for MSD parent fabric")
-			case len(entry.VrfTemplateConfig.AdvertiseDefaultRoute) != 0:
-				tflog.Error(ctx, "VRF operation failed, AdvertiseDefaultRoute is not supported for MSD parent fabric")
-				dg.AddError("VRF operation failed", "AdvertiseDefaultRoute is not supported for MSD parent fabric")
-			case len(entry.VrfTemplateConfig.ConfigureStaticDefaultRoute) != 0:
-				tflog.Error(ctx, "VRF operation failed, ConfigureStaticDefaultRoute is not supported for MSD parent fabric")
-				dg.AddError("VRF operation failed", "ConfigureStaticDefaultRoute is not supported for MSD parent fabric")
-			case len(entry.VrfTemplateConfig.BgpPassword) != 0:
-				tflog.Error(ctx, "VRF operation failed, BgpPassword is not supported for MSD parent fabric")
-				dg.AddError("VRF operation failed", "BgpPassword is not supported for MSD parent fabric")
-			case len(entry.VrfTemplateConfig.BgpPasswordType) != 0:
-				tflog.Error(ctx, "VRF operation failed, BgpPasswordType is not supported for MSD parent fabric")
-				dg.AddError("VRF operation failed", "BgpPasswordType is not supported for MSD parent fabric")
-			case len(entry.VrfTemplateConfig.Netflow) != 0:
-				tflog.Error(ctx, "VRF operation failed, Netflow is not supported for MSD parent fabric")
-				dg.AddError("VRF operation failed", "Netflow is not supported for MSD parent fabric")
-			case len(entry.VrfTemplateConfig.NetflowMonitor) != 0:
-				tflog.Error(ctx, "VRF operation failed, NetflowMonitor is not supported for MSD parent fabric")
-				dg.AddError("VRF operation failed", "NetflowMonitor is not supported for MSD parent fabric")
-			case len(entry.VrfTemplateConfig.Trm) != 0:
-				tflog.Error(ctx, "VRF operation failed, TRM is not supported for MSD parent fabric")
-				dg.AddError("VRF operation failed", "TRM is not supported for MSD parent fabric")
-			case len(entry.VrfTemplateConfig.TrmBgwMsite) != 0:
-				tflog.Error(ctx, "VRF operation failed, TRM BGP Multi-Site is not supported for MSD parent fabric")
-				dg.AddError("VRF operation failed", "TRM BGP Multi-Site is not supported for MSD parent fabric")
-			case len(entry.VrfTemplateConfig.NoRp) != 0:
-				tflog.Error(ctx, "VRF operation failed, NoRp is not supported for MSD parent fabric")
-				dg.AddError("VRF operation failed", "NoRp is not supported for MSD parent fabric")
-			case len(entry.VrfTemplateConfig.RpAddress) != 0:
-				tflog.Error(ctx, "VRF operation failed, RpAddress is not supported for MSD parent fabric")
-				dg.AddError("VRF operation failed", "RpAddress is not supported for MSD parent fabric")
-			case entry.VrfTemplateConfig.RpLoopbackId != nil:
-				tflog.Error(ctx, "VRF operation failed, RpLoopbackId is not supported for MSD parent fabric")
-				dg.AddError("VRF operation failed", "RpLoopbackId is not supported for MSD parent fabric")
-			case len(entry.VrfTemplateConfig.UnderlayMulticastAddress) != 0:
-				tflog.Error(ctx, "VRF operation failed, UnderlayMulticastAddress is not supported for MSD parent fabric")
-				dg.AddError("VRF operation failed", "UnderlayMulticastAddress is not supported for MSD parent fabric")
-			case len(entry.VrfTemplateConfig.OverlayMulticastGroups) != 0:
-				tflog.Error(ctx, "VRF operation failed, OverlayMulticastGroups is not supported for MSD parent fabric")
-				dg.AddError("VRF operation failed", "OverlayMulticastGroups is not supported for MSD parent fabric")
-			case len(entry.VrfTemplateConfig.RouteTargetImportMvpn) != 0:
-				tflog.Error(ctx, "VRF operation failed, RouteTargetImportMvpn is not supported for MSD parent fabric")
-				dg.AddError("VRF operation failed", "RouteTargetImportMvpn is not supported for MSD parent fabric")
-			case len(entry.VrfTemplateConfig.RouteTargetExportMvpn) != 0:
-				tflog.Error(ctx, "VRF operation failed, RouteTargetExportMvpn is not supported for MSD parent fabric")
-				dg.AddError("VRF operation failed", "RouteTargetExportMvpn is not supported for MSD parent fabric")
-			}
-		}
-	} else {
-		for _, entry := range vrf.Vrfs {
-			for serial, attach := range entry.AttachList {
-				if attach.Fabric != "" && vrf.FabricName != attach.Fabric {
-					tflog.Error(ctx, "VRF operation failed, FabricName in attachment should match VRF FabricName")
-					dg.AddError("VRF operation failed", fmt.Sprintf("FabricName in attachment \"%s\" should match VRF FabricName \"%s\"", serial, vrf.FabricName))
-					return
-				}
-			}
-		}
-	}
 }
