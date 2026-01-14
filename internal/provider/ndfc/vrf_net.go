@@ -59,7 +59,7 @@ func (c NDFC) CheckNetworkVrfConfig(ctx context.Context, dg *diag.Diagnostics, n
 	}
 
 	// Step 2 - Check if VRFs are attached
-	err = c.RscGetVrfAttachments(ctx, dg, ndfcVRFs)
+	err = c.RscGetVrfAttachments(ctx, dg, ndfcVRFs, nil)
 	if err != nil {
 		tflog.Error(ctx, "CheckNetworkVrfConfig: Failed to Read existing VRF Attachments")
 		dg.AddError("VRF Attachments Read Failed", err.Error())

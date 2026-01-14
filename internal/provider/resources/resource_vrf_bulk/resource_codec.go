@@ -72,17 +72,17 @@ func (v NDFCVrfBulkModel) GetAttachmentNames(vrf string) []string {
 	return attachmentNames
 }
 
-func (v NDFCVrfBulkModel) GetAttachmentValues(vrf string) []rva.NDFCAttachListValue {
-	attachmentValues := make([]rva.NDFCAttachListValue, 0)
-	vrfEntry, ok := v.Vrfs[vrf]
-	if ok {
-		for _, v := range vrfEntry.AttachList {
-			attachmentValues = append(attachmentValues, v)
-		}
+// func (v NDFCVrfBulkModel) GetAttachmentValues(vrf string) []rva.NDFCAttachListValue {
+// 	attachmentValues := make([]rva.NDFCAttachListValue, 0)
+// 	vrfEntry, ok := v.Vrfs[vrf]
+// 	if ok {
+// 		for _, v := range vrfEntry.AttachList {
+// 			attachmentValues = append(attachmentValues, v)
+// 		}
 
-	}
-	return attachmentValues
-}
+// 	}
+// 	return attachmentValues
+// }
 
 func (v NDFCVrfsValue) GetAttachmentValues(filters uint16, attach string) []rva.NDFCAttachListValue {
 	log.Printf("GetAttachmentValues: %s %s", v.VrfName, v.FabricName)
@@ -147,7 +147,7 @@ func (v *NDFCVrfBulkModel) FillVrfPayloadFromModel(depMap *map[string][]string) 
 	return payload
 }
 
-func (v *NDFCVrfBulkModel) FillAttachmentsFromPayload(payload *rva.NDFCVrfAttachmentsPayloads) {
+func (v *NDFCVrfBulkModel) FillAttachmentsFromPayload(payload *rva.NDFCVrfAttachmentsPayloads, keyMap *map[string]string) {
 	for i := range (*payload).VrfAttachments {
 		vrfName := (*payload).VrfAttachments[i].VrfName
 		attachList := (*payload).VrfAttachments[i].AttachList
@@ -155,7 +155,20 @@ func (v *NDFCVrfBulkModel) FillAttachmentsFromPayload(payload *rva.NDFCVrfAttach
 		if ok {
 			vrfEntry.AttachList = make(map[string]rva.NDFCAttachListValue)
 			for j := range attachList {
-				vrfEntry.AttachList[attachList[j].SwitchSerialNo] = attachList[j]
+				if keyMap != nil {
+					kk := vrfName + ":" + attachList[j].SwitchSerialNo
+					key, ok := (*keyMap)[kk]
+					if ok {
+						vrfEntry.AttachList[key] = attachList[j]
+						log.Printf("[DEBUG] Mapping  for %s is %s", kk, key)
+					} else {
+						log.Printf("[WARN] Mapping  for %s is missing", kk)
+						vrfEntry.AttachList[attachList[j].SwitchSerialNo] = attachList[j]
+					}
+				} else {
+					vrfEntry.AttachList[attachList[j].SwitchSerialNo] = attachList[j]
+				}
+
 			}
 			//put it back
 			v.Vrfs[vrfName] = vrfEntry
@@ -196,16 +209,16 @@ func (v *NDFCVrfBulkModel) FillAttachPayloadFromModel(delFlag bool) *rva.NDFCVrf
 			vrfAttachVal.VrfName = vrfName
 		}
 		for attachKey, attachEntry := range vrfEntry.AttachList {
-			attachEntry.SerialNumber = attachKey
 			if attachEntry.Fabric == "" {
 				attachEntry.Fabric = v.FabricName
 			}
 			attachEntry.VrfName = vrfName
 			log.Printf("AttachEntry vrfname %s FabricName %s", vrfName, attachEntry.Fabric)
 			if attachEntry.DeployThisAttachment {
-				payload.DepMap[vrfName] = append(payload.DepMap[vrfName], attachKey)
+				// attachKey can be IP; use serial number
+				payload.DepMap[vrfName] = append(payload.DepMap[vrfName], attachEntry.SerialNumber)
 			}
-			log.Printf("DeployThisAttachment %s/%s", vrfName, attachKey)
+			log.Printf("DeployThisAttachment %s/%s", vrfName, attachEntry.SerialNumber)
 			if delFlag {
 				attachEntry.Deployment = "false"
 			} else {

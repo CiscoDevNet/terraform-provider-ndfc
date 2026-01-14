@@ -29,6 +29,7 @@ func (c NDFC) RscDeployVrfAttachments(ctx context.Context, dg *diag.Diagnostics,
 	detach_present := false
 	var d *NDFCVrfNetworkDeployment
 	if va, ok := attachment.(*resource_vrf_bulk.NDFCVrfBulkModel); ok {
+		c.vrfAttachmentSerialRemap(ctx, va)
 		d = NewVrfNetworkDeployment(&c, va.FabricName, "vrfs")
 		c.fillDeploymentDBFromModel(ctx, va, d, &detach_present)
 	} else if payload, ok := attachment.(*rva.NDFCVrfAttachmentsPayloads); ok {
@@ -82,7 +83,7 @@ func (c NDFC) fillDeploymentDBFromModel(ctx context.Context, va *resource_vrf_bu
 			if attachEntry.Deployment == "false" || deployAllVrf ||
 				vrfEntry.DeployAttachments || attachEntry.DeployThisAttachment {
 				tflog.Info(ctx, fmt.Sprintf("RscDeployVrfAttachments: Deploying Attachment %s/%s", vrfName, serial))
-				d.updateDeploymentDB(serial, vrfName, attachEntry.Deployment)
+				d.updateDeploymentDB(attachEntry.SerialNumber, vrfName, attachEntry.Deployment)
 			}
 		}
 	}

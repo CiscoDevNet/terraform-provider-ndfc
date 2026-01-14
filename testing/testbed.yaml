@@ -9,6 +9,11 @@ ndfc:
     - "9CQ9P9E782H"
     - "9Q34PHYLDB5"
     - "9QBCTIN0FMY"
+  switch_ip:
+    - "192.168.20.50"
+    - "192.168.20.40"
+    - "192.168.20.30"
+  
   #VRFs/Networks created during the tests will have below prefix
   vrf_prefix: "vrf_a_test_"
   net_prefix: "net_a_test_"
