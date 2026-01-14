@@ -106,14 +106,16 @@ func (d *NDFCVrfNetworkDeployment) Deploy(ctx context.Context, dg *diag.Diagnost
 			//depAPI.SetDeployLocked()
 			deploy_post_payload := d.deployPayloadBulk(serial)
 			tflog.Info(ctx, fmt.Sprintf("Deploy:%s Deploying Attachments %s", d.RsType, deploy_post_payload))
-			for i := 0; i < 3; i++ {
+			for range 3 {
 				res, err := depAPI.DeployPost([]byte(deploy_post_payload))
+				// Always log the response for debugging
+				tflog.Debug(ctx, fmt.Sprintf("Deploy bulk: Response: %v", res.String()))
 				if err != nil {
-					tflog.Error(ctx, fmt.Sprintf("Deploy: Error in bulk deployment %s", err.Error()))
+					tflog.Error(ctx, fmt.Sprintf("Deploy: Error in bulk deployment %s, response: %s", err.Error(), res.String()))
 					continue
 				}
 				deployment_ok = true
-				tflog.Info(ctx, fmt.Sprintf("Deploy, bulk: Success res : %v", res.Str))
+				tflog.Info(ctx, fmt.Sprintf("Deploy, bulk: Success res : %v", res.String()))
 				break
 			}
 			if !deployment_ok {
@@ -137,13 +139,16 @@ func (d *NDFCVrfNetworkDeployment) Deploy(ctx context.Context, dg *diag.Diagnost
 				depAPI := api.NewDeploymentAPI("", d.GetLock(), &d.ctrlr.apiClient, d.RsType)
 				//depAPI.SetDeployLocked()
 				res, err := depAPI.DeployPost([]byte(deploy_post_payload))
+				// Always log the response for debugging
+				tflog.Debug(ctx, fmt.Sprintf("Deploy: %s: Response: %v", d.RsType, res.String()))
 				if err != nil {
 					//dg.AddError("Error in deploying attachments", err.Error())
-					tflog.Error(ctx, fmt.Sprintf("Deploy: %s: Error in deploying attachments %s", d.RsType, err.Error()))
+					tflog.Error(ctx, fmt.Sprintf("Deploy: %s: Error in deploying attachments %s, response: %s", d.RsType, err.Error(), res.String()))
 					depRsc.PostCount++
 					retryRscList = append(retryRscList, v)
+					continue
 				}
-				tflog.Info(ctx, fmt.Sprintf("Deploy: %s: Success res : %v", d.RsType, res.Str))
+				tflog.Info(ctx, fmt.Sprintf("Deploy: %s: Success res : %v", d.RsType, res.String()))
 			} else {
 				depRsc.SetCurrentState(NDFCStateFailed)
 				depRsc.failCnt = depRsc.PostCount

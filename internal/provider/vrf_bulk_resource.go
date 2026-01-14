@@ -67,8 +67,28 @@ func (r *vrfBulkResource) Create(ctx context.Context, req resource.CreateRequest
 	if resp.Diagnostics.HasError() {
 		return
 	}
-	// Create API call logic
-	vrfDone := r.client.RscCreateBulkVrf(ctx, &resp.Diagnostics, &in)
+
+	fabricName := in.FabricName.ValueString()
+
+	// Check the MSD type of this fabric
+	isMsdParent, parentFabric := r.client.CheckIsFabricMsdType(ctx, &resp.Diagnostics, fabricName)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+	isMsdChild := parentFabric != ""
+
+	var vrfDone *resource_vrf_bulk.VrfBulkModel
+
+	// Call appropriate function based on fabric type
+	if isMsdParent || isMsdChild {
+		// MSD fabric (parent or child)
+		vrfDone = r.client.RscCreateBulkVrfMsd(ctx, &resp.Diagnostics, &in, isMsdParent, isMsdChild, parentFabric)
+	} else {
+		// Regular (non-MSD) fabric
+		tflog.Info(ctx, fmt.Sprintf("Regular (non-MSD) fabric detected: %s", fabricName))
+		vrfDone = r.client.RscCreateBulkVrf(ctx, &resp.Diagnostics, &in)
+	}
+
 	if vrfDone == nil {
 		tflog.Error(ctx, "Create Bulk VRF Failed")
 		return
@@ -174,12 +194,28 @@ func (r *vrfBulkResource) Update(ctx context.Context, req resource.UpdateRequest
 		resp.Diagnostics.AddError("ID cannot be empty for update", "Id is mandatory - State may be corrupted")
 		return
 	}
-	// Update API call logic
 
-	// Create API call logic
-	r.client.RscUpdateBulkVrf(ctx, &resp.Diagnostics, unique_id, &planData, &stateData, &configData)
+	fabricName := planData.FabricName.ValueString()
+
+	// Check the MSD type of this fabric
+	isMsdParent, parentFabric := r.client.CheckIsFabricMsdType(ctx, &resp.Diagnostics, fabricName)
 	if resp.Diagnostics.HasError() {
-		tflog.Error(ctx, "Create Bulk VRF Failed")
+		return
+	}
+	isMsdChild := parentFabric != ""
+
+	// Call appropriate function based on fabric type
+	if isMsdParent || isMsdChild {
+		// MSD fabric (parent or child)
+		r.client.RscUpdateBulkVrfMsd(ctx, &resp.Diagnostics, unique_id, &planData, &stateData, &configData, isMsdParent, isMsdChild, parentFabric)
+	} else {
+		// Regular (non-MSD) fabric
+		tflog.Info(ctx, fmt.Sprintf("Regular (non-MSD) fabric detected: %s", fabricName))
+		r.client.RscUpdateBulkVrf(ctx, &resp.Diagnostics, unique_id, &planData, &stateData, &configData)
+	}
+
+	if resp.Diagnostics.HasError() {
+		tflog.Error(ctx, "Update Bulk VRF Failed")
 		return
 	}
 	// Handle empty Vrfs map
@@ -214,7 +250,24 @@ func (r *vrfBulkResource) Delete(ctx context.Context, req resource.DeleteRequest
 		return
 	}
 
-	r.client.RscDeleteBulkVrf(ctx, &resp.Diagnostics, data.Id.ValueString(), &data)
+	fabricName := data.FabricName.ValueString()
+
+	// Check the MSD type of this fabric
+	isMsdParent, parentFabric := r.client.CheckIsFabricMsdType(ctx, &resp.Diagnostics, fabricName)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+	isMsdChild := parentFabric != ""
+
+	// Call appropriate function based on fabric type
+	if isMsdParent || isMsdChild {
+		// MSD fabric (parent or child)
+		r.client.RscDeleteBulkVrfMsd(ctx, &resp.Diagnostics, data.Id.ValueString(), &data, isMsdParent, isMsdChild, parentFabric)
+	} else {
+		// Regular (non-MSD) fabric
+		tflog.Info(ctx, fmt.Sprintf("Regular (non-MSD) fabric detected: %s", fabricName))
+		r.client.RscDeleteBulkVrf(ctx, &resp.Diagnostics, data.Id.ValueString(), &data)
+	}
 
 	// Delete API call logic
 }
