@@ -1467,6 +1467,554 @@ func TestAccVRFResourceMixedReplaceAndUpdate(t *testing.T) {
 	)
 }
 
+// ==================== IP-KEY BASED TESTS ====================
+// These tests use IP addresses instead of serial numbers as attachment keys
+
+// TestAccVRFResourceIPKeyAttachmentCRUD tests attachment CRUD operations using IP addresses as keys
+func TestAccVRFResourceIPKeyAttachmentCRUD(t *testing.T) {
+
+	x := &map[string]string{
+		"RscType":  ndfc.ResourceVrfBulk,
+		"RscName":  "vrf_test",
+		"User":     helper.GetConfig("vrf").NDFC.User,
+		"Password": helper.GetConfig("vrf").NDFC.Password,
+		"Host":     helper.GetConfig("vrf").NDFC.URL,
+		"Insecure": helper.GetConfig("vrf").NDFC.Insecure,
+	}
+	vrfScaledBulk := new(resource_vrf_bulk.NDFCVrfBulkModel)
+	stepCount := new(int)
+	*stepCount = 0
+
+	resource.Test(t, resource.TestCase{
+
+		PreCheck:                 func() { testAccPreCheck(t, "vrf") },
+		ProtoV6ProviderFactories: testAccProtoV6ProviderFactories,
+		Steps: []resource.TestStep{
+			// Step 1: Create VRFs with 2 attachments using IP keys
+			{
+				Config: func() string {
+					*stepCount++
+					tName := fmt.Sprintf("%s_%d", t.Name(), *stepCount)
+
+					tfConfig := new(string)
+					helper.GenerateVrfBulkObject(&vrfScaledBulk, helper.GetConfig("vrf").NDFC.Fabric,
+						5, false, false, false, []string{helper.GetConfig("vrf").NDFC.SwitchIP[0], helper.GetConfig("vrf").NDFC.SwitchIP[1]})
+					helper.GetTFConfigWithSingleResource(tName, *x, []interface{}{vrfScaledBulk}, &tfConfig)
+					return *tfConfig
+				}(),
+				Check: resource.ComposeTestCheckFunc(VrfBulkModelHelperStateCheck(vrfTestRscName, *vrfScaledBulk, path.Empty())...),
+			},
+			// Step 2: Remove both attachments (detach)
+			{
+				Config: func() string {
+					*stepCount++
+					tName := fmt.Sprintf("%s_%d", t.Name(), *stepCount)
+					tfConfig := new(string)
+					helper.VrfAttachmentsMod(&vrfScaledBulk, 1, len(vrfScaledBulk.Vrfs), nil, "", nil)
+					helper.GetTFConfigWithSingleResource(tName, *x, []interface{}{vrfScaledBulk}, &tfConfig)
+					return *tfConfig
+				}(),
+				Check: resource.ComposeTestCheckFunc(VrfBulkModelHelperStateCheck(vrfTestRscName, *vrfScaledBulk, path.Empty())...),
+			},
+			// Step 3: Add 2 attachments back using IP keys
+			{
+				Config: func() string {
+					*stepCount++
+					tName := fmt.Sprintf("%s_%d", t.Name(), *stepCount)
+					tfConfig := new(string)
+					helper.VrfAttachmentsMod(&vrfScaledBulk, 1, len(vrfScaledBulk.Vrfs), []string{helper.GetConfig("vrf").NDFC.SwitchIP[0], helper.GetConfig("vrf").NDFC.SwitchIP[1]}, "", nil)
+					helper.GetTFConfigWithSingleResource(tName, *x, []interface{}{vrfScaledBulk}, &tfConfig)
+					return *tfConfig
+				}(),
+				Check: resource.ComposeTestCheckFunc(VrfBulkModelHelperStateCheck(vrfTestRscName, *vrfScaledBulk, path.Empty())...),
+			},
+			// Step 4: Add 3rd attachment using IP key
+			{
+				Config: func() string {
+					*stepCount++
+					tName := fmt.Sprintf("%s_%d", t.Name(), *stepCount)
+					tfConfig := new(string)
+					helper.VrfAttachmentsMod(&vrfScaledBulk, 1, len(vrfScaledBulk.Vrfs), helper.GetConfig("vrf").NDFC.SwitchIP, "", nil)
+					helper.GetTFConfigWithSingleResource(tName, *x, []interface{}{vrfScaledBulk}, &tfConfig)
+					return *tfConfig
+				}(),
+				Check: resource.ComposeTestCheckFunc(VrfBulkModelHelperStateCheck(vrfTestRscName, *vrfScaledBulk, path.Empty())...),
+			},
+			// Step 5: Modify params on specific attachment using IP key
+			{
+				Config: func() string {
+					tfConfig := new(string)
+					*stepCount++
+					tName := fmt.Sprintf("%s_%d", t.Name(), *stepCount)
+
+					helper.VrfAttachmentsMod(&vrfScaledBulk, 1, 1, helper.GetConfig("vrf").NDFC.SwitchIP, helper.GetConfig("vrf").NDFC.SwitchIP[2], map[string]interface{}{
+						"vlan":          3001,
+						"loopback_id":   1001,
+						"loopback_ipv4": "10.1.1.1",
+						"loopback_ipv6": "2001:db8::68",
+					})
+
+					helper.VrfAttachmentsMod(&vrfScaledBulk, 3, 3, helper.GetConfig("vrf").NDFC.SwitchIP, helper.GetConfig("vrf").NDFC.SwitchIP[2], map[string]interface{}{
+						"vlan":          3010,
+						"loopback_id":   1010,
+						"loopback_ipv4": "10.1.1.10",
+						"loopback_ipv6": "2001:db8::610",
+					})
+					helper.GetTFConfigWithSingleResource(tName, *x, []interface{}{vrfScaledBulk}, &tfConfig)
+					return *tfConfig
+				}(),
+				Check: resource.ComposeTestCheckFunc(VrfBulkModelHelperStateCheck(vrfTestRscName, *vrfScaledBulk, path.Empty())...),
+			},
+		}})
+}
+
+// TestAccVRFResourceIPKeyGlobalDeploy tests global deploy with IP-based attachment keys
+func TestAccVRFResourceIPKeyGlobalDeploy(t *testing.T) {
+
+	x := &map[string]string{
+		"RscType":  ndfc.ResourceVrfBulk,
+		"RscName":  "vrf_test",
+		"User":     helper.GetConfig("vrf").NDFC.User,
+		"Password": helper.GetConfig("vrf").NDFC.Password,
+		"Host":     helper.GetConfig("vrf").NDFC.URL,
+		"Insecure": helper.GetConfig("vrf").NDFC.Insecure,
+	}
+	vrfScaledBulk := new(resource_vrf_bulk.NDFCVrfBulkModel)
+	stepCount := new(int)
+	*stepCount = 0
+
+	resource.Test(t, resource.TestCase{
+		PreCheck:                 func() { testAccPreCheck(t, "vrf") },
+		ProtoV6ProviderFactories: testAccProtoV6ProviderFactories,
+		Steps: []resource.TestStep{
+			{
+				PreConfig: func() {
+					t.Logf(logTestStep, t.Name(), *stepCount)
+				},
+				Config: func() string {
+					*stepCount++
+					tName := fmt.Sprintf("%s_%d", t.Name(), *stepCount)
+
+					tfConfig := new(string)
+					helper.GenerateVrfBulkObject(&vrfScaledBulk, helper.GetConfig("vrf").NDFC.Fabric,
+						5, true, false, false, []string{helper.GetConfig("vrf").NDFC.SwitchIP[0], helper.GetConfig("vrf").NDFC.SwitchIP[1]})
+					helper.GetTFConfigWithSingleResource(tName, *x, []interface{}{vrfScaledBulk}, &tfConfig)
+					return *tfConfig
+				}(),
+				Check: resource.ComposeTestCheckFunc(VrfBulkModelHelperStateCheck(vrfTestRscName, *vrfScaledBulk, path.Empty())...),
+			},
+			{
+				// Add 3rd Attachment using IP key
+				Config: func() string {
+					*stepCount++
+					tName := fmt.Sprintf("%s_%d", t.Name(), *stepCount)
+					tfConfig := new(string)
+					helper.VrfAttachmentsMod(&vrfScaledBulk, 1, len(vrfScaledBulk.Vrfs), helper.GetConfig("vrf").NDFC.SwitchIP, "", nil)
+					helper.GetTFConfigWithSingleResource(tName, *x, []interface{}{vrfScaledBulk}, &tfConfig)
+					return *tfConfig
+				}(),
+				Check: resource.ComposeTestCheckFunc(VrfBulkModelHelperStateCheck(vrfTestRscName, *vrfScaledBulk, path.Empty())...),
+			},
+		},
+	})
+}
+
+// TestAccVRFResourceIPKeyVrfAttachLevelDeploy tests attachment-level deploy with IP-based keys
+func TestAccVRFResourceIPKeyVrfAttachLevelDeploy(t *testing.T) {
+
+	x := &map[string]string{
+		"RscType":  ndfc.ResourceVrfBulk,
+		"RscName":  "vrf_test",
+		"User":     helper.GetConfig("vrf").NDFC.User,
+		"Password": helper.GetConfig("vrf").NDFC.Password,
+		"Host":     helper.GetConfig("vrf").NDFC.URL,
+		"Insecure": helper.GetConfig("vrf").NDFC.Insecure,
+	}
+	vrfScaledBulk := new(resource_vrf_bulk.NDFCVrfBulkModel)
+	stepCount := new(int)
+	*stepCount = 0
+
+	resource.Test(t, resource.TestCase{
+		PreCheck:                 func() { testAccPreCheck(t, "vrf") },
+		ProtoV6ProviderFactories: testAccProtoV6ProviderFactories,
+		Steps: []resource.TestStep{
+			{
+				PreConfig: func() {
+					t.Logf(logTestStep, t.Name(), *stepCount)
+				},
+				Config: func() string {
+					*stepCount++
+					tName := fmt.Sprintf("%s_%d", t.Name(), *stepCount)
+
+					tfConfig := new(string)
+					helper.GenerateVrfBulkObject(&vrfScaledBulk, helper.GetConfig("vrf").NDFC.Fabric,
+						5, false, false, true, []string{helper.GetConfig("vrf").NDFC.SwitchIP[0], helper.GetConfig("vrf").NDFC.SwitchIP[1]})
+					helper.GetTFConfigWithSingleResource(tName, *x, []interface{}{vrfScaledBulk}, &tfConfig)
+					return *tfConfig
+				}(),
+				Check: resource.ComposeTestCheckFunc(VrfBulkModelHelperStateCheck(vrfTestRscName, *vrfScaledBulk, path.Empty())...),
+			},
+		},
+	})
+}
+
+// TestAccVRFResourceIPKeyAddRemoveVrfsWithDeploy tests add/remove VRFs with deploy using IP-based keys
+func TestAccVRFResourceIPKeyAddRemoveVrfsWithDeploy(t *testing.T) {
+	x := &map[string]string{
+		"RscType":  ndfc.ResourceVrfBulk,
+		"RscName":  "vrf_test",
+		"User":     helper.GetConfig("vrf").NDFC.User,
+		"Password": helper.GetConfig("vrf").NDFC.Password,
+		"Host":     helper.GetConfig("vrf").NDFC.URL,
+		"Insecure": helper.GetConfig("vrf").NDFC.Insecure,
+	}
+
+	tfConfig := new(string)
+	stepCount := new(int)
+	*stepCount = 0
+	vrfScaledBulk := new(resource_vrf_bulk.NDFCVrfBulkModel)
+
+	resource.Test(t, resource.TestCase{
+		PreCheck:                 func() { testAccPreCheck(t, "vrf") },
+		ProtoV6ProviderFactories: testAccProtoV6ProviderFactories,
+		Steps: []resource.TestStep{
+			// Step 1: Create 3 VRFs with 2 attachments each using IP keys (with deploy)
+			{
+				Config: func() string {
+					*stepCount++
+					tName := fmt.Sprintf("%s_%d", t.Name(), *stepCount)
+					helper.GenerateVrfBulkObject(&vrfScaledBulk, helper.GetConfig("vrf").NDFC.Fabric,
+						3, false, false, true, []string{helper.GetConfig("vrf").NDFC.SwitchIP[0], helper.GetConfig("vrf").NDFC.SwitchIP[1]})
+					helper.GetTFConfigWithSingleResource(tName, *x, []interface{}{vrfScaledBulk}, &tfConfig)
+					return *tfConfig
+				}(),
+				Check: resource.ComposeTestCheckFunc(VrfBulkModelHelperStateCheck(vrfTestRscName, *vrfScaledBulk, path.Empty())...),
+			},
+
+			// Step 2: Remove the 3rd VRF entirely
+			{
+				Config: func() string {
+					*stepCount++
+					tName := fmt.Sprintf("%s_%d", t.Name(), *stepCount)
+					helper.DeleteVrfs(&vrfScaledBulk, 3, 3)
+					helper.GetTFConfigWithSingleResource(tName, *x, []interface{}{vrfScaledBulk}, &tfConfig)
+					return *tfConfig
+				}(),
+				Check: resource.ComposeTestCheckFunc(VrfBulkModelHelperStateCheck(vrfTestRscName, *vrfScaledBulk, path.Empty())...),
+			},
+
+			// Step 3: Add the 3rd VRF back using IP keys
+			{
+				Config: func() string {
+					*stepCount++
+					tName := fmt.Sprintf("%s_%d", t.Name(), *stepCount)
+					helper.GenerateVrfBulkObject(&vrfScaledBulk, helper.GetConfig("vrf").NDFC.Fabric,
+						3, false, false, true, []string{helper.GetConfig("vrf").NDFC.SwitchIP[0], helper.GetConfig("vrf").NDFC.SwitchIP[1]})
+					helper.GetTFConfigWithSingleResource(tName, *x, []interface{}{vrfScaledBulk}, &tfConfig)
+					return *tfConfig
+				}(),
+				Check: resource.ComposeTestCheckFunc(VrfBulkModelHelperStateCheck(vrfTestRscName, *vrfScaledBulk, path.Empty())...),
+			},
+
+			// Step 4: Remove the 1st VRF
+			{
+				Config: func() string {
+					*stepCount++
+					tName := fmt.Sprintf("%s_%d", t.Name(), *stepCount)
+					helper.DeleteVrfs(&vrfScaledBulk, 1, 1)
+					helper.GetTFConfigWithSingleResource(tName, *x, []interface{}{vrfScaledBulk}, &tfConfig)
+					return *tfConfig
+				}(),
+				Check: resource.ComposeTestCheckFunc(VrfBulkModelHelperStateCheck(vrfTestRscName, *vrfScaledBulk, path.Empty())...),
+			},
+
+			// Step 5: Add both 1st and 2nd VRFs back using IP keys
+			{
+				Config: func() string {
+					*stepCount++
+					tName := fmt.Sprintf("%s_%d", t.Name(), *stepCount)
+					helper.GenerateVrfBulkObject(&vrfScaledBulk, helper.GetConfig("vrf").NDFC.Fabric,
+						3, false, false, true, []string{helper.GetConfig("vrf").NDFC.SwitchIP[0], helper.GetConfig("vrf").NDFC.SwitchIP[1]})
+					helper.GetTFConfigWithSingleResource(tName, *x, []interface{}{vrfScaledBulk}, &tfConfig)
+					return *tfConfig
+				}(),
+				Check: resource.ComposeTestCheckFunc(VrfBulkModelHelperStateCheck(vrfTestRscName, *vrfScaledBulk, path.Empty())...),
+			},
+		}},
+	)
+}
+
+// TestAccVRFResourceIPKeySimultaneousModifications tests complex updates with IP-based keys
+func TestAccVRFResourceIPKeySimultaneousModifications(t *testing.T) {
+	x := &map[string]string{
+		"RscType":  ndfc.ResourceVrfBulk,
+		"RscName":  "vrf_test",
+		"User":     helper.GetConfig("vrf").NDFC.User,
+		"Password": helper.GetConfig("vrf").NDFC.Password,
+		"Host":     helper.GetConfig("vrf").NDFC.URL,
+		"Insecure": helper.GetConfig("vrf").NDFC.Insecure,
+	}
+
+	tfConfig := new(string)
+	stepCount := new(int)
+	*stepCount = 0
+	vrfScaledBulk := new(resource_vrf_bulk.NDFCVrfBulkModel)
+
+	resource.Test(t, resource.TestCase{
+		PreCheck:                 func() { testAccPreCheck(t, "vrf") },
+		ProtoV6ProviderFactories: testAccProtoV6ProviderFactories,
+		Steps: []resource.TestStep{
+			// Step 1: Create 5 VRFs with 2 attachments each using IP keys
+			{
+				Config: func() string {
+					*stepCount++
+					tName := fmt.Sprintf("%s_%d", t.Name(), *stepCount)
+					helper.GenerateVrfBulkObject(&vrfScaledBulk, helper.GetConfig("vrf").NDFC.Fabric,
+						5, false, false, false, []string{helper.GetConfig("vrf").NDFC.SwitchIP[0], helper.GetConfig("vrf").NDFC.SwitchIP[1]})
+					helper.GetTFConfigWithSingleResource(tName, *x, []interface{}{vrfScaledBulk}, &tfConfig)
+					return *tfConfig
+				}(),
+				Check: resource.ComposeTestCheckFunc(VrfBulkModelHelperStateCheck(vrfTestRscName, *vrfScaledBulk, path.Empty())...),
+			},
+
+			// Step 2: Add 3rd attachment with deploy=false, toggle existing 2 attachments to deploy=true
+			{
+				Config: func() string {
+					*stepCount++
+					tName := fmt.Sprintf("%s_%d", t.Name(), *stepCount)
+					// Add 3rd attachment and enable deployment on existing attachments for all VRFs
+					for i := 1; i <= 5; i++ {
+						vrfName := helper.GetConfig("vrf").NDFC.VrfPrefix + strconv.Itoa(i)
+						if vrf, ok := vrfScaledBulk.Vrfs[vrfName]; ok {
+							// Toggle existing 2 attachments to deploy=true
+							for ipKey, attach := range vrf.AttachList {
+								attach.DeployThisAttachment = true
+								vrf.AttachList[ipKey] = attach
+							}
+							// Add 3rd attachment with deploy=false using IP key
+							thirdAttach := resource_vrf_attachments.NDFCAttachListValue{}
+							thirdAttach.SerialNumber = helper.GetConfig("vrf").NDFC.SwitchIP[2]
+							thirdAttach.DeployThisAttachment = false
+							vrf.AttachList[helper.GetConfig("vrf").NDFC.SwitchIP[2]] = thirdAttach
+							vrfScaledBulk.Vrfs[vrfName] = vrf
+						}
+					}
+					helper.GetTFConfigWithSingleResource(tName, *x, []interface{}{vrfScaledBulk}, &tfConfig)
+					return *tfConfig
+				}(),
+				Check: resource.ComposeTestCheckFunc(VrfBulkModelHelperStateCheck(vrfTestRscName, *vrfScaledBulk, path.Empty())...),
+			},
+
+			// Step 3: Toggle 3rd attachment to deploy=true
+			{
+				Config: func() string {
+					*stepCount++
+					tName := fmt.Sprintf("%s_%d", t.Name(), *stepCount)
+					// Toggle 3rd attachment to deploy=true for all VRFs
+					for i := 1; i <= 5; i++ {
+						vrfName := helper.GetConfig("vrf").NDFC.VrfPrefix + strconv.Itoa(i)
+						if vrf, ok := vrfScaledBulk.Vrfs[vrfName]; ok {
+							thirdIP := helper.GetConfig("vrf").NDFC.SwitchIP[2]
+							if attach, ok := vrf.AttachList[thirdIP]; ok {
+								attach.DeployThisAttachment = true
+								vrf.AttachList[thirdIP] = attach
+								vrfScaledBulk.Vrfs[vrfName] = vrf
+							}
+						}
+					}
+					helper.GetTFConfigWithSingleResource(tName, *x, []interface{}{vrfScaledBulk}, &tfConfig)
+					return *tfConfig
+				}(),
+				Check: resource.ComposeTestCheckFunc(VrfBulkModelHelperStateCheck(vrfTestRscName, *vrfScaledBulk, path.Empty())...),
+			},
+
+			// Step 4: Complex simultaneous modifications across multiple VRFs
+			{
+				Config: func() string {
+					*stepCount++
+					tName := fmt.Sprintf("%s_%d", t.Name(), *stepCount)
+
+					// 1. Modify vlan parameters on attachment 2 (SwitchIP[1]) for VRFs 1-3
+					for i := 1; i <= 3; i++ {
+						vrfName := helper.GetConfig("vrf").NDFC.VrfPrefix + strconv.Itoa(i)
+						if vrf, ok := vrfScaledBulk.Vrfs[vrfName]; ok {
+							secondIP := helper.GetConfig("vrf").NDFC.SwitchIP[1]
+							if attach, ok := vrf.AttachList[secondIP]; ok {
+								attach.Vlan = new(types.Int64Custom)
+								*attach.Vlan = types.Int64Custom(1000 + i) // 1001, 1002, 1003
+								vrf.AttachList[secondIP] = attach
+								vrfScaledBulk.Vrfs[vrfName] = vrf
+							}
+						}
+					}
+
+					// 2. Delete VRF 4 entirely
+					vrfName4 := helper.GetConfig("vrf").NDFC.VrfPrefix + "4"
+					delete(vrfScaledBulk.Vrfs, vrfName4)
+
+					// 3. From VRF 5, remove 2nd and 3rd attachments
+					vrfName5 := helper.GetConfig("vrf").NDFC.VrfPrefix + "5"
+					if vrf5, ok := vrfScaledBulk.Vrfs[vrfName5]; ok {
+						delete(vrf5.AttachList, helper.GetConfig("vrf").NDFC.SwitchIP[1])
+						delete(vrf5.AttachList, helper.GetConfig("vrf").NDFC.SwitchIP[2])
+						vrfScaledBulk.Vrfs[vrfName5] = vrf5
+					}
+
+					helper.GetTFConfigWithSingleResource(tName, *x, []interface{}{vrfScaledBulk}, &tfConfig)
+					return *tfConfig
+				}(),
+				Check: resource.ComposeTestCheckFunc(VrfBulkModelHelperStateCheck(vrfTestRscName, *vrfScaledBulk, path.Empty())...),
+			},
+		}},
+	)
+}
+
+// TestAccVRFResourceIPKeyVrfLevelDeploy tests VRF-level deploy (deploy_attachments) with IP-based keys
+func TestAccVRFResourceIPKeyVrfLevelDeploy(t *testing.T) {
+
+	x := &map[string]string{
+		"RscType":  ndfc.ResourceVrfBulk,
+		"RscName":  "vrf_test",
+		"User":     helper.GetConfig("vrf").NDFC.User,
+		"Password": helper.GetConfig("vrf").NDFC.Password,
+		"Host":     helper.GetConfig("vrf").NDFC.URL,
+		"Insecure": helper.GetConfig("vrf").NDFC.Insecure,
+	}
+	vrfScaledBulk := new(resource_vrf_bulk.NDFCVrfBulkModel)
+	stepCount := new(int)
+	*stepCount = 0
+
+	resource.Test(t, resource.TestCase{
+		PreCheck:                 func() { testAccPreCheck(t, "vrf") },
+		ProtoV6ProviderFactories: testAccProtoV6ProviderFactories,
+		Steps: []resource.TestStep{
+			// Step 1: Create 5 VRFs with deploy_attachments=true, 2 IP-keyed attachments each
+			{
+				PreConfig: func() {
+					t.Logf(logTestStep, t.Name(), *stepCount)
+				},
+				Config: func() string {
+					*stepCount++
+					tName := fmt.Sprintf("%s_%d", t.Name(), *stepCount)
+
+					tfConfig := new(string)
+					helper.GenerateVrfBulkObject(&vrfScaledBulk, helper.GetConfig("vrf").NDFC.Fabric,
+						5, false, true, false, []string{helper.GetConfig("vrf").NDFC.SwitchIP[0], helper.GetConfig("vrf").NDFC.SwitchIP[1]})
+					helper.GetTFConfigWithSingleResource(tName, *x, []interface{}{vrfScaledBulk}, &tfConfig)
+					return *tfConfig
+				}(),
+				Check: resource.ComposeTestCheckFunc(VrfBulkModelHelperStateCheck(vrfTestRscName, *vrfScaledBulk, path.Empty())...),
+			},
+			// Step 2: Add 3rd attachment using IP key (auto-deployed via VRF-level flag)
+			{
+				Config: func() string {
+					*stepCount++
+					tName := fmt.Sprintf("%s_%d", t.Name(), *stepCount)
+					tfConfig := new(string)
+					helper.VrfAttachmentsMod(&vrfScaledBulk, 1, len(vrfScaledBulk.Vrfs), helper.GetConfig("vrf").NDFC.SwitchIP, "", nil)
+					helper.GetTFConfigWithSingleResource(tName, *x, []interface{}{vrfScaledBulk}, &tfConfig)
+					return *tfConfig
+				}(),
+				Check: resource.ComposeTestCheckFunc(VrfBulkModelHelperStateCheck(vrfTestRscName, *vrfScaledBulk, path.Empty())...),
+			},
+		},
+	})
+}
+
+// TestAccVRFResourceIPKeyMixedKeys tests attachments with mixed keys (serial + IP) in same VRF
+func TestAccVRFResourceIPKeyMixedKeys(t *testing.T) {
+
+	x := &map[string]string{
+		"RscType":  ndfc.ResourceVrfBulk,
+		"RscName":  "vrf_test",
+		"User":     helper.GetConfig("vrf").NDFC.User,
+		"Password": helper.GetConfig("vrf").NDFC.Password,
+		"Host":     helper.GetConfig("vrf").NDFC.URL,
+		"Insecure": helper.GetConfig("vrf").NDFC.Insecure,
+	}
+
+	tfConfig := new(string)
+	stepCount := new(int)
+	*stepCount = 0
+	vrfScaledBulk := new(resource_vrf_bulk.NDFCVrfBulkModel)
+
+	resource.Test(t, resource.TestCase{
+		PreCheck:                 func() { testAccPreCheck(t, "vrf") },
+		ProtoV6ProviderFactories: testAccProtoV6ProviderFactories,
+		Steps: []resource.TestStep{
+			// Step 1: Create 3 VRFs with mixed keys - 1st attachment uses serial, 2nd uses IP
+			{
+				Config: func() string {
+					*stepCount++
+					tName := fmt.Sprintf("%s_%d", t.Name(), *stepCount)
+
+					// Create VRFs with mixed attachment keys
+					vrfScaledBulk.FabricName = helper.GetConfig("vrf").NDFC.Fabric
+					vrfScaledBulk.DeployAllAttachments = false
+					vrfScaledBulk.Vrfs = make(map[string]resource_vrf_bulk.NDFCVrfsValue)
+
+					for i := 1; i <= 3; i++ {
+						vrfName := helper.GetConfig("vrf").NDFC.VrfPrefix + strconv.Itoa(i)
+						vrf := resource_vrf_bulk.NDFCVrfsValue{}
+						vrf.DeployAttachments = true
+						vrf.AttachList = make(map[string]resource_vrf_attachments.NDFCAttachListValue)
+
+						// First attachment uses serial number as key
+						attach1 := resource_vrf_attachments.NDFCAttachListValue{}
+						//attach1.SerialNumber = helper.GetConfig("vrf").NDFC.Switches[0]
+						vrf.AttachList[helper.GetConfig("vrf").NDFC.Switches[0]] = attach1
+
+						// Second attachment uses IP address as key
+						attach2 := resource_vrf_attachments.NDFCAttachListValue{}
+						//attach2.SerialNumber = helper.GetConfig("vrf").NDFC.SwitchIP[1]
+						vrf.AttachList[helper.GetConfig("vrf").NDFC.SwitchIP[1]] = attach2
+
+						vrfScaledBulk.Vrfs[vrfName] = vrf
+					}
+
+					helper.GetTFConfigWithSingleResource(tName, *x, []interface{}{vrfScaledBulk}, &tfConfig)
+					return *tfConfig
+				}(),
+				Check: resource.ComposeTestCheckFunc(VrfBulkModelHelperStateCheck(vrfTestRscName, *vrfScaledBulk, path.Empty())...),
+			},
+			// Step 2: Add 3rd attachment using IP key
+			{
+				Config: func() string {
+					*stepCount++
+					tName := fmt.Sprintf("%s_%d", t.Name(), *stepCount)
+
+					for vrfName, vrf := range vrfScaledBulk.Vrfs {
+						attach3 := resource_vrf_attachments.NDFCAttachListValue{}
+						//attach3.SerialNumber = helper.GetConfig("vrf").NDFC.SwitchIP[2]
+						vrf.AttachList[helper.GetConfig("vrf").NDFC.SwitchIP[2]] = attach3
+						vrfScaledBulk.Vrfs[vrfName] = vrf
+					}
+
+					helper.GetTFConfigWithSingleResource(tName, *x, []interface{}{vrfScaledBulk}, &tfConfig)
+					return *tfConfig
+				}(),
+				Check: resource.ComposeTestCheckFunc(VrfBulkModelHelperStateCheck(vrfTestRscName, *vrfScaledBulk, path.Empty())...),
+			},
+			// Step 3: Remove the serial-based attachment, keep IP-based ones
+			{
+				Config: func() string {
+					*stepCount++
+					tName := fmt.Sprintf("%s_%d", t.Name(), *stepCount)
+
+					for vrfName, vrf := range vrfScaledBulk.Vrfs {
+						delete(vrf.AttachList, helper.GetConfig("vrf").NDFC.Switches[0])
+						vrfScaledBulk.Vrfs[vrfName] = vrf
+					}
+
+					helper.GetTFConfigWithSingleResource(tName, *x, []interface{}{vrfScaledBulk}, &tfConfig)
+					return *tfConfig
+				}(),
+				Check: resource.ComposeTestCheckFunc(VrfBulkModelHelperStateCheck(vrfTestRscName, *vrfScaledBulk, path.Empty())...),
+			},
+		},
+	})
+}
+
 // TestAccVRFResourceFreeformConfig tests freeform config on VRF attachments
 // Tests setting, updating, and removing freeform config
 func TestAccVRFResourceFreeformConfig(t *testing.T) {

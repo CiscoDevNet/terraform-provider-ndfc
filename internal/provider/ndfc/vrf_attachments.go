@@ -70,6 +70,7 @@ func VrfAttachmentsSplitID(id string) (string, []string) {
 func (c NDFC) RscCreateVrfAttachments(ctx context.Context, dg *diag.Diagnostics, va *rva.NDFCVrfAttachmentsPayloads) error {
 	tflog.Debug(ctx, "RscCreateVrfAttachments: Entering Create")
 
+	//c.vrfAttachmentSerialRemapFromPayload(ctx, va)
 	// Attach the VRF Attachments
 	data, err := json.Marshal(va.VrfAttachments)
 	if err != nil {
@@ -87,7 +88,10 @@ func (c NDFC) RscCreateVrfAttachments(ctx context.Context, dg *diag.Diagnostics,
 	return nil
 }
 
-func (c NDFC) RscGetVrfAttachments(ctx context.Context, dg *diag.Diagnostics, vrfs *resource_vrf_bulk.NDFCVrfBulkModel) error {
+func (c NDFC) RscGetVrfAttachments(ctx context.Context, dg *diag.Diagnostics,
+	vrfs *resource_vrf_bulk.NDFCVrfBulkModel,
+	keyMap *map[string]string) error {
+
 	tflog.Debug(ctx, "RscGetVrfAttachments: Entering Get")
 	res, err := c.getVrfAttachments(ctx, vrfs.FabricName, vrfs.GetVrfNames())
 	if err != nil {
@@ -108,7 +112,7 @@ func (c NDFC) RscGetVrfAttachments(ctx context.Context, dg *diag.Diagnostics, vr
 		return err
 	}
 
-	vrfs.FillAttachmentsFromPayload(&vaPayload)
+	vrfs.FillAttachmentsFromPayload(&vaPayload, keyMap)
 	// Filter out the implicit attachments
 	for i, vrfEntry := range vrfs.Vrfs {
 		skip := 0
@@ -184,6 +188,8 @@ func (c NDFC) RscUpdateVrfAttachments(ctx context.Context, dg *diag.Diagnostics,
 	// Create the VRF Attachments
 
 	printSummary(actionMap)
+	// convert IP to Serial if needed
+	c.vrfAttachmentSerialRemapFromPayload(ctx, updateVA)
 
 	if updateVA == nil || len(updateVA.VrfAttachments) == 0 {
 		tflog.Warn(ctx, "RscUpdateVrfAttachments: No VRF Attachments to update")
@@ -215,6 +221,7 @@ func (c NDFC) RscUpdateVrfAttachments(ctx context.Context, dg *diag.Diagnostics,
 		tflog.Warn(ctx, "RscUpdateVrfAttachments: Global Undeploy not supported yet")
 	} else {
 		tflog.Info(ctx, "RscUpdateVrfAttachments: Deploying the changes")
+		c.vrfAttachmentSerialRemapFromPayload(ctx, deployVA)
 		c.RscDeployVrfAttachments(ctx, dg, deployVA)
 		//c.DeployVrfFromPayload(ctx, dg, deployVA)
 	}
@@ -286,7 +293,11 @@ func printSummary(actionMap map[string]*rva.NDFCVrfAttachmentsPayloads) {
 
 func (c NDFC) RscDeleteVrfAttachments(ctx context.Context, dg *diag.Diagnostics, delVrf *resource_vrf_bulk.NDFCVrfBulkModel) error {
 	tflog.Debug(ctx, "RscDeleteVrfAttachments: Entering Delete")
+	_ = c.vrfAttachmentSerialRemap(ctx, delVrf)
 	va := delVrf.FillAttachPayloadFromModel(true)
+	// Fill serial numbers if the keys are IP
+	//c.vrfAttachmentSerialRemapFromPayload(ctx, va)
+
 	va.FabricName = delVrf.FabricName
 	if len(va.VrfAttachments) == 0 {
 		tflog.Info(ctx, "vrfAttachmentsDelete: No attachments to delete")
