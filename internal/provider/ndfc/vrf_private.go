@@ -14,6 +14,8 @@ import (
 	"errors"
 	"fmt"
 	"log"
+	"net"
+	rva "terraform-provider-ndfc/internal/provider/resources/resource_vrf_attachments"
 	"terraform-provider-ndfc/internal/provider/resources/resource_vrf_bulk"
 	. "terraform-provider-ndfc/internal/provider/types"
 
@@ -22,6 +24,11 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-log/tflog"
 	"github.com/tidwall/gjson"
+)
+
+const (
+	KeyTypeIP     = uint16(1)
+	KeyTypeSerial = uint16(2)
 )
 
 func (c NDFC) vrfCreateBulk(ctx context.Context, fabricName string, vrfsPayload *resource_vrf_bulk.NDFCBulkVrfPayload) error {
@@ -342,7 +349,7 @@ func (c NDFC) fillMissingParams(ctx context.Context, ndVRFs *resource_vrf_bulk.N
 			if vrfEntry.AttachList[serial].FilterThisValue {
 				continue
 			}
-			serialNumbersSet[serial] = true
+			serialNumbersSet[vrfEntry.AttachList[serial].SwitchSerialNo] = true
 		}
 	}
 
@@ -418,4 +425,61 @@ func (c NDFC) fillMissingParams(ctx context.Context, ndVRFs *resource_vrf_bulk.N
 	tflog.Info(ctx, fmt.Sprintf("fillMissingParams: Complete - Updated=%d, Skipped=%d, Errors=%d",
 		totalUpdated, totalSkipped, totalErrors))
 	return nil
+}
+
+func (c NDFC) vrfAttachmentSerialRemap(ctx context.Context, vrf *resource_vrf_bulk.NDFCVrfBulkModel) map[string]string {
+	keyMap := make(map[string]string)
+	for vrfName, vrfEntry := range vrf.Vrfs {
+		for attKey, attachEntry := range vrfEntry.AttachList {
+			// check if key is IP or Serial
+			if net.ParseIP(attKey) != nil {
+				// IP
+				serial := c.GetSerialFromIP(ctx, vrf.FabricName, attKey)
+				if serial == "" {
+					panic(fmt.Sprintf("Failed to get serial for IP %s in fabric %s", attKey, vrf.FabricName))
+				}
+				attachEntry.SerialNumber = serial
+			} else {
+				// Serial
+				attachEntry.SerialNumber = attKey
+			}
+			vrfEntry.AttachList[attKey] = attachEntry
+			kk := vrfName + ":" + attachEntry.SerialNumber
+			keyMap[kk] = attKey
+		}
+		vrf.Vrfs[vrfName] = vrfEntry
+	}
+	return keyMap
+}
+
+func (c NDFC) vrfAttachmentSerialRemapFromPayload(ctx context.Context, payload *rva.NDFCVrfAttachmentsPayloads) {
+	for v := range payload.VrfAttachments {
+		vrfEntry := &payload.VrfAttachments[v]
+		for i := range vrfEntry.AttachList {
+			// check if key is IP or Serial
+			if net.ParseIP(vrfEntry.AttachList[i].SerialNumber) != nil {
+				// IP
+				serial := c.GetSerialFromIP(ctx, payload.FabricName, vrfEntry.AttachList[i].SerialNumber)
+				if serial == "" {
+					panic(fmt.Sprintf("Failed to get serial for IP %s in fabric %s", vrfEntry.AttachList[i].SerialNumber, payload.FabricName))
+				}
+				vrfEntry.AttachList[i].SerialNumber = serial
+			}
+		}
+	}
+}
+
+func vrfAttachmentKeyMap(ctx context.Context, vrf *resource_vrf_bulk.NDFCVrfBulkModel) map[string]uint16 {
+	keyMap := make(map[string]uint16)
+	for vrfName, vrfEntry := range vrf.Vrfs {
+		for attKey := range vrfEntry.AttachList {
+			key := vrfName + ":" + attKey
+			if net.ParseIP(attKey) != nil {
+				keyMap[key] = KeyTypeIP
+			} else {
+				keyMap[key] = KeyTypeSerial
+			}
+		}
+	}
+	return keyMap
 }

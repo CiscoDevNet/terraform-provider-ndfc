@@ -28,11 +28,12 @@ type NDFC struct {
 	rscMutex              map[string]*sync.Mutex
 	WaitForDeployComplete bool
 	deployMutex           *sync.RWMutex
+	switchDB              *SwitchDB
 }
 
 const ResourceRestAPI = "rest_api"
-var instance *NDFC
 
+var instance *NDFC
 
 func NewNDFCClient(host string, user string, pass string, domain string, insecure bool, timeout int64) (*NDFC, error) {
 	log.Printf("New NDFC client")
@@ -59,6 +60,8 @@ func NewNDFCClient(host string, user string, pass string, domain string, insecur
 		return nil, err
 	}
 	log.Printf("[DEBUG] Authentication successful during creation of NewNDFCClient with token: %s", ndfc.apiClient.Token)
+
+	ndfc.switchDB = NewSwitchDB(ndfc.GetSwitchesInFabric)
 
 	instance = ndfc
 	return ndfc, nil
