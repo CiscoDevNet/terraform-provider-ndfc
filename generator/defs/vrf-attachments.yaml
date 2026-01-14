@@ -14,7 +14,10 @@ resource:
       model_name: fabric
       tf_name: fabric
       type: String
-      description: The name of the fabric
+      description: The name of the child fabric this attachment is
+                   present in, only applicable when global fabric name
+                   is MSD parent fabric,
+                   otherwise this field should remain empty.
     - &deploy
       model_name: deployAllAttachments
       tf_name: deploy_all_attachments
