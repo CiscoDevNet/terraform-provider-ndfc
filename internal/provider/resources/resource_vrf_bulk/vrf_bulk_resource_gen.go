@@ -82,8 +82,8 @@ func VrfBulkResourceSchema(ctx context.Context) schema.Schema {
 									"fabric": schema.StringAttribute{
 										Optional:            true,
 										Computed:            true,
-										Description:         "The name of the fabric",
-										MarkdownDescription: "The name of the fabric",
+										Description:         "The name of the child fabric this attachment is present in, only applicable when global fabric name is MSD parent fabric, otherwise this field should remain empty.",
+										MarkdownDescription: "The name of the child fabric this attachment is present in, only applicable when global fabric name is MSD parent fabric, otherwise this field should remain empty.",
 									},
 									"freeform_config": schema.StringAttribute{
 										Optional:            true,
