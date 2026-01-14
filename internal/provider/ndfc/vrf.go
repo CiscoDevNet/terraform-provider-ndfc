@@ -87,7 +87,9 @@ func (c NDFC) VrfBulkCreateID(ndVrfs *resource_vrf_bulk.NDFCVrfBulkModel) string
 	return ""
 }
 
-func (c NDFC) RscGetBulkVrf(ctx context.Context, dg *diag.Diagnostics, ID string, depMap *map[string][]string) *resource_vrf_bulk.VrfBulkModel {
+func (c NDFC) RscGetBulkVrf(ctx context.Context, dg *diag.Diagnostics, ID string,
+	depMap *map[string][]string,
+	keyMap *map[string]string) *resource_vrf_bulk.VrfBulkModel {
 	var filterMap map[string]bool
 	tflog.Debug(ctx, fmt.Sprintf("RscGetBulkVrf entry fabirc %s", ID))
 
@@ -135,7 +137,8 @@ func (c NDFC) RscGetBulkVrf(ctx context.Context, dg *diag.Diagnostics, ID string
 	}
 
 	//Get Attachments
-	err = c.RscGetVrfAttachments(ctx, dg, &ndVrfs)
+	err = c.RscGetVrfAttachments(ctx, dg, &ndVrfs, keyMap)
+
 	if err == nil {
 		for i, vrfEntry := range ndVrfs.Vrfs {
 			if vrfEntry.FilterThisValue {
@@ -161,7 +164,7 @@ func (c NDFC) RscGetBulkVrf(ctx context.Context, dg *diag.Diagnostics, ID string
 				deps := (*depMap)[i]
 				if len(deps) > 0 {
 					for _, dep := range deps {
-						if dep == j {
+						if dep == attachEntry.SwitchSerialNo {
 							attachLevelDep = true
 							log.Printf("Attachment level dep flag is set for  %s/%s", i, j)
 						}
@@ -251,7 +254,7 @@ func (c NDFC) RscImportBulkVrf(ctx context.Context, dg *diag.Diagnostics, ID str
 		return nil
 	}
 	//Get Attachments
-	err = c.RscGetVrfAttachments(ctx, dg, &ndVrfs)
+	err = c.RscGetVrfAttachments(ctx, dg, &ndVrfs, nil)
 	if err == nil {
 		for i, vrfEntry := range ndVrfs.Vrfs {
 			if vrfEntry.FilterThisValue {
@@ -360,6 +363,7 @@ func (c NDFC) RscCreateBulkVrf(ctx context.Context, dg *diag.Diagnostics, vrfBul
 	//Part 2: Create Attachments if any
 
 	// fill the attachment entries
+	keyMap := c.vrfAttachmentSerialRemap(ctx, vrf)
 	va := vrf.FillAttachPayloadFromModel(false)
 
 	if len(va.VrfAttachments) > 0 {
@@ -373,7 +377,8 @@ func (c NDFC) RscCreateBulkVrf(ctx context.Context, dg *diag.Diagnostics, vrfBul
 		//Check and deploy
 		c.RscDeployVrfAttachments(ctx, dg, vrf)
 	}
-	outVrf := c.RscGetBulkVrf(ctx, dg, ID, &va.DepMap)
+
+	outVrf := c.RscGetBulkVrf(ctx, dg, ID, &va.DepMap, &keyMap)
 	if outVrf == nil {
 		tflog.Error(ctx, "Failed to verify: Reading from NDFC after create failed")
 		dg.AddError("Failed to verify", "Reading from NDFC after create failed")
@@ -555,10 +560,10 @@ func (c NDFC) RscUpdateBulkVrf(ctx context.Context,
 		tflog.Error(ctx, "Error during update")
 		return
 	}
+	keyMap := c.vrfAttachmentSerialRemap(ctx, plan)
 	newID := c.VrfBulkCreateID(plan)
 	depMap := FillDeployMap(plan)
-
-	*(vrfBulkPlan) = *(c.RscGetBulkVrf(ctx, dg, newID, &depMap))
+	*(vrfBulkPlan) = *(c.RscGetBulkVrf(ctx, dg, newID, &depMap, &keyMap))
 }
 
 func FillDeployMap(plan *resource_vrf_bulk.NDFCVrfBulkModel) map[string][]string {

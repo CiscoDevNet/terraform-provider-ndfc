@@ -67,6 +67,7 @@ type NDFCConfig struct {
 	Insecure          string           `yaml:"insecure"`
 	Fabric            string           `yaml:"fabric"`
 	Switches          []string         `yaml:"switches"`
+	SwitchIP          []string         `yaml:"switch_ip"`
 	VrfPrefix         string           `yaml:"vrf_prefix"`
 	NetPrefix         string           `yaml:"net_prefix"`
 	VpcPair           []string         `yaml:"vpc_pair"`

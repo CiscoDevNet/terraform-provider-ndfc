@@ -202,3 +202,11 @@ func (c *NDFC) GetDeviceName(ctx context.Context, fabricName, serialNumber strin
 		return response.SerialNumMap[serialNumber].SwitchName, nil
 	*/
 }
+
+func (c *NDFC) GetSerialFromIP(ctx context.Context, fabricName, ip string) string {
+	sw, status := c.switchDB.GetSerialByIP(ctx, fabricName, ip)
+	if status {
+		return sw
+	}
+	return ""
+}
