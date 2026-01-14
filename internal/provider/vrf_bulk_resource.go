@@ -12,6 +12,7 @@ import (
 	"context"
 	"fmt"
 	"log"
+	"net"
 	"terraform-provider-ndfc/internal/provider/ndfc"
 	"terraform-provider-ndfc/internal/provider/resources/resource_vrf_bulk"
 
@@ -100,24 +101,37 @@ func (r *vrfBulkResource) Read(ctx context.Context, req resource.ReadRequest, re
 		log.Printf("[DEBUG] DeployAllAttachments flag set")
 		deployMap["global"] = append(deployMap["global"], "all")
 	}
+	keyMap := make(map[string]string)
 	for vrfName, v := range dataVrf.Vrfs {
 		v.VrfName = vrfName
 		if v.DeployAttachments {
 			//first element is the vrf itself - means deploy enabled at vrf level
 			deployMap[v.VrfName] = append(deployMap[v.VrfName], v.VrfName)
 		}
-		for serial, s := range v.AttachList {
-			s.SerialNumber = serial
+		for attachKey, s := range v.AttachList {
+			if net.ParseIP(attachKey) != nil {
+				serial := r.client.GetSerialFromIP(ctx, dataVrf.FabricName, attachKey)
+				kk := vrfName + ":" + serial
+				log.Printf("[DEBUG] Key: %s, attach-key: %s", kk, attachKey)
+				keyMap[kk] = attachKey
+				s.SerialNumber = serial
+			} else {
+				// It's a serial number
+				kk := vrfName + ":" + attachKey
+				log.Printf("[DEBUG] Key: %s, attach-key: %s", kk, attachKey)
+				keyMap[kk] = attachKey
+				s.SerialNumber = attachKey
+			}
 			if s.DeployThisAttachment {
 				deployMap[v.VrfName] = append(deployMap[v.VrfName], s.SerialNumber)
 			}
-			v.AttachList[serial] = s
+			v.AttachList[attachKey] = s
 		}
 		dataVrf.Vrfs[vrfName] = v
 	}
 
 	tflog.Info(ctx, fmt.Sprintf("Incoming ID %s", unique_id))
-	dd := r.client.RscGetBulkVrf(ctx, &resp.Diagnostics, unique_id, &deployMap)
+	dd := r.client.RscGetBulkVrf(ctx, &resp.Diagnostics, unique_id, &deployMap, &keyMap)
 	if dd == nil {
 		tflog.Error(ctx, "Read Bulk VRF Failed")
 		resp.Diagnostics.AddWarning("Read Failure", "No configuration found in NDFC")

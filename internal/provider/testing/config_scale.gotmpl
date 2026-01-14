@@ -60,7 +60,6 @@ resource "ndfc_{{.RscType}}" "{{.RscName}}" {
             attach_list = {
                 {{- range $attach, $attachEntry := $vrfEntry.AttachList}}
                 "{{$attach}}" : {
-                    serial_number = "{{$attachEntry.SerialNumber}}"
                     {{- if $attachEntry.Vlan}}
                     vlan = "{{$attachEntry.Vlan}}"
                     {{- end}}
