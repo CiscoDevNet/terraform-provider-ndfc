@@ -13,6 +13,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"log"
+	"net"
 	"regexp"
 	"strings"
 	"terraform-provider-ndfc/internal/provider/datasources/datasource_networks"
@@ -71,6 +72,8 @@ func (c *NDFC) RscCreateNetworks(ctx context.Context, dg *diag.Diagnostics, in *
 		return nil
 	}
 
+	keyMap := c.netAttachmentSerialRemap(ctx, nw)
+
 	//Part 1: Create Networks
 
 	err = c.networksCreate(ctx, nw.FabricName, nw)
@@ -89,9 +92,9 @@ func (c *NDFC) RscCreateNetworks(ctx context.Context, dg *diag.Diagnostics, in *
 		if entry.DeployAttachments {
 			depMap[i] = append(depMap[i], i)
 		}
-		for j, attachEntry := range entry.Attachments {
+		for _, attachEntry := range entry.Attachments {
 			if attachEntry.DeployThisAttachment {
-				depMap[i] = append(depMap[i], j)
+				depMap[i] = append(depMap[i], attachEntry.SerialNumber)
 			}
 		}
 	}
@@ -107,7 +110,7 @@ func (c *NDFC) RscCreateNetworks(ctx context.Context, dg *diag.Diagnostics, in *
 	//Part 3: Deploy Attachments if any
 	c.RscDeployNetworkAttachments(ctx, dg, nw)
 
-	out := c.RscGetNetworks(ctx, dg, ID, &depMap)
+	out := c.RscGetNetworks(ctx, dg, ID, &depMap, &keyMap)
 	if out == nil {
 		tflog.Error(ctx, "Failed to verify: Reading from NDFC after create failed")
 		dg.AddError("Failed to verify", "Reading from NDFC after create failed")
@@ -119,7 +122,7 @@ func (c *NDFC) RscCreateNetworks(ctx context.Context, dg *diag.Diagnostics, in *
 	return out
 }
 
-func (c *NDFC) RscGetNetworks(ctx context.Context, dg *diag.Diagnostics, ID string, depMap *map[string][]string) *resource_networks.NetworksModel {
+func (c *NDFC) RscGetNetworks(ctx context.Context, dg *diag.Diagnostics, ID string, depMap *map[string][]string, keyMap *map[string]string) *resource_networks.NetworksModel {
 	// Read API call logic
 	var filterMap map[string]bool
 	tflog.Debug(ctx, fmt.Sprintf("RscGetNetworks entry fabirc %s", ID))
@@ -171,7 +174,7 @@ func (c *NDFC) RscGetNetworks(ctx context.Context, dg *diag.Diagnostics, ID stri
 
 	//Get Attachments
 
-	err = c.RscGetNetworkAttachments(ctx, ndNets)
+	err = c.RscGetNetworkAttachments(ctx, ndNets, keyMap)
 	if err == nil {
 		tflog.Debug(ctx, "Network Attachments read success")
 
@@ -198,7 +201,7 @@ func (c *NDFC) RscGetNetworks(ctx context.Context, dg *diag.Diagnostics, ID stri
 				deps := (*depMap)[i]
 				if len(deps) > 0 {
 					for _, dep := range deps {
-						if dep == j {
+						if dep == attachEntry.SwitchSerialNo {
 							attachLevelDep = true
 							log.Printf("Setting Attachment level dep flag is set for  %s/%s", i, j)
 						}
@@ -292,7 +295,7 @@ func (c *NDFC) RscImportNetworks(ctx context.Context, dg *diag.Diagnostics, ID s
 		return nil
 	}
 	//Get Attachments
-	err = c.RscGetNetworkAttachments(ctx, ndNets)
+	err = c.RscGetNetworkAttachments(ctx, ndNets, nil)
 	if err == nil {
 		tflog.Debug(ctx, "Network Attachments read success")
 		for i, nwEntry := range ndNets.Networks {
@@ -470,20 +473,29 @@ func (c *NDFC) RscUpdateNetworks(ctx context.Context, dg *diag.Diagnostics, ID s
 	if planNw.DeployAllAttachments {
 		depMap["global"] = append(depMap["global"], "all")
 	}
+	keyMap := make(map[string]string)
 	for i, entry := range planNw.Networks {
 		if entry.DeployAttachments {
 			depMap[i] = append(depMap[i], i)
 		}
 		for j, attachEntry := range entry.Attachments {
+			serial := ""
+			if net.ParseIP(j) != nil {
+				serial = c.GetSerialFromIP(ctx, planNw.FabricName, j)
+			} else {
+				serial = j
+			}
+			keyMap[i+":"+serial] = j
 			if attachEntry.DeployThisAttachment {
-				depMap[i] = append(depMap[i], j)
+				depMap[i] = append(depMap[i], serial)
 			}
 		}
 	}
 	log.Printf("Deploy Map %v", depMap)
+	log.Printf("Key Map %v", keyMap)
 
 	//4. Read the updated data from NDFC
-	*plan = *(c.RscGetNetworks(ctx, dg, newID, &depMap))
+	*plan = *(c.RscGetNetworks(ctx, dg, newID, &depMap, &keyMap))
 }
 
 func (c *NDFC) RscDeleteNetworks(ctx context.Context, dg *diag.Diagnostics, ID string, in *resource_networks.NetworksModel) {
