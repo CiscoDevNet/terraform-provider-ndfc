@@ -101,6 +101,9 @@ depends_on = [resource.ndfc_vrfs.{{.VrfRscName}}]
             {{- if $networkEntry.DisplayName }}
             display_name = "{{$networkEntry.DisplayName}}"
             {{- end}}
+            {{- if $networkEntry.NetworkId}}
+            network_id = "{{$networkEntry.NetworkId}}"
+            {{- end}}
             {{- if $networkEntry.NetworkTemplateConfig.VlanId }}
             vlan_id = "{{$networkEntry.NetworkTemplateConfig.VlanId}}"
             {{- end}}
@@ -142,6 +145,9 @@ depends_on = [resource.ndfc_vrfs.{{.VrfRscName}}]
             {{- end}}
             {{- if $networkEntry.NetworkTemplateConfig.RoutingTag }}
             routing_tag = "{{$networkEntry.NetworkTemplateConfig.RoutingTag}}"
+            {{- end}}
+            {{- if $networkEntry.NetworkTemplateConfig.GatewayIpv4Address }}
+            gateway_ipv4_address = "{{$networkEntry.NetworkTemplateConfig.GatewayIpv4Address}}"
             {{- end}}
             {{- if $networkEntry.Attachments}}
             attachments = {

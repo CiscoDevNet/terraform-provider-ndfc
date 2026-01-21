@@ -107,7 +107,7 @@ func (v NDFCDhcpRelayServersValues) MarshalJSON() ([]byte, error) {
 	return retBytes, nil
 }
 
-func (v *NDFCNetworksModel) FillAttachmentsFromPayload(payload *rna.NDFCNetworkAttachments) {
+func (v *NDFCNetworksModel) FillAttachmentsFromPayload(payload *rna.NDFCNetworkAttachments, keyMap *map[string]string) {
 	for _, vv := range payload.NetworkAttachments {
 		nw := vv.NetworkName
 		if nwEntry, ok := v.Networks[nw]; ok {
@@ -115,7 +115,17 @@ func (v *NDFCNetworksModel) FillAttachmentsFromPayload(payload *rna.NDFCNetworkA
 				nwEntry.Attachments = make(map[string]rna.NDFCAttachmentsValue)
 			}
 			for _, attachEntry := range vv.Attachments {
-				nwEntry.Attachments[attachEntry.SwitchSerialNo] = attachEntry
+				// Use keyMap to map serial numbers back to original keys (IP or serial)
+				if keyMap != nil {
+					kk := nw + ":" + attachEntry.SwitchSerialNo
+					if key, ok := (*keyMap)[kk]; ok {
+						nwEntry.Attachments[key] = attachEntry
+					} else {
+						nwEntry.Attachments[attachEntry.SwitchSerialNo] = attachEntry
+					}
+				} else {
+					nwEntry.Attachments[attachEntry.SwitchSerialNo] = attachEntry
+				}
 			}
 			//put it back
 			v.Networks[nw] = nwEntry
@@ -138,24 +148,27 @@ func (v *NDFCNetworksModel) FillAttachmentsPayloadFromModel(payload *rna.NDFCNet
 		nwPayload := new(rna.NDFCNetworkAttachmentsPayload)
 		nwPayload.NetworkName = nwName
 		nwPayload.Attachments = make([]rna.NDFCAttachmentsValue, 0)
-		for serial, attachEntry := range nwEntry.Attachments {
-			log.Printf("Adding attachment %s/%s - operation %v", nwName, serial, op)
+		for attachKey, attachEntry := range nwEntry.Attachments {
+			log.Printf("Adding attachment %s/%s - operation %v", nwName, attachKey, op)
 			attachEntry.NetworkName = nwName
 			if attachEntry.Fabric == "" {
 				attachEntry.Fabric = v.FabricName
 			}
-			log.Printf("Attachment %s/%s fabricName=%s", nwName, serial, attachEntry.Fabric)
-			attachEntry.SerialNumber = serial
+			log.Printf("Attachment %s/%s fabricName=%s", nwName, attachKey, attachEntry.Fabric)
+			// Use SerialNumber if already set (from IP-to-serial conversion), otherwise use key
+			if attachEntry.SerialNumber == "" {
+				attachEntry.SerialNumber = attachKey
+			}
 			switch op {
 			case NwAttachmentAttach:
-				log.Printf("[DEBUG] Adding attachment %s/%s - operation true", nwName, serial)
+				log.Printf("[DEBUG] Adding attachment %s/%s - operation true", nwName, attachKey)
 				attachEntry.Deployment = "true"
 			case NwAttachmentDetach:
-				log.Printf("[DEBUG] Adding attachment %s/%s - operation false", nwName, serial)
+				log.Printf("[DEBUG] Adding attachment %s/%s - operation false", nwName, attachKey)
 				attachEntry.Deployment = "false"
 			}
 			nwPayload.Attachments = append(nwPayload.Attachments, attachEntry)
-			nwEntry.Attachments[serial] = attachEntry
+			nwEntry.Attachments[attachKey] = attachEntry
 		}
 		if len(nwPayload.Attachments) > 0 {
 			payload.NetworkAttachments = append(payload.NetworkAttachments, *nwPayload)
@@ -166,13 +179,16 @@ func (v *NDFCNetworksModel) FillAttachmentsPayloadFromModel(payload *rna.NDFCNet
 
 func (v NDFCNetworksValue) GetAttachmentValues(filters uint16, attach string) []rna.NDFCAttachmentsValue {
 	log.Printf("GetAttachmentValues: %s %s", v.NetworkName, v.FabricName)
-	update := func(a *rna.NDFCAttachmentsValue, serial string) {
+	update := func(a *rna.NDFCAttachmentsValue, attachKey string) {
 		log.Printf("GetAttachmentValues: update %s %s", v.NetworkName, v.FabricName)
 		if a.Fabric == "" {
 			a.Fabric = v.FabricName
 		}
 		a.NetworkName = v.NetworkName
-		a.SerialNumber = serial
+		// Use SerialNumber if already set (from IP-to-serial conversion), otherwise use key
+		if a.SerialNumber == "" {
+			a.SerialNumber = attachKey
+		}
 		if a.Vlan == nil {
 			a.Vlan = new(Int64Custom)
 			*a.Vlan = Int64Custom(-1)
@@ -182,17 +198,17 @@ func (v NDFCNetworksValue) GetAttachmentValues(filters uint16, attach string) []
 		}
 	}
 	attachmentValues := make([]rna.NDFCAttachmentsValue, 0)
-	for serial, attachEntry := range v.Attachments {
+	for attachKey, attachEntry := range v.Attachments {
 		if filters != 0 {
 			if attachEntry.UpdateAction&filters != 0 {
-				update(&attachEntry, serial)
+				update(&attachEntry, attachKey)
 				attachmentValues = append(attachmentValues, attachEntry)
 			}
 		} else {
-			update(&attachEntry, serial)
+			update(&attachEntry, attachKey)
 			attachmentValues = append(attachmentValues, attachEntry)
 		}
-		log.Printf("Loop GetAttachmentValues: %s %s %s %s", v.NetworkName, v.FabricName, serial, attachEntry.Deployment)
+		log.Printf("Loop GetAttachmentValues: %s %s %s %s", v.NetworkName, v.FabricName, attachKey, attachEntry.Deployment)
 	}
 	return attachmentValues
 }

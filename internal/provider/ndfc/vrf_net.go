@@ -11,6 +11,7 @@ package ndfc
 import (
 	"context"
 	"fmt"
+	"net"
 	"strings"
 	"terraform-provider-ndfc/internal/provider/resources/resource_networks"
 
@@ -73,7 +74,16 @@ func (c NDFC) CheckNetworkVrfConfig(ctx context.Context, dg *diag.Diagnostics, n
 			continue
 		}
 		for serial := range network.Attachments {
-			if _, ok := vrfEntry.AttachList[serial]; !ok {
+			// check if key is IP/Serial
+			searchKey := ""
+			if net.ParseIP(serial) != nil {
+				//convert to serial
+				searchKey = c.GetSerialFromIP(ctx, nw.FabricName, serial)
+			} else {
+				searchKey = serial
+			}
+			// AttachList in this case is keyed by serial
+			if _, ok := vrfEntry.AttachList[searchKey]; !ok {
 				//path := path.
 				dg.AddAttributeError(path.Root("ndfc_networks").AtName("networks").AtMapKey(nwName).AtName("attachments").AtMapKey(serial),
 					"Config error: Attachment not found",
