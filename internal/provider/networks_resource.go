@@ -12,6 +12,7 @@ import (
 	"context"
 	"fmt"
 	"log"
+	"net"
 	"terraform-provider-ndfc/internal/provider/ndfc"
 	"terraform-provider-ndfc/internal/provider/resources/resource_networks"
 
@@ -97,6 +98,7 @@ func (r *networkBulkResource) Read(ctx context.Context, req resource.ReadRequest
 	// unique_id = fabric_name/[network1,network2,network3...]
 	dataNetwork := data.GetModelData()
 	deployMap := make(map[string][]string)
+	keyMap := make(map[string]string)
 	if dataNetwork.DeployAllAttachments {
 		deployMap["global"] = append(deployMap["global"], "all")
 	}
@@ -108,22 +110,40 @@ func (r *networkBulkResource) Read(ctx context.Context, req resource.ReadRequest
 			deployMap[v.NetworkName] = append(deployMap[v.NetworkName], v.NetworkName)
 		}
 
-		for serial, s := range v.Attachments {
-			s.SerialNumber = serial
+		for attachKey, s := range v.Attachments {
+			// Check if key is IP or Serial and build keyMap
+			if net.ParseIP(attachKey) != nil {
+				// IP address key - convert to serial
+				serial := r.client.GetSerialFromIP(ctx, dataNetwork.FabricName, attachKey)
+				if serial == "" {
+					resp.Diagnostics.AddError("IP to Serial conversion failed",
+						fmt.Sprintf("Failed to get serial for IP %s in fabric %s", attachKey, dataNetwork.FabricName))
+					return
+				}
+				s.SerialNumber = serial
+				kk := nwName + ":" + serial
+				keyMap[kk] = attachKey
+			} else {
+				// Serial number key
+				s.SerialNumber = attachKey
+				kk := nwName + ":" + attachKey
+				keyMap[kk] = attachKey
+			}
 			if s.DeployThisAttachment {
+				log.Printf("Deploy flag set for attachment %s", s.SerialNumber)
 				deployMap[v.NetworkName] = append(deployMap[v.NetworkName], s.SerialNumber)
 			}
 			if len(s.SwitchPorts) > 0 {
 				//Store the order of ports as they appear
-				key := "SwitchPorts:" + v.NetworkName + "/" + s.SerialNumber
+				key := "SwitchPorts:" + v.NetworkName + "/" + attachKey
 				deployMap[key] = append(deployMap[key], s.SwitchPorts...)
 			}
 			if len(s.TorPorts) > 0 {
 				//Store the order of ports as they appear
-				key := "TorPorts:" + v.NetworkName + "/" + s.SerialNumber
+				key := "TorPorts:" + v.NetworkName + "/" + attachKey
 				deployMap[key] = append(deployMap[key], s.TorPorts...)
 			}
-			v.Attachments[serial] = s
+			v.Attachments[attachKey] = s
 		}
 		dataNetwork.Networks[nwName] = v
 		log.Printf("DeployMap = %v", deployMap)
@@ -131,7 +151,7 @@ func (r *networkBulkResource) Read(ctx context.Context, req resource.ReadRequest
 	}
 
 	tflog.Info(ctx, fmt.Sprintf("Incoming ID %s", unique_id))
-	dd := r.client.RscGetNetworks(ctx, &resp.Diagnostics, unique_id, &deployMap)
+	dd := r.client.RscGetNetworks(ctx, &resp.Diagnostics, unique_id, &deployMap, &keyMap)
 	if dd == nil {
 		tflog.Error(ctx, "Read Networks Failed")
 		//resp.Diagnostics.AddError("Read Failure", "No data received from NDFC")
