@@ -125,7 +125,8 @@ func (c NDFC) networksUpdate(ctx context.Context, dg *diag.Diagnostics, updateRs
 		rsObj.PutNetworkName = payload.Networks[i].NetworkName
 		res, err := rsObj.Put(data)
 		if err != nil {
-			dg.AddError(fmt.Sprintf("Resource %s, Update failed", payload.Networks[i].NetworkName), fmt.Sprintf("Error %v, response %s", err, res.Str))
+			log.Printf("Error PUT: %v |%s|", res, res.String())
+			dg.AddError(fmt.Sprintf("Resource %s, Update failed", payload.Networks[i].NetworkName), fmt.Sprintf("Error %v, response %s", err, res.String()))
 			return
 		}
 		// Get and check if they Mismatch
@@ -138,7 +139,7 @@ func (c NDFC) networksUpdate(ctx context.Context, dg *diag.Diagnostics, updateRs
 		rs, err := rsObj.Get()
 		if err != nil {
 			tflog.Error(ctx, "Read resource after PUT Failed")
-			dg.AddError(fmt.Sprintf("Resource %s, Get failed", payload.Networks[i].NetworkName), fmt.Sprintf("Error %v, response %s", err, res.Str))
+			dg.AddError(fmt.Sprintf("Resource %s, Get failed", payload.Networks[i].NetworkName), fmt.Sprintf("Error %v, response %s", err, string(rs)))
 			return
 		}
 		rsNewValue := resource_networks.NDFCNetworksValue{}
@@ -261,16 +262,21 @@ type NetworkSwitchDetailsListItem struct {
 }
 
 // fillNetworkAttachmentMissingParams fetches additional attachment details like freeformConfig
-func (c NDFC) fillNetworkAttachmentMissingParams(ctx context.Context, ndNetworks *resource_networks.NDFCNetworksModel) error {
+func (c NDFC) fillNetworkAttachmentMissingParams(ctx context.Context, ndNetworks *resource_networks.NDFCNetworksModel, keyMap *map[string]string) error {
 	// Collect all network names and serial numbers
 	networkNames := make([]string, 0)
 	serialNumbersSet := make(map[string]bool)
 
 	for networkName, networkEntry := range ndNetworks.Networks {
 		networkNames = append(networkNames, networkName)
-		for serial := range networkEntry.Attachments {
-			if networkEntry.Attachments[serial].FilterThisValue {
+		for attachKey, attachEntry := range networkEntry.Attachments {
+			if attachEntry.FilterThisValue {
 				continue
+			}
+			// Use SerialNumber field if set, otherwise use key
+			serial := attachEntry.SwitchSerialNo
+			if serial == "" {
+				serial = attachKey
 			}
 			serialNumbersSet[serial] = true
 		}
@@ -325,12 +331,21 @@ func (c NDFC) fillNetworkAttachmentMissingParams(ctx context.Context, ndNetworks
 					continue
 				}
 
-				attachEntry, ok := networkEntry.Attachments[switchDetail.SerialNumber]
+				// Find attachment key - could be IP or serial
+				attachKey := switchDetail.SerialNumber
+				if keyMap != nil {
+					kk := networkDetail.NetworkName + ":" + switchDetail.SerialNumber
+					if key, found := (*keyMap)[kk]; found {
+						attachKey = key
+					}
+				}
+
+				attachEntry, ok := networkEntry.Attachments[attachKey]
 				if ok {
 					// Update freeformConfig if not empty in the response
 					if switchDetail.FreeformConfig != "" {
 						attachEntry.FreeformConfig = switchDetail.FreeformConfig
-						networkEntry.Attachments[switchDetail.SerialNumber] = attachEntry
+						networkEntry.Attachments[attachKey] = attachEntry
 						tflog.Debug(ctx, fmt.Sprintf("fillNetworkAttachmentMissingParams: Updated freeformConfig for Network=%s, Serial=%s",
 							networkDetail.NetworkName, switchDetail.SerialNumber))
 						totalUpdated++

@@ -83,7 +83,9 @@ func (c NDFC) fillNetDeploymentDBFromModel(ctx context.Context, va *resource_net
 		deployAll = true
 	}
 	for nwName, nwEntry := range va.Networks {
-		for serial, attachEntry := range nwEntry.Attachments {
+		for _, attachEntry := range nwEntry.Attachments {
+			// Use SerialNumber field (already converted from IP if needed) instead of map key
+			serial := attachEntry.SerialNumber
 			if attachEntry.Deployment == "false" {
 				tflog.Info(ctx, fmt.Sprintf("fillNetDeploymentDBFromModel: Deploying Attachment %s/%s due to detach", nwName, serial))
 				*detach_present = true
