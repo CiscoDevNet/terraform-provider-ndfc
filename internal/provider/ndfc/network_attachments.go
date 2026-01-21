@@ -20,7 +20,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-log/tflog"
 )
 
-func (c *NDFC) RscGetNetworkAttachments(ctx context.Context, nw *resource_networks.NDFCNetworksModel) error {
+func (c *NDFC) RscGetNetworkAttachments(ctx context.Context, nw *resource_networks.NDFCNetworksModel, keyMap *map[string]string) error {
 	log.Printf("RscGetNetworkAttachments: fabricName=%s", nw.FabricName)
 
 	nwAttachPayload, err := c.netAttachmentsGet(ctx, nw.FabricName, nw.GetNetworksNames())
@@ -29,7 +29,7 @@ func (c *NDFC) RscGetNetworkAttachments(ctx context.Context, nw *resource_networ
 		return err
 	}
 
-	nw.FillAttachmentsFromPayload(nwAttachPayload)
+	nw.FillAttachmentsFromPayload(nwAttachPayload, keyMap)
 
 	for netName, nwEntry := range nw.Networks {
 		skip := 0
@@ -53,7 +53,7 @@ func (c *NDFC) RscGetNetworkAttachments(ctx context.Context, nw *resource_networ
 	}
 
 	// Fill missing parameters like freeformConfig from the switch details API
-	err = c.fillNetworkAttachmentMissingParams(ctx, nw)
+	err = c.fillNetworkAttachmentMissingParams(ctx, nw, keyMap)
 	if err != nil {
 		tflog.Warn(ctx, fmt.Sprintf("Failed to fill missing network attachment parameters: %v", err))
 		// Don't return error, just log warning as this is supplementary data
@@ -70,7 +70,7 @@ func (c NDFC) RscGetPendingNetAttachments(ctx context.Context, nw *resource_netw
 		tflog.Error(ctx, "RscGetPendingNetAttachments: Error getting network attachments", map[string]interface{}{"Err": err})
 		return
 	}
-	nw.FillAttachmentsFromPayload(nwAttachPayload)
+	nw.FillAttachmentsFromPayload(nwAttachPayload, nil)
 	for netName, nwEntry := range nw.Networks {
 		for serial, attachEntry := range nwEntry.Attachments {
 			if attachEntry.AttachState != NDFCStateNA {
@@ -94,6 +94,8 @@ func (c *NDFC) RscUpdateNetAttachments(ctx context.Context, dg *diag.Diagnostics
 	if updateNwAttach != nil && len(updateNwAttach.NetworkAttachments) == 0 {
 		tflog.Info(ctx, "RscUpdateNetAttachments: No attachments to update")
 	} else {
+		// Convert IP keys to serial numbers before API call
+		c.netAttachmentSerialRemapFromPayload(ctx, updateNwAttach)
 		log.Printf("Network Attachments: %v", updateNwAttach.NetworkAttachments)
 		data, err := json.Marshal(updateNwAttach.NetworkAttachments)
 		if err != nil {
@@ -111,6 +113,9 @@ func (c *NDFC) RscUpdateNetAttachments(ctx context.Context, dg *diag.Diagnostics
 
 	naDeploy := actions["deploy"].(*rna.NDFCNetworkAttachments)
 	naUndeploy := actions["undeploy"].(*rna.NDFCNetworkAttachments)
+
+	// Convert IP keys to serial numbers for deploy payload
+	c.netAttachmentSerialRemapFromPayload(ctx, naDeploy)
 
 	if naDeploy.GlobalDeploy {
 		//Using update to deploy everything in update
@@ -143,6 +148,9 @@ func (c *NDFC) RscUpdateNetAttachments(ctx context.Context, dg *diag.Diagnostics
 func (c NDFC) RscDeleteNetAttachments(ctx context.Context, dg *diag.Diagnostics, in *resource_networks.NDFCNetworksModel) error {
 
 	tflog.Debug(ctx, fmt.Sprintf("RscDeleteNetAttachments: fabricName=%s", in.FabricName))
+
+	// Convert IP keys to serial numbers before detach
+	_ = c.netAttachmentSerialRemap(ctx, in)
 
 	err, count := c.netAttachmentsDetach(ctx, in)
 	if err != nil {

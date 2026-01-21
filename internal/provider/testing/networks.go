@@ -127,6 +127,10 @@ func ModifyNetworksObject(nws **resource_networks.NDFCNetworksModel, nwNo int, v
 				nw.NetworkTemplateConfig.InterfaceDescription = value.(string)
 			case "layer2_only":
 				nw.NetworkTemplateConfig.Layer2Only = value.(string)
+			case "gateway_ipv4_address":
+				nw.NetworkTemplateConfig.GatewayIpv4Address = value.(string)
+			case "gateway_ipv6_address":
+				nw.NetworkTemplateConfig.GatewayIpv6Address = value.(string)
 			}
 		}
 		nets.Networks[nwName] = nw
