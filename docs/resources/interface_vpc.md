@@ -64,7 +64,7 @@ resource "ndfc_interface_vpc" "test_resource_interface_vpc_1" {
     * `int_vpc_dot1q_tunnel`
     * `int_vpc_pvlan_host`
     * `int_vpc_trunk_host`"
-- `serial_number` (String) Serial number of switch to configure
+- `serial_number` (String) Serial number or management IPv4 address of switch to configure
 
 ### Read-Only
 
@@ -100,7 +100,7 @@ Optional:
 - `peer2_port_channel_id` (Number) Port channel ID
 - `port_type_fast` (Boolean) Enable spanning-tree edge port behavior
 - `portchannel_mode` (String) Port-channel mode
-- `serial_number` (String) Serial number of switch to configure. This field cannot be specified if `serial_number` is specified at resource level
+- `serial_number` (String) Serial number or management IPv4 address of switch to configure. This field cannot be specified if `serial_number` is specified at resource level
 - `speed` (String) Interface speed
 
 Read-Only:

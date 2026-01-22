@@ -189,8 +189,8 @@ func InterfaceVlanResourceSchema(ctx context.Context) schema.Schema {
 						},
 						"serial_number": schema.StringAttribute{
 							Optional:            true,
-							Description:         "Serial number of switch to configure",
-							MarkdownDescription: "Serial number of switch to configure",
+							Description:         "Serial number or management IPv4 address of switch to configure",
+							MarkdownDescription: "Serial number or management IPv4 address of switch to configure",
 						},
 						"vrf": schema.StringAttribute{
 							Optional:            true,
@@ -237,8 +237,8 @@ func InterfaceVlanResourceSchema(ctx context.Context) schema.Schema {
 			},
 			"serial_number": schema.StringAttribute{
 				Optional:            true,
-				Description:         "Serial number of switch to configure",
-				MarkdownDescription: "Serial number of switch to configure",
+				Description:         "Serial number or management IPv4 address of switch to configure",
+				MarkdownDescription: "Serial number or management IPv4 address of switch to configure",
 				PlanModifiers: []planmodifier.String{
 					stringplanmodifier.RequiresReplace(),
 				},

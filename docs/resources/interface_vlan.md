@@ -58,7 +58,7 @@ resource "ndfc_interface_vlan" "test_resource_interface_vlan_1" {
 
 - `deploy` (Boolean) Deploy the configuration
 - `policy` (String) Name of the policy. Examples: `int_vlan`, `int_freeform`
-- `serial_number` (String) Serial number of switch to configure
+- `serial_number` (String) Serial number or management IPv4 address of switch to configure
 
 ### Read-Only
 
@@ -95,7 +95,7 @@ Optional:
 - `netflow_sampler` (String) Netflow sampler name, applicable to N7K only
 - `preempt` (Boolean) Enable HSRP preempt
 - `routing_tag` (String) Routing tag
-- `serial_number` (String) Serial number of switch to configure
+- `serial_number` (String) Serial number or management IPv4 address of switch to configure
 - `vrf` (String) VRF name
 - `vrf_dhcp1` (String) VRF for DHCP server 1
 - `vrf_dhcp2` (String) VRF for DHCP server 2

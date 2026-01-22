@@ -12,6 +12,7 @@ import (
 	"context"
 	"fmt"
 	"log"
+	"net"
 	"regexp"
 	"strings"
 	"terraform-provider-ndfc/internal/provider/resources/resource_interface_common"
@@ -129,9 +130,27 @@ func (c NDFC) NDFCIfType(ifType string) string {
 
 // inData - to be sent to NDFC
 func (c NDFC) IfPreProcess(inData *resource_interface_common.NDFCInterfaceCommonModel) {
+	if inData.SerialNumber != "" {
+		if net.ParseIP(inData.SerialNumber) != nil {
+			inData.SerialNumber = c.GetSerialFromIP(context.Background(), "", inData.SerialNumber)
+			if inData.SerialNumber == "" {
+				log.Printf("[ERROR] IfPreProcess: Failed to get serial number for IP %s", inData.SerialNumber)
+				return
+			}
+		}
+	}
+
 	for k, intf := range inData.Interfaces {
 		if intf.SerialNumber == "" {
 			intf.SerialNumber = inData.SerialNumber
+		} else {
+			if net.ParseIP(intf.SerialNumber) != nil {
+				intf.SerialNumber = c.GetSerialFromIP(context.Background(), "", intf.SerialNumber)
+				if intf.SerialNumber == "" {
+					log.Printf("[ERROR] IfPreProcess: Failed to get serial number for IP %s", intf.SerialNumber)
+					return
+				}
+			}
 		}
 		intf.NvPairs.InterfaceName = intf.InterfaceName
 		inData.Interfaces[k] = intf

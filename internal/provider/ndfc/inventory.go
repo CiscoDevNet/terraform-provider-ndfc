@@ -203,10 +203,21 @@ func (c *NDFC) GetDeviceName(ctx context.Context, fabricName, serialNumber strin
 	*/
 }
 
+// GetAllSwitches retrieves all switches from NDFC inventory
+// This is used as the loader function for SwitchDB
+func (c *NDFC) GetAllSwitches(ctx context.Context) ([]byte, error) {
+	res, err := c.apiClient.GetRawJson("/lan-fabric/rest/inventory/switches")
+	if err != nil {
+		log.Printf("[ERROR] GetAllSwitches: Failed to get switches: %v", err)
+		return nil, err
+	}
+	return res, nil
+}
+
 func (c *NDFC) GetSerialFromIP(ctx context.Context, fabricName, ip string) string {
-	sw, status := c.switchDB.GetSerialByIP(ctx, fabricName, ip)
+	sw, status := c.switchDB.GetSwitchByIP(ctx, fabricName, ip)
 	if status {
-		return sw
+		return sw.SerialNumber
 	}
 	return ""
 }

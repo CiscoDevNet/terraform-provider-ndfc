@@ -12,6 +12,7 @@ import (
 	"context"
 	"fmt"
 	"log"
+	"net"
 	"strings"
 	"time"
 
@@ -46,8 +47,20 @@ func (c NDFC) RscGetInterfaces(ctx context.Context, dg *diag.Diagnostics, in res
 			continue
 		}
 
-		keyMap[intf.SerialNumber+":"+intf.InterfaceName] = i
-		log.Printf("Keymap: %s-%s", intf.SerialNumber+":"+intf.InterfaceName, i)
+		serial := ""
+
+		if net.ParseIP(intf.SerialNumber) != nil {
+			serial = c.GetSerialFromIP(ctx, "", intf.SerialNumber)
+			if serial == "" {
+				dg.AddError("Failed to get serial number", fmt.Sprintf("Failed to get serial number for IP %s", intf.SerialNumber))
+				return
+			}
+		} else {
+			serial = intf.SerialNumber
+		}
+
+		keyMap[serial+":"+intf.InterfaceName] = i
+		log.Printf("Keymap: %s-%s", serial+":"+intf.InterfaceName, i)
 	}
 
 	data := resource_interface_common.NDFCInterfaceCommonModel{}
@@ -137,6 +150,8 @@ func (c NDFC) RscGetInterfaces(ctx context.Context, dg *diag.Diagnostics, in res
 						Hence, use the GET to retrieve the interfaces and take serial from the GET payload
 					*/
 					ifList[i].SerialNumber = newSerialNumber
+				} else {
+					ifList[i].SerialNumber = intf.SerialNumber
 				}
 				c.processCustomIfPolicy(ctx, &ifList[i], data.PolicyType, inData.Interfaces[key].CustomPolicyParameters)
 				data.Interfaces[key] = ifList[i]
@@ -187,6 +202,7 @@ func (c NDFC) RscGetInterfaces(ctx context.Context, dg *diag.Diagnostics, in res
 			}
 		}
 	}
+
 	err := in.SetModelData(&data)
 	if err.HasError() {
 		dg.Append(err.Errors()...)
