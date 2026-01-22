@@ -162,8 +162,8 @@ func InterfacePortchannelResourceSchema(ctx context.Context) schema.Schema {
 						},
 						"serial_number": schema.StringAttribute{
 							Optional:            true,
-							Description:         "Serial number of switch to configure. This field cannot be specified if `serial_number` is already mentioned outside",
-							MarkdownDescription: "Serial number of switch to configure. This field cannot be specified if `serial_number` is already mentioned outside",
+							Description:         "Serial number or management IPv4 address of switch to configure. This field cannot be specified if `serial_number` is already mentioned outside",
+							MarkdownDescription: "Serial number or management IPv4 address of switch to configure. This field cannot be specified if `serial_number` is already mentioned outside",
 						},
 						"speed": schema.StringAttribute{
 							Optional:            true,
@@ -198,8 +198,8 @@ func InterfacePortchannelResourceSchema(ctx context.Context) schema.Schema {
 			},
 			"serial_number": schema.StringAttribute{
 				Optional:            true,
-				Description:         "Serial number of switch to configure. This field cannot be specified if `serial_number` inside `interfaces` block is specified`",
-				MarkdownDescription: "Serial number of switch to configure. This field cannot be specified if `serial_number` inside `interfaces` block is specified`",
+				Description:         "Serial number or management IPv4 address of switch to configure. This field cannot be specified if `serial_number` inside `interfaces` block is specified`",
+				MarkdownDescription: "Serial number or management IPv4 address of switch to configure. This field cannot be specified if `serial_number` inside `interfaces` block is specified`",
 				PlanModifiers: []planmodifier.String{
 					stringplanmodifier.RequiresReplace(),
 				},

@@ -23,7 +23,7 @@ data "ndfc_interfaces" "test_resource_interfaces_1" {
 
 ### Required
 
-- `serial_number` (String) Serial number of switch to configure
+- `serial_number` (String) Serial number or management IPv4 address of switch to configure
 
 ### Optional
 

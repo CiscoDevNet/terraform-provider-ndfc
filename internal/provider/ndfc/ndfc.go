@@ -61,7 +61,7 @@ func NewNDFCClient(host string, user string, pass string, domain string, insecur
 	}
 	log.Printf("[DEBUG] Authentication successful during creation of NewNDFCClient with token: %s", ndfc.apiClient.Token)
 
-	ndfc.switchDB = NewSwitchDB(ndfc.GetSwitchesInFabric)
+	ndfc.switchDB = NewSwitchDB(ndfc.GetAllSwitches)
 
 	instance = ndfc
 	return ndfc, nil

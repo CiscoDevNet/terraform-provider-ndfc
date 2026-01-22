@@ -39,7 +39,7 @@ resource:
       model_name: serial_number
       tf_name: serial_number
       type: String
-      description: Serial number of switch to configure
+      description: Serial number or management IPv4 address of switch to configure
       example: 9DBYO6WQJ46
       payload_hide: true
       tf_requires_replace: true
@@ -64,7 +64,7 @@ resource:
       - model_name: serialNumber
         tf_name: serial_number
         type: String
-        description: Serial number of switch to configure
+        description: Serial number or management IPv4 address of switch to configure
       - &ifName
         model_name: ifName
         tf_name: interface_name

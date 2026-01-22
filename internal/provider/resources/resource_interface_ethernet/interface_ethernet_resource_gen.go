@@ -381,8 +381,8 @@ func InterfaceEthernetResourceSchema(ctx context.Context) schema.Schema {
 						},
 						"serial_number": schema.StringAttribute{
 							Optional:            true,
-							Description:         "Serial number of switch to configure. This field cannot be specified if `serial_number` is specified in the common block",
-							MarkdownDescription: "Serial number of switch to configure. This field cannot be specified if `serial_number` is specified in the common block",
+							Description:         "Serial number or management IPv4 address of switch to configure. This field cannot be specified if `serial_number` is specified in the common block",
+							MarkdownDescription: "Serial number or management IPv4 address of switch to configure. This field cannot be specified if `serial_number` is specified in the common block",
 						},
 						"speed": schema.StringAttribute{
 							Optional:            true,
@@ -437,8 +437,8 @@ func InterfaceEthernetResourceSchema(ctx context.Context) schema.Schema {
 			},
 			"serial_number": schema.StringAttribute{
 				Optional:            true,
-				Description:         "Serial number of switch to configure. This field cannot be specified if `serial_number` inside `interfaces` block is specified`",
-				MarkdownDescription: "Serial number of switch to configure. This field cannot be specified if `serial_number` inside `interfaces` block is specified`",
+				Description:         "Serial number or management IPv4 address of switch to configure. This field cannot be specified if `serial_number` inside `interfaces` block is specified`",
+				MarkdownDescription: "Serial number or management IPv4 address of switch to configure. This field cannot be specified if `serial_number` inside `interfaces` block is specified`",
 				PlanModifiers: []planmodifier.String{
 					stringplanmodifier.RequiresReplace(),
 				},

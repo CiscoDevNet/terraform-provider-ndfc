@@ -43,7 +43,7 @@ resource "ndfc_interface_loopback" "test_resource_interface_loopback_1" {
 
 - `deploy` (Boolean) Deploy the configuration
 - `policy` (String) Name of the policy. Supported policies:: `int_loopback`, `int_multisite_loopback`
-- `serial_number` (String) Serial number of switch to configure. This field cannot be specified if `serial_number` inside `interfaces` block is specified`
+- `serial_number` (String) Serial number or management IPv4 address of switch to configure. This field cannot be specified if `serial_number` inside `interfaces` block is specified`
 
 ### Read-Only
 
@@ -64,7 +64,7 @@ Optional:
 - `ipv4_address` (String) IPv4 address
 - `ipv6_address` (String) IPv6 address
 - `route_map_tag` (String) Route map tag
-- `serial_number` (String) Serial number of switch to configure. This field cannot be specified if `serial_number` outside `interfaces` block is specified
+- `serial_number` (String) Serial number or management IPv4 address of switch to configure. This field cannot be specified if `serial_number` outside `interfaces` block is specified
 - `vrf` (String) VRF name
 
 Read-Only:
