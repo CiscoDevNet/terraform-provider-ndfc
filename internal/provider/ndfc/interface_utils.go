@@ -147,7 +147,7 @@ func (c NDFC) IfPostProcess(inData *resource_interface_common.NDFCInterfaceCommo
 
 func (c NDFC) ifDiff(ctx context.Context,
 	state *resource_interface_common.NDFCInterfaceCommonModel,
-	plan *resource_interface_common.NDFCInterfaceCommonModel) map[string]interface{} {
+	plan *resource_interface_common.NDFCInterfaceCommonModel, id string) map[string]interface{} {
 
 	createIntf := new(resource_interface_common.NDFCInterfaceCommonModel)
 	deleteIntf := new(resource_interface_common.NDFCInterfaceCommonModel)
@@ -161,12 +161,25 @@ func (c NDFC) ifDiff(ctx context.Context,
 
 	action := make(map[string]interface{})
 
+	ifMap := ifIdToMap(id)
+
 	for k, intf := range plan.Interfaces {
 		// Check in state
 		if stateIntf, ok := state.Interfaces[k]; !ok {
 			// New interface, create it
 			tflog.Debug(ctx, fmt.Sprintf("New Interface in plan: %s:%s", intf.SerialNumber, intf.InterfaceName))
 			createIntf.Interfaces[k] = intf
+			// Look for the if in IfID - possible state corruption due to external modification (drift) & removal from state
+			// in such cases we need to attempt a delete from ND and then re-create
+			if swIfList, ok := ifMap[intf.SerialNumber]; ok {
+				for _, ifName := range swIfList {
+					if ifName == intf.InterfaceName {
+						log.Printf("[DEBUG] Interface found in id - so may need delete & create: %s:%s", intf.SerialNumber, intf.InterfaceName)
+						deleteIntf.Interfaces[k] = intf
+					}
+				}
+			}
+
 		} else {
 			stateIntf.FilterThisValue = true
 			var ctrl bool
