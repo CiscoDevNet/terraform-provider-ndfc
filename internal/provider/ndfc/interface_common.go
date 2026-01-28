@@ -287,7 +287,7 @@ func (i *NDFCInterfaceCommon) DsGetInterfaceDetails(ctx context.Context, diags *
 		tflog.Error(ctx, fmt.Sprintf("Error getting interfaces: %s: %v", err.Error(), string(res)))
 		return
 	}
-	log.Printf("Response=%s", string(res))
+	//log.Printf("Response=%s", string(res))
 	err = json.Unmarshal((res), &inData.Interfaces)
 	if err != nil {
 		log.Printf("Error unmarshalling data: %s", err.Error())
