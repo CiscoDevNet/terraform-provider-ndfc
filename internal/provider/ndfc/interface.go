@@ -168,6 +168,7 @@ func (c NDFC) RscGetInterfaces(ctx context.Context, dg *diag.Diagnostics, in res
 					intf, ok := data.Interfaces[key]
 					if !ok {
 						tflog.Error(ctx, fmt.Sprintf("Read Error: Not found in read data %s", key))
+						continue
 					}
 					// After a deployment, the status string is "Success" for some time - consider it as "In-Sync"
 					if dsIfModel.Interfaces[i].DeploymentStatus == "In-Sync" || dsIfModel.Interfaces[i].DeploymentStatus == "Success" {
@@ -243,7 +244,7 @@ func (c NDFC) RscUpdateInterfaces(ctx context.Context, dg *diag.Diagnostics, uni
 	c.IfPreProcess(plan)
 	c.IfPreProcess(state)
 
-	actions := c.ifDiff(ctx, state, plan)
+	actions := c.ifDiff(ctx, state, plan, unique_id)
 	ifObj := c.NewInterfaceObject(planData.GetInterfaceType(), &c.apiClient, c.GetLock(ResourceInterfaces))
 
 	//Delete any interfaces marked for delete
