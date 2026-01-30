@@ -15,7 +15,6 @@ resource "ndfc_fabric_vxlan_msd" "test_resource_fabric_vxlan_msd_1" {
   ms_ifc_bgp_password_enable = false
   ms_loopback_id             = 100
   ms_underlay_autoconfig     = false
-  tor_auto_deploy            = false
   default_network            = "Default_Network_Universal"
   default_vrf                = "Default_VRF_Universal"
   network_extension_template = "Default_Network_Extension_Universal"
