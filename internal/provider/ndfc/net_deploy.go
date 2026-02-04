@@ -46,9 +46,20 @@ func (c NDFC) RscDeployNetworkAttachments(ctx context.Context, dg *diag.Diagnost
 
 	// Get configuration preview to refresh the deploy status
 	// This is bug in NDFC sometimes the status is not updated
-	_, err := c.getConfigurationPreview(d.FabricName)
+	// For MSD fabrics (parent or child), use the MSD parent fabric for config preview
+	_, parentFabric := c.CheckIsFabricMsdType(ctx, dg, d.FabricName)
+	previewFabric := d.FabricName
+	if parentFabric != "" {
+		// This is an MSD child fabric - use the parent for preview
+		previewFabric = parentFabric
+		tflog.Info(ctx, fmt.Sprintf("RscDeployNetworkAttachments: Using MSD parent fabric %s for config preview (child fabric: %s)", previewFabric, d.FabricName))
+	}
+	// Use serial numbers for targeted config preview
+	serialNumbers := d.GetSerialNumbers()
+	tflog.Info(ctx, fmt.Sprintf("RscDeployNetworkAttachments: Config preview for fabric %s with serials %v", previewFabric, serialNumbers))
+	_, err := c.GetConfigurationPreview(previewFabric, serialNumbers)
 	if err != nil {
-		dg.AddError("Deploy failed", "Configuration preview failed")
+		dg.AddError("Deploy failed", fmt.Sprintf("Configuration preview failed for fabric %s ", previewFabric))
 		return
 	}
 	// If detach is present in the list

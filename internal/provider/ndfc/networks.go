@@ -37,7 +37,8 @@ func (c *NDFC) RscCreateNetworks(ctx context.Context, dg *diag.Diagnostics, in *
 		return nil
 	}
 
-	c.ValidateMsdParentNetworkParameters(ctx, dg, nw)
+	// Validate attachment fabric field - fabric field should NOT be set for regular fabrics
+	c.validateNetworkAttachmentFabricField(ctx, dg, nw, false, false)
 	if dg.HasError() {
 		return nil
 	}
@@ -339,7 +340,8 @@ func (c *NDFC) RscUpdateNetworks(ctx context.Context, dg *diag.Diagnostics, ID s
 
 	nw := config.GetModelData()
 
-	c.ValidateMsdParentNetworkParameters(ctx, dg, nw)
+	// Validate attachment fabric field - fabric field should NOT be set for regular fabrics
+	c.validateNetworkAttachmentFabricField(ctx, dg, nw, false, false)
 	if dg.HasError() {
 		return
 	}
@@ -609,55 +611,4 @@ func (c *NDFC) DsGetNetworks(ctx context.Context, dg *diag.Diagnostics, fabricNa
 		dg.Append(d.Errors()...)
 	}
 	return vModel
-}
-
-// Check and handle MSD Parent Fabric usecase
-func (c *NDFC) ValidateMsdParentNetworkParameters(ctx context.Context, dg *diag.Diagnostics, nw *resource_networks.NDFCNetworksModel) {
-
-	fType := c.GetFabricTemplateType(ctx, dg, nw.FabricName)
-	tflog.Debug(ctx, fmt.Sprintf("Fabric Type is %s", fType))
-	if fType == ResourceVxlanMsdType {
-		for _, entry := range nw.Networks {
-			switch {
-			case entry.NetworkTemplateConfig.DhcpRelayServers != nil:
-				tflog.Debug(ctx, fmt.Sprintf("Fabric Type is %s and DHCP Relay is configured", fType))
-				dg.AddError("DHCP Relay config not supported for MSD Parent Fabric",
-					fmt.Sprintf("In network %s, DHCP Relay config should be done in the MSD child Fabric", entry.NetworkName))
-			case entry.NetworkTemplateConfig.DhcpRelayLoopbackId != nil:
-				tflog.Debug(ctx, fmt.Sprintf("Fabric Type is %s and DHCP Relay Loopback ID is configured", fType))
-				dg.AddError("DHCP Relay Loopback ID config not supported for MSD Parent Fabric",
-					fmt.Sprintf("In network %s, DHCP Relay Loopback ID config should be done in the MSD child Fabric", entry.NetworkName))
-			case len(entry.NetworkTemplateConfig.MulticastGroup) != 0:
-				tflog.Debug(ctx, fmt.Sprintf("Fabric Type is %s and Multicast Group is configured", fType))
-				dg.AddError("Multicast Group config not supported for MSD Parent Fabric",
-					fmt.Sprintf("In network %s, Multicast Group config should be done in the MSD child Fabric", entry.NetworkName))
-			case len(entry.NetworkTemplateConfig.Trm) != 0:
-				tflog.Debug(ctx, fmt.Sprintf("Fabric Type is %s and TRM Enabled is configured", fType))
-				dg.AddError("TRM Enabled config not supported for MSD Parent Fabric",
-					fmt.Sprintf("In network %s, TRM Enabled config should be done in the MSD child Fabric", entry.NetworkName))
-			case len(entry.NetworkTemplateConfig.Netflow) != 0:
-				tflog.Debug(ctx, fmt.Sprintf("Fabric Type is %s and Netflow is configured", fType))
-				dg.AddError("Netflow config not supported for MSD Parent Fabric",
-					fmt.Sprintf("In network %s, Netflow config should be done in the MSD child Fabric", entry.NetworkName))
-			case len(entry.NetworkTemplateConfig.VlanNetflowMonitor) != 0:
-				tflog.Debug(ctx, fmt.Sprintf("Fabric Type is %s and VLAN Netflow Monitor is configured", fType))
-				dg.AddError("VLAN Netflow Monitor config not supported for MSD Parent Fabric",
-					fmt.Sprintf("In network %s, VLAN Netflow Monitor config should be done in the MSD child Fabric", entry.NetworkName))
-			case len(entry.NetworkTemplateConfig.L3GatwayBorder) != 0:
-				tflog.Debug(ctx, fmt.Sprintf("Fabric Type is %s and L3 Gateway Border is configured", fType))
-				dg.AddError("L3 Gateway Border config not supported for MSD Parent Fabric",
-					fmt.Sprintf("In network %s, L3 Gateway Border config should be done in the MSD child Fabric", entry.NetworkName))
-			}
-		}
-	} else {
-		for _, entry := range nw.Networks {
-			for serial, attach := range entry.Attachments {
-				if attach.Fabric != "" && nw.FabricName != attach.Fabric {
-					tflog.Error(ctx, "Network modification failed, FabricName in attachment should match Network FabricName")
-					dg.AddError("Network modification failed", fmt.Sprintf("FabricName in attachment \"%s\" should match Network FabricName \"%s\"", serial, nw.FabricName))
-					return
-				}
-			}
-		}
-	}
 }

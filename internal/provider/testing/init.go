@@ -34,6 +34,22 @@ type Links struct {
 	DstInterface string `yaml:"dst_interface"`
 }
 
+type MsdChildFabric struct {
+	Name             string           `yaml:"name"`
+	BgpAs            string           `yaml:"bgp_as"`
+	Switches         []string         `yaml:"switches"`
+	InventoryDevices InventoryDevices `yaml:"inventory_devices"`
+}
+
+type MsdConfig struct {
+	MsdFabricName string           `yaml:"msd_fabric_name"`
+	VrfPrefix     string           `yaml:"vrf_prefix"`
+	NetworkPrefix string           `yaml:"network_prefix"`
+	ChildFabrics  []MsdChildFabric `yaml:"child_fabrics"`
+	VrfNames      []string         `yaml:"vrf_names"`
+	NetworkNames  []string         `yaml:"network_names"`
+}
+
 type InventoryDevices []InventoryDevice
 type IntegratedConfig struct {
 	Fabric    string           `yaml:"fabric"`
@@ -73,6 +89,7 @@ type NDFCConfig struct {
 	VpcPair           []string         `yaml:"vpc_pair"`
 	Integration       IntegratedConfig `yaml:"integration_test"`
 	Link              Links            `yaml:"links"`
+	Msd               MsdConfig        `yaml:"msd"`
 	mockPort          int
 	mockServerStarted bool
 	mockConfigFile    string

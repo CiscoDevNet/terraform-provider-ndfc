@@ -211,9 +211,13 @@ func (v NDFCNetworksValue) DeepEqual(c NDFCNetworksValue) int {
 			return RequiresUpdate
 		}
 	}
-	if v.NetworkTemplateConfig.Trm != c.NetworkTemplateConfig.Trm {
-		log.Printf("v.NetworkTemplateConfig.Trm=%s, c.NetworkTemplateConfig.Trm=%s", v.NetworkTemplateConfig.Trm, c.NetworkTemplateConfig.Trm)
-		return RequiresUpdate
+	if v.NetworkTemplateConfig.Trm != "" {
+		if v.NetworkTemplateConfig.Trm != c.NetworkTemplateConfig.Trm {
+			log.Printf("v.NetworkTemplateConfig.Trm=%s, c.NetworkTemplateConfig.Trm=%s", v.NetworkTemplateConfig.Trm, c.NetworkTemplateConfig.Trm)
+			return RequiresUpdate
+		}
+	} else {
+		log.Printf("Skipping - v.NetworkTemplateConfig.Trm=%s, c.NetworkTemplateConfig.Trm=%s", v.NetworkTemplateConfig.Trm, c.NetworkTemplateConfig.Trm)
 	}
 	if v.NetworkTemplateConfig.RouteTargetBoth != c.NetworkTemplateConfig.RouteTargetBoth {
 		log.Printf("v.NetworkTemplateConfig.RouteTargetBoth=%s, c.NetworkTemplateConfig.RouteTargetBoth=%s", v.NetworkTemplateConfig.RouteTargetBoth, c.NetworkTemplateConfig.RouteTargetBoth)

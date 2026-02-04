@@ -42,6 +42,26 @@ func (c NDFC) RscDeployVrfAttachments(ctx context.Context, dg *diag.Diagnostics,
 		//dg.AddWarning("Deployment not done", "No attachments to deploy")
 		return
 	}
+
+	// Get configuration preview to refresh the deploy status
+	// This is bug in NDFC sometimes the status is not updated
+	// For MSD fabrics (parent or child), use the MSD parent fabric for config preview
+	_, parentFabric := c.CheckIsFabricMsdType(ctx, dg, d.FabricName)
+	fabricName := d.FabricName
+	if parentFabric != "" {
+		// This is an MSD child fabric - use the parent for preview
+		fabricName = parentFabric
+		tflog.Info(ctx, fmt.Sprintf("RscDeployVrfAttachments: Using MSD parent fabric %s for config preview (child fabric: %s)", fabricName, d.FabricName))
+	}
+	// Use serial numbers for targeted config preview
+	serialNumbers := d.GetSerialNumbers()
+	tflog.Info(ctx, fmt.Sprintf("RscDeployVrfAttachments: Config preview for fabric %s with serials %v", fabricName, serialNumbers))
+	res, err := c.GetConfigurationPreview(fabricName, serialNumbers)
+	if err != nil {
+		dg.AddError("Deploy failed", fmt.Sprintf("Configuration preview failed for fabric %s  res : %v", fabricName, res))
+		return
+	}
+
 	// If detach is present in the list
 	// have to wait for deploy complete so that subsequent ops like delete can be taken up
 	if detach_present || d.ctrlr.WaitForDeployComplete {
