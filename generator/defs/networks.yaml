@@ -291,6 +291,9 @@ resource:
         ndfc_nested: [networkTemplateConfig]
         tf_name: trm
         type: Bool
+        optional: true
+        computed: true
+        use_state: true
         description: Enable Tenant Routed Multicast
         example: true
       - &rtBothAuto

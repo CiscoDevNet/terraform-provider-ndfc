@@ -68,7 +68,7 @@ func (c NDFC) vrfAttachmentsPost(ctx context.Context, fabricName string, data []
 	if err != nil {
 		return err
 	}
-	tflog.Info(ctx, fmt.Sprintf("vrfAttachmentsCreate: Success res : %v", res.Str))
+	tflog.Info(ctx, fmt.Sprintf("vrfAttachmentsCreate: Success res : %v", res.String()))
 	return nil
 }
 

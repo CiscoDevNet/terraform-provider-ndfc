@@ -49,7 +49,7 @@ func (c NDFC) vrfCreateBulk(ctx context.Context, fabricName string, vrfsPayload 
 		return errors.Join(err, err1, err2)
 	}
 
-	tflog.Info(ctx, fmt.Sprintf("vrfCreateBulk: Success res : %v", res.Str))
+	tflog.Info(ctx, fmt.Sprintf("vrfCreateBulk: Success res : %v", res.String()))
 	return nil
 }
 
@@ -262,10 +262,10 @@ func (c NDFC) vrfBulkUpdate(ctx context.Context, dg *diag.Diagnostics, ndVRFs *r
 		vrfObj.PutVrf = payload.Vrfs[i].VrfName
 		res, err := vrfObj.Put(data)
 		if err != nil {
-			dg.AddError(fmt.Sprintf("VRF %s, Update failed", payload.Vrfs[i].VrfName), fmt.Sprintf("Error %v, response %s", err, res.Str))
+			dg.AddError(fmt.Sprintf("VRF %s, Update failed", payload.Vrfs[i].VrfName), fmt.Sprintf("Error %v, response %s", err, res.String()))
 			return
 		}
-		tflog.Info(ctx, fmt.Sprintf("Update VRF %s Successful. Message %s", payload.Vrfs[i].VrfName, res.Str))
+		tflog.Info(ctx, fmt.Sprintf("Update VRF %s Successful. Message %s", payload.Vrfs[i].VrfName, res.String()))
 	}
 }
 
