@@ -42,14 +42,18 @@ func (c *NDFC) RscCreateLinks(ctx context.Context, resp *resource.CreateResponse
 	}
 
 	// Validate the template
-	tmplPayload, err := json.Marshal(modelData.LinkParameters)
-	if err != nil {
-		dg.AddError("Create Error", fmt.Sprintf("Failed to marshal link parameters, got error: %s", err))
-		return
-	}
-	if valid, errors := ndfcTmpl.ValidatePayload(tmplPayload); !valid && len(errors) > 0 {
-		dg.AddError("Create Error", fmt.Sprintf("Template validation errors in link parameters, got errors: %s", errors))
-		return
+	if modelData.LinkParameters != nil {
+		tmplPayload, err := json.Marshal(modelData.LinkParameters)
+		if err != nil {
+			dg.AddError("Create Error", fmt.Sprintf("Failed to marshal link parameters, got error: %s", err))
+			return
+		}
+		if valid, errors := ndfcTmpl.ValidatePayload(tmplPayload); !valid && len(errors) > 0 {
+			dg.AddError("Create Error", fmt.Sprintf("Template validation errors in link parameters, got errors: %s", errors))
+			return
+		}
+	} else {
+		modelData.LinkParameters = make(map[string]string)
 	}
 
 	//c.adjustLinksPayload(ctx, dg, modelData, ndfcTmpl)
@@ -122,6 +126,10 @@ func (c *NDFC) RscCreateLinks(ctx context.Context, resp *resource.CreateResponse
 func (c NDFC) adjustLinksPayload(ctx context.Context, dg *diag.Diagnostics,
 	in *resource_links.NDFCLinksModel, out *resource_links.NDFCLinksModel,
 	ndfcTmpl *ndfctemplates.NDFCTemplate) {
+
+	if out.LinkParameters == nil {
+		out.LinkParameters = make(map[string]string)
+	}
 
 	log.Printf("[DEBUG] Adjusting link payload, templateName in %s, out %s", in.TemplateName, out.TemplateName)
 	if ndfcTmpl == nil {
@@ -346,14 +354,18 @@ func (c *NDFC) RscUpdateLinks(ctx context.Context, dg *diag.Diagnostics, id stri
 	// Step 3: Perform 3-way merge between current data, plan data, and state data
 	resource_links.MergeLinksData(currentData, planModelData, stateModelData)
 
-	tmplPayload, err := json.Marshal(currentData.LinkParameters)
-	if err != nil {
-		dg.AddError("Client Error", fmt.Sprintf("Failed to marshal link parameters, got error: %s", err))
-		return
-	}
-	if valid, errors := ndfcTmpl.ValidatePayload(tmplPayload); !valid && len(errors) > 0 {
-		dg.AddError("Client Error", fmt.Sprintf("Template validation errors in link parameters, got errors: %s", errors))
-		return
+	if currentData.LinkParameters != nil {
+		tmplPayload, err := json.Marshal(currentData.LinkParameters)
+		if err != nil {
+			dg.AddError("Client Error", fmt.Sprintf("Failed to marshal link parameters, got error: %s", err))
+			return
+		}
+		if valid, errors := ndfcTmpl.ValidatePayload(tmplPayload); !valid && len(errors) > 0 {
+			dg.AddError("Client Error", fmt.Sprintf("Template validation errors in link parameters, got errors: %s", errors))
+			return
+		}
+	} else {
+		currentData.LinkParameters = make(map[string]string)
 	}
 
 	ndfcTmpl.FillDefaultValues(&currentData.LinkParameters)
