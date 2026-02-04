@@ -32,8 +32,8 @@ const UrlGlobalConfigDeploy = "/lan-fabric/rest/control/fabrics/%s/config-deploy
 const UrlSwitchConfigDeploy = "/lan-fabric/rest/control/fabrics/%s/config-deploy/%s?forceShowRun=false"
 const UrlSaveConfig = "/lan-fabric/rest/control/fabrics/%s/config-save"
 const UrlGetFabricErrors = "/lan-fabric/rest/control/fabrics/%s/errors"
-const UrlGetGlobalConfigPreview = "/lan-fabric/rest/control/fabrics/%s/config-preview/%s"
-const UrlGetConfigPreview = "/lan-fabric/rest/control/fabrics/%s/config-preview"
+const UrlGetGlobalConfigPreview = "/lan-fabric/rest/control/fabrics/%s/config-preview/%s?forceShowRun=false&showBrief=true"
+const UrlGetConfigPreview = "/lan-fabric/rest/control/fabrics/%s/config-preview?forceShowRun=false&showBrief=true"
 
 const UrlGetDeploymentHistory = "/lan-fabric/rest/config/delivery/deployerHistoryByFabric/%s?serialNumber=%s&sort=%s"
 

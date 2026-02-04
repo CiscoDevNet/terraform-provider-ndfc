@@ -554,7 +554,7 @@ func (c NDFC) handleMsdChildVrfOperations(ctx context.Context, dg *diag.Diagnost
 	// 		// Child-specific properties remain from child config
 	// 		vrf.Vrfs[vrfName] = vrfEntry
 	// 	}
-	//}
+	// }
 
 	tflog.Info(ctx, "MSD Child: VRF update completed successfully")
 	return nil

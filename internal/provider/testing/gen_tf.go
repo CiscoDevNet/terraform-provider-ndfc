@@ -14,6 +14,7 @@ import (
 	"log"
 	"os"
 	"strings"
+	"terraform-provider-ndfc/internal/provider/resources/resource_fabric_vxlan_msd"
 	"terraform-provider-ndfc/internal/provider/resources/resource_interface_common"
 	"terraform-provider-ndfc/internal/provider/resources/resource_links"
 	"terraform-provider-ndfc/internal/provider/resources/resource_networks"
@@ -24,6 +25,145 @@ import (
 	"text/template"
 	"time"
 )
+
+// MsdComprehensiveTestConfig is a unified structure for MSD comprehensive test
+// It encapsulates all resources: VXLAN fabrics, inventory, MSD fabric, VRFs, and Networks
+type MsdComprehensiveTestConfig struct {
+	// VXLAN Fabrics (child fabrics for MSD)
+	VxlanFabrics []VxlanFabricConfig
+	// Inventory devices for each child fabric
+	InventoryDevices []InventoryDevicesConfig
+	// MSD Fabric configuration
+	MsdFabric *MsdFabricConfig
+	// MSD Parent VRFs in MSD fabric
+	MsdParentVrfs *MsdVrfsConfig
+	// MSD Child VRFs in each child fabric
+	MsdChildVrfs []MsdVrfsConfig
+	// MSD Parent Networks in MSD fabric
+	MsdParentNetworks *MsdNetworksConfig
+	// MSD Child Networks in each child fabric
+	MsdChildNetworks []MsdNetworksConfig
+}
+
+// MsdFabricConfig represents the MSD fabric resource configuration
+type MsdFabricConfig struct {
+	ResourceName string
+	DependsOn    string
+	FabricName   string
+	Deploy       bool
+	ChildFabrics []string
+}
+
+// MSD VRFs and Networks structures (kept for backward compatibility)
+type MsdVrfsNetworks struct {
+	MsdParentVrfs     *MsdVrfsConfig
+	MsdChildVrfs      []MsdVrfsConfig
+	MsdParentNetworks *MsdNetworksConfig
+	MsdChildNetworks  []MsdNetworksConfig
+}
+
+type MsdVrfsConfig struct {
+	ResourceName         string
+	DependsOn            string
+	FabricName           string
+	DeployAllAttachments bool
+	Vrfs                 map[string]MsdVrfEntry
+}
+
+type MsdVrfEntry struct {
+	VrfId                      int
+	VlanId                     int
+	DisableRtAuto              bool
+	Ipv6LinkLocal              bool
+	LoopbackRoutingTag         int
+	MaxBgpPaths                int
+	MaxIbgpPaths               int
+	Mtu                        int
+	RedistributeDirectRouteMap string
+	VrfExtensionTemplate       string
+	VrfTemplate                string
+	InterfaceDescription       string
+	VlanName                   string
+	VrfDescription             string
+	AdvertiseDefaultRoute      bool
+	AdvertiseHostRoutes        bool
+	AttachList                 map[string]MsdAttachment
+}
+
+type MsdNetworksConfig struct {
+	ResourceName         string
+	DependsOn            string
+	FabricName           string
+	DeployAllAttachments bool
+	Networks             map[string]MsdNetworkEntry
+}
+
+type MsdNetworkEntry struct {
+	VrfName              string
+	NetworkId            int
+	GatewayIpv4Address   string
+	GatewayIpv6Address   string
+	VlanId               int
+	VlanName             string
+	Layer2Only           bool
+	InterfaceDescription string
+	Mtu                  int
+	SecondaryGateway1    string
+	SecondaryGateway2    string
+	SecondaryGateway3    string
+	SecondaryGateway4    string
+	RoutingTag           int
+	ArpSuppression       bool
+	RouteTargetBoth      bool
+	DhcpLoopbackId       int
+	MulticastGroup       string
+	Trm                  bool
+	Netflow              bool
+	VlanNetflowMonitor   string
+	L3GatewayOnBorder    bool
+	IgmpVersion          int
+	Attachments          map[string]MsdAttachment
+}
+
+type MsdAttachment struct {
+	DeployThisAttachment bool
+	Fabric               string
+}
+
+// VXLAN Fabric and Inventory structures for MSD test setup
+type MsdFabricsAndInventory struct {
+	VxlanFabrics     []VxlanFabricConfig
+	InventoryDevices []InventoryDevicesConfig
+}
+
+type VxlanFabricConfig struct {
+	ResourceName string
+	FabricName   string
+	BgpAs        string
+	Deploy       bool
+}
+
+type InventoryDevicesConfig struct {
+	ResourceName   string
+	DependsOn      string
+	FabricName     string
+	AuthProtocol   string
+	Username       string
+	Password       string
+	MaxHops        int
+	PreserveConfig bool
+	Save           bool
+	Deploy         bool
+	Retries        int
+	RetryWaitTime  int
+	Devices        map[string]InventoryDeviceEntry
+}
+
+type InventoryDeviceEntry struct {
+	Role                  string
+	DiscoveryType         string
+	DiscoveryAuthProtocol string
+}
 
 const tfHeader = `
 terraform {
@@ -241,6 +381,55 @@ func GetTFConfigWithSingleResource(tt string, cfg map[string]string, rscs []inte
 			args["RscName"] = rsNames[i]
 			args["RscType"] = "links"
 			err = t.ExecuteTemplate(&output, "NDFC_LINKS_RSC", args)
+			if err != nil {
+				panic(err)
+			}
+		}
+
+		fabricMsdRsc, ok := rsc.(*resource_fabric_vxlan_msd.FabricVxlanMsdModel)
+		if ok {
+			args["FabricVxlanMsd"] = fabricMsdRsc
+			args["RscName"] = rsNames[i]
+			args["RscType"] = "fabric_vxlan_msd"
+			err = t.ExecuteTemplate(&output, "NDFC_FABRIC_VXLAN_MSD_RSC", args)
+			if err != nil {
+				panic(err)
+			}
+		}
+
+		msdVrfsNetworks, ok := rsc.(*MsdVrfsNetworks)
+		if ok {
+			args["MsdParentVrfs"] = msdVrfsNetworks.MsdParentVrfs
+			args["MsdChildVrfs"] = msdVrfsNetworks.MsdChildVrfs
+			args["MsdParentNetworks"] = msdVrfsNetworks.MsdParentNetworks
+			args["MsdChildNetworks"] = msdVrfsNetworks.MsdChildNetworks
+			err = t.ExecuteTemplate(&output, "NDFC_MSD_VRFS_NETWORKS", args)
+			if err != nil {
+				panic(err)
+			}
+		}
+
+		fabricsAndInventory, ok := rsc.(*MsdFabricsAndInventory)
+		if ok {
+			args["VxlanFabrics"] = fabricsAndInventory.VxlanFabrics
+			args["InventoryDevices"] = fabricsAndInventory.InventoryDevices
+			err = t.ExecuteTemplate(&output, "NDFC_VXLAN_FABRICS_AND_INVENTORY", args)
+			if err != nil {
+				panic(err)
+			}
+		}
+
+		// Unified MSD Comprehensive Test Config - handles all MSD test resources in one structure
+		msdTestConfig, ok := rsc.(*MsdComprehensiveTestConfig)
+		if ok {
+			args["VxlanFabrics"] = msdTestConfig.VxlanFabrics
+			args["InventoryDevices"] = msdTestConfig.InventoryDevices
+			args["MsdFabric"] = msdTestConfig.MsdFabric
+			args["MsdParentVrfs"] = msdTestConfig.MsdParentVrfs
+			args["MsdChildVrfs"] = msdTestConfig.MsdChildVrfs
+			args["MsdParentNetworks"] = msdTestConfig.MsdParentNetworks
+			args["MsdChildNetworks"] = msdTestConfig.MsdChildNetworks
+			err = t.ExecuteTemplate(&output, "NDFC_MSD_COMPREHENSIVE_TEST", args)
 			if err != nil {
 				panic(err)
 			}

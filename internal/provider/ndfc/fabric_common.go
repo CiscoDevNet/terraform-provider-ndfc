@@ -207,6 +207,23 @@ func (f *NDFC) RscDeployFabric(ctx context.Context, dg *diag.Diagnostics, fname 
 	}
 
 }
+
+// GetConfigurationPreview retrieves the configuration preview for specific switches in a fabric.
+// This refreshes the config status of switches and is generic for both VRF and Network operations.
+func (f *NDFC) GetConfigurationPreview(fabricName string, serialNumbers []string) ([]byte, error) {
+	previewApi := api.NewConfigDeploymentAPI(f.GetLock(ResourceConfigDeploy), &f.apiClient)
+	previewApi.FabricName = fabricName
+	previewApi.Preview = true
+	previewApi.SerialNumbers = serialNumbers
+
+	// Config Preview refreshes the config status of switches in the fabric
+	payload, err := previewApi.Get()
+	if len(payload) == 0 || string(payload) == "[]" || err != nil {
+		return nil, fmt.Errorf("configuration preview failed")
+	}
+	return payload, nil
+}
+
 func (f *NDFC) GetSwitchesInFabric(ctx context.Context, fname string) ([]byte, error) {
 	fapi := api.NewFabricAPI(f.GetLock(ResourceFabrics), &f.apiClient)
 	fapi.FabricName = fname

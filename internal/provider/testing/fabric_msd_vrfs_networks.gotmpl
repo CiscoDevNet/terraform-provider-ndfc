@@ -1,0 +1,860 @@
+{{/* 
+Example MSD Fabric, VRFs and Networks configuration
+
+# MSD Fabric
+resource "ndfc_fabric_vxlan_msd" "MSD_Fabric" {
+  fabric_name   = "MSD"
+  deploy        = false
+  child_fabrics = ["TF_VXLAN_FABRIC", "TF_VXLAN_FABRIC2"]
+}
+
+# MSD Parent VRFs
+resource "ndfc_vrfs" "msd_vrfs" {
+  fabric_name = "MSD"
+  vrfs = {
+    "vrf_01" = {
+      vlan_id = 234
+      mtu = 9216
+      attach_list = {
+        "SERIAL1" = {
+          deploy_this_attachment = true
+          fabric = "TF_VXLAN_FABRIC"
+        }
+      }
+    }
+  }
+}
+
+# MSD Child VRFs
+resource "ndfc_vrfs" "child_vrfs1" {
+  fabric_name = "TF_VXLAN_FABRIC"
+  vrfs = {
+    "vrf_01" = {
+      vlan_id = 234
+      mtu = 9216
+      advertise_default_route = true
+      attach_list = {
+        "SERIAL1" = {
+          deploy_this_attachment = true
+        }
+      }
+    }
+  }
+}
+
+# MSD Parent Networks
+resource "ndfc_networks" "msd_networks" {
+  fabric_name = "MSD"
+  networks = {
+    "TF_NW_1" = {
+      vrf_name = "vrf_01"
+      network_id = 31001
+      vlan_id = 301
+      gateway_ipv4_address = "192.168.1.1/24"
+      attachments = {
+        "SERIAL1" = {
+          deploy_this_attachment = true
+          fabric = "TF_VXLAN_FABRIC"
+        }
+      }
+    }
+  }
+}
+
+# MSD Child Networks
+resource "ndfc_networks" "child_networks1" {
+  fabric_name = "TF_VXLAN_FABRIC"
+  networks = {
+    "TF_NW_1" = {
+      vrf_name = "vrf_01"
+      network_id = 31001
+      vlan_id = 301
+      gateway_ipv4_address = "192.168.1.1/24"
+      trm = true
+      multicast_group = "239.1.1.1"
+      attachments = {
+        "SERIAL1" = {
+          deploy_this_attachment = true
+        }
+      }
+    }
+  }
+}
+*/}}
+
+{{define "NDFC_FABRIC_VXLAN_MSD_RSC"}}
+resource "ndfc_{{.RscType}}" "{{.RscName}}" {
+    {{ with .FabricVxlanMsd }}
+        fabric_name   = {{.FabricName}}
+        deploy        = {{.Deploy}}
+        {{if not .ChildFabrics.IsNull}}child_fabrics = {{.ChildFabrics}}{{end}}
+    {{end}}
+}
+{{end}}
+{{define "NDFC_MSD_VRFS_NETWORKS"}}
+# =============================================================================
+# MSD Parent VRFs - Basic configuration with fabric field in attachments
+# =============================================================================
+{{with .MsdParentVrfs}}
+resource "ndfc_vrfs" "{{.ResourceName}}" {
+    {{if .DependsOn}}depends_on = [{{.DependsOn}}]{{end}}
+    fabric_name = "{{.FabricName}}"
+    {{if .DeployAllAttachments}}deploy_all_attachments = {{.DeployAllAttachments}}{{end}}
+    vrfs = {
+    {{- range $vrfName, $vrfEntry := .Vrfs}}
+        "{{$vrfName}}" = {
+            {{- if $vrfEntry.VrfId}}
+            vrf_id = {{$vrfEntry.VrfId}}
+            {{- end}}
+            {{- if $vrfEntry.VlanId}}
+            vlan_id = {{$vrfEntry.VlanId}}
+            {{- end}}
+            {{- if $vrfEntry.DisableRtAuto}}
+            disable_rt_auto = {{$vrfEntry.DisableRtAuto}}
+            {{- end}}
+            {{- if $vrfEntry.Ipv6LinkLocal}}
+            ipv6_link_local = {{$vrfEntry.Ipv6LinkLocal}}
+            {{- end}}
+            {{- if $vrfEntry.LoopbackRoutingTag}}
+            loopback_routing_tag = {{$vrfEntry.LoopbackRoutingTag}}
+            {{- end}}
+            {{- if $vrfEntry.MaxBgpPaths}}
+            max_bgp_paths = {{$vrfEntry.MaxBgpPaths}}
+            {{- end}}
+            {{- if $vrfEntry.MaxIbgpPaths}}
+            max_ibgp_paths = {{$vrfEntry.MaxIbgpPaths}}
+            {{- end}}
+            {{- if $vrfEntry.Mtu}}
+            mtu = {{$vrfEntry.Mtu}}
+            {{- end}}
+            {{- if $vrfEntry.RedistributeDirectRouteMap}}
+            redistribute_direct_route_map = "{{$vrfEntry.RedistributeDirectRouteMap}}"
+            {{- end}}
+            {{- if $vrfEntry.VrfExtensionTemplate}}
+            vrf_extension_template = "{{$vrfEntry.VrfExtensionTemplate}}"
+            {{- end}}
+            {{- if $vrfEntry.VrfTemplate}}
+            vrf_template = "{{$vrfEntry.VrfTemplate}}"
+            {{- end}}
+            {{- if $vrfEntry.InterfaceDescription}}
+            interface_description = "{{$vrfEntry.InterfaceDescription}}"
+            {{- end}}
+            {{- if $vrfEntry.VlanName}}
+            vlan_name = "{{$vrfEntry.VlanName}}"
+            {{- end}}
+            {{- if $vrfEntry.VrfDescription}}
+            vrf_description = "{{$vrfEntry.VrfDescription}}"
+            {{- end}}
+            {{- if $vrfEntry.AdvertiseDefaultRoute}}
+            advertise_default_route = {{$vrfEntry.AdvertiseDefaultRoute}}
+            {{- end}}
+            {{- if $vrfEntry.AdvertiseHostRoutes}}
+            advertise_host_routes = {{$vrfEntry.AdvertiseHostRoutes}}
+            {{- end}}
+            {{- if $vrfEntry.AttachList}}
+            attach_list = {
+                {{- range $serial, $attachEntry := $vrfEntry.AttachList}}
+                "{{$serial}}" = {
+                    deploy_this_attachment = {{$attachEntry.DeployThisAttachment}}
+                    {{- if $attachEntry.Fabric}}
+                    fabric = "{{$attachEntry.Fabric}}"
+                    {{- end}}
+                }
+                {{- end}}
+            }
+            {{- end}}
+        }
+    {{- end}}
+    }
+}
+{{end}}
+
+# =============================================================================
+# MSD Child VRFs - Extended configuration without fabric field in attachments
+# =============================================================================
+{{range .MsdChildVrfs}}
+{{if .Vrfs}}
+resource "ndfc_vrfs" "{{.ResourceName}}" {
+    {{if .DependsOn}}depends_on = [{{.DependsOn}}]{{end}}
+    fabric_name = "{{.FabricName}}"
+    {{if .DeployAllAttachments}}deploy_all_attachments = {{.DeployAllAttachments}}{{end}}
+    vrfs = {
+    {{- range $vrfName, $vrfEntry := .Vrfs}}
+        "{{$vrfName}}" = {
+            {{- if $vrfEntry.VrfId}}
+            vrf_id = {{$vrfEntry.VrfId}}
+            {{- end}}
+            {{- if $vrfEntry.DisableRtAuto}}
+            disable_rt_auto = {{$vrfEntry.DisableRtAuto}}
+            {{- end}}
+            {{- if $vrfEntry.Ipv6LinkLocal}}
+            ipv6_link_local = {{$vrfEntry.Ipv6LinkLocal}}
+            {{- end}}
+            {{- if $vrfEntry.LoopbackRoutingTag}}
+            loopback_routing_tag = {{$vrfEntry.LoopbackRoutingTag}}
+            {{- end}}
+            {{- if $vrfEntry.MaxBgpPaths}}
+            max_bgp_paths = {{$vrfEntry.MaxBgpPaths}}
+            {{- end}}
+            {{- if $vrfEntry.MaxIbgpPaths}}
+            max_ibgp_paths = {{$vrfEntry.MaxIbgpPaths}}
+            {{- end}}
+            {{- if $vrfEntry.Mtu}}
+            mtu = {{$vrfEntry.Mtu}}
+            {{- end}}
+            {{- if $vrfEntry.RedistributeDirectRouteMap}}
+            redistribute_direct_route_map = "{{$vrfEntry.RedistributeDirectRouteMap}}"
+            {{- end}}
+            {{- if $vrfEntry.VrfExtensionTemplate}}
+            vrf_extension_template = "{{$vrfEntry.VrfExtensionTemplate}}"
+            {{- end}}
+            {{- if $vrfEntry.VrfTemplate}}
+            vrf_template = "{{$vrfEntry.VrfTemplate}}"
+            {{- end}}
+            {{- if $vrfEntry.InterfaceDescription}}
+            interface_description = "{{$vrfEntry.InterfaceDescription}}"
+            {{- end}}
+            {{- if $vrfEntry.VlanName}}
+            vlan_name = "{{$vrfEntry.VlanName}}"
+            {{- end}}
+            {{- if $vrfEntry.VrfDescription}}
+            vrf_description = "{{$vrfEntry.VrfDescription}}"
+            {{- end}}
+            {{- if $vrfEntry.AdvertiseDefaultRoute}}
+            advertise_default_route = {{$vrfEntry.AdvertiseDefaultRoute}}
+            {{- end}}
+            {{- if $vrfEntry.AdvertiseHostRoutes}}
+            advertise_host_routes = {{$vrfEntry.AdvertiseHostRoutes}}
+            {{- end}}
+            {{- if $vrfEntry.AttachList}}
+            attach_list = {
+                {{- range $serial, $attachEntry := $vrfEntry.AttachList}}
+                "{{$serial}}" = {
+                    deploy_this_attachment = {{$attachEntry.DeployThisAttachment}}
+                    {{- if $attachEntry.Fabric}}
+                    fabric = "{{$attachEntry.Fabric}}"
+                    {{- end}}
+                }
+                {{- end}}
+            }
+            {{- end}}
+        }
+    {{- end}}
+    }
+}
+{{end}}
+{{end}}
+
+# =============================================================================
+# MSD Parent Networks - Basic configuration with fabric field in attachments
+# =============================================================================
+{{with .MsdParentNetworks}}
+resource "ndfc_networks" "{{.ResourceName}}" {
+    {{if .DependsOn}}depends_on = [{{.DependsOn}}]{{end}}
+    fabric_name = "{{.FabricName}}"
+    {{if .DeployAllAttachments}}deploy_all_attachments = {{.DeployAllAttachments}}{{end}}
+    networks = {
+    {{- range $networkName, $networkEntry := .Networks}}
+        "{{$networkName}}" = {
+            vrf_name = "{{$networkEntry.VrfName}}"
+            network_id = {{$networkEntry.NetworkId}}
+            {{- if $networkEntry.GatewayIpv4Address}}
+            gateway_ipv4_address = "{{$networkEntry.GatewayIpv4Address}}"
+            {{- end}}
+            {{- if $networkEntry.GatewayIpv6Address}}
+            gateway_ipv6_address = "{{$networkEntry.GatewayIpv6Address}}"
+            {{- end}}
+            {{- if $networkEntry.VlanId}}
+            vlan_id = {{$networkEntry.VlanId}}
+            {{- end}}
+            {{- if $networkEntry.VlanName}}
+            vlan_name = "{{$networkEntry.VlanName}}"
+            {{- end}}
+            {{- if $networkEntry.Layer2Only}}
+            layer2_only = {{$networkEntry.Layer2Only}}
+            {{- end}}
+            {{- if $networkEntry.InterfaceDescription}}
+            interface_description = "{{$networkEntry.InterfaceDescription}}"
+            {{- end}}
+            {{- if $networkEntry.Mtu}}
+            mtu = {{$networkEntry.Mtu}}
+            {{- end}}
+            {{- if $networkEntry.SecondaryGateway1}}
+            secondary_gateway_1 = "{{$networkEntry.SecondaryGateway1}}"
+            {{- end}}
+            {{- if $networkEntry.SecondaryGateway2}}
+            secondary_gateway_2 = "{{$networkEntry.SecondaryGateway2}}"
+            {{- end}}
+            {{- if $networkEntry.SecondaryGateway3}}
+            secondary_gateway_3 = "{{$networkEntry.SecondaryGateway3}}"
+            {{- end}}
+            {{- if $networkEntry.SecondaryGateway4}}
+            secondary_gateway_4 = "{{$networkEntry.SecondaryGateway4}}"
+            {{- end}}
+            {{- if $networkEntry.RoutingTag}}
+            routing_tag = {{$networkEntry.RoutingTag}}
+            {{- end}}
+            {{- if $networkEntry.ArpSuppression}}
+            arp_suppression = {{$networkEntry.ArpSuppression}}
+            {{- end}}
+            {{- if $networkEntry.RouteTargetBoth}}
+            route_target_both = {{$networkEntry.RouteTargetBoth}}
+            {{- end}}
+            {{- if $networkEntry.Trm}}
+            trm = {{$networkEntry.Trm}}
+            {{- end}}
+            {{- if $networkEntry.Attachments}}
+            attachments = {
+                {{- range $serial, $attachEntry := $networkEntry.Attachments}}
+                "{{$serial}}" = {
+                    deploy_this_attachment = {{$attachEntry.DeployThisAttachment}}
+                    {{- if $attachEntry.Fabric}}
+                    fabric = "{{$attachEntry.Fabric}}"
+                    {{- end}}
+                }
+                {{- end}}
+            }
+            {{- end}}
+        }
+    {{- end}}
+    }
+}
+{{end}}
+
+# =============================================================================
+# MSD Child Networks - Extended configuration without fabric field in attachments
+# =============================================================================
+{{range .MsdChildNetworks}}
+{{if .Networks}}
+resource "ndfc_networks" "{{.ResourceName}}" {
+    {{if .DependsOn}}depends_on = [{{.DependsOn}}]{{end}}
+    fabric_name = "{{.FabricName}}"
+    {{if .DeployAllAttachments}}deploy_all_attachments = {{.DeployAllAttachments}}{{end}}
+    networks = {
+    {{- range $networkName, $networkEntry := .Networks}}
+        "{{$networkName}}" = {
+            vrf_name = "{{$networkEntry.VrfName}}"
+            network_id = {{$networkEntry.NetworkId}}
+            {{- if $networkEntry.GatewayIpv4Address}}
+            gateway_ipv4_address = "{{$networkEntry.GatewayIpv4Address}}"
+            {{- end}}
+            {{- if $networkEntry.GatewayIpv6Address}}
+            gateway_ipv6_address = "{{$networkEntry.GatewayIpv6Address}}"
+            {{- end}}
+            {{- if $networkEntry.VlanId}}
+            vlan_id = {{$networkEntry.VlanId}}
+            {{- end}}
+            {{- if $networkEntry.VlanName}}
+            vlan_name = "{{$networkEntry.VlanName}}"
+            {{- end}}
+            {{- if $networkEntry.Layer2Only}}
+            layer2_only = {{$networkEntry.Layer2Only}}
+            {{- end}}
+            {{- if $networkEntry.InterfaceDescription}}
+            interface_description = "{{$networkEntry.InterfaceDescription}}"
+            {{- end}}
+            {{- if $networkEntry.Mtu}}
+            mtu = {{$networkEntry.Mtu}}
+            {{- end}}
+            {{- if $networkEntry.SecondaryGateway1}}
+            secondary_gateway_1 = "{{$networkEntry.SecondaryGateway1}}"
+            {{- end}}
+            {{- if $networkEntry.SecondaryGateway2}}
+            secondary_gateway_2 = "{{$networkEntry.SecondaryGateway2}}"
+            {{- end}}
+            {{- if $networkEntry.SecondaryGateway3}}
+            secondary_gateway_3 = "{{$networkEntry.SecondaryGateway3}}"
+            {{- end}}
+            {{- if $networkEntry.SecondaryGateway4}}
+            secondary_gateway_4 = "{{$networkEntry.SecondaryGateway4}}"
+            {{- end}}
+            {{- if $networkEntry.RoutingTag}}
+            routing_tag = {{$networkEntry.RoutingTag}}
+            {{- end}}
+            {{- if $networkEntry.ArpSuppression}}
+            arp_suppression = {{$networkEntry.ArpSuppression}}
+            {{- end}}
+            {{- if $networkEntry.RouteTargetBoth}}
+            route_target_both = {{$networkEntry.RouteTargetBoth}}
+            {{- end}}
+            {{- if $networkEntry.DhcpLoopbackId}}
+            dhcp_loopback_id = {{$networkEntry.DhcpLoopbackId}}
+            {{- end}}
+            {{- if $networkEntry.MulticastGroup}}
+            multicast_group = "{{$networkEntry.MulticastGroup}}"
+            {{- end}}
+            {{- if $networkEntry.Trm}}
+            trm = {{$networkEntry.Trm}}
+            {{- end}}
+            {{- if $networkEntry.Netflow}}
+            netflow = {{$networkEntry.Netflow}}
+            {{- end}}
+            {{- if $networkEntry.VlanNetflowMonitor}}
+            vlan_netflow_monitor = "{{$networkEntry.VlanNetflowMonitor}}"
+            {{- end}}
+            {{- if $networkEntry.L3GatewayOnBorder}}
+            l3_gateway_on_border = {{$networkEntry.L3GatewayOnBorder}}
+            {{- end}}
+            {{- if $networkEntry.IgmpVersion}}
+            igmp_version = {{$networkEntry.IgmpVersion}}
+            {{- end}}
+            {{- if $networkEntry.Attachments}}
+            attachments = {
+                {{- range $serial, $attachEntry := $networkEntry.Attachments}}
+                "{{$serial}}" = {
+                    deploy_this_attachment = {{$attachEntry.DeployThisAttachment}}
+                }
+                {{- end}}
+            }
+            {{- end}}
+        }
+    {{- end}}
+    }
+}
+{{end}}
+{{end}}
+{{end}}
+
+{{/* Template for generating VXLAN fabrics and inventory devices for MSD test setup */}}
+
+{{define "NDFC_VXLAN_FABRICS_AND_INVENTORY"}}
+# =============================================================================
+# VXLAN EVPN Fabrics (Child fabrics for MSD)
+# =============================================================================
+{{range .VxlanFabrics}}
+resource "ndfc_fabric_vxlan_evpn" "{{.ResourceName}}" {
+    fabric_name = "{{.FabricName}}"
+    bgp_as      = "{{.BgpAs}}"
+    deploy      = {{.Deploy}}
+}
+{{end}}
+
+# =============================================================================
+# Inventory Devices for each child fabric
+# =============================================================================
+{{range .InventoryDevices}}
+resource "ndfc_inventory_devices" "{{.ResourceName}}" {
+    {{if .DependsOn}}depends_on = [{{.DependsOn}}]{{end}}
+    fabric_name     = "{{.FabricName}}"
+    auth_protocol   = "{{.AuthProtocol}}"
+    username        = "{{.Username}}"
+    password        = "{{.Password}}"
+    max_hops        = {{.MaxHops}}
+    preserve_config = {{.PreserveConfig}}
+    save            = {{.Save}}
+    deploy          = {{.Deploy}}
+    retries         = {{.Retries}}
+    retry_wait_timeout = {{.RetryWaitTime}}
+    devices = {
+    {{- range $deviceIp, $deviceEntry := .Devices}}
+        "{{$deviceIp}}" = {
+            role                    = "{{$deviceEntry.Role}}"
+            discovery_type          = "{{$deviceEntry.DiscoveryType}}"
+            discovery_auth_protocol = "{{$deviceEntry.DiscoveryAuthProtocol}}"
+        }
+    {{- end}}
+    }
+}
+{{end}}
+{{end}}
+
+{{/* =============================================================================
+     UNIFIED MSD COMPREHENSIVE TEST TEMPLATE
+     Generates all resources for MSD comprehensive test in one structure
+     ============================================================================= */}}
+{{define "NDFC_MSD_COMPREHENSIVE_TEST"}}
+# =============================================================================
+# VXLAN EVPN Fabrics (Child fabrics for MSD)
+# =============================================================================
+{{range .VxlanFabrics}}
+resource "ndfc_fabric_vxlan_evpn" "{{.ResourceName}}" {
+    fabric_name = "{{.FabricName}}"
+    bgp_as      = "{{.BgpAs}}"
+    deploy      = {{.Deploy}}
+}
+{{end}}
+
+# =============================================================================
+# Inventory Devices for each child fabric
+# =============================================================================
+{{range .InventoryDevices}}
+resource "ndfc_inventory_devices" "{{.ResourceName}}" {
+    {{if .DependsOn}}depends_on = [{{.DependsOn}}]{{end}}
+    fabric_name     = "{{.FabricName}}"
+    auth_protocol   = "{{.AuthProtocol}}"
+    username        = "{{.Username}}"
+    password        = "{{.Password}}"
+    max_hops        = {{.MaxHops}}
+    preserve_config = {{.PreserveConfig}}
+    save            = {{.Save}}
+    deploy          = {{.Deploy}}
+    retries         = {{.Retries}}
+    retry_wait_timeout = {{.RetryWaitTime}}
+    devices = {
+    {{- range $deviceIp, $deviceEntry := .Devices}}
+        "{{$deviceIp}}" = {
+            role                    = "{{$deviceEntry.Role}}"
+            discovery_type          = "{{$deviceEntry.DiscoveryType}}"
+            discovery_auth_protocol = "{{$deviceEntry.DiscoveryAuthProtocol}}"
+        }
+    {{- end}}
+    }
+}
+{{end}}
+
+# =============================================================================
+# MSD Fabric
+# =============================================================================
+{{with .MsdFabric}}
+resource "ndfc_fabric_vxlan_msd" "{{.ResourceName}}" {
+    {{if .DependsOn}}depends_on = [{{.DependsOn}}]{{end}}
+    fabric_name   = "{{.FabricName}}"
+    deploy        = {{.Deploy}}
+    {{if .ChildFabrics}}child_fabrics = [{{range $i, $cf := .ChildFabrics}}{{if $i}}, {{end}}"{{$cf}}"{{end}}]{{end}}
+}
+{{end}}
+
+# =============================================================================
+# MSD Parent VRFs - Basic configuration with fabric field in attachments
+# =============================================================================
+{{with .MsdParentVrfs}}
+{{if .Vrfs}}
+resource "ndfc_vrfs" "{{.ResourceName}}" {
+    {{if .DependsOn}}depends_on = [{{.DependsOn}}]{{end}}
+    fabric_name = "{{.FabricName}}"
+    {{if .DeployAllAttachments}}deploy_all_attachments = {{.DeployAllAttachments}}{{end}}
+    vrfs = {
+    {{- range $vrfName, $vrfEntry := .Vrfs}}
+        "{{$vrfName}}" = {
+            {{- if $vrfEntry.VrfId}}
+            vrf_id = {{$vrfEntry.VrfId}}
+            {{- end}}
+            {{- if $vrfEntry.VlanId}}
+            vlan_id = {{$vrfEntry.VlanId}}
+            {{- end}}
+            {{- if $vrfEntry.DisableRtAuto}}
+            disable_rt_auto = {{$vrfEntry.DisableRtAuto}}
+            {{- end}}
+            {{- if $vrfEntry.Ipv6LinkLocal}}
+            ipv6_link_local = {{$vrfEntry.Ipv6LinkLocal}}
+            {{- end}}
+            {{- if $vrfEntry.LoopbackRoutingTag}}
+            loopback_routing_tag = {{$vrfEntry.LoopbackRoutingTag}}
+            {{- end}}
+            {{- if $vrfEntry.MaxBgpPaths}}
+            max_bgp_paths = {{$vrfEntry.MaxBgpPaths}}
+            {{- end}}
+            {{- if $vrfEntry.MaxIbgpPaths}}
+            max_ibgp_paths = {{$vrfEntry.MaxIbgpPaths}}
+            {{- end}}
+            {{- if $vrfEntry.Mtu}}
+            mtu = {{$vrfEntry.Mtu}}
+            {{- end}}
+            {{- if $vrfEntry.RedistributeDirectRouteMap}}
+            redistribute_direct_route_map = "{{$vrfEntry.RedistributeDirectRouteMap}}"
+            {{- end}}
+            {{- if $vrfEntry.VrfExtensionTemplate}}
+            vrf_extension_template = "{{$vrfEntry.VrfExtensionTemplate}}"
+            {{- end}}
+            {{- if $vrfEntry.VrfTemplate}}
+            vrf_template = "{{$vrfEntry.VrfTemplate}}"
+            {{- end}}
+            {{- if $vrfEntry.InterfaceDescription}}
+            interface_description = "{{$vrfEntry.InterfaceDescription}}"
+            {{- end}}
+            {{- if $vrfEntry.VlanName}}
+            vlan_name = "{{$vrfEntry.VlanName}}"
+            {{- end}}
+            {{- if $vrfEntry.VrfDescription}}
+            vrf_description = "{{$vrfEntry.VrfDescription}}"
+            {{- end}}
+            {{- if $vrfEntry.AdvertiseDefaultRoute}}
+            advertise_default_route = {{$vrfEntry.AdvertiseDefaultRoute}}
+            {{- end}}
+            {{- if $vrfEntry.AdvertiseHostRoutes}}
+            advertise_host_routes = {{$vrfEntry.AdvertiseHostRoutes}}
+            {{- end}}
+            {{- if $vrfEntry.AttachList}}
+            attach_list = {
+                {{- range $serial, $attachEntry := $vrfEntry.AttachList}}
+                "{{$serial}}" = {
+                    deploy_this_attachment = {{$attachEntry.DeployThisAttachment}}
+                    {{- if $attachEntry.Fabric}}
+                    fabric = "{{$attachEntry.Fabric}}"
+                    {{- end}}
+                }
+                {{- end}}
+            }
+            {{- end}}
+        }
+    {{- end}}
+    }
+}
+{{end}}
+{{end}}
+
+# =============================================================================
+# MSD Child VRFs - Extended configuration without fabric field in attachments
+# =============================================================================
+{{range .MsdChildVrfs}}
+{{if .Vrfs}}
+resource "ndfc_vrfs" "{{.ResourceName}}" {
+    {{if .DependsOn}}depends_on = [{{.DependsOn}}]{{end}}
+    fabric_name = "{{.FabricName}}"
+    {{if .DeployAllAttachments}}deploy_all_attachments = {{.DeployAllAttachments}}{{end}}
+    vrfs = {
+    {{- range $vrfName, $vrfEntry := .Vrfs}}
+        "{{$vrfName}}" = {
+            {{- if $vrfEntry.VrfId}}
+            vrf_id = {{$vrfEntry.VrfId}}
+            {{- end}}
+            {{- if $vrfEntry.DisableRtAuto}}
+            disable_rt_auto = {{$vrfEntry.DisableRtAuto}}
+            {{- end}}
+            {{- if $vrfEntry.Ipv6LinkLocal}}
+            ipv6_link_local = {{$vrfEntry.Ipv6LinkLocal}}
+            {{- end}}
+            {{- if $vrfEntry.LoopbackRoutingTag}}
+            loopback_routing_tag = {{$vrfEntry.LoopbackRoutingTag}}
+            {{- end}}
+            {{- if $vrfEntry.MaxBgpPaths}}
+            max_bgp_paths = {{$vrfEntry.MaxBgpPaths}}
+            {{- end}}
+            {{- if $vrfEntry.MaxIbgpPaths}}
+            max_ibgp_paths = {{$vrfEntry.MaxIbgpPaths}}
+            {{- end}}
+            {{- if $vrfEntry.Mtu}}
+            mtu = {{$vrfEntry.Mtu}}
+            {{- end}}
+            {{- if $vrfEntry.RedistributeDirectRouteMap}}
+            redistribute_direct_route_map = "{{$vrfEntry.RedistributeDirectRouteMap}}"
+            {{- end}}
+            {{- if $vrfEntry.VrfExtensionTemplate}}
+            vrf_extension_template = "{{$vrfEntry.VrfExtensionTemplate}}"
+            {{- end}}
+            {{- if $vrfEntry.VrfTemplate}}
+            vrf_template = "{{$vrfEntry.VrfTemplate}}"
+            {{- end}}
+            {{- if $vrfEntry.InterfaceDescription}}
+            interface_description = "{{$vrfEntry.InterfaceDescription}}"
+            {{- end}}
+            {{- if $vrfEntry.VlanName}}
+            vlan_name = "{{$vrfEntry.VlanName}}"
+            {{- end}}
+            {{- if $vrfEntry.VrfDescription}}
+            vrf_description = "{{$vrfEntry.VrfDescription}}"
+            {{- end}}
+            {{- if $vrfEntry.AdvertiseDefaultRoute}}
+            advertise_default_route = {{$vrfEntry.AdvertiseDefaultRoute}}
+            {{- end}}
+            {{- if $vrfEntry.AdvertiseHostRoutes}}
+            advertise_host_routes = {{$vrfEntry.AdvertiseHostRoutes}}
+            {{- end}}
+            {{- if $vrfEntry.AttachList}}
+            attach_list = {
+                {{- range $serial, $attachEntry := $vrfEntry.AttachList}}
+                "{{$serial}}" = {
+                    deploy_this_attachment = {{$attachEntry.DeployThisAttachment}}
+                    {{- if $attachEntry.Fabric}}
+                    fabric = "{{$attachEntry.Fabric}}"
+                    {{- end}}
+                }
+                {{- end}}
+            }
+            {{- end}}
+        }
+    {{- end}}
+    }
+}
+{{end}}
+{{end}}
+
+# =============================================================================
+# MSD Parent Networks - Basic configuration with fabric field in attachments
+# =============================================================================
+{{with .MsdParentNetworks}}
+{{if .Networks}}
+resource "ndfc_networks" "{{.ResourceName}}" {
+    {{if .DependsOn}}depends_on = [{{.DependsOn}}]{{end}}
+    fabric_name = "{{.FabricName}}"
+    {{if .DeployAllAttachments}}deploy_all_attachments = {{.DeployAllAttachments}}{{end}}
+    networks = {
+    {{- range $networkName, $networkEntry := .Networks}}
+        "{{$networkName}}" = {
+            vrf_name = "{{$networkEntry.VrfName}}"
+            network_id = {{$networkEntry.NetworkId}}
+            {{- if $networkEntry.GatewayIpv4Address}}
+            gateway_ipv4_address = "{{$networkEntry.GatewayIpv4Address}}"
+            {{- end}}
+            {{- if $networkEntry.GatewayIpv6Address}}
+            gateway_ipv6_address = "{{$networkEntry.GatewayIpv6Address}}"
+            {{- end}}
+            {{- if $networkEntry.VlanId}}
+            vlan_id = {{$networkEntry.VlanId}}
+            {{- end}}
+            {{- if $networkEntry.VlanName}}
+            vlan_name = "{{$networkEntry.VlanName}}"
+            {{- end}}
+            {{- if $networkEntry.Layer2Only}}
+            layer2_only = {{$networkEntry.Layer2Only}}
+            {{- end}}
+            {{- if $networkEntry.InterfaceDescription}}
+            interface_description = "{{$networkEntry.InterfaceDescription}}"
+            {{- end}}
+            {{- if $networkEntry.Mtu}}
+            mtu = {{$networkEntry.Mtu}}
+            {{- end}}
+            {{- if $networkEntry.SecondaryGateway1}}
+            secondary_gateway_1 = "{{$networkEntry.SecondaryGateway1}}"
+            {{- end}}
+            {{- if $networkEntry.SecondaryGateway2}}
+            secondary_gateway_2 = "{{$networkEntry.SecondaryGateway2}}"
+            {{- end}}
+            {{- if $networkEntry.SecondaryGateway3}}
+            secondary_gateway_3 = "{{$networkEntry.SecondaryGateway3}}"
+            {{- end}}
+            {{- if $networkEntry.SecondaryGateway4}}
+            secondary_gateway_4 = "{{$networkEntry.SecondaryGateway4}}"
+            {{- end}}
+            {{- if $networkEntry.RoutingTag}}
+            routing_tag = {{$networkEntry.RoutingTag}}
+            {{- end}}
+            {{- if $networkEntry.ArpSuppression}}
+            arp_suppression = {{$networkEntry.ArpSuppression}}
+            {{- end}}
+            {{- if $networkEntry.RouteTargetBoth}}
+            route_target_both = {{$networkEntry.RouteTargetBoth}}
+            {{- end}}
+            {{- if $networkEntry.DhcpLoopbackId}}
+            dhcp_loopback_id = {{$networkEntry.DhcpLoopbackId}}
+            {{- end}}
+            {{- if $networkEntry.MulticastGroup}}
+            multicast_group = "{{$networkEntry.MulticastGroup}}"
+            {{- end}}
+            {{- if $networkEntry.Trm}}
+            trm = {{$networkEntry.Trm}}
+            {{- end}}
+            {{- if $networkEntry.Netflow}}
+            netflow = {{$networkEntry.Netflow}}
+            {{- end}}
+            {{- if $networkEntry.VlanNetflowMonitor}}
+            vlan_netflow_monitor = "{{$networkEntry.VlanNetflowMonitor}}"
+            {{- end}}
+            {{- if $networkEntry.L3GatewayOnBorder}}
+            l3_gateway_on_border = {{$networkEntry.L3GatewayOnBorder}}
+            {{- end}}
+            {{- if $networkEntry.IgmpVersion}}
+            igmp_version = {{$networkEntry.IgmpVersion}}
+            {{- end}}
+            {{- if $networkEntry.Attachments}}
+            attachments = {
+                {{- range $serial, $attachEntry := $networkEntry.Attachments}}
+                "{{$serial}}" = {
+                    deploy_this_attachment = {{$attachEntry.DeployThisAttachment}}
+                    {{- if $attachEntry.Fabric}}
+                    fabric = "{{$attachEntry.Fabric}}"
+                    {{- end}}
+                }
+                {{- end}}
+            }
+            {{- end}}
+        }
+    {{- end}}
+    }
+}
+{{end}}
+{{end}}
+
+# =============================================================================
+# MSD Child Networks - Extended configuration without fabric field in attachments
+# =============================================================================
+{{range .MsdChildNetworks}}
+{{if .Networks}}
+resource "ndfc_networks" "{{.ResourceName}}" {
+    {{if .DependsOn}}depends_on = [{{.DependsOn}}]{{end}}
+    fabric_name = "{{.FabricName}}"
+    {{if .DeployAllAttachments}}deploy_all_attachments = {{.DeployAllAttachments}}{{end}}
+    networks = {
+    {{- range $networkName, $networkEntry := .Networks}}
+        "{{$networkName}}" = {
+            vrf_name = "{{$networkEntry.VrfName}}"
+            network_id = {{$networkEntry.NetworkId}}
+            {{- if $networkEntry.GatewayIpv4Address}}
+            gateway_ipv4_address = "{{$networkEntry.GatewayIpv4Address}}"
+            {{- end}}
+            {{- if $networkEntry.GatewayIpv6Address}}
+            gateway_ipv6_address = "{{$networkEntry.GatewayIpv6Address}}"
+            {{- end}}
+            {{- if $networkEntry.VlanId}}
+            vlan_id = {{$networkEntry.VlanId}}
+            {{- end}}
+            {{- if $networkEntry.VlanName}}
+            vlan_name = "{{$networkEntry.VlanName}}"
+            {{- end}}
+            {{- if $networkEntry.Layer2Only}}
+            layer2_only = {{$networkEntry.Layer2Only}}
+            {{- end}}
+            {{- if $networkEntry.InterfaceDescription}}
+            interface_description = "{{$networkEntry.InterfaceDescription}}"
+            {{- end}}
+            {{- if $networkEntry.Mtu}}
+            mtu = {{$networkEntry.Mtu}}
+            {{- end}}
+            {{- if $networkEntry.SecondaryGateway1}}
+            secondary_gateway_1 = "{{$networkEntry.SecondaryGateway1}}"
+            {{- end}}
+            {{- if $networkEntry.SecondaryGateway2}}
+            secondary_gateway_2 = "{{$networkEntry.SecondaryGateway2}}"
+            {{- end}}
+            {{- if $networkEntry.SecondaryGateway3}}
+            secondary_gateway_3 = "{{$networkEntry.SecondaryGateway3}}"
+            {{- end}}
+            {{- if $networkEntry.SecondaryGateway4}}
+            secondary_gateway_4 = "{{$networkEntry.SecondaryGateway4}}"
+            {{- end}}
+            {{- if $networkEntry.RoutingTag}}
+            routing_tag = {{$networkEntry.RoutingTag}}
+            {{- end}}
+            {{- if $networkEntry.ArpSuppression}}
+            arp_suppression = {{$networkEntry.ArpSuppression}}
+            {{- end}}
+            {{- if $networkEntry.RouteTargetBoth}}
+            route_target_both = {{$networkEntry.RouteTargetBoth}}
+            {{- end}}
+            {{- if $networkEntry.DhcpLoopbackId}}
+            dhcp_loopback_id = {{$networkEntry.DhcpLoopbackId}}
+            {{- end}}
+            {{- if $networkEntry.MulticastGroup}}
+            multicast_group = "{{$networkEntry.MulticastGroup}}"
+            {{- end}}
+            {{- if $networkEntry.Trm}}
+            trm = {{$networkEntry.Trm}}
+            {{- end}}
+            {{- if $networkEntry.Netflow}}
+            netflow = {{$networkEntry.Netflow}}
+            {{- end}}
+            {{- if $networkEntry.VlanNetflowMonitor}}
+            vlan_netflow_monitor = "{{$networkEntry.VlanNetflowMonitor}}"
+            {{- end}}
+            {{- if $networkEntry.L3GatewayOnBorder}}
+            l3_gateway_on_border = {{$networkEntry.L3GatewayOnBorder}}
+            {{- end}}
+            {{- if $networkEntry.IgmpVersion}}
+            igmp_version = {{$networkEntry.IgmpVersion}}
+            {{- end}}
+            {{- if $networkEntry.Attachments}}
+            attachments = {
+                {{- range $serial, $attachEntry := $networkEntry.Attachments}}
+                "{{$serial}}" = {
+                    deploy_this_attachment = {{$attachEntry.DeployThisAttachment}}
+                }
+                {{- end}}
+            }
+            {{- end}}
+        }
+    {{- end}}
+    }
+}
+{{end}}
+{{end}}
+{{end}}

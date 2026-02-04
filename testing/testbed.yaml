@@ -53,4 +53,35 @@ ndfc:
     src_interface: Ethernet1/1
     dst_interface: Ethernet1/1
 
-
+  # Configuration for the MSD, part of 187 testbed
+  msd:
+    msd_fabric_name: msd_fabric
+    vrf_prefix: "vrf_"
+    network_prefix: "TF_NW_"
+    child_fabrics:
+      - name: child_fabric1
+        bgp_as: "65001"
+        switches:
+          - "9PJFRPZZ26Z"
+          - "9G4KUS84LFI"
+        inventory_devices:
+          - device: "192.168.10.206"
+            role: "leaf"
+          - device: "192.168.10.207"
+            role: "leaf"
+      - name: child_fabric2
+        bgp_as: "65002"
+        switches:
+          - "92Z298RRNPO"
+          - "9ZHWL1HRWKR"
+        inventory_devices:
+          - device: "192.168.10.208"
+            role: "leaf"
+          - device: "192.168.10.209"
+            role: "leaf"
+      - name: child_fabric3
+        bgp_as: "65003"
+      - name: child_fabric4
+        bgp_as: "65004"
+      - name: child_fabric5
+        bgp_as: "65005"
