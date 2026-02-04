@@ -44,7 +44,7 @@ func (c NDFC) networksCreate(ctx context.Context, fabricName string, rscModel *r
 		return errors.Join(err, err1, err2)
 	}
 
-	tflog.Info(ctx, fmt.Sprintf("resource create: Success res : %v", res.Str))
+	tflog.Info(ctx, fmt.Sprintf("resource create: Success res : %v", res.String()))
 	return nil
 }
 
@@ -146,7 +146,7 @@ func (c NDFC) networksUpdate(ctx context.Context, dg *diag.Diagnostics, updateRs
 		err = json.Unmarshal(rs, &rsNewValue)
 		if err != nil {
 			tflog.Error(ctx, "Unmarshal Failed, networks GET followed by PUT")
-			dg.AddError(fmt.Sprintf("Resource %s, Unmarshal failed", payload.Networks[i].NetworkName), fmt.Sprintf("Error %v, response %s", err, res.Str))
+			dg.AddError(fmt.Sprintf("Resource %s, Unmarshal failed", payload.Networks[i].NetworkName), fmt.Sprintf("Error %v, response %s", err, res.String()))
 			return
 		}
 		changes := payload.Networks[i].DeepEqual(rsNewValue)
@@ -155,7 +155,7 @@ func (c NDFC) networksUpdate(ctx context.Context, dg *diag.Diagnostics, updateRs
 			retryIndices = append(retryIndices, i)
 			continue
 		}
-		tflog.Info(ctx, fmt.Sprintf("Update resource %s Successfull. Message %s", payload.Networks[i].NetworkName, res.Str))
+		tflog.Info(ctx, fmt.Sprintf("Update resource %s Successfull. Message %s", payload.Networks[i].NetworkName, res.String()))
 	}
 	if len(retryIndices) > 0 {
 		tflog.Info(ctx, "Retrying network update due to mismatch", map[string]interface{}{"Err": "Mismatch in network data retrieved after PUT"})

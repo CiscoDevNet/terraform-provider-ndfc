@@ -81,8 +81,8 @@ func NetworksResourceSchema(ctx context.Context) schema.Schema {
 									"fabric": schema.StringAttribute{
 										Optional:            true,
 										Computed:            true,
-										Description:         "The name of the fabric",
-										MarkdownDescription: "The name of the fabric",
+										Description:         "The name of the child fabric this attachment is present in, only applicable when global fabric name is MSD parent fabric, otherwise this field should remain empty.",
+										MarkdownDescription: "The name of the child fabric this attachment is present in, only applicable when global fabric name is MSD parent fabric, otherwise this field should remain empty.",
 										PlanModifiers: []planmodifier.String{
 											stringplanmodifier.UseStateForUnknown(),
 										},
@@ -347,8 +347,12 @@ func NetworksResourceSchema(ctx context.Context) schema.Schema {
 						},
 						"trm": schema.BoolAttribute{
 							Optional:            true,
+							Computed:            true,
 							Description:         "Enable Tenant Routed Multicast",
 							MarkdownDescription: "Enable Tenant Routed Multicast",
+							PlanModifiers: []planmodifier.Bool{
+								boolplanmodifier.UseStateForUnknown(),
+							},
 						},
 						"vlan_id": schema.Int64Attribute{
 							Optional:            true,

@@ -62,6 +62,15 @@ func (c *NDFCVrfNetworkDeployment) GetLock() *sync.Mutex {
 	return nil
 }
 
+// GetSerialNumbers returns all unique serial numbers from the deployment
+func (c *NDFCVrfNetworkDeployment) GetSerialNumbers() []string {
+	serials := make([]string, 0, len(c.RscByAttachments))
+	for serial := range c.RscByAttachments {
+		serials = append(serials, serial)
+	}
+	return serials
+}
+
 func (c *NDFCVrfNetworkDeployRsc) GetPostPayload() string {
 	deploy_post_payload := "\"" + c.Attachment[0] + "\":\""
 	deploy_post_payload += strings.Join(c.RsList, ",")

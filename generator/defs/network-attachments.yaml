@@ -51,7 +51,10 @@ resource:
               optional: true
               computed: true
               unmarshal_tag: fabricName
-              description: The name of the fabric
+              description: The name of the child fabric this attachment is
+                          present in, only applicable when global fabric name
+                          is MSD parent fabric,
+                          otherwise this field should remain empty.
               use_state: true
             - model_name: networkName
               tf_name: network_name

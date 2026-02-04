@@ -68,8 +68,28 @@ func (r *networkBulkResource) Create(ctx context.Context, req resource.CreateReq
 	if r.client == nil {
 		panic("Client is nil")
 	}
-	// Create API call logic
-	networkDone := r.client.RscCreateNetworks(ctx, &resp.Diagnostics, &in)
+
+	fabricName := in.FabricName.ValueString()
+
+	// Check the MSD type of this fabric
+	isMsdParent, parentFabric := r.client.CheckIsFabricMsdType(ctx, &resp.Diagnostics, fabricName)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+	isMsdChild := parentFabric != ""
+
+	var networkDone *resource_networks.NetworksModel
+
+	// Call appropriate function based on fabric type
+	if isMsdParent || isMsdChild {
+		// MSD fabric (parent or child)
+		networkDone = r.client.RscCreateNetworksMsd(ctx, &resp.Diagnostics, &in, isMsdParent, isMsdChild, parentFabric)
+	} else {
+		// Regular (non-MSD) fabric
+		tflog.Info(ctx, fmt.Sprintf("Regular (non-MSD) fabric detected: %s", fabricName))
+		networkDone = r.client.RscCreateNetworks(ctx, &resp.Diagnostics, &in)
+	}
+
 	if networkDone == nil {
 		tflog.Error(ctx, "Create Networks Failed")
 		return
@@ -182,12 +202,28 @@ func (r *networkBulkResource) Update(ctx context.Context, req resource.UpdateReq
 		resp.Diagnostics.AddError("ID cannot be empty for update", "Id is mandatory - State may be corrupted")
 		return
 	}
-	// Update API call logic
 
-	// Create API call logic
-	r.client.RscUpdateNetworks(ctx, &resp.Diagnostics, unique_id, &planData, &stateData, &configData)
+	fabricName := planData.FabricName.ValueString()
+
+	// Check the MSD type of this fabric
+	isMsdParent, parentFabric := r.client.CheckIsFabricMsdType(ctx, &resp.Diagnostics, fabricName)
 	if resp.Diagnostics.HasError() {
-		tflog.Error(ctx, "Create Bulk VRF Failed")
+		return
+	}
+	isMsdChild := parentFabric != ""
+
+	// Call appropriate function based on fabric type
+	if isMsdParent || isMsdChild {
+		// MSD fabric (parent or child)
+		r.client.RscUpdateNetworksMsd(ctx, &resp.Diagnostics, unique_id, &planData, &stateData, &configData, isMsdParent, isMsdChild, parentFabric)
+	} else {
+		// Regular (non-MSD) fabric
+		tflog.Info(ctx, fmt.Sprintf("Regular (non-MSD) fabric detected: %s", fabricName))
+		r.client.RscUpdateNetworks(ctx, &resp.Diagnostics, unique_id, &planData, &stateData, &configData)
+	}
+
+	if resp.Diagnostics.HasError() {
+		tflog.Error(ctx, "Update Networks Failed")
 		return
 	}
 	//
@@ -213,7 +249,24 @@ func (r *networkBulkResource) Delete(ctx context.Context, req resource.DeleteReq
 		return
 	}
 
-	r.client.RscDeleteNetworks(ctx, &resp.Diagnostics, data.Id.ValueString(), &data)
+	fabricName := data.FabricName.ValueString()
+
+	// Check the MSD type of this fabric
+	isMsdParent, parentFabric := r.client.CheckIsFabricMsdType(ctx, &resp.Diagnostics, fabricName)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+	isMsdChild := parentFabric != ""
+
+	// Call appropriate function based on fabric type
+	if isMsdParent || isMsdChild {
+		// MSD fabric (parent or child)
+		r.client.RscDeleteNetworksMsd(ctx, &resp.Diagnostics, data.Id.ValueString(), &data, isMsdParent, isMsdChild, parentFabric)
+	} else {
+		// Regular (non-MSD) fabric
+		tflog.Info(ctx, fmt.Sprintf("Regular (non-MSD) fabric detected: %s", fabricName))
+		r.client.RscDeleteNetworks(ctx, &resp.Diagnostics, data.Id.ValueString(), &data)
+	}
 
 	// Delete API call logic
 }
