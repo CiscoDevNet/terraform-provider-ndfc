@@ -15,11 +15,18 @@ import (
 func ConfigurationDeployResourceSchema(ctx context.Context) schema.Schema {
 	return schema.Schema{
 		Attributes: map[string]schema.Attribute{
-			"config_save": schema.BoolAttribute{
+			"always_execute": schema.BoolAttribute{
 				Optional:            true,
 				Computed:            true,
-				Description:         "Save the configuration",
-				MarkdownDescription: "Save the configuration",
+				Description:         "When set to false (default), the chosen operations (recalculate or deploy, whichever is set to true) are executed only once and not executed on subsequent terraform apply runs. When set to true, the chosen operations are always executed, in every terraform apply run. This shows up as an \"Update\" to the resource which then always shows a change in the plan for this resource.",
+				MarkdownDescription: "When set to false (default), the chosen operations (recalculate or deploy, whichever is set to true) are executed only once and not executed on subsequent terraform apply runs. When set to true, the chosen operations are always executed, in every terraform apply run. This shows up as an \"Update\" to the resource which then always shows a change in the plan for this resource.",
+				Default:             booldefault.StaticBool(false),
+			},
+			"deploy": schema.BoolAttribute{
+				Optional:            true,
+				Computed:            true,
+				Description:         "Perform deploy operation when true.",
+				MarkdownDescription: "Perform deploy operation when true.",
 				Default:             booldefault.StaticBool(false),
 			},
 			"fabric_name": schema.StringAttribute{
@@ -38,18 +45,18 @@ func ConfigurationDeployResourceSchema(ctx context.Context) schema.Schema {
 					stringplanmodifier.UseStateForUnknown(),
 				},
 			},
+			"recalculate": schema.BoolAttribute{
+				Optional:            true,
+				Computed:            true,
+				Description:         "Perform recalculate operation when true; also known as config-save in API.",
+				MarkdownDescription: "Perform recalculate operation when true; also known as config-save in API.",
+				Default:             booldefault.StaticBool(false),
+			},
 			"serial_numbers": schema.SetAttribute{
 				ElementType:         types.StringType,
 				Optional:            true,
 				Description:         "Value 'ALL' if all switches in the fabric are to be deployed, or a list of serial numbers of the switches to be deployed.",
 				MarkdownDescription: "Value 'ALL' if all switches in the fabric are to be deployed, or a list of serial numbers of the switches to be deployed.",
-			},
-			"trigger_deploy_on_update": schema.BoolAttribute{
-				Optional:            true,
-				Computed:            true,
-				Description:         "Default set to false, config deploy will be only triggered on create of resource. If set to true in resource update, the configurations are deployed to the switches and the flag will be toggled back to false after the deployment is completed, when terraform refresh is performed. Terraform plan will always show in-place update for this field when set to true.",
-				MarkdownDescription: "Default set to false, config deploy will be only triggered on create of resource. If set to true in resource update, the configurations are deployed to the switches and the flag will be toggled back to false after the deployment is completed, when terraform refresh is performed. Terraform plan will always show in-place update for this field when set to true.",
-				Default:             booldefault.StaticBool(false),
 			},
 		},
 		Description:         "This resource allows configuration deployment operations across specified switches or all switches in an NDFC-managed fabric.",
@@ -58,9 +65,10 @@ func ConfigurationDeployResourceSchema(ctx context.Context) schema.Schema {
 }
 
 type ConfigurationDeployModel struct {
-	ConfigSave            types.Bool   `tfsdk:"config_save"`
-	FabricName            types.String `tfsdk:"fabric_name"`
-	Id                    types.String `tfsdk:"id"`
-	SerialNumbers         types.Set    `tfsdk:"serial_numbers"`
-	TriggerDeployOnUpdate types.Bool   `tfsdk:"trigger_deploy_on_update"`
+	AlwaysExecute types.Bool   `tfsdk:"always_execute"`
+	Deploy        types.Bool   `tfsdk:"deploy"`
+	FabricName    types.String `tfsdk:"fabric_name"`
+	Id            types.String `tfsdk:"id"`
+	Recalculate   types.Bool   `tfsdk:"recalculate"`
+	SerialNumbers types.Set    `tfsdk:"serial_numbers"`
 }
