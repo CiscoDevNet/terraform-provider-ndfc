@@ -40,28 +40,32 @@ resource:
       example: "[\"ALL\"]"
       ndfc_type: set
 
-    - &config_save
-      model_name: configSave
-      tf_name: config_save
+    - &recalculate
+      model_name: recalculate
+      tf_name: recalculate
       type: Bool
-      description: Save the configuration
+      description: Perform recalculate operation when true; also known as config-save in API.
       default_value: false
       ndfc_type: bool
       payload_hide: true
       example: true
 
-    - &trigger_deploy_on_update
-      model_name: trigger_deploy_on_update
-      tf_name: trigger_deploy_on_update
+    - &always_execute
+      model_name: alwaysExecute
+      tf_name: always_execute
       type: Bool
       description: >-
-            Default set to false, config deploy will be only triggered on
-            create of resource. If set to true in resource update, the
-            configurations are deployed to the switches and the flag will be
-            toggled back to false after the deployment is completed,
-            when terraform refresh is performed. Terraform plan will always
-            show in-place update for this field when set to true.
+          When set to false (default), the chosen operations (recalculate or deploy, whichever is set to true) are executed only once and not executed on subsequent terraform apply runs. When set to true, the chosen operations are always executed, in every terraform apply run. This shows up as an "Update" to the resource which then always shows a change in the plan for this resource.
       ndfc_type: bool
       payload_hide: true
       example: false
       default_value: false
+
+    - model_name: deploy
+      tf_name: deploy
+      type: Bool
+      description: Perform deploy operation when true.
+      default_value: false
+      ndfc_type: bool
+      payload_hide: true
+      example: true
