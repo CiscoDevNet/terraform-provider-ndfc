@@ -14,10 +14,11 @@ This resource allows configuration deployment operations across specified switch
 
 ```terraform
 resource "ndfc_configuration_deploy" "test_resource_configuration_deploy_1" {
-  fabric_name              = "CML"
-  serial_numbers           = ["ALL"]
-  config_save              = true
-  trigger_deploy_on_update = false
+  fabric_name    = "CML"
+  serial_numbers = ["ALL"]
+  recalculate    = true
+  always_execute = false
+  deploy         = true
 }
 ```
 
@@ -30,9 +31,10 @@ resource "ndfc_configuration_deploy" "test_resource_configuration_deploy_1" {
 
 ### Optional
 
-- `config_save` (Boolean) Save the configuration
+- `always_execute` (Boolean) When set to false (default), the chosen operations (recalculate or deploy, whichever is set to true) are executed only once and not executed on subsequent terraform apply runs. When set to true, the chosen operations are always executed, in every terraform apply run. This shows up as an "Update" to the resource which then always shows a change in the plan for this resource.
+- `deploy` (Boolean) Perform deploy operation when true.
+- `recalculate` (Boolean) Perform recalculate operation when true; also known as config-save in API.
 - `serial_numbers` (Set of String) Value 'ALL' if all switches in the fabric are to be deployed, or a list of serial numbers of the switches to be deployed.
-- `trigger_deploy_on_update` (Boolean) Default set to false, config deploy will be only triggered on create of resource. If set to true in resource update, the configurations are deployed to the switches and the flag will be toggled back to false after the deployment is completed, when terraform refresh is performed. Terraform plan will always show in-place update for this field when set to true.
 
 ### Read-Only
 

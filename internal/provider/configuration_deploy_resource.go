@@ -56,8 +56,8 @@ func (r *ConfigDeployResource) ValidateConfig(ctx context.Context, req resource.
 	if resp.Diagnostics.HasError() {
 		return
 	}
-	if !data.ConfigSave.ValueBool() && data.SerialNumbers.IsNull() {
-		resp.Diagnostics.AddAttributeError(path.Root("config_save"), "config_save and serial_numbers", "At least one of the fields 'config_save=true' or 'serial_numbers' must be set")
+	if !data.Recalculate.ValueBool() && data.SerialNumbers.IsNull() {
+		resp.Diagnostics.AddAttributeError(path.Root("recalculate"), "recalculate and serial_numbers", "At least one of the fields 'recalculate=true' or 'serial_numbers' must be set")
 		return
 	}
 	data.SerialNumbers.ElementsAs(ctx, &serialNumbers, false)
@@ -118,9 +118,9 @@ func (r *ConfigDeployResource) Read(ctx context.Context, req resource.ReadReques
 		return
 	}
 	//  False returned on purpose, so that terraform detects a change in plan and triggers update for this resource during next apply
-	data.TriggerDeployOnUpdate = types.BoolValue(false)
+	data.AlwaysExecute = types.BoolValue(false)
 	tflog.Debug(ctx, fmt.Sprintf("Start of %s Read", loggingConfigDeploy))
-	tflog.Debug(ctx, fmt.Sprintf("End of %s Read data.TriggerDeployOnUpdate %v   ", loggingConfigDeploy, data.TriggerDeployOnUpdate.ValueBool()))
+	tflog.Debug(ctx, fmt.Sprintf("End of %s Read data.AlwaysExecute %v   ", loggingConfigDeploy, data.AlwaysExecute.ValueBool()))
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 }
 
@@ -154,10 +154,10 @@ func (r *ConfigDeployResource) Deploy(ctx context.Context, dg *diag.Diagnostics,
 		FirstIndex := strings.ToUpper(serialNumbers[0])
 		if FirstIndex == "ALL" {
 			// Deploy configuration for all serial numbers
-			r.client.RecalculateAndDeploy(ctx, dg, data.FabricName.ValueString(), data.ConfigSave.ValueBool(), true, nil)
+			r.client.RecalculateAndDeploy(ctx, dg, data.FabricName.ValueString(), data.Recalculate.ValueBool(), data.Deploy.ValueBool(), nil)
 		} else {
 			// Deploy configuration for specific serial numbers
-			r.client.RecalculateAndDeploy(ctx, dg, data.FabricName.ValueString(), data.ConfigSave.ValueBool(), true, serialNumbers)
+			r.client.RecalculateAndDeploy(ctx, dg, data.FabricName.ValueString(), data.Recalculate.ValueBool(), data.Deploy.ValueBool(), serialNumbers)
 		}
 	}
 
