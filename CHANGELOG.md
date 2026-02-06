@@ -1,3 +1,9 @@
+## 0.2.2
+_Pre Release_
+
+### Added
+- Bug Fixes
+
 ## 0.2.1
 _Pre Release_
 ### Added
