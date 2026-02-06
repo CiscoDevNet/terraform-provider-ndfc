@@ -183,7 +183,7 @@ func (c NDFC) ifDiff(ctx context.Context,
 		} else {
 			stateIntf.FilterThisValue = true
 			var ctrl bool
-			tflog.Debug(ctx, fmt.Sprintf("Existing Interface in plan: %s:%s", intf.SerialNumber, intf.InterfaceName))
+			tflog.Debug(ctx, fmt.Sprintf("Existing Interface in plan: %s:%s. -- Primary %s", intf.SerialNumber, intf.InterfaceName, intf.NvPairs.PrimaryIntf))
 			action := intf.CreatePlan(stateIntf, &ctrl)
 			tflog.Debug(ctx, fmt.Sprintf("CreatePlan: Action: %v", action))
 			if action == types.RequiresUpdate {

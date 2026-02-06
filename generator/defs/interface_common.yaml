@@ -704,6 +704,14 @@ resource:
         use_state: true
         description: "Internal parameter used to track portchannel membership"
         example: false
+      
+      - model_name: PRIMARY_INTF
+        tf_name: primary_intf
+        type: String
+        use_state: true
+        computed: true
+        ndfc_nested: [nvPairs]
+        description: "Internal parameter used to track vPC membership"
 
 
 datasource:

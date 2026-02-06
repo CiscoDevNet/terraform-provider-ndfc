@@ -92,6 +92,12 @@ func (v *InterfacesValue) SetValue(jsonData *resource_interface_common.NDFCInter
 		v.PortChannelName = types.StringNull()
 	}
 
+	if jsonData.NvPairs.PrimaryIntf != "" {
+		v.PrimaryIntf = types.StringValue(jsonData.NvPairs.PrimaryIntf)
+	} else {
+		v.PrimaryIntf = types.StringNull()
+	}
+
 	if jsonData.SerialNumber != "" {
 		v.SerialNumber = types.StringValue(jsonData.SerialNumber)
 	} else {
@@ -524,6 +530,14 @@ func (v InterfaceEthernetModel) GetModelData() *resource_interface_common.NDFCIn
 				data1.NvPairs.PortChannelName = ele1.PortChannelName.ValueString()
 			} else {
 				data1.NvPairs.PortChannelName = ""
+			}
+
+			// primary_intf | String| [nvPairs]| false
+			if !ele1.PrimaryIntf.IsNull() && !ele1.PrimaryIntf.IsUnknown() {
+				//-----inline nested----
+				data1.NvPairs.PrimaryIntf = ele1.PrimaryIntf.ValueString()
+			} else {
+				data1.NvPairs.PrimaryIntf = ""
 			}
 
 			// serial_number | String| []| false

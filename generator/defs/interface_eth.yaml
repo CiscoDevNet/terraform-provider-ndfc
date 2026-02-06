@@ -97,6 +97,13 @@ resource:
         ndfc_nested: [nvPairs]
         computed: true
         description: "Internal parameter used to track portchannel membership"
+      - model_name: PRIMARY_INTF
+        tf_name: primary_intf
+        type: String
+        use_state: true
+        computed: true
+        ndfc_nested: [nvPairs]
+        description: "Internal parameter used to track vPC membership"
       - model_name: serialNumber
         tf_name: serial_number
         type: String
