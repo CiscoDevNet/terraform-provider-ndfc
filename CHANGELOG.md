@@ -1,4 +1,4 @@
-## 0.2.2
+## 0.3.0
 _Pre Release_
 
 ### Added
