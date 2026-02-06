@@ -122,7 +122,7 @@ func (c NDFC) RscGetInterfaces(ctx context.Context, dg *diag.Diagnostics, in res
 					}
 				}
 
-				log.Printf("Found entry: key %s entry %s:%s", key, ifList[i].SerialNumber, ifList[i].InterfaceName)
+				log.Printf("Found entry: key %s entry %s:%s -- Primary Intf %s", key, ifList[i].SerialNumber, ifList[i].InterfaceName, ifList[i].NvPairs.PrimaryIntf)
 				intf := inData.Interfaces[key]
 				ifObj.ModifyAttributesForTerraform(ctx, dg, &ifList[i], &intf)
 				// Serial at resource level and per entry level are mutually exclusive

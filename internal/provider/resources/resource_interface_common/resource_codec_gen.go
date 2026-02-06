@@ -111,6 +111,7 @@ type NDFCNvPairsValue struct {
 	Ttag                      string                     `json:"TTAG,omitempty"`
 	PVlanMappingList          NDFCPVlanMappingListValues `json:"MAPPING_LIST,omitempty"`
 	PVlanAssocList            NDFCPVlanAssocListValues   `json:"ASSOCIATION_LIST,omitempty"`
+	PrimaryIntf               string                     `json:"PRIMARY_INTF,omitempty"`
 }
 
 type NDFCPVlanMappingListValues []NDFCPVlanMappingListValue
