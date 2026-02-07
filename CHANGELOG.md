@@ -1,8 +1,13 @@
 ## 0.3.0
 _Pre Release_
-
+### BREAKING CHANGES
+- **`ndfc_configuration_deploy` resource**: Renamed attributes for clarity
+  - `config_save` renamed to `recalculate`
+  - `trigger_deploy_on_update` renamed to `always_execute`
 ### Added
-- Bug Fixes
+- **`ndfc_configuration_deploy` resource**: Added `deploy` flag to control deployment separately from recalculation
+### Fixed
+- Bug fixes and stability improvements
 
 ## 0.2.1
 _Pre Release_
