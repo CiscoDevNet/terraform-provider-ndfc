@@ -77,3 +77,5 @@ require (
 	gopkg.in/check.v1 v1.0.0-20201130134442-10cb98267c6c // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 )
+
+replace github.com/netascode/go-nd => github.com/mdmohan/go-nd v0.0.0-20260210104108-3c13820f8c7c
