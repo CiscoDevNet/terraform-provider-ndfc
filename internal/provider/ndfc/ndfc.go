@@ -47,7 +47,7 @@ func NewNDFCClient(host string, user string, pass string, domain string, insecur
 	ndfc.deployMutex = new(sync.RWMutex)
 	api.SetLockFns(GlobalDeployTrylock, []func(string){AcquireResourceLock, ReleaseResourceLock})
 	var err error
-	ndfc.apiClient, err = nd.NewClient(host, ndfc.url, user, pass, domain, insecure, nd.MaxRetries(500), nd.RequestTimeout(time.Duration(timeout)))
+	ndfc.apiClient, err = nd.NewClient(host, ndfc.url, user, pass, domain, insecure, nd.MaxRetries(30), nd.RequestTimeout(time.Duration(timeout)))
 	if err != nil {
 		return nil, err
 	}
