@@ -3,12 +3,12 @@
 page_title: "ndfc_fabric_vxlan_msd Resource - terraform-provider-ndfc"
 subcategory: ""
 description: |-
-  Resource to configure and manage a VXLAN MSD Fabric. Only creation/updation/deletion of the fabric is supported, MSD fabric features as seen in NDFC are no fully supported by the provider. Its under development.
+    Resource to configure and manage a VXLAN MSD Fabric.
 ---
 
 # ndfc_fabric_vxlan_msd (Resource)
 
-Resource to configure and manage a VXLAN MSD Fabric. Only creation/updation/deletion of the fabric is supported, MSD fabric features as seen in NDFC are no fully supported by the provider. Its under development.
+Resource to configure and manage a VXLAN MSD Fabric.
 
 ## Example Usage
 
@@ -123,8 +123,6 @@ resource "ndfc_fabric_vxlan_msd" "test_resource_fabric_vxlan_msd_1" {
 
 ## Import
 
-Import is supported using the following syntax:
-
 The [`terraform import` command](https://developer.hashicorp.com/terraform/cli/commands/import) can be used, for example:
 
 ```shell
@@ -132,3 +130,1782 @@ The [`terraform import` command](https://developer.hashicorp.com/terraform/cli/c
 # Name of the fabric you would want to import for this resource
 terraform import ndfc_fabric_vxlan_msd.test_resource_fabric_vxlan_msd TF_FABRIC_VXLAN_MSD
 ```
+
+## MSD Workflow with VRF and Networks
+
+Below is an example of how to create an MSD fabric with two child fabrics. The same workflow applies for update and delete operations as well.
+
+Child fabrics `child_fabric1` and `child_fabric2` are VXLAN EVPN fabrics created beforehand along with inventory for the fabrics. The dependencies ensure that the fabrics are created in the correct order.
+
+```terraform
+resource "ndfc_fabric_vxlan_msd" "msd_fabric" {
+  depends_on    = [ndfc_fabric_vxlan.child_fabric1, ndfc_fabric_vxlan.child_fabric2]
+  fabric_name   = "msd_fabric"
+  deploy        = false
+  child_fabrics = ["child_fabric1", "child_fabric2"]
+}
+```
+
+Using variables for shared configuration between parent and child resources ensures consistency and reduces chances of misconfiguration while applying parent-level properties in child resources.
+Below is an example of how to define variables for shared configuration of VRFs and Networks between parent and child resources.
+This will be referred throughout the document to illustrate the workflow and best practices for managing VRFs and Networks in an MSD fabric.
+```terraform
+# =============================================================================
+# Shared VRF Configuration Variables
+# These variables are shared between msd_fabric parent and child VRFs
+# =============================================================================
+
+variable "vrf_configs" {
+  description = "Shared VRF configuration for both msd_fabric parent and child VRFs"
+  type = map(object({
+    vlan_id                       = number
+    disable_rt_auto               = optional(bool, false)
+    ipv6_link_local               = optional(bool, true)
+    loopback_routing_tag          = optional(number, 12345)
+    max_bgp_paths                 = optional(number, 1)
+    max_ibgp_paths                = optional(number, 2)
+    mtu                           = optional(number, 9216)
+    redistribute_direct_route_map = optional(string, "FABRIC-RMAP-REDIST-SUBNET")
+    vrf_extension_template        = optional(string, "Default_VRF_Extension_Universal")
+    vrf_template                  = optional(string, "Default_VRF_Universal")
+    interface_description         = optional(string)
+    vlan_name                     = optional(string)
+    vrf_description               = optional(string)
+    # ndfc_vrfs specific attributes (not available in msd_fabric parent)
+    advertise_default_route = optional(bool, true)
+    advertise_host_routes   = optional(bool, true)
+  }))
+  default = {
+    "vrf_01" = {
+      vlan_id                       = 234
+      disable_rt_auto               = false
+      ipv6_link_local               = true
+      loopback_routing_tag          = 12345
+      max_bgp_paths                 = 1
+      max_ibgp_paths                = 2
+      mtu                           = 9216
+      redistribute_direct_route_map = "FABRIC-RMAP-REDIST-SUBNET"
+      vrf_extension_template        = "Default_VRF_Extension_Universal"
+      vrf_template                  = "Default_VRF_Universal"
+      advertise_default_route       = true
+      advertise_host_routes         = true
+    },
+    "vrf_02" = {
+      vlan_id                       = 24
+      disable_rt_auto               = false
+      ipv6_link_local               = true
+      loopback_routing_tag          = 12345
+      max_bgp_paths                 = 1
+      max_ibgp_paths                = 2
+      mtu                           = 9211
+      redistribute_direct_route_map = "FABRIC-RMAP-REDIST-SUBNET"
+      vrf_extension_template        = "Default_VRF_Extension_Universal"
+      vrf_template                  = "Default_VRF_Universal"
+      advertise_default_route       = true
+      advertise_host_routes         = true
+    }
+  }
+}
+
+# =============================================================================
+# Shared Network Configuration Variables
+# These variables are shared between msd_fabric parent and child Networks.
+# =============================================================================
+
+variable "network_configs" {
+  description = "Shared Network configuration for both msd_fabric parent and child Networks"
+  type = map(object({
+    # Parent properties: is_l2_only, vrf_name, net_id, vlan_id, vlan_name, int_desc,
+    # gw_ip_address, gw_ipv6_address, secondary_ip_address, mtu_l3intf, route_tag,
+    # arp_supress, route_target_both
+    vrf_name              = string
+    network_id            = number
+    vlan_id               = number
+    vlan_name             = optional(string)
+    layer2_only           = optional(bool, false)
+    interface_description = optional(string)
+    gateway_ipv4_address  = optional(string)
+    gateway_ipv6_address  = optional(string)
+    secondary_gateway_1   = optional(string)
+    secondary_gateway_2   = optional(string)
+    secondary_gateway_3   = optional(string)
+    secondary_gateway_4   = optional(string)
+    mtu                   = optional(number, 9216)
+    routing_tag           = optional(number)
+    arp_suppression       = optional(bool)
+    route_target_both     = optional(bool)
+    # Child properties: dhcp_loopback_id, dhcp_servers, multicast_group_address,
+    # trm_enable, netflow_enable, vlan_netflow_monitor, l3gw_on_border, igmp_version
+    dhcp_loopback_id     = optional(number)
+    dhcp_servers         = optional(list(object({ address = string, vrf = string })))
+    multicast_group      = optional(string)
+    trm                  = optional(bool)
+    netflow              = optional(bool)
+    vlan_netflow_monitor = optional(string)
+    l3_gateway_on_border = optional(bool)
+    igmp_version         = optional(number)
+  }))
+  default = {
+    "nw_01" = {
+      vrf_name              = "vrf_01"
+      network_id            = 31001
+      gateway_ipv4_address  = "192.168.1.1/24"
+      gateway_ipv6_address  = "2001::2/64"
+      vlan_id               = 301
+      vlan_name             = "nw_01"
+      layer2_only           = false
+      interface_description = "nw_01 SVI"
+      mtu                   = 9100
+      routing_tag           = 12345
+      # Child properties
+      trm                  = true
+      multicast_group      = "239.1.1.1"
+      igmp_version         = 3
+      l3_gateway_on_border = true
+    },
+    "nw_02" = {
+      vrf_name              = "vrf_02"
+      network_id            = 31002
+      gateway_ipv4_address  = "192.168.2.1/24"
+      gateway_ipv6_address  = "2002::1/64"
+      vlan_id               = 32
+      vlan_name             = "nw_02"
+      layer2_only           = false
+      interface_description = "nw_02 SVI"
+      mtu                   = 9100
+      routing_tag           = 12345
+      # Child properties
+      trm             = false
+      multicast_group = "239.1.1.2"
+      igmp_version    = 3
+    }
+  }
+}
+```
+
+### VRF Resources Definition
+
+Below is an illustration of how `ndfc_vrfs` and `ndfc_networks` resources can be defined.
+
+In the example below, the resource `msd_parent_vrfs_attributes` will be referred to as the parent resource, and `child1_specific_vrfs_attributes` and `child2_specific_vrfs_attributes` will be referred to as child resources. Both use the `ndfc_vrfs` resource type.
+
+- `msd_parent_vrfs_attributes` is the parent resource which creates VRFs and manages parent-level properties of the VRFs.
+- `child1_specific_vrfs_attributes` and `child2_specific_vrfs_attributes` are the child resources which manage child-level properties of the same VRFs, specific to each child fabric. The child resources strictly depend on the parent resource (`msd_parent_vrfs_attributes`) to ensure VRFs are created. Child-level properties can be applied only after the VRFs are created by the parent resource. Users cannot set child-specific properties in the parent resource and will get an error if they try to do so.
+- The attachment section of `msd_parent_vrfs_attributes` must contain all attachments of child fabrics (superset of `child1_specific_vrfs_attributes` and `child2_specific_vrfs_attributes`) with the fabric field specified, making it easy to deploy attachments together with the parent resource. This is not needed in child resources of `ndfc_vrfs`.
+- Parent properties should be set in both parent and child resources and should be identical. If parent properties mismatch between parent and child resources, the user will get an error. This ensures that when the resource is detached from the MSD fabric, it will not have any drifts once it becomes a standalone resource.
+- The dependencies should be set correctly while creating the resources to avoid any deployment issues. Child resources should depend on the parent resource to ensure child resources are created after the parent resource is created.
+
+> **Note:** The example below uses only two child fabrics. The number of child resources would vary based on the number of child fabrics managed in the MSD fabric, but the workflow and best practices remain the same.
+
+```terraform
+resource "ndfc_vrfs" "msd_parent_vrfs_attributes" {
+  fabric_name = ndfc_fabric_vxlan_msd.msd_fabric.fabric_name # msd_fabric is the parent fabric created earlier
+  vrfs = {
+    for vrf_name, vrf_config in var.vrf_configs : vrf_name => {
+      vlan_id                       = vrf_config.vlan_id
+      disable_rt_auto               = vrf_config.disable_rt_auto
+      ipv6_link_local               = vrf_config.ipv6_link_local
+      loopback_routing_tag          = vrf_config.loopback_routing_tag
+      max_bgp_paths                 = vrf_config.max_bgp_paths
+      max_ibgp_paths                = vrf_config.max_ibgp_paths
+      mtu                           = vrf_config.mtu
+      redistribute_direct_route_map = vrf_config.redistribute_direct_route_map
+      vrf_extension_template        = vrf_config.vrf_extension_template
+      vrf_template                  = vrf_config.vrf_template
+      interface_description         = vrf_config.interface_description
+      vlan_name                     = vrf_config.vlan_name
+      vrf_description               = vrf_config.vrf_description
+      # Attachments with fabric field
+      attach_list = {
+        "9PJFRPZZ26Z" = {
+          deploy_this_attachment = true
+          fabric                 = tolist(ndfc_fabric_vxlan_msd.msd_fabric.child_fabrics)[0]
+        }
+        "9G4KUS84LFI" = {
+          deploy_this_attachment = true
+          fabric                 = tolist(ndfc_fabric_vxlan_msd.msd_fabric.child_fabrics)[0]
+        }
+        "92Z298RRNPO" = {
+          deploy_this_attachment = true
+          fabric                 = tolist(ndfc_fabric_vxlan_msd.msd_fabric.child_fabrics)[1]
+        }
+        "9ZHWL1HRWKR" = {
+          deploy_this_attachment = true
+          fabric                 = tolist(ndfc_fabric_vxlan_msd.msd_fabric.child_fabrics)[1]
+        }
+      }
+    }
+  }
+}
+
+resource "ndfc_vrfs" "child1_specific_vrfs_attributes" {
+  depends_on  = [ndfc_vrfs.msd_parent_vrfs_attributes]
+  fabric_name = tolist(ndfc_fabric_vxlan_msd.msd_fabric.child_fabrics)[0]
+  vrfs = {
+    for vrf_name, vrf_config in var.vrf_configs : vrf_name => {
+      disable_rt_auto               = vrf_config.disable_rt_auto
+      ipv6_link_local               = vrf_config.ipv6_link_local
+      loopback_routing_tag          = vrf_config.loopback_routing_tag
+      max_bgp_paths                 = vrf_config.max_bgp_paths
+      max_ibgp_paths                = vrf_config.max_ibgp_paths
+      mtu                           = vrf_config.mtu
+      redistribute_direct_route_map = vrf_config.redistribute_direct_route_map
+      vrf_extension_template        = vrf_config.vrf_extension_template
+      vrf_template                  = vrf_config.vrf_template
+      interface_description         = vrf_config.interface_description
+      vlan_name                     = vrf_config.vlan_name
+      vrf_description               = vrf_config.vrf_description
+      advertise_default_route       = vrf_config.advertise_default_route
+      advertise_host_routes         = vrf_config.advertise_host_routes
+      # Attachments (no fabric field for child)
+      attach_list = {
+        "9PJFRPZZ26Z" = {
+          deploy_this_attachment = true
+        }
+        "9G4KUS84LFI" = {
+          deploy_this_attachment = true
+        }
+      }
+    }
+  }
+}
+
+resource "ndfc_vrfs" "child2_specific_vrfs_attributes" {
+  depends_on  = [ndfc_vrfs.msd_parent_vrfs_attributes]
+  fabric_name = tolist(ndfc_fabric_vxlan_msd.msd_fabric.child_fabrics)[1]
+  vrfs = {
+    for vrf_name, vrf_config in var.vrf_configs : vrf_name => {
+      disable_rt_auto               = vrf_config.disable_rt_auto
+      ipv6_link_local               = vrf_config.ipv6_link_local
+      loopback_routing_tag          = vrf_config.loopback_routing_tag
+      max_bgp_paths                 = vrf_config.max_bgp_paths
+      max_ibgp_paths                = vrf_config.max_ibgp_paths
+      mtu                           = vrf_config.mtu
+      redistribute_direct_route_map = vrf_config.redistribute_direct_route_map
+      vrf_extension_template        = vrf_config.vrf_extension_template
+      vrf_template                  = vrf_config.vrf_template
+      interface_description         = vrf_config.interface_description
+      vlan_name                     = vrf_config.vlan_name
+      vrf_description               = vrf_config.vrf_description
+      advertise_default_route       = vrf_config.advertise_default_route
+      advertise_host_routes         = vrf_config.advertise_host_routes
+      # Attachments (no fabric field for child)
+      attach_list = {
+        "92Z298RRNPO" = {
+          deploy_this_attachment = true
+        }
+        "9ZHWL1HRWKR" = {
+          deploy_this_attachment = true
+        }
+      }
+    }
+  }
+}
+```
+
+### Network Resources Definition
+
+In the example below, the resource `msd_parent_networks_attributes` will be referred to as the parent resource, and `child1_specific_networks_attributes` and `child2_specific_networks_attributes` will be referred to as child resources. Both use the `ndfc_networks` resource type.
+
+- `msd_parent_networks_attributes` is the parent resource which creates Networks and manages parent-level properties of the Networks.
+- `child1_specific_networks_attributes` and `child2_specific_networks_attributes` are the child resources which manage child-level properties of the same Networks, specific to each child fabric. The child resources strictly depend on the parent resource (`msd_parent_networks_attributes`) to ensure Networks are created. Child-level properties can be applied only after the Networks are created by the parent resource. Users cannot set child-specific properties in the parent resource and will get an error if they try to do so.
+- The attachment section of `msd_parent_networks_attributes` must contain all attachments of child fabrics (superset of `child1_specific_networks_attributes` and `child2_specific_networks_attributes`) with the fabric field specified, making it easy to deploy attachments together with the parent resource. This is not needed in child resources of `ndfc_networks`.
+- Parent properties should be set in both parent and child resources and should be identical. If parent properties mismatch between parent and child resources, the user will get an error. This ensures that when the resource is detached from the MSD fabric, it will not have any drifts once it becomes a standalone resource.
+- The dependencies should be set correctly while creating the resources to avoid any deployment issues. Child resources should depend on the parent resource to ensure child resources are created after the parent resource is created.
+- Network resources depend on VRF resources as VRFs need to be created before creating Networks. In the example below, `msd_parent_networks_attributes` depends on all VRF resources to ensure that all VRFs are created before creating any Network, and child Network resources depend on the parent Network resource to ensure parent-level properties are created before applying child-level properties.
+
+> **Note:** The example below uses only two child fabrics. The number of child resources would vary based on the number of child fabrics managed in the MSD fabric, but the workflow and best practices remain the same.
+
+```terraform
+resource "ndfc_networks" "msd_parent_networks_attributes" {
+  depends_on  = [ndfc_vrfs.msd_parent_vrfs_attributes, ndfc_vrfs.child1_specific_vrfs_attributes, ndfc_vrfs.child2_specific_vrfs_attributes]
+  fabric_name = ndfc_fabric_vxlan_msd.msd_fabric.fabric_name
+  networks = {
+    for network_name, network_config in var.network_configs : network_name => {
+      # Parent properties only
+      vrf_name              = network_config.vrf_name
+      network_id            = network_config.network_id
+      gateway_ipv4_address  = network_config.gateway_ipv4_address
+      gateway_ipv6_address  = network_config.gateway_ipv6_address
+      vlan_id               = network_config.vlan_id
+      vlan_name             = network_config.vlan_name
+      layer2_only           = network_config.layer2_only
+      interface_description = network_config.interface_description
+      mtu                   = network_config.mtu
+      secondary_gateway_1   = network_config.secondary_gateway_1
+      secondary_gateway_2   = network_config.secondary_gateway_2
+      secondary_gateway_3   = network_config.secondary_gateway_3
+      secondary_gateway_4   = network_config.secondary_gateway_4
+      routing_tag           = network_config.routing_tag
+      arp_suppression       = network_config.arp_suppression
+      route_target_both     = network_config.route_target_both
+      # Attachments with fabric field
+      attach_list = {
+        "9PJFRPZZ26Z" = {
+          deploy_this_attachment = true
+          fabric                 = tolist(ndfc_fabric_vxlan_msd.msd_fabric.child_fabrics)[0]
+        }
+        "9G4KUS84LFI" = {
+          deploy_this_attachment = true
+          fabric                 = tolist(ndfc_fabric_vxlan_msd.msd_fabric.child_fabrics)[0]
+        }
+        "92Z298RRNPO" = {
+          deploy_this_attachment = true
+          fabric                 = tolist(ndfc_fabric_vxlan_msd.msd_fabric.child_fabrics)[1]
+        }
+        "9ZHWL1HRWKR" = {
+          deploy_this_attachment = true
+          fabric                 = tolist(ndfc_fabric_vxlan_msd.msd_fabric.child_fabrics)[1]
+        }
+      }
+    }
+  }
+}
+
+resource "ndfc_networks" "child1_specific_networks_attributes" {
+  depends_on  = [ndfc_networks.msd_parent_networks_attributes]
+  fabric_name = tolist(ndfc_fabric_vxlan_msd.msd_fabric.child_fabrics)[0]
+  networks = {
+    for network_name, network_config in var.network_configs : network_name => {
+      vrf_name              = network_config.vrf_name
+      network_id            = network_config.network_id
+      gateway_ipv4_address  = network_config.gateway_ipv4_address
+      gateway_ipv6_address  = network_config.gateway_ipv6_address
+      vlan_id               = network_config.vlan_id
+      vlan_name             = network_config.vlan_name
+      layer2_only           = network_config.layer2_only
+      interface_description = network_config.interface_description
+      mtu                   = network_config.mtu
+      secondary_gateway_1   = network_config.secondary_gateway_1
+      secondary_gateway_2   = network_config.secondary_gateway_2
+      secondary_gateway_3   = network_config.secondary_gateway_3
+      secondary_gateway_4   = network_config.secondary_gateway_4
+      routing_tag           = network_config.routing_tag
+      arp_suppression       = network_config.arp_suppression
+      route_target_both     = network_config.route_target_both
+      dhcp_loopback_id      = network_config.dhcp_loopback_id
+      dhcp_servers          = network_config.dhcp_servers
+      multicast_group       = network_config.multicast_group
+      trm                   = network_config.trm
+      netflow               = network_config.netflow
+      vlan_netflow_monitor  = network_config.vlan_netflow_monitor
+      l3_gateway_on_border  = network_config.l3_gateway_on_border
+      igmp_version          = network_config.igmp_version
+      # Attachments (no fabric field for child)
+      attach_list = {
+        "9PJFRPZZ26Z" = {
+          deploy_this_attachment = true
+        }
+        "9G4KUS84LFI" = {
+          deploy_this_attachment = true
+        }
+      }
+    }
+  }
+}
+
+resource "ndfc_networks" "child2_specific_networks_attributes" {
+  depends_on  = [ndfc_networks.msd_parent_networks_attributes]
+  fabric_name = tolist(ndfc_fabric_vxlan_msd.msd_fabric.child_fabrics)[1]
+  networks = {
+    for network_name, network_config in var.network_configs : network_name => {
+      vrf_name              = network_config.vrf_name
+      network_id            = network_config.network_id
+      gateway_ipv4_address  = network_config.gateway_ipv4_address
+      gateway_ipv6_address  = network_config.gateway_ipv6_address
+      vlan_id               = network_config.vlan_id
+      vlan_name             = network_config.vlan_name
+      layer2_only           = network_config.layer2_only
+      interface_description = network_config.interface_description
+      mtu                   = network_config.mtu
+      secondary_gateway_1   = network_config.secondary_gateway_1
+      secondary_gateway_2   = network_config.secondary_gateway_2
+      secondary_gateway_3   = network_config.secondary_gateway_3
+      secondary_gateway_4   = network_config.secondary_gateway_4
+      routing_tag           = network_config.routing_tag
+      arp_suppression       = network_config.arp_suppression
+      route_target_both     = network_config.route_target_both
+      dhcp_loopback_id      = network_config.dhcp_loopback_id
+      dhcp_servers          = network_config.dhcp_servers
+      multicast_group       = network_config.multicast_group
+      trm                   = network_config.trm
+      netflow               = network_config.netflow
+      vlan_netflow_monitor  = network_config.vlan_netflow_monitor
+      l3_gateway_on_border  = network_config.l3_gateway_on_border
+      igmp_version          = network_config.igmp_version
+      # Attachments (no fabric field for child)
+      attach_list = {
+        "92Z298RRNPO" = {
+          deploy_this_attachment = true
+        }
+        "9ZHWL1HRWKR" = {
+          deploy_this_attachment = true
+        }
+      }
+    }
+  }
+}
+```
+
+---
+
+## Use Cases
+
+Below are a few use cases to manage the MSD fabric with VRF and Network resources.
+
+### Use Case 1: Migrating Standalone Fabrics to MSD
+
+The `child_fabric1` and `child_fabric2` resources are already created as individual fabrics. They have `ndfc_vrfs` and `ndfc_networks` resources created and attached to them. Now the user wants to manage these fabrics as child fabrics under a new MSD fabric. Below are the steps to achieve this:
+
+1. Create the `ndfc_fabric_vxlan_msd` resource with `child_fabric1` and `child_fabric2` as child fabrics.
+2. Create `ndfc_vrfs` and `ndfc_networks` resources for the parent fabric with parent-level properties and attachments for both child fabrics.
+3. Realign the dependencies of `child_fabric1` and `child_fabric2` VRF and Network resources to depend on the parent `ndfc_vrfs` and `ndfc_networks` resources respectively, instead of the fabric VXLAN EVPN resources. This ensures that child fabric VRFs and Networks are created after parent-level properties are created by the parent resources.
+
+**BEFORE: Standalone Child Fabrics Configuration**
+
+> **Note:** The examples below reference `var.vrf_configs` and `var.network_configs` variables defined in the [Shared Configuration Variables](#msd-workflow-with-vrf-and-networks) section above. Using variables ensures consistency between parent and child resources.
+
+```terraform
+# =============================================================================
+# BEFORE: Two standalone VXLAN EVPN fabrics with their own VRFs and Networks
+# =============================================================================
+
+# Standalone Fabric 1
+resource "ndfc_fabric_vxlan_evpn" "child_fabric1" {
+  fabric_name    = "child_fabric1"
+  bgp_as         = 65001
+  anycast_gw_mac = "2020.0000.00aa"
+  deploy         = true
+}
+
+# Standalone Fabric 2
+resource "ndfc_fabric_vxlan_evpn" "child_fabric2" {
+  fabric_name    = "child_fabric2"
+  bgp_as         = 65002
+  anycast_gw_mac = "2020.0000.00aa"
+  deploy         = true
+}
+
+# Inventory for child_fabric1
+resource "ndfc_inventory_devices" "child_fabric1_inventory" {
+  depends_on  = [ndfc_fabric_vxlan_evpn.child_fabric1]
+  fabric_name = ndfc_fabric_vxlan_evpn.child_fabric1.fabric_name
+  # ... device configuration ...
+}
+
+# Inventory for child_fabric2
+resource "ndfc_inventory_devices" "child_fabric2_inventory" {
+  depends_on  = [ndfc_fabric_vxlan_evpn.child_fabric2]
+  fabric_name = ndfc_fabric_vxlan_evpn.child_fabric2.fabric_name
+  # ... device configuration ...
+}
+
+# VRFs for child_fabric1 - depends on its own fabric resource
+resource "ndfc_vrfs" "child_fabric1_vrfs" {
+  depends_on  = [ndfc_inventory_devices.child_fabric1_inventory]
+  fabric_name = ndfc_fabric_vxlan_evpn.child_fabric1.fabric_name
+  vrfs = {
+    for vrf_name, vrf_config in var.vrf_configs : vrf_name => {
+      vlan_id                       = vrf_config.vlan_id
+      disable_rt_auto               = vrf_config.disable_rt_auto
+      ipv6_link_local               = vrf_config.ipv6_link_local
+      loopback_routing_tag          = vrf_config.loopback_routing_tag
+      max_bgp_paths                 = vrf_config.max_bgp_paths
+      max_ibgp_paths                = vrf_config.max_ibgp_paths
+      mtu                           = vrf_config.mtu
+      redistribute_direct_route_map = vrf_config.redistribute_direct_route_map
+      vrf_extension_template        = vrf_config.vrf_extension_template
+      vrf_template                  = vrf_config.vrf_template
+      advertise_default_route       = vrf_config.advertise_default_route
+      advertise_host_routes         = vrf_config.advertise_host_routes
+      attach_list = {
+        "9PJFRPZZ26Z" = { deploy_this_attachment = true }
+        "9G4KUS84LFI" = { deploy_this_attachment = true }
+      }
+    }
+  }
+}
+
+# VRFs for child_fabric2 - depends on its own fabric resource
+resource "ndfc_vrfs" "child_fabric2_vrfs" {
+  depends_on  = [ndfc_inventory_devices.child_fabric2_inventory]
+  fabric_name = ndfc_fabric_vxlan_evpn.child_fabric2.fabric_name
+  vrfs = {
+    for vrf_name, vrf_config in var.vrf_configs : vrf_name => {
+      vlan_id                       = vrf_config.vlan_id
+      disable_rt_auto               = vrf_config.disable_rt_auto
+      ipv6_link_local               = vrf_config.ipv6_link_local
+      loopback_routing_tag          = vrf_config.loopback_routing_tag
+      max_bgp_paths                 = vrf_config.max_bgp_paths
+      max_ibgp_paths                = vrf_config.max_ibgp_paths
+      mtu                           = vrf_config.mtu
+      redistribute_direct_route_map = vrf_config.redistribute_direct_route_map
+      vrf_extension_template        = vrf_config.vrf_extension_template
+      vrf_template                  = vrf_config.vrf_template
+      advertise_default_route       = vrf_config.advertise_default_route
+      advertise_host_routes         = vrf_config.advertise_host_routes
+      attach_list = {
+        "92Z298RRNPO" = { deploy_this_attachment = true }
+        "9ZHWL1HRWKR" = { deploy_this_attachment = true }
+      }
+    }
+  }
+}
+
+# Networks for child_fabric1 - depends on VRF resource
+resource "ndfc_networks" "child_fabric1_networks" {
+  depends_on  = [ndfc_vrfs.child_fabric1_vrfs]
+  fabric_name = ndfc_fabric_vxlan_evpn.child_fabric1.fabric_name
+  networks = {
+    for network_name, network_config in var.network_configs : network_name => {
+      vrf_name              = network_config.vrf_name
+      network_id            = network_config.network_id
+      gateway_ipv4_address  = network_config.gateway_ipv4_address
+      gateway_ipv6_address  = network_config.gateway_ipv6_address
+      vlan_id               = network_config.vlan_id
+      vlan_name             = network_config.vlan_name
+      layer2_only           = network_config.layer2_only
+      interface_description = network_config.interface_description
+      mtu                   = network_config.mtu
+      routing_tag           = network_config.routing_tag
+      trm                   = network_config.trm
+      multicast_group       = network_config.multicast_group
+      igmp_version          = network_config.igmp_version
+      l3_gateway_on_border  = network_config.l3_gateway_on_border
+      attach_list = {
+        "9PJFRPZZ26Z" = { deploy_this_attachment = true }
+        "9G4KUS84LFI" = { deploy_this_attachment = true }
+      }
+    }
+  }
+}
+
+# Networks for child_fabric2 - depends on VRF resource
+resource "ndfc_networks" "child_fabric2_networks" {
+  depends_on  = [ndfc_vrfs.child_fabric2_vrfs]
+  fabric_name = ndfc_fabric_vxlan_evpn.child_fabric2.fabric_name
+  networks = {
+    for network_name, network_config in var.network_configs : network_name => {
+      vrf_name              = network_config.vrf_name
+      network_id            = network_config.network_id
+      gateway_ipv4_address  = network_config.gateway_ipv4_address
+      gateway_ipv6_address  = network_config.gateway_ipv6_address
+      vlan_id               = network_config.vlan_id
+      vlan_name             = network_config.vlan_name
+      layer2_only           = network_config.layer2_only
+      interface_description = network_config.interface_description
+      mtu                   = network_config.mtu
+      routing_tag           = network_config.routing_tag
+      trm                   = network_config.trm
+      multicast_group       = network_config.multicast_group
+      igmp_version          = network_config.igmp_version
+      l3_gateway_on_border  = network_config.l3_gateway_on_border
+      attach_list = {
+        "92Z298RRNPO" = { deploy_this_attachment = true }
+        "9ZHWL1HRWKR" = { deploy_this_attachment = true }
+      }
+    }
+  }
+}
+```
+
+**AFTER: Migrated to MSD Fabric Configuration**
+
+```terraform
+# =============================================================================
+# AFTER: Child fabrics managed under MSD fabric with parent VRF/Network resources
+# =============================================================================
+
+# Child fabrics remain as standalone resources (unchanged)
+resource "ndfc_fabric_vxlan_evpn" "child_fabric1" {
+  fabric_name    = "child_fabric1"
+  bgp_as         = 65001
+  anycast_gw_mac = "2020.0000.00aa"
+  deploy         = true
+}
+
+resource "ndfc_fabric_vxlan_evpn" "child_fabric2" {
+  fabric_name    = "child_fabric2"
+  bgp_as         = 65002
+  anycast_gw_mac = "2020.0000.00aa"
+  deploy         = true
+}
+
+# Inventory resources remain unchanged
+resource "ndfc_inventory_devices" "child_fabric1_inventory" {
+  depends_on  = [ndfc_fabric_vxlan_evpn.child_fabric1]
+  fabric_name = ndfc_fabric_vxlan_evpn.child_fabric1.fabric_name
+  # ... device configuration ...
+}
+
+resource "ndfc_inventory_devices" "child_fabric2_inventory" {
+  depends_on  = [ndfc_fabric_vxlan_evpn.child_fabric2]
+  fabric_name = ndfc_fabric_vxlan_evpn.child_fabric2.fabric_name
+  # ... device configuration ...
+}
+
+# Step 1: NEW - Create MSD fabric with child fabrics
+resource "ndfc_fabric_vxlan_msd" "msd_fabric" {
+  depends_on    = [ndfc_inventory_devices.child_fabric1_inventory, ndfc_inventory_devices.child_fabric2_inventory]
+  fabric_name   = "msd_fabric"
+  deploy        = false
+  child_fabrics = ["child_fabric1", "child_fabric2"]
+}
+
+# Step 2: NEW - Create parent VRF resource with parent-level properties and ALL attachments
+resource "ndfc_vrfs" "msd_parent_vrfs" {
+  depends_on  = [ndfc_fabric_vxlan_msd.msd_fabric]
+  fabric_name = ndfc_fabric_vxlan_msd.msd_fabric.fabric_name
+  vrfs = {
+    for vrf_name, vrf_config in var.vrf_configs : vrf_name => {
+      # Parent-level properties only
+      vlan_id                       = vrf_config.vlan_id
+      disable_rt_auto               = vrf_config.disable_rt_auto
+      ipv6_link_local               = vrf_config.ipv6_link_local
+      loopback_routing_tag          = vrf_config.loopback_routing_tag
+      max_bgp_paths                 = vrf_config.max_bgp_paths
+      max_ibgp_paths                = vrf_config.max_ibgp_paths
+      mtu                           = vrf_config.mtu
+      redistribute_direct_route_map = vrf_config.redistribute_direct_route_map
+      vrf_extension_template        = vrf_config.vrf_extension_template
+      vrf_template                  = vrf_config.vrf_template
+      # Attachments from BOTH child fabrics with fabric field specified
+      attach_list = {
+        "9PJFRPZZ26Z" = {
+          deploy_this_attachment = true
+          fabric                 = tolist(ndfc_fabric_vxlan_msd.msd_fabric.child_fabrics)[0]
+        }
+        "9G4KUS84LFI" = {
+          deploy_this_attachment = true
+          fabric                 = tolist(ndfc_fabric_vxlan_msd.msd_fabric.child_fabrics)[0]
+        }
+        "92Z298RRNPO" = {
+          deploy_this_attachment = true
+          fabric                 = tolist(ndfc_fabric_vxlan_msd.msd_fabric.child_fabrics)[1]
+        }
+        "9ZHWL1HRWKR" = {
+          deploy_this_attachment = true
+          fabric                 = tolist(ndfc_fabric_vxlan_msd.msd_fabric.child_fabrics)[1]
+        }
+      }
+    }
+  }
+}
+
+# Step 3: MODIFIED - child_fabric1 VRFs now depend on parent VRF resource
+resource "ndfc_vrfs" "child_fabric1_vrfs" {
+  depends_on  = [ndfc_vrfs.msd_parent_vrfs]
+  fabric_name = tolist(ndfc_fabric_vxlan_msd.msd_fabric.child_fabrics)[0]
+  vrfs = {
+    for vrf_name, vrf_config in var.vrf_configs : vrf_name => {
+      vlan_id                       = vrf_config.vlan_id
+      disable_rt_auto               = vrf_config.disable_rt_auto
+      ipv6_link_local               = vrf_config.ipv6_link_local
+      loopback_routing_tag          = vrf_config.loopback_routing_tag
+      max_bgp_paths                 = vrf_config.max_bgp_paths
+      max_ibgp_paths                = vrf_config.max_ibgp_paths
+      mtu                           = vrf_config.mtu
+      redistribute_direct_route_map = vrf_config.redistribute_direct_route_map
+      vrf_extension_template        = vrf_config.vrf_extension_template
+      vrf_template                  = vrf_config.vrf_template
+      advertise_default_route       = vrf_config.advertise_default_route
+      advertise_host_routes         = vrf_config.advertise_host_routes
+      attach_list = {
+        "9PJFRPZZ26Z" = { deploy_this_attachment = true }
+        "9G4KUS84LFI" = { deploy_this_attachment = true }
+      }
+    }
+  }
+}
+
+# Step 3: MODIFIED - child_fabric2 VRFs now depend on parent VRF resource
+resource "ndfc_vrfs" "child_fabric2_vrfs" {
+  depends_on  = [ndfc_vrfs.msd_parent_vrfs]
+  fabric_name = tolist(ndfc_fabric_vxlan_msd.msd_fabric.child_fabrics)[1]
+  vrfs = {
+    for vrf_name, vrf_config in var.vrf_configs : vrf_name => {
+      vlan_id                       = vrf_config.vlan_id
+      disable_rt_auto               = vrf_config.disable_rt_auto
+      ipv6_link_local               = vrf_config.ipv6_link_local
+      loopback_routing_tag          = vrf_config.loopback_routing_tag
+      max_bgp_paths                 = vrf_config.max_bgp_paths
+      max_ibgp_paths                = vrf_config.max_ibgp_paths
+      mtu                           = vrf_config.mtu
+      redistribute_direct_route_map = vrf_config.redistribute_direct_route_map
+      vrf_extension_template        = vrf_config.vrf_extension_template
+      vrf_template                  = vrf_config.vrf_template
+      advertise_default_route       = vrf_config.advertise_default_route
+      advertise_host_routes         = vrf_config.advertise_host_routes
+      attach_list = {
+        "92Z298RRNPO" = { deploy_this_attachment = true }
+        "9ZHWL1HRWKR" = { deploy_this_attachment = true }
+      }
+    }
+  }
+}
+
+# Step 2: NEW - Create parent Network resource with parent-level properties and ALL attachments
+resource "ndfc_networks" "msd_parent_networks" {
+  depends_on  = [ndfc_vrfs.msd_parent_vrfs, ndfc_vrfs.child_fabric1_vrfs, ndfc_vrfs.child_fabric2_vrfs]
+  fabric_name = ndfc_fabric_vxlan_msd.msd_fabric.fabric_name
+  networks = {
+    for network_name, network_config in var.network_configs : network_name => {
+      vrf_name              = network_config.vrf_name
+      network_id            = network_config.network_id
+      gateway_ipv4_address  = network_config.gateway_ipv4_address
+      gateway_ipv6_address  = network_config.gateway_ipv6_address
+      vlan_id               = network_config.vlan_id
+      vlan_name             = network_config.vlan_name
+      layer2_only           = network_config.layer2_only
+      interface_description = network_config.interface_description
+      mtu                   = network_config.mtu
+      routing_tag           = network_config.routing_tag
+      attach_list = {
+        "9PJFRPZZ26Z" = {
+          deploy_this_attachment = true
+          fabric                 = tolist(ndfc_fabric_vxlan_msd.msd_fabric.child_fabrics)[0]
+        }
+        "9G4KUS84LFI" = {
+          deploy_this_attachment = true
+          fabric                 = tolist(ndfc_fabric_vxlan_msd.msd_fabric.child_fabrics)[0]
+        }
+        "92Z298RRNPO" = {
+          deploy_this_attachment = true
+          fabric                 = tolist(ndfc_fabric_vxlan_msd.msd_fabric.child_fabrics)[1]
+        }
+        "9ZHWL1HRWKR" = {
+          deploy_this_attachment = true
+          fabric                 = tolist(ndfc_fabric_vxlan_msd.msd_fabric.child_fabrics)[1]
+        }
+      }
+    }
+  }
+}
+
+# Step 3: MODIFIED - child_fabric1 Networks now depend on parent Network resource
+resource "ndfc_networks" "child_fabric1_networks" {
+  depends_on  = [ndfc_networks.msd_parent_networks]
+  fabric_name = tolist(ndfc_fabric_vxlan_msd.msd_fabric.child_fabrics)[0]
+  networks = {
+    for network_name, network_config in var.network_configs : network_name => {
+      vrf_name              = network_config.vrf_name
+      network_id            = network_config.network_id
+      gateway_ipv4_address  = network_config.gateway_ipv4_address
+      gateway_ipv6_address  = network_config.gateway_ipv6_address
+      vlan_id               = network_config.vlan_id
+      vlan_name             = network_config.vlan_name
+      layer2_only           = network_config.layer2_only
+      interface_description = network_config.interface_description
+      mtu                   = network_config.mtu
+      routing_tag           = network_config.routing_tag
+      trm                   = network_config.trm
+      multicast_group       = network_config.multicast_group
+      igmp_version          = network_config.igmp_version
+      l3_gateway_on_border  = network_config.l3_gateway_on_border
+      attach_list = {
+        "9PJFRPZZ26Z" = { deploy_this_attachment = true }
+        "9G4KUS84LFI" = { deploy_this_attachment = true }
+      }
+    }
+  }
+}
+
+# Step 3: MODIFIED - child_fabric2 Networks now depend on parent Network resource
+resource "ndfc_networks" "child_fabric2_networks" {
+  depends_on  = [ndfc_networks.msd_parent_networks]
+  fabric_name = tolist(ndfc_fabric_vxlan_msd.msd_fabric.child_fabrics)[1]
+  networks = {
+    for network_name, network_config in var.network_configs : network_name => {
+      vrf_name              = network_config.vrf_name
+      network_id            = network_config.network_id
+      gateway_ipv4_address  = network_config.gateway_ipv4_address
+      gateway_ipv6_address  = network_config.gateway_ipv6_address
+      vlan_id               = network_config.vlan_id
+      vlan_name             = network_config.vlan_name
+      layer2_only           = network_config.layer2_only
+      interface_description = network_config.interface_description
+      mtu                   = network_config.mtu
+      routing_tag           = network_config.routing_tag
+      trm                   = network_config.trm
+      multicast_group       = network_config.multicast_group
+      igmp_version          = network_config.igmp_version
+      l3_gateway_on_border  = network_config.l3_gateway_on_border
+      attach_list = {
+        "92Z298RRNPO" = { deploy_this_attachment = true }
+        "9ZHWL1HRWKR" = { deploy_this_attachment = true }
+      }
+    }
+  }
+}
+```
+
+**Key Changes Summary:**
+
+| Component | Before | After |
+|-----------|--------|-------|
+| MSD Fabric | Not present | New `ndfc_fabric_vxlan_msd.msd_fabric` resource |
+| Parent VRF | Not present | New `ndfc_vrfs.msd_parent_vrfs` with all attachments |
+| Parent Network | Not present | New `ndfc_networks.msd_parent_networks` with all attachments |
+| Child VRF depends_on | `ndfc_inventory_devices.*` | `ndfc_vrfs.msd_parent_vrfs` |
+| Child Network depends_on | `ndfc_vrfs.child_fabric*_vrfs` | `ndfc_networks.msd_parent_networks` |
+| Child attachments | No fabric field | Parent has fabric field, children don't |
+
+---
+
+### Use Case 2: Removing a Child Fabric from MSD
+
+Starting from the configuration in Use Case 1 (AFTER creating state), the user wants to remove `child_fabric2` from the MSD fabric so it becomes a standalone fabric again. Below are the steps to achieve this:
+
+1. Remove `child_fabric2` from the `child_fabrics` list in the `ndfc_fabric_vxlan_msd` resource.
+2. Remove all `child_fabric2` attachments from the parent `ndfc_vrfs` and `ndfc_networks` resources.
+3. Update the `child_fabric2` VRF and Network resources to depend on their own fabric inventory instead of the parent MSD resources, making them standalone again.
+
+**BEFORE: MSD Fabric with Two Child Fabrics (from Use Case 1 AFTER creating state)**
+
+```terraform
+# =============================================================================
+# BEFORE: MSD fabric managing both child_fabric1 and child_fabric2
+# =============================================================================
+
+# MSD fabric with both child fabrics
+resource "ndfc_fabric_vxlan_msd" "msd_fabric" {
+  depends_on    = [ndfc_inventory_devices.child_fabric1_inventory, ndfc_inventory_devices.child_fabric2_inventory]
+  fabric_name   = "msd_fabric"
+  deploy        = false
+  child_fabrics = ["child_fabric1", "child_fabric2"]
+}
+
+# Parent VRF resource with attachments from BOTH child fabrics
+resource "ndfc_vrfs" "msd_parent_vrfs" {
+  depends_on  = [ndfc_fabric_vxlan_msd.msd_fabric]
+  fabric_name = ndfc_fabric_vxlan_msd.msd_fabric.fabric_name
+  vrfs = {
+    for vrf_name, vrf_config in var.vrf_configs : vrf_name => {
+      vlan_id                       = vrf_config.vlan_id
+      disable_rt_auto               = vrf_config.disable_rt_auto
+      ipv6_link_local               = vrf_config.ipv6_link_local
+      loopback_routing_tag          = vrf_config.loopback_routing_tag
+      max_bgp_paths                 = vrf_config.max_bgp_paths
+      max_ibgp_paths                = vrf_config.max_ibgp_paths
+      mtu                           = vrf_config.mtu
+      redistribute_direct_route_map = vrf_config.redistribute_direct_route_map
+      vrf_extension_template        = vrf_config.vrf_extension_template
+      vrf_template                  = vrf_config.vrf_template
+      # Attachments from BOTH child fabrics
+      attach_list = {
+        "9PJFRPZZ26Z" = {
+          deploy_this_attachment = true
+          fabric                 = "child_fabric1"
+        }
+        "9G4KUS84LFI" = {
+          deploy_this_attachment = true
+          fabric                 = "child_fabric1"
+        }
+        "92Z298RRNPO" = {
+          deploy_this_attachment = true
+          fabric                 = "child_fabric2"
+        }
+        "9ZHWL1HRWKR" = {
+          deploy_this_attachment = true
+          fabric                 = "child_fabric2"
+        }
+      }
+    }
+  }
+}
+
+# child_fabric1 VRFs - depends on parent MSD VRF resource
+resource "ndfc_vrfs" "child_fabric1_vrfs" {
+  depends_on  = [ndfc_vrfs.msd_parent_vrfs]
+  fabric_name = "child_fabric1"
+  vrfs = {
+    for vrf_name, vrf_config in var.vrf_configs : vrf_name => {
+      vlan_id                       = vrf_config.vlan_id
+      disable_rt_auto               = vrf_config.disable_rt_auto
+      ipv6_link_local               = vrf_config.ipv6_link_local
+      loopback_routing_tag          = vrf_config.loopback_routing_tag
+      max_bgp_paths                 = vrf_config.max_bgp_paths
+      max_ibgp_paths                = vrf_config.max_ibgp_paths
+      mtu                           = vrf_config.mtu
+      redistribute_direct_route_map = vrf_config.redistribute_direct_route_map
+      vrf_extension_template        = vrf_config.vrf_extension_template
+      vrf_template                  = vrf_config.vrf_template
+      advertise_default_route       = vrf_config.advertise_default_route
+      advertise_host_routes         = vrf_config.advertise_host_routes
+      attach_list = {
+        "9PJFRPZZ26Z" = { deploy_this_attachment = true }
+        "9G4KUS84LFI" = { deploy_this_attachment = true }
+      }
+    }
+  }
+}
+
+# child_fabric2 VRFs - depends on parent MSD VRF resource
+resource "ndfc_vrfs" "child_fabric2_vrfs" {
+  depends_on  = [ndfc_vrfs.msd_parent_vrfs]
+  fabric_name = "child_fabric2"
+  vrfs = {
+    for vrf_name, vrf_config in var.vrf_configs : vrf_name => {
+      vlan_id                       = vrf_config.vlan_id
+      disable_rt_auto               = vrf_config.disable_rt_auto
+      ipv6_link_local               = vrf_config.ipv6_link_local
+      loopback_routing_tag          = vrf_config.loopback_routing_tag
+      max_bgp_paths                 = vrf_config.max_bgp_paths
+      max_ibgp_paths                = vrf_config.max_ibgp_paths
+      mtu                           = vrf_config.mtu
+      redistribute_direct_route_map = vrf_config.redistribute_direct_route_map
+      vrf_extension_template        = vrf_config.vrf_extension_template
+      vrf_template                  = vrf_config.vrf_template
+      advertise_default_route       = vrf_config.advertise_default_route
+      advertise_host_routes         = vrf_config.advertise_host_routes
+      attach_list = {
+        "92Z298RRNPO" = { deploy_this_attachment = true }
+        "9ZHWL1HRWKR" = { deploy_this_attachment = true }
+      }
+    }
+  }
+}
+
+# Parent Network resource with attachments from BOTH child fabrics
+resource "ndfc_networks" "msd_parent_networks" {
+  depends_on  = [ndfc_vrfs.msd_parent_vrfs, ndfc_vrfs.child_fabric1_vrfs, ndfc_vrfs.child_fabric2_vrfs]
+  fabric_name = ndfc_fabric_vxlan_msd.msd_fabric.fabric_name
+  networks = {
+    for network_name, network_config in var.network_configs : network_name => {
+      vrf_name              = network_config.vrf_name
+      network_id            = network_config.network_id
+      gateway_ipv4_address  = network_config.gateway_ipv4_address
+      gateway_ipv6_address  = network_config.gateway_ipv6_address
+      vlan_id               = network_config.vlan_id
+      vlan_name             = network_config.vlan_name
+      layer2_only           = network_config.layer2_only
+      interface_description = network_config.interface_description
+      mtu                   = network_config.mtu
+      routing_tag           = network_config.routing_tag
+      attach_list = {
+        "9PJFRPZZ26Z" = {
+          deploy_this_attachment = true
+          fabric                 = "child_fabric1"
+        }
+        "9G4KUS84LFI" = {
+          deploy_this_attachment = true
+          fabric                 = "child_fabric1"
+        }
+        "92Z298RRNPO" = {
+          deploy_this_attachment = true
+          fabric                 = "child_fabric2"
+        }
+        "9ZHWL1HRWKR" = {
+          deploy_this_attachment = true
+          fabric                 = "child_fabric2"
+        }
+      }
+    }
+  }
+}
+
+# child_fabric1 Networks - depends on parent MSD Network resource
+resource "ndfc_networks" "child_fabric1_networks" {
+  depends_on  = [ndfc_networks.msd_parent_networks]
+  fabric_name = "child_fabric1"
+  networks = {
+    for network_name, network_config in var.network_configs : network_name => {
+      vrf_name              = network_config.vrf_name
+      network_id            = network_config.network_id
+      gateway_ipv4_address  = network_config.gateway_ipv4_address
+      gateway_ipv6_address  = network_config.gateway_ipv6_address
+      vlan_id               = network_config.vlan_id
+      vlan_name             = network_config.vlan_name
+      layer2_only           = network_config.layer2_only
+      interface_description = network_config.interface_description
+      mtu                   = network_config.mtu
+      routing_tag           = network_config.routing_tag
+      trm                   = network_config.trm
+      multicast_group       = network_config.multicast_group
+      igmp_version          = network_config.igmp_version
+      l3_gateway_on_border  = network_config.l3_gateway_on_border
+      attach_list = {
+        "9PJFRPZZ26Z" = { deploy_this_attachment = true }
+        "9G4KUS84LFI" = { deploy_this_attachment = true }
+      }
+    }
+  }
+}
+
+# child_fabric2 Networks - depends on parent MSD Network resource
+resource "ndfc_networks" "child_fabric2_networks" {
+  depends_on  = [ndfc_networks.msd_parent_networks]
+  fabric_name = "child_fabric2"
+  networks = {
+    for network_name, network_config in var.network_configs : network_name => {
+      vrf_name              = network_config.vrf_name
+      network_id            = network_config.network_id
+      gateway_ipv4_address  = network_config.gateway_ipv4_address
+      gateway_ipv6_address  = network_config.gateway_ipv6_address
+      vlan_id               = network_config.vlan_id
+      vlan_name             = network_config.vlan_name
+      layer2_only           = network_config.layer2_only
+      interface_description = network_config.interface_description
+      mtu                   = network_config.mtu
+      routing_tag           = network_config.routing_tag
+      trm                   = network_config.trm
+      multicast_group       = network_config.multicast_group
+      igmp_version          = network_config.igmp_version
+      l3_gateway_on_border  = network_config.l3_gateway_on_border
+      attach_list = {
+        "92Z298RRNPO" = { deploy_this_attachment = true }
+        "9ZHWL1HRWKR" = { deploy_this_attachment = true }
+      }
+    }
+  }
+}
+```
+
+**AFTER: child_fabric2 Removed from MSD and Operating Independently**
+
+```terraform
+# =============================================================================
+# AFTER: child_fabric2 removed from MSD, now operating as standalone fabric
+# =============================================================================
+
+# MSD fabric now only manages child_fabric1
+resource "ndfc_fabric_vxlan_msd" "msd_fabric" {
+  depends_on    = [ndfc_inventory_devices.child_fabric1_inventory]
+  fabric_name   = "msd_fabric"
+  deploy        = false
+  child_fabrics = ["child_fabric1"]
+}
+
+# Parent VRF resource - child_fabric2 attachments REMOVED
+resource "ndfc_vrfs" "msd_parent_vrfs" {
+  depends_on  = [ndfc_fabric_vxlan_msd.msd_fabric]
+  fabric_name = ndfc_fabric_vxlan_msd.msd_fabric.fabric_name
+  vrfs = {
+    for vrf_name, vrf_config in var.vrf_configs : vrf_name => {
+      vlan_id                       = vrf_config.vlan_id
+      disable_rt_auto               = vrf_config.disable_rt_auto
+      ipv6_link_local               = vrf_config.ipv6_link_local
+      loopback_routing_tag          = vrf_config.loopback_routing_tag
+      max_bgp_paths                 = vrf_config.max_bgp_paths
+      max_ibgp_paths                = vrf_config.max_ibgp_paths
+      mtu                           = vrf_config.mtu
+      redistribute_direct_route_map = vrf_config.redistribute_direct_route_map
+      vrf_extension_template        = vrf_config.vrf_extension_template
+      vrf_template                  = vrf_config.vrf_template
+      attach_list = {
+        "9PJFRPZZ26Z" = {
+          deploy_this_attachment = true
+          fabric                 = tolist(ndfc_fabric_vxlan_msd.msd_fabric.child_fabrics)[0]
+        }
+        "9G4KUS84LFI" = {
+          deploy_this_attachment = true
+          fabric                 = tolist(ndfc_fabric_vxlan_msd.msd_fabric.child_fabrics)[0]
+        }
+      }
+    }
+  }
+}
+
+# child_fabric1 VRFs - still depends on parent MSD VRF resource
+resource "ndfc_vrfs" "child_fabric1_vrfs" {
+  depends_on  = [ndfc_vrfs.msd_parent_vrfs]
+  fabric_name = tolist(ndfc_fabric_vxlan_msd.msd_fabric.child_fabrics)[0]
+  vrfs = {
+    for vrf_name, vrf_config in var.vrf_configs : vrf_name => {
+      vlan_id                       = vrf_config.vlan_id
+      disable_rt_auto               = vrf_config.disable_rt_auto
+      ipv6_link_local               = vrf_config.ipv6_link_local
+      loopback_routing_tag          = vrf_config.loopback_routing_tag
+      max_bgp_paths                 = vrf_config.max_bgp_paths
+      max_ibgp_paths                = vrf_config.max_ibgp_paths
+      mtu                           = vrf_config.mtu
+      redistribute_direct_route_map = vrf_config.redistribute_direct_route_map
+      vrf_extension_template        = vrf_config.vrf_extension_template
+      vrf_template                  = vrf_config.vrf_template
+      advertise_default_route       = vrf_config.advertise_default_route
+      advertise_host_routes         = vrf_config.advertise_host_routes
+      attach_list = {
+        "9PJFRPZZ26Z" = { deploy_this_attachment = true }
+        "9G4KUS84LFI" = { deploy_this_attachment = true }
+      }
+    }
+  }
+}
+
+# child_fabric2 VRFs - NOW STANDALONE (depends on its own inventory, not MSD)
+resource "ndfc_vrfs" "child_fabric2_vrfs" {
+  depends_on  = [ndfc_inventory_devices.child_fabric2_inventory]
+  fabric_name = "child_fabric2"
+  vrfs = {
+    for vrf_name, vrf_config in var.vrf_configs : vrf_name => {
+      vlan_id                       = vrf_config.vlan_id
+      disable_rt_auto               = vrf_config.disable_rt_auto
+      ipv6_link_local               = vrf_config.ipv6_link_local
+      loopback_routing_tag          = vrf_config.loopback_routing_tag
+      max_bgp_paths                 = vrf_config.max_bgp_paths
+      max_ibgp_paths                = vrf_config.max_ibgp_paths
+      mtu                           = vrf_config.mtu
+      redistribute_direct_route_map = vrf_config.redistribute_direct_route_map
+      vrf_extension_template        = vrf_config.vrf_extension_template
+      vrf_template                  = vrf_config.vrf_template
+      advertise_default_route       = vrf_config.advertise_default_route
+      advertise_host_routes         = vrf_config.advertise_host_routes
+      attach_list = {
+        "92Z298RRNPO" = { deploy_this_attachment = true }
+        "9ZHWL1HRWKR" = { deploy_this_attachment = true }
+      }
+    }
+  }
+}
+
+# Parent Network resource - child_fabric2 attachments REMOVED
+resource "ndfc_networks" "msd_parent_networks" {
+  depends_on  = [ndfc_vrfs.msd_parent_vrfs, ndfc_vrfs.child_fabric1_vrfs]
+  fabric_name = ndfc_fabric_vxlan_msd.msd_fabric.fabric_name
+  networks = {
+    for network_name, network_config in var.network_configs : network_name => {
+      vrf_name              = network_config.vrf_name
+      network_id            = network_config.network_id
+      gateway_ipv4_address  = network_config.gateway_ipv4_address
+      gateway_ipv6_address  = network_config.gateway_ipv6_address
+      vlan_id               = network_config.vlan_id
+      vlan_name             = network_config.vlan_name
+      layer2_only           = network_config.layer2_only
+      interface_description = network_config.interface_description
+      mtu                   = network_config.mtu
+      routing_tag           = network_config.routing_tag
+      attach_list = {
+        "9PJFRPZZ26Z" = {
+          deploy_this_attachment = true
+          fabric                 = tolist(ndfc_fabric_vxlan_msd.msd_fabric.child_fabrics)[0]
+        }
+        "9G4KUS84LFI" = {
+          deploy_this_attachment = true
+          fabric                 = tolist(ndfc_fabric_vxlan_msd.msd_fabric.child_fabrics)[0]
+        }
+      }
+    }
+  }
+}
+
+# child_fabric1 Networks - still depends on parent MSD Network resource
+resource "ndfc_networks" "child_fabric1_networks" {
+  depends_on  = [ndfc_networks.msd_parent_networks]
+  fabric_name = tolist(ndfc_fabric_vxlan_msd.msd_fabric.child_fabrics)[0]
+  networks = {
+    for network_name, network_config in var.network_configs : network_name => {
+      vrf_name              = network_config.vrf_name
+      network_id            = network_config.network_id
+      gateway_ipv4_address  = network_config.gateway_ipv4_address
+      gateway_ipv6_address  = network_config.gateway_ipv6_address
+      vlan_id               = network_config.vlan_id
+      vlan_name             = network_config.vlan_name
+      layer2_only           = network_config.layer2_only
+      interface_description = network_config.interface_description
+      mtu                   = network_config.mtu
+      routing_tag           = network_config.routing_tag
+      trm                   = network_config.trm
+      multicast_group       = network_config.multicast_group
+      igmp_version          = network_config.igmp_version
+      l3_gateway_on_border  = network_config.l3_gateway_on_border
+      attach_list = {
+        "9PJFRPZZ26Z" = { deploy_this_attachment = true }
+        "9G4KUS84LFI" = { deploy_this_attachment = true }
+      }
+    }
+  }
+}
+
+# child_fabric2 Networks - NOW STANDALONE (depends on its own VRF resource)
+resource "ndfc_networks" "child_fabric2_networks" {
+  depends_on  = [ndfc_vrfs.child_fabric2_vrfs]
+  fabric_name = "child_fabric2"
+  networks = {
+    for network_name, network_config in var.network_configs : network_name => {
+      vrf_name              = network_config.vrf_name
+      network_id            = network_config.network_id
+      gateway_ipv4_address  = network_config.gateway_ipv4_address
+      gateway_ipv6_address  = network_config.gateway_ipv6_address
+      vlan_id               = network_config.vlan_id
+      vlan_name             = network_config.vlan_name
+      layer2_only           = network_config.layer2_only
+      interface_description = network_config.interface_description
+      mtu                   = network_config.mtu
+      routing_tag           = network_config.routing_tag
+      trm                   = network_config.trm
+      multicast_group       = network_config.multicast_group
+      igmp_version          = network_config.igmp_version
+      l3_gateway_on_border  = network_config.l3_gateway_on_border
+      attach_list = {
+        "92Z298RRNPO" = { deploy_this_attachment = true }
+        "9ZHWL1HRWKR" = { deploy_this_attachment = true }
+      }
+    }
+  }
+}
+```
+
+**Key Changes Summary:**
+
+| Component | Before | After |
+|-----------|--------|-------|
+| MSD `child_fabrics` | `["child_fabric1", "child_fabric2"]` | `["child_fabric1"]` |
+| Parent VRF attachments | 4 attachments (both fabrics) | 2 attachments (child_fabric1 only) |
+| Parent Network attachments | 4 attachments (both fabrics) | 2 attachments (child_fabric1 only) |
+| Parent Network `depends_on` | Includes `child_fabric2_vrfs` | Removed `child_fabric2_vrfs` |
+| `child_fabric2_vrfs` depends_on | `ndfc_vrfs.msd_parent_vrfs` | `ndfc_inventory_devices.child_fabric2_inventory` |
+| `child_fabric2_networks` depends_on | `ndfc_networks.msd_parent_networks` | `ndfc_vrfs.child_fabric2_vrfs` |
+
+> **Note:** The `child_fabric2` VRF and Network resources remain unchanged in terms of their configuration properties. Only the `depends_on` references are updated to make them standalone. This ensures no configuration drift when detaching vrfs and Networks from the MSD fabric. Only drift is ndfc_fabric_vxlan_msd resource.
+
+---
+
+### Use Case 3: Removing a VRF or Network from MSD Fabric
+
+When removing a VRF or Network from an MSD-managed setup, you must remove ALL references from BOTH the parent and child resources. This example demonstrates removing `nw_01` from the configuration.
+
+> **Note on Variable Usage:** This use case shows explicit Network names to clearly illustrate the removal pattern. When using the recommended variable-driven approach (with `var.network_configs`), instead of manually removing Network blocks from your configuration, you would remove the entry from your variable definition. The `for` loop will automatically exclude the removed item from all resources.
+
+> **IMPORTANT:** When removing a VRF or Network, you must remove it from:
+> - The parent `ndfc_vrfs` / `ndfc_networks` resource
+> - ALL child `ndfc_vrfs` / `ndfc_networks` resources
+> - All attachment references in both parent and child resources
+>
+> **Failing to remove references from all resources will cause deployment issues and potential state inconsistencies.**
+
+The same principle applies when removing individual attachments - they must be removed from both the parent resource (where the `fabric` field is specified) and the corresponding child resource.
+
+**BEFORE: MSD Fabric with nw_01 Network**
+
+```terraform
+# =============================================================================
+# BEFORE: MSD fabric with nw_01 network in parent and child resources
+# =============================================================================
+
+# Parent Network resource with nw_01
+resource "ndfc_networks" "msd_parent_networks" {
+  depends_on  = [ndfc_vrfs.msd_parent_vrfs, ndfc_vrfs.child_fabric1_vrfs, ndfc_vrfs.child_fabric2_vrfs]
+  fabric_name = ndfc_fabric_vxlan_msd.msd_fabric.fabric_name
+  networks = {
+    "nw_01" = {
+      vrf_name              = "vrf_01"
+      network_id            = 31001
+      gateway_ipv4_address  = "192.168.1.1/24"
+      gateway_ipv6_address  = "2001::2/64"
+      vlan_id               = 301
+      vlan_name             = "nw_01"
+      layer2_only           = false
+      interface_description = "nw_01 SVI"
+      mtu                   = 9100
+      routing_tag           = 12345
+      attach_list = {
+        "9PJFRPZZ26Z" = {
+          deploy_this_attachment = true
+          fabric                 = "child_fabric1"
+        }
+        "9G4KUS84LFI" = {
+          deploy_this_attachment = true
+          fabric                 = "child_fabric1"
+        }
+        "92Z298RRNPO" = {
+          deploy_this_attachment = true
+          fabric                 = "child_fabric2"
+        }
+        "9ZHWL1HRWKR" = {
+          deploy_this_attachment = true
+          fabric                 = "child_fabric2"
+        }
+      }
+    }
+    "nw_02" = {
+      vrf_name              = "vrf_02"
+      network_id            = 31002
+      gateway_ipv4_address  = "192.168.2.1/24"
+      gateway_ipv6_address  = "2002::1/64"
+      vlan_id               = 32
+      vlan_name             = "nw_02"
+      layer2_only           = false
+      interface_description = "nw_02 SVI"
+      mtu                   = 9100
+      routing_tag           = 12345
+      attach_list = {
+        "9PJFRPZZ26Z" = {
+          deploy_this_attachment = true
+          fabric                 = "child_fabric1"
+        }
+        "9G4KUS84LFI" = {
+          deploy_this_attachment = true
+          fabric                 = "child_fabric1"
+        }
+        "92Z298RRNPO" = {
+          deploy_this_attachment = true
+          fabric                 = "child_fabric2"
+        }
+        "9ZHWL1HRWKR" = {
+          deploy_this_attachment = true
+          fabric                 = "child_fabric2"
+        }
+      }
+    }
+  }
+}
+
+# child_fabric1 Networks with nw_01
+resource "ndfc_networks" "child_fabric1_networks" {
+  depends_on  = [ndfc_networks.msd_parent_networks]
+  fabric_name = "child_fabric1"
+  networks = {
+    "nw_01" = {
+      vrf_name              = "vrf_01"
+      network_id            = 31001
+      gateway_ipv4_address  = "192.168.1.1/24"
+      gateway_ipv6_address  = "2001::2/64"
+      vlan_id               = 301
+      vlan_name             = "nw_01"
+      layer2_only           = false
+      interface_description = "nw_01 SVI"
+      mtu                   = 9100
+      routing_tag           = 12345
+      trm                   = true
+      multicast_group       = "239.1.1.1"
+      igmp_version          = 3
+      l3_gateway_on_border  = true
+      attach_list = {
+        "9PJFRPZZ26Z" = { deploy_this_attachment = true }
+        "9G4KUS84LFI" = { deploy_this_attachment = true }
+      }
+    }
+    "nw_02" = {
+      vrf_name              = "vrf_02"
+      network_id            = 31002
+      gateway_ipv4_address  = "192.168.2.1/24"
+      gateway_ipv6_address  = "2002::1/64"
+      vlan_id               = 32
+      vlan_name             = "nw_02"
+      layer2_only           = false
+      interface_description = "nw_02 SVI"
+      mtu                   = 9100
+      routing_tag           = 12345
+      trm                   = false
+      multicast_group       = "239.1.1.2"
+      igmp_version          = 3
+      attach_list = {
+        "9PJFRPZZ26Z" = { deploy_this_attachment = true }
+        "9G4KUS84LFI" = { deploy_this_attachment = true }
+      }
+    }
+  }
+}
+
+# child_fabric2 Networks with nw_01
+resource "ndfc_networks" "child_fabric2_networks" {
+  depends_on  = [ndfc_networks.msd_parent_networks]
+  fabric_name = "child_fabric2"
+  networks = {
+    "nw_01" = {
+      vrf_name              = "vrf_01"
+      network_id            = 31001
+      gateway_ipv4_address  = "192.168.1.1/24"
+      gateway_ipv6_address  = "2001::2/64"
+      vlan_id               = 301
+      vlan_name             = "nw_01"
+      layer2_only           = false
+      interface_description = "nw_01 SVI"
+      mtu                   = 9100
+      routing_tag           = 12345
+      trm                   = true
+      multicast_group       = "239.1.1.1"
+      igmp_version          = 3
+      l3_gateway_on_border  = true
+      attach_list = {
+        "92Z298RRNPO" = { deploy_this_attachment = true }
+        "9ZHWL1HRWKR" = { deploy_this_attachment = true }
+      }
+    }
+    "nw_02" = {
+      vrf_name              = "vrf_02"
+      network_id            = 31002
+      gateway_ipv4_address  = "192.168.2.1/24"
+      gateway_ipv6_address  = "2002::1/64"
+      vlan_id               = 32
+      vlan_name             = "nw_02"
+      layer2_only           = false
+      interface_description = "nw_02 SVI"
+      mtu                   = 9100
+      routing_tag           = 12345
+      trm                   = false
+      multicast_group       = "239.1.1.2"
+      igmp_version          = 3
+      attach_list = {
+        "92Z298RRNPO" = { deploy_this_attachment = true }
+        "9ZHWL1HRWKR" = { deploy_this_attachment = true }
+      }
+    }
+  }
+}
+```
+
+**AFTER: nw_01 Removed from All Resources**
+
+```terraform
+# =============================================================================
+# AFTER: nw_01 removed from parent AND all child resources
+# =============================================================================
+
+# Parent Network resource - nw_01 removed
+resource "ndfc_networks" "msd_parent_networks" {
+  depends_on  = [ndfc_vrfs.msd_parent_vrfs, ndfc_vrfs.child_fabric1_vrfs, ndfc_vrfs.child_fabric2_vrfs]
+  fabric_name = ndfc_fabric_vxlan_msd.msd_fabric.fabric_name
+  networks = {
+    "nw_02" = {
+      vrf_name              = "vrf_02"
+      network_id            = 31002
+      gateway_ipv4_address  = "192.168.2.1/24"
+      gateway_ipv6_address  = "2002::1/64"
+      vlan_id               = 32
+      vlan_name             = "nw_02"
+      layer2_only           = false
+      interface_description = "nw_02 SVI"
+      mtu                   = 9100
+      routing_tag           = 12345
+      attach_list = {
+        "9PJFRPZZ26Z" = {
+          deploy_this_attachment = true
+          fabric                 = "child_fabric1"
+        }
+        "9G4KUS84LFI" = {
+          deploy_this_attachment = true
+          fabric                 = "child_fabric1"
+        }
+        "92Z298RRNPO" = {
+          deploy_this_attachment = true
+          fabric                 = "child_fabric2"
+        }
+        "9ZHWL1HRWKR" = {
+          deploy_this_attachment = true
+          fabric                 = "child_fabric2"
+        }
+      }
+    }
+  }
+}
+
+# child_fabric1 Networks - nw_01 removed
+resource "ndfc_networks" "child_fabric1_networks" {
+  depends_on  = [ndfc_networks.msd_parent_networks]
+  fabric_name = "child_fabric1"
+  networks = {
+    "nw_02" = {
+      vrf_name              = "vrf_02"
+      network_id            = 31002
+      gateway_ipv4_address  = "192.168.2.1/24"
+      gateway_ipv6_address  = "2002::1/64"
+      vlan_id               = 32
+      vlan_name             = "nw_02"
+      layer2_only           = false
+      interface_description = "nw_02 SVI"
+      mtu                   = 9100
+      routing_tag           = 12345
+      trm                   = false
+      multicast_group       = "239.1.1.2"
+      igmp_version          = 3
+      attach_list = {
+        "9PJFRPZZ26Z" = { deploy_this_attachment = true }
+        "9G4KUS84LFI" = { deploy_this_attachment = true }
+      }
+    }
+  }
+}
+
+# child_fabric2 Networks - nw_01 removed
+resource "ndfc_networks" "child_fabric2_networks" {
+  depends_on  = [ndfc_networks.msd_parent_networks]
+  fabric_name = "child_fabric2"
+  networks = {
+    "nw_02" = {
+      vrf_name              = "vrf_02"
+      network_id            = 31002
+      gateway_ipv4_address  = "192.168.2.1/24"
+      gateway_ipv6_address  = "2002::1/64"
+      vlan_id               = 32
+      vlan_name             = "nw_02"
+      layer2_only           = false
+      interface_description = "nw_02 SVI"
+      mtu                   = 9100
+      routing_tag           = 12345
+      trm                   = false
+      multicast_group       = "239.1.1.2"
+      igmp_version          = 3
+      attach_list = {
+        "92Z298RRNPO" = { deploy_this_attachment = true }
+        "9ZHWL1HRWKR" = { deploy_this_attachment = true }
+      }
+    }
+  }
+}
+```
+
+**Key Changes Summary:**
+
+| Component | Before | After |
+|-----------|--------|-------|
+| Parent `ndfc_networks` | Contains `nw_01` and `nw_02` | Only `nw_02` remains |
+| `child_fabric1_networks` | Contains `nw_01` and `nw_02` | Only `nw_02` remains |
+| `child_fabric2_networks` | Contains `nw_01` and `nw_02` | Only `nw_02` remains |
+| `nw_01` attachments | Present in all resources | Removed from all resources |
+
+> **IMPORTANT - Checklist for Removing VRF/Network:**
+>
+> When removing a VRF or Network from MSD-managed resources, ensure you complete ALL of the following:
+>
+> 1. Remove the VRF/network block from the **parent** `ndfc_vrfs`/`ndfc_networks` resource
+> 2. Remove the VRF/network block from **each child** `ndfc_vrfs`/`ndfc_networks` resource
+> 3. Remove all **attachment entries** for that VRF/network from the parent resource
+> 4. Remove all **attachment entries** for that VRF/network from each child resource
+>
+> **The same applies when removing individual attachments** - they must be removed from both the parent resource (where `fabric` field is specified) and the corresponding child resource's `attach_list`.
+>
+> Missing any of these steps will result in deployment failures or state inconsistencies between Terraform and NDFC.
+
+---
+
+### Use Case 4: Importing Existing MSD Fabric into Terraform
+
+When you have an existing MSD fabric with VRFs and Networks already configured in NDFC, you can import them into Terraform to manage them as Infrastructure as Code. This use case demonstrates the import process and the steps required to set up proper resource management.
+
+> **Note on Variable Usage:** After importing and verifying your configuration with `terraform plan`, consider refactoring to use the variable-driven approach (with `var.vrf_configs` and `var.network_configs`) as shown in earlier examples. This enables easier maintenance and consistency across parent and child resources.
+
+#### Step 1: Create Empty Resource Blocks
+
+First, create empty or minimal resource blocks in your Terraform configuration for all resources you want to import:
+
+```terraform
+# =============================================================================
+# Step 1: Create resource blocks for import
+# =============================================================================
+
+# MSD Fabric resource block
+resource "ndfc_fabric_vxlan_msd" "msd_fabric" {
+  fabric_name = "msd_fabric"
+  deploy      = false
+}
+
+# Parent VRF resource block
+resource "ndfc_vrfs" "msd_parent_vrfs" {
+  fabric_name = "msd_fabric"
+  vrfs        = {}
+}
+
+# Child fabric 1 VRF resource block
+resource "ndfc_vrfs" "child_fabric1_vrfs" {
+  fabric_name = "child_fabric1"
+  vrfs        = {}
+}
+
+# Child fabric 2 VRF resource block
+resource "ndfc_vrfs" "child_fabric2_vrfs" {
+  fabric_name = "child_fabric2"
+  vrfs        = {}
+}
+
+# Parent Network resource block
+resource "ndfc_networks" "msd_parent_networks" {
+  fabric_name = "msd_fabric"
+  networks    = {}
+}
+
+# Child fabric 1 Network resource block
+resource "ndfc_networks" "child_fabric1_networks" {
+  fabric_name = "child_fabric1"
+  networks    = {}
+}
+
+# Child fabric 2 Network resource block
+resource "ndfc_networks" "child_fabric2_networks" {
+  fabric_name = "child_fabric2"
+  networks    = {}
+}
+```
+
+#### Step 2: Import Resources Using Terraform Import Commands
+
+Run the import commands in the correct order - fabric first, then VRFs, then Networks:
+
+```shell
+# =============================================================================
+# Step 2: Import commands (run in this order)
+# =============================================================================
+
+# Import the MSD fabric
+# Format: terraform import <resource_type>.<resource_name> <fabric_name>
+terraform import ndfc_fabric_vxlan_msd.msd_fabric msd_fabric
+
+# Import parent VRFs (from MSD fabric)
+# Format: terraform import <resource_type>.<resource_name> <fabric_name>/[<vrf1>,<vrf2>,...]
+terraform import ndfc_vrfs.vrfs fabric/[vrf_01,vrf_02]
+
+# Import child fabric 1 VRFs
+terraform import ndfc_vrfs.child_fabric1_vrfs child_fabric1/[vrf_01,vrf_02]
+
+# Import child fabric 2 VRFs
+terraform import ndfc_vrfs.child_fabric2_vrfs child_fabric2/[vrf_01,vrf_02]
+
+# Import parent Networks (from MSD fabric)
+# Format: terraform import <resource_type>.<resource_name> <fabric_name>/[<net1>,<net2>,...]
+terraform import ndfc_networks.nets fabric/[nw_01,nw_02]
+
+# Import child fabric 1 Networks
+terraform import ndfc_networks.child_fabric1_networks child_fabric1/[nw_01,nw_02]
+
+# Import child fabric 2 Networks
+terraform import ndfc_networks.child_fabric2_networks child_fabric2/[nw_01,nw_02]
+```
+
+#### Step 3: Update Resource Configurations
+
+After import, run `terraform plan` to see the current state. Update your resource blocks to match the imported configuration and add proper dependencies:
+
+```terraform
+# =============================================================================
+# Step 3: Updated configuration with proper dependencies after import
+# =============================================================================
+
+# MSD Fabric - update with actual configuration
+resource "ndfc_fabric_vxlan_msd" "msd_fabric" {
+  fabric_name   = "msd_fabric"
+  deploy        = false
+  child_fabrics = ["child_fabric1", "child_fabric2"]
+}
+
+# Parent VRF resource - add dependency on MSD fabric
+resource "ndfc_vrfs" "msd_parent_vrfs" {
+  depends_on  = [ndfc_fabric_vxlan_msd.msd_fabric]
+  fabric_name = ndfc_fabric_vxlan_msd.msd_fabric.fabric_name
+  vrfs = {
+    "vrf_01" = {
+      vlan_id = 234
+      attach_list = {
+        "9PJFRPZZ26Z" = {
+          deploy_this_attachment = true
+          fabric                 = "child_fabric1"
+        }
+      }
+    }
+  }
+}
+
+# Child fabric 1 VRFs - add dependency on parent VRF resource
+resource "ndfc_vrfs" "child_fabric1_vrfs" {
+  depends_on  = [ndfc_vrfs.msd_parent_vrfs]
+  fabric_name = "child_fabric1"
+  vrfs = {
+    "vrf_01" = {
+      vlan_id = 234
+      attach_list = {
+        "9PJFRPZZ26Z" = { deploy_this_attachment = true }
+      }
+    }
+  }
+}
+
+# Child fabric 2 VRFs - add dependency on parent VRF resource
+resource "ndfc_vrfs" "child_fabric2_vrfs" {
+  depends_on  = [ndfc_vrfs.msd_parent_vrfs]
+  fabric_name = "child_fabric2"
+  vrfs = {
+    "vrf_01" = {
+      vlan_id = 234
+      attach_list = {
+        "92Z298RRNPO" = { deploy_this_attachment = true }
+      }
+    }
+  }
+}
+
+# Parent Network resource - add dependency on ALL VRF resources
+resource "ndfc_networks" "msd_parent_networks" {
+  depends_on  = [ndfc_vrfs.msd_parent_vrfs, ndfc_vrfs.child_fabric1_vrfs, ndfc_vrfs.child_fabric2_vrfs]
+  fabric_name = ndfc_fabric_vxlan_msd.msd_fabric.fabric_name
+  networks = {
+    "nw_01" = {
+      vrf_name   = "vrf_01"
+      network_id = 31001
+      attach_list = {
+        "9PJFRPZZ26Z" = {
+          deploy_this_attachment = true
+          fabric                 = "child_fabric1"
+        }
+      }
+    }
+  }
+}
+
+# Child fabric 1 Networks - add dependency on parent Network resource
+resource "ndfc_networks" "child_fabric1_networks" {
+  depends_on  = [ndfc_networks.msd_parent_networks]
+  fabric_name = "child_fabric1"
+  networks = {
+    "nw_01" = {
+      vrf_name   = "vrf_01"
+      network_id = 31001
+      attach_list = {
+        "9PJFRPZZ26Z" = { deploy_this_attachment = true }
+      }
+    }
+  }
+}
+
+# Child fabric 2 Networks - add dependency on parent Network resource
+resource "ndfc_networks" "child_fabric2_networks" {
+  depends_on  = [ndfc_networks.msd_parent_networks]
+  fabric_name = "child_fabric2"
+  networks = {
+    "nw_01" = {
+      vrf_name   = "vrf_01"
+      network_id = 31001
+      attach_list = {
+        "92Z298RRNPO" = { deploy_this_attachment = true }
+      }
+    }
+  }
+}
+```
+
+#### Import Command Reference
+
+| Resource Type | Import Format | Example |
+|---------------|---------------|---------|
+| `ndfc_fabric_vxlan_msd` | `<fabric_name>` | `terraform import ndfc_fabric_vxlan_msd.msd msd_fabric` |
+| `ndfc_vrfs` | `<fabric_name>/[<vrf1>,<vrf2>,...]` | `terraform import ndfc_vrfs.vrfs fabric/[vrf_01,vrf_02]` |
+| `ndfc_networks` | `<fabric_name>/[<net1>,<net2>,...]` | `terraform import ndfc_networks.nets fabric/[nw_01,nw_02]` |
+
+> **IMPORTANT - Post-Import Checklist:**
+>
+> After importing resources, you MUST complete the following to ensure proper resource management:
+>
+> 1. **Run `terraform plan`** to see the current imported state and identify any configuration differences
+> 2. **Add proper `depends_on`** references following the dependency hierarchy:
+>    - Parent VRFs → MSD Fabric
+>    - Child VRFs → Parent VRFs
+>    - Parent Networks → All VRF resources
+>    - Child Networks → Parent Networks
+>
+> **Failing to set up dependencies correctly will cause deployment ordering issues and potential failures during future terraform apply operations.**
+> **Using below module as reference or anything similar to it will ensure that you have the correct dependencies set up and avoid any deployment issues.**
+---
+
+## Working MSD Module
+
+A complete, working Terraform module for MSD fabric provisioning is available in the [`examples/modules/msd/`](examples/modules/msd/) directory.
+
+This module automates the end-to-end MSD workflow:
+
+1. Creates the MSD parent fabric and associates the child VXLAN EVPN fabrics.
+2. Creates VRFs in the MSD parent fabric with attachments to all switches across child fabrics, then creates child-specific VRF attributes in each child fabric.
+3. Creates Networks in the MSD parent fabric with attachments to all switches across child fabrics, then creates child-specific Network attributes in each child fabric.
+4. Deploys configurations at each stage using `deploy_attachments = true` on VRF and Network resources.
+
+**Prerequisites:** The individual VXLAN EVPN child fabrics must be created beforehand, along with the inventory that adds their respective switches. The module expects the child fabrics and their switches to already exist.
+
+
+A usage example is provided in [`examples/modules/msd/examples/basic/main.tf`](examples/modules/msd/examples/basic/main.tf). Refer to the [`README.md`](examples/modules/msd/README.md) for module inputs, outputs, design notes, and instructions on what values need to be updated for your environment.
