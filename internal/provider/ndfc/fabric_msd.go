@@ -5,7 +5,9 @@ import (
 	"encoding/json"
 	"fmt"
 	"slices"
+	"strings"
 	"terraform-provider-ndfc/internal/provider/ndfc/api"
+	"terraform-provider-ndfc/internal/provider/resources/resource_configuration_deploy"
 	"terraform-provider-ndfc/internal/provider/resources/resource_fabric_common"
 
 	"github.com/hashicorp/terraform-plugin-framework/diag"
@@ -17,6 +19,26 @@ func (m *NDFC) AddChildFabricsToMsd(ctx context.Context, dg *diag.Diagnostics, t
 	if len(model.ChildFabrics) > 0 {
 		tflog.Debug(ctx, fmt.Sprintf("AddChildFabricsToMsd: child fabrics %v", model.ChildFabrics))
 		m.ManageChildFabricsInMsd(ctx, dg, model.FabricName, model.ChildFabrics, api.MSD_OPERATION_ADD)
+		if dg.HasError() {
+			return
+		}
+		// Deploy only child fabrics that contain border gateway switches
+		for _, childFabric := range model.ChildFabrics {
+			borderSerials := m.GetBorderSwitchSerials(ctx, dg, childFabric)
+			if dg.HasError() {
+				return
+			}
+			if len(borderSerials) > 0 {
+				tflog.Info(ctx, fmt.Sprintf("AddChildFabricsToMsd: Child fabric %s has border gateway switches %v, deploying fabric", childFabric, borderSerials))
+				m.RecalculateAndDeploy(ctx, dg, childFabric, true, true, nil)
+				if dg.HasError() {
+					tflog.Error(ctx, fmt.Sprintf("AddChildFabricsToMsd: Failed to deploy child fabric %s", childFabric))
+					return
+				}
+			} else {
+				tflog.Debug(ctx, fmt.Sprintf("AddChildFabricsToMsd: No border gateway switches found in child fabric %s, skipping deploy", childFabric))
+			}
+		}
 		return
 	}
 	tflog.Debug(ctx, "AddChildFabricsToMsd: No child fabrics to add")
@@ -29,13 +51,21 @@ func (m *NDFC) RemoveChildFabricsFromMsd(ctx context.Context, dg *diag.Diagnosti
 		if dg.HasError() {
 			return
 		}
-		// Deploy the removed child fabrics to ensure configuration is applied
+		// Deploy only child fabrics that contain border gateway switches
 		for _, childFabric := range model.ChildFabrics {
-			tflog.Info(ctx, fmt.Sprintf("RemoveChildFabricsFromMsd: Deploying removed child fabric %s", childFabric))
-			m.RscDeployFabric(ctx, dg, childFabric)
+			borderSerials := m.GetBorderSwitchSerials(ctx, dg, childFabric)
 			if dg.HasError() {
-				tflog.Error(ctx, fmt.Sprintf("RemoveChildFabricsFromMsd: Failed to deploy removed child fabric %s", childFabric))
 				return
+			}
+			if len(borderSerials) > 0 {
+				tflog.Info(ctx, fmt.Sprintf("RemoveChildFabricsFromMsd: Child fabric %s has border gateway switches %v, deploying fabric", childFabric, borderSerials))
+				m.RecalculateAndDeploy(ctx, dg, childFabric, true, true, nil)
+				if dg.HasError() {
+					tflog.Error(ctx, fmt.Sprintf("RemoveChildFabricsFromMsd: Failed to deploy child fabric %s", childFabric))
+					return
+				}
+			} else {
+				tflog.Debug(ctx, fmt.Sprintf("RemoveChildFabricsFromMsd: No border gateway switches found in child fabric %s, skipping deploy", childFabric))
 			}
 		}
 		return
@@ -77,6 +107,39 @@ func (m *NDFC) UpdateChildFabricsToMsd(ctx context.Context, dg *diag.Diagnostics
 		tflog.Debug(ctx, fmt.Sprintf("UpdateChildFabricsToMsd: Removing child fabrics %v", delList))
 		m.ManageChildFabricsInMsd(ctx, dg, parentFabric, delList, api.MSD_OPERATION_REMOVE)
 	}
+}
+
+// GetBorderSwitchSerials retrieves serial numbers of all border gateway switches in a fabric.
+func (m *NDFC) GetBorderSwitchSerials(ctx context.Context, dg *diag.Diagnostics, fabricName string) []string {
+	payload, err := m.GetSwitchesInFabric(ctx, fabricName)
+	if err != nil {
+		tflog.Error(ctx, fmt.Sprintf("GetBorderSwitchSerials: Failed to get switches in fabric %s", fabricName))
+		dg.AddError("Failed to get switches in fabric", fmt.Sprintf("Error: %q", err.Error()))
+		return nil
+	}
+	if len(payload) == 0 || string(payload) == "[]" {
+		tflog.Debug(ctx, fmt.Sprintf("GetBorderSwitchSerials: No switches found in fabric %s", fabricName))
+		return nil
+	}
+
+	var response resource_configuration_deploy.SwitchStatusDB
+	err = json.Unmarshal(payload, &response)
+	if err != nil {
+		tflog.Error(ctx, fmt.Sprintf("GetBorderSwitchSerials: Failed to unmarshal switches for fabric %s", fabricName))
+		dg.AddError("Failed to unmarshal switches in fabric", fmt.Sprintf("Error: %q", err.Error()))
+		return nil
+	}
+
+	borderSerials := make([]string, 0)
+	for serial, sw := range response.SerialNumMap {
+		role := strings.ToLower(sw.SwitchRole)
+		if strings.Contains(role, "border gateway") {
+			tflog.Debug(ctx, fmt.Sprintf("GetBorderSwitchSerials: Found border switch %s (role: %s) in fabric %s", serial, sw.SwitchRole, fabricName))
+			borderSerials = append(borderSerials, serial)
+		}
+	}
+	tflog.Debug(ctx, fmt.Sprintf("GetBorderSwitchSerials: Found %d border switches in fabric %s", len(borderSerials), fabricName))
+	return borderSerials
 }
 
 func (m *NDFC) ManageChildFabricsInMsd(ctx context.Context, dg *diag.Diagnostics, parentFabric string, childFabrics []string, op string) {

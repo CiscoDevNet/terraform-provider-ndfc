@@ -1084,6 +1084,34 @@ func deployAndSave(ctx context.Context, client *ndfc.NDFC, diags *diag.Diagnosti
 		}
 		sort.Strings(serialNumbers)
 		client.RecalculateAndDeploy(ctx, diags, data.FabricName.ValueString(), data.Save.ValueBool(), data.Deploy.ValueBool(), serialNumbers)
+		if diags.HasError() {
+			return
+		}
+
+		// If this fabric is an MSD child and has border gateway switches, then deploy msd parent fabric also.
+		if data.Deploy.ValueBool() {
+			hasBorderGateway := false
+			for _, device := range devices {
+				if strings.Contains(strings.ToLower(device.Role.ValueString()), "border_gateway") {
+					hasBorderGateway = true
+					break
+				}
+			}
+			if hasBorderGateway {
+				_, parentFabric := client.CheckIsFabricMsdType(ctx, diags, data.FabricName.ValueString())
+				if diags.HasError() {
+					return
+				}
+				if parentFabric != "" {
+					tflog.Info(ctx, fmt.Sprintf("deployAndSave: Fabric %s is MSD child (parent: %s) with border gateway switches, deploying parent fabric", data.FabricName.ValueString(), parentFabric))
+					client.RecalculateAndDeploy(ctx, diags, parentFabric, true, true, nil)
+					if diags.HasError() {
+						return
+					}
+				}
+			}
+		}
+
 		validateFabric(ctx, client, diags, data, "configured")
 		if diags.HasError() {
 			tflog.Debug(ctx, "Validation failed for state configured")
