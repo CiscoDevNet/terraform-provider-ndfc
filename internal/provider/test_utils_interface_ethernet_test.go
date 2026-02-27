@@ -79,6 +79,9 @@ func InterfaceEthernetInterfacesValueHelperStateCheck(RscName string, c resource
 	if c.NvPairs.PortChannelName != "" {
 		ret = append(ret, resource.TestCheckResourceAttr(RscName, attrPath.AtName("port_channel_name").String(), c.NvPairs.PortChannelName))
 	}
+	if c.NvPairs.PrimaryIntf != "" {
+		ret = append(ret, resource.TestCheckResourceAttr(RscName, attrPath.AtName("primary_intf").String(), c.NvPairs.PrimaryIntf))
+	}
 	if c.SerialNumber != "" {
 		ret = append(ret, resource.TestCheckResourceAttr(RscName, attrPath.AtName("serial_number").String(), c.SerialNumber))
 	}

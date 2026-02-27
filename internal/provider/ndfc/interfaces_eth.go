@@ -187,13 +187,22 @@ func (i *NDFCEthernetInterface) getEthInterfaces(ctx context.Context, diags *dia
 	}
 	retList := make([]resource_interface_common.NDFCInterfacesValue, 0)
 	for _, ifGroup := range ifList {
+		pcPolicies := []string{
+			"int_vpc_trunk_po_member_11_1",
+			"int_vpc_peer_link_po_member_11_1",
+			"int_port_channel_trunk_member",
+		}
 		// We are only interested in the ports with configured policy
 		// or those changed due to membership in a port-channel
 		pcMember := ""
 		if ifGroup.Policy != policy {
-			if strings.HasPrefix(ifGroup.Policy, "int_port_channel_trunk_member") {
-				pcMember = ifGroup.Policy
-			} else {
+			for _, pcPolicy := range pcPolicies {
+				if strings.HasPrefix(ifGroup.Policy, pcPolicy) {
+					log.Printf("PortChannelPolicy: %s set on port %s", ifGroup.Policy, ifGroup.Interfaces[0].InterfaceName)
+					pcMember = ifGroup.Policy
+				}
+			}
+			if pcMember == "" {
 				tflog.Debug(ctx, fmt.Sprintf("Skipping Policies %s", ifGroup.Policy))
 				continue
 			}
@@ -201,7 +210,7 @@ func (i *NDFCEthernetInterface) getEthInterfaces(ctx context.Context, diags *dia
 		for index := range ifGroup.Interfaces {
 			// Check if ifName is Ethernet, ethernet, eth etc
 			intf := &ifGroup.Interfaces[index]
-			log.Printf("Interface Name: %s", intf.InterfaceName)
+			log.Printf("Interface Name: %s Primary intf %s", intf.InterfaceName, intf.NvPairs.PrimaryIntf)
 			if strings.HasPrefix(strings.ToLower(intf.InterfaceName), "eth") {
 				intf.PortChannelPolicy = pcMember
 				retList = append(retList, *intf)
@@ -313,6 +322,7 @@ func (ei *NDFCEthernetInterface) ModifyAttributesForTerraform(ctx context.Contex
 		toModel.NvPairs = plan.NvPairs
 		// Copy computed stuff and other attributes that are changeable in port-chanel policy
 		toModel.NvPairs.PortChannelName = nvTmp.PortChannelName
+		toModel.NvPairs.PrimaryIntf = nvTmp.PrimaryIntf
 
 		if nvTmp.InterfaceDescription != "" {
 			toModel.NvPairs.InterfaceDescription = nvTmp.InterfaceDescription

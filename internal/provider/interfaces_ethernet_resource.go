@@ -305,6 +305,10 @@ func (r interfaceEthernetResource) ModifyPlan(ctx context.Context, req resource.
 					log.Printf("[DEBUG] interface_ethernet.ModfyPlan:  - PortChannelName in state %s", elementState[k].PortChannelName.ValueString())
 					v.PortChannelName = ifEntry.PortChannelName
 				}
+				if !ifEntry.PrimaryIntf.IsNull() {
+					log.Printf("[DEBUG] interface_ethernet.ModfyPlan:  - PrimaryIntf in state %s", elementState[k].PrimaryIntf.ValueString())
+					v.PrimaryIntf = ifEntry.PrimaryIntf
+				}
 			}
 		} else {
 			// first time setting, if its empty in plan, set it to unknown as NDFC may set something for certain policies
