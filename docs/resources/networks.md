@@ -24,7 +24,6 @@ resource "ndfc_networks" "test_resource_networks_1" {
       network_extension_template = "Default_Network_Extension_Universal"
       vrf_name                   = "VRF1"
       primary_network_id         = 30000
-      network_type               = "Normal"
       gateway_ipv4_address       = "192.0.2.1/24"
       gateway_ipv6_address       = "2001:db8::1/64"
       vlan_id                    = 1600
@@ -113,6 +112,7 @@ Optional:
 - `secondary_gateway_4` (String) IPv4 Secondary GW4
 - `svi_netflow_monitor` (String) Interface Vlan Netflow Monitor. Applicable only if 'Layer 2 Only' is not enabled. Provide monitor name defined in fabric setting for Layer 3 Record. For NX-OS only.
 - `trm` (Boolean) Enable Tenant Routed Multicast
+- `trm_v6` (Boolean) Enable IPv6 Tenant Routed Multicast
 - `vlan_id` (Number) VLAN ID
 - `vlan_name` (String) Vlan name. If > 32 chars, enable 'system vlan long-name' for NX-OS, disable VTPv1 and VTPv2 or switch to VTPv3 for IOS XE.
 - `vlan_netflow_monitor` (String) Vlan Netflow Monitor. Provide monitor name defined in fabric setting for Layer 3 Record. For NX-OS only

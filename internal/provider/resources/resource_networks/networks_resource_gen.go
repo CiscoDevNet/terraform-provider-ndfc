@@ -242,7 +242,9 @@ func NetworksResourceSchema(ctx context.Context) schema.Schema {
 							Computed:            true,
 							Description:         "MTU for L3 interface",
 							MarkdownDescription: "MTU for L3 interface",
-							Default:             int64default.StaticInt64(9216),
+							PlanModifiers: []planmodifier.Int64{
+								int64planmodifier.UseStateForUnknown(),
+							},
 						},
 						"multicast_group": schema.StringAttribute{
 							Optional:            true,
@@ -295,7 +297,9 @@ func NetworksResourceSchema(ctx context.Context) schema.Schema {
 							Computed:            true,
 							Description:         "Network Type",
 							MarkdownDescription: "Network Type",
-							Default:             stringdefault.StaticString("Normal"),
+							PlanModifiers: []planmodifier.String{
+								stringplanmodifier.UseStateForUnknown(),
+							},
 						},
 						"primary_network_id": schema.Int64Attribute{
 							Optional:            true,
@@ -350,6 +354,15 @@ func NetworksResourceSchema(ctx context.Context) schema.Schema {
 							Computed:            true,
 							Description:         "Enable Tenant Routed Multicast",
 							MarkdownDescription: "Enable Tenant Routed Multicast",
+							PlanModifiers: []planmodifier.Bool{
+								boolplanmodifier.UseStateForUnknown(),
+							},
+						},
+						"trm_v6": schema.BoolAttribute{
+							Optional:            true,
+							Computed:            true,
+							Description:         "Enable IPv6 Tenant Routed Multicast",
+							MarkdownDescription: "Enable IPv6 Tenant Routed Multicast",
 							PlanModifiers: []planmodifier.Bool{
 								boolplanmodifier.UseStateForUnknown(),
 							},
@@ -969,6 +982,24 @@ func (t NetworksType) ValueFromObject(ctx context.Context, in basetypes.ObjectVa
 			fmt.Sprintf(`trm expected to be basetypes.BoolValue, was: %T`, trmAttribute))
 	}
 
+	trmV6Attribute, ok := attributes["trm_v6"]
+
+	if !ok {
+		diags.AddError(
+			"Attribute Missing",
+			`trm_v6 is missing from object`)
+
+		return nil, diags
+	}
+
+	trmV6Val, ok := trmV6Attribute.(basetypes.BoolValue)
+
+	if !ok {
+		diags.AddError(
+			"Attribute Wrong Type",
+			fmt.Sprintf(`trm_v6 expected to be basetypes.BoolValue, was: %T`, trmV6Attribute))
+	}
+
 	vlanIdAttribute, ok := attributes["vlan_id"]
 
 	if !ok {
@@ -1076,6 +1107,7 @@ func (t NetworksType) ValueFromObject(ctx context.Context, in basetypes.ObjectVa
 		SecondaryGateway4:        secondaryGateway4Val,
 		SviNetflowMonitor:        sviNetflowMonitorVal,
 		Trm:                      trmVal,
+		TrmV6:                    trmV6Val,
 		VlanId:                   vlanIdVal,
 		VlanName:                 vlanNameVal,
 		VlanNetflowMonitor:       vlanNetflowMonitorVal,
@@ -1687,6 +1719,24 @@ func NewNetworksValue(attributeTypes map[string]attr.Type, attributes map[string
 			fmt.Sprintf(`trm expected to be basetypes.BoolValue, was: %T`, trmAttribute))
 	}
 
+	trmV6Attribute, ok := attributes["trm_v6"]
+
+	if !ok {
+		diags.AddError(
+			"Attribute Missing",
+			`trm_v6 is missing from object`)
+
+		return NewNetworksValueUnknown(), diags
+	}
+
+	trmV6Val, ok := trmV6Attribute.(basetypes.BoolValue)
+
+	if !ok {
+		diags.AddError(
+			"Attribute Wrong Type",
+			fmt.Sprintf(`trm_v6 expected to be basetypes.BoolValue, was: %T`, trmV6Attribute))
+	}
+
 	vlanIdAttribute, ok := attributes["vlan_id"]
 
 	if !ok {
@@ -1794,6 +1844,7 @@ func NewNetworksValue(attributeTypes map[string]attr.Type, attributes map[string
 		SecondaryGateway4:        secondaryGateway4Val,
 		SviNetflowMonitor:        sviNetflowMonitorVal,
 		Trm:                      trmVal,
+		TrmV6:                    trmV6Val,
 		VlanId:                   vlanIdVal,
 		VlanName:                 vlanNameVal,
 		VlanNetflowMonitor:       vlanNetflowMonitorVal,
@@ -1900,6 +1951,7 @@ type NetworksValue struct {
 	SecondaryGateway4        basetypes.StringValue `tfsdk:"secondary_gateway_4"`
 	SviNetflowMonitor        basetypes.StringValue `tfsdk:"svi_netflow_monitor"`
 	Trm                      basetypes.BoolValue   `tfsdk:"trm"`
+	TrmV6                    basetypes.BoolValue   `tfsdk:"trm_v6"`
 	VlanId                   basetypes.Int64Value  `tfsdk:"vlan_id"`
 	VlanName                 basetypes.StringValue `tfsdk:"vlan_name"`
 	VlanNetflowMonitor       basetypes.StringValue `tfsdk:"vlan_netflow_monitor"`
@@ -1908,7 +1960,7 @@ type NetworksValue struct {
 }
 
 func (v NetworksValue) ToTerraformValue(ctx context.Context) (tftypes.Value, error) {
-	attrTypes := make(map[string]tftypes.Type, 34)
+	attrTypes := make(map[string]tftypes.Type, 35)
 
 	var val tftypes.Value
 	var err error
@@ -1947,6 +1999,7 @@ func (v NetworksValue) ToTerraformValue(ctx context.Context) (tftypes.Value, err
 	attrTypes["secondary_gateway_4"] = basetypes.StringType{}.TerraformType(ctx)
 	attrTypes["svi_netflow_monitor"] = basetypes.StringType{}.TerraformType(ctx)
 	attrTypes["trm"] = basetypes.BoolType{}.TerraformType(ctx)
+	attrTypes["trm_v6"] = basetypes.BoolType{}.TerraformType(ctx)
 	attrTypes["vlan_id"] = basetypes.Int64Type{}.TerraformType(ctx)
 	attrTypes["vlan_name"] = basetypes.StringType{}.TerraformType(ctx)
 	attrTypes["vlan_netflow_monitor"] = basetypes.StringType{}.TerraformType(ctx)
@@ -1956,7 +2009,7 @@ func (v NetworksValue) ToTerraformValue(ctx context.Context) (tftypes.Value, err
 
 	switch v.state {
 	case attr.ValueStateKnown:
-		vals := make(map[string]tftypes.Value, 34)
+		vals := make(map[string]tftypes.Value, 35)
 
 		val, err = v.ArpSuppression.ToTerraformValue(ctx)
 
@@ -2198,6 +2251,14 @@ func (v NetworksValue) ToTerraformValue(ctx context.Context) (tftypes.Value, err
 
 		vals["trm"] = val
 
+		val, err = v.TrmV6.ToTerraformValue(ctx)
+
+		if err != nil {
+			return tftypes.NewValue(objectType, tftypes.UnknownValue), err
+		}
+
+		vals["trm_v6"] = val
+
 		val, err = v.VlanId.ToTerraformValue(ctx)
 
 		if err != nil {
@@ -2352,6 +2413,7 @@ func (v NetworksValue) ToObjectValue(ctx context.Context) (basetypes.ObjectValue
 		"secondary_gateway_4":        basetypes.StringType{},
 		"svi_netflow_monitor":        basetypes.StringType{},
 		"trm":                        basetypes.BoolType{},
+		"trm_v6":                     basetypes.BoolType{},
 		"vlan_id":                    basetypes.Int64Type{},
 		"vlan_name":                  basetypes.StringType{},
 		"vlan_netflow_monitor":       basetypes.StringType{},
@@ -2399,6 +2461,7 @@ func (v NetworksValue) ToObjectValue(ctx context.Context) (basetypes.ObjectValue
 			"secondary_gateway_4":        v.SecondaryGateway4,
 			"svi_netflow_monitor":        v.SviNetflowMonitor,
 			"trm":                        v.Trm,
+			"trm_v6":                     v.TrmV6,
 			"vlan_id":                    v.VlanId,
 			"vlan_name":                  v.VlanName,
 			"vlan_netflow_monitor":       v.VlanNetflowMonitor,
@@ -2543,6 +2606,10 @@ func (v NetworksValue) Equal(o attr.Value) bool {
 		return false
 	}
 
+	if !v.TrmV6.Equal(other.TrmV6) {
+		return false
+	}
+
 	if !v.VlanId.Equal(other.VlanId) {
 		return false
 	}
@@ -2606,6 +2673,7 @@ func (v NetworksValue) AttributeTypes(ctx context.Context) map[string]attr.Type 
 		"secondary_gateway_4":        basetypes.StringType{},
 		"svi_netflow_monitor":        basetypes.StringType{},
 		"trm":                        basetypes.BoolType{},
+		"trm_v6":                     basetypes.BoolType{},
 		"vlan_id":                    basetypes.Int64Type{},
 		"vlan_name":                  basetypes.StringType{},
 		"vlan_netflow_monitor":       basetypes.StringType{},
