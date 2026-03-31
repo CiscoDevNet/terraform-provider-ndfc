@@ -126,8 +126,10 @@ resource:
         type: String
         enum_values: ["Normal", "Primary", "Community", "Isolated"]
         description: Network Type
-        default_value: Normal
-        example: Normal
+        optional: true
+        computed: true
+        use_state: true
+
       - &nwStatus
         model_name: networkStatus
         tf_name: network_status
@@ -190,10 +192,12 @@ resource:
         type: Int64
         min_int: 68
         max_int: 9216
-        default_value: 9216
+        computed: true
+        optional: true
         description: MTU for L3 interface
         example: 9200
         handle_empty: true
+        use_state: true
       - &secondaryGW1
         model_name: secondaryGW1
         ndfc_nested: [networkTemplateConfig]
@@ -296,6 +300,15 @@ resource:
         use_state: true
         description: Enable Tenant Routed Multicast
         example: true
+      - &trmV6Enabled
+        model_name: trmV6Enabled
+        ndfc_nested: [networkTemplateConfig]
+        tf_name: trm_v6
+        type: Bool
+        optional: true
+        computed: true
+        use_state: true
+        description: Enable IPv6 Tenant Routed Multicast
       - &rtBothAuto
         model_name: rtBothAuto
         ndfc_nested: [networkTemplateConfig]

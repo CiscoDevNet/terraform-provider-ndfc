@@ -1,8 +1,8 @@
 module terraform-provider-ndfc
 
-go 1.24.0
+go 1.26
 
-toolchain go1.24.2
+toolchain go1.26.1
 
 require (
 	github.com/hashicorp/hcl/v2 v2.23.0
@@ -12,8 +12,8 @@ require (
 	github.com/hashicorp/terraform-plugin-log v0.9.0
 	github.com/hashicorp/terraform-plugin-testing v1.12.0
 	github.com/looplab/fsm v1.0.2
-	github.com/netascode/go-nd v0.1.3
-	github.com/stretchr/testify v1.10.0
+	github.com/netascode/go-nd v0.1.4
+	github.com/stretchr/testify v1.11.1
 	github.com/tidwall/gjson v1.18.0
 	github.com/zclconf/go-cty v1.17.0
 	gopkg.in/yaml.v2 v2.4.0
@@ -57,7 +57,7 @@ require (
 	github.com/oklog/run v1.1.0 // indirect
 	github.com/pmezard/go-difflib v1.0.0 // indirect
 	github.com/rogpeppe/go-internal v1.14.1 // indirect
-	github.com/tidwall/match v1.1.1 // indirect
+	github.com/tidwall/match v1.2.0 // indirect
 	github.com/tidwall/pretty v1.2.1 // indirect
 	github.com/tidwall/sjson v1.2.5 // indirect
 	github.com/vmihailenco/msgpack v4.0.4+incompatible // indirect

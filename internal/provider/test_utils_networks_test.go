@@ -77,8 +77,6 @@ func NetworksValueHelperStateCheck(RscName string, c resource_networks.NDFCNetwo
 	}
 	if c.NetworkType != "" {
 		ret = append(ret, resource.TestCheckResourceAttr(RscName, attrPath.AtName("network_type").String(), c.NetworkType))
-	} else {
-		ret = append(ret, resource.TestCheckResourceAttr(RscName, attrPath.AtName("network_type").String(), "Normal"))
 	}
 	if c.NetworkStatus != "" {
 		ret = append(ret, resource.TestCheckResourceAttr(RscName, attrPath.AtName("network_status").String(), c.NetworkStatus))
@@ -105,8 +103,6 @@ func NetworksValueHelperStateCheck(RscName string, c resource_networks.NDFCNetwo
 	}
 	if c.NetworkTemplateConfig.Mtu != nil {
 		ret = append(ret, resource.TestCheckResourceAttr(RscName, attrPath.AtName("mtu").String(), strconv.Itoa(int(*c.NetworkTemplateConfig.Mtu))))
-	} else {
-		ret = append(ret, resource.TestCheckResourceAttr(RscName, attrPath.AtName("mtu").String(), "9216"))
 	}
 	if c.NetworkTemplateConfig.SecondaryGateway1 != "" {
 		ret = append(ret, resource.TestCheckResourceAttr(RscName, attrPath.AtName("secondary_gateway_1").String(), c.NetworkTemplateConfig.SecondaryGateway1))
@@ -139,6 +135,9 @@ func NetworksValueHelperStateCheck(RscName string, c resource_networks.NDFCNetwo
 	}
 	if c.NetworkTemplateConfig.Trm != "" {
 		ret = append(ret, resource.TestCheckResourceAttr(RscName, attrPath.AtName("trm").String(), c.NetworkTemplateConfig.Trm))
+	}
+	if c.NetworkTemplateConfig.TrmV6 != "" {
+		ret = append(ret, resource.TestCheckResourceAttr(RscName, attrPath.AtName("trm_v6").String(), c.NetworkTemplateConfig.TrmV6))
 	}
 	if c.NetworkTemplateConfig.RouteTargetBoth != "" {
 		ret = append(ret, resource.TestCheckResourceAttr(RscName, attrPath.AtName("route_target_both").String(), c.NetworkTemplateConfig.RouteTargetBoth))

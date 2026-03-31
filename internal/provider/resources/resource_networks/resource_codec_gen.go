@@ -69,6 +69,7 @@ type NDFCNetworkTemplateConfigValue struct {
 	DhcpRelayLoopbackId  *Int64Custom               `json:"loopbackId,omitempty"`
 	RoutingTag           *Int64Custom               `json:"tag,omitempty"`
 	Trm                  string                     `json:"trmEnabled,omitempty"`
+	TrmV6                string                     `json:"trmV6Enabled,omitempty"`
 	RouteTargetBoth      string                     `json:"rtBothAuto,omitempty"`
 	Netflow              string                     `json:"ENABLE_NETFLOW,omitempty"`
 	SviNetflowMonitor    string                     `json:"SVI_NETFLOW_MONITOR,omitempty"`
@@ -326,6 +327,13 @@ func (v *NetworksValue) SetValue(jsonData *NDFCNetworksValue) diag.Diagnostics {
 		v.Trm = types.BoolValue(x)
 	} else {
 		v.Trm = types.BoolNull()
+	}
+
+	if jsonData.NetworkTemplateConfig.TrmV6 != "" {
+		x, _ := strconv.ParseBool(jsonData.NetworkTemplateConfig.TrmV6)
+		v.TrmV6 = types.BoolValue(x)
+	} else {
+		v.TrmV6 = types.BoolNull()
 	}
 
 	if jsonData.NetworkTemplateConfig.RouteTargetBoth != "" {
@@ -815,6 +823,14 @@ func (v NetworksModel) GetModelData() *NDFCNetworksModel {
 				data1.NetworkTemplateConfig.Trm = strconv.FormatBool(ele1.Trm.ValueBool())
 			} else {
 				data1.NetworkTemplateConfig.Trm = ""
+			}
+
+			// trm_v6 | Bool| [networkTemplateConfig]| false
+			if !ele1.TrmV6.IsNull() && !ele1.TrmV6.IsUnknown() {
+				//-----inline nested----
+				data1.NetworkTemplateConfig.TrmV6 = strconv.FormatBool(ele1.TrmV6.ValueBool())
+			} else {
+				data1.NetworkTemplateConfig.TrmV6 = ""
 			}
 
 			// route_target_both | Bool| [networkTemplateConfig]| false

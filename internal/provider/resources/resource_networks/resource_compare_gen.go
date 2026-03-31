@@ -219,6 +219,14 @@ func (v NDFCNetworksValue) DeepEqual(c NDFCNetworksValue) int {
 	} else {
 		log.Printf("Skipping - v.NetworkTemplateConfig.Trm=%s, c.NetworkTemplateConfig.Trm=%s", v.NetworkTemplateConfig.Trm, c.NetworkTemplateConfig.Trm)
 	}
+	if v.NetworkTemplateConfig.TrmV6 != "" {
+		if v.NetworkTemplateConfig.TrmV6 != c.NetworkTemplateConfig.TrmV6 {
+			log.Printf("v.NetworkTemplateConfig.TrmV6=%s, c.NetworkTemplateConfig.TrmV6=%s", v.NetworkTemplateConfig.TrmV6, c.NetworkTemplateConfig.TrmV6)
+			return RequiresUpdate
+		}
+	} else {
+		log.Printf("Skipping - v.NetworkTemplateConfig.TrmV6=%s, c.NetworkTemplateConfig.TrmV6=%s", v.NetworkTemplateConfig.TrmV6, c.NetworkTemplateConfig.TrmV6)
+	}
 	if v.NetworkTemplateConfig.RouteTargetBoth != c.NetworkTemplateConfig.RouteTargetBoth {
 		log.Printf("v.NetworkTemplateConfig.RouteTargetBoth=%s, c.NetworkTemplateConfig.RouteTargetBoth=%s", v.NetworkTemplateConfig.RouteTargetBoth, c.NetworkTemplateConfig.RouteTargetBoth)
 		return RequiresUpdate
@@ -559,6 +567,19 @@ func (v *NDFCNetworksValue) CreatePlan(c NDFCNetworksValue, cf *bool) int {
 		//v empty, fill with c
 		log.Printf("Copy from state: v.NetworkTemplateConfig.Trm=%v, c.NetworkTemplateConfig.Trm=%v", v.NetworkTemplateConfig.Trm, c.NetworkTemplateConfig.Trm)
 		v.NetworkTemplateConfig.Trm = c.NetworkTemplateConfig.Trm
+	}
+
+	if v.NetworkTemplateConfig.TrmV6 != "" {
+		if v.NetworkTemplateConfig.TrmV6 != c.NetworkTemplateConfig.TrmV6 {
+			log.Printf("Update: v.NetworkTemplateConfig.TrmV6=%v, c.NetworkTemplateConfig.TrmV6=%v", v.NetworkTemplateConfig.TrmV6, c.NetworkTemplateConfig.TrmV6)
+			if action == ActionNone || action == RequiresUpdate {
+				action = RequiresUpdate
+			}
+		}
+	} else {
+		//v empty, fill with c
+		log.Printf("Copy from state: v.NetworkTemplateConfig.TrmV6=%v, c.NetworkTemplateConfig.TrmV6=%v", v.NetworkTemplateConfig.TrmV6, c.NetworkTemplateConfig.TrmV6)
+		v.NetworkTemplateConfig.TrmV6 = c.NetworkTemplateConfig.TrmV6
 	}
 
 	if v.NetworkTemplateConfig.RouteTargetBoth != "" {

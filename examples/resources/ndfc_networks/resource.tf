@@ -10,7 +10,6 @@ resource "ndfc_networks" "test_resource_networks_1" {
       network_extension_template = "Default_Network_Extension_Universal"
       vrf_name                   = "VRF1"
       primary_network_id         = 30000
-      network_type               = "Normal"
       gateway_ipv4_address       = "192.0.2.1/24"
       gateway_ipv6_address       = "2001:db8::1/64"
       vlan_id                    = 1600
