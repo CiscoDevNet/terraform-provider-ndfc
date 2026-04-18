@@ -1,3 +1,9 @@
+## 0.3.1
+_Pre Release_
+### Fixed
+- **`ndfc_networks` resource**: Removed incorrect default values for `network_type` and `mtu` attributes that could cause deployment failures
+- **`ndfc_networks` resource**: Added `trm_v6` attribute for IPv6 Tenant Routed Multicast support
+
 ## 0.3.0
 _Pre Release_
 ### BREAKING CHANGES
