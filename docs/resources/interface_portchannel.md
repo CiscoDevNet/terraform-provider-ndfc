@@ -59,7 +59,7 @@ resource "ndfc_interface_portchannel" "test_resource_interface_portchannel_1" {
     * `int_port_channel_pvlan_host`
     * `int_l3_port_channel`
     * `int_monitor_port_channel`"
-- `serial_number` (String) Serial number of switch to configure. This field cannot be specified if `serial_number` inside `interfaces` block is specified`
+- `serial_number` (String) Serial number or management IPv4 address of switch to configure. This field cannot be specified if `serial_number` inside `interfaces` block is specified`
 
 ### Read-Only
 
@@ -89,7 +89,7 @@ Optional:
 - `orphan_port` (Boolean) If enabled, configure the interface as a vPC orphan port to be suspended by the secondary peer in vPC failures
 - `port_type_fast` (Boolean) Enable spanning-tree edge port behavior
 - `portchannel_mode` (String) Port-channel mode. Allowed values are `on`, `active`, `passive`
-- `serial_number` (String) Serial number of switch to configure. This field cannot be specified if `serial_number` is already mentioned outside
+- `serial_number` (String) Serial number or management IPv4 address of switch to configure. This field cannot be specified if `serial_number` is already mentioned outside
 - `speed` (String) Interface speed
 
 Read-Only:

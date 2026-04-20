@@ -141,8 +141,8 @@ func GenerateIntfResource(intfObj **resource_interface_common.NDFCInterfaceCommo
 			ifTmp.NvPairs.CopyPoDescription = "true"
 			EthIntf += 2
 		case "vpc":
-			ifTmp.NvPairs.Peer1MemberInterfaces = fmt.Sprintf("Ethernet1/%d", 10+intfNumber)
-			ifTmp.NvPairs.Peer2MemberInterfaces = fmt.Sprintf("Ethernet1/%d", 10+intfNumber)
+			ifTmp.NvPairs.Peer1MemberInterfaces = fmt.Sprintf("Ethernet1/%d", 40+intfNumber)
+			ifTmp.NvPairs.Peer2MemberInterfaces = fmt.Sprintf("Ethernet1/%d", 40+intfNumber)
 			ifTmp.NvPairs.Peer1PortChannelId = new(int64)
 			*ifTmp.NvPairs.Peer1PortChannelId = int64(150 + intfNumber)
 			ifTmp.NvPairs.Peer2PortChannelId = new(types.Int64Custom)

@@ -61,7 +61,7 @@ resource:
       model_name: serial_number
       tf_name: serial_number
       type: String
-      description: Serial number of switch to configure. This field cannot be specified if `serial_number` inside `interfaces` block is specified`
+      description: Serial number or management IPv4 address of switch to configure. This field cannot be specified if `serial_number` inside `interfaces` block is specified`
       example: 9DBYO6WQJ46
       payload_hide: true
       tf_requires_replace: true
@@ -100,7 +100,7 @@ resource:
       - model_name: serialNumber
         tf_name: serial_number
         type: String
-        description: Serial number of switch to configure. This field cannot be specified if `serial_number` is specified in the common block
+        description: Serial number or management IPv4 address of switch to configure. This field cannot be specified if `serial_number` is specified in the common block
       - &ifName
         model_name: ifName
         tf_name: interface_name
