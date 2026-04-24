@@ -99,17 +99,18 @@ func (r *policyResource) Read(ctx context.Context, req resource.ReadRequest, res
 
 func (r *policyResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
 
-	var planData resource_policy.PolicyModel
+	var planData, stateData resource_policy.PolicyModel
 
-	// Read Terraform plan data into the model
+	// Read Terraform plan and state data into the model
 	resp.Diagnostics.Append(req.Plan.Get(ctx, &planData)...)
+	resp.Diagnostics.Append(req.State.Get(ctx, &stateData)...)
 
 	if resp.Diagnostics.HasError() {
 		return
 	}
 
 	// Create API call logic
-	r.client.RscUpdatePolicy(ctx, &resp.Diagnostics, &planData)
+	r.client.RscUpdatePolicy(ctx, &resp.Diagnostics, &planData, &stateData)
 	if resp.Diagnostics.HasError() {
 		tflog.Error(ctx, "Update Policy Failed")
 		return
