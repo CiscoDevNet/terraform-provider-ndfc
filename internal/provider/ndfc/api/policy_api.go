@@ -19,20 +19,23 @@ import (
 // PolicyAPI is the API client for the policy resource
 const UrlPolicyCreate = "/lan-fabric/rest/control/policies"
 const UrlPolicy = "/lan-fabric/rest/control/policies/%s"
+const UrlPolicyUpdate = "/lan-fabric/rest/control/policies/%s?mark-delete-and-update=true"
 const UrlPolicyDeploy = "/lan-fabric/rest/control/policies/deploy"
 
 const UrlPolicyGroup = "/lan-fabric/rest/control/policies/policygroup/%s"
 const UrlPolicyGroupCreate = "/lan-fabric/rest/control/policies/policygroup/create?serialNumbers=%s"
 const UrlPolicyGroupUpdate = "/lan-fabric/rest/control/policies/policygroup/%s?serialNumbers=%s&mark-delete-and-update=true"
+const UrlPolicyGroupSwitchUpdate = "/lan-fabric/rest/control/policies/policygroup/%s?serialNumbers=%s"
 const UrlPolicyGroupDelete = "/lan-fabric/rest/control/policies/policygroup/policyIds"
 
 type PolicyAPI struct {
 	NDFCAPICommon
-	mutex          *sync.Mutex
-	Deploy         bool
-	PolicyGroup    bool
-	DeploySwitches []string
-	PolicyID       string
+	mutex            *sync.Mutex
+	Deploy           bool
+	PolicyGroup      bool
+	SwitchOnlyUpdate bool
+	DeploySwitches   []string
+	PolicyID         string
 }
 
 func (c *PolicyAPI) GetLock() *sync.Mutex {
@@ -70,12 +73,15 @@ func (c *PolicyAPI) PostUrl() string {
 func (c *PolicyAPI) PutUrl() string {
 	if c.PolicyGroup {
 		if len(c.DeploySwitches) != 0 {
+			if c.SwitchOnlyUpdate {
+				return fmt.Sprintf(UrlPolicyGroupSwitchUpdate, c.PolicyID, strings.Join(c.DeploySwitches, ","))
+			}
 			return fmt.Sprintf(UrlPolicyGroupUpdate, c.PolicyID, strings.Join(c.DeploySwitches, ","))
 		} else {
 			panic("Switches cannot be empty")
 		}
 	}
-	return fmt.Sprintf(UrlPolicy, c.PolicyID)
+	return fmt.Sprintf(UrlPolicyUpdate, c.PolicyID)
 }
 
 func (c *PolicyAPI) DeleteUrl() string {

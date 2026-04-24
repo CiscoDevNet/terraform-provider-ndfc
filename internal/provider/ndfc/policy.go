@@ -370,7 +370,7 @@ func (c *NDFC) rscGetPolicy(ctx context.Context, dg *diag.Diagnostics, pID strin
 	return model
 }
 
-func (c *NDFC) RscUpdatePolicy(ctx context.Context, dg *diag.Diagnostics, model *resource_policy.PolicyModel) {
+func (c *NDFC) RscUpdatePolicy(ctx context.Context, dg *diag.Diagnostics, model *resource_policy.PolicyModel, stateModel *resource_policy.PolicyModel) {
 	// Start transaction logging with a unique ID for this operation
 	txID := fmt.Sprintf("tx-%d", time.Now().UnixNano())
 	policyID := model.PolicyId.ValueString()
@@ -395,27 +395,12 @@ func (c *NDFC) RscUpdatePolicy(ctx context.Context, dg *diag.Diagnostics, model 
 	// Hence id has been added to schema and used only in PUT
 	ID := model.Id.ValueInt64()
 
-	tflog.Debug(ctx, "Initializing policy API client",
-		map[string]interface{}{
-			"transaction_id": txID,
-			"policy_id":      policyID,
-		})
-
-	policyApi := api.NewPolicyAPI(c.GetLock(ResourcePolicy), &c.apiClient)
-	policyApi.PolicyID = policyID
-
 	// Prepare policy data for update
 	policyData := model.GetModelData()
 	policyData.PolicyId = policyID
 	policyData.Id = &ID
 
 	if model.IsPolicyGroup.ValueBool() {
-		tflog.Debug(ctx, "Processing policy group update",
-			map[string]interface{}{
-				"transaction_id": txID,
-				"serial_numbers": policyData.SerialNumbers,
-				"policy_id":      policyID,
-			})
 		if len(policyData.SerialNumbers) == 0 {
 			errMsg := "Serial numbers cannot be empty for policy group"
 			tflog.Error(ctx, errMsg,
@@ -426,86 +411,73 @@ func (c *NDFC) RscUpdatePolicy(ctx context.Context, dg *diag.Diagnostics, model 
 			dg.AddError("Invalid configuration", errMsg)
 			return
 		}
-		policyApi.PolicyGroup = true
-		policyApi.DeploySwitches = policyData.SerialNumbers
-	}
-	tflog.Debug(ctx, "Marshaling policy data",
-		map[string]interface{}{
-			"transaction_id": txID,
-			"policy_id":      policyID,
-		})
 
-	data, err := json.Marshal(policyData)
-	if err != nil {
-		errMsg := fmt.Sprintf("Failed to marshal policy data: %v", err)
-		tflog.Error(ctx, errMsg,
+		// Detect what changed between state and plan
+		switchesChanged := !model.SerialNumbers.Equal(stateModel.SerialNumbers)
+		nvPairsChanged := !model.PolicyParameters.Equal(stateModel.PolicyParameters)
+
+		tflog.Info(ctx, "Policy group change detection",
 			map[string]interface{}{
-				"transaction_id": txID,
-				"policy_id":      policyID,
-			})
-		dg.AddError("Failed to marshal policy data", errMsg)
-		return
-	}
-
-	tflog.Info(ctx, "Sending policy update request",
-		map[string]interface{}{
-			"transaction_id": txID,
-			"policy_id":      policyID,
-			"payload_size":   len(data),
-		})
-
-	log.Printf("[DEBUG] [%s] Updating policy with ID: %v: PUT Data |%s|", txID, policyID, string(data))
-
-	res, err := policyApi.Put(data)
-	if err != nil {
-		errMsg := fmt.Sprintf("Failed to update policy: %v - Response: %s", err, res.String())
-		tflog.Error(ctx, errMsg,
-			map[string]interface{}{
-				"transaction_id": txID,
-				"policy_id":      policyID,
-			})
-		dg.AddError("Failed to update policy", errMsg)
-		return
-	}
-
-	tflog.Info(ctx, "Successfully updated policy",
-		map[string]interface{}{
-			"transaction_id": txID,
-			"policy_id":      policyID,
-		})
-
-	// Handle policy deployment if requested
-	if policyData.Deploy {
-		tflog.Info(ctx, "Initiating policy deployment",
-			map[string]interface{}{
-				"transaction_id": txID,
-				"policy_id":      policyID,
+				"transaction_id":   txID,
+				"policy_id":        policyID,
+				"switches_changed": switchesChanged,
+				"nv_pairs_changed": nvPairsChanged,
 			})
 
-		deployData := resource_policy.PolicyDeploy{
-			PolicyId:     policyID,
-			SerialNumber: policyData.SerialNumbers,
-			PolicyGroup:  model.IsPolicyGroup.ValueBool(),
-			DeleteFlag:   false,
+		// Case 1: Switch list changed - GET current policy, PUT it back with new serial numbers in QP
+		if switchesChanged {
+			c.policyGroupUpdateSwitches(ctx, dg, txID, policyID, policyData)
+			if dg.HasError() {
+				return
+			}
+
+			if policyData.Deploy {
+				// Deploy to union of old + new switches so removed switches get the deletion deployed
+				stateData := stateModel.GetModelData()
+				allSwitches := unionStrings(policyData.SerialNumbers, stateData.SerialNumbers)
+				tflog.Debug(ctx, "Deploying to all affected switches (old + new)",
+					map[string]interface{}{
+						"transaction_id":  txID,
+						"policy_id":       policyID,
+						"deploy_switches": allSwitches,
+					})
+				savedSwitches := policyData.SerialNumbers
+				policyData.SerialNumbers = allSwitches
+				c.policyDeployAfterUpdate(ctx, dg, txID, policyID, policyData, model.IsPolicyGroup.ValueBool())
+				policyData.SerialNumbers = savedSwitches
+				if dg.HasError() {
+					return
+				}
+			}
 		}
 
-		c.RscDeployPolicy(ctx, dg, deployData)
+		// Case 2: nvPairs changed - PUT with regular policy URL
+		if nvPairsChanged {
+			c.policyGroupUpdateNvPairs(ctx, dg, txID, policyID, policyData, ID)
+			if dg.HasError() {
+				return
+			}
+
+			if policyData.Deploy {
+				c.policyDeployAfterUpdate(ctx, dg, txID, policyID, policyData, model.IsPolicyGroup.ValueBool())
+				if dg.HasError() {
+					return
+				}
+			}
+		}
+	} else {
+		// Non-policy-group: single PUT with regular policy URL
+		c.policyUpdateSingle(ctx, dg, txID, policyID, policyData)
 		if dg.HasError() {
-			tflog.Error(ctx, "Policy update succeeded but deployment failed",
-				map[string]interface{}{
-					"transaction_id": txID,
-					"policy_id":      policyID,
-				})
-			// cannot rollback to old config as the old data is overwritten in NDFC
-			// throw error so that user can correct the config and re-apply
-			dg.AddError("Failed to deploy policy", "Policy was updated but deployment failed. Please check the logs and retry.")
 			return
 		}
-		tflog.Info(ctx, "Successfully deployed policy",
-			map[string]interface{}{
-				"transaction_id": txID,
-				"policy_id":      policyID,
-			})
+
+		if policyData.Deploy {
+			c.policyDeployAfterUpdate(ctx, dg, txID, policyID, policyData, model.IsPolicyGroup.ValueBool())
+			if dg.HasError() {
+				return
+			}
+		}
 	}
 
 	// Refresh the policy data after update
@@ -529,6 +501,9 @@ func (c *NDFC) RscUpdatePolicy(ctx context.Context, dg *diag.Diagnostics, model 
 	if model.IsPolicyGroup.ValueBool() {
 		c.rscGetPolicyGroup(ctx, dg, policyID, newModel)
 		newModel.IsPolicyGroup = model.IsPolicyGroup.ValueBool()
+		// NDFC policygroup GET may return stale switch list after update;
+		// use the planned serial numbers since we just PUT them
+		newModel.SerialNumbers = policyData.SerialNumbers
 	}
 
 	// Update the model with the refreshed data
@@ -541,6 +516,156 @@ func (c *NDFC) RscUpdatePolicy(ctx context.Context, dg *diag.Diagnostics, model 
 		map[string]interface{}{
 			CtxKeyTransactionID: txID,
 			CtxKeyPolicyID:      policyID,
+		})
+}
+
+// policyDeployAfterUpdate handles policy deployment after an update operation.
+func (c *NDFC) policyDeployAfterUpdate(ctx context.Context, dg *diag.Diagnostics, txID, policyID string, policyData *resource_policy.NDFCPolicyModel, isPolicyGroup bool) {
+	tflog.Info(ctx, "Initiating policy deployment",
+		map[string]interface{}{
+			"transaction_id": txID,
+			"policy_id":      policyID,
+		})
+
+	deployData := resource_policy.PolicyDeploy{
+		PolicyId:     policyID,
+		SerialNumber: policyData.SerialNumbers,
+		PolicyGroup:  isPolicyGroup,
+		DeleteFlag:   true, // updates need full deployment to flush any removals
+	}
+
+	c.RscDeployPolicy(ctx, dg, deployData)
+	if dg.HasError() {
+		tflog.Error(ctx, "Policy update succeeded but deployment failed",
+			map[string]interface{}{
+				"transaction_id": txID,
+				"policy_id":      policyID,
+			})
+		// cannot rollback to old config as the old data is overwritten in NDFC
+		// throw error so that user can correct the config and re-apply
+		dg.AddError("Failed to deploy policy", "Policy was updated but deployment failed. Please check the logs and retry.")
+		return
+	}
+	tflog.Info(ctx, "Successfully deployed policy",
+		map[string]interface{}{
+			"transaction_id": txID,
+			"policy_id":      policyID,
+		})
+}
+
+// policyGroupUpdateSwitches handles the case where the switch list changed for a policy group.
+// It GETs the current policy from NDFC and PUTs the same payload back with the new serial numbers in the query parameter.
+func (c *NDFC) policyGroupUpdateSwitches(ctx context.Context, dg *diag.Diagnostics, txID, policyID string, policyData *resource_policy.NDFCPolicyModel) {
+	tflog.Info(ctx, "Updating policy group switch membership",
+		map[string]interface{}{
+			"transaction_id": txID,
+			"policy_id":      policyID,
+			"new_switches":   policyData.SerialNumbers,
+		})
+
+	// GET the current policy data from NDFC
+	currentPolicy := c.rscGetPolicy(ctx, dg, policyID)
+	if currentPolicy == nil {
+		dg.AddError("Failed to get policy for switch update",
+			fmt.Sprintf("Cannot read current policy %s before updating switches", policyID))
+		return
+	}
+
+	// Marshal the current policy data (unchanged) for the PUT body
+	data, err := json.Marshal(currentPolicy)
+	if err != nil {
+		dg.AddError("Failed to marshal policy data",
+			fmt.Sprintf("Failed to marshal policy data: %v", err))
+		return
+	}
+
+	// PUT with policygroup URL using new serial numbers in QP (no mark-delete-and-update for switch-only update)
+	policyApi := api.NewPolicyAPI(c.GetLock(ResourcePolicy), &c.apiClient)
+	policyApi.PolicyID = policyID
+	policyApi.PolicyGroup = true
+	policyApi.SwitchOnlyUpdate = true
+	policyApi.DeploySwitches = policyData.SerialNumbers
+
+	log.Printf("[DEBUG] [%s] Updating policy group switches for %s: PUT Data |%s|", txID, policyID, string(data))
+
+	res, err := policyApi.Put(data)
+	if err != nil {
+		dg.AddError("Failed to update policy group switches",
+			fmt.Sprintf("Failed to update policy group switches: %v - Response: %s", err, res.String()))
+		return
+	}
+
+	tflog.Info(ctx, "Successfully updated policy group switches",
+		map[string]interface{}{
+			"transaction_id": txID,
+			"policy_id":      policyID,
+		})
+}
+
+// policyGroupUpdateNvPairs handles the case where nvPairs changed for a policy group.
+// It PUTs the updated policy data using the policygroup URL with mark-delete-and-update.
+func (c *NDFC) policyGroupUpdateNvPairs(ctx context.Context, dg *diag.Diagnostics, txID, policyID string, policyData *resource_policy.NDFCPolicyModel, ID int64) {
+	tflog.Info(ctx, "Updating policy group nvPairs",
+		map[string]interface{}{
+			"transaction_id": txID,
+			"policy_id":      policyID,
+		})
+
+	policyData.Id = &ID
+	data, err := json.Marshal(policyData)
+	if err != nil {
+		dg.AddError("Failed to marshal policy data",
+			fmt.Sprintf("Failed to marshal policy data: %v", err))
+		return
+	}
+
+	// Use policygroup URL with current serial numbers for nvPairs update
+	policyApi := api.NewPolicyAPI(c.GetLock(ResourcePolicy), &c.apiClient)
+	policyApi.PolicyID = policyID
+	policyApi.PolicyGroup = true
+	policyApi.DeploySwitches = policyData.SerialNumbers
+
+	log.Printf("[DEBUG] [%s] Updating policy group nvPairs for %s: PUT Data |%s|", txID, policyID, string(data))
+
+	res, err := policyApi.Put(data)
+	if err != nil {
+		dg.AddError("Failed to update policy nvPairs",
+			fmt.Sprintf("Failed to update policy nvPairs: %v - Response: %s", err, res.String()))
+		return
+	}
+
+	tflog.Info(ctx, "Successfully updated policy group nvPairs",
+		map[string]interface{}{
+			"transaction_id": txID,
+			"policy_id":      policyID,
+		})
+}
+
+// policyUpdateSingle handles the update for a non-policy-group policy (single PUT).
+func (c *NDFC) policyUpdateSingle(ctx context.Context, dg *diag.Diagnostics, txID, policyID string, policyData *resource_policy.NDFCPolicyModel) {
+	data, err := json.Marshal(policyData)
+	if err != nil {
+		dg.AddError("Failed to marshal policy data",
+			fmt.Sprintf("Failed to marshal policy data: %v", err))
+		return
+	}
+
+	policyApi := api.NewPolicyAPI(c.GetLock(ResourcePolicy), &c.apiClient)
+	policyApi.PolicyID = policyID
+
+	log.Printf("[DEBUG] [%s] Updating policy with ID: %v: PUT Data |%s|", txID, policyID, string(data))
+
+	res, err := policyApi.Put(data)
+	if err != nil {
+		dg.AddError("Failed to update policy",
+			fmt.Sprintf("Failed to update policy: %v - Response: %s", err, res.String()))
+		return
+	}
+
+	tflog.Info(ctx, "Successfully updated policy",
+		map[string]interface{}{
+			"transaction_id": txID,
+			"policy_id":      policyID,
 		})
 }
 
@@ -849,6 +974,25 @@ func (c NDFC) rsUpdatePolicy(ctx context.Context, dg *diag.Diagnostics, pdata *r
 
 }
 */
+
+// unionStrings returns the union of two string slices (no duplicates).
+func unionStrings(a, b []string) []string {
+	seen := make(map[string]struct{}, len(a)+len(b))
+	result := make([]string, 0, len(a)+len(b))
+	for _, s := range a {
+		if _, ok := seen[s]; !ok {
+			seen[s] = struct{}{}
+			result = append(result, s)
+		}
+	}
+	for _, s := range b {
+		if _, ok := seen[s]; !ok {
+			seen[s] = struct{}{}
+			result = append(result, s)
+		}
+	}
+	return result
+}
 
 func (c NDFC) policyTrim(pdata *resource_policy.NDFCPolicyModel, ndata *resource_policy.NDFCPolicyModel) {
 	// Trim the data to remove any fields that are  returned by NDFC and not in policy_parameters

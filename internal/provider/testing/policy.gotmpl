@@ -28,7 +28,7 @@ resource "ndfc_{{.RscType}}" "{{.RscName}}" {
         entity_type          = "{{.EntityType}}"
         description          = "{{.Description}}"
         template_name        = "{{.TemplateName}}"
-        source               = "{{.Source}}"
+        {{ if .Source }}source               = "{{.Source}}"{{ end }}
         priority             = {{.Priority}}
         {{ if .IsPolicyGroup }}
         serial_numbers       = [

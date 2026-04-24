@@ -1018,3 +1018,254 @@ func TestAccPolicyGroupVRFRouteTracking(t *testing.T) {
 			},
 		}})
 }
+
+// TestAccPolicyGroupUpdateCombinations tests the three update scenarios for policy groups:
+// Step 1: Create policy group with switch[0]
+// Step 2: Only switch list modified — add switch[1]
+// Step 3: Only nvPairs modified — change IP_PREFIX
+// Step 4: Both modified — remove switch[1] AND change OBJECT_TRACKING_NUMBER
+// TestAccPolicyGroupACLUpdateCombinations tests policy group updates with ip_acl template.
+// Step 1: Create with 1 switch, 1 ACE
+// Step 2: Add second switch (switches only)
+// Step 3: Add second ACE entry (nvPairs only)
+// Step 4: Remove one switch + remove second ACE (both change)
+// Step 5: Add switch back + add second ACE back (both change)
+func TestAccPolicyGroupACLUpdateCombinations(t *testing.T) {
+	x := &map[string]string{
+		"RscType":  ndfc.ResourcePolicy,
+		"RscName":  "pg_acl_combo_test",
+		"User":     helper.GetConfig("policy").NDFC.User,
+		"Password": helper.GetConfig("policy").NDFC.Password,
+		"Host":     helper.GetConfig("policy").NDFC.URL,
+		"Insecure": helper.GetConfig("policy").NDFC.Insecure,
+	}
+
+	tf_config := new(string)
+	*tf_config = `provider "ndfc" {
+		host     = "https://"
+		username = "admin"
+		password = "admin!@#"
+		domain   = "example.com"
+		insecure = true
+		}`
+
+	stepCount := new(int)
+	*stepCount = 0
+
+	testSwitches := helper.GetConfig("policy").NDFC.Switches
+	if len(testSwitches) < 2 {
+		t.Skip("At least 2 switches are required for policy group ACL update testing")
+	}
+
+	acesSingle := `{\"ACES\":[{\"ACTION\":\"permit\",\"CUSTOM_PROTOCOL\":\"\",\"DEST_IP\":\"40.0.0.1\",\"DEST_PORT\":\"\",\"DEST_PORT_ACTION\":\"\",\"DEST_PORT_RANGE_END\":\"\",\"DEST_PORT_RANGE_START\":\"\",\"ICMP_ADVANCED_OPTION\":\"\",\"PROTOCOL\":\"ip\",\"REMARK_COMMENT\":\"\",\"SEQUENCE_NUMBER\":\"10\",\"SRC_IP\":\"41.0.0.1\",\"SRC_PORT\":\"\",\"SRC_PORT_ACTION\":\"\",\"SRC_PORT_RANGE_END\":\"\",\"SRC_PORT_RANGE_START\":\"\",\"TCP_ADVANCED_OPTION\":\"\"}]}`
+
+	acesBoth := `{\"ACES\":[{\"ACTION\":\"permit\",\"CUSTOM_PROTOCOL\":\"\",\"DEST_IP\":\"40.0.0.1\",\"DEST_PORT\":\"\",\"DEST_PORT_ACTION\":\"\",\"DEST_PORT_RANGE_END\":\"\",\"DEST_PORT_RANGE_START\":\"\",\"ICMP_ADVANCED_OPTION\":\"\",\"PROTOCOL\":\"ip\",\"REMARK_COMMENT\":\"\",\"SEQUENCE_NUMBER\":\"10\",\"SRC_IP\":\"41.0.0.1\",\"SRC_PORT\":\"\",\"SRC_PORT_ACTION\":\"\",\"SRC_PORT_RANGE_END\":\"\",\"SRC_PORT_RANGE_START\":\"\",\"TCP_ADVANCED_OPTION\":\"\"},{\"ACTION\":\"permit\",\"CUSTOM_PROTOCOL\":\"\",\"DEST_IP\":\"30.0.0.10\",\"DEST_PORT\":\"443\",\"DEST_PORT_ACTION\":\"equal-to\",\"DEST_PORT_RANGE_END\":\"\",\"DEST_PORT_RANGE_START\":\"\",\"ICMP_ADVANCED_OPTION\":\"\",\"PROTOCOL\":\"tcp\",\"REMARK_COMMENT\":\"\",\"SEQUENCE_NUMBER\":\"20\",\"SRC_IP\":\"20.0.0.10\",\"SRC_PORT\":\"\",\"SRC_PORT_ACTION\":\"none\",\"SRC_PORT_RANGE_END\":\"\",\"SRC_PORT_RANGE_START\":\"\",\"TCP_ADVANCED_OPTION\":\"\"}]}`
+
+	policyResource := new(resource_policy.NDFCPolicyModel)
+
+	resource.Test(t, resource.TestCase{
+		PreCheck:                 func() { testAccPreCheck(t, "policy") },
+		ProtoV6ProviderFactories: testAccProtoV6ProviderFactories,
+		Steps: []resource.TestStep{
+			// Step 1: Create with switch[0] and single ACE
+			{
+				Config: func() string {
+					*stepCount++
+					tName := fmt.Sprintf("%s_%d", t.Name(), *stepCount)
+
+					policyResource.IsPolicyGroup = true
+					policyResource.Deploy = true
+					policyResource.EntityName = "Switch"
+					policyResource.EntityType = "SWITCH"
+					policyResource.Description = "custom acl4"
+					policyResource.TemplateName = "ip_acl"
+					policyResource.Priority = new(int64)
+					*policyResource.Priority = 500
+					policyResource.SerialNumbers = []string{testSwitches[0]}
+					policyResource.PolicyParameters = map[string]string{
+						"ACL_NAME": "test_acl4",
+						"ACES":     acesSingle,
+					}
+					policyResource.Deleted = new(bool)
+					*policyResource.Deleted = false
+
+					helper.GetTFConfigWithSingleResource(tName, *x, []interface{}{policyResource}, &tf_config)
+					return *tf_config
+				}(),
+				Check: resource.ComposeTestCheckFunc(
+					PolicyModelHelperStateCheck("ndfc_policy.pg_acl_combo_test", *policyResource, path.Empty())...),
+			},
+			// Step 2: Add second switch (switches only change)
+			{
+				Config: func() string {
+					*stepCount++
+					tName := fmt.Sprintf("%s_%d", t.Name(), *stepCount)
+					policyResource.SerialNumbers = []string{testSwitches[0], testSwitches[1]}
+					helper.GetTFConfigWithSingleResource(tName, *x, []interface{}{policyResource}, &tf_config)
+					return *tf_config
+				}(),
+				Check: resource.ComposeTestCheckFunc(
+					PolicyModelHelperStateCheck("ndfc_policy.pg_acl_combo_test", *policyResource, path.Empty())...),
+			},
+			// Step 3: Add second ACE entry (nvPairs only change)
+			{
+				Config: func() string {
+					*stepCount++
+					tName := fmt.Sprintf("%s_%d", t.Name(), *stepCount)
+					policyResource.PolicyParameters = map[string]string{
+						"ACL_NAME": "test_acl4",
+						"ACES":     acesBoth,
+					}
+					helper.GetTFConfigWithSingleResource(tName, *x, []interface{}{policyResource}, &tf_config)
+					return *tf_config
+				}(),
+				Check: resource.ComposeTestCheckFunc(
+					PolicyModelHelperStateCheck("ndfc_policy.pg_acl_combo_test", *policyResource, path.Empty())...),
+			},
+			// Step 4: Remove switch[1] + remove second ACE (both change)
+			{
+				Config: func() string {
+					*stepCount++
+					tName := fmt.Sprintf("%s_%d", t.Name(), *stepCount)
+					policyResource.SerialNumbers = []string{testSwitches[0]}
+					policyResource.PolicyParameters = map[string]string{
+						"ACL_NAME": "test_acl4",
+						"ACES":     acesSingle,
+					}
+					helper.GetTFConfigWithSingleResource(tName, *x, []interface{}{policyResource}, &tf_config)
+					return *tf_config
+				}(),
+				Check: resource.ComposeTestCheckFunc(
+					PolicyModelHelperStateCheck("ndfc_policy.pg_acl_combo_test", *policyResource, path.Empty())...),
+			},
+			// Step 5: Add switch[1] back + add second ACE back (both change)
+			{
+				Config: func() string {
+					*stepCount++
+					tName := fmt.Sprintf("%s_%d", t.Name(), *stepCount)
+					policyResource.SerialNumbers = []string{testSwitches[0], testSwitches[1]}
+					policyResource.PolicyParameters = map[string]string{
+						"ACL_NAME": "test_acl4",
+						"ACES":     acesBoth,
+					}
+					helper.GetTFConfigWithSingleResource(tName, *x, []interface{}{policyResource}, &tf_config)
+					return *tf_config
+				}(),
+				Check: resource.ComposeTestCheckFunc(
+					PolicyModelHelperStateCheck("ndfc_policy.pg_acl_combo_test", *policyResource, path.Empty())...),
+			},
+		},
+	})
+}
+
+func TestAccPolicyGroupUpdateCombinations(t *testing.T) {
+	x := &map[string]string{
+		"RscType":  ndfc.ResourcePolicy,
+		"RscName":  "pg_update_combo_test",
+		"User":     helper.GetConfig("policy").NDFC.User,
+		"Password": helper.GetConfig("policy").NDFC.Password,
+		"Host":     helper.GetConfig("policy").NDFC.URL,
+		"Insecure": helper.GetConfig("policy").NDFC.Insecure,
+	}
+
+	tf_config := new(string)
+	*tf_config = `provider "ndfc" {
+		host     = "https://"
+		username = "admin"
+		password = "admin!@#"
+		domain   = "example.com"
+		insecure = true
+		}`
+
+	stepCount := new(int)
+	*stepCount = 0
+
+	testSwitches := helper.GetConfig("policy").NDFC.Switches
+	if len(testSwitches) < 2 {
+		t.Skip("At least 2 switches are required for policy group update testing")
+	}
+
+	policyResource := new(resource_policy.NDFCPolicyModel)
+
+	resource.Test(t, resource.TestCase{
+		PreCheck:                 func() { testAccPreCheck(t, "policy") },
+		ProtoV6ProviderFactories: testAccProtoV6ProviderFactories,
+		Steps: []resource.TestStep{
+			// Step 1: Create policy group with switch[0] only
+			{
+				Config: func() string {
+					*stepCount++
+					tName := fmt.Sprintf("%s_%d", t.Name(), *stepCount)
+
+					policyResource.IsPolicyGroup = true
+					policyResource.Deploy = true
+					policyResource.EntityName = "SWITCH"
+					policyResource.EntityType = "SWITCH"
+					policyResource.Description = "PG update combo test"
+					policyResource.TemplateName = "vrf_route_tracking"
+					policyResource.Source = "template"
+					policyResource.Priority = new(int64)
+					*policyResource.Priority = 500
+					policyResource.SerialNumbers = []string{testSwitches[0]}
+					policyResource.PolicyParameters = map[string]string{
+						"VRF_NAME":               "default",
+						"IP_PREFIX":              "34.1.1.0/24",
+						"OBJECT_TRACKING_NUMBER": "10",
+					}
+					policyResource.Deleted = new(bool)
+					*policyResource.Deleted = false
+
+					helper.GetTFConfigWithSingleResource(tName, *x, []interface{}{policyResource}, &tf_config)
+					return *tf_config
+				}(),
+				Check: resource.ComposeTestCheckFunc(
+					PolicyModelHelperStateCheck("ndfc_policy.pg_update_combo_test", *policyResource, path.Empty())...),
+			},
+			// Step 2: Only switch list modified — add switch[1]
+			{
+				Config: func() string {
+					*stepCount++
+					tName := fmt.Sprintf("%s_%d", t.Name(), *stepCount)
+					policyResource.SerialNumbers = []string{testSwitches[0], testSwitches[1]}
+					helper.GetTFConfigWithSingleResource(tName, *x, []interface{}{policyResource}, &tf_config)
+					return *tf_config
+				}(),
+				Check: resource.ComposeTestCheckFunc(
+					PolicyModelHelperStateCheck("ndfc_policy.pg_update_combo_test", *policyResource, path.Empty())...),
+			},
+			// Step 3: Only nvPairs modified — change IP_PREFIX
+			{
+				Config: func() string {
+					*stepCount++
+					tName := fmt.Sprintf("%s_%d", t.Name(), *stepCount)
+					policyResource.PolicyParameters = map[string]string{
+						"VRF_NAME":               "default",
+						"IP_PREFIX":              "35.1.1.0/24",
+						"OBJECT_TRACKING_NUMBER": "10",
+					}
+					helper.GetTFConfigWithSingleResource(tName, *x, []interface{}{policyResource}, &tf_config)
+					return *tf_config
+				}(),
+				Check: resource.ComposeTestCheckFunc(
+					PolicyModelHelperStateCheck("ndfc_policy.pg_update_combo_test", *policyResource, path.Empty())...),
+			},
+			// Step 4: Both modified — remove switch[1] AND change OBJECT_TRACKING_NUMBER
+			{
+				Config: func() string {
+					*stepCount++
+					tName := fmt.Sprintf("%s_%d", t.Name(), *stepCount)
+					policyResource.SerialNumbers = []string{testSwitches[0]}
+					policyResource.PolicyParameters = map[string]string{
+						"VRF_NAME":               "default",
+						"IP_PREFIX":              "35.1.1.0/24",
+						"OBJECT_TRACKING_NUMBER": "20",
+					}
+					helper.GetTFConfigWithSingleResource(tName, *x, []interface{}{policyResource}, &tf_config)
+					return *tf_config
+				}(),
+				Check: resource.ComposeTestCheckFunc(
+					PolicyModelHelperStateCheck("ndfc_policy.pg_update_combo_test", *policyResource, path.Empty())...),
+			},
+		},
+	})
+}
